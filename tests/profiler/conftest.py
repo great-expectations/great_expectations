@@ -218,7 +218,7 @@ def rule_with_variables_with_parameters(
             }
         ),
     )
-    rule._domain_parameters = {
+    rule._parameters = {
         column_Age_structured_type_domain.id: single_part_name_parameter_container,
         column_Date_structured_type_domain.id: multi_part_name_parameter_container,
     }

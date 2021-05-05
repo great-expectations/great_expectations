@@ -24,8 +24,8 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     def _build_expectation_configuration(
         self,
         domain: Domain,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs
     ) -> ExpectationConfiguration:
         expectation_kwargs: dict = {}
@@ -38,8 +38,8 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             expectation_kwargs[parameter_name] = get_parameter_value(
                 fully_qualified_parameter_name=fully_qualified_parameter_name,
                 domain=domain,
-                rule_variables=rule_variables,
-                rule_domain_parameters=rule_domain_parameters,
+                variables=variables,
+                parameters=parameters,
             )
 
         expectation_kwargs.update(kwargs)

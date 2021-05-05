@@ -23,16 +23,12 @@ class MetricParameterBuilder(ParameterBuilder):
         self,
         name: str,
         metric_name: str,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         data_context: Optional[DataContext] = None,
     ):
         super().__init__(
             name=name,
-            rule_variables=rule_variables,
-            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 
@@ -45,6 +41,8 @@ class MetricParameterBuilder(ParameterBuilder):
         domain: Domain,
         validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         """
@@ -59,8 +57,8 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_domain_kwargs = get_parameter_value(
                 fully_qualified_parameter_name=self._metric_domain_kwargs,
                 domain=domain,
-                rule_variables=self.rule_variables,
-                rule_domain_parameters=self.rule_domain_parameters,
+                variables=variables,
+                parameters=parameters,
             )
         else:
             metric_domain_kwargs = self._metric_domain_kwargs
@@ -74,8 +72,8 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_value_kwargs = get_parameter_value(
                 fully_qualified_parameter_name=self._metric_value_kwargs,
                 domain=domain,
-                rule_variables=self.rule_variables,
-                rule_domain_parameters=self.rule_domain_parameters,
+                variables=variables,
+                parameters=parameters,
             )
         else:
             metric_value_kwargs = self._metric_value_kwargs

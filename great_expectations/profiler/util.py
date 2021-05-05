@@ -17,8 +17,8 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
 def get_parameter_value(
     fully_qualified_parameter_name: str,
     domain: Domain,
-    rule_variables: Optional[ParameterContainer] = None,
-    rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
     """
     Get the parameter value from the current rule state using the fully-qualified parameter name.
@@ -26,8 +26,8 @@ def get_parameter_value(
     Args
         :param fully_qualified_parameter_name: str -- A dot-separated string key starting with $ for fetching parameters
         :param domain: Domain -- current Domain of interest
-        :param rule_variables
-        :param rule_domain_parameters
+        :param variables
+        :param parameters
     :return: value
     """
     validate_fully_qualified_parameter_name(
@@ -58,9 +58,9 @@ def get_parameter_value(
 
     parameter_container: ParameterContainer
     if fully_qualified_parameter_name_references_variable:
-        parameter_container = rule_variables
+        parameter_container = variables
     else:
-        parameter_container = rule_domain_parameters[domain.id]
+        parameter_container = parameters[domain.id]
 
     parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_as_list[0]

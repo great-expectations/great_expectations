@@ -37,8 +37,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         threshold: Optional[float] = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -52,8 +50,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         super().__init__(
             name=name,
-            rule_variables=rule_variables,
-            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 
@@ -75,6 +71,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         """Check the percentage of values matching each string, and return the best fit, or None if no

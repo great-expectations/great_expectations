@@ -35,8 +35,6 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         metric_name: str,
         metric_value_kwargs: Union[str, dict],
         p_values: List[float],
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -54,8 +52,6 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         super().__init__(
             name=name,
             batch_request=batch_request,
-            rule_variables=rule_variables,
-            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 
@@ -68,6 +64,9 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         self,
         domain: Domain,
         validator: Validator,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         samples = []
@@ -90,8 +89,8 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 metric_value_kwargs = get_parameter_value(
                     fully_qualified_parameter_name=self._metric_value_kwargs,
                     domain=domain,
-                    rule_variables=self.rule_variables,
-                    rule_domain_parameters=self.rule_domain_parameters,
+                    variables=variables,
+                    parameters=parameters,
                 )
             else:
                 metric_value_kwargs = self._metric_value_kwargs

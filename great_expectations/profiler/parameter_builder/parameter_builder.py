@@ -31,13 +31,9 @@ class ParameterBuilder(ABC):
     def __init__(
         self,
         name: str,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         self._name = name
-        self._rule_variables = rule_variables
-        self._rule_domain_parameters = rule_domain_parameters
         self._data_context = data_context
 
     def build_parameters(
@@ -45,10 +41,16 @@ class ParameterBuilder(ABC):
         domain: Domain,
         validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         return self._build_parameters(
-            domain=domain, validator=validator, batch_ids=batch_ids
+            domain=domain,
+            validator=validator,
+            variables=variables,
+            parameters=parameters,
+            batch_ids=batch_ids,
         )
 
     @abstractmethod
@@ -57,6 +59,8 @@ class ParameterBuilder(ABC):
         domain: Domain,
         validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         pass
@@ -64,14 +68,6 @@ class ParameterBuilder(ABC):
     @property
     def name(self) -> str:
         return self._name
-
-    @property
-    def rule_variables(self) -> Optional[ParameterContainer]:
-        return self._rule_variables
-
-    @property
-    def rule_domain_parameters(self) -> Optional[Dict[str, ParameterContainer]]:
-        return self._rule_domain_parameters
 
     @property
     def data_context(self) -> DataContext:

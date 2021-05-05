@@ -7,9 +7,6 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_container import (
-    ParameterContainer,
-)
 from great_expectations.profiler.util import get_batch_ids
 
 
@@ -26,8 +23,6 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
         self,
         name: str,
         batch_request: BatchRequest,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         if data_context is None:
@@ -37,8 +32,6 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
 
         super().__init__(
             name=name,
-            rule_variables=rule_variables,
-            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 
