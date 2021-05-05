@@ -21,7 +21,7 @@ class ParameterBuilder(ABC):
 
         ```
         parameter_builders:
-          - parameter_name: mean
+          - name: my_parameter_builder
             class_name: MetricParameterBuilder
             metric_name: column.mean
             metric_domain_kwargs: $domain.domain_kwargs
@@ -30,7 +30,7 @@ class ParameterBuilder(ABC):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         # TODO: AJB 20210505 Investigate whether validator/domain should be optional, passed at all ?? <ALEX></ALEX>.
         validator: Validator = None,
         domain: Domain = None,
@@ -38,7 +38,7 @@ class ParameterBuilder(ABC):
         rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
-        self._parameter_name = parameter_name
+        self._name = name
         self._validator = validator
         self._domain = domain
         self._rule_variables = rule_variables
@@ -62,8 +62,8 @@ class ParameterBuilder(ABC):
         pass
 
     @property
-    def parameter_name(self) -> str:
-        return self._parameter_name
+    def name(self) -> str:
+        return self._name
 
     @property
     def validator(self) -> Validator:

@@ -21,7 +21,7 @@ class MetricParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         # TODO: AJB 20210505 Investigate whether validator/domain should be optional, passed at all ?? <ALEX></ALEX>.
         metric_name: str,
         validator: Validator = None,
@@ -33,7 +33,7 @@ class MetricParameterBuilder(ParameterBuilder):
         data_context: Optional[DataContext] = None,
     ):
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             validator=validator,
             domain=domain,
             rule_variables=rule_variables,
