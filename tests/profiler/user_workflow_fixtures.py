@@ -7,163 +7,17 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 # TODO: Move these fixtures to integration tests
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def alice_columnar_table_single_batch():
 
-    # TODO: this config specifies a class_name and module_name for the Rule class which is currently not configurable
-    #  please decide whether Rule class is configurable before considering this a finalized configuration.
-
-    verbose_profiler_config = """
-variables:
-  max_user_id: 999999999999
-  min_timestamp: 2004-10-19 10:23:54
-rules:
-  # my_rule_for_user_ids:
-  #   class_name: Rule
-  #   module_name: great_expectations.profiler.rule.rule
-  #   domain_builder:
-  #     class_name: MyCustomSemanticTypeColumnDomainBuilder
-  #     module_name: plugins.profiler.domain_builder.my_custom_semantic_type_column_domain_builder
-  #     semantic_types:
-  #       - user_id
-  #   parameter_builders:
-  #     - name: my_min_user_id
-  #       class_name: MetricParameterBuilder
-  #       module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
-  #       metric_name: column.min
-  #       metric_domain_kwargs: $domain.domain_kwargs
-  #   expectation_configuration_builders:
-  #     - expectation_type: expect_column_values_to_be_between
-  #       class_name: DefaultExpectationConfigurationBuilder
-  #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-  #       min_value: $my_min_user_id.parameter.min_value
-  #       max_value: $variables.max_user_id
-  #       column: $domain.domain_kwargs.column
-  #     - expectation_type: expect_column_values_to_not_be_null
-  #       class_name: DefaultExpectationConfigurationBuilder
-  #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-  #       column: $domain.domain_kwargs.column
-  #     - expectation_type: expect_column_values_to_be_of_type
-  #       class_name: DefaultExpectationConfigurationBuilder
-  #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-  #       column: $domain.domain_kwargs.column
-  #       type_: INTEGER
-  my_rule_for_timestamps:
-    class_name: Rule
-    module_name: great_expectations.profiler.rule.rule
-    domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
-      module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
-      column_name_suffixes:
-        - _ts
-      # user_input_list_of_domain_names:
-      #   - event_ts
-      #   - server_ts
-      #   - device_ts
-    parameter_builders:
-      - name: my_max_event_ts
-        class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
-        metric_name: column.max
-        metric_domain_kwargs: $domain.domain_kwargs
-    expectation_configuration_builders:
-      # - expectation_type: expect_column_values_to_be_of_type
-      #   class_name: DefaultExpectationConfigurationBuilder
-      #   module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-      #   column: $domain.domain_kwargs.column
-      #   type_: TIMESTAMP
-      - expectation_type: expect_column_values_to_be_increasing
-        class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        column: $domain.domain_kwargs.column
-      - expectation_type: expect_column_values_to_be_dateutil_parseable
-        class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        column: $domain.domain_kwargs.column
-      # - expectation_type: expect_column_min_to_be_between
-      #   class_name: DefaultExpectationConfigurationBuilder
-      #   module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-      #   column: $domain.domain_kwargs.column
-      #   min_value: $variables.min_timestamp
-      #   max_value: $variables.min_timestamp
-      #   meta:
-      #     notes:
-      #       format: markdown
-      #       content:
-      #         - ### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**
-      # - expectation_type: expect_column_max_to_be_between
-      #   class_name: DefaultExpectationConfigurationBuilder
-      #   module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-      #   column: $domain.domain_kwargs.column
-      #   min_value: $variables.min_timestamp
-      #   max_value: $my_max_event_ts.parameter.max_value
-      #   meta:
-      #     notes:
-      #       format: markdown
-      #       content:
-      #         - ### This expectation confirms that the event_ts contains the latest timestamp of all domains
-"""
+    with open("alice_user_workflow_verbose_profiler_config.yml") as f:
+        verbose_profiler_config = f.read()
 
     # TODO: This "simplified" configuration has outstanding questions and proposed configurations that should be
     #  answered before it is considered to be a standard configuration.
-    simplified_profiler_config = """
-variables:
-  max_user_id: 999999999999
-  min_timestamp: 2004-10-19 10:23:54
-rules:
-  # my_rule_for_user_ids:
-  #   domain_builder:
-  #     class_name: MyCustomSemanticTypeColumnDomainBuilder
-  #     module_name: plugins.profiler.domain_builder.my_custom_semantic_type_column_domain_builder
-  #     semantic_types:
-  #       - user_id
-  #   parameter_builders:
-  #     - name: my_min_user_id
-  #       class_name: MetricParameterBuilder
-  #       metric_name: column.min
-  #   expectation_configuration_builders:
-  #     - expectation_type: expect_column_values_to_be_between
-  #       min_value: $my_min_user_id.parameter.min_value
-  #       max_value: $variables.max_user_id
-  #     - expectation_type: expect_column_values_to_not_be_null
-  #     - expectation_type: expect_column_values_to_be_of_type
-  #       type_: INTEGER
-  my_rule_for_timestamps:
-    domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
-      column_name_suffixes:
-        - _ts
-      user_input_list_of_domain_names:
-        - event_ts
-        - server_ts
-        - device_ts
-    parameter_builders:
-      - name: my_max_event_ts
-        class_name: MetricParameterBuilder
-        metric_name: column.max
-        metric_domain_kwargs: $domain.event_ts.domain_kwargs
-    expectation_configuration_builders:
-      - expectation_type: expect_column_values_to_be_of_type
-        type_: TIMESTAMP
-      - expectation_type: expect_column_values_to_be_increasing
-      - expectation_type: expect_column_values_to_be_dateutil_parseable
-      - expectation_type: expect_column_min_to_be_between
-        min_value: $variables.min_timestamp
-        max_value: $variables.min_timestamp
-        meta:
-          notes:
-            format: markdown
-            content:
-              - ### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**
-      - expectation_type: expect_column_max_to_be_between
-        min_value: $variables.min_timestamp
-        max_value: $my_max_event_ts.parameter.max_value
-        meta:
-          notes:
-            format: markdown
-            content:
-              - ### This expectation confirms that the event_ts contains the latest timestamp of all domains
-"""
+
+    with open("alice_user_workflow_simplified_profiler_config.yml") as f:
+        simplified_profiler_config = f.read()
 
     profiler_configs: List[str] = []
     profiler_configs.append(verbose_profiler_config)
@@ -301,24 +155,3 @@ rules:
         "expected_expectation_suite": expected_expectation_suite,
         "sample_data_relative_path": sample_data_relative_path,
     }
-
-
-def test_fixture_generation(alice_columnar_table_single_batch):
-    assert (
-        alice_columnar_table_single_batch["sample_data_relative_path"]
-        == "alice_columnar_table_single_batch_data.csv"
-    )
-    assert len(alice_columnar_table_single_batch["profiler_configs"]) > 0
-    for profiler_config in alice_columnar_table_single_batch["profiler_configs"]:
-        assert len(profiler_config) > 0
-        assert isinstance(profiler_config, str)
-    assert isinstance(
-        alice_columnar_table_single_batch["expected_expectation_suite"],
-        ExpectationSuite,
-    )
-    # assert (
-    #     len(
-    #         alice_columnar_table_single_batch["expected_expectation_suite"].expectations
-    #     )
-    #     == 18
-    # )
