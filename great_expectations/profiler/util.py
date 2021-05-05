@@ -1,9 +1,8 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest
-from great_expectations.core.domain_types import SemanticDomainTypes
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -13,45 +12,6 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterNode,
     validate_fully_qualified_parameter_name,
 )
-
-
-def parse_semantic_domain_type_argument(
-    semantic_types: Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ] = None
-) -> List[SemanticDomainTypes]:
-    if semantic_types is None:
-        return []
-
-    semantic_type: Union[str, SemanticDomainTypes]
-    if isinstance(semantic_types, str):
-        return [
-            SemanticDomainTypes[semantic_type]
-            for semantic_type in [semantic_types]
-            if SemanticDomainTypes.has_member_key(key=semantic_type)
-        ]
-    if isinstance(semantic_types, SemanticDomainTypes):
-        return [semantic_type for semantic_type in [semantic_types]]
-    elif isinstance(semantic_types, List):
-        if all([isinstance(semantic_type, str) for semantic_type in semantic_types]):
-            return [
-                SemanticDomainTypes[semantic_type]
-                for semantic_type in semantic_types
-                if SemanticDomainTypes.has_member_key(key=semantic_type)
-            ]
-        elif all(
-            [
-                isinstance(semantic_type, SemanticDomainTypes)
-                for semantic_type in semantic_types
-            ]
-        ):
-            return [semantic_type for semantic_type in semantic_types]
-        else:
-            raise ValueError(
-                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
-            )
-    else:
-        raise ValueError("Unrecognized semantic_types directive.")
 
 
 def get_parameter_value(

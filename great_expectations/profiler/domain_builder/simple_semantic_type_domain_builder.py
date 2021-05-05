@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
+from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
@@ -9,7 +10,6 @@ from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.domain_builder.inferred_semantic_domain_type import (
     InferredSemanticDomainType,
 )
-from great_expectations.profiler.util import parse_semantic_domain_type_argument
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
 
@@ -51,7 +51,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         if semantic_types is None:
             semantic_types = self._semantic_types
         else:
-            semantic_types = parse_semantic_domain_type_argument(
+            semantic_types = _parse_semantic_domain_type_argument(
                 semantic_types=semantic_types
             )
 
@@ -185,3 +185,42 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         return inferred_semantic_column_type
+
+
+def _parse_semantic_domain_type_argument(
+    semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None
+) -> List[SemanticDomainTypes]:
+    if semantic_types is None:
+        return []
+
+    semantic_type: Union[str, SemanticDomainTypes]
+    if isinstance(semantic_types, str):
+        return [
+            SemanticDomainTypes[semantic_type]
+            for semantic_type in [semantic_types]
+            if SemanticDomainTypes.has_member_key(key=semantic_type)
+        ]
+    if isinstance(semantic_types, SemanticDomainTypes):
+        return [semantic_type for semantic_type in [semantic_types]]
+    elif isinstance(semantic_types, List):
+        if all([isinstance(semantic_type, str) for semantic_type in semantic_types]):
+            return [
+                SemanticDomainTypes[semantic_type]
+                for semantic_type in semantic_types
+                if SemanticDomainTypes.has_member_key(key=semantic_type)
+            ]
+        elif all(
+            [
+                isinstance(semantic_type, SemanticDomainTypes)
+                for semantic_type in semantic_types
+            ]
+        ):
+            return [semantic_type for semantic_type in semantic_types]
+        else:
+            raise ValueError(
+                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
+            )
+    else:
+        raise ValueError("Unrecognized semantic_types directive.")
