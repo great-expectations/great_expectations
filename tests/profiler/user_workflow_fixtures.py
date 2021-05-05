@@ -60,12 +60,12 @@ rules:
       #   - event_ts
       #   - server_ts
       #   - device_ts
-    # parameter_builders:
-      # - parameter_name: my_max_event_ts
-      #   class_name: MetricParameterBuilder
-      #   module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
-      #   metric_name: column.max
-      #   metric_domain_kwargs: $domain.domain_kwargs
+    parameter_builders:
+      - parameter_name: my_max_event_ts
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.max
+        metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       # - expectation_type: expect_column_values_to_be_of_type
       #   class_name: DefaultExpectationConfigurationBuilder

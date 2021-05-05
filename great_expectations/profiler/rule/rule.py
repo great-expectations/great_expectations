@@ -77,7 +77,9 @@ class Rule:
             ) in self._expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
-                        rule=self, domain=domain
+                        domain=domain,
+                        rule_variables=self.variables,
+                        rule_domain_parameters=self.domain_parameters,
                     )
                 )
 

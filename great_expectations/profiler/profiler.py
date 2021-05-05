@@ -52,7 +52,8 @@ class Profiler:
                     )
                 domain_builder = instantiate_class_from_config(
                     domain_builder_config,
-                    runtime_environment={"data_context": data_context},
+                    # TODO: AJB 20210505 - we may not need this, remove or keep.
+                    # runtime_environment={"data_context": data_context},
                 )
 
                 parameter_builders = []

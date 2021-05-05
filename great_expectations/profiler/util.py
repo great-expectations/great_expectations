@@ -116,7 +116,10 @@ def get_parameter_value(
         # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
         # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of
         # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
-        return domain[DOMAIN_KWARGS_PARAMETER_NAME]
+        if domain:
+            return domain[DOMAIN_KWARGS_PARAMETER_NAME]
+        else:
+            return None
 
     fully_qualified_parameter_name_references_variable: bool = False
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):

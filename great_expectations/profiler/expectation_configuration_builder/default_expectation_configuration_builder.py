@@ -36,6 +36,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             parameter_name,
             fully_qualified_parameter_name,
         ) in self._parameter_name_to_fully_qualified_parameter_name_dict.items():
+            # TODO: AJB 20210505 this is only valid for columns, we need to check the domain type here
             if fully_qualified_parameter_name.startswith(
                 DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
             ):
@@ -52,9 +53,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 )
 
         expectation_kwargs.update(kwargs)
-        # TODO: AJB 20210503 why is "rule" in these kwargs, is it necessary and how best to
-        #  avoid passing it to ExpectationConfiguration?
-        expectation_kwargs.pop("rule")
 
         return ExpectationConfiguration(
             expectation_type=self._expectation_type, kwargs=expectation_kwargs
