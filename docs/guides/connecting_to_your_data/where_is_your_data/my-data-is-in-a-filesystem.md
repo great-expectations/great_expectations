@@ -19,20 +19,33 @@ This guide will help you connect to your data stored on a filesystem. This enabl
 
 Which backend would you like Great Expectations to use when validating your data?
 
-- [pandas](#i-want-my-computation-to-occur-in-pandas) (uses the `PandasExecutionEngine`)
-- [spark](#i-want-my-computation-to-occur-in-spark) (uses the `SparkExecutionEngine`)
+<Tabs
+  defaultValue="pandas"
+  values={[
+    {label: 'pandas', value: 'pandas'},
+    {label: 'spark', value: 'spark'},
+  ]}>
+  <TabItem value="pandas">
 
-#### I want my computation to occur in Pandas
-
-Here is an example of your configuration:
+Here is an example configuration:
 
 ```python file=../../../../integration/code/pandas/filesystem/csv_runtime_data_connector.py#L8-L22
 ```
 
-#### I want my computation to occur in Spark
+</TabItem>
+<TabItem value="spark">
+
+Here is an example configuration:
 
 :::danger TODO this is a stub
 :::
+
+```python
+TODO STUFF HERE
+```
+
+</TabItem>
+</Tabs>
 
 ### 2. Add the datasource to your project
 
@@ -129,7 +142,16 @@ Load a `Batch` of your data to test if your `Datasource` configuration works by 
 
 ## Additional Notes
 
-**TODO** Do we want to provide the full script? Pros: copy-n-paste glory. Cons: some scripts have some necessary hacky bits (for example connection strings that work in tests and also look friendly for users).
+:::note **TODO** Do we want to provide the full script?
+
+Pros:
+- copy-n-paste glory.
+
+Cons:
+
+- some scripts have some necessary hacky bits (for example connection strings that work in tests and also look friendly for users).
+- this might need to be dynamic based on tab selections spark/location/etc
+:::
 
 #### Full script
 
