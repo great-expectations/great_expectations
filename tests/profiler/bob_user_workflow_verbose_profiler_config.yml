@@ -51,7 +51,12 @@ rules:
         class_name: MultiBatchAggregateMetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
         batch_request:
-          # TODO: Filter for batches for previous full year
+          # Filter for batches for previous full year
+          #  using batch_filter_parameters with `year` as one of the parameters
+          #  `year` needs to be defined as a group by the data_connector
+          # TODO: is this possible - how do we specify a data_connector (when calling Profiler.profile()?)?
+          batch_filter_parameters:
+            year: 2020 # TODO: Can this be relative?
         metric_configuration:
           metric_name: column.mean
           # Domain kwargs here refer to the current domain being processed - the list of domains coming from the DomainBuilder (here the list of columns filtered by SimpleColumnSuffixDomainBuilder)
