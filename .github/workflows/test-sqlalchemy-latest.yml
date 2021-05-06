@@ -27,6 +27,7 @@ jobs:
         python-version: [3.8]
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      GE_TEST_LOCAL_DB_HOSTNAME: postgres
     steps:
       - uses: actions/checkout@v2
         with:
