@@ -1,7 +1,7 @@
 # Note the call to Profiler.profile() takes multiple batches
 # Unless filtered / specified this list of batches will be used for all metrics/parameters
 variables:
-  # TODO: Do we plan to support lists or mappings in variables?
+  # TODO: Do we plan to support lists or mappings in variables? Yes
 #  vendor_ids:
 #    - 1
 #    - 2
@@ -28,12 +28,21 @@ rules:
         # TODO: how to specify compute over all batches (e.g. use all batches in parameter) - options:
         # don't specify a specific batch_request and assume all batches passed via the various methods to Profiler.profile()?
 #        batch_request: $batch.batch_id
+        # maybe an "all" flag?
         metric_name: column.distinct_values
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_in_set
         column: $domain.domain_kwargs.column
         # TODO: How exactly to reference the value_set?
         value_set: $my_value_set_for_ids.counts
+
+  # NOTES 20210506 - reason for "active batch" - we want to push someone toward specifying the start for best practices
+  # (e.g. cursor)
+  # e.g. train vs test data.
+  # Subject to sorting - dataconnector needs sorter to ensure that this is
+  # TODO: Warning if you specify ?? and dataconnector is not sorted - how can we infer this?
+  # Ordering in dataconnector is default to lexicographic
+  # TODO: Train/test partitioner dataconnector
 
   my_rule_for_amounts:
     # expect_column_values_to_be_between for each of the _amount columns
@@ -48,7 +57,9 @@ rules:
     parameter_builders:
       - name: my_mean_parameter_for_batches_in_previous_full_year
         # TODO: Implement MultiBatchAggregateMetricParameterBuilder which takes a metric name and list of batches, computes aggregate over all batches by either: 1. merging them into one batch or 2. if linear computes it from single batch aggregate metrics / metadata. E.g. mean of means
-        class_name: MultiBatchAggregateMetricParameterBuilder
+        # TODO: Streaming mean / stdev consider how would that work?
+        # MultibatchAggregateFunctionParameterBuilder takes optional function, if no function then return list of metric values. ~~MultiBatchAggregateMetricParameterBuilder assumes you are using the same aggregating function as the metric~~
+        class_name: MultibatchAggregateFunctionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
         batch_request:
           # Filter for batches for previous full year
@@ -58,14 +69,15 @@ rules:
           batch_filter_parameters:
             year: 2020 # TODO: Can this be relative?
         metric_configuration:
-          metric_name: column.mean
+          metric_name: column.mean # per batch metric
           # Domain kwargs here refer to the current domain being processed - the list of domains coming from the DomainBuilder (here the list of columns filtered by SimpleColumnSuffixDomainBuilder)
           metric_domain_kwargs: $domain.domain_kwargs
+          aggregate_fn: stdev # Not necessarily a metric, but some operator on all of the batches
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        # TODO: Do we support literals here or must this be defined in variables?
+        # Note literals are and will continue to be supported (you do not have to add to "variables" first):
         min_value: 0
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
@@ -73,8 +85,13 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 0.8
-        max_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 1.2
+        # Note: save this for complicated statistical ... you use exotic parameter builder or create your own parameter builder
+#        min_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 0.8
+#        max_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 1.2
+        # NOTE: this would need us to add `mean()` to our GE language parsing these evaluations
+        # TODO: How much is available in this language? Not path integrals. But mean.
+        min_value: mean($my_mean_parameter_for_batches_in_previous_full_year.parameter.means) * 0.8
+        max_value: mean($my_mean_parameter_for_batches_in_previous_full_year.parameter.means) * 1.2
 
   my_rule_for_numeric_data:
     class_name: Rule
