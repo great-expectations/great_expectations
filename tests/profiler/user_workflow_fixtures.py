@@ -111,22 +111,22 @@ def alice_columnar_table_single_batch():
                 #         },
                 #     }
                 # ),
-                # ExpectationConfiguration(
-                #     **{
-                #         "expectation_type": "expect_column_max_to_be_between",
-                #         "kwargs": {
-                #             "column": my_rule_for_timestamps_column_name,
-                #             "min_value": "2004-10-19 10:23:54",  # From variables
-                #             "max_value": "2004-10-19 11:05:20",  # From data
-                #         },
-                #         "meta": {
-                #             "format": "markdown",
-                #             "content": [
-                #                 "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
-                #             ],
-                #         },
-                #     }
-                # ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "kwargs": {
+                            "column": my_rule_for_timestamps_column_name,
+                            "min_value": "2004-10-19 10:23:54",  # From variables
+                            "max_value": "2004-10-19 11:05:20",  # From data
+                        },
+                        "meta": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                            ],
+                        },
+                    }
+                ),
             ]
         )
 

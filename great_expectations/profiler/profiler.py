@@ -54,6 +54,7 @@ class Profiler:
                     domain_builder_config,
                     # TODO: AJB 20210505 - we may not need this, remove or keep.
                     # runtime_environment={"data_context": data_context},
+                    runtime_environment={},
                 )
 
                 parameter_builders = []
