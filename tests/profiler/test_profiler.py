@@ -528,7 +528,6 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
 def test_alice_user_workflow_single_batch(
     alice_columnar_table_single_batch_context, alice_columnar_table_single_batch
 ):
-
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
     # Load profiler configs & loop (run tests for each one)
@@ -538,6 +537,7 @@ def test_alice_user_workflow_single_batch(
         full_profiler_config_dict = yaml.load(profiler_config)
         rule_configs = full_profiler_config_dict.get("rules")
         variable_configs = full_profiler_config_dict.get("variables")
+        print(f'\n[ALEX_TEST] VARIABLE_CONFIGS: {variable_configs} ; TYPE: {str(type(variable_configs))}')
         profiler = Profiler(
             rule_configs=rule_configs,
             variable_configs=variable_configs,

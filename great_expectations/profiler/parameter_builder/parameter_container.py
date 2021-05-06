@@ -15,6 +15,15 @@ DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
 VARIABLES_KEY: str = "$variables."
 
 
+def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
+    if not fully_qualified_parameter_name.startswith("$"):
+        raise ge_exceptions.ProfilerExecutionError(
+            message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
+names must start with $ (e.g., "${fully_qualified_parameter_name}").
+"""
+        )
+
+
 @dataclass
 class ParameterNode(SerializableDictDot):
     """
@@ -91,6 +100,29 @@ class ParameterContainer(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=asdict(self))
+
+
+def build_parameter_container_for_variables(
+    variable_configs: Dict[str, Any]
+) -> ParameterContainer:
+    """
+    Build a ParameterContainer for all of the profiler config variables passed as key value pairs
+    Args:
+        variable_configs: Variable key:value pairs e.g. {"variable_name": variable_value, ...}
+
+    Returns:
+        ParameterContainer containing all variables
+    """
+    variable_config_key: str
+    variable_config_value: Any
+    parameter_values: Dict[str, Dict[str, Any]] = {}
+    for variable_config_key, variable_config_value in variable_configs.items():
+        variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
+        parameter_values[variable_config_key] = {
+            "value": variable_config_value,
+        }
+
+    return build_parameter_container(parameter_values=parameter_values)
 
 
 def build_parameter_container(
@@ -368,35 +400,3 @@ def _get_parameter_value_one_domain_scope(
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
 """
         )
-
-
-def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
-    if not fully_qualified_parameter_name.startswith("$"):
-        raise ge_exceptions.ProfilerExecutionError(
-            message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
-names must start with $ (e.g., "${fully_qualified_parameter_name}").
-"""
-        )
-
-
-def build_parameter_container_for_variables(
-    variable_configs: Dict[str, Any]
-) -> ParameterContainer:
-    """
-    Build a ParameterContainer for all of the profiler config variables passed as key value pairs
-    Args:
-        variable_configs: Variable key:value pairs e.g. {"variable_name": variable_value, ...}
-
-    Returns:
-        ParameterContainer containing all variables
-    """
-    variable_values_with_fully_qualified_names: Dict[str, Dict[str, Any]] = {}
-    for variable_config_key, variable_config_value in variable_configs.items():
-        variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
-        variable_values_with_fully_qualified_names[variable_config_key] = {
-            "value": variable_config_value
-        }
-
-    return build_parameter_container(
-        parameter_values=variable_values_with_fully_qualified_names
-    )
