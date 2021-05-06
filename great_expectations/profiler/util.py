@@ -1,3 +1,4 @@
+import copy
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -79,27 +80,31 @@ def get_parameter_value(
         :param parameters
     :return: value
     """
+    actual_parameters: Optional[Dict[str, ParameterContainer]] = copy.deepcopy(
+        parameters
+    )
     domain_ids: Optional[List[str]]
+    domain_cursor: Domain
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
+        domain_id: str = IDDict().to_id()
+        actual_parameters[domain_id] = copy.deepcopy(variables)
+        domain_ids = [domain_id]
         fully_qualified_parameter_name = fully_qualified_parameter_name[
             len(VARIABLES_KEY) :
         ]
-        domain_ids = None
     else:
-        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
-        domain_cursor: Domain
         if isinstance(domain, Domain):
-            domain_ids = [domain.id]
-        elif (
+            domain = [domain]
+        elif not (
             isinstance(domain, list)
             and len(domain) > 0
             and all([isinstance(domain_cursor, Domain) for domain_cursor in domain])
         ):
-            domain_ids = [domain_cursor.id for domain_cursor in domain]
-        else:
             raise ValueError(
                 "Either a single Domain object or a non-empty list of Domain objects is required."
             )
+        domain_ids = [domain_cursor.id for domain_cursor in domain]
+        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
     fully_qualified_parameter_name_as_list: List[
         str
@@ -107,15 +112,6 @@ def get_parameter_value(
 
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
-
-    domain_id: str
-    actual_parameters: Optional[Dict[str, ParameterContainer]]
-    if domain_ids is None:
-        domain_id = IDDict().to_id()
-        actual_parameters = {domain_id: variables}
-        domain_ids = [domain_id]
-    else:
-        actual_parameters = parameters
 
     return _get_parameter_value_multiple_domain_scope(
         fully_qualified_parameter_name=fully_qualified_parameter_name,
@@ -134,21 +130,28 @@ def _get_parameter_value_multiple_domain_scope(
     domain_id: str
     parameter_container: ParameterContainer
     exception_messages: List[str] = []
+    parameter_value: Optional[Any] = None
     for domain_id in domain_ids:
         parameter_container = parameters[domain_id]
         try:
-            return _get_parameter_value_one_domain_scope(
+            parameter_value = _get_parameter_value_one_domain_scope(
                 fully_qualified_parameter_name=fully_qualified_parameter_name,
                 fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
                 parameters=parameter_container,
             )
+            # In the present implementation, the first non-NULL parameter value found is returned.  In the future,
+            # parameter name across domains will need to be disambiguated (e.g., bu using a domain-specific scoping).
+            if parameter_value is not None:
+                return parameter_value
         except KeyError as e:
             exception_messages.append(
                 f"""Unable to find value for parameter name "{fully_qualified_parameter_name}" for domain_id \
 "{domain_id}": "{e}" occurred.
 """
             )
-    raise ge_exceptions.ProfilerExecutionError(message=";".join(exception_messages))
+    if len(exception_messages) > 0:
+        raise ge_exceptions.ProfilerExecutionError(message=";".join(exception_messages))
+    return parameter_value
 
 
 def _get_parameter_value_one_domain_scope(
@@ -159,6 +162,8 @@ def _get_parameter_value_one_domain_scope(
     parameter_node: Optional[ParameterNode] = parameters.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
+    if parameter_node is None:
+        return None
 
     parameter_name_part: Optional[str] = None
     try:
