@@ -5,13 +5,10 @@ on:
 jobs:
   postgres:
     name: Test latest sqlalchemy with postgres
-    # Service containers to run with `container-job`
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
+        # Our tests assume an empty password so do not provide it
         ports:
           - 5432:5432
         env:
@@ -29,7 +26,6 @@ jobs:
         python-version: [3.8]
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      #GE_TEST_LOCAL_DB_HOSTNAME: localhost
     steps:
       - uses: actions/checkout@v2
         with:
@@ -47,8 +43,8 @@ jobs:
       - name: Test with pytest
         run: |
           pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics
-      - uses: act10ns/slack@v1
-        name: Notify via Slack
+      - name: Notify via Slack
+        uses: act10ns/slack@v1
         with:
           status: ${{ job.status }}
           channel: '#notifications-builds'
