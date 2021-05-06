@@ -1,11 +1,32 @@
 name: Latest SQLAlchemy
-on: [pull_request]
+on:
+  schedule:
+    - cron: '0 0 * * *'
 jobs:
-  build:
+  postgres:
+    name: Test latest sqlalchemy with postgres
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_DB: test_ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.8]
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -23,3 +44,42 @@ jobs:
       - name: Test with pytest
         run: |
           pytest --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          channel: '#notifications-builds'
+        if: always()
+
+#        actions-setup-mysql
+#https://github:
+#  com/marketplace/actions/actions-setup-mysql:
+#  mysql:
+#    name: Test latest sqlalchemy with mysql
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        python-version: [ 3.8 ]
+#    env:
+#      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          ref: ${{ github.head_ref }}
+#      - name: Set up Python ${{ matrix.python-version }}
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: ${{ matrix.python-version }}
+#      - name: Install dependencies including latest sqlalchemy version
+#        run: |
+#          pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+#          pip install .
+#          pip install --requirement requirements.txt
+#          pip install --upgrade SQLAlchemy
+#      - name: Test with pytest
+#        run: |
+#          pytest --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+#      - uses: act10ns/slack@v1
+#        with:
+#          status: ${{ job.status }}
+#          channel: '#notifications-builds'
+#        if: always()
