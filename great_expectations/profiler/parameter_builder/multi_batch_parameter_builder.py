@@ -1,15 +1,13 @@
 from abc import ABC
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
-from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.domain_builder.util import get_batch_ids
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.validator.validator import Validator
+from great_expectations.profiler.util import get_batch_ids
 
 
 # TODO: <Alex>ALEX -- If ParameterBuilder already extends ABC, why does this class need to do the same?</Alex>
@@ -23,12 +21,8 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
 
     def __init__(
         self,
-        parameter_name: str,
-        validator: Validator,
-        domain: Domain,
+        name: str,
         batch_request: BatchRequest,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         if data_context is None:
@@ -37,11 +31,7 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
             )
 
         super().__init__(
-            parameter_name=parameter_name,
-            validator=validator,
-            domain=domain,
-            rule_variables=rule_variables,
-            rule_domain_parameters=rule_domain_parameters,
+            name=name,
             data_context=data_context,
         )
 

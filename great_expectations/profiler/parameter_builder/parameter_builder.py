@@ -21,7 +21,7 @@ class ParameterBuilder(ABC):
 
         ```
         parameter_builders:
-          - parameter_name: mean
+          - name: my_parameter_builder
             class_name: MetricParameterBuilder
             metric_name: column.mean
             metric_domain_kwargs: $domain.domain_kwargs
@@ -30,55 +30,44 @@ class ParameterBuilder(ABC):
 
     def __init__(
         self,
-        parameter_name: str,
-        validator: Validator,
-        domain: Domain,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
+        name: str,
         data_context: Optional[DataContext] = None,
     ):
-        self._parameter_name = parameter_name
-        self._validator = validator
-        self._domain = domain
-        self._rule_variables = rule_variables
-        self._rule_domain_parameters = rule_domain_parameters
+        self._name = name
         self._data_context = data_context
 
     def build_parameters(
         self,
+        domain: Domain,
+        validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
-        """Build the parameters for the specified domain_kwargs."""
-        return self._build_parameters(batch_ids=batch_ids)
+        return self._build_parameters(
+            domain=domain,
+            validator=validator,
+            variables=variables,
+            parameters=parameters,
+            batch_ids=batch_ids,
+        )
 
     @abstractmethod
     def _build_parameters(
         self,
+        domain: Domain,
+        validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         pass
 
     @property
-    def parameter_name(self) -> str:
-        return self._parameter_name
-
-    @property
-    def validator(self) -> Validator:
-        return self._validator
-
-    @property
-    def domain(self) -> Domain:
-        return self._domain
-
-    @property
-    def rule_variables(self) -> Optional[ParameterContainer]:
-        return self._rule_variables
-
-    @property
-    def rule_domain_parameters(self) -> Optional[Dict[str, ParameterContainer]]:
-        return self._rule_domain_parameters
+    def name(self) -> str:
+        return self._name
 
     @property
     def data_context(self) -> DataContext:

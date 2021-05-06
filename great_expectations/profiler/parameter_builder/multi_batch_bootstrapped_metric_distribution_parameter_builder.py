@@ -12,8 +12,8 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_NAME,
     ParameterContainer,
     build_parameter_container,
+    get_parameter_value,
 )
-from great_expectations.profiler.util import get_parameter_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -30,15 +30,11 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
 
     def __init__(
         self,
-        parameter_name: str,
-        validator: Validator,
-        domain: Domain,
+        name: str,
         batch_request: BatchRequest,
         metric_name: str,
         metric_value_kwargs: Union[str, dict],
         p_values: List[float],
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -47,19 +43,15 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         The ParameterBuilder will build parameters for the active domain from the rule.
 
         Args:
-            parameter_name: the name of the parameter handled by this ParameterBuilder
+            name: the name of this ParameterBuilder (from configuration)
             batch_request: BatchRequest elements that should be used to obtain additional batch_ids
             metric_name: metric from which to build the parameters
             metric_value_kwargs: value kwargs for the metric to be built
             p_values: the p_values for which to return metric value estimates
         """
         super().__init__(
-            parameter_name=parameter_name,
-            validator=validator,
-            domain=domain,
+            name=name,
             batch_request=batch_request,
-            rule_variables=rule_variables,
-            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 
@@ -70,6 +62,11 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
     def _build_parameters(
         self,
+        domain: Domain,
+        validator: Validator,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         samples = []
@@ -82,7 +79,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
             metric_domain_kwargs: Union[
                 str, Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
-            ] = copy.deepcopy(self.domain[DOMAIN_KWARGS_PARAMETER_NAME])
+            ] = copy.deepcopy(domain[DOMAIN_KWARGS_PARAMETER_NAME])
 
             if (
                 self._metric_value_kwargs
@@ -91,15 +88,15 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             ):
                 metric_value_kwargs = get_parameter_value(
                     fully_qualified_parameter_name=self._metric_value_kwargs,
-                    domain=self.domain,
-                    rule_variables=self.rule_variables,
-                    rule_domain_parameters=self.rule_domain_parameters,
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
                 )
             else:
                 metric_value_kwargs = self._metric_value_kwargs
 
             samples.append(
-                self.validator.get_metric(
+                validator.get_metric(
                     metric=MetricConfiguration(
                         metric_name=self._metric_name,
                         metric_domain_kwargs=metric_domain_kwargs,
