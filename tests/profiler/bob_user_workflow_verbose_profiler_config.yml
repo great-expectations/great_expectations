@@ -44,7 +44,18 @@ rules:
       module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
       column_name_suffixes:
         - _amount
-    # Note: no parameter_builders
+    # Parameter used later in expectation that current batch mean is within 20% of mean of all months in last year - parameter calculates mean of all batches in the previous full year
+    parameter_builders:
+      - name: my_mean_parameter_for_batches_in_previous_full_year
+        # TODO: Implement MultiBatchAggregateMetricParameterBuilder which takes a metric name and list of batches, computes aggregate over all batches by either: 1. merging them into one batch or 2. if linear computes it from single batch aggregate metrics / metadata. E.g. mean of means
+        class_name: MultiBatchAggregateMetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
+        batch_request:
+          # TODO: Filter for batches for previous full year
+        metric_configuration:
+          metric_name: column.mean
+          # Domain kwargs here refer to the current domain being processed - the list of domains coming from the DomainBuilder (here the list of columns filtered by SimpleColumnSuffixDomainBuilder)
+          metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
@@ -53,6 +64,12 @@ rules:
         min_value: 0
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
+      - expectation_type: expect_column_mean_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        min_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 0.8
+        max_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 1.2
 
   my_rule_for_numeric_data:
     class_name: Rule
