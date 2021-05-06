@@ -8,8 +8,8 @@ from great_expectations.profiler.parameter_builder.parameter_builder import (
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
+    get_parameter_value,
 )
-from great_expectations.profiler.util import get_parameter_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 

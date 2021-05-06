@@ -3,7 +3,9 @@ from typing import Any
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.profiler.util import get_parameter_value
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    get_parameter_value,
+)
 
 
 # noinspection PyPep8Naming
