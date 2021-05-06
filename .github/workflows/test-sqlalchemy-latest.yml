@@ -1,5 +1,5 @@
 name: Latest SQLAlchemy
-on: [push, pull_request]
+on: [push]
 #   schedule:
 #     - cron: '0 0 * * *'
 jobs:
