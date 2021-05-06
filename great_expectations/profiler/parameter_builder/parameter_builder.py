@@ -31,31 +31,36 @@ class ParameterBuilder(ABC):
     def __init__(
         self,
         name: str,
-        validator: Validator,
-        domain: Domain,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         self._name = name
-        self._validator = validator
-        self._domain = domain
-        self._rule_variables = rule_variables
-        self._rule_domain_parameters = rule_domain_parameters
         self._data_context = data_context
 
     def build_parameters(
         self,
+        domain: Domain,
+        validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
-        """Build the parameters for the specified domain_kwargs."""
-        return self._build_parameters(batch_ids=batch_ids)
+        return self._build_parameters(
+            domain=domain,
+            validator=validator,
+            variables=variables,
+            parameters=parameters,
+            batch_ids=batch_ids,
+        )
 
     @abstractmethod
     def _build_parameters(
         self,
+        domain: Domain,
+        validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         pass
@@ -63,22 +68,6 @@ class ParameterBuilder(ABC):
     @property
     def name(self) -> str:
         return self._name
-
-    @property
-    def validator(self) -> Validator:
-        return self._validator
-
-    @property
-    def domain(self) -> Domain:
-        return self._domain
-
-    @property
-    def rule_variables(self) -> Optional[ParameterContainer]:
-        return self._rule_variables
-
-    @property
-    def rule_domain_parameters(self) -> Optional[Dict[str, ParameterContainer]]:
-        return self._rule_domain_parameters
 
     @property
     def data_context(self) -> DataContext:

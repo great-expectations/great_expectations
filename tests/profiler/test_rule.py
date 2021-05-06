@@ -3,11 +3,12 @@ from typing import Any
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    get_parameter_value,
+)
+
 
 # noinspection PyPep8Naming
-from great_expectations.profiler.util import get_parameter_value
-
-
 def test_get_parameter_value_invalid_parameter_name(
     rule_with_variables_with_parameters, column_Age_structured_type_domain
 ):
@@ -18,8 +19,8 @@ def test_get_parameter_value_invalid_parameter_name(
         parameter_value: Any = get_parameter_value(
             fully_qualified_parameter_name="mean",
             domain=column_Age_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
 
 
@@ -36,8 +37,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Age_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == 1.0e-2
     )
@@ -47,8 +48,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Age_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == 5.0
     )
@@ -58,8 +59,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == 1.0e-2
     )
@@ -71,8 +72,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%Y-%m-%d %H:%M:%S %Z"
     )
@@ -82,8 +83,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%Y-%m-%d"
     )
@@ -95,8 +96,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%m-%Y-%d %H:%M:%S %Z"
     )
@@ -106,8 +107,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%m-%Y-%d"
     )
@@ -119,8 +120,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == 100
     )
@@ -132,8 +133,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == 5
     )
@@ -143,8 +144,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == 9.1e-1
     )
@@ -154,8 +155,8 @@ def test_get_parameter_value_valid_parameter_name(
         get_parameter_value(
             fully_qualified_parameter_name=fully_qualified_parameter_name,
             domain=column_Date_structured_type_domain,
-            rule_variables=rule_with_variables_with_parameters.variables,
-            rule_domain_parameters=rule_with_variables_with_parameters.domain_parameters,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
         )
         == 6.5e-1
     )

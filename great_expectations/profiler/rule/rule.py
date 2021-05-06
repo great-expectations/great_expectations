@@ -43,10 +43,10 @@ class Rule:
         self._expectation_configuration_builders = expectation_configuration_builders
         self._variables = variables
 
-        self._domain_parameters = {}
+        self._parameters = {}
 
     def evaluate(
-        self, validator: Validator, batch_ids: Optional[List[str]]
+        self, validator: Validator, batch_ids: Optional[List[str]] = None
     ) -> List[ExpectationConfiguration]:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
@@ -67,9 +67,15 @@ class Rule:
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_container: ParameterContainer = (
-                    parameter_builder.build_parameters(batch_ids=batch_ids)
+                    parameter_builder.build_parameters(
+                        domain=domain,
+                        validator=validator,
+                        variables=self.variables,
+                        parameters=self.parameters,
+                        batch_ids=batch_ids,
+                    )
                 )
-                self._domain_parameters[domain.id] = parameter_container
+                self._parameters[domain.id] = parameter_container
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
             for (
@@ -77,7 +83,9 @@ class Rule:
             ) in self._expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
-                        rule=self, domain=domain
+                        domain=domain,
+                        variables=self.variables,
+                        parameters=self.parameters,
                     )
                 )
 
@@ -89,6 +97,6 @@ class Rule:
         return copy.deepcopy(self._variables)
 
     @property
-    def domain_parameters(self) -> Dict[str, ParameterContainer]:
-        # Returning a copy of the "self._domain_parameters" state variable in order to prevent write-before-read hazard.
-        return copy.deepcopy(self._domain_parameters)
+    def parameters(self) -> Dict[str, ParameterContainer]:
+        # Returning a copy of the "self._parameters" state variable in order to prevent write-before-read hazard.
+        return copy.deepcopy(self._parameters)
