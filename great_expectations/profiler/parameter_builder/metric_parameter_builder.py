@@ -8,8 +8,8 @@ from great_expectations.profiler.parameter_builder.parameter_builder import (
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
+    get_parameter_value,
 )
-from great_expectations.profiler.util import get_parameter_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -22,22 +22,13 @@ class MetricParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        # TODO: AJB 20210505 Investigate whether validator/domain should be optional, passed at all ?? <ALEX></ALEX>.
         metric_name: str,
-        validator: Validator = None,
-        domain: Domain = None,
-        rule_variables: Optional[ParameterContainer] = None,
-        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         data_context: Optional[DataContext] = None,
     ):
         super().__init__(
             name=name,
-            validator=validator,
-            domain=domain,
-            rule_variables=rule_variables,
-            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 
@@ -47,7 +38,11 @@ class MetricParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
+        domain: Domain,
+        validator: Validator,
         *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         """
@@ -61,9 +56,9 @@ class MetricParameterBuilder(ParameterBuilder):
         ) and self._metric_domain_kwargs.startswith("$"):
             metric_domain_kwargs = get_parameter_value(
                 fully_qualified_parameter_name=self._metric_domain_kwargs,
-                domain=self.domain,
-                rule_variables=self.rule_variables,
-                rule_domain_parameters=self.rule_domain_parameters,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
             )
         else:
             metric_domain_kwargs = self._metric_domain_kwargs
@@ -76,16 +71,16 @@ class MetricParameterBuilder(ParameterBuilder):
         ):
             metric_value_kwargs = get_parameter_value(
                 fully_qualified_parameter_name=self._metric_value_kwargs,
-                domain=self.domain,
-                rule_variables=self.rule_variables,
-                rule_domain_parameters=self.rule_domain_parameters,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
             )
         else:
             metric_value_kwargs = self._metric_value_kwargs
 
         parameter_values: Dict[str, Dict[str, Any]] = {
             f"$parameter.{self._metric_name}": {
-                "value": self.validator.get_metric(
+                "value": validator.get_metric(
                     metric=MetricConfiguration(
                         metric_name=self._metric_name,
                         metric_domain_kwargs=metric_domain_kwargs,
