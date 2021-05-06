@@ -3,7 +3,7 @@ on: [push]
 #   schedule:
 #     - cron: '0 0 * * *'
 jobs:
-  postgres-job:
+  postgres:
     name: Test latest sqlalchemy with postgres
     # Service containers to run with `container-job`
     services:
@@ -12,6 +12,8 @@ jobs:
         # Docker Hub image
         image: postgres
         # Provide the password for postgres
+        ports:
+          - 5432:5432
         env:
           POSTGRES_DB: test_ci
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -27,7 +29,7 @@ jobs:
         python-version: [3.8]
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      GE_TEST_LOCAL_DB_HOSTNAME: postgres
+      #GE_TEST_LOCAL_DB_HOSTNAME: localhost
     steps:
       - uses: actions/checkout@v2
         with:
