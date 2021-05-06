@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
+from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_container import (
@@ -108,36 +109,51 @@ def get_parameter_value(
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
 
+    domain_id: str
+    actual_parameters: Optional[Dict[str, ParameterContainer]]
     if domain_ids is None:
+        domain_id = IDDict().to_id()
+        actual_parameters = {domain_id: variables}
+        domain_ids = [domain_id]
+    else:
+        actual_parameters = parameters
+
+    return _get_parameter_value_multiple_domain_scope(
+        fully_qualified_parameter_name=fully_qualified_parameter_name,
+        fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
+        parameters=actual_parameters,
+        domain_ids=domain_ids,
+    )
+
+
+def _get_parameter_value_multiple_domain_scope(
+    fully_qualified_parameter_name: str,
+    fully_qualified_parameter_name_as_list: List[str],
+    parameters: Dict[str, ParameterContainer],
+    domain_ids: List[str],
+) -> Optional[Any]:
+    domain_id: str
+    parameter_container: ParameterContainer
+    exception_messages: List[str] = []
+    for domain_id in domain_ids:
+        parameter_container = parameters[domain_id]
         try:
             return _get_parameter_value_one_domain_scope(
+                fully_qualified_parameter_name=fully_qualified_parameter_name,
                 fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
-                parameters=variables,
+                parameters=parameter_container,
             )
         except KeyError as e:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": "{e}" occurred.'
+            exception_messages.append(
+                f"""Unable to find value for parameter name "{fully_qualified_parameter_name}" for domain_id \
+"{domain_id}": "{e}" occurred.
+"""
             )
-    else:
-        parameter_container: ParameterContainer
-        domain_id: str
-        exception_messages: List[str] = []
-        for domain_id in domain_ids:
-            parameter_container = parameters[domain_id]
-            try:
-                return _get_parameter_value_one_domain_scope(
-                    fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
-                    parameters=parameter_container,
-                )
-            except KeyError as e:
-                exception_messages.append(
-                    f"""Unable to find value for parameter name "{fully_qualified_parameter_name}" for domain_id \
-"{domain_id}": "{e}" occurred."""
-                )
-        raise ge_exceptions.ProfilerExecutionError(message=";".join(exception_messages))
+    raise ge_exceptions.ProfilerExecutionError(message=";".join(exception_messages))
 
 
 def _get_parameter_value_one_domain_scope(
+    fully_qualified_parameter_name: str,
     fully_qualified_parameter_name_as_list: List[str],
     parameters: ParameterContainer,
 ) -> Optional[Any]:
@@ -157,7 +173,9 @@ def _get_parameter_value_one_domain_scope(
             parameter_node = parameter_node.descendants[parameter_name_part]
     except KeyError:
         raise KeyError(
-            f'Part "{parameter_name_part}" does not exist in fully-qualified parameter name.'
+            f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
+"{parameter_name_part}" does not exist in fully-qualified parameter name.
+"""
         )
 
 
