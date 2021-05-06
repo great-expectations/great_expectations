@@ -1,6 +1,5 @@
 import copy
-from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -17,53 +16,6 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
 )
 
 
-def domain_kwargs_parameter(func: Callable = None) -> Callable:
-    @wraps(func)
-    def get_parameter_value_for_fully_qualified_parameter_name(
-        fully_qualified_parameter_name: str,
-        domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[Any]:
-        validate_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name
-        )
-
-        # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
-        # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of the
-        # DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
-        if (
-            fully_qualified_parameter_name
-            == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
-        ):
-            if domain:
-                # Supports the "$domain.domain_kwargs" style syntax.
-                return domain[DOMAIN_KWARGS_PARAMETER_NAME]
-            return None
-
-        if fully_qualified_parameter_name.startswith(
-            DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
-        ):
-            if domain and domain[DOMAIN_KWARGS_PARAMETER_NAME]:
-                # Supports the "$domain.domain_kwargs.column" style syntax.
-                return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
-                    fully_qualified_parameter_name[
-                        (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
-                    ]
-                )
-            return None
-
-        return func(
-            fully_qualified_parameter_name=fully_qualified_parameter_name,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-    return get_parameter_value_for_fully_qualified_parameter_name
-
-
-@domain_kwargs_parameter
 def get_parameter_value(
     fully_qualified_parameter_name: str,
     domain: Union[Domain, List[Domain]],
@@ -80,6 +32,31 @@ def get_parameter_value(
         :param parameters
     :return: value
     """
+    validate_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name
+    )
+
+    # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
+    # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of the
+    # DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
+    if fully_qualified_parameter_name == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME:
+        if domain:
+            # Supports the "$domain.domain_kwargs" style syntax.
+            return domain[DOMAIN_KWARGS_PARAMETER_NAME]
+        return None
+
+    if fully_qualified_parameter_name.startswith(
+        DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
+    ):
+        if domain and domain[DOMAIN_KWARGS_PARAMETER_NAME]:
+            # Supports the "$domain.domain_kwargs.column" style syntax.
+            return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
+                fully_qualified_parameter_name[
+                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
+                ]
+            )
+        return None
+
     actual_parameters: Optional[Dict[str, ParameterContainer]] = copy.deepcopy(
         parameters
     )
