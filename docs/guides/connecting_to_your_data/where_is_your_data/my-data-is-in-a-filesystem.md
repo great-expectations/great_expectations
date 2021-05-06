@@ -17,9 +17,7 @@ This guide will help you connect to your data stored on a filesystem. This enabl
 
 ### 1. Choose an `ExecutionEngine`
 
-Which compute backend would you like to perform your data validations?
-
-There are two choices:
+Which backend would you like Great Expectations to use when validating your data?
 
 - [pandas](#i-want-my-computation-to-occur-in-pandas) (uses the `PandasExecutionEngine`)
 - [spark](#i-want-my-computation-to-occur-in-spark) (uses the `SparkExecutionEngine`)
