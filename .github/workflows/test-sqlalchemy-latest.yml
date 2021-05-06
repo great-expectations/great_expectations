@@ -3,7 +3,7 @@ on: [push]
 #   schedule:
 #     - cron: '0 0 * * *'
 jobs:
-  postgres:
+  postgres-job:
     name: Test latest sqlalchemy with postgres
     # Service containers to run with `container-job`
     services:
@@ -46,6 +46,7 @@ jobs:
         run: |
           pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics tests/core/test_batch_related_objects.py
       - uses: act10ns/slack@v1
+        name: Notify via Slack
         with:
           status: ${{ job.status }}
           channel: '#notifications-builds'
