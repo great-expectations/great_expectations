@@ -43,7 +43,7 @@ jobs:
           pip install --upgrade SQLAlchemy
       - name: Test with pytest
         run: |
-          pytest --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+          pytest --no-spark --napoleon-docstrings --ignore=tests/cli --ignore=tests/integration/usage_statistics tests/core/test_batch_related_objects.py
       - uses: act10ns/slack@v1
         with:
           status: ${{ job.status }}
