@@ -16,7 +16,7 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
 )
 
 
-def parameter_name_parser(func: Callable = None) -> Callable:
+def domain_kwargs_parameter(func: Callable = None) -> Callable:
     @wraps(func)
     def get_parameter_value_for_fully_qualified_parameter_name(
         fully_qualified_parameter_name: str,
@@ -62,7 +62,7 @@ def parameter_name_parser(func: Callable = None) -> Callable:
     return get_parameter_value_for_fully_qualified_parameter_name
 
 
-@parameter_name_parser
+@domain_kwargs_parameter
 def get_parameter_value(
     fully_qualified_parameter_name: str,
     domain: Union[Domain, List[Domain]],
@@ -87,16 +87,15 @@ def get_parameter_value(
         domain_ids = None
     else:
         fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        domain_cursor: Domain
         if isinstance(domain, Domain):
             domain_ids = [domain.id]
-        elif isinstance(domain, list):
-            if len(domain) > 0:
-                domain_cursor: Domain
-                domain_ids = [domain_cursor.id for domain_cursor in domain]
-            else:
-                raise ValueError(
-                    "Either a single Domain object or a non-empty list of Domain objects is required."
-                )
+        elif (
+            isinstance(domain, list)
+            and len(domain) > 0
+            and all([isinstance(domain_cursor, Domain) for domain_cursor in domain])
+        ):
+            domain_ids = [domain_cursor.id for domain_cursor in domain]
         else:
             raise ValueError(
                 "Either a single Domain object or a non-empty list of Domain objects is required."
