@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -64,7 +64,7 @@ def parameter_name_parser(func: Callable = None) -> Callable:
 @parameter_name_parser
 def get_parameter_value(
     fully_qualified_parameter_name: str,
-    domain: Domain,
+    domain: Union[Domain, List[Domain]],
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
@@ -73,20 +73,33 @@ def get_parameter_value(
     A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
     Args
         :param fully_qualified_parameter_name: str -- A dot-separated string key starting with $ for fetching parameters
-        :param domain: Domain -- current Domain of interest
+        :param domain: Union[Domain, List[Domain]] -- current Domain (or List[Domain]) of interest
         :param variables
         :param parameters
     :return: value
     """
-    parameter_container: ParameterContainer
+    domain_ids: Optional[List[str]]
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
-        parameter_container = variables
         fully_qualified_parameter_name = fully_qualified_parameter_name[
             len(VARIABLES_KEY) :
         ]
+        domain_ids = None
     else:
-        parameter_container = parameters[domain.id]
         fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        if isinstance(domain, Domain):
+            domain_ids = [domain.id]
+        elif isinstance(domain, list):
+            if len(domain) > 0:
+                domain_cursor: Domain
+                domain_ids = [domain_cursor.id for domain_cursor in domain]
+            else:
+                raise ValueError(
+                    "Either a single Domain object or a non-empty list of Domain objects is required."
+                )
+        else:
+            raise ValueError(
+                "Either a single Domain object or a non-empty list of Domain objects is required."
+            )
 
     fully_qualified_parameter_name_as_list: List[
         str
@@ -95,15 +108,33 @@ def get_parameter_value(
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
 
-    try:
-        return _get_parameter_value_one_domain_scope(
-            fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
-            parameters=parameter_container,
-        )
-    except KeyError as e:
-        raise ge_exceptions.ProfilerExecutionError(
-            message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": Error "{e}" occurred.'
-        )
+    if domain_ids is None:
+        try:
+            return _get_parameter_value_one_domain_scope(
+                fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
+                parameters=variables,
+            )
+        except KeyError as e:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": "{e}" occurred.'
+            )
+    else:
+        parameter_container: ParameterContainer
+        domain_id: str
+        exception_messages: List[str] = []
+        for domain_id in domain_ids:
+            parameter_container = parameters[domain_id]
+            try:
+                return _get_parameter_value_one_domain_scope(
+                    fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
+                    parameters=parameter_container,
+                )
+            except KeyError as e:
+                exception_messages.append(
+                    f"""Unable to find value for parameter name "{fully_qualified_parameter_name}" for domain_id \
+"{domain_id}": "{e}" occurred."""
+                )
+        raise ge_exceptions.ProfilerExecutionError(message=";".join(exception_messages))
 
 
 def _get_parameter_value_one_domain_scope(
