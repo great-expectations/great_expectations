@@ -7,7 +7,7 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional
 
 import pandas as pd
 from dateutil.parser import parse
@@ -98,6 +98,12 @@ class Validator:
             ), "batches provided to Validator must be Great Expectations Batch objects"
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
+
+        if len(batches) > 1:
+            logger.info(
+                f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
+                f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
+            )
 
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
@@ -690,6 +696,15 @@ class Validator:
         active_batch_id = self.execution_engine.active_batch_data_id
         active_batch = self.batches.get(active_batch_id) if active_batch_id else None
         return active_batch
+
+    def set_active_batch_id(self, batch_id):
+        if batch_id not in self.batches.keys():
+            raise ValueError(
+                f"batch_id {batch_id} not found in loaded batches. Batches must first be loaded before"
+                f"they can be set as active"
+            )
+        else:
+            self.execution_engine._active_batch_data_id = batch_id
 
     @property
     def active_batch_spec(self):

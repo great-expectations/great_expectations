@@ -1234,12 +1234,8 @@ class BaseDataContext:
             batch_filter_parameters=batch_filter_parameters,
             **kwargs,
         )
-        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
-        if len(batch_list) != 1:
-            raise ValueError(
-                f"Got {len(batch_list)} batches instead of a single batch."
-            )
-        return batch_list[0]
+
+        return batch_list
 
     @usage_statistics_enabled_method(
         event_name="data_context.run_validation_operator",
@@ -1701,7 +1697,7 @@ class BaseDataContext:
             ),
         )
 
-        batch_definition = batch.batch_definition
+        batch_definition = batch[0].batch_definition
         execution_engine = self.datasources[
             batch_definition.datasource_name
         ].execution_engine
@@ -1711,7 +1707,7 @@ class BaseDataContext:
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,
-            batches=[batch],
+            batches=batch,
         )
 
         return validator
