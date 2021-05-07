@@ -100,7 +100,7 @@ class Validator:
             self._batches[batch.id] = batch
 
         if len(batches) > 1:
-            logger.info(
+            logger.warning(
                 f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
                 f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
             )
