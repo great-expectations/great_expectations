@@ -6,9 +6,8 @@ rules:
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
     domain_builder:
-      # TODO: Move MyCustomSemanticTypeColumnDomainBuilder to tests
       class_name: MyCustomSemanticTypeColumnDomainBuilder
-      module_name: great_expectations.profiler.domain_builder
+      module_name: tests.profiler.plugins
       semantic_types:
         - user_id
     parameter_builders:
@@ -28,6 +27,7 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
+        # TODO: Get the below expectation type to work
   #     - expectation_type: expect_column_values_to_be_of_type
   #       class_name: DefaultExpectationConfigurationBuilder
   #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder

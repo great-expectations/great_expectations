@@ -11,8 +11,7 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.fixture
 def alice_columnar_table_single_batch():
-    # with open("alice_user_workflow_verbose_profiler_config.yml") as f:
-    #     verbose_profiler_config = f.read()
+
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__, "alice_user_workflow_verbose_profiler_config.yml"
     )
@@ -22,8 +21,6 @@ def alice_columnar_table_single_batch():
     # TODO: This "simplified" configuration has outstanding questions and proposed configurations that should be
     #  answered before it is considered to be a standard configuration.
 
-    # with open("alice_user_workflow_simplified_profiler_config.yml") as f:
-    #     simplified_profiler_config = f.read()
     simplified_profiler_config_file_path: str = file_relative_path(
         __file__, "alice_user_workflow_simplified_profiler_config.yml"
     )
