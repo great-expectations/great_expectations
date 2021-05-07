@@ -1,9 +1,7 @@
-import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
@@ -260,7 +258,7 @@ def _set_parameter_node_attribute_name_value_pairs(
 
 def get_parameter_value(
     fully_qualified_parameter_name: str,
-    domain: Union[Domain, List[Domain]],
+    domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
@@ -299,31 +297,14 @@ def get_parameter_value(
             )
         return None
 
-    actual_parameters: Optional[Dict[str, ParameterContainer]] = copy.deepcopy(
-        parameters
-    )
-    domain_ids: Optional[List[str]]
-    domain_cursor: Domain
+    parameter_container: ParameterContainer
+
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
-        domain_id: str = IDDict().to_id()
-        actual_parameters[domain_id] = copy.deepcopy(variables)
-        domain_ids = [domain_id]
-        fully_qualified_parameter_name = fully_qualified_parameter_name[
-            len(VARIABLES_KEY) :
-        ]
-    else:
-        if isinstance(domain, Domain):
-            domain = [domain]
-        elif not (
-            isinstance(domain, list)
-            and len(domain) > 0
-            and all([isinstance(domain_cursor, Domain) for domain_cursor in domain])
-        ):
-            raise ValueError(
-                "Either a single Domain object or a non-empty list of Domain objects is required."
-            )
-        domain_ids = [domain_cursor.id for domain_cursor in domain]
         fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        parameter_container = variables
+    else:
+        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        parameter_container = parameters[domain.id]
 
     fully_qualified_parameter_name_as_list: List[
         str
@@ -332,53 +313,19 @@ def get_parameter_value(
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
 
-    return _get_parameter_value_multiple_domain_scope(
+    return _get_parameter_value_one_domain_scope(
         fully_qualified_parameter_name=fully_qualified_parameter_name,
         fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
-        parameters=actual_parameters,
-        domain_ids=domain_ids,
+        parameter_container=parameter_container,
     )
-
-
-def _get_parameter_value_multiple_domain_scope(
-    fully_qualified_parameter_name: str,
-    fully_qualified_parameter_name_as_list: List[str],
-    parameters: Dict[str, ParameterContainer],
-    domain_ids: List[str],
-) -> Optional[Any]:
-    domain_id: str
-    parameter_container: ParameterContainer
-    exception_messages: List[str] = []
-    parameter_value: Optional[Any] = None
-    for domain_id in domain_ids:
-        parameter_container = parameters[domain_id]
-        try:
-            parameter_value = _get_parameter_value_one_domain_scope(
-                fully_qualified_parameter_name=fully_qualified_parameter_name,
-                fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
-                parameters=parameter_container,
-            )
-            # In the present implementation, the first non-NULL parameter value found is returned.  In the future,
-            # parameter name across domains will need to be disambiguated (e.g., bu using a domain-specific scoping).
-            if parameter_value is not None:
-                return parameter_value
-        except KeyError as e:
-            exception_messages.append(
-                f"""Unable to find value for parameter name "{fully_qualified_parameter_name}" for domain_id \
-"{domain_id}": "{e}" occurred.
-"""
-            )
-    if len(exception_messages) > 0:
-        raise ge_exceptions.ProfilerExecutionError(message=";".join(exception_messages))
-    return parameter_value
 
 
 def _get_parameter_value_one_domain_scope(
     fully_qualified_parameter_name: str,
     fully_qualified_parameter_name_as_list: List[str],
-    parameters: ParameterContainer,
+    parameter_container: ParameterContainer,
 ) -> Optional[Any]:
-    parameter_node: Optional[ParameterNode] = parameters.get_parameter_node(
+    parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
     if parameter_node is None:

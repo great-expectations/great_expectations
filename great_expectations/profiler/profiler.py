@@ -88,9 +88,8 @@ class Profiler:
                     variables = build_parameter_container_for_variables(
                         variable_configs=variable_configs
                     )
-                print(f'\n[ALEX_TEST] VARIABLES: {variables} ; TYPE: {str(type(variables))}')
 
-                # TODO: <Alex>ALEXs -- use name-value pairs in arguments; add type hints throughout.</Alex>
+                # TODO: <Alex>ALEX -- use name-value pairs in arguments; add type hints throughout.</Alex>
                 self._rules.append(
                     Rule(
                         name=rule_name,

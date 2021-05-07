@@ -537,7 +537,6 @@ def test_alice_user_workflow_single_batch(
         full_profiler_config_dict = yaml.load(profiler_config)
         rule_configs = full_profiler_config_dict.get("rules")
         variable_configs = full_profiler_config_dict.get("variables")
-        print(f'\n[ALEX_TEST] VARIABLE_CONFIGS: {variable_configs} ; TYPE: {str(type(variable_configs))}')
         profiler = Profiler(
             rule_configs=rule_configs,
             variable_configs=variable_configs,
@@ -562,4 +561,9 @@ def test_alice_user_workflow_single_batch(
         )
 
         # Check resulting expectation suite
-        assert suite == alice_columnar_table_single_batch["expected_expectation_suite"]
+        assert (
+            suite.to_json_dict()
+            == alice_columnar_table_single_batch[
+                "expected_expectation_suite"
+            ].to_json_dict()
+        )
