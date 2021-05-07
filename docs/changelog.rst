@@ -100,6 +100,7 @@ Develop
 * [ENHANCEMENT][MAINTENANCE] Use Metrics to Protect Against Wrong Column Names
 * [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
+* [BUGFIX] Fix issue for read_method on missing compression param for read_parquet #2557
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
 * [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 * [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)

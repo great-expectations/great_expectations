@@ -149,6 +149,7 @@ Please check your config."""
             s3_url = S3Url(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+
             if "compression" not in reader_options.keys():
                 reader_options["compression"] = sniff_s3_compression(s3_url)
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
@@ -160,6 +161,10 @@ Please check your config."""
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
+
+            reader_options = self._drop_unsupported_option_keys_for_reader(
+                reader_fn, reader_options
+            )
             df = reader_fn(buf, **reader_options)
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
@@ -179,6 +184,24 @@ Please check your config."""
         typed_batch_data = PandasBatchData(execution_engine=self, dataframe=df)
 
         return typed_batch_data, batch_markers
+
+    def _drop_unsupported_option_keys_for_reader(self, reader_fn, reader_options):
+        available_keys = reader_fn.__code__.co_varnames
+        current_keys = list(reader_options.keys())
+        dropped_option_keys = []
+        for key in current_keys:
+            if key not in available_keys:
+                reader_options.pop(key, None)
+                dropped_option_keys.append(key)
+
+        if dropped_option_keys:
+            logger.warning(
+                "Some reader option keys have been dropped as {reader_fn_name} does not support them: {dropped_option_keys}".format(
+                    reader_fn_name=reader_fn.__name__,
+                    dropped_option_keys=dropped_option_keys,
+                )
+            )
+        return reader_options
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
