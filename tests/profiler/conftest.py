@@ -13,6 +13,7 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterNode,
 )
 from great_expectations.profiler.rule.rule import Rule
+from tests.profiler.bob_user_workflow_fixture import bob_columnar_table_multi_batch
 
 
 # noinspection PyPep8Naming
