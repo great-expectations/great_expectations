@@ -11,6 +11,7 @@ These pages provide a high-level overview of key Great Expectations features, wi
 
    /reference/glossary_of_expectations
    /reference/core_concepts
+   /reference/data_context_reference.rst
    /reference/supporting_resources
    /reference/spare_parts
    API Reference <autoapi/great_expectations/index>
