@@ -6,6 +6,8 @@ from great_expectations.profile.base import (
     ProfilerDataType,
     ProfilerTypeMapping,
 )
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 try:
     from sqlalchemy.exc import OperationalError
@@ -135,7 +137,10 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
         df.expect_table_columns_to_match_ordered_list(None)
         df.set_config_value("interactive_evaluation", False)
 
-        columns = df.get_table_columns()
+        if isinstance(df, Validator):
+            columns = df.get_metric(MetricConfiguration("table.columns", dict()))
+        else:
+            columns = df.get_table_columns()
 
         meta_columns = {}
         for column in columns:
@@ -175,7 +180,6 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
-                    # TODO: change to class-first expectation structure?
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )
@@ -231,7 +235,6 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
-                    # TODO: migrate to class first structure
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )
