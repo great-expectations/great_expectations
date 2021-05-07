@@ -6,13 +6,13 @@ from great_expectations.util import load_data_into_database
 CONNECTION_STRING = """postgresql+psycopg2://postgres:@localhost/test_ci"""
 load_data_into_database(
     "taxi_data",
-    "../fixtures/test_data/reports/yellow_tripdata_sample_2019-01.csv",
+    "../../../../integration/fixtures/data/reports/yellow_tripdata_sample_2019-01.csv",
     CONNECTION_STRING,
 )
 
 # context = ge.get_context()
 context = ge.DataContext(
-    context_root_dir="../fixtures/runtime_data_taxi_monthly/great_expectations"
+    context_root_dir="../../../../integration/fixtures/runtime_data_taxi_monthly/great_expectations"
 )
 
 # with a connection_string
@@ -64,4 +64,3 @@ batch_data = batch.data
 assert isinstance(
     batch_data, ge.execution_engine.sqlalchemy_batch_data.SqlAlchemyBatchData
 )
-

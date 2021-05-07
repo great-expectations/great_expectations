@@ -96,9 +96,14 @@ module.exports = {
             { type: 'category',
               label: "Database",
               items: [
-                'guides/connecting_to_your_data/where_is_your_data/my_data_is_in_a_database/postgres',
-                'guides/connecting_to_your_data/where_is_your_data/my_data_is_in_a_database/snowflake',
-                'guides/connecting_to_your_data/where_is_your_data/my_data_is_in_a_database/sqlite',
+                'guides/connecting_to_your_data/database/athena',
+                'guides/connecting_to_your_data/database/bigquery',
+                'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mysql',
+                'guides/connecting_to_your_data/database/postgres',
+                'guides/connecting_to_your_data/database/redshift',
+                'guides/connecting_to_your_data/database/snowflake',
+                'guides/connecting_to_your_data/database/sqlite',
               ]
             },
             {
