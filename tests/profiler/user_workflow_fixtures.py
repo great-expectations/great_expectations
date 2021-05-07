@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import Dict, List
 
 import pytest
 
@@ -67,172 +67,83 @@ def alice_columnar_table_single_batch():
         ),
     ]
 
-    # my_rule_for_timestamps_expectation_configurations: List[
-    #     ExpectationConfiguration
-    # ] = []
-    # my_rule_for_timestamps_column_names: List[str] = [
-    #     "event_ts",
-    #     "server_ts",
-    #     "device_ts",
-    # ]
-    # for my_rule_for_timestamps_column_name in my_rule_for_timestamps_column_names:
-    #     my_rule_for_timestamps_expectation_configurations.extend(
-    #         [
-    #             # ExpectationConfiguration(
-    #             #     **{
-    #             #         "expectation_type": "expect_column_values_to_be_of_type",
-    #             #         "kwargs": {
-    #             #             "column": my_rule_for_timestamps_column_name,
-    #             #             "type_": "TIMESTAMP",
-    #             #         },
-    #             #         "meta": {},
-    #             #     }
-    #             # ),
-    #             ExpectationConfiguration(
-    #                 **{
-    #                     "expectation_type": "expect_column_values_to_be_increasing",
-    #                     "kwargs": {
-    #                         "column": my_rule_for_timestamps_column_name,
-    #                     },
-    #                     "meta": {},
-    #                 }
-    #             ),
-    #             ExpectationConfiguration(
-    #                 **{
-    #                     "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-    #                     "kwargs": {
-    #                         "column": my_rule_for_timestamps_column_name,
-    #                     },
-    #                     "meta": {},
-    #                 }
-    #             ),
-    #             # ExpectationConfiguration(
-    #             #     **{
-    #             #         "expectation_type": "expect_column_min_to_be_between",
-    #             #         "kwargs": {
-    #             #             "column": my_rule_for_timestamps_column_name,
-    #             #             "min_value": "2004-10-19 10:23:54",  # From variables
-    #             #             "max_value": "2004-10-19 10:23:54",  # From variables
-    #             #         },
-    #             #         "meta": {
-    #             #             "format": "markdown",
-    #             #             "content": [
-    #             #                 "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-    #             #             ],
-    #             #         },
-    #             #     }
-    #             # ),
-    #             ExpectationConfiguration(
-    #                 **{
-    #                     "expectation_type": "expect_column_max_to_be_between",
-    #                     "kwargs": {
-    #                         "column": my_rule_for_timestamps_column_name,
-    #                         # TODO: <Alex>ALEX</Alex>
-    #                         "min_value": "2004-10-19T10:23:54",  # From variables
-    #                         # "min_value": datetime.datetime(2004, 10, 19, 10, 23, 54),  # From variables
-    #                         "max_value": "2004-10-19 11:05:20",  # From data
-    #                         # "max_value": datetime.datetime(2004, 10, 19, 11, 5, 20),  # From data
-    #                         # TODO: <Alex>ALEX</Alex>
-    #                     },
-    #                     # "meta": {
-    #                     #     "format": "markdown",
-    #                     #     "content": [
-    #                     #         "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
-    #                     #     ],
-    #                     # },
-    #                 }
-    #             ),
-    #         ]
-    #     )
-    my_rule_for_timestamps_expectation_configurations = [
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_increasing",
-                "meta": {},
-                "kwargs": {
-                    "column": "event_ts",
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                "meta": {},
-                "kwargs": {
-                    "column": "event_ts",
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_max_to_be_between",
-                "meta": {},
-                "kwargs": {
-                    "column": "event_ts",
-                    "min_value": "2004-10-19T10:23:54",  # From variables
-                    "max_value": "2004-10-19 11:05:20",  # From data
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_increasing",
-                "meta": {},
-                "kwargs": {
-                    "column": "server_ts",
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                "meta": {},
-                "kwargs": {
-                    "column": "server_ts",
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_max_to_be_between",
-                "meta": {},
-                "kwargs": {
-                    "column": "server_ts",
-                    "min_value": "2004-10-19T10:23:54",  # From variables
-                    "max_value": "2004-10-19 11:05:20",  # From data
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_increasing",
-                "meta": {},
-                "kwargs": {
-                    "column": "device_ts",
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                "meta": {},
-                "kwargs": {
-                    "column": "device_ts",
-                },
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_max_to_be_between",
-                "meta": {},
-                "kwargs": {
-                    "column": "device_ts",
-                    "min_value": "2004-10-19T10:23:54",  # From variables
-                    "max_value": "2004-10-19 11:05:22",  # From data
-                },
-            }
-        ),
+    my_rule_for_timestamps_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = []
+    my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
+        {"column_name": "event_ts", "observed_max_time_str": "2004-10-19 11:05:20",},
+        {"column_name": "server_ts", "observed_max_time_str": "2004-10-19 11:05:20",},
+        {"column_name": "device_ts", "observed_max_time_str": "2004-10-19 11:05:22",},
     ]
+    for column_data in my_rule_for_timestamps_column_data:
+        my_rule_for_timestamps_expectation_configurations.extend(
+            [
+                # ExpectationConfiguration(
+                #     **{
+                #         "expectation_type": "expect_column_values_to_be_of_type",
+                #         "kwargs": {
+                #             "column": my_rule_for_timestamps_column_name,
+                #             "type_": "TIMESTAMP",
+                #         },
+                #         "meta": {},
+                #     }
+                # ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_increasing",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "min_value": "2004-10-19T10:23:54",  # From variables
+                            "max_value": "2004-10-19T10:23:54",  # From variables
+                        },
+                        "meta": {},
+                        # TODO: meta field handling is not yet working
+                        # "meta": {
+                        #     "format": "markdown",
+                        #     "content": [
+                        #         "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                        #     ],
+                        # },
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "min_value": "2004-10-19T10:23:54",  # From variables
+                            "max_value": column_data["observed_max_time_str"],  # From data
+                        },
+                        "meta": {},
+                        # TODO: meta field handling is not yet working
+                        # "meta": {
+                        #     "format": "markdown",
+                        #     "content": [
+                        #         "### This expectation should be replaced with the below expectation"
+                        #     ],
+                        # },
+                    }
+                ),
+            ]
+        )
 
     # expectation_configurations: List[ExpectationConfiguration] = []
     # # expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)

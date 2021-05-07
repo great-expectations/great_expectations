@@ -79,7 +79,7 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_value_kwargs = self._metric_value_kwargs
 
         parameter_values: Dict[str, Dict[str, Any]] = {
-            f"$parameter.{self._metric_name}": {
+            f"${self.name}.parameters.{self._metric_name}": {
                 "value": validator.get_metric(
                     metric=MetricConfiguration(
                         metric_name=self._metric_name,
