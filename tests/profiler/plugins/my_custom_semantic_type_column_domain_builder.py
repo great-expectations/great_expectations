@@ -12,8 +12,6 @@ from great_expectations.profiler.domain_builder.inferred_semantic_domain_type im
 )
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
-# TODO: Move MyCustomSemanticTypeColumnDomainBuilder to tests
-
 
 class MyCustomSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     """
