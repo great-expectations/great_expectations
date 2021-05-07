@@ -14,6 +14,9 @@ module.exports = {
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
   themeConfig: {
+    prism: {
+      theme: require('prism-react-renderer/themes/vsDark'),
+    },
     navbar: {
       title: 'Great Expectations',
       logo: {
@@ -67,7 +70,7 @@ module.exports = {
               href: 'https://www.youtube.com/c/GreatExpectationsData'
             }
           ]
-        }
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Superconductive.`
     }

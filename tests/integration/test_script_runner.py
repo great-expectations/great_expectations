@@ -21,31 +21,30 @@ class BackendDependencies(enum.Enum):
 
 integration_test_matrix = [
     {
-        "name": "pandas_two_batch_requests_two_validators",
-        "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
-    },
-    {
-        "name": "pandas_filesystem_runtime_golden_path",
+        "user_flow_script": "integration/code/connecting_to_your_data/filesystem/pandas.py",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "integration/fixtures/runtime_data_taxi_monthly/great_expectations",
-        "data_dir": "integration/fixtures/test_data",
-        "user_flow_script": "integration/code/path_filesystem_runtime_data_connector.py",
+        "data_dir": "integration/fixtures/data",
     },
-    {
-        "name": "postgres_runtime_golden_path",
-        "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "integration/fixtures/runtime_data_taxi_monthly/great_expectations",
-        "user_flow_script": "integration/code/query_postgres_runtime_data_connector.py",
-        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
-    },
+    # {
+    #     "name": "postgres_runtime_golden_path",
+    #     "base_dir": file_relative_path(__file__, "../../"),
+    #     "data_context_dir": "integration/fixtures/runtime_data_taxi_monthly/great_expectations",
+    #     "user_flow_script": "integration/code/query_postgres_runtime_data_connector.py",
+    #     "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    # },
+    # {
+    #      "name": "pandas_two_batch_requests_two_validators",
+    #      "base_dir": file_relative_path(__file__, "../../"),
+    #      "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #      "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #      "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+    #  },
 ]
 
 
 def idfn(test_configuration):
-    return test_configuration.get("name")
+    return test_configuration.get("user_flow_script")
 
 
 @pytest.fixture
@@ -85,7 +84,7 @@ def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
         if test_configuration.get("data_dir") is not None:
             # Test Data
             source_data_dir = os.path.join(base_dir, test_configuration.get("data_dir"))
-            test_data_dir = os.path.join(tmp_path, "test_data")
+            test_data_dir = os.path.join(tmp_path, "data")
             shutil.copytree(
                 source_data_dir,
                 test_data_dir,
