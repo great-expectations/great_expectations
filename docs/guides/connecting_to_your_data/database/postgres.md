@@ -7,7 +7,7 @@ import ConnectionStringDetails from '../reference/configuration_explanation.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect Great Expectations to data in a Postgresql database. We will be building a `Datasource` configuration, and using it to verify connectivity. By the end of this how-to guide, you should have a `Batch` representing a slice of data in your database, and a working code snippet that can be used as a starting point for more complex configurations. 
+This guide will help you connect Great Expectations to data in a Postgresql database. We will be building a `Datasource` configuration, and using it to verify connectivity. By the end of this how-to guide, you should have a `Batch` representing a slice of data in your database, and a working code snippet that can be used as a starting point for more complex configurations.
 
 :::note Prerequisites: This how-to-guide assumes you have already:
 - Completed the [Getting Started Tutorial.](../../tutorials/quick-start.md)
@@ -77,6 +77,10 @@ The configuration also contains 2 `DataConnectors` by default:
 
 :::warning
   - Add blurb about ActiveDataConnectors here
+:::
+
+:::warning
+  - Add test for yaml here
 :::
 
 ### 5. Save configuration to DataContext.
