@@ -1,8 +1,8 @@
 def load_data_into_database(
     table_name: str, csv_path: str, connection_string: str
 ) -> None:
-    import sqlalchemy as sa
     import pandas as pd
+    import sqlalchemy as sa
 
     engine = sa.create_engine(connection_string)
     engine.execute(f"DROP TABLE IF EXISTS {table_name}")
