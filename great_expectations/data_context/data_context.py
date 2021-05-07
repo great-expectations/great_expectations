@@ -1176,7 +1176,7 @@ class BaseDataContext:
         batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> Union[Batch, DataAsset]:
-        """Get a list of batches, based on a variety of flexible input types.
+        """Get exactly one batch, based on a variety of flexible input types.
 
         Args:
             datasource_name
@@ -1681,32 +1681,30 @@ class BaseDataContext:
                 expectation_suite_name=create_expectation_suite_with_name
             )
 
-        batch_list: Batch = cast(
-            Batch,
-            self.get_batch_list(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_request=batch_request,
-                batch_data=batch_data,
-                data_connector_query=data_connector_query,
-                batch_identifiers=batch_identifiers,
-                limit=limit,
-                index=index,
-                custom_filter_function=custom_filter_function,
-                batch_spec_passthrough=batch_spec_passthrough,
-                sampling_method=sampling_method,
-                sampling_kwargs=sampling_kwargs,
-                splitter_method=splitter_method,
-                splitter_kwargs=splitter_kwargs,
-                runtime_parameters=runtime_parameters,
-                query=query,
-                path=path,
-                batch_filter_parameters=batch_filter_parameters,
-                **kwargs,
-            ),
+        batch_list: List[Batch] = self.get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            **kwargs,
         )
-
+        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
+        # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition = batch_list[-1].batch_definition
         execution_engine = self.datasources[
             batch_definition.datasource_name

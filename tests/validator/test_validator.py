@@ -1,12 +1,12 @@
 import datetime
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Set, Union
 
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core import IDDict
+from great_expectations.core import ExpectationSuite, IDDict
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -456,19 +456,21 @@ def test_head(
 
 
 @pytest.fixture()
-def multi_batch_taxi_validator(yellow_trip_pandas_data_context):
-    context = yellow_trip_pandas_data_context
+def multi_batch_taxi_validator(
+    yellow_trip_pandas_data_context: DataContext,
+) -> Validator:
+    context: DataContext = yellow_trip_pandas_data_context
 
-    suite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
-    multi_batch_request = BatchRequest(
+    multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
         data_connector_name="monthly",
         data_asset_name="my_reports",
         data_connector_query={"batch_filter_parameters": {"year": "2019"}},
     )
 
-    validator_multi_batch = context.get_validator(
+    validator_multi_batch: Validator = context.get_validator(
         batch_request=multi_batch_request, expectation_suite=suite
     )
 
@@ -486,7 +488,7 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
         == "03"
     )
 
-    validator_batch_identifiers_for_all_batches = [
+    validator_batch_identifiers_for_all_batches: List[str] = [
         i for i in multi_batch_taxi_validator.batches
     ]
     assert validator_batch_identifiers_for_all_batches == [
@@ -497,7 +499,7 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
 
 
 def test_validator_batch_filter(multi_batch_taxi_validator):
-    total_batch_definition_list = [
+    total_batch_definition_list: List[BatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
 
@@ -505,7 +507,9 @@ def test_validator_batch_filter(multi_batch_taxi_validator):
         data_connector_query_dict={"batch_filter_parameters": {"month": "01"}}
     )
 
-    jan_batch_definition_list = jan_batch_filter.select_from_data_connector_query(
+    jan_batch_definition_list: List[
+        BatchDefinition
+    ] = jan_batch_filter.select_from_data_connector_query(
         batch_definition_list=total_batch_definition_list
     )
 
@@ -517,20 +521,51 @@ def test_validator_batch_filter(multi_batch_taxi_validator):
         data_connector_query_dict={"index": slice(-1, 0, -1)}
     )
 
-    feb_march_batch_definition_list = (
-        feb_march_batch_filter.select_from_data_connector_query(
-            batch_definition_list=total_batch_definition_list
-        )
+    feb_march_batch_definition_list: List[
+        BatchDefinition
+    ] = feb_march_batch_filter.select_from_data_connector_query(
+        batch_definition_list=total_batch_definition_list
     )
 
     for i in feb_march_batch_definition_list:
         print(i["batch_identifiers"])
     assert len(feb_march_batch_definition_list) == 2
 
-    batch_definitions_months_set = {
+    batch_definitions_months_set: Set[str] = {
         v.batch_identifiers["month"] for v in feb_march_batch_definition_list
     }
     assert batch_definitions_months_set == {"02", "03"}
+
+    jan_march_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={
+            "custom_filter_function": lambda batch_identifiers: batch_identifiers[
+                "month"
+            ]
+            == "01"
+            or batch_identifiers["month"] == "03"
+        }
+    )
+
+    jan_march_batch_definition_list: List[
+        BatchDefinition
+    ] = jan_march_batch_filter.select_from_data_connector_query(
+        batch_definition_list=total_batch_definition_list
+    )
+
+    for i in jan_march_batch_definition_list:
+        print(i["batch_identifiers"])
+    assert len(jan_march_batch_definition_list) == 2
+
+    batch_definitions_months_set: Set[str] = {
+        v.batch_identifiers["month"] for v in jan_march_batch_definition_list
+    }
+    assert batch_definitions_months_set == {"01", "03"}
+
+
+def test_custom_filter_function(multi_batch_taxi_validator):
+    total_batch_definition_list: List[BatchDefinition] = [
+        v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
+    ]
 
 
 def test_validator_set_active_batch(multi_batch_taxi_validator):
@@ -543,7 +578,7 @@ def test_validator_set_active_batch(multi_batch_taxi_validator):
         "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
     ).success
 
-    multi_batch_taxi_validator.set_active_batch_id("18653cbf8fb5baf5fbbc5ed95f9ee94d")
+    multi_batch_taxi_validator.active_batch_id = "18653cbf8fb5baf5fbbc5ed95f9ee94d"
 
     assert (
         multi_batch_taxi_validator.active_batch_id == "18653cbf8fb5baf5fbbc5ed95f9ee94d"

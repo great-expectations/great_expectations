@@ -4344,6 +4344,12 @@ def yellow_trip_pandas_data_context(
     tmp_path_factory,
     monkeypatch,
 ):
+    """
+    Provides a data context with a data_connector for a pandas datasource which can connect to three months of
+    yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
+    where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
+    batch_filter_parameters is set to "01", "02", or "03"
+    """
     # Reenable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
