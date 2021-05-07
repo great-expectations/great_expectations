@@ -2,31 +2,32 @@ variables:
   max_user_id: 999999999999
   min_timestamp: 2004-10-19 10:23:54
 rules:
-  # my_rule_for_user_ids:
-  #   class_name: Rule
-  #   module_name: great_expectations.profiler.rule.rule
-  #   domain_builder:
-  #     class_name: MyCustomSemanticTypeColumnDomainBuilder
-  #     module_name: plugins.profiler.domain_builder.my_custom_semantic_type_column_domain_builder
-  #     semantic_types:
-  #       - user_id
-  #   parameter_builders:
-  #     - name: my_min_user_id
-  #       class_name: MetricParameterBuilder
-  #       module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
-  #       metric_name: column.min
-  #       metric_domain_kwargs: $domain.domain_kwargs
-  #   expectation_configuration_builders:
-  #     - expectation_type: expect_column_values_to_be_between
-  #       class_name: DefaultExpectationConfigurationBuilder
-  #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-  #       min_value: $my_min_user_id.parameter.min_value
-  #       max_value: $variables.max_user_id
-  #       column: $domain.domain_kwargs.column
-  #     - expectation_type: expect_column_values_to_not_be_null
-  #       class_name: DefaultExpectationConfigurationBuilder
-  #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-  #       column: $domain.domain_kwargs.column
+  my_rule_for_user_ids:
+    class_name: Rule
+    module_name: great_expectations.profiler.rule.rule
+    domain_builder:
+      # TODO: Move MyCustomSemanticTypeColumnDomainBuilder to tests
+      class_name: MyCustomSemanticTypeColumnDomainBuilder
+      module_name: great_expectations.profiler.domain_builder
+      semantic_types:
+        - user_id
+    parameter_builders:
+      - name: my_min_user_id
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.min
+        metric_domain_kwargs: $domain.domain_kwargs
+    expectation_configuration_builders:
+      - expectation_type: expect_column_values_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        min_value: $my_min_user_id.parameters.column.min
+        max_value: $variables.max_user_id
+        column: $domain.domain_kwargs.column
+      - expectation_type: expect_column_values_to_not_be_null
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        column: $domain.domain_kwargs.column
   #     - expectation_type: expect_column_values_to_be_of_type
   #       class_name: DefaultExpectationConfigurationBuilder
   #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder

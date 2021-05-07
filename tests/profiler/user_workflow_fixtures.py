@@ -40,8 +40,8 @@ def alice_columnar_table_single_batch():
                 "expectation_type": "expect_column_values_to_be_between",
                 "kwargs": {
                     "column": "user_id",
-                    "min_value": "19",  # From the data
-                    "max_value": "999999999999",
+                    "min_value": 397433,  # From the data
+                    "max_value": 999999999999,
                 },
                 "meta": {},
             }
@@ -55,16 +55,17 @@ def alice_columnar_table_single_batch():
                 "meta": {},
             }
         ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {
-                    "column": "user_id",
-                    "type_": "INTEGER",
-                },
-                "meta": {},
-            }
-        ),
+        # TODO: Enable this ExpectationConfiguration
+        # ExpectationConfiguration(
+        #     **{
+        #         "expectation_type": "expect_column_values_to_be_of_type",
+        #         "kwargs": {
+        #             "column": "user_id",
+        #             "type_": "INTEGER",
+        #         },
+        #         "meta": {},
+        #     }
+        # ),
     ]
 
     my_rule_for_timestamps_expectation_configurations: List[
@@ -145,9 +146,9 @@ def alice_columnar_table_single_batch():
             ]
         )
 
-    # expectation_configurations: List[ExpectationConfiguration] = []
-    # # expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
-    # expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
+    expectation_configurations: List[ExpectationConfiguration] = []
+    expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
+    expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
     #
     # # assert len(expectation_configurations) == 18
 
@@ -155,15 +156,13 @@ def alice_columnar_table_single_batch():
     expected_expectation_suite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name
     )
-    # for expectation_configuration in expectation_configurations:
-    #     expected_expectation_suite.add_expectation(expectation_configuration)
-    # TODO: <Alex>ALEX</Alex>
-    for expectation_configuration in my_rule_for_timestamps_expectation_configurations:
+    for expectation_configuration in expectation_configurations:
         expected_expectation_suite.add_expectation(expectation_configuration)
 
+    # TODO: <Alex>ALEX</Alex>
     # assert len(expected_expectation_suite.expectations) == 18
 
-    # NOTE that this expectation suite will fail when validated on the data in sample_data_relative_path
+    # NOTE that this expectation suite should fail when validated on the data in sample_data_relative_path
     # because the device_ts is ahead of the event_ts for the latest event
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
