@@ -313,14 +313,14 @@ def get_parameter_value(
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
 
-    return _get_parameter_value_one_domain_scope(
+    return _get_parameter_value_from_parameter_container(
         fully_qualified_parameter_name=fully_qualified_parameter_name,
         fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
         parameter_container=parameter_container,
     )
 
 
-def _get_parameter_value_one_domain_scope(
+def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name: str,
     fully_qualified_parameter_name_as_list: List[str],
     parameter_container: ParameterContainer,
