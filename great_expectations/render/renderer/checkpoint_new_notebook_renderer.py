@@ -104,7 +104,7 @@ Glad you asked! Checkpoints are very versatile. For example, you can validate ma
                 first_expectation_suite.expectation_suite_name
             )
             sample_yaml_str = f'my_checkpoint_name = "{self.checkpoint_name}" # This was populated from your CLI command.\n\n'
-            sample_yaml_str += f'{self.checkpoint_name}_config = f"""'
+            sample_yaml_str += f'yaml_config = f"""'
             sample_yaml_str += "\nname: {my_checkpoint_name}"
             sample_yaml_str += f"""
 config_version: 1.0
@@ -120,7 +120,7 @@ validations:
     expectation_suite_name: {first_expectation_suite_name}
 """
             sample_yaml_str += '"""'
-            sample_yaml_str += f"\nprint({self.checkpoint_name}_config)"
+            sample_yaml_str += f"\nprint(yaml_config)"
 
             self.add_code_cell(
                 sample_yaml_str,
@@ -142,7 +142,7 @@ This `test_yaml_config()` function is meant to enable fast dev loops. If your co
 If you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters."""
         )
         self.add_code_cell(
-            f"""my_checkpoint = context.test_yaml_config(yaml_config={self.checkpoint_name}_config)""",
+            f"""my_checkpoint = context.test_yaml_config(yaml_config=yaml_config)""",
             lint=True,
         )
 
@@ -163,7 +163,7 @@ You can run the following cell to print out the full yaml configuration. For exa
 Run the following cell to save this Checkpoint to your Checkpoint Store."""
         )
         self.add_code_cell(
-            f"context.add_checkpoint(**yaml.load({self.checkpoint_name}_config))",
+            f"context.add_checkpoint(**yaml.load(yaml_config))",
             lint=True,
         )
 
