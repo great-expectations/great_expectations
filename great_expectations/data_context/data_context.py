@@ -1176,7 +1176,7 @@ class BaseDataContext:
         batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> Union[Batch, DataAsset]:
-        """Get exactly one batch, based on a variety of flexible input types.
+        """Get a list of batches, based on a variety of flexible input types.
 
         Args:
             datasource_name
@@ -1234,8 +1234,18 @@ class BaseDataContext:
             batch_filter_parameters=batch_filter_parameters,
             **kwargs,
         )
-
-        return batch_list
+        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        warnings.warn(
+            "get_batch will be deprecated for the V3 Batch Request API in a future version of GE. Please use"
+            "get_batch_list instead.",
+            DeprecationWarning,
+        )
+        if len(batch_list) != 1:
+            raise ValueError(
+                f"Got {len(batch_list)} batches instead of a single batch. If you would like to use a BatchRequest to "
+                f"return multiple batches, please use get_batch_list directly instead of calling get_batch"
+            )
+        return batch_list[0]
 
     @usage_statistics_enabled_method(
         event_name="data_context.run_validation_operator",
@@ -1671,9 +1681,9 @@ class BaseDataContext:
                 expectation_suite_name=create_expectation_suite_with_name
             )
 
-        batch: Batch = cast(
+        batch_list: Batch = cast(
             Batch,
-            self.get_batch(
+            self.get_batch_list(
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
@@ -1697,7 +1707,7 @@ class BaseDataContext:
             ),
         )
 
-        batch_definition = batch[0].batch_definition
+        batch_definition = batch_list[-1].batch_definition
         execution_engine = self.datasources[
             batch_definition.datasource_name
         ].execution_engine
@@ -1707,7 +1717,7 @@ class BaseDataContext:
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,
-            batches=batch,
+            batches=batch_list,
         )
 
         return validator
