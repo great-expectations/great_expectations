@@ -89,7 +89,7 @@ class Profiler:
                         variable_configs=variable_configs
                     )
 
-                # TODO: <Alex>ALEXs -- use name-value pairs in arguments; add type hints throughout.</Alex>
+                # TODO: <Alex>ALEX -- use name-value pairs in arguments; add type hints throughout.</Alex>
                 self._rules.append(
                     Rule(
                         name=rule_name,

@@ -528,7 +528,6 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
 def test_alice_user_workflow_single_batch(
     alice_columnar_table_single_batch_context, alice_columnar_table_single_batch
 ):
-
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
     # Load profiler configs & loop (run tests for each one)
@@ -562,4 +561,9 @@ def test_alice_user_workflow_single_batch(
         )
 
         # Check resulting expectation suite
-        assert suite == alice_columnar_table_single_batch["expected_expectation_suite"]
+        assert (
+            suite.to_json_dict()
+            == alice_columnar_table_single_batch[
+                "expected_expectation_suite"
+            ].to_json_dict()
+        )

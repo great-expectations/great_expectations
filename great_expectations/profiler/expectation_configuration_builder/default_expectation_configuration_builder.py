@@ -6,7 +6,6 @@ from great_expectations.profiler.expectation_configuration_builder.expectation_c
     ExpectationConfigurationBuilder,
 )
 from great_expectations.profiler.parameter_builder.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     ParameterContainer,
     get_parameter_value,
 )
@@ -36,21 +35,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             parameter_name,
             fully_qualified_parameter_name,
         ) in self._parameter_name_to_fully_qualified_parameter_name_dict.items():
-            # TODO: AJB 20210505 this is only valid for columns, we need to check the domain type here
-            if fully_qualified_parameter_name.startswith(
-                DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
-            ):
-                # TODO: AJB 20210503 is this how to reference the domain? Maybe there should be a method on Domain to return the actual domain name
-                expectation_kwargs[parameter_name] = domain.domain_kwargs[
-                    domain.domain_type
-                ]
-            elif fully_qualified_parameter_name.startswith("$"):
-                expectation_kwargs[parameter_name] = get_parameter_value(
-                    fully_qualified_parameter_name=fully_qualified_parameter_name,
-                    domain=domain,
-                    variables=variables,
-                    parameters=parameters,
-                )
+            expectation_kwargs[parameter_name] = get_parameter_value(
+                fully_qualified_parameter_name=fully_qualified_parameter_name,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
 
         expectation_kwargs.update(kwargs)
 
