@@ -1,13 +1,15 @@
-from typing import Any, Dict, List, Union
+import datetime
+from typing import Any, Dict, List, Set, Union
 
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core import IDDict
+from great_expectations.core import ExpectationSuite, IDDict
 from great_expectations.core.batch import (
     Batch,
+    BatchDefinition,
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
@@ -15,6 +17,10 @@ from great_expectations.core.batch import (
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
+)
+from great_expectations.datasource.data_connector.batch_filter import (
+    BatchFilter,
+    build_batch_filter,
 )
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -447,3 +453,139 @@ def test_head(
         "SexCode": {0: 1, 1: 1, 2: 0, 3: 1, 4: 0},
     }
     assert head.to_dict() == expected
+
+
+@pytest.fixture()
+def multi_batch_taxi_validator(
+    yellow_trip_pandas_data_context: DataContext,
+) -> Validator:
+    context: DataContext = yellow_trip_pandas_data_context
+
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    multi_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
+    )
+
+    validator_multi_batch: Validator = context.get_validator(
+        batch_request=multi_batch_request, expectation_suite=suite
+    )
+
+    return validator_multi_batch
+
+
+def test_validator_can_instantiate_with_a_multi_batch_request(
+    multi_batch_taxi_validator,
+):
+    assert len(multi_batch_taxi_validator.batches) == 3
+    assert (
+        multi_batch_taxi_validator.active_batch.batch_definition.batch_identifiers[
+            "month"
+        ]
+        == "03"
+    )
+
+    validator_batch_identifiers_for_all_batches: List[str] = [
+        i for i in multi_batch_taxi_validator.batches
+    ]
+    assert validator_batch_identifiers_for_all_batches == [
+        "18653cbf8fb5baf5fbbc5ed95f9ee94d",
+        "92bcffc67c34a1c9a67e0062ed4a9529",
+        "021563e94d7866f395288f6e306aed9b",
+    ]
+
+
+def test_validator_batch_filter(multi_batch_taxi_validator):
+    total_batch_definition_list: List[BatchDefinition] = [
+        v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
+    ]
+
+    jan_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={"batch_filter_parameters": {"month": "01"}}
+    )
+
+    jan_batch_definition_list: List[
+        BatchDefinition
+    ] = jan_batch_filter.select_from_data_connector_query(
+        batch_definition_list=total_batch_definition_list
+    )
+
+    assert len(jan_batch_definition_list) == 1
+    assert jan_batch_definition_list[0]["batch_identifiers"]["month"] == "01"
+    assert jan_batch_definition_list[0]["id"] == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+
+    feb_march_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={"index": slice(-1, 0, -1)}
+    )
+
+    feb_march_batch_definition_list: List[
+        BatchDefinition
+    ] = feb_march_batch_filter.select_from_data_connector_query(
+        batch_definition_list=total_batch_definition_list
+    )
+
+    for i in feb_march_batch_definition_list:
+        print(i["batch_identifiers"])
+    assert len(feb_march_batch_definition_list) == 2
+
+    batch_definitions_months_set: Set[str] = {
+        v.batch_identifiers["month"] for v in feb_march_batch_definition_list
+    }
+    assert batch_definitions_months_set == {"02", "03"}
+
+    jan_march_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={
+            "custom_filter_function": lambda batch_identifiers: batch_identifiers[
+                "month"
+            ]
+            == "01"
+            or batch_identifiers["month"] == "03"
+        }
+    )
+
+    jan_march_batch_definition_list: List[
+        BatchDefinition
+    ] = jan_march_batch_filter.select_from_data_connector_query(
+        batch_definition_list=total_batch_definition_list
+    )
+
+    for i in jan_march_batch_definition_list:
+        print(i["batch_identifiers"])
+    assert len(jan_march_batch_definition_list) == 2
+
+    batch_definitions_months_set: Set[str] = {
+        v.batch_identifiers["month"] for v in jan_march_batch_definition_list
+    }
+    assert batch_definitions_months_set == {"01", "03"}
+
+
+def test_custom_filter_function(multi_batch_taxi_validator):
+    total_batch_definition_list: List[BatchDefinition] = [
+        v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
+    ]
+
+
+def test_validator_set_active_batch(multi_batch_taxi_validator):
+    jan_min_date = "2019-01-01"
+    mar_min_date = "2019-03-01"
+    assert (
+        multi_batch_taxi_validator.active_batch_id == "021563e94d7866f395288f6e306aed9b"
+    )
+    assert multi_batch_taxi_validator.expect_column_values_to_be_between(
+        "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
+    ).success
+
+    multi_batch_taxi_validator.active_batch_id = "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+
+    assert (
+        multi_batch_taxi_validator.active_batch_id == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+    )
+    assert not multi_batch_taxi_validator.expect_column_values_to_be_between(
+        "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
+    ).success
+    assert multi_batch_taxi_validator.expect_column_values_to_be_between(
+        "pickup_datetime", min_value=jan_min_date, parse_strings_as_datetimes=True
+    ).success
