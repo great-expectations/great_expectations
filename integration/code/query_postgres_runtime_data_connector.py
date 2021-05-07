@@ -1,7 +1,7 @@
+from ruamel import yaml
 import great_expectations as ge
-from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
 from great_expectations.core.batch import Batch
-from integration.code.utils import load_data_into_database
+from great_expectations.util import load_data_into_database
 
 CONNECTION_STRING = """postgresql+psycopg2://postgres:@localhost/test_ci"""
 load_data_into_database(
@@ -33,8 +33,9 @@ data_connectors:
 """
 config = config.replace("<YOUR_CONNECTION_STRING_HERE>", CONNECTION_STRING)
 
-sanitize_yaml_and_save_datasource(context, config, overwrite_existing=True)
+context.add_datasource(**yaml.load(config))
 
+# First test for RuntimeBatchRequest using a query
 batch_request = ge.core.batch.RuntimeBatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -48,3 +49,19 @@ batch_data = batch.data
 assert isinstance(
     batch_data, ge.execution_engine.sqlalchemy_batch_data.SqlAlchemyBatchData
 )
+
+
+# Second test for BatchRequest naming a table
+batch_request = ge.core.batch.BatchRequest(
+    datasource_name="my_postgres_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+
+)
+batch = context.get_batch(batch_request=batch_request)
+assert isinstance(batch, Batch)
+batch_data = batch.data
+assert isinstance(
+    batch_data, ge.execution_engine.sqlalchemy_batch_data.SqlAlchemyBatchData
+)
+

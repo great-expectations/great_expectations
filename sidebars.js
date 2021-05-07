@@ -94,7 +94,14 @@ module.exports = {
           label: '🔌 Connecting to your data',
           items: [
             { type: 'doc', id: 'guides/connecting_to_your_data/where_is_your_data/my-data-is-in-a-filesystem' },
-            { type: 'doc', id: 'guides/connecting_to_your_data/where_is_your_data/my-data-is-in-a-database' }
+            { type: 'category',
+              label: "My Data Is in a Database",
+              items: [
+                'guides/connecting_to_your_data/where_is_your_data/my_data_is_in_a_database/my-data-is-in-postgres',
+                'guides/connecting_to_your_data/where_is_your_data/my_data_is_in_a_database/my-data-is-in-snowflake',
+                'guides/connecting_to_your_data/where_is_your_data/my_data_is_in_a_database/my-data-is-in-sqlite',
+              ]
+            }
           ]
         },
         {
