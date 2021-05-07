@@ -15,17 +15,33 @@ config_version: 3.0
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
   taxi_datasource_with_runtime_data_connector:
-    class_name: Datasource
     execution_engine:
-      class_name: PandasExecutionEngine
       module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
     module_name: great_expectations.datasource
     data_connectors:
       default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
         batch_identifiers:
           - default_identifier_name
         module_name: great_expectations.datasource.data_connector
+    class_name: Datasource
+  my_postgres_datasource:
+    execution_engine:
+      connection_string: postgresql+psycopg2://postgres:@localhost/test_ci
+      module_name: great_expectations.execution_engine
+      class_name: SqlAlchemyExecutionEngine
+    module_name: great_expectations.datasource
+    data_connectors:
+      default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+        module_name: great_expectations.datasource.data_connector
+      default_inferred_data_connector_name:
+        class_name: InferredAssetSqlDataConnector
+        module_name: great_expectations.datasource.data_connector
+    class_name: Datasource
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -85,7 +101,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
+  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
   data_context_id: b9b23461-53c3-4490-a09e-fbe12984c25a
   enabled: true
-  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
 notebooks:
