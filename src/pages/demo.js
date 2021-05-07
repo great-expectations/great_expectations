@@ -12,7 +12,7 @@ class Article extends React.Component {
         display: this.shouldBeHidden() ? 'none' : 'block'
       }}
       >
-        <a href='#'>{this.props.title}</a> {this.props.tags.map((item, i) => (<em key={i} style={{ fontSize: '0.7em', display: 'inline', margin: '3px', padding: '0 3px', color: '#fff', background: '#ccc' }}>{item}</em>))}
+        <a href='docs/guides/connecting_to_your_data/where_is_your_data/my-data-is-in-a-database'>{this.props.title}</a> {this.props.tags.map((item, i) => (<em key={i} style={{ fontSize: '0.7em', display: 'inline', margin: '3px', padding: '0 3px', color: '#fff', background: '#ccc' }}>{item}</em>))}
       </li>
     )
   }
@@ -50,7 +50,8 @@ const dataLocationOptions = [
 const computeOptions = [
   { value: 'compute-database', label: 'database' },
   { value: 'compute-pandas', label: 'pandas' },
-  { value: 'compute-spark', label: 'spark' }
+  { value: 'compute-spark', label: 'spark' },
+  { value: 'compute-postgres', label: 'postgres' }
 ]
 
 export default class TOC extends React.Component {
@@ -233,6 +234,8 @@ export default class TOC extends React.Component {
           <Article title='How to configure a MySQL Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
           <Article title='How to configure a Redshift Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
           <Article title='How to configure a Snowflake Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to configure a Postgres Datasource' tags={['configure-datasource', 'compute-postgres', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+
         </ol>
         <h2>Configuring a DataConnector</h2>
         <ol>
