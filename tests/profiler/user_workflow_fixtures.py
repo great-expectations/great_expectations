@@ -46,9 +46,7 @@ def alice_columnar_table_single_batch():
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {
-                    "column": "user_id",
-                },
+                "kwargs": {"column": "user_id",},
                 "meta": {},
             }
         ),
@@ -89,18 +87,14 @@ def alice_columnar_table_single_batch():
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
+                        "kwargs": {"column": column_data["column_name"],},
                         "meta": {},
                     }
                 ),
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
+                        "kwargs": {"column": column_data["column_name"],},
                         "meta": {},
                     }
                 ),
@@ -128,7 +122,9 @@ def alice_columnar_table_single_batch():
                         "kwargs": {
                             "column": column_data["column_name"],
                             "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": column_data["observed_max_time_str"],  # From data
+                            "max_value": column_data[
+                                "observed_max_time_str"
+                            ],  # From data
                         },
                         "meta": {},
                         # TODO: meta field handling is not yet working
