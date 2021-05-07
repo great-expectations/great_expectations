@@ -45,5 +45,5 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         expectation_kwargs.update(kwargs)
 
         return ExpectationConfiguration(
-            expectation_type=self._expectation_type, **expectation_kwargs
+            expectation_type=self._expectation_type, kwargs=expectation_kwargs
         )
