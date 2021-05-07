@@ -15,8 +15,6 @@ If you scroll down, you will see all Expectations that were generated for the ``
 
 We also see the **observed values** for this batch, which is exactly the numbers 1 through 6 that we expected. This makes sense, since we're developing the Expectation using the January data batch.
 
-.. figure:: /images/validation_results_column.png
-
 **Feel free to click around and explore Data Docs a little more.** You will find two more interesting features:
 
 #. If you click on the *Home* page, you will see a list of all validation runs.
