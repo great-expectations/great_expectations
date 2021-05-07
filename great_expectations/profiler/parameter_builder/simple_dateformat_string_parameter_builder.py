@@ -32,7 +32,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        name: str,
+        parameter_name: str,
         domain_kwargs: str,
         threshold: Optional[float] = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
@@ -43,13 +43,17 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         Configure this SimpleDateFormatStringParameterBuilder
 
         Args:
+            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will REPLACE the default
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
+            data_context: DataContext
         """
 
         super().__init__(
-            name=name,
+            parameter_name=parameter_name,
             data_context=data_context,
         )
 
@@ -87,8 +91,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             )
             if batch_ids[0] not in validator.execution_engine.loaded_batch_data_ids:
                 raise ge_exceptions.ProfilerExecutionError(
-                    f"Parameter Builder {self.name} cannot build parameters because batch {batch_ids[0]} is not "
-                    f"currently loaded in the validator."
+                    f"""Parameter Builder {self.name} cannot build parameters because batch {batch_ids[0]} is not \
+currently loaded in the validator.
+"""
                 )
 
         # TODO: <Alex>ALEX -- type overloading is generally a poor practice; the caller should decide on the type of "metric_domain_kwargs" and call this method accordingly.</Alex>
@@ -140,9 +145,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best_success_ratio = current_success_ratio
 
         parameter_values: Dict[str, Dict[str, Any]] = {
-            "$parameter.date_format_string": {
+            self.fully_qualified_parameter_name: {
                 "value": best_fit_date_format_estimate,
                 "details": {"success_ratio": best_success_ratio},
             },
         }
         return build_parameter_container(parameter_values=parameter_values)
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return "$parameter.date_format_string"

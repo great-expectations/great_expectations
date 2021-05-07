@@ -11,7 +11,7 @@ rules:
       semantic_types:
         - user_id
     parameter_builders:
-      - name: my_min_user_id
+      - parameter_name: my_min_user_id
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
@@ -20,7 +20,7 @@ rules:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        min_value: $my_min_user_id.parameters.column.min
+        min_value: $parameter.my_min_user_id.column.min
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_not_be_null
@@ -51,7 +51,7 @@ rules:
       #   - server_ts
       #   - device_ts
     parameter_builders: # TODO: <Alex>ALEX Anthony, AJB -- we might need to discuss potentially enriching this.</Alex>
-      - name: my_max_event_ts
+      - parameter_name: my_max_event_ts
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
@@ -91,7 +91,7 @@ rules:
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
-        max_value: $my_max_event_ts.parameters.column.max
+        max_value: $parameter.my_max_event_ts.column.max
         # TODO: These additional kwargs are not being handled correctly
 #        meta:
 #         notes:
@@ -105,7 +105,7 @@ rules:
 #        column: $domain.domain_kwargs.column
 #        min_value: $variables.min_timestamp
         # TODO: How to reference the event_ts domain?
-#        max_value: $my_max_event_ts.parameters[0].column.max
+#        max_value: $my_max_event_ts.parameter[0].column.max
         # TODO: These additional kwargs are not being handled correctly
 #        meta:
 #         notes:
