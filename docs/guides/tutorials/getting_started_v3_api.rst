@@ -12,7 +12,7 @@ links to detailed material you can dig into later.
 
    The steps described in this tutorial assume you want to use the Great Expectations v3 (Batch Requests) API. The CLI
    commands used in this tutorial are available in Great Expectations version 0.13.19 and above. To understand the
-   differences between the v2 and v3 APIs, read this :ref:`article <v3_vs_v2_api_v2>`.
+   differences between the v2 and v3 APIs, read this :ref:`article <v3_vs_v2_api>`.
 
 The tutorial will walk you through the following steps:
 

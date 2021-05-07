@@ -10,7 +10,7 @@ Welcome to Great Expectations! This tutorial will help you set up your first loc
 
    The steps described in this tutorial assume you are installing Great Expectations version 0.13.8 or above and intend
    to use the v2 (Batch Kwargs) API. To understand the differences between the v2 and v3 APIs, read this
-   :ref:`article <v3_vs_v2_api_v2>`.
+   :ref:`article <v3_vs_v2_api>`.
 
    For a tutorial for older versions of Great Expectations, please see older
    versions of this documentation.
