@@ -65,13 +65,14 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
     def _build_parameters(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
-    ) -> ParameterContainer:
+    ):
         samples = []
         # TODO: 20210426 AJB I think we need to handle not passing batch_ids here and everywhere else by processing all batches if `batch_ids is None`
         # TODO: <Alex>ALEX -- batch_id is not used -- so this is not miltibatch yet.  A potential approach is to compute metrics for the given domain for every batch (corresponding to the "batch_ids" list).  For this reason, the must-have requirement of including "batch_id" in "domain_kwargs" may need to be revised.</Alex>
@@ -116,7 +117,9 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 "details": None,
             },
         }
-        return build_parameter_container(parameter_values=parameter_values)
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
 
     @property
     def fully_qualified_parameter_name(self) -> str:

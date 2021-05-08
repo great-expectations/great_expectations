@@ -45,13 +45,14 @@ class MetricParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
-    ) -> ParameterContainer:
+    ):
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
             Args:
@@ -98,7 +99,9 @@ class MetricParameterBuilder(ParameterBuilder):
                 "details": None,
             },
         }
-        return build_parameter_container(parameter_values=parameter_values)
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
 
     @property
     def fully_qualified_parameter_name(self) -> str:

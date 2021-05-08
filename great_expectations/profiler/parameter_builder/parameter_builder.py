@@ -48,14 +48,16 @@ class ParameterBuilder(ABC):
 
     def build_parameters(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
-    ) -> ParameterContainer:
-        return self._build_parameters(
+    ):
+        self._build_parameters(
+            parameter_container=parameter_container,
             domain=domain,
             validator=validator,
             variables=variables,
@@ -66,13 +68,14 @@ class ParameterBuilder(ABC):
     @abstractmethod
     def _build_parameters(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
-    ) -> ParameterContainer:
+    ):
         pass
 
     @property

@@ -72,13 +72,14 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     # TODO: <Alex>ALEX -- This looks like a single-Batch case.</Alex>
     def _build_parameters(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
-    ) -> ParameterContainer:
+    ):
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
         if batch_ids is None:
@@ -150,7 +151,9 @@ currently loaded in the validator.
                 "details": {"success_ratio": best_success_ratio},
             },
         }
-        return build_parameter_container(parameter_values=parameter_values)
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
 
     @property
     def fully_qualified_parameter_name(self) -> str:
