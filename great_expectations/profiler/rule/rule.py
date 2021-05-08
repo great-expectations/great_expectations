@@ -64,18 +64,20 @@ class Rule:
 
         domain: Domain
         for domain in domains:
+            parameter_container: ParameterContainer = ParameterContainer(
+                parameter_nodes=None
+            )
+            self._parameters[domain.id] = parameter_container
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
-                parameter_container: ParameterContainer = (
-                    parameter_builder.build_parameters(
-                        domain=domain,
-                        validator=validator,
-                        variables=self.variables,
-                        parameters=self.parameters,
-                        batch_ids=batch_ids,
-                    )
+                parameter_builder.build_parameters(
+                    parameter_container=parameter_container,
+                    domain=domain,
+                    validator=validator,
+                    variables=self.variables,
+                    parameters=self.parameters,
+                    batch_ids=batch_ids,
                 )
-                self._parameters[domain.id] = parameter_container
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
             for (

@@ -120,15 +120,22 @@ def build_parameter_container_for_variables(
             "value": variable_config_value,
         }
 
-    return build_parameter_container(parameter_values=parameter_values)
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    build_parameter_container(
+        parameter_container=parameter_container, parameter_values=parameter_values
+    )
+
+    return parameter_container
 
 
 def build_parameter_container(
-    parameter_values: Dict[str, Dict[str, Any]]
-) -> ParameterContainer:
+    parameter_container: ParameterContainer,
+    parameter_values: Dict[str, Dict[str, Any]],
+):
     """
     Builds the ParameterNode trees, corresponding to the fully_qualified_parameter_name first-level keys.
 
+    :param parameter_container initialized ParameterContainer for all ParameterNode trees
     :param parameter_values
     Example of required structure for "parameter_values" (matching the type hint in the method signature):
     {
@@ -156,7 +163,6 @@ def build_parameter_container(
     In particular, if any ParameterNode object in the tree (starting with the root-level ParameterNode object) already
     exists, it is reused; in other words, ParameterNode objects are unique per part of fully-qualified parameter names.
     """
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameter_node: Optional[ParameterNode]
     fully_qualified_parameter_name: str
     parameter_value_details_dict: Dict[str, Any]
@@ -176,7 +182,7 @@ def build_parameter_container(
         ].split(".")
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
         parameter_value = parameter_value_details_dict["value"]
-        # details key is not required for globally defined "variables"
+        # The details key is optional; in particular, it is commonly omitted for globally scoped "variables".
         parameter_details = parameter_value_details_dict.get("details")
         parameter_node = parameter_container.get_parameter_node(
             parameter_name_root=parameter_name_root
@@ -195,15 +201,13 @@ def build_parameter_container(
             details=parameter_details,
         )
 
-    return parameter_container
-
 
 def _build_parameter_node_tree_for_one_parameter(
     parameter_node: ParameterNode,
     parameter_name_as_list: List[str],
     parameter_value: Any,
     details: Optional[Any] = None,
-) -> None:
+):
     """
     Recursively builds a tree of ParameterNode objects, creating new ParameterNode objects parsimoniously (i.e., only if
     ParameterNode object, corresponding to a part of fully-qualified parameter names in a "name space" does not exist).

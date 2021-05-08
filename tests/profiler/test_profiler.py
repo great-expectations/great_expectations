@@ -560,10 +560,4 @@ def test_alice_user_workflow_single_batch(
             ],
         )
 
-        # Check resulting expectation suite
-        assert (
-            suite.to_json_dict()
-            == alice_columnar_table_single_batch[
-                "expected_expectation_suite"
-            ].to_json_dict()
-        )
+        assert suite == alice_columnar_table_single_batch["expected_expectation_suite"]

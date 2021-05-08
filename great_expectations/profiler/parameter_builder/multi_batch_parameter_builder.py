@@ -21,17 +21,24 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
 
     def __init__(
         self,
-        name: str,
+        parameter_name: str,
         batch_request: BatchRequest,
         data_context: Optional[DataContext] = None,
     ):
+        """
+        Args:
+            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            data_context: DataContext
+        """
         if data_context is None:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"MultiBatchParameterBuilder requires a data_context, but none was provided."
             )
 
         super().__init__(
-            name=name,
+            parameter_name=parameter_name,
             data_context=data_context,
         )
 

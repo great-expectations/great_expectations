@@ -36,9 +36,9 @@ def alice_columnar_table_single_batch():
             **{
                 "expectation_type": "expect_column_values_to_be_between",
                 "kwargs": {
-                    "column": "user_id",
                     "min_value": 397433,  # From the data
                     "max_value": 999999999999,
+                    "column": "user_id",
                 },
                 "meta": {},
             }

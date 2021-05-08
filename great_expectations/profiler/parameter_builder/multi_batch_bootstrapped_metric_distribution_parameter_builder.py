@@ -30,7 +30,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
 
     def __init__(
         self,
-        name: str,
+        parameter_name: str,
         batch_request: BatchRequest,
         metric_name: str,
         metric_value_kwargs: Union[str, dict],
@@ -43,14 +43,17 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         The ParameterBuilder will build parameters for the active domain from the rule.
 
         Args:
-            name: the name of this ParameterBuilder (from configuration)
+            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             batch_request: BatchRequest elements that should be used to obtain additional batch_ids
             metric_name: metric from which to build the parameters
             metric_value_kwargs: value kwargs for the metric to be built
             p_values: the p_values for which to return metric value estimates
+            data_context: DataContext
         """
         super().__init__(
-            name=name,
+            parameter_name=parameter_name,
             batch_request=batch_request,
             data_context=data_context,
         )
@@ -62,13 +65,14 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
     def _build_parameters(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
-    ) -> ParameterContainer:
+    ):
         samples = []
         # TODO: 20210426 AJB I think we need to handle not passing batch_ids here and everywhere else by processing all batches if `batch_ids is None`
         # TODO: <Alex>ALEX -- batch_id is not used -- so this is not miltibatch yet.  A potential approach is to compute metrics for the given domain for every batch (corresponding to the "batch_ids" list).  For this reason, the must-have requirement of including "batch_id" in "domain_kwargs" may need to be revised.</Alex>
@@ -107,10 +111,16 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             )
 
         parameter_values: Dict[str, Dict[str, Any]] = {
-            f"$parameter.{self._metric_name}": {
+            self.fully_qualified_parameter_name: {
                 # TODO: Using the first sample for now, but this should be extended for handling multiple batches
                 "value": samples[0],
                 "details": None,
             },
         }
-        return build_parameter_container(parameter_values=parameter_values)
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.parameter_name}.{self._metric_name}"
