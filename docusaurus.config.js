@@ -15,7 +15,7 @@ module.exports = {
   projectName: 'great_expectations',
   themeConfig: {
     prism: {
-      theme: require('prism-react-renderer/themes/vsDark'),
+      theme: require('prism-react-renderer/themes/vsDark')
     },
     navbar: {
       title: 'Great Expectations',
@@ -70,7 +70,7 @@ module.exports = {
               href: 'https://www.youtube.com/c/GreatExpectationsData'
             }
           ]
-        },
+        }
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Superconductive.`
     }
