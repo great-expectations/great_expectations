@@ -98,7 +98,7 @@ module.exports = {
               label: '📁 Filesystem',
               items: [
                 { type: 'doc', id: 'guides/connecting_to_your_data/filesystem/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/filesystem/spark' },
+                { type: 'doc', id: 'guides/connecting_to_your_data/filesystem/spark' }
               ]
             },
             {
@@ -110,7 +110,7 @@ module.exports = {
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/pandas' },
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/spark' },
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' },
+                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' }
               ]
             },
             { type: 'doc', id: 'guides/connecting_to_your_data/where_is_your_data/my-data-is-in-a-database' }
