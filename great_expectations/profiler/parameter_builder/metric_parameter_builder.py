@@ -21,14 +21,21 @@ class MetricParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        name: str,
+        parameter_name: str,
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         data_context: Optional[DataContext] = None,
     ):
+        """
+        Args:
+            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            data_context: DataContext
+        """
         super().__init__(
-            name=name,
+            parameter_name=parameter_name,
             data_context=data_context,
         )
 
@@ -38,13 +45,14 @@ class MetricParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_ids: Optional[List[str]] = None,
-    ) -> ParameterContainer:
+    ):
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
             Args:
@@ -79,7 +87,7 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_value_kwargs = self._metric_value_kwargs
 
         parameter_values: Dict[str, Dict[str, Any]] = {
-            f"${self.name}.parameters.{self._metric_name}": {
+            self.fully_qualified_parameter_name: {
                 "value": validator.get_metric(
                     metric=MetricConfiguration(
                         metric_name=self._metric_name,
@@ -91,4 +99,10 @@ class MetricParameterBuilder(ParameterBuilder):
                 "details": None,
             },
         }
-        return build_parameter_container(parameter_values=parameter_values)
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.parameter_name}.{self._metric_name}"
