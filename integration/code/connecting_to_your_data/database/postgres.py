@@ -10,7 +10,7 @@ load_data_into_database(
     CONNECTION_STRING,
 )
 
-# context = ge.get_context()
+#context = ge.get_context()
 context = ge.DataContext(
     context_root_dir="../../../../integration/fixtures/runtime_data_taxi_monthly/great_expectations"
 )
@@ -33,8 +33,10 @@ data_connectors:
 """
 config = config.replace("<YOUR_CONNECTION_STRING_HERE>", CONNECTION_STRING)
 
+print(f"Adding Datasource")
 context.add_datasource(**yaml.load(config))
 
+print(f"RuntimeBatchRequest")
 # First test for RuntimeBatchRequest using a query
 batch_request = ge.core.batch.RuntimeBatchRequest(
     datasource_name="my_postgres_datasource",
@@ -43,13 +45,10 @@ batch_request = ge.core.batch.RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "something_something"},
 )
-batch = context.get_batch(batch_request=batch_request)
-assert isinstance(batch, Batch)
-batch_data = batch.data
-assert isinstance(
-    batch_data, ge.execution_engine.sqlalchemy_batch_data.SqlAlchemyBatchData
-)
 
+context.create_expectation_suite(expectation_suite_name="test_suite", overwrite_existing=True)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
+print(validator.head())
 
 # Second test for BatchRequest naming a table
 batch_request = ge.core.batch.BatchRequest(
@@ -58,9 +57,6 @@ batch_request = ge.core.batch.BatchRequest(
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
 
 )
-batch = context.get_batch(batch_request=batch_request)
-assert isinstance(batch, Batch)
-batch_data = batch.data
-assert isinstance(
-    batch_data, ge.execution_engine.sqlalchemy_batch_data.SqlAlchemyBatchData
-)
+context.create_expectation_suite(expectation_suite_name="test_suite", overwrite_existing=True)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
+print(validator.head())
