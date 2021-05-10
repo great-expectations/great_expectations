@@ -34,14 +34,14 @@ integration_test_matrix = [
     #     "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     # },
     {
-         "name": "pandas_two_batch_requests_two_validators",
-         "base_dir": file_relative_path(__file__, "../../"),
-         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-         "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
-         "expected_stderrs": "",
-         "expected_stdouts": "",
-     },
+        "name": "pandas_two_batch_requests_two_validators",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+        "expected_stderrs": "",
+        "expected_stdouts": "",
+    },
 ]
 
 

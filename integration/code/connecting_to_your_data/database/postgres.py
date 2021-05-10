@@ -1,4 +1,5 @@
 from ruamel import yaml
+
 import great_expectations as ge
 from great_expectations.core.batch import Batch
 from great_expectations.util import load_data_into_database
@@ -10,7 +11,7 @@ load_data_into_database(
     CONNECTION_STRING,
 )
 
-#context = ge.get_context()
+# context = ge.get_context()
 context = ge.DataContext(
     context_root_dir="../../../../integration/fixtures/runtime_data_taxi_monthly/great_expectations"
 )
@@ -46,8 +47,12 @@ batch_request = ge.core.batch.RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "something_something"},
 )
 
-context.create_expectation_suite(expectation_suite_name="test_suite", overwrite_existing=True)
-validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
 print(validator.head())
 
 # Second test for BatchRequest naming a table
@@ -55,8 +60,11 @@ batch_request = ge.core.batch.BatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
-
 )
-context.create_expectation_suite(expectation_suite_name="test_suite", overwrite_existing=True)
-validator = context.get_validator(batch_request=batch_request, expectation_suite_name="test_suite")
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
 print(validator.head())
