@@ -9,12 +9,19 @@ from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 
 integration_test_matrix = [
+    # {
+    #     "name": "pandas_two_batch_requests_two_validators",
+    #     "base_dir": file_relative_path(__file__, "../../"),
+    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+    # },
     {
-        "name": "pandas_two_batch_requests_two_validators",
+        "name": "pandas_one_multi_batch_request_one_validator",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
     },
 ]
 
@@ -74,7 +81,7 @@ def test_docs(test_configuration, tmp_path):
         errs = res.stderr.decode("utf-8")
         print(outs)
         print(errs)
-        assert len(errs) == 0
+        assert res.returncode == 0
     except:
         raise
     finally:
