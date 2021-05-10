@@ -15,6 +15,8 @@ integration_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+        "expected_stderrs": "",
+        "expected_stdouts": "",
     },
 ]
 
@@ -70,11 +72,24 @@ def test_docs(test_configuration, tmp_path):
         # Execute test
         res = subprocess.run(["python", script_path], capture_output=True)
         # Check final state
+        expected_stderrs = test_configuration.get("expected_stderrs")
+        expected_stdouts = test_configuration.get("expected_stdouts")
+        expected_failure = test_configuration.get("expected_failure")
         outs = res.stdout.decode("utf-8")
         errs = res.stderr.decode("utf-8")
         print(outs)
         print(errs)
-        assert len(errs) == 0
+
+        if expected_stderrs:
+            assert expected_stderrs == errs
+
+        if expected_stdouts:
+            assert expected_stdouts == outs
+
+        if expected_failure:
+            assert res.returncode != 0
+        else:
+            assert res.returncode == 0
     except:
         raise
     finally:
