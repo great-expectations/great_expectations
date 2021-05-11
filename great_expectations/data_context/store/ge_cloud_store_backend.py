@@ -75,7 +75,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "data": {
                 'type': self.ge_cloud_resource_type,
                 "attributes": {
-                    "created_by_id": "df665fc4-1891-4ef7-9a12-a0c46015c92c",
+                    "created_by_id": self.ge_cloud_credentials["user_id"],
+                    "account_id": self.ge_cloud_credentials["account_id"],
                     "checkpoint_config": value.to_json_dict()
                 },
             }
