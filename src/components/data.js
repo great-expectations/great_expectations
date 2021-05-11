@@ -120,7 +120,7 @@ export const data = {
       datasourceYaml: pandasDatasourceConfig,
       batchRequestSnippet: pandasFilesystemBatchRequestSnippet,
       congratsMessage: null,
-      additionalNotes: null,
+      additionalNotes: null
     },
     spark: {
       compute: 'compute-spark',
@@ -134,7 +134,7 @@ export const data = {
       datasourceYaml: sparkDatasourceConfig,
       batchRequestSnippet: sparkFilesystemBatchRequestSnippet,
       congratsMessage: null,
-      additionalNotes: null,
+      additionalNotes: null
     }
   },
   s3: {
@@ -156,7 +156,7 @@ export const data = {
       datasourceYaml: pandasDatasourceConfig,
       batchRequestSnippet: pandasS3BatchRequestSnippet,
       congratsMessage: null,
-      additionalNotes: null,
+      additionalNotes: null
     },
     spark: {
       compute: 'compute-spark',
@@ -178,7 +178,7 @@ export const data = {
       congratsMessage: null,
       additionalNotes: `
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum convallis sagittis ex at hendrerit. Etiam vel leo id lacus feugiat pretium sit amet quis nisl. Vestibulum at viverra leo, at vulputate est. Aliquam ex sapien, congue et blandit a, tincidunt non nisi. Quisque consectetur est a interdum consectetur. Etiam efficitur eros nibh, ut placerat ante congue eu. Maecenas fermentum ultrices eros, quis tempus augue tristique nec. Sed sit amet ultrices risus, et euismod turpis. Vivamus non diam nec erat blandit aliquet.
-`,
+`
     }
   },
   database: {
@@ -210,7 +210,7 @@ export const data = {
  For more information, please refer to [Additional Notes](#additional-notes).`,
       batchRequestSnippet: postgresBatchRequestSnippet,
       congratsMessage: null,
-      additionalNotes: null,
+      additionalNotes: null
     }
   }
 }

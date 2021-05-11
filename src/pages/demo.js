@@ -1,29 +1,25 @@
 import React from 'react'
 import Select from 'react-select'
 
-
-import {installOptions, metadataOptions, dataDocsOptions, dataLocationOptions, computeOptions, databaseOptions } from '../components/options.js';
+import { installOptions, metadataOptions, dataDocsOptions, dataLocationOptions, computeOptions, databaseOptions } from '../components/options.js'
 import { CodeSnippet } from '../components/snippet.js'
 import { Prerequisites } from '../components/prerequisites.js'
 import { Article } from '../components/article.js'
 import { data, addDatasourceSnippet } from '../components/data.js'
-
-const noSelectionMessage = '# Please make a selction to see code specific to your choices'
-
 
 class InteractiveHowtoGuide extends React.Component {
   getDatasourceConfigSnippet () {
     if (this.props.data) {
       return this.props.data.datasourceYaml
     }
-      return "# Please answer the compute question"
+    return '# Please answer the compute question'
   }
 
   getBatchRequestSnippet () {
     if (this.props.data) {
       return this.props.data.batchRequestSnippet
     }
-    return "# Please answer the location question"
+    return '# Please answer the location question'
   }
 
   getDeps () {
@@ -31,7 +27,6 @@ class InteractiveHowtoGuide extends React.Component {
       return this.props.data.prerequisites.dependencies
     }
     return []
-
   }
 
   getNotes () {
@@ -43,16 +38,17 @@ class InteractiveHowtoGuide extends React.Component {
 
   renderBlank () {
     return (
-      <div  >
-      <h2>Please answer both questions for a customized how to guide.</h2>
+      <div>
+        <h2>Please answer both questions for a customized how to guide.</h2>
       </div>
     )
   }
+
   renderAdditionalNotes () {
     if (this.props.data) {
       if (this.props.data.additionalNotes) {
         return (
-          <div >
+          <div>
             <h2>Additional Notes</h2>
             {this.props.data.additionalNotes}
           </div>
@@ -102,7 +98,7 @@ function removeItemsFromArray (items, array) {
   return array.filter(item => !itemsToRemove.has(item))
 }
 
-const buttonStyle = { fontSize: '1.5em', color: 'white', background: '#00bfa5', padding: '.5em', borderRadius: '8px'}
+const buttonStyle = { fontSize: '1.5em', color: 'white', background: '#00bfa5', padding: '.5em', borderRadius: '8px' }
 
 export default class TOC extends React.Component {
   constructor (props) {
@@ -201,24 +197,24 @@ export default class TOC extends React.Component {
     } else if (this.state.compute === 'compute-postgres') {
       result = data.database.postgres
     } else {
-      result = null;
+      result = null
     };
     console.log('result = ', result)
     return result
   }
 
-  getDatasourceAdditional() {
+  getDatasourceAdditional () {
     const element = this.getDataElement()
 
     if (element) {
       return (
         <div>
-        <h4>Additional stuff</h4>
-        {element.datasourceAdditional}
+          <h4>Additional stuff</h4>
+          {element.datasourceAdditional}
         </div>
       )
+    }
   }
-}
 
   // <p>hiddenTags: {this.state.hiddenTags.map((tag) => (tag + ", "))}</p>
   // <p>installSelectedOption: {this.state.installSelectedOption}</p>
@@ -294,7 +290,7 @@ export default class TOC extends React.Component {
       // <Article title='How to host and share Data Docs on Amazon S3' tags={['datadocs', 'datadocs-s3']} hiddenTags={this.state.hiddenTags} />
       // </ol>
       <div>
-        <div style={{ width: '500px', padding: '20px', float: 'left', background: '#eee'}}>
+        <div style={{ width: '500px', padding: '20px', float: 'left', background: '#eee' }}>
           <div style={{}}>
             <pre> [  M I N I M A P  ] </pre>
             <h1>Connecting to your data</h1>
@@ -349,7 +345,7 @@ export default class TOC extends React.Component {
           </div>
         </div>
 
-        <div style={{ padding: '20px', marginLeft: '500px', marginRight: '100px', minWidth: '1000px', background: 'white'}}>
+        <div style={{ padding: '20px', marginLeft: '500px', marginRight: '100px', minWidth: '1000px', background: 'white' }}>
           <h2>Your configuration guide</h2>
           <p>This guide will help you connect to your data stored in <strong>{this.state.dataLocation}</strong> using <strong>{this.state.compute}</strong>.
             This will allow you to work with your data in Great Expectations and <a href='#'>create expectation suites</a>, <a href='#'>validate your data</a> and more.
@@ -360,7 +356,7 @@ export default class TOC extends React.Component {
               location={this.state.dataLocation}
               compute={this.state.compute}
               datasourceAdditional={this.getDatasourceAdditional()}
-              />
+            />
           </div>
         </div>
       </div>
