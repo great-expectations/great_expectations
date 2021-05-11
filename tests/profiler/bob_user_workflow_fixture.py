@@ -12,6 +12,4 @@ def bob_columnar_table_multi_batch():
     profiler_configs: List[str] = []
     profiler_configs.append(verbose_profiler_config)
 
-    return {
-        "profiler_configs": profiler_configs
-    }
+    return {"profiler_configs": profiler_configs}
