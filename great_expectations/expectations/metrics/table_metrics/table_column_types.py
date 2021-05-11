@@ -47,21 +47,12 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        batch_id = metric_domain_kwargs.get("batch_id")
-        if batch_id is None:
-            if execution_engine.active_batch_data_id is not None:
-                batch_id = execution_engine.active_batch_data_id
-            else:
-                raise GreatExpectationsError(
-                    "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "
-                    "execution engine"
-                )
-        batch_data = execution_engine.loaded_batch_data_dict.get(batch_id)
-        if batch_data is None:
-            raise GreatExpectationsError(
-                "the requested batch is not available; please load the batch into the execution engine."
-            )
-        return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
+        batch_data, _, _ = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
+        return _get_sqlalchemy_column_metadata(
+            engine=execution_engine.engine, batch_data=batch_data
+        )
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(

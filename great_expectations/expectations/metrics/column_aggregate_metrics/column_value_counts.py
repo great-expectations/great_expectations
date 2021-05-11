@@ -80,7 +80,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
-        selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        batch_data, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
@@ -109,6 +109,7 @@ class ColumnValueCounts(ColumnMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
+        selectable = batch_data.ephemeral_selectable
         results = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()

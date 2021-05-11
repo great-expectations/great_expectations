@@ -84,7 +84,7 @@ class ColumnQuantileValues(ColumnMetricProvider):
         runtime_configuration: Dict,
     ):
         (
-            selectable,
+            batch_data,
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
@@ -96,6 +96,7 @@ class ColumnQuantileValues(ColumnMetricProvider):
         dialect = sqlalchemy_engine.dialect
         quantiles = metric_value_kwargs["quantiles"]
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
+        selectable = batch_data.ephemeral_selectable
         if dialect.name.lower() == "mssql":
             return _get_column_quantiles_mssql(
                 column=column,

@@ -132,7 +132,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
                     compute_domain_kwargs = metric_domain_kwargs
                 (
-                    selectable,
+                    batch_data,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
@@ -149,6 +149,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     )
 
                 dialect = sqlalchemy_engine.dialect
+                selectable = batch_data.ephemeral_selectable
                 metric_aggregate = metric_fn(
                     cls,
                     column=sa.column(column_name),
