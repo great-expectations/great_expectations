@@ -63,7 +63,7 @@ Load your DataContext into memory using the `get_context()` method.
 
 Here is an example configuration:
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L19-33
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L19-L33
 ```
 
 :::note What does the configuration contain?
