@@ -1,19 +1,28 @@
 # Note the call to Profiler.profile() takes multiple batches
 # Unless filtered / specified this list of batches will be used for all metrics/parameters
+# This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_2019-*.csv)
 variables:
-  # TODO: Do we plan to support lists or mappings in variables? Yes
+# TODO: Support lists and mappings in variables
 #  vendor_ids:
 #    - 1
 #    - 2
 #    - 4
   max_vendor_id: 4
-  max_amount: 99999
+  max_amount: 99999.99
   false_positive_threshold: 0.01
 rules:
+  # Here we define 3 rules showing various methods to handle multi-batch parameters
+  # 1. my_rule_for_ids uses a simple ParameterBuilder to build a list of parameters per batch to be aggregated in the referencing ExpectationConfigurationBuilder
+  # 2. my_rule_for_amounts uses an aggregating ParameterBuilder to build a list of parameters and then aggregate them using a specified aggregation function. (While this example is not sufficiently complex to warrant a custom ParameterBuilder, one could be created - alternatively the complexity could be handled in a custom ExpectationConfigurationBuilder)
+  # 3. my_rule_for_numeric_data is a hybrid approach, where multiple parameters are computed depending on prior parameters to supply the ExpectationConfigurationBuilder with a pre-computed parameter
+
   my_rule_for_ids:
+    # Create a value_set based on prior batches (relative to when the profiler is run) and evaluate new batches using this value_set
+    # Rationale: I want alerts when new value_set items are added to my dataset
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
     domain_builder:
+      # Build list of domains from some categorical column domains: vendor_id, rate_code_id, pickup_location_id, dropoff_location_id, payment_type
       class_name: SimpleColumnSuffixDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
       column_name_suffixes:
@@ -21,77 +30,109 @@ rules:
         - _type
     parameter_builders:
       - name: my_value_set_for_ids
-        # NOTE: This parameter is meant to be the union of all observed batch value_sets
+        # This parameter is the union of all observed batch value_sets
+        # MultiBatchParameterBuilder does not aggregate Parameters, it returns a list of value_set for each batch
         class_name: MultiBatchParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_parameter_builder
         metric_domain_kwargs: $domain.domain_kwargs
-        # TODO: how to specify compute over all batches (e.g. use all batches in parameter) - options:
-        # don't specify a specific batch_request and assume all batches passed via the various methods to Profiler.profile()?
-#        batch_request: $batch.batch_id
-        # maybe an "all" flag?
+        # Specify all batches prior to the 6 most recent to be used to create this set of Parameters using the below batch_request
+        batch_request:
+          partition_request:
+            partition_index: "-6:"
+        # TODO: Should we also support "offset" from the active_batch (active_batch can be set via passing a validator to the Profiler.profile() method and previously setting the active batch validator.active_batch_id(batch_id="mybatchid"))?
+        # Note: To specify all batches explicitly use the below batch_request
+        # batch_request:
+        #  partition_request:
+        #    partition_index: "0:"
+        # TODO: Maybe this can be omitted and inferred as the default (all batches)?
+        # TODO: James - maybe default isn't necessarily what's in the validator
         metric_name: column.distinct_values
     expectation_configuration_builders:
+      # Create union of value sets here in the expectation_configuration_builder
       - expectation_type: expect_column_values_to_be_in_set
         column: $domain.domain_kwargs.column
-        # TODO: How exactly to reference the value_set?
-        value_set: $my_value_set_for_ids.counts
-
-  # NOTES 20210506 - reason for "active batch" - we want to push someone toward specifying the start for best practices
-  # (e.g. cursor)
-  # e.g. train vs test data.
-  # Subject to sorting - dataconnector needs sorter to ensure that this is
-  # TODO: Warning if you specify ?? and dataconnector is not sorted - how can we infer this?
-  # Ordering in dataconnector is default to lexicographic
-  # TODO: Train/test partitioner dataconnector
+        # Parameter builder returns a list of value_sets so take the union() here
+        # TODO: Build `union(sets: List[Set])` method in GE parsing language
+        # TODO: How to reference list of parameters from ParameterBuilder?
+        value_set: union($parameter.my_value_set_for_ids.parameter_list)
 
   my_rule_for_amounts:
-    # expect_column_values_to_be_between for each of the _amount columns
+    # This rule creates expect_column_values_to_be_between & expect_column_mean_to_be_between for each of the _amount column domains
+    # Rationale: I want alerts when my current data varies from prior data (within some bounds)
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
     domain_builder:
+      # Build list of domains from "amount" column domains: fare_amount,tip_amount,tolls_amount,total_amount
       class_name: SimpleColumnSuffixDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
       column_name_suffixes:
         - _amount
-    # Parameter used later in expectation that current batch mean is within 20% of mean of all months in last year - parameter calculates mean of all batches in the previous full year
     parameter_builders:
       - name: my_mean_parameter_for_batches_in_previous_full_year
-        # TODO: Implement MultiBatchAggregateMetricParameterBuilder which takes a metric name and list of batches, computes aggregate over all batches by either: 1. merging them into one batch or 2. if linear computes it from single batch aggregate metrics / metadata. E.g. mean of means
+        # Parameter computes the mean of all batches in the previous full year
+
+        # Options for where to calculate aggregate (mean of batch means)
+        # 1. Preferred: MultiBatchParameterBuilder returns a list of parameters calculated on each batch (e.g. [mean_batch_1, mean_batch_2, ...])
+        # 2. Medium complexity configs: (Out of scope for now, but shown here in this example config): MultiBatchAggregateFunctionParameterBuilder which takes a metric_configuration to compute on a list of batches, then "aggregate_fn" parameter which defines an aggregate function to be calculated on all of the computed metrics. (other parameter builders can be customized to calculate non-linear or other more complicated aggregations)
+          # MultiBatchAggregateFunctionParameterBuilder takes optional function, if no function specified then return list of metric values.
+        # 3. High complexity configs: Custom ParameterBuilders / ExpectationConfigurationBuilders can be referenced via plugins
         # TODO: Streaming mean / stdev consider how would that work?
-        # MultibatchAggregateFunctionParameterBuilder takes optional function, if no function then return list of metric values. ~~MultiBatchAggregateMetricParameterBuilder assumes you are using the same aggregating function as the metric~~
-        class_name: MultibatchAggregateFunctionParameterBuilder
+        class_name: MultiBatchAggregateFunctionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
         batch_request:
           # Filter for batches for previous full year
           #  using batch_filter_parameters with `year` as one of the parameters
           #  `year` needs to be defined as a group by the data_connector
           # TODO: is this possible - how do we specify a data_connector (when calling Profiler.profile()?)?
-          batch_filter_parameters:
-            year: 2020 # TODO: Can this be relative?
+          data_connector_query:
+            batch_filter_parameters:
+              year: 2020 # TODO: Can this be relative to the current year? (e.g. specify last year vs the exact year)
         metric_configuration:
           metric_name: column.mean # per batch metric
           # Domain kwargs here refer to the current domain being processed - the list of domains coming from the DomainBuilder (here the list of columns filtered by SimpleColumnSuffixDomainBuilder)
           metric_domain_kwargs: $domain.domain_kwargs
-          aggregate_fn: stdev # Not necessarily a metric, but some operator on all of the batches
+        aggregate_fn: mean # Not necessarily a metric, but some function to apply to all of the batches - can be different from metric_name
+      - name: my_stdev_of_means_parameter_for_batches_in_previous_full_year
+        # Parameter computes the stdev of means of all batches in the previous full year
+        class_name: MultiBatchAggregateFunctionParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
+        batch_request:
+          data_connector_query:
+            batch_filter_parameters:
+              year: 2020
+        metric_configuration:
+          metric_name: column.mean # per batch metric
+          metric_domain_kwargs: $domain.domain_kwargs
+        aggregate_fn: stdev # note different than metric computed in metric_configuration
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        # Note literals are and will continue to be supported (you do not have to add to "variables" first):
+        # Note: literals are and will continue to be supported (you do not have to add to "variables" first, unless you want to reference in multiple locations):
         min_value: 0
-        max_value: $variables.max_user_id
+        max_value: $variables.max_amount
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_mean_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        # Note: save this for complicated statistical ... you use exotic parameter builder or create your own parameter builder
-#        min_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 0.8
-#        max_value: $my_mean_parameter_for_batches_in_previous_full_year.parameter.mean * 1.2
-        # NOTE: this would need us to add `mean()` to our GE language parsing these evaluations
-        # TODO: How much is available in this language? Not path integrals. But mean.
-        min_value: mean($my_mean_parameter_for_batches_in_previous_full_year.parameter.means) * 0.8
-        max_value: mean($my_mean_parameter_for_batches_in_previous_full_year.parameter.means) * 1.2
+        # Note: proposal to reference here in dot notation by the aggregate_fn name
+        min_value: $parameter.my_mean_parameter_for_batches_in_previous_full_year.mean * 0.8
+        max_value: $parameter.my_mean_parameter_for_batches_in_previous_full_year.mean * 1.2
+        # Alternatively, we could have used a MultiBatchParameterBuilder and processed the means in the ExpectationConfigurationBuilder as in my_rule_for_ids
+        # min_value: mean($parameter.my_mean_parameter_for_batches_in_previous_full_year.means) * 0.8
+        # max_value: mean($parameter.my_mean_parameter_for_batches_in_previous_full_year.means) * 1.2
+        # Note: this would need us to add `mean()` to our GE language parsing these evaluations
+      - expectation_type: expect_column_stdev_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        min_value: $parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.stdev * 0.8
+        max_value: $parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.stdev * 1.2
+        # Alternatively, we could have used a MultiBatchParameterBuilder and processed the means in the ExpectationConfigurationBuilder as in my_rule_for_ids
+        # min_value: stdev($parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.means) * 0.8
+        # max_value: stdev($parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.means) * 1.2
+        # Note: this would need us to add `stdev()` to our GE language parsing these evaluations
 
   my_rule_for_numeric_data:
     class_name: Rule
@@ -104,7 +145,7 @@ rules:
     parameter_builders:
       # NOTE: These parameter_builders are from https://github.com/superconductive/design/blob/main/docs/20201203_profiling.md
       # NOTE: my_column_mean and my_column_min are added as parameters but unused in expectation_configuration_builders - this is OK
-      # TODO: Should we warn users if there are unused ParameterBuilders in a Profiler configuration?
+      # TODO: Should we warn users if there are unused ParameterBuilders in a Profiler configuration? As an advanced feature - NO for now.
       - name: my_column_mean
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
@@ -128,6 +169,17 @@ rules:
         # 2. MultiBatchBootstrappedMetricDistributionParameterBuilder does not have a metric_domain_kwargs param
         # 3. MultiBatchBootstrappedMetricDistributionParameterBuilder takes a list of batch_ids and a batch_request. The way that batch_ids seems to work in other areas is as a filter (e.g. the batch_request returns some batches and we filter to only those contained in the list batch_ids, if batch_ids is None then we use all batches) whereas here it seems meant to add to the batches from the batch_request (maybe just a param name change to clarify e.g. `additional_batch_ids`)
 
+      # THIS IS ANALOGOUS TO aggregate_fn - but instead of aggregating you are bootstrapping
+      # In the other case it was mean, but this case it's
+      # THis is an example of midway between compute all in parameter builder and all in expectation builder
+      - # compute in multiple parameters
+
+      # Example
+      # getting more sophisticated in our bounds on the expectation
+
+      # Bootstrapping - sample and look at distribution of samples. Using replacement specifically.
+      # Construct distribution of likely observed means if I were to reconstruct my experiment.
+      # removes assumption of distribution of observed values
       - name: false_positive_threshold_min
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
