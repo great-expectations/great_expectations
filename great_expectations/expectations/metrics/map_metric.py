@@ -164,7 +164,7 @@ def column_function_partial(
                     )
 
                 dialect = execution_engine.dialect_module
-                selectable = batch_data.ephemeral_selectable
+                selectable = batch_data.engine_ready_selectable
                 column_function = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -388,7 +388,7 @@ def column_condition_partial(
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
-                selectable = batch_data.ephemeral_selectable
+                selectable = batch_data.engine_ready_selectable
                 expected_condition = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -877,7 +877,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     else_=0,
                 ).label("condition")
             ]
-            selectable = batch_data.ephemeral_selectable
+            selectable = batch_data.engine_ready_selectable
             inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
                 count_case_statement,
                 sa.select(count_case_statement).select_from(selectable),
@@ -939,7 +939,7 @@ def _sqlalchemy_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    selectable = batch_data.ephemeral_selectable
+    selectable = batch_data.engine_ready_selectable
     query = (
         sa.select([sa.column(column_name).label("unexpected_values")])
         .select_from(selectable)
@@ -989,7 +989,7 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column: sa.Column = sa.column(column_name)
 
-    selectable = batch_data.ephemeral_selectable
+    selectable = batch_data.engine_ready_selectable
     return execution_engine.engine.execute(
         sa.select([column, sa.func.count(column)])
         .select_from(selectable)
@@ -1017,7 +1017,7 @@ def _sqlalchemy_map_condition_rows(
         compute_domain_kwargs, domain_type=SemanticDomainTypes.IDENTITY.value
     )
 
-    selectable = batch_data.ephemeral_selectable
+    selectable = batch_data.engine_ready_selectable
     query = (
         sa.select([sa.text("*")]).select_from(selectable).where(unexpected_condition)
     )

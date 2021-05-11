@@ -408,6 +408,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
             if domain_kwargs["table"] != data_object.selectable.name:
+                # noinspection PyProtectedMember
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
@@ -471,7 +472,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     logger.warning(
                         f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                     )
-            data_object.ephemeral_selectable = selectable
+            data_object.engine_ready_selectable = selectable
             return data_object, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
@@ -572,7 +573,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         ]
                         selectable = sa.select(to_select).select_from(selectable)
 
-        data_object.ephemeral_selectable = selectable
+        data_object.engine_ready_selectable = selectable
         return data_object, compute_domain_kwargs, accessor_domain_kwargs
 
     def resolve_metric_bundle(
@@ -622,7 +623,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 query["domain_kwargs"], domain_type=SemanticDomainTypes.IDENTITY.value
             )
             assert len(query["select"]) == len(query["ids"])
-            selectable = data_object.ephemeral_selectable
+            selectable = data_object.engine_ready_selectable
             try:
                 res = self.engine.execute(
                     sa.select(query["select"]).select_from(selectable)

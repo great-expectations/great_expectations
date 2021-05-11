@@ -194,7 +194,7 @@ class ColumnValuesBetweenCount(MetricProvider):
             else:
                 condition = sa.and_(column >= min_value, column <= max_value)
 
-        selectable = batch_data.ephemeral_selectable
+        selectable = batch_data.engine_ready_selectable
         return execution_engine.engine.execute(
             sa.select([sa.func.count()]).select_from(selectable).where(condition)
         ).scalar()

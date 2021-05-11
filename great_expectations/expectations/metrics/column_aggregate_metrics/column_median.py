@@ -60,7 +60,7 @@ class ColumnMedian(ColumnMetricProvider):
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
-        selectable = batch_data.ephemeral_selectable
+        selectable = batch_data.engine_ready_selectable
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)

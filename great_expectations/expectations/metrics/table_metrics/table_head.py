@@ -49,7 +49,7 @@ class TableHead(TableMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         df = None
-        selectable = batch_data.ephemeral_selectable
+        selectable = batch_data.engine_ready_selectable
         table_name = getattr(selectable, "name", None)
         if table_name is not None:
             try:

@@ -143,7 +143,7 @@ class ColumnHistogram(ColumnMetricProvider):
                 ).label("bin_" + str(len(bins) - 1))
             )
 
-        selectable = batch_data.ephemeral_selectable
+        selectable = batch_data.engine_ready_selectable
         query = (
             sa.select(case_conditions)
             .where(

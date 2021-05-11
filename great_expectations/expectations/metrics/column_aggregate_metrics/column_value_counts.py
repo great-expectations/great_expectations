@@ -109,7 +109,7 @@ class ColumnValueCounts(ColumnMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        selectable = batch_data.ephemeral_selectable
+        selectable = batch_data.engine_ready_selectable
         results = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()

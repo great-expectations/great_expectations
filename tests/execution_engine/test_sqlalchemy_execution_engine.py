@@ -248,7 +248,7 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -273,7 +273,7 @@ def test_get_compute_domain_with_column_pair(sa):
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -302,7 +302,7 @@ def test_get_compute_domain_with_column_pair(sa):
         )
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data2.ephemeral_selectable)
+        sa.select(["*"]).select_from(data2.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -331,7 +331,7 @@ def test_get_compute_domain_with_multicolumn(sa):
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -353,7 +353,7 @@ def test_get_compute_domain_with_multicolumn(sa):
         )
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -380,7 +380,7 @@ def test_get_compute_domain_with_column_domain(sa):
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
@@ -403,7 +403,7 @@ def test_get_compute_domain_with_column_domain(sa):
         sa.select([sa.column("a")]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
@@ -433,7 +433,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
         .where(sa.column("b") > 24)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
@@ -468,7 +468,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
         .where(sa.column("b") == 2)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
@@ -501,7 +501,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
         .where(sa.column("b") == 2)
     ).fetchall()
     domain_data = engine.engine.execute(
-        sa.select(["*"]).select_from(data.ephemeral_selectable)
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
     ).fetchall()
 
     # Ensuring compute kwargs have not been modified

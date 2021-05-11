@@ -170,7 +170,7 @@ class SqlAlchemyBatchData(BatchData):
             else:
                 self._selectable = selectable.alias(self._record_set_name)
 
-        self._ephemeral_selectable = None
+        self._engine_ready_selectable = None
 
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
@@ -194,12 +194,12 @@ class SqlAlchemyBatchData(BatchData):
         return self._selectable
 
     @property
-    def ephemeral_selectable(self):
-        return self._ephemeral_selectable
+    def engine_ready_selectable(self):
+        return self._engine_ready_selectable
 
-    @ephemeral_selectable.setter
-    def ephemeral_selectable(self, ephemeral_selectable):
-        self._ephemeral_selectable = ephemeral_selectable
+    @engine_ready_selectable.setter
+    def engine_ready_selectable(self, engine_ready_selectable):
+        self._engine_ready_selectable = engine_ready_selectable
 
     @property
     def use_quoted_name(self):

@@ -149,7 +149,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     )
 
                 dialect = sqlalchemy_engine.dialect
-                selectable = batch_data.ephemeral_selectable
+                selectable = batch_data.engine_ready_selectable
                 metric_aggregate = metric_fn(
                     cls,
                     column=sa.column(column_name),
