@@ -2,11 +2,11 @@ import React from 'react'
 import Select from 'react-select'
 
 
-import {installOptions, metadataOptions, dataDocsOptions, dataLocationOptions, computeOptions, databaseOptions } from './options.js';
-import { CodeSnippet } from './snippet.js'
-import { Prerequisites } from './prerequisites.js'
-import { Article } from './article.js'
-import { data, addDatasourceSnippet } from './data.js'
+import {installOptions, metadataOptions, dataDocsOptions, dataLocationOptions, computeOptions, databaseOptions } from '../components/options.js';
+import { CodeSnippet } from '../components/snippet.js'
+import { Prerequisites } from '../components/prerequisites.js'
+import { Article } from '../components/article.js'
+import { data, addDatasourceSnippet } from '../components/data.js'
 
 
 class InteractiveHowtoGuide extends React.Component {
