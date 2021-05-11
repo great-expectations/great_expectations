@@ -15,8 +15,6 @@ integration_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
-        # "expected_stderrs": "",
-        # "expected_stdouts": "",
     },
     {
         "name": "pandas_one_multi_batch_request_one_validator",
@@ -24,8 +22,6 @@ integration_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
-        # "expected_stderrs": "",
-        # "expected_stdouts": "",
     },
 ]
 

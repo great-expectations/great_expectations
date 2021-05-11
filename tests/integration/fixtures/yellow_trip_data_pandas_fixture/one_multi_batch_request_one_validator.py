@@ -1,3 +1,5 @@
+import numpy as np
+
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.datasource.data_connector.batch_filter import (
@@ -47,7 +49,7 @@ jan_feb_batch_definition_list: list = (
 
 # Get the highest max and lowest min between January and February
 cumulative_max = 0
-cumulative_min = 0
+cumulative_min = np.Inf
 for batch_definition in jan_feb_batch_definition_list:
     batch_id: str = batch_definition.id
     current_max = validator_multi_batch.get_metric(
