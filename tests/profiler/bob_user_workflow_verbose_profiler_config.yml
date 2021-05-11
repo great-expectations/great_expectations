@@ -2,19 +2,20 @@
 # Unless filtered / specified this list of batches will be used for all metrics/parameters
 # This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_2019-*.csv)
 variables:
-# TODO: Support lists and mappings in variables
-#  vendor_ids:
-#    - 1
-#    - 2
-#    - 4
-  max_vendor_id: 4
   max_amount: 99999.99
   false_positive_threshold: 0.01
+# TODO: Support lists and mappings in variables
+  quantiles:
+    - 0.05
+    - 0.25
+    - 0.50
+    - 0.75
+    - 0.95
 rules:
   # Here we define 3 rules showing various methods to handle multi-batch parameters
   # 1. my_rule_for_ids uses a simple ParameterBuilder to build a list of parameters per batch to be aggregated in the referencing ExpectationConfigurationBuilder
   # 2. my_rule_for_amounts uses an aggregating ParameterBuilder to build a list of parameters and then aggregate them using a specified aggregation function. (While this example is not sufficiently complex to warrant a custom ParameterBuilder, one could be created - alternatively the complexity could be handled in a custom ExpectationConfigurationBuilder)
-  # 3. my_rule_for_numeric_data is a hybrid approach, where multiple parameters are computed depending on prior parameters to supply the ExpectationConfigurationBuilder with a pre-computed parameter
+  # 3. my_rule_for_numeric_data uses MultiBatchBootstrappedMetricDistributionParameterBuilder to compute multiple parameters to supply ExpectationConfigurationBuilders with pre-computed parameters
 
   my_rule_for_ids:
     # Create a value_set based on prior batches (relative to when the profiler is run) and evaluate new batches using this value_set
@@ -38,14 +39,13 @@ rules:
         # Specify all batches prior to the 6 most recent to be used to create this set of Parameters using the below batch_request
         batch_request:
           partition_request:
-            partition_index: "-6:"
+            partition_index: ":-6"
         # TODO: Should we also support "offset" from the active_batch (active_batch can be set via passing a validator to the Profiler.profile() method and previously setting the active batch validator.active_batch_id(batch_id="mybatchid"))?
         # Note: To specify all batches explicitly use the below batch_request
         # batch_request:
         #  partition_request:
         #    partition_index: "0:"
-        # TODO: Maybe this can be omitted and inferred as the default (all batches)?
-        # TODO: James - maybe default isn't necessarily what's in the validator
+        # TODO: Maybe this can be omitted and inferred as the default (all batches)? James: maybe default isn't necessarily what's in the validator.
         metric_name: column.distinct_values
     expectation_configuration_builders:
       # Create union of value sets here in the expectation_configuration_builder
@@ -53,7 +53,7 @@ rules:
         column: $domain.domain_kwargs.column
         # Parameter builder returns a list of value_sets so take the union() here
         # TODO: Build `union(sets: List[Set])` method in GE parsing language
-        # TODO: How to reference list of parameters from ParameterBuilder?
+        # TODO: How to reference list of parameters from ParameterBuilder (proposal below)?
         value_set: union($parameter.my_value_set_for_ids.parameter_list)
 
   my_rule_for_amounts:
@@ -135,17 +135,19 @@ rules:
         # Note: this would need us to add `stdev()` to our GE language parsing these evaluations
 
   my_rule_for_numeric_data:
+    # This rule creates several expectations for all numeric column domains. There is some overlap with the my_rule_for_amounts rule
+    # Rationale: I want alerts when my current numeric data varies from prior data (within some bounds, based on a confidence level)
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
     domain_builder:
+      # Build list of domains from all numeric column domains by checking column storage type using the configured execution engine
       class_name: SimpleSemanticTypeColumnDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
       semantic_types:
         - numeric
     parameter_builders:
-      # NOTE: These parameter_builders are from https://github.com/superconductive/design/blob/main/docs/20201203_profiling.md
-      # NOTE: my_column_mean and my_column_min are added as parameters but unused in expectation_configuration_builders - this is OK
-      # TODO: Should we warn users if there are unused ParameterBuilders in a Profiler configuration? As an advanced feature - NO for now.
+      # Note: my_column_mean and my_column_min are added as parameters but unused in expectation_configuration_builders - this is OK, we should still accept this as a valid Profiler configuration.
+      # TODO: Maybe in the future we should warn users if there are unused ParameterBuilders in a Profiler configuration.
       - name: my_column_mean
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
@@ -162,40 +164,21 @@ rules:
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
 
-        # TODO: I don't totally understand the following parameters, and there is likely work to be done to make MultiBatchBootstrappedMetricDistributionParameterBuilder work as intended.
-        # for example,
-        # 1. why does false_positive_threshold_min have the metric_configuration
-        # mapping instead of passing metric_name and metric_domain_kwargs (this can be changed easily)
-        # 2. MultiBatchBootstrappedMetricDistributionParameterBuilder does not have a metric_domain_kwargs param
-        # 3. MultiBatchBootstrappedMetricDistributionParameterBuilder takes a list of batch_ids and a batch_request. The way that batch_ids seems to work in other areas is as a filter (e.g. the batch_request returns some batches and we filter to only those contained in the list batch_ids, if batch_ids is None then we use all batches) whereas here it seems meant to add to the batches from the batch_request (maybe just a param name change to clarify e.g. `additional_batch_ids`)
-
-      # THIS IS ANALOGOUS TO aggregate_fn - but instead of aggregating you are bootstrapping
-      # In the other case it was mean, but this case it's
-      # THis is an example of midway between compute all in parameter builder and all in expectation builder
-      - # compute in multiple parameters
-
-      # Example
-      # getting more sophisticated in our bounds on the expectation
-
-      # Bootstrapping - sample and look at distribution of samples. Using replacement specifically.
-      # Construct distribution of likely observed means if I were to reconstruct my experiment.
-      # removes assumption of distribution of observed values
       - name: false_positive_threshold_min
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
-        # TODO: Not sure I understand the comment here - why would we want to add the batches from the call to profile? Wouldn't we expect that this parameter is calculated just from the explicitly defined batch_request below? (if this is useful, maybe there are two modes)
+        # TODO: Not sure I understand the comment here about unioning - why would we want to add the batches from the call to profile? Wouldn't we expect that this parameter is calculated just from the explicitly defined batch_request below? (if this is useful, maybe there are two modes)
         batch_request: # this should be unioned with the rest of the batch request from the call to profile
           partition_request:
             # NOTE: interpreted like python slices e.g. most recent 10 batches
             partition_index: "-10:"
         metric_configuration:
           metric_name: column.min
-          # TODO: Are these metric_domain_kwargs referencing the current domain being processed when evaluating the rule (and then will be processed on that domain for each of the last 10 batches)?
+          # Process this metric on each of the domains in the list generated by the DomainBuilder:
           metric_domain_kwargs: $domain.domain_kwargs
         p_values:
           min_value: $variables.false_positive_threshold
           max_value: 1.0
-        # TODO: Question: does this false_positive_threshold_min parameter produce a distribution of the column min based on the most recent 10 batches where the p_values sets the resulting min and max acceptable values for the column min? For example if the p_values are not set, then the min is the lowest min of any batch and the max is the highest min of any batch.
 
       - name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
@@ -207,55 +190,27 @@ rules:
           metric_name: column.quantile_values
           metric_domain_kwargs: $domain.domain_kwargs
           metric_value_kwargs:
-            quantiles:
-              - 0.05
-              - 0.25
-              - 0.50
-              - 0.75
-              - 0.95
+            quantiles: $variables.quantiles
         p_values:
           min_value: ($variables.false_positive_threshold / 2)
           max_value: 1 - ($variables.false_positive_threshold / 2)
-        # TODO: Question: does this parameter produce a distribution of the column quantile values for each of the quantiles listed based on the most recent 10 batches where the p_values sets the resulting min and max acceptable values for each of the quantiles? For example if the p_values are not set, then the quantile range is between the smallest observed value for that quantile in any of the latest 10 batches and the largest observed value for that quantile in any of the latest 10 batches?
-
-      - name: quantiles
-        class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
-        metric_name: column.quantile_values
-        metric_domain_kwargs: $domain.domain_kwargs
-        metric_value_kwargs:
-          quantiles:
-            - 0.05
-            - 0.25
-            - 0.50
-            - 0.75
-            - 0.95
-        # TODO: Question: does this parameter_builder produce an actual value for each of the quantiles for the domain that is currently being processed (for the batch that is currently being processed)?
 
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        min_value: $false_positive_threshold_min.parameter.min_value
-        max_value: $false_positive_threshold_min.parameter.max_value
+        column: $domain.domain_kwargs.column
+        min_value: $parameter.false_positive_threshold_min.min_value
+        max_value: $parameter.false_positive_threshold_min.max_value
       - expectation_type: expect_column_quantile_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        quantiles:
-          - 0.05
-          - 0.25
-          - 0.50
-          - 0.75
-          - 0.95
-        # TODO: Is this the way to refer to the value_ranges? Should it not be $quantile_ranges.parameter.ranges to be consistent with other parameters?
-        value_ranges: $quantile_ranges
+        column: $domain.domain_kwargs.column
+        quantiles: $variables.quantiles
+        value_ranges: $parameter.quantile_ranges.ranges
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        min_value: 0.9 * $my_column_max.parameter.max
-        max_value: 1.1 * $my_column_max.parameter.max
-
-
-  # TODO: Reference specific batch (index or name) / filter batches
-  # TODO: rule or expectation_configuration based on data from relative batch with relative expectation (Evaluation Parameter)
-  # TODO: Are all permutations of the above TODOs possible?
+        column: $domain.domain_kwargs.column
+        min_value: 0.9 * $parameter.my_column_max.max
+        max_value: 1.1 * $parameter.my_column_max.max
