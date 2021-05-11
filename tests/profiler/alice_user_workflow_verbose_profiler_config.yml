@@ -103,14 +103,17 @@ rules:
 #           format: markdown
 #           content:
 #             - ### This expectation should be replaced with the below expectation
-        # TODO: This expectation needs to access a parameter
+        # TODO: This expectation needs to access a parameter for a set domain (event_ts)
+        # TODO: to confirm that the event_ts contains the latest timestamp of all domains
 #      - expectation_type: expect_column_max_to_be_between
 #        class_name: DefaultExpectationConfigurationBuilder
 #        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
 #        column: $domain.domain_kwargs.column
 #        min_value: $variables.min_timestamp
         # TODO: How to reference the event_ts domain?
-#        max_value: $my_max_event_ts.parameter[0].column.max
+#        max_value: $parameter.my_max_event_ts.parameter[0].column.max
+#        or
+#        max_value: $parameter.my_max_event_ts.event_ts.column.max
         # TODO: These additional kwargs are not being handled correctly
 #        meta:
 #         notes:
