@@ -12,7 +12,7 @@ class Article extends React.Component {
         display: this.shouldBeHidden() ? 'none' : 'block'
       }}
       >
-        <a href='#'>{this.props.title}</a> {this.props.tags.map((item, i) => (<em key={i} style={{ fontSize: '0.7em', display: 'inline', margin: '3px', padding: '0 3px', color: '#fff', background: '#ccc' }}>{item}</em>))}
+        <a href='docs/guides/connecting_to_your_data/database/postgres'>{this.props.title}</a> {this.props.tags.map((item, i) => (<em key={i} style={{ fontSize: '0.7em', display: 'inline', margin: '3px', padding: '0 3px', color: '#fff', background: '#ccc' }}>{item}</em>))}
       </li>
     )
   }
@@ -47,10 +47,17 @@ const dataLocationOptions = [
   { value: 'data-location-azure', label: 'azure' },
   { value: 'data-location-gcs', label: 'gcs' }
 ]
+
 const computeOptions = [
-  { value: 'compute-database', label: 'database' },
   { value: 'compute-pandas', label: 'pandas' },
-  { value: 'compute-spark', label: 'spark' }
+  { value: 'compute-spark', label: 'spark' },
+  { value: 'compute-postgres', label: 'postgres' },
+  { value: 'compute-mysql', label: 'mysql' },
+  { value: 'compute-mssql', label: 'mssql' },
+  { value: 'compute-bigquery', label: 'bigquery' },
+  { value: 'compute-redshift', label: 'redshift' },
+  { value: 'compute-snowflake', label: 'snowflake' },
+  { value: 'compute-athena', label: 'athena' },
 ]
 
 export default class TOC extends React.Component {
@@ -220,19 +227,26 @@ export default class TOC extends React.Component {
         <button onClick={() => this.reset()}>Reset Filters</button>
         <h2>Configuring a Datasource</h2>
         <ol>
-          <Article title='How to configure a Pandas/filesystem Datasource' tags={['configure-datasource', 'compute-pandas', 'data-location-filesystem']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure a Pandas/S3 Datasource' tags={['configure-datasource', 'compute-pandas', 'data-location-s3']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure a Spark/filesystem Datasource' tags={['configure-datasource', 'compute-spark', 'data-location-filesystem']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on a filesystem using Pandas' tags={['configure-datasource', 'compute-pandas', 'data-location-filesystem']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on a filesystem using Spark' tags={['configure-datasource', 'compute-spark', 'data-location-filesystem']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on S3 using Pandas' tags={['configure-datasource', 'compute-pandas', 'data-location-s3']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on S3 using Spark' tags={['configure-datasource', 'compute-spark', 'data-location-s3']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on GCS using Pandas' tags={['configure-datasource', 'compute-pandas', 'data-location-gcs']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on GCS using Spark' tags={['configure-datasource', 'compute-spark', 'data-location-gcs']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on Azure using Pandas' tags={['configure-datasource', 'compute-pandas', 'data-location-azure']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data on Azure using Spark' tags={['configure-datasource', 'compute-spark', 'data-location-azure']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data in a Athena database' tags={['configure-datasource', 'compute-athena', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data in a BigQuery database' tags={['configure-datasource', 'compute-bigquery', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data in a MSSQL database' tags={['configure-datasource', 'compute-mssql', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data in a MYSQL database' tags={['configure-datasource', 'compute-mysql', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data in a Redshift database' tags={['configure-datasource', 'compute-redshift', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data in a Snowflake database' tags={['configure-datasource', 'compute-snowflake', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+          <Article title='How to connect to your data in a Postgresql database' tags={['configure-datasource', 'compute-postgres', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
           <Article title='How to configure a self managed Spark Datasource' tags={['configure-datasource', 'compute-spark']} hiddenTags={this.state.hiddenTags} />
           <Article title='How to configure an EMR Spark Datasource' tags={['configure-datasource', 'compute-spark', 'data-location-filesystem']} hiddenTags={this.state.hiddenTags} />
           <Article title='How to configure a Databricks AWS Datasource' tags={['configure-datasource', 'compute-spark', 'data-location-s3']} hiddenTags={this.state.hiddenTags} />
           <Article title='How to configure a Databricks Azure Datasource' tags={['configure-datasource', 'compute-spark', 'data-location-azure']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure an Athena Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure a BigQuery Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure a MSSQL Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure a MySQL Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure a Redshift Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
-          <Article title='How to configure a Snowflake Datasource' tags={['configure-datasource', 'compute-database', 'data-location-database']} hiddenTags={this.state.hiddenTags} />
+
         </ol>
         <h2>Configuring a DataConnector</h2>
         <ol>

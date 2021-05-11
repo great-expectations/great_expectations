@@ -93,6 +93,19 @@ module.exports = {
           type: 'category',
           label: '🔌 Connecting to your data',
           items: [
+            { type: 'category',
+              label: "Database",
+              items: [
+                'guides/connecting_to_your_data/database/athena',
+                'guides/connecting_to_your_data/database/bigquery',
+                'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mysql',
+                'guides/connecting_to_your_data/database/postgres',
+                'guides/connecting_to_your_data/database/redshift',
+                'guides/connecting_to_your_data/database/snowflake',
+                'guides/connecting_to_your_data/database/sqlite',
+              ]
+            },
             {
               type: 'category',
               label: '📁 Filesystem',
@@ -113,7 +126,6 @@ module.exports = {
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' },
               ]
             },
-            { type: 'doc', id: 'guides/connecting_to_your_data/where_is_your_data/my-data-is-in-a-database' }
           ]
         },
         {
