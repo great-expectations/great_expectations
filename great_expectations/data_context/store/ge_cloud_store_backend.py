@@ -89,7 +89,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                                               f"{self.ge_cloud_resource_name}")
         try:
             response = requests.post(url, json=data, headers=headers)
-            return response.json()
+            response_json = response.json()
+
+            object_id = response_json["data"]["id"]
+            return self.get_url_for_key((object_id,))
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in GE Cloud Store Backend.")
