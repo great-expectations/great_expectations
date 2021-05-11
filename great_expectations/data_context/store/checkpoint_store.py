@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 
@@ -17,13 +18,16 @@ class CheckpointStore(ConfigurationStore):
 
     _configuration_class = CheckpointConfig
 
-    def ge_cloud_response_to_object(self, response):
-        ge_cloud_checkpoint_id = response["data"]["id"]
-        checkpoint_config_json = response["data"]["attributes"]["checkpoint_config"]
+    def ge_cloud_response_json_dict_to_object_json_str(self, response_json_dict):
+        """
+        This method takes full json response from GE cloud and outputs a json str appropriate for
+        deserialization into a GE object
+        """
+        ge_cloud_checkpoint_id = response_json_dict["data"]["id"]
+        checkpoint_config_json = response_json_dict["data"]["attributes"]["checkpoint_config"]
         checkpoint_config_json["ge_cloud_id"] = ge_cloud_checkpoint_id
-        checkpoint_config = self._configuration_class(**self._configuration_class.get_schema_class()().load(
-            checkpoint_config_json))
-        return checkpoint_config
+
+        return json.dumps(checkpoint_config_json)
 
     def serialization_self_check(self, pretty_print: bool):
         test_checkpoint_name: str = "test-name-" + "".join(
