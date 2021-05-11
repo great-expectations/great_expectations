@@ -4,6 +4,10 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
+    build_parameter_container_for_variables,
+)
 from great_expectations.profiler.rule.rule import Rule
 from great_expectations.validator.validator import Validator
 
@@ -16,6 +20,7 @@ class Profiler:
         self,
         *,
         rules: Optional[Dict[str, Rule]] = None,
+        variable_configs: Optional[Dict[str, Dict]] = None,
         rule_configs: Optional[Dict[str, Dict]] = None,
         data_context: Optional[DataContext] = None,
     ):
@@ -27,6 +32,7 @@ class Profiler:
 
         Args:
             rules: A rule or set of rules of format {"rule_name": Rule object}
+            variable_configs: Variables from a profiler configuration
             rule_configs: An alternative to rules, providing a rule configuration as a dictionary instead of a Rule
             data_context: An organizational DataContext object that defines a full runtime environment (data access, etc.)
         """
@@ -46,18 +52,21 @@ class Profiler:
                     )
                 domain_builder = instantiate_class_from_config(
                     domain_builder_config,
-                    runtime_environment={"data_context": data_context},
+                    # TODO: AJB 20210505 - we may not need this, remove or keep.
+                    # runtime_environment={"data_context": data_context},
+                    runtime_environment={},
                 )
 
                 parameter_builders = []
                 parameter_builder_configs = rule_config.get("parameter_builders")
-                for parameter_builder_config in parameter_builder_configs:
-                    parameter_builders.append(
-                        instantiate_class_from_config(
-                            parameter_builder_config,
-                            runtime_environment={"data_context": data_context},
+                if parameter_builder_configs:
+                    for parameter_builder_config in parameter_builder_configs:
+                        parameter_builders.append(
+                            instantiate_class_from_config(
+                                parameter_builder_config,
+                                runtime_environment={"data_context": data_context},
+                            )
                         )
-                    )
 
                 expectation_configuration_builders = []
                 configuration_builder_configs = rule_config.get(
@@ -69,19 +78,25 @@ class Profiler:
                             configuration_builder_config,
                             runtime_environment={"data_context": data_context},
                             config_defaults={
-                                "class_name": "ParameterIdConfigurationBuilder"
+                                "class_name": "DefaultExpectationConfigurationBuilder"
                             },
                         )
                     )
 
-                # TODO: <Alex>ALEXs -- use name-value pairs in arguments; add type hints throughout.</Alex>
+                variables: Optional[ParameterContainer] = None
+                if variable_configs:
+                    variables = build_parameter_container_for_variables(
+                        variable_configs=variable_configs
+                    )
+
+                # TODO: <Alex>ALEX -- use name-value pairs in arguments; add type hints throughout.</Alex>
                 self._rules.append(
                     Rule(
                         name=rule_name,
                         domain_builder=domain_builder,
                         parameter_builders=parameter_builders,
                         expectation_configuration_builders=expectation_configuration_builders,
-                        variables=None,
+                        variables=variables,
                     )
                 )
 

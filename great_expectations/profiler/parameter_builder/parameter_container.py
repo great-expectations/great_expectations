@@ -1,9 +1,7 @@
-import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
@@ -13,6 +11,15 @@ DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
     f"$domain.{DOMAIN_KWARGS_PARAMETER_NAME}"
 )
 VARIABLES_KEY: str = "$variables."
+
+
+def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
+    if not fully_qualified_parameter_name.startswith("$"):
+        raise ge_exceptions.ProfilerExecutionError(
+            message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
+names must start with $ (e.g., "${fully_qualified_parameter_name}").
+"""
+        )
 
 
 @dataclass
@@ -93,12 +100,42 @@ class ParameterContainer(SerializableDictDot):
         return convert_to_json_serializable(data=asdict(self))
 
 
-def build_parameter_container(
-    parameter_values: Dict[str, Dict[str, Any]]
+def build_parameter_container_for_variables(
+    variable_configs: Dict[str, Any]
 ) -> ParameterContainer:
+    """
+    Build a ParameterContainer for all of the profiler config variables passed as key value pairs
+    Args:
+        variable_configs: Variable key:value pairs e.g. {"variable_name": variable_value, ...}
+
+    Returns:
+        ParameterContainer containing all variables
+    """
+    variable_config_key: str
+    variable_config_value: Any
+    parameter_values: Dict[str, Dict[str, Any]] = {}
+    for variable_config_key, variable_config_value in variable_configs.items():
+        variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
+        parameter_values[variable_config_key] = {
+            "value": variable_config_value,
+        }
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    build_parameter_container(
+        parameter_container=parameter_container, parameter_values=parameter_values
+    )
+
+    return parameter_container
+
+
+def build_parameter_container(
+    parameter_container: ParameterContainer,
+    parameter_values: Dict[str, Dict[str, Any]],
+):
     """
     Builds the ParameterNode trees, corresponding to the fully_qualified_parameter_name first-level keys.
 
+    :param parameter_container initialized ParameterContainer for all ParameterNode trees
     :param parameter_values
     Example of required structure for "parameter_values" (matching the type hint in the method signature):
     {
@@ -126,7 +163,6 @@ def build_parameter_container(
     In particular, if any ParameterNode object in the tree (starting with the root-level ParameterNode object) already
     exists, it is reused; in other words, ParameterNode objects are unique per part of fully-qualified parameter names.
     """
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameter_node: Optional[ParameterNode]
     fully_qualified_parameter_name: str
     parameter_value_details_dict: Dict[str, Any]
@@ -146,7 +182,8 @@ def build_parameter_container(
         ].split(".")
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
         parameter_value = parameter_value_details_dict["value"]
-        parameter_details = parameter_value_details_dict["details"]
+        # The details key is optional; in particular, it is commonly omitted for globally scoped "variables".
+        parameter_details = parameter_value_details_dict.get("details")
         parameter_node = parameter_container.get_parameter_node(
             parameter_name_root=parameter_name_root
         )
@@ -164,15 +201,13 @@ def build_parameter_container(
             details=parameter_details,
         )
 
-    return parameter_container
-
 
 def _build_parameter_node_tree_for_one_parameter(
     parameter_node: ParameterNode,
     parameter_name_as_list: List[str],
     parameter_value: Any,
     details: Optional[Any] = None,
-) -> None:
+):
     """
     Recursively builds a tree of ParameterNode objects, creating new ParameterNode objects parsimoniously (i.e., only if
     ParameterNode object, corresponding to a part of fully-qualified parameter names in a "name space" does not exist).
@@ -227,7 +262,7 @@ def _set_parameter_node_attribute_name_value_pairs(
 
 def get_parameter_value(
     fully_qualified_parameter_name: str,
-    domain: Union[Domain, List[Domain]],
+    domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
@@ -266,31 +301,14 @@ def get_parameter_value(
             )
         return None
 
-    actual_parameters: Optional[Dict[str, ParameterContainer]] = copy.deepcopy(
-        parameters
-    )
-    domain_ids: Optional[List[str]]
-    domain_cursor: Domain
+    parameter_container: ParameterContainer
+
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
-        domain_id: str = IDDict().to_id()
-        actual_parameters[domain_id] = copy.deepcopy(variables)
-        domain_ids = [domain_id]
-        fully_qualified_parameter_name = fully_qualified_parameter_name[
-            len(VARIABLES_KEY) :
-        ]
-    else:
-        if isinstance(domain, Domain):
-            domain = [domain]
-        elif not (
-            isinstance(domain, list)
-            and len(domain) > 0
-            and all([isinstance(domain_cursor, Domain) for domain_cursor in domain])
-        ):
-            raise ValueError(
-                "Either a single Domain object or a non-empty list of Domain objects is required."
-            )
-        domain_ids = [domain_cursor.id for domain_cursor in domain]
         fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        parameter_container = variables
+    else:
+        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        parameter_container = parameters[domain.id]
 
     fully_qualified_parameter_name_as_list: List[
         str
@@ -299,53 +317,19 @@ def get_parameter_value(
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
 
-    return _get_parameter_value_multiple_domain_scope(
+    return _get_parameter_value_from_parameter_container(
         fully_qualified_parameter_name=fully_qualified_parameter_name,
         fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
-        parameters=actual_parameters,
-        domain_ids=domain_ids,
+        parameter_container=parameter_container,
     )
 
 
-def _get_parameter_value_multiple_domain_scope(
+def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name: str,
     fully_qualified_parameter_name_as_list: List[str],
-    parameters: Dict[str, ParameterContainer],
-    domain_ids: List[str],
+    parameter_container: ParameterContainer,
 ) -> Optional[Any]:
-    domain_id: str
-    parameter_container: ParameterContainer
-    exception_messages: List[str] = []
-    parameter_value: Optional[Any] = None
-    for domain_id in domain_ids:
-        parameter_container = parameters[domain_id]
-        try:
-            parameter_value = _get_parameter_value_one_domain_scope(
-                fully_qualified_parameter_name=fully_qualified_parameter_name,
-                fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
-                parameters=parameter_container,
-            )
-            # In the present implementation, the first non-NULL parameter value found is returned.  In the future,
-            # parameter name across domains will need to be disambiguated (e.g., bu using a domain-specific scoping).
-            if parameter_value is not None:
-                return parameter_value
-        except KeyError as e:
-            exception_messages.append(
-                f"""Unable to find value for parameter name "{fully_qualified_parameter_name}" for domain_id \
-"{domain_id}": "{e}" occurred.
-"""
-            )
-    if len(exception_messages) > 0:
-        raise ge_exceptions.ProfilerExecutionError(message=";".join(exception_messages))
-    return parameter_value
-
-
-def _get_parameter_value_one_domain_scope(
-    fully_qualified_parameter_name: str,
-    fully_qualified_parameter_name_as_list: List[str],
-    parameters: ParameterContainer,
-) -> Optional[Any]:
-    parameter_node: Optional[ParameterNode] = parameters.get_parameter_node(
+    parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
     if parameter_node is None:
@@ -365,14 +349,5 @@ def _get_parameter_value_one_domain_scope(
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
-"""
-        )
-
-
-def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
-    if not fully_qualified_parameter_name.startswith("$"):
-        raise ge_exceptions.ProfilerExecutionError(
-            message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
-names must start with $ (e.g., "${fully_qualified_parameter_name}").
 """
         )
