@@ -1,4 +1,4 @@
-from great_expectations.util import verify_dynamic_loading_support
+from ..util import verify_dynamic_loading_support
 
 from .actions import (
     EmailAction,

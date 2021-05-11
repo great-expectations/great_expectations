@@ -26,22 +26,6 @@ datasources:
           - default_identifier_name
         module_name: great_expectations.datasource.data_connector
     class_name: Datasource
-  my_postgres_datasource:
-    execution_engine:
-      connection_string: postgresql+psycopg2://postgres:@localhost/test_ci
-      module_name: great_expectations.execution_engine
-      class_name: SqlAlchemyExecutionEngine
-    module_name: great_expectations.datasource
-    data_connectors:
-      default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - default_identifier_name
-        module_name: great_expectations.datasource.data_connector
-      default_inferred_data_connector_name:
-        class_name: InferredAssetSqlDataConnector
-        module_name: great_expectations.datasource.data_connector
-    class_name: Datasource
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
