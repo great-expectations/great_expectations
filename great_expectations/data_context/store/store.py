@@ -128,19 +128,15 @@ class Store:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             if value:
-                if getattr(self, "ge_cloud_response_to_object"):
-                    return self.ge_cloud_response_to_object(response=value)
-                else:
-                    return value
-            else:
-                return None
+                value = self.ge_cloud_response_json_dict_to_object_json_str(response_json_dict=value)
         else:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
-            if value:
-                return self.deserialize(key, value)
-            else:
-                return None
+
+        if value:
+            return self.deserialize(key, value)
+        else:
+            return None
 
     def set(self, key, value):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
