@@ -1,27 +1,25 @@
 import React from 'react'
 import Select from 'react-select'
 
-
-import {installOptions, metadataOptions, dataDocsOptions, dataLocationOptions, computeOptions, databaseOptions } from '../components/options.js';
+import { installOptions, metadataOptions, dataDocsOptions, dataLocationOptions, computeOptions, databaseOptions } from '../components/options.js'
 import { CodeSnippet } from '../components/snippet.js'
 import { Prerequisites } from '../components/prerequisites.js'
 import { Article } from '../components/article.js'
 import { data, addDatasourceSnippet } from '../components/data.js'
-
 
 class InteractiveHowtoGuide extends React.Component {
   getDatasourceConfigSnippet () {
     if (this.props.data) {
       return this.props.data.datasourceYaml
     }
-      return "# Please answer the compute question"
+    return '# Please answer the compute question'
   }
 
   getBatchRequestSnippet () {
     if (this.props.data) {
       return this.props.data.batchRequestSnippet
     }
-    return "# Please answer the location question"
+    return '# Please answer the location question'
   }
 
   getDeps () {
@@ -29,7 +27,6 @@ class InteractiveHowtoGuide extends React.Component {
       return this.props.data.prerequisites.dependencies
     }
     return []
-
   }
 
   getNotes () {
@@ -41,16 +38,17 @@ class InteractiveHowtoGuide extends React.Component {
 
   renderBlank () {
     return (
-      <div  >
-      <h2>Please answer both questions for a customized how to guide.</h2>
+      <div>
+        <h2>Please answer both questions for a customized how to guide.</h2>
       </div>
     )
   }
+
   renderAdditionalNotes () {
     if (this.props.data) {
       if (this.props.data.additionalNotes) {
         return (
-          <div >
+          <div>
             <h2>Additional Notes</h2>
             {this.props.data.additionalNotes}
           </div>
@@ -100,7 +98,7 @@ function removeItemsFromArray (items, array) {
   return array.filter(item => !itemsToRemove.has(item))
 }
 
-const buttonStyle = { fontSize: '1.5em', color: 'white', background: '#00bfa5', padding: '.5em', borderRadius: '8px'}
+const buttonStyle = { fontSize: '1.5em', color: 'white', background: '#00bfa5', padding: '.5em', borderRadius: '8px' }
 
 export default class TOC extends React.Component {
   constructor (props) {
@@ -114,7 +112,7 @@ export default class TOC extends React.Component {
       compute: null,
       stepsViewerVisible: true,
       setupVisible: false,
-      dataVisible: false,
+      dataVisible: false
     }
     this.handleInstallChange = this.handleInstallChange.bind(this)
     this.handleMetadataStoreChange = this.handleMetadataStoreChange.bind(this)
@@ -201,72 +199,75 @@ export default class TOC extends React.Component {
     } else if (this.state.compute === 'compute-postgres') {
       result = data.database.postgres
     } else {
-      result = null;
+      result = null
     };
     console.log('result = ', result)
     return result
   }
 
-  getDatasourceAdditional() {
+  getDatasourceAdditional () {
     const element = this.getDataElement()
 
     if (element) {
       return (
         <div>
-        <h4>Additional stuff</h4>
-        {element.datasourceAdditional}
+          <h4>Additional stuff</h4>
+          {element.datasourceAdditional}
         </div>
       )
+    }
   }
-}
-handleSetupCollapse () {
-  const setupVisible = this.state.setupVisible
-  this.setState({ setupVisible: !setupVisible})
-}
-handleDataCollapse () {
-  const dataVisible = this.state.dataVisible
-  this.setState({ dataVisible: !dataVisible})
-}
-getCollapseIcon (visible) {
-  if (visible) {
-    return '🔽'
+
+  handleSetupCollapse () {
+    const setupVisible = this.state.setupVisible
+    this.setState({ setupVisible: !setupVisible })
   }
-  return '▶️'
-}
+
+  handleDataCollapse () {
+    const dataVisible = this.state.dataVisible
+    this.setState({ dataVisible: !dataVisible })
+  }
+
+  getCollapseIcon (visible) {
+    if (visible) {
+      return '🔽'
+    }
+    return '▶️'
+  }
 
   render () {
     return (
       <div>
-        <div style={{ width: '500px', padding: '20px', float: 'left', background: '#eee'}}>
-        <pre> [  M I N I M A P  ] </pre>
+        <div style={{ width: '500px', padding: '20px', float: 'left', background: '#eee' }}>
+          <pre> [  M I N I M A P  ] </pre>
           <div id='setup'>
             <h1 onClick={() => this.handleSetupCollapse()}>{this.getCollapseIcon(this.state.setupVisible)} [ICON] Setup</h1>
             <div style={{ display: this.state.setupVisible ? 'block' : 'none' }}>
               <ol>
-              <li>Where will you install Great Expectations? <Select
-              defaultValue={null}
+                <li>Where will you install Great Expectations? <Select
+                  defaultValue={null}
               // value={this.state.installSelectedOption}
-              onChange={this.handleInstallChange}
-              options={installOptions}
-              isSearchable
-              />
-              </li>
-              <li>Where will you store your metadata? <Select
-              defaultValue={null}
+                  onChange={this.handleInstallChange}
+                  options={installOptions}
+                  isSearchable
+                                                               />
+                </li>
+                <li>Where will you store your metadata? <Select
+                  defaultValue={null}
               // value={this.state.metadataSelectedOption}
-              onChange={this.handleMetadataStoreChange}
-              options={metadataOptions}
-              isSearchable
-              />
-              </li>
-              <li>Where will you store and host your Data Docs? <Select
-              defaultValue={null}
+                  onChange={this.handleMetadataStoreChange}
+                  options={metadataOptions}
+                  isSearchable
+                                                        />
+                </li>
+                <li>Where will you store and host your Data Docs? <Select
+                  defaultValue={null}
               // value={this.state.dataDocsSelectedOption}
-              onChange={this.handleDataDocsChange}
-              options={dataDocsOptions}
-              isSearchable
-              />
-              </li>
+                  onChange={this.handleDataDocsChange}
+                  options={dataDocsOptions}
+                  isSearchable
+                                                                  />
+                </li>
               </ol>
               <button onClick={() => this.reset()} style={buttonStyle}>Reset answers</button>
 
@@ -274,38 +275,38 @@ getCollapseIcon (visible) {
               <br />
               <h2>Installation</h2>
               <ol>
-              <Article title='How to install Great Expectations locally' tags={['install', 'install-locally']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to install Great Expectations in DataBricks' tags={['install', 'install-databricks']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to install Great Expectations locally' tags={['install', 'install-locally']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to install Great Expectations in DataBricks' tags={['install', 'install-databricks']} hiddenTags={this.state.hiddenTags} />
               </ol>
               <h2>Configuration Type</h2>
               <ol>
-              <Article title='How to configure a DataContext in yaml' tags={['configure', 'yaml']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure a DataContext in python code' tags={['configure', 'code', 'databricks']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a DataContext in yaml' tags={['configure', 'yaml']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a DataContext in python code' tags={['configure', 'code', 'databricks']} hiddenTags={this.state.hiddenTags} />
               </ol>
 
               <h2>Configuring metadata stores</h2>
               <ol>
-              <Article title='How to configure an Expectation store in Amazon S3' tags={['metadata-store', 'metadata-store-s3']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure an Expectation store in Azure blob storage' tags={['metadata-store', 'metadata-store-azure']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure an Expectation store in GCS' tags={['metadata-store', 'metadata-store-gcs']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure an Expectation store on a filesystem' tags={['metadata-store', 'metadata-store-filesystem']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure an Expectation store to PostgreSQL' tags={['metadata-store', 'metadata-store-database']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure a Validation Result store in Amazon S3' tags={['metadata-store', 'metadata-store-s3']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure a Validation Result store in Azure blob storage' tags={['metadata-store', 'metadata-store-azure']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure a Validation Result store in GCS' tags={['metadata-store', 'metadata-store-gcs']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure a Validation Result store on a filesystem' tags={['metadata-store', 'metadata-store-filesystem']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure a Validation Result store to PostgreSQL' tags={['metadata-store', 'metadata-store-database']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to configure a MetricsStore' tags={['metadata-store']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure an Expectation store in Amazon S3' tags={['metadata-store', 'metadata-store-s3']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure an Expectation store in Azure blob storage' tags={['metadata-store', 'metadata-store-azure']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure an Expectation store in GCS' tags={['metadata-store', 'metadata-store-gcs']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure an Expectation store on a filesystem' tags={['metadata-store', 'metadata-store-filesystem']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure an Expectation store to PostgreSQL' tags={['metadata-store', 'metadata-store-database']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a Validation Result store in Amazon S3' tags={['metadata-store', 'metadata-store-s3']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a Validation Result store in Azure blob storage' tags={['metadata-store', 'metadata-store-azure']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a Validation Result store in GCS' tags={['metadata-store', 'metadata-store-gcs']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a Validation Result store on a filesystem' tags={['metadata-store', 'metadata-store-filesystem']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a Validation Result store to PostgreSQL' tags={['metadata-store', 'metadata-store-database']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to configure a MetricsStore' tags={['metadata-store']} hiddenTags={this.state.hiddenTags} />
               </ol>
 
               <h2>Data Docs</h2>
               <ol>
-              <Article title='How to add comments to Expectations and display them in Data Docs' tags={['datadocs']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to Create Renderers for Custom Expectations' tags={['datadocs']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to host and share Data Docs on a filesystem' tags={['datadocs', 'datadocs-filesystem']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to host and share Data Docs on Azure Blob Storage' tags={['datadocs', 'datadocs-azure']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to host and share Data Docs on GCS' tags={['datadocs', 'datadocs-gcs']} hiddenTags={this.state.hiddenTags} />
-              <Article title='How to host and share Data Docs on Amazon S3' tags={['datadocs', 'datadocs-s3']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to add comments to Expectations and display them in Data Docs' tags={['datadocs']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to Create Renderers for Custom Expectations' tags={['datadocs']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to host and share Data Docs on a filesystem' tags={['datadocs', 'datadocs-filesystem']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to host and share Data Docs on Azure Blob Storage' tags={['datadocs', 'datadocs-azure']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to host and share Data Docs on GCS' tags={['datadocs', 'datadocs-gcs']} hiddenTags={this.state.hiddenTags} />
+                <Article title='How to host and share Data Docs on Amazon S3' tags={['datadocs', 'datadocs-s3']} hiddenTags={this.state.hiddenTags} />
               </ol>
             </div>
           </div>
@@ -364,8 +365,7 @@ getCollapseIcon (visible) {
           </div>
         </div>
 
-
-        <div style={{ padding: '20px', marginLeft: '500px', marginRight: '100px', minWidth: '1000px', background: 'white'}}>
+        <div style={{ padding: '20px', marginLeft: '500px', marginRight: '100px', minWidth: '1000px', background: 'white' }}>
           <h2>Your configuration guide</h2>
           <p>This guide will help you connect to your data stored in <strong>{this.state.dataLocation}</strong> using <strong>{this.state.compute}</strong>.
             This will allow you to work with your data in Great Expectations and <a href='#'>create expectation suites</a>, <a href='#'>validate your data</a> and more.
@@ -376,7 +376,7 @@ getCollapseIcon (visible) {
               location={this.state.dataLocation}
               compute={this.state.compute}
               datasourceAdditional={this.getDatasourceAdditional()}
-              />
+            />
           </div>
         </div>
       </div>
