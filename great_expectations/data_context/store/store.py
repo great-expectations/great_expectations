@@ -148,13 +148,9 @@ class Store:
         elif self.store_backend.__class__.__name__ == "GeCloudStoreBackend":
             # skip serialization
             self._validate_key(key)
-            response = self._store_backend.set(
+            return self._store_backend.set(
                 self.key_to_tuple(key), value
             )
-            if getattr(self, "ge_cloud_response_to_object"):
-                return self.ge_cloud_response_to_object(response=response)
-            else:
-                return response
         else:
             self._validate_key(key)
             return self._store_backend.set(
