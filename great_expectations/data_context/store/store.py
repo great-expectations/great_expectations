@@ -1,3 +1,4 @@
+import json
 import logging
 
 from great_expectations.core.data_context_key import DataContextKey
@@ -55,6 +56,13 @@ class Store:
                 "Invalid StoreBackend configuration: expected a StoreBackend instance."
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
+
+    def ge_cloud_response_json_dict_to_object_json_str(self, response_json_dict):
+        """
+        This method takes full json response from GE cloud and outputs a json str appropriate for
+        deserialization into a GE object
+        """
+        return json.dumps(response_json_dict)
 
     def _validate_key(self, key):
         # STORE_BACKEND_ID_KEY always validated
