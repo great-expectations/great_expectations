@@ -1581,6 +1581,7 @@ class CheckpointConfigSchema(Schema):
             "slack_webhook",
             "notify_on",
             "notify_with",
+            "ge_cloud_id",
         )
         ordered = True
 
@@ -1691,7 +1692,7 @@ class CheckpointConfig(BaseYamlConfig):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None
+        ge_cloud_id: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
