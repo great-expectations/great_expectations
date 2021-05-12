@@ -170,6 +170,8 @@ class SqlAlchemyBatchData(BatchData):
             else:
                 self._selectable = selectable.alias(self._record_set_name)
 
+        self._engine_ready_selectable = None
+
     @property
     def sql_engine_dialect(self) -> DefaultDialect:
         """Returns the Batches' current engine dialect"""
@@ -190,6 +192,14 @@ class SqlAlchemyBatchData(BatchData):
     @property
     def selectable(self):
         return self._selectable
+
+    @property
+    def engine_ready_selectable(self):
+        return self._engine_ready_selectable
+
+    @engine_ready_selectable.setter
+    def engine_ready_selectable(self, engine_ready_selectable):
+        self._engine_ready_selectable = engine_ready_selectable
 
     @property
     def use_quoted_name(self):

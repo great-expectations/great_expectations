@@ -6,8 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
-from packaging.version import parse as parse_version
-
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
@@ -371,7 +369,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         domain_kwargs: Dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Select, dict, dict]:
+    ) -> Tuple[SqlAlchemyBatchData, dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -384,7 +382,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
-            SqlAlchemy column
+            SqlAlchemy compute domain
         """
         # Extracting value from enum if it is given for future computation
         domain_type = MetricDomainTypes(domain_type)
@@ -411,6 +409,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
             if domain_kwargs["table"] != data_object.selectable.name:
+                # noinspection PyProtectedMember
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
@@ -474,7 +473,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     logger.warning(
                         f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                     )
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+            data_object.engine_ready_selectable = selectable
+            return data_object, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
@@ -574,8 +574,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         ]
                         selectable = sa.select(to_select).select_from(selectable)
 
-        # Letting selectable fall through
-        return selectable, compute_domain_kwargs, accessor_domain_kwargs
+        data_object.engine_ready_selectable = selectable
+        return data_object, compute_domain_kwargs, accessor_domain_kwargs
 
     def resolve_metric_bundle(
         self,
@@ -620,10 +620,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
-            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
+            data_object, compute_domain_kwargs, _ = self.get_compute_domain(
                 query["domain_kwargs"], domain_type="identity"
             )
             assert len(query["select"]) == len(query["ids"])
+            selectable = data_object.engine_ready_selectable
             try:
                 res = self.engine.execute(
                     sa.select(query["select"]).select_from(selectable)
@@ -852,7 +853,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         """
             )
 
-        batch_data: SqlAlchemyBatchData
         batch_markers: BatchMarkers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -870,6 +870,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name = batch_spec.get("table_name", None)
         source_schema_name = batch_spec.get("schema_name", None)
 
+        batch_data: Optional[SqlAlchemyBatchData] = None
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             query: str = batch_spec.query
