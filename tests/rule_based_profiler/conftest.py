@@ -16,8 +16,11 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 from great_expectations.rule_based_profiler.rule.rule import Rule
 
 # noinspection PyUnresolvedReferences
-from tests.rule_based_profiler.user_workflow_fixtures import (
+from tests.rule_based_profiler.alice_user_workflow_fixture import (
     alice_columnar_table_single_batch,
+)
+from tests.rule_based_profiler.bob_user_workflow_fixture import (
+    bob_columnar_table_multi_batch,
 )
 
 

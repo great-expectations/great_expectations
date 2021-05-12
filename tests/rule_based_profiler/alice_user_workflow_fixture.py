@@ -11,6 +11,25 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.fixture
 def alice_columnar_table_single_batch():
+    """
+    About the "Alice" User Workflow Fixture
+
+    Alice has a single table of columnar data called user_events (DataAsset) that she wants to check periodically as new data is added.
+
+      - She knows what some of the columns mean, but not all - and there are MANY of them (only a subset currently shown in examples and fixtures).
+
+      - She has organized other tables similarly so that for example column name suffixes indicate which are for user ids (_id) and which timestamps are for versioning (_ts).
+
+    She wants to use a configurable profiler to generate a description (ExpectationSuite) about the table so that she can:
+
+        1. use it to validate the user_events table periodically and set up alerts for when things change
+
+        2. have a place to add her domain knowledge of the data (that can also be validated against new data)
+
+        3. if all goes well, generalize some of the Profiler to use on her other tables
+
+    Alice configures her Profiler using the yaml configurations and data file locations captured in this fixture.
+    """
 
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__, "alice_user_workflow_verbose_profiler_config.yml"
