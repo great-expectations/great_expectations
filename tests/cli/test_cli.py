@@ -8,10 +8,12 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import cli
+from great_expectations.util import delete_blank_lines
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAML()
 yaml.default_flow_style = False
+
 
 TOP_LEVEL_HELP = """Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
 
@@ -50,13 +52,9 @@ def test_cli_command_entrance(caplog):
     runner: CliRunner = CliRunner(mix_stderr=True)
     result: Result = runner.invoke(cli, catch_exceptions=False)
     assert result.exit_code == 0
-    print(
-        f"\n[ALEX_TEST] RESULT_OUTPUT:\n{result.output} ; TYPE: {str(type(result.output))}"
+    assert delete_blank_lines(text=result.output) == delete_blank_lines(
+        text=TOP_LEVEL_HELP
     )
-    print(
-        f"\n[ALEX_TEST] TOPLEVEL_HELP:\n{TOP_LEVEL_HELP} ; TYPE: {str(type(TOP_LEVEL_HELP))}"
-    )
-    assert result.output == TOP_LEVEL_HELP
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -64,13 +62,9 @@ def test_cli_top_level_help(caplog):
     runner: CliRunner = CliRunner(mix_stderr=True)
     result: Result = runner.invoke(cli, "--help", catch_exceptions=False)
     assert result.exit_code == 0
-    print(
-        f"\n[ALEX_TEST] RESULT_OUTPUT:\n{result.output} ; TYPE: {str(type(result.output))}"
+    assert delete_blank_lines(text=result.output) == delete_blank_lines(
+        text=TOP_LEVEL_HELP
     )
-    print(
-        f"\n[ALEX_TEST] TOPLEVEL_HELP:\n{TOP_LEVEL_HELP} ; TYPE: {str(type(TOP_LEVEL_HELP))}"
-    )
-    assert result.output == TOP_LEVEL_HELP
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -78,7 +72,9 @@ def test_cli_top_level_help_with_v3_flag(caplog):
     runner: CliRunner = CliRunner(mix_stderr=True)
     result: Result = runner.invoke(cli, "--v3-api --help", catch_exceptions=False)
     assert result.exit_code == 0
-    assert result.output == TOP_LEVEL_HELP
+    assert delete_blank_lines(text=result.output) == delete_blank_lines(
+        text=TOP_LEVEL_HELP
+    )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 

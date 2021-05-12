@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import pstats
+import re
 import time
 from collections import OrderedDict
 from datetime import datetime
@@ -945,3 +946,7 @@ def generate_library_json_from_registered_expectations():
         library_json[expectation_name] = report_object
 
     return library_json
+
+
+def delete_blank_lines(text: str) -> str:
+    return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
