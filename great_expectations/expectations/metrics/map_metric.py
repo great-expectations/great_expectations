@@ -149,7 +149,7 @@ def column_function_partial(
                     # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
                     compute_domain_kwargs = metric_domain_kwargs
                 (
-                    selectable,
+                    batch_data,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
@@ -164,6 +164,7 @@ def column_function_partial(
                     )
 
                 dialect = execution_engine.dialect_module
+                selectable = batch_data.engine_ready_selectable
                 column_function = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -370,7 +371,7 @@ def column_condition_partial(
                 )
 
                 (
-                    selectable,
+                    batch_data,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
@@ -387,6 +388,7 @@ def column_condition_partial(
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
+                selectable = batch_data.engine_ready_selectable
                 expected_condition = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -524,7 +526,8 @@ def _pandas_column_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
 
     ###
@@ -590,7 +593,8 @@ def _pandas_column_map_series_and_domain_values(
         accessor_domain_kwargs == accessor_domain_kwargs_2
     ), "map_series and condition must have the same accessor kwargs"
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
 
     ###
@@ -655,7 +659,8 @@ def _pandas_map_condition_index(
     ) = metrics.get("unexpected_condition")
 
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
 
     ###
@@ -704,7 +709,8 @@ def _pandas_column_map_condition_value_counts(
     ) = metrics.get("unexpected_condition")
 
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
 
     ###
@@ -772,7 +778,8 @@ def _pandas_map_condition_rows(
     ) = metrics.get("unexpected_condition")
 
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
 
     ###
@@ -841,8 +848,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+    (batch_data, _, _,) = execution_engine.get_compute_domain(
+        compute_domain_kwargs,
+        domain_type="identity",
     )
     temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
     if execution_engine.dialect == "mssql":
@@ -870,6 +878,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     else_=0,
                 ).label("condition")
             ]
+            selectable = batch_data.engine_ready_selectable
             inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
                 count_case_statement,
                 sa.select(count_case_statement).select_from(selectable),
@@ -915,8 +924,9 @@ def _sqlalchemy_column_map_condition_values(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+    (batch_data, _, _,) = execution_engine.get_compute_domain(
+        compute_domain_kwargs,
+        domain_type="identity",
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -931,6 +941,7 @@ def _sqlalchemy_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
+    selectable = batch_data.engine_ready_selectable
     query = (
         sa.select([sa.column(column_name).label("unexpected_values")])
         .select_from(selectable)
@@ -962,8 +973,9 @@ def _sqlalchemy_column_map_condition_value_counts(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+    (batch_data, _, _,) = execution_engine.get_compute_domain(
+        compute_domain_kwargs,
+        domain_type="identity",
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -980,6 +992,7 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column: sa.Column = sa.column(column_name)
 
+    selectable = batch_data.engine_ready_selectable
     return execution_engine.engine.execute(
         sa.select([column, sa.func.count(column)])
         .select_from(selectable)
@@ -1003,10 +1016,12 @@ def _sqlalchemy_map_condition_rows(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+    (batch_data, _, _,) = execution_engine.get_compute_domain(
+        compute_domain_kwargs,
+        domain_type="identity",
     )
 
+    selectable = batch_data.engine_ready_selectable
     query = (
         sa.select([sa.text("*")]).select_from(selectable).where(unexpected_condition)
     )
@@ -1051,7 +1066,8 @@ def _spark_map_condition_unexpected_count_value(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
@@ -1070,7 +1086,8 @@ def spark_column_map_condition_values(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1111,7 +1128,8 @@ def _spark_column_map_condition_value_counts(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1150,7 +1168,8 @@ def _spark_map_condition_rows(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type="identity",
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
