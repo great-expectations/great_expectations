@@ -27,6 +27,13 @@ integration_test_matrix = [
         "data_dir": "integration/fixtures/data",
     },
     {
+        "name": "pandas_one_multi_batch_request_one_validator",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
+    },
+    {
         "name": "postgres_runtime_golden_path",
         "data_dir": "integration/fixtures/data",
         "base_dir": file_relative_path(__file__, "../../"),
