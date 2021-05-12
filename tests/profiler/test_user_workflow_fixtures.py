@@ -14,9 +14,9 @@ def test_alice_fixture_generation(alice_columnar_table_single_batch):
         alice_columnar_table_single_batch["expected_expectation_suite"],
         ExpectationSuite,
     )
-    # assert (
-    #     len(
-    #         alice_columnar_table_single_batch["expected_expectation_suite"].expectations
-    #     )
-    #     == 18
-    # )
+    assert (
+        len(
+            alice_columnar_table_single_batch["expected_expectation_suite"].expectations
+        )
+        == 14
+    )
