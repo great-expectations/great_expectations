@@ -127,10 +127,6 @@ module.exports = {
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' },
               ]
             },
-
-              { type: 'category',
-              label: '🍏 Core Skills',
-              items:[
                   {
               type: 'category',
               label: '✳️  How to get a Batch of data from a configured Datasource',
@@ -154,9 +150,6 @@ module.exports = {
                 items: [ { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
               },
 
-              ]
-
-            },
 
             {
               type: 'category',
