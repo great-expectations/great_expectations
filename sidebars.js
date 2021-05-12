@@ -93,8 +93,11 @@ module.exports = {
           type: 'category',
           label: '🔌 Connecting to your data',
           items: [
-
             { type: 'category',
+              label: "Configuration",
+              items: [
+            {
+              type: 'category',
               label: "🚀 Database",
               items: [
                 'guides/connecting_to_your_data/database/athena',
@@ -111,22 +114,23 @@ module.exports = {
               type: 'category',
               label: '📁 Filesystem',
               items: [
-                { type: 'doc', id: 'guides/connecting_to_your_data/filesystem/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/filesystem/spark' },
+                {type: 'doc', id: 'guides/connecting_to_your_data/filesystem/pandas'},
+                {type: 'doc', id: 'guides/connecting_to_your_data/filesystem/spark'},
               ]
             },
             {
               type: 'category',
               label: '☁️ Cloud',
               items: [
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/s3/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/s3/spark' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/spark' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' },
+                {type: 'doc', id: 'guides/connecting_to_your_data/cloud/s3/pandas'},
+                {type: 'doc', id: 'guides/connecting_to_your_data/cloud/s3/spark'},
+                {type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/pandas'},
+                {type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/spark'},
+                {type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/pandas'},
+                {type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark'},
               ]
-            },
+            }]
+        },
                   {
               type: 'category',
               label: '✳️  How to get a Batch of data from a configured Datasource',
