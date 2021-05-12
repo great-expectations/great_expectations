@@ -589,3 +589,56 @@ def test_validator_set_active_batch(multi_batch_taxi_validator):
     assert multi_batch_taxi_validator.expect_column_values_to_be_between(
         "pickup_datetime", min_value=jan_min_date, parse_strings_as_datetimes=True
     ).success
+
+
+def test_instantiate_validator_with_a_list_of_batch_requests(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    jan_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "01"}},
+    )
+
+    feb_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "02"}},
+    )
+
+    validator_two_batch_requests_two_batches: Validator = context.get_validator(
+        batch_request_list=[jan_batch_request, feb_batch_request],
+        expectation_suite=suite,
+    )
+
+    # Instantiate a validator with a single BatchRequest yielding two batches for testing
+    jan_feb_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"index": "0:2"},
+    )
+
+    validator_one_batch_request_two_batches: Validator = context.get_validator(
+        batch_request=jan_feb_batch_request, expectation_suite=suite
+    )
+
+    assert (
+        validator_one_batch_request_two_batches.batches.keys()
+        == validator_two_batch_requests_two_batches.batches.keys()
+    )
+
+    with pytest.raises(ValueError) as ve:
+        validator: Validator = context.get_validator(
+            batch_request=jan_feb_batch_request,
+            batch_request_list=[jan_batch_request, feb_batch_request],
+            expectation_suite=suite,
+        )
+    assert ve.value.args == (
+        "Exactly one of batch_request or batch_request_list_must_be_specified",
+    )
