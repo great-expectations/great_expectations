@@ -247,7 +247,9 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
     raw_data = engine.engine.execute(
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -270,7 +272,9 @@ def test_get_compute_domain_with_column_pair(sa):
     raw_data = engine.engine.execute(
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -297,7 +301,9 @@ def test_get_compute_domain_with_column_pair(sa):
             engine.active_batch_data.selectable
         )
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data2)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data2.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -324,7 +330,9 @@ def test_get_compute_domain_with_multicolumn(sa):
     raw_data = engine.engine.execute(
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -344,7 +352,9 @@ def test_get_compute_domain_with_multicolumn(sa):
             engine.active_batch_data.selectable
         )
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -369,7 +379,9 @@ def test_get_compute_domain_with_column_domain(sa):
     raw_data = engine.engine.execute(
         sa.select(["*"]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -390,7 +402,9 @@ def test_get_compute_domain_with_column_domain(sa):
     raw_data = engine.engine.execute(
         sa.select([sa.column("a")]).select_from(engine.active_batch_data.selectable)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -418,7 +432,9 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
         .select_from(engine.active_batch_data.selectable)
         .where(sa.column("b") > 24)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -451,7 +467,9 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
         .select_from(engine.active_batch_data.selectable)
         .where(sa.column("b") == 2)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -482,7 +500,9 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
         .select_from(engine.active_batch_data.selectable)
         .where(sa.column("b") == 2)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(
+        sa.select(["*"]).select_from(data.engine_ready_selectable)
+    ).fetchall()
 
     # Ensuring compute kwargs have not been modified
     assert (
