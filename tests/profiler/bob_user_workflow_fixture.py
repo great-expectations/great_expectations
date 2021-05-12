@@ -20,7 +20,7 @@ def bob_columnar_table_multi_batch():
 
     But he also:
 
-      - He wants to verify that the latest batches are not so different from all of the batches last year, if they are he wants to be alerted as maybe there are data collection issues or fares have changed significantly.
+      - Wants to verify that the latest batches are not so different from all of the batches last year, if they are he wants to be alerted as maybe there are data collection issues or fares have changed significantly.
 
     Bob configures his Profiler using the yaml configurations and data file locations captured in this fixture.
     """
