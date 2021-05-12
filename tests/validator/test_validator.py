@@ -10,6 +10,7 @@ from great_expectations.core import ExpectationSuite, IDDict
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
+    BatchMarkers,
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
@@ -18,6 +19,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.datasource import BaseDatasource, Datasource, LegacyDatasource
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -589,3 +591,53 @@ def test_validator_set_active_batch(multi_batch_taxi_validator):
     assert multi_batch_taxi_validator.expect_column_values_to_be_between(
         "pickup_datetime", min_value=jan_min_date, parse_strings_as_datetimes=True
     ).success
+
+
+def test_validator_load_batch_from_batch_request(yellow_trip_pandas_data_context):
+    context: DataContext = yellow_trip_pandas_data_context
+
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    jan_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "01"}},
+    )
+
+    validator: Validator = context.get_validator(
+        batch_request=jan_batch_request, expectation_suite=suite
+    )
+
+    assert len(validator.batches) == 1
+    assert validator.active_batch_id == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+
+    first_batch_markers: BatchMarkers = validator.active_batch_markers
+    assert (
+        first_batch_markers["pandas_data_fingerprint"]
+        == "c4f929e6d4fab001fedc9e075bf4b612"
+    )
+
+    feb_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "02"}},
+    )
+
+    datasource: Union[LegacyDatasource, BaseDatasource] = context.datasources[
+        feb_batch_request.datasource_name
+    ]
+    validator.load_batch_from_batch_request(
+        datasource=datasource, batch_request=feb_batch_request
+    )
+
+    updated_batch_markers: BatchMarkers = validator.active_batch_markers
+    assert (
+        updated_batch_markers["pandas_data_fingerprint"]
+        == "88b447d903f05fb594b87b13de399e45"
+    )
+
+    assert len(validator.batches) == 2
+    assert validator.active_batch_id == "92bcffc67c34a1c9a67e0062ed4a9529"
+    assert first_batch_markers != updated_batch_markers
