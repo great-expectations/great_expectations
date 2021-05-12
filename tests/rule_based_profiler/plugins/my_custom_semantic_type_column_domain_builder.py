@@ -3,11 +3,11 @@ from typing import Any, Dict, List, Optional, Union, cast
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.profiler.domain_builder.column_domain_builder import (
+from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
-from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.domain_builder.inferred_semantic_domain_type import (
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
     InferredSemanticDomainType,
 )
 from great_expectations.validator.validator import MetricConfiguration, Validator

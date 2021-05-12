@@ -2,10 +2,10 @@ from typing import Iterable, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain_types import MetricDomainTypes
-from great_expectations.profiler.domain_builder.column_domain_builder import (
+from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
-from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
 

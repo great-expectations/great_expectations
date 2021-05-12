@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
     get_parameter_value,

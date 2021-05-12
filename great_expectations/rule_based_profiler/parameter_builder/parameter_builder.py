@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
 from great_expectations.data_context import DataContext
-from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.validator.validator import Validator

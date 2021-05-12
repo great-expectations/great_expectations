@@ -4,11 +4,11 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
-from great_expectations.profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.validator.validator import Validator
 
 

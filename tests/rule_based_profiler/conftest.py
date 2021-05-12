@@ -8,15 +8,17 @@ from great_expectations.core.domain_types import (
     SemanticDomainTypes,
     StructuredDomainTypes,
 )
-from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
-from great_expectations.profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.rule.rule import Rule
 
 # noinspection PyUnresolvedReferences
-from tests.profiler.user_workflow_fixtures import alice_columnar_table_single_batch
+from tests.rule_based_profiler.user_workflow_fixtures import (
+    alice_columnar_table_single_batch,
+)
 
 
 # noinspection PyPep8Naming
