@@ -59,7 +59,7 @@ class ColumnHistogram(ColumnMetricProvider):
             column: the name of the column for which to get the histogram
             bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
         """
-        selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        batch_data, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
@@ -143,6 +143,7 @@ class ColumnHistogram(ColumnMetricProvider):
                 ).label("bin_" + str(len(bins) - 1))
             )
 
+        selectable = batch_data.engine_ready_selectable
         query = (
             sa.select(case_conditions)
             .where(

@@ -45,10 +45,11 @@ class TableHead(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        selectable, _, _ = execution_engine.get_compute_domain(
+        batch_data, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         df = None
+        selectable = batch_data.engine_ready_selectable
         table_name = getattr(selectable, "name", None)
         if table_name is not None:
             try:
