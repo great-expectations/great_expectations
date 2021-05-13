@@ -7,9 +7,17 @@ Changelog
 Develop
 -----------------
 
+* [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
+* [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
+* [MAINTENANCE] Improve robustness of integration test_runner
+0.13.19
+-----------------
+* [BUGFIX] Fix packaging error breaking V3 CLI suite commands (#2719)
+
+0.13.18
+-----------------
 * [ENHANCEMENT] Improve support for quantiles calculation in Athena
 * [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
-* [ENHANCEMENT] Great Expectations Compatibility with SqlAlchemy 1.4 #2641
 * [ENHANCEMENT] Update all Data Connectors to allow for `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `DataConnector.build_batch_spec` to use `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `ConfiguredAssetSqlDataConnector.build_batch_spec` and `ConfiguredAssetFilePathDataConnector.build_batch_spec` to properly process `Asset.batch_spec_passthrough`
@@ -18,8 +26,19 @@ Develop
 * [ENHANCEMENT} Update the datasource new notebook for improved data asset inference
 * [ENHANCEMENT] Update the `datasource new` notebook for improved data asset inference
 * [ENHANCEMENT] Made stylistic improvements to the `checkpoint new` notebook
+* [ENHANCEMENT] Add mode prompt to suite new and suite edit #2706
+* [ENHANCEMENT] Update build_gallery.py script to better-handle user-submitted Expectations failing #2705
+* [ENHANCEMENT] Docs + Tests for passing in reader_options to Spark #2670
+* [ENHANCEMENT] Adding progressbar to validator loop #2620 (Thanks @peterdhansen!)
+* [ENHANCEMENT] Great Expectations Compatibility with SqlAlchemy 1.4 #2641
+* [ENHANCEMENT] Athena expect column quantile values to be between #2544 (Thanks @RicardoPedrotti!)
 * [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors #2665
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
+* [BUGFIX] Handle limit for oracle with rownum #2691 (Thanks @NathanFarmer!)
+* [BUGFIX] add create table logic for athena #2668 (Thanks @kj-9!)
+* [BUGFIX] Add note for user-submitted Expectation that is not compatible with SqlAlchemy 1.4 (uszipcode) #2677
+* [BUGFIX] Usage stats cli payload schema #2680
+* [BUGFIX] Rename assets in SqlDataConnectors #2665
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
 * [DOCS] Update Configuring Data Docs documentation for V3 API CLI
@@ -28,6 +47,23 @@ Develop
 * [DOCS] Fix typos in "How to load a database table, view, or query result as a batch" guide and update with `create_temp_table` info
 * [DOCS] Update "How to add a Validation Operator" guide to make it clear it is only for V2 API
 * [DOCS] Update Version Migration Guide to recommend using V3 without caveats
+* [DOCS] Formatting fixes for datasource docs #2686
+* [DOCS] Add note about v3 API to How to use the Great Expectations command line interface (CLI) #2675
+* [DOCS] CLI SUITE Documentation for V3 #2687
+* [DOCS] how to share data docs on azure #2589 (Thanks @benoitLebreton-perso!)
+* [DOCS] Fix typo in Core concepts/Key Ideas section #2660 (Thanks @svenhofstede!)
+* [DOCS] typo in datasource documentation #2654 (Thanks @Gfeuillen!)
+* [DOCS] fix grammar #2579 (Thanks @carlsonp!)
+* [DOCS] Typo fix in Core Concepts/ Key Ideas section #2644 (Thanks @TremaMiguel!)
+* [DOCS] Corrects wrong pypi package in Contrib Packages README #2653 (Thanks @mielvds!)
+* [DOCS] Update dividing_data_assets_into_batches.rst #2651 (Thanks @lhayhurst!)
+* [MAINTENANCE] Temporarily pin sqlalchemy (1.4.9) and add new CI stage #2708
+* [MAINTENANCE] Run CLI tests as a separate stage in Azure pipelines #2672
+* [MAINTENANCE] Updates to usage stats messages & tests for new CLI #2689
+* [MAINTENANCE] Making user configurable profile test more robust; minor cleanup #2685
+* [MAINTENANCE] remove cli.project.upgrade event #2682
+* [MAINTENANCE] column reflection fallback should introspect one table (not all tables) #2657 (Thank you @peterdhansen!)
+* [MAINTENANCE] Refactor Tests to Use Common Libraries #2663
 
 0.13.17
 -----------------
