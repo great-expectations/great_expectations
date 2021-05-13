@@ -17,6 +17,14 @@ module.exports = {
     prism: {
       theme: require('prism-react-renderer/themes/vsDark'),
     },
+    announcementBar: {
+      id: 'RTD_docs', // Link to RTD Docs
+      content:
+        '🔄 Older Documentation for Great Expectations can be found at the Read the Docs site🔄',
+      backgroundColor: '#32a852', // Defaults to `#fff`.
+      textColor: '#091E42', // Defaults to `#000`.
+      isCloseable: false, // Defaults to `true`.
+    },
     navbar: {
       title: 'Great Expectations',
       logo: {

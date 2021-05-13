@@ -47,7 +47,9 @@ extensions = [
     "sphinx_gitstamp",
     # "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
-    "autoapi.extension",
+    #"autoapi.extension",
+    "versionwarning.extension",
+
 ]
 
 autoapi_type = "python"
@@ -252,6 +254,10 @@ texinfo_documents = [
     ),
 ]
 
+# versionwarning
+versionwarning_message_placeholder = "latest"
+versionwarning_body_selector = "div.document"
+#versionwarning_banner_title = ""
 
 autodoc_member_order = "bysource"
 
