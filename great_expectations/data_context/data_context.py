@@ -1688,10 +1688,10 @@ class BaseDataContext:
                 bool(x)
                 for x in [batch_request is not None, batch_request_list is not None]
             )
-            != 1
+            > 1
         ):
             raise ValueError(
-                "Exactly one of batch_request or batch_request_list_must_be_specified"
+                "Only one of batch_request or batch_request_list may be specified"
             )
         if batch_request_list:
             batch_list: List = []
