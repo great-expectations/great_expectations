@@ -5,7 +5,7 @@ rules:
   my_rule_for_user_ids:
     class_name: Rule
     module_name: great_expectations.rule_based_profiler.rule
-    domain_builder:
+    domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
       class_name: MyCustomSemanticTypeColumnDomainBuilder
       module_name: tests.rule_based_profiler.plugins
       semantic_types:
