@@ -1,9 +1,18 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
+    DomainBuilder,
+)
+from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
+)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container_for_variables,
@@ -50,14 +59,15 @@ class Profiler:
                     raise ge_exceptions.ProfilerConfigurationError(
                         message=f'Invalid rule "{rule_name}": no domain_builder found.'
                     )
-                domain_builder = instantiate_class_from_config(
+                domain_builder: DomainBuilder = instantiate_class_from_config(
                     domain_builder_config,
-                    # TODO: AJB 20210505 - we may not need this, remove or keep.
-                    # runtime_environment={"data_context": data_context},
                     runtime_environment={},
+                    config_defaults={
+                        "module_name": "great_expectations.rule_based_profiler.rule"
+                    },
                 )
 
-                parameter_builders = []
+                parameter_builders: List[ParameterBuilder] = []
                 parameter_builder_configs = rule_config.get("parameter_builders")
                 if parameter_builder_configs:
                     for parameter_builder_config in parameter_builder_configs:
@@ -65,10 +75,15 @@ class Profiler:
                             instantiate_class_from_config(
                                 parameter_builder_config,
                                 runtime_environment={"data_context": data_context},
+                                config_defaults={
+                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder"
+                                },
                             )
                         )
 
-                expectation_configuration_builders = []
+                expectation_configuration_builders: List[
+                    ExpectationConfigurationBuilder
+                ] = []
                 configuration_builder_configs = rule_config.get(
                     "expectation_configuration_builders"
                 )
@@ -78,7 +93,8 @@ class Profiler:
                             configuration_builder_config,
                             runtime_environment={"data_context": data_context},
                             config_defaults={
-                                "class_name": "DefaultExpectationConfigurationBuilder"
+                                "class_name": "DefaultExpectationConfigurationBuilder",
+                                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                             },
                         )
                     )
