@@ -16,7 +16,6 @@ class DomainBuilder(ABC):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs
     ) -> List[Domain]:
         """
         :param validator
@@ -30,7 +29,7 @@ class DomainBuilder(ABC):
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
-        return self._get_domains(validator=validator, batch_ids=batch_ids, **kwargs)
+        return self._get_domains(validator=validator, batch_ids=batch_ids)
 
     @abstractmethod
     def _get_domains(
@@ -38,7 +37,6 @@ class DomainBuilder(ABC):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs
     ) -> List[Domain]:
         """_get_domains is the primary workhorse for the DomainBuilder"""
         pass

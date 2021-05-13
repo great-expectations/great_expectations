@@ -36,7 +36,6 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
@@ -55,7 +54,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
             )
         )
 
-        # First check the column name ends in "_id"
+        # First check the column name ends in "_id".
         candidate_column_names: List[str] = list(
             filter(
                 lambda candidate_column_name: candidate_column_name.endswith(

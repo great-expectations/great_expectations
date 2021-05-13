@@ -63,7 +63,7 @@ class Profiler:
                     domain_builder_config,
                     runtime_environment={},
                     config_defaults={
-                        "module_name": "great_expectations.rule_based_profiler.rule"
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder"
                     },
                 )
 
@@ -105,7 +105,6 @@ class Profiler:
                         variable_configs=variable_configs
                     )
 
-                # TODO: <Alex>ALEX -- use name-value pairs in arguments; add type hints throughout.</Alex>
                 self._rules.append(
                     Rule(
                         name=rule_name,

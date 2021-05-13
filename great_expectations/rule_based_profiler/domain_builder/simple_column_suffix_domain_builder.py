@@ -24,7 +24,6 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs,
     ) -> List[Domain]:
         """
         Find the column suffix for each column and return all domains matching the specified suffix.
@@ -34,20 +33,16 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
                 message=f"{self.__class__.__name__} requires a reference to an instance of the Validator class."
             )
 
-        config: dict = kwargs
-        column_name_suffixes: Union[str, Iterable, List[str]] = config.get(
-            "column_name_suffixes"
-        )
-        if column_name_suffixes is None:
-            column_name_suffixes = self._column_name_suffixes
-        elif isinstance(column_name_suffixes, str):
+        column_name_suffixes: Union[
+            str, Iterable, List[str]
+        ] = self._column_name_suffixes
+        if isinstance(column_name_suffixes, str):
             column_name_suffixes = [column_name_suffixes]
-        elif isinstance(column_name_suffixes, (Iterable, List)):
-            pass
         else:
-            raise ValueError(
-                "Unrecognized column_name_suffixes directive -- must be a list or a string."
-            )
+            if not isinstance(column_name_suffixes, (Iterable, List)):
+                raise ValueError(
+                    "Unrecognized column_name_suffixes directive -- must be a list or a string."
+                )
 
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(

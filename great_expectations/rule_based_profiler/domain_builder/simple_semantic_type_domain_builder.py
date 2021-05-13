@@ -33,7 +33,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
@@ -43,16 +42,9 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 message=f"{self.__class__.__name__} requires a reference to an instance of the Validator class."
             )
 
-        config: dict = kwargs
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = config.get("semantic_types")
-        if semantic_types is None:
-            semantic_types = self._semantic_types
-        else:
-            semantic_types = _parse_semantic_domain_type_argument(
-                semantic_types=semantic_types
-            )
+        ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
 
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(

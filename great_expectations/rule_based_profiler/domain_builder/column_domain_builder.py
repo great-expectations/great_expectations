@@ -16,10 +16,9 @@ class ColumnDomainBuilder(DomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs,
     ) -> List[Domain]:
         """
-        Obtains and returns a given column.
+        Obtains and returns domains for all columns of a table.
         """
         if validator is None:
             raise ge_exceptions.ProfilerExecutionError(
