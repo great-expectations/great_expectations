@@ -632,6 +632,10 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
         validator_one_batch_request_two_batches.batches.keys()
         == validator_two_batch_requests_two_batches.batches.keys()
     )
+    assert (
+        validator_one_batch_request_two_batches.active_batch_id
+        == validator_two_batch_requests_two_batches.active_batch_id
+    )
 
     with pytest.raises(ValueError) as ve:
         validator: Validator = context.get_validator(
