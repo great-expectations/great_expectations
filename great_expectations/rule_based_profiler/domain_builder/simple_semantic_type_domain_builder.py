@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
+from great_expectations.core.domain_types import SemanticDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
@@ -33,8 +33,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        domain_type: Optional[MetricDomainTypes] = None,
-        **kwargs,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
@@ -44,16 +42,9 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 message=f"{self.__class__.__name__} requires a reference to an instance of the Validator class."
             )
 
-        config: dict = kwargs
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = config.get("semantic_types")
-        if semantic_types is None:
-            semantic_types = self._semantic_types
-        else:
-            semantic_types = _parse_semantic_domain_type_argument(
-                semantic_types=semantic_types
-            )
+        ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
 
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.validator.validator import Validator
 
@@ -17,8 +16,6 @@ class DomainBuilder(ABC):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        domain_type: Optional[MetricDomainTypes] = None,
-        **kwargs
     ) -> List[Domain]:
         """
         :param validator
@@ -29,14 +26,10 @@ class DomainBuilder(ABC):
         Note: In this class, we do not verify that all of these batch_ids are accessible; this should be done elsewhere
         (with an error raised in the appropriate situations).
 
-        :param domain_type
-
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
-        return self._get_domains(
-            validator=validator, batch_ids=batch_ids, domain_type=domain_type, **kwargs
-        )
+        return self._get_domains(validator=validator, batch_ids=batch_ids)
 
     @abstractmethod
     def _get_domains(
@@ -44,8 +37,6 @@ class DomainBuilder(ABC):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        domain_type: Optional[MetricDomainTypes] = None,
-        **kwargs
     ) -> List[Domain]:
         """_get_domains is the primary workhorse for the DomainBuilder"""
         pass
