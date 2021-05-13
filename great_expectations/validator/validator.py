@@ -693,6 +693,8 @@ class Validator:
         for batch in batches:
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
+            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
+            # execution_engine. The final active_batch_id will be that of the final batch loaded.
             self.active_batch_id = batch.id
 
         return batches
