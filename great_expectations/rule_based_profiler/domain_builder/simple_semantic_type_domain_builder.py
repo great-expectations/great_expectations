@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
+from great_expectations.core.domain_types import SemanticDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
@@ -33,7 +33,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        domain_type: Optional[MetricDomainTypes] = None,
         **kwargs,
     ) -> List[Domain]:
         """
