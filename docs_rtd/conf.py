@@ -48,7 +48,6 @@ extensions = [
     # "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
     #"autoapi.extension",
-    "versionwarning.extension",
 
 ]
 
@@ -254,10 +253,6 @@ texinfo_documents = [
     ),
 ]
 
-# versionwarning
-versionwarning_message_placeholder = "latest"
-versionwarning_body_selector = "div.document"
-#versionwarning_banner_title = ""
 
 autodoc_member_order = "bysource"
 
