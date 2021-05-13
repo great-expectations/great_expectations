@@ -195,10 +195,24 @@ class SqlAlchemyBatchData(BatchData):
 
     @property
     def engine_ready_selectable(self):
+        """
+        The "selectable" property is set during the instantiation of "SqlAlchemyBatchData".  However, depending on the
+        specifics of "domain_kwargs" passed to "SqlAlchemyExecutionEngine.get_compute_domain()", the actual "selectable"
+        may need to change before getting passed to the "SqlAlchemy.engine.execute()" commands of the form
+        "engine.execute(sa.select([...]).select_from(engine_ready_selectable).<where,group_by,limit>.fetch<one|all>()".
+        This property must be a separate state variable of "SqlAlchemyBatchData", because the value of "self.selectable"
+        set during the instantiation of "SqlAlchemyBatchData" must not be altered, because its original value is reused.
+        :return: Sqlalchemy Selectable or None
+        """
         return self._engine_ready_selectable
 
     @engine_ready_selectable.setter
     def engine_ready_selectable(self, engine_ready_selectable):
+        """
+        This is the setter method, allowing "SqlAlchemyExecutionEngine.get_compute_domain()", to pass this property (as
+        defined in the property definition for "SqlAlchemyBatchData.engine_ready_selectable") to metric computations.
+        :param engine_ready_selectable: Sqlalchemy Selectable or None
+        """
         self._engine_ready_selectable = engine_ready_selectable
 
     @property
