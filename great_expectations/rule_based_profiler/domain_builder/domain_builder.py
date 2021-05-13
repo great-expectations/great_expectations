@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from great_expectations.core.domain_types import MetricDomainTypes
-from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.validator.validator import Validator
 
 

@@ -4,11 +4,11 @@ from typing import Any, Dict, List, Optional, Union
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain_types import MetricDomainTypes
-from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import (
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.parameter_builder.multi_batch_parameter_builder import (
     MultiBatchParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_NAME,
     ParameterContainer,
     build_parameter_container,

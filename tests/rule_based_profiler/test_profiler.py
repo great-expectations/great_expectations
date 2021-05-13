@@ -11,7 +11,7 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.profiler import Profiler
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 yaml = YAML()

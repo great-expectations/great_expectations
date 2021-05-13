@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
 
 DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"

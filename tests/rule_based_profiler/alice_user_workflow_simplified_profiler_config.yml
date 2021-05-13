@@ -8,7 +8,7 @@ rules:
   my_rule_for_user_ids:
     domain_builder:
       class_name: MyCustomSemanticTypeColumnDomainBuilder
-      module_name: tests.profiler.plugins
+      module_name: tests.rule_based_profiler.plugins
       semantic_types:
        - user_id
     parameter_builders:

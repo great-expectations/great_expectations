@@ -4,41 +4,41 @@ variables:
 rules:
   my_rule_for_user_ids:
     class_name: Rule
-    module_name: great_expectations.profiler.rule.rule
+    module_name: great_expectations.rule_based_profiler.rule.rule
     domain_builder:
       class_name: MyCustomSemanticTypeColumnDomainBuilder
-      module_name: tests.profiler.plugins
+      module_name: tests.rule_based_profiler.plugins
       semantic_types:
         - user_id
     parameter_builders:
       - parameter_name: my_min_user_id
         class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        module_name: great_expectations.rule_based_profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
         min_value: $parameter.my_min_user_id.column.min
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_not_be_null
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
         # TODO: Get the below expectation type to work
   #     - expectation_type: expect_column_values_to_be_of_type
   #       class_name: DefaultExpectationConfigurationBuilder
-  #       module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+  #       module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
   #       column: $domain.domain_kwargs.column
   #       type_: INTEGER
   my_rule_for_timestamps:
     class_name: Rule
-    module_name: great_expectations.profiler.rule.rule
+    module_name: great_expectations.rule_based_profiler.rule.rule
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
-      module_name: great_expectations.profiler.domain_builder
+      module_name: great_expectations.rule_based_profiler.domain_builder
       column_name_suffixes:
         - _ts
       # TODO: This functionality does not yet exist
@@ -53,33 +53,33 @@ rules:
     parameter_builders: # TODO: <Alex>ALEX Anthony, AJB -- we might need to discuss potentially enriching this.</Alex>
       - parameter_name: my_max_event_ts
         class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        module_name: great_expectations.rule_based_profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
       - parameter_name: my_min_event_ts
         class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        module_name: great_expectations.rule_based_profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
 #      - expectation_type: expect_column_values_to_be_of_type
 #        class_name: DefaultExpectationConfigurationBuilder
-#        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+#        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
 #        column: $domain.domain_kwargs.column
         # TODO: This is getting passed as a parameter name for some reason
         # great_expectations.exceptions.exceptions.ProfilerExecutionError: Unable to get value for parameter name "TIMESTAMP" -- parameter names must start with $ (e.g., "$TIMESTAMP").
 #        type_: TIMESTAMP
       - expectation_type: expect_column_values_to_be_increasing
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_be_dateutil_parseable
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
         max_value: $variables.min_timestamp
@@ -93,7 +93,7 @@ rules:
       # TODO: from a specific domain
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
         max_value: $parameter.my_max_event_ts.column.max
@@ -107,7 +107,7 @@ rules:
         # TODO: to confirm that the event_ts contains the latest timestamp of all domains
 #      - expectation_type: expect_column_max_to_be_between
 #        class_name: DefaultExpectationConfigurationBuilder
-#        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+#        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder
 #        column: $domain.domain_kwargs.column
 #        min_value: $variables.min_timestamp
         # TODO: How to reference the event_ts domain?
