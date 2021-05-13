@@ -1696,8 +1696,8 @@ class BaseDataContext:
         if batch_request_list:
             batch_list: List = []
             for batch_request in batch_request_list:
-                batch_list.append(
-                    *self.get_batch_list(
+                batch_list.extend(
+                    self.get_batch_list(
                         datasource_name=datasource_name,
                         data_connector_name=data_connector_name,
                         data_asset_name=data_asset_name,
