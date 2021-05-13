@@ -8,7 +8,6 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.profiler import Profiler
@@ -35,6 +34,15 @@ def multibatch_generic_csv_generator():
             start_date = datetime.datetime(2000, 1, 1)
 
         file_list = []
+        category_strings = {
+            0: "category0",
+            1: "category1",
+            2: "category2",
+            3: "category3",
+            4: "category4",
+            5: "category5",
+            6: "category6",
+        }
         for batch_num in range(num_event_batches):
             # generate a dataframe with multiple column types
             batch_start_date = start_date + datetime.timedelta(
@@ -50,6 +58,9 @@ def multibatch_generic_csv_generator():
                         for i in range(num_events_per_batch)
                     ],
                     "batch_num": [batch_num + 1 for _ in range(num_events_per_batch)],
+                    "string_cardinality_3": [
+                        category_strings[i % 3] for i in range(num_events_per_batch)
+                    ],
                 }
             )
             filename = f"csv_batch_{batch_num + 1:03}_of_{num_event_batches:03}.csv"
@@ -189,6 +200,13 @@ def test_batches_are_accessible(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
     )
     assert metric_max == total_batches
+    metric_value_set = validator_1.get_metric(
+        MetricConfiguration(
+            "column.distinct_values",
+            metric_domain_kwargs={"column": "string_cardinality_3"},
+        )
+    )
+    assert metric_value_set == {"category0", "category1", "category2"}
 
     batch_request_2 = BatchRequest(
         datasource_name="generic_csv_generator",
@@ -206,6 +224,13 @@ def test_batches_are_accessible(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
     )
     assert metric_max == total_batches - 1
+    metric_value_set = validator_2.get_metric(
+        MetricConfiguration(
+            "column.distinct_values",
+            metric_domain_kwargs={"column": "string_cardinality_3"},
+        )
+    )
+    assert metric_value_set == {"category0", "category1", "category2"}
 
     for batch_num in range(1, total_batches + 1):
         batch_request = BatchRequest(
@@ -226,168 +251,10 @@ def test_batches_are_accessible(
             )
         )
         assert metric_max == (total_batches + 1) - batch_num
-
-
-@pytest.fixture(scope="module")
-def simple_multibatch_profiler_configuration_yaml():
-    config = """
-name: BasicSuiteBuilderProfiler
-variables:
-  alert_threshold: 0.01
-rules:
-  datetime:
-    domain_builder:
-      class_name: SimpleSemanticTypeColumnDomainBuilder
-      module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
-      semantic_type_filters: datetime
-    parameter_builders:
-      - name: my_dateformat
-        class_name: SimpleDateFormatStringParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.simple_dateformat_string_parameter_builder
-        domain_kwargs: $domain.domain_kwargs
-    expectation_configuration_builders:
-        - expectation_type: expect_column_values_to_match_strftime_format
-          column: $domain.domain_kwargs.column
-          strftime_format: $parameter.custom_date_formats.my_dateformat
-  numeric:
-    class_name: SemanticTypeColumnDomainBuilder
-    type: numeric
-    parameter_builders:
-      - name: quantile_ranges
-        class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
-        batch_request:
-          partition_request:
-            partition_index: "-10:"
-        metric_configuration:
-          metric_name: column.quantile_values
-          metric_domain_kwargs: $domain.domain_kwargs
-          metric_value_kwargs:
-            quantiles:
-              - 0.05
-              - 0.25
-              - 0.50
-              - 0.75
-              - 0.95
-        p_values:
-          min_value: ($alert_threshold / 2)
-          max_value: 1 - ($alert_threshold / 2)
-    expectation_configuration_builders:
-      - expectation_type: expect_column_quantile_values_to_be_between
-        value_ranges: $quantile_ranges
-"""
-    return config
-
-
-@pytest.fixture(scope="module")
-def very_simple_multibatch_profiler_configuration_yaml():
-    config = """
-name: BasicSuiteBuilderProfiler
-rules:
-  numeric:
-    domain_builder:
-      class_name: SimpleSemanticTypeColumnDomainBuilder
-      module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
-      semantic_type_filters: integer
-    parameter_builders:
-      - name: my_min
-        class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
-        metric_name: column.min
-        metric_domain_kwargs: $domain.domain_kwargs
-      - name: my_max
-        class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
-        metric_name: column.max
-        metric_domain_kwargs: $domain.domain_kwargs
-    expectation_configuration_builders:
-      - expectation_type: expect_column_values_to_be_between
-        module_name: great_expectations.profiler.expectation_configuration_builder.parameter_identification_configuration_builder
-        min_value: $min
-        max_value: $max
-"""
-    return config
-
-
-# TODO: 20210416 AJB - Parametrize these tests, pull fixtures from ?? (public repo e.g. here or quagga?)
-
-
-@pytest.mark.xfail(
-    reason="The Profiler is not yet implemented.",
-    run=True,
-    strict=True,
-)
-def test_profiler_init_manual_very_simple_multibatch_profiler_configuration_yaml(
-    multibatch_generic_csv_generator_context,
-    very_simple_multibatch_profiler_configuration_yaml,
-    multibatch_generic_csv_generator,
-):
-
-    # TODO: 20210416 AJB - THIS IS A HACK - use/create a ProfilerConfig & ProfilerConfigSchema with validation etc. This also strips out "variables" key.
-    full_profiler_config_dict = yaml.load(
-        very_simple_multibatch_profiler_configuration_yaml
-    )
-    rule_configs = full_profiler_config_dict["rules"]
-
-    profiler = Profiler(
-        rule_configs=rule_configs,
-        data_context=multibatch_generic_csv_generator_context,
-    )
-
-    context: DataContext = multibatch_generic_csv_generator_context
-    data_relative_path = "../data"
-    data_path = os.path.join(context.root_directory, data_relative_path)
-    multibatch_generic_csv_generator(data_path=data_path)
-
-    # Test with a single batch
-    batch_1 = context.get_batch(
-        datasource_name="generic_csv_generator",
-        data_connector_name="daily_data_connector",
-        data_asset_name="daily_data_asset",
-        data_connector_query={
-            "index": -1,
-        },
-    )
-    suite = profiler.profile(batch=batch_1)
-
-    # TODO: 20210416 AJB Make these assertions against the expected ExpectationSuite for the config / data
-    assert suite == ExpectationSuite()
-    # assert False
-
-    # TODO: 20210419 AJB test with multiple batches
-
-
-@pytest.mark.xfail(
-    reason="The Profiler is not yet implemented.",
-    run=True,
-    strict=True,
-)
-def test_profiler_init_manual_simple_multibatch_profiler_configuration_yaml(
-    multibatch_generic_csv_generator_context,
-    simple_multibatch_profiler_configuration_yaml,
-    multibatch_generic_csv_generator,
-):
-
-    # TODO: 20210416 AJB - THIS IS A HACK - use/create a ProfilerConfig & ProfilerConfigSchema with validation etc
-    full_profiler_config_dict = yaml.load(simple_multibatch_profiler_configuration_yaml)
-    rule_configs = full_profiler_config_dict["rules"]
-
-    profiler = Profiler(
-        rule_configs=rule_configs,
-        data_context=multibatch_generic_csv_generator_context,
-    )
-    suite = profiler.profile()
-
-    # TODO: 20210416 AJB Make these assertions against the expected ExpectationSuite for the config / data
-    assert suite == ExpectationSuite()
-    assert False
-
-
-@pytest.mark.xfail(
-    reason="The Profiler is not yet implemented.",
-    run=True,
-    strict=True,
-)
-def test_profiler_rule_init_helper(
-    taxicab_context, simple_multibatch_profiler_configuration_yaml
-):
-    assert False
+        metric_value_set = validator.get_metric(
+            MetricConfiguration(
+                "column.distinct_values",
+                metric_domain_kwargs={"column": "string_cardinality_3"},
+            )
+        )
+        assert metric_value_set == {"category0", "category1", "category2"}
