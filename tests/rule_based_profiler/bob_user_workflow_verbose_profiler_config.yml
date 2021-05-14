@@ -30,7 +30,7 @@ rules:
         - _id
         - _type
     parameter_builders:
-      - name: my_value_set_for_ids
+      - parameter_name: my_value_set_for_ids
         # This parameter is the union of all observed batch value_sets
         # MultiBatchParameterBuilder does not aggregate Parameters, it returns a list of value_set for each batch
         class_name: MultiBatchParameterBuilder
@@ -68,7 +68,7 @@ rules:
       column_name_suffixes:
         - _amount
     parameter_builders:
-      - name: my_mean_parameter_for_batches_in_previous_full_year
+      - parameter_name: my_mean_parameter_for_batches_in_previous_full_year
         # Parameter computes the mean of all batches in the previous full year
 
         # Options for where to calculate aggregate (mean of batch means)
@@ -92,7 +92,7 @@ rules:
           # Domain kwargs here refer to the current domain being processed - the list of domains coming from the DomainBuilder (here the list of columns filtered by SimpleColumnSuffixDomainBuilder)
           metric_domain_kwargs: $domain.domain_kwargs
         aggregate_fn: mean # Not necessarily a metric, but some function to apply to all of the batches - can be different from metric_name
-      - name: my_stdev_of_means_parameter_for_batches_in_previous_full_year
+      - parameter_name: my_stdev_of_means_parameter_for_batches_in_previous_full_year
         # Parameter computes the stdev of means of all batches in the previous full year
         class_name: MultiBatchAggregateFunctionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
@@ -148,23 +148,23 @@ rules:
     parameter_builders:
       # Note: my_column_mean and my_column_min are added as parameters but unused in expectation_configuration_builders - this is OK, we should still accept this as a valid Profiler configuration.
       # TODO: Maybe in the future we should warn users if there are unused ParameterBuilders in a Profiler configuration.
-      - name: my_column_mean
+      - parameter_name: my_column_mean
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.mean
         metric_domain_kwargs: $domain.domain_kwargs
-      - name: my_column_min
+      - parameter_name: my_column_min
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-      - name: my_column_max
+      - parameter_name: my_column_max
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
 
-      - name: false_positive_threshold_min
+      - parameter_name: false_positive_threshold_min
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
         # TODO: Not sure I understand the comment here about unioning - why would we want to add the batches from the call to profile? Wouldn't we expect that this parameter is calculated just from the explicitly defined batch_request below? (if this is useful, maybe there are two modes)
@@ -180,7 +180,7 @@ rules:
           min_value: $variables.false_positive_threshold
           max_value: 1.0
 
-      - name: quantile_ranges
+      - parameter_name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
         batch_request:
