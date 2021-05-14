@@ -1,5 +1,5 @@
-from abc import ABC
-from typing import Dict, List, Optional
+from abc import abstractmethod
+from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -10,8 +10,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
 from great_expectations.rule_based_profiler.util import get_batch_ids
 
 
-# TODO: <Alex>ALEX -- If ParameterBuilder already extends ABC, why does this class need to do the same?</Alex>
-class MultiBatchParameterBuilder(ParameterBuilder, ABC):
+class MultiBatchParameterBuilder(ParameterBuilder):
     """
     Defines the abstract MultiBatchParameterBuilder class
 
@@ -46,6 +45,19 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
         self._batch_ids = get_batch_ids(
             data_context=self.data_context, batch_request=self._batch_request
         )
+
+    @abstractmethod
+    def _build_parameters(
+        self,
+        parameter_container: ParameterContainer,
+        domain: Domain,
+        validator: Validator,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        batch_ids: Optional[List[str]] = None,
+    ):
+        pass
 
     @property
     def batch_ids(self) -> List[str]:
