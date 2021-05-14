@@ -21,11 +21,11 @@ rules:
     # Create a value_set based on prior batches (relative to when the profiler is run) and evaluate new batches using this value_set
     # Rationale: I want alerts when new value_set items are added to my dataset
     class_name: Rule
-    module_name: great_expectations.profiler.rule.rule
+    module_name: great_expectations.profiler.rule
     domain_builder:
       # Build list of domains from some categorical column domains: vendor_id, rate_code_id, pickup_location_id, dropoff_location_id, payment_type
       class_name: SimpleColumnSuffixDomainBuilder
-      module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
+      module_name: great_expectations.profiler.domain_builder
       column_name_suffixes:
         - _id
         - _type
@@ -34,7 +34,7 @@ rules:
         # This parameter is the union of all observed batch value_sets
         # MultiBatchParameterBuilder does not aggregate Parameters, it returns a list of value_set for each batch
         class_name: MultiBatchParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.multi_batch_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         metric_domain_kwargs: $domain.domain_kwargs
         # Specify all batches prior to the 6 most recent to be used to create this set of Parameters using the below batch_request
         batch_request:
@@ -60,11 +60,11 @@ rules:
     # This rule creates expect_column_values_to_be_between & expect_column_mean_to_be_between for each of the _amount column domains
     # Rationale: I want alerts when my current data varies from prior data (within some bounds)
     class_name: Rule
-    module_name: great_expectations.profiler.rule.rule
+    module_name: great_expectations.profiler.rule
     domain_builder:
       # Build list of domains from "amount" column domains: fare_amount,tip_amount,tolls_amount,total_amount
       class_name: SimpleColumnSuffixDomainBuilder
-      module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
+      module_name: great_expectations.profiler.domain_builder
       column_name_suffixes:
         - _amount
     parameter_builders:
@@ -78,7 +78,7 @@ rules:
         # 3. High complexity configs: Custom ParameterBuilders / ExpectationConfigurationBuilders can be referenced via plugins
         # TODO: Streaming mean / stdev consider how would that work?
         class_name: MultiBatchAggregateFunctionParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         batch_request:
           # Filter for batches for previous full year
           #  using batch_filter_parameters with `year` as one of the parameters
@@ -95,7 +95,7 @@ rules:
       - parameter_name: my_stdev_of_means_parameter_for_batches_in_previous_full_year
         # Parameter computes the stdev of means of all batches in the previous full year
         class_name: MultiBatchAggregateFunctionParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.multi_batch_metric_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         batch_request:
           data_connector_query:
             batch_filter_parameters:
@@ -107,7 +107,7 @@ rules:
       - parameter_name: my_max_of_congestion_surcharge_outside_of_domain_builder_domains
         # This parameter computes the max of the congestion_surcharge column domain, which is outside of the set of domains collected by this Rule's DomainBuilder
         class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         metric_name: column.max
         metric_domain_kwargs:
           column: congestion_surcharge
@@ -115,14 +115,14 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.profiler.expectation_configuration_builder
         # Note: literals are and will continue to be supported (you do not have to add to "variables" first, unless you want to reference in multiple locations):
         min_value: 0
         max_value: $variables.max_amount
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_mean_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         # Note: proposal to reference here in dot notation by the aggregate_fn name
         min_value: $parameter.my_mean_parameter_for_batches_in_previous_full_year.mean * 0.8
@@ -133,7 +133,7 @@ rules:
         # Note: this would need us to add `mean()` to our GE language parsing these evaluations
       - expectation_type: expect_column_stdev_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.stdev * 0.8
         max_value: $parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.stdev * 1.2
@@ -144,7 +144,7 @@ rules:
       - expectation_type: expect_column_max_to_be_between
         # expect that the column max of any columns collected by the DomainBuilder is greater than the column max of congestion_surcharge
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $parameter.my_max_of_congestion_surcharge_outside_of_domain_builder_domains.max
         max_value: null
@@ -153,11 +153,11 @@ rules:
     # This rule creates several expectations for all numeric column domains. There is some overlap with the my_rule_for_amounts rule
     # Rationale: I want alerts when my current numeric data varies from prior data (within some bounds, based on a confidence level)
     class_name: Rule
-    module_name: great_expectations.profiler.rule.rule
+    module_name: great_expectations.profiler.rule
     domain_builder:
       # Build list of domains from all numeric column domains by checking column storage type using the configured execution engine
       class_name: SimpleSemanticTypeColumnDomainBuilder
-      module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
+      module_name: great_expectations.profiler.domain_builder
       semantic_types:
         - numeric
     parameter_builders:
@@ -165,23 +165,23 @@ rules:
       # TODO: Maybe in the future we should warn users if there are unused ParameterBuilders in a Profiler configuration.
       - parameter_name: my_column_mean
         class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         metric_name: column.mean
         metric_domain_kwargs: $domain.domain_kwargs
       - parameter_name: my_column_min
         class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
       - parameter_name: my_column_max
         class_name: MetricParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
 
       - parameter_name: false_positive_threshold_min
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         # TODO: Not sure I understand the comment here about unioning - why would we want to add the batches from the call to profile? Wouldn't we expect that this parameter is calculated just from the explicitly defined batch_request below? (if this is useful, maybe there are two modes)
         batch_request: # this should be unioned with the rest of the batch request from the call to profile
           partition_request:
@@ -197,7 +197,7 @@ rules:
 
       - parameter_name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
-        module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
+        module_name: great_expectations.profiler.parameter_builder
         batch_request:
           partition_request:
             partition_index: "-10:"
@@ -213,19 +213,19 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $parameter.false_positive_threshold_min.min_value
         max_value: $parameter.false_positive_threshold_min.max_value
       - expectation_type: expect_column_quantile_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         quantiles: $variables.quantiles
         value_ranges: $parameter.quantile_ranges.ranges
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        module_name: great_expectations.profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: 0.9 * $parameter.my_column_max.max
         max_value: 1.1 * $parameter.my_column_max.max
