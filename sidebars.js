@@ -93,8 +93,9 @@ module.exports = {
           type: 'category',
           label: '🔌 Connecting to your data',
           items: [
+
             { type: 'category',
-              label: "Database",
+              label: "🚀 Database",
               items: [
                 'guides/connecting_to_your_data/database/athena',
                 'guides/connecting_to_your_data/database/bigquery',
@@ -126,6 +127,47 @@ module.exports = {
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' },
               ]
             },
+
+              { type: 'category',
+              label: '🍏 Core Skills',
+              items:[
+                  {
+              type: 'category',
+              label: '✳️  How to get a Batch of data from a configured Datasource',
+              items: [ { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
+              },
+
+              {
+                type: 'category',
+                label: '✳️  How to create a Batch of data from a single file or in-memory dataframe',
+                items: [ { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
+              },
+
+              {
+                type: 'category',
+                label: '✳️  How to configure a DataConnector to introspect and partition tables in SQL',
+                items: [ { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
+              },
+              {
+                type: 'category',
+                label: '✳️  How to configure a DataConnector to introspect and partition a file system or blob store',
+                items: [ { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
+              },
+
+              ]
+
+            },
+
+            {
+              type: 'category',
+              label: '🏢 Contributing',
+              items: [ { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
+            },
+            {
+            type: 'category',
+            label: '🔬 Advanced',
+            items: [ { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
+          },
           ]
         },
         {
