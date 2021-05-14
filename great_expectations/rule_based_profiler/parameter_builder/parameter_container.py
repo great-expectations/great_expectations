@@ -101,12 +101,12 @@ class ParameterContainer(SerializableDictDot):
 
 
 def build_parameter_container_for_variables(
-    variable_configs: Dict[str, Any]
+    variables_configs: Dict[str, Any]
 ) -> ParameterContainer:
     """
     Build a ParameterContainer for all of the profiler config variables passed as key value pairs
     Args:
-        variable_configs: Variable key:value pairs e.g. {"variable_name": variable_value, ...}
+        variables_configs: Variable key: value pairs e.g. {"variable_name": variable_value, ...}
 
     Returns:
         ParameterContainer containing all variables
@@ -114,7 +114,7 @@ def build_parameter_container_for_variables(
     variable_config_key: str
     variable_config_value: Any
     parameter_values: Dict[str, Dict[str, Any]] = {}
-    for variable_config_key, variable_config_value in variable_configs.items():
+    for variable_config_key, variable_config_value in variables_configs.items():
         variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
         parameter_values[variable_config_key] = {
             "value": variable_config_value,
