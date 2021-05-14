@@ -46,7 +46,7 @@ module.exports = {
               },
               {
                 label: "0.13.9",
-                to: 'docs/0.9.9/',
+                to: 'docs/',
                 //activeBasePath: 'docs',
               },
               {
