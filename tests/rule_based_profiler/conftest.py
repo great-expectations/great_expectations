@@ -19,6 +19,9 @@ from great_expectations.rule_based_profiler.rule.rule import Rule
 from tests.rule_based_profiler.alice_user_workflow_fixture import (
     alice_columnar_table_single_batch,
 )
+from tests.rule_based_profiler.bob_user_workflow_fixture import (
+    bob_columnar_table_multi_batch,
+)
 
 
 # noinspection PyPep8Naming
