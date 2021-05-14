@@ -16,41 +16,99 @@ module.exports = {
   themeConfig: {
     prism: {
       theme: require('prism-react-renderer/themes/vsDark'),
-      customCss: require.resolve('./src/css/custom.css')
+      customCss: require.resolve('./src/css/custom.css'),
+    },
+    colorMode:{
+      disableSwitch: true,
     },
     announcementBar: {
       id: 'RTD_docs', // Link to RTD Docs
       content:
-        '🔄 Older Documentation for Great Expectations can be found at the Read the Docs site🔄',
+        '🔄 Older Documentation for Great Expectations can be found at the <a href="file:///Users/work/Development/great_expectations/docs_rtd/build/html/index.html">Read the Docs site</a> 🔄',
       backgroundColor: '#32a852', // Defaults to `#fff`.
       textColor: '#091E42', // Defaults to `#000`.
       isCloseable: false, // Defaults to `true`.
     },
     navbar: {
-      title: 'Great Expectations',
+      title: 'great_expectations',
       logo: {
         alt: 'Great Expectations',
         src: 'img/logo.svg'
       },
       items: [
+        // {
+        // // TODO change this to live side by side
+        //   to: 'docs/',
+        //   activeBasePath: 'docs',
+        //   label: 'Docs',
+        //   position: 'left'
+        // },
+        // {
+        //   to: 'docs/0.9.9/',
+        //   activeBasePath: 'docs',
+        //   label: 'Old Docusaurus Docs',
+        //   position: 'left'
+        // },
+        // {
+        //   href: 'https://github.com/great-expectations/great_expectations',
+        //   label: 'GitHub',
+        //   position: 'right'
+        // }
+
         {
-        // TODO change this to live side by side
-          to: 'docs/',
-          activeBasePath: 'docs',
-          label: 'Docs',
-          position: 'left'
+          label: "Documentation",
+          position: 'right',
+          items: [
+              {
+                label: "Documentation (1.0.0)",
+                to: 'docs/',
+                //activeBasePath: 'docs',
+              },
+              {
+                label: "Documentation (0.9.9)",
+                to: 'docs/0.9.9/',
+                //activeBasePath: 'docs',
+              },
+          ]
+        },
+
+        {
+          label: "Case Studies",
+          position: 'right',
+          href: 'https://greatexpectations.io/case-studies'
         },
         {
-          to: 'docs/0.9.9/',
-          activeBasePath: 'docs',
-          label: 'Old Docusaurus Docs',
-          position: 'left'
+          label: "Blog",
+          position: 'right',
+          href: 'https://greatexpectations.io/blog'
         },
+
         {
-          href: 'https://github.com/great-expectations/great_expectations',
-          label: 'GitHub',
-          position: 'right'
-        }
+          label: "Community",
+          position: 'right',
+          items: [
+              {
+                label: "Slack",
+                href: 'https://greatexpectations.io/slack'
+
+              },
+              {
+                label: "Github",
+                href: 'https://github.com/great-expectations/great_expectations'
+
+              },
+              {
+                label: "Discuss",
+                href: 'https://discuss.greatexpectations.io/'
+
+              },
+              {
+                label: "Newsletter",
+                href: 'https://greatexpectations.io/newsletter'
+              },
+          ]
+        },
+
       ]
     },
     footer: {
