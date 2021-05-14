@@ -60,12 +60,12 @@ module.exports = {
           position: 'right',
           items: [
               {
-                label: "1.0.0",
+                label: "0.13.10",
                 to: 'docs/',
                 //activeBasePath: 'docs',
               },
               {
-                label: "0.9.9",
+                label: "0.13.9",
                 to: 'docs/0.9.9/',
                 //activeBasePath: 'docs',
               },
