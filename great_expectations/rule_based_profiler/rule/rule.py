@@ -47,7 +47,7 @@ class Rule:
 
         self._parameters = {}
 
-    def evaluate(
+    def generate(
         self, validator: Validator, batch_ids: Optional[List[str]] = None
     ) -> List[ExpectationConfiguration]:
         """

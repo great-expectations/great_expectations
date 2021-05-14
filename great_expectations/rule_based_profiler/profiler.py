@@ -28,9 +28,8 @@ class Profiler:
     def __init__(
         self,
         *,
-        rules: Optional[Dict[str, Rule]] = None,
-        variable_configs: Optional[Dict[str, Dict]] = None,
-        rule_configs: Optional[Dict[str, Dict]] = None,
+        variables_configs: Optional[Dict[str, Dict]] = None,
+        rules_configs: Optional[Dict[str, Dict]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -40,84 +39,74 @@ class Profiler:
         These will be used to define profiler computation patterns.
 
         Args:
-            rules: A rule or set of rules of format {"rule_name": Rule object}
-            variable_configs: Variables from a profiler configuration
-            rule_configs: An alternative to rules, providing a rule configuration as a dictionary instead of a Rule
+            variables_configs: Variables from a profiler configuration
+            rules_configs: Rule configuration as a dictionary
             data_context: An organizational DataContext object that defines a full runtime environment (data access, etc.)
         """
         self._data_context = data_context
-        # TODO: <Alex>ALEX -- We should combine rules and rule_configs into one Union typed variable; then this check will become unnecessary.</Alex>
-        assert (
-            sum([bool(x) for x in (rules, rule_configs)]) == 1
-        ), "Exactly one of rules or rule_configs must be provided"
 
-        if rules is None:
-            self._rules = []
-            for rule_name, rule_config in rule_configs.items():
-                domain_builder_config = rule_config.get("domain_builder")
-                if domain_builder_config is None:
-                    raise ge_exceptions.ProfilerConfigurationError(
-                        message=f'Invalid rule "{rule_name}": no domain_builder found.'
-                    )
-                domain_builder: DomainBuilder = instantiate_class_from_config(
-                    domain_builder_config,
-                    runtime_environment={},
-                    config_defaults={
-                        "module_name": "great_expectations.rule_based_profiler.domain_builder"
-                    },
+        self._rules = []
+        for rule_name, rule_config in rules_configs.items():
+            domain_builder_config = rule_config.get("domain_builder")
+            if domain_builder_config is None:
+                raise ge_exceptions.ProfilerConfigurationError(
+                    message=f'Invalid rule "{rule_name}": no domain_builder found.'
                 )
+            domain_builder: DomainBuilder = instantiate_class_from_config(
+                domain_builder_config,
+                runtime_environment={},
+                config_defaults={
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder"
+                },
+            )
 
-                parameter_builders: List[ParameterBuilder] = []
-                parameter_builder_configs = rule_config.get("parameter_builders")
-                if parameter_builder_configs:
-                    for parameter_builder_config in parameter_builder_configs:
-                        parameter_builders.append(
-                            instantiate_class_from_config(
-                                parameter_builder_config,
-                                runtime_environment={"data_context": data_context},
-                                config_defaults={
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder"
-                                },
-                            )
-                        )
-
-                expectation_configuration_builders: List[
-                    ExpectationConfigurationBuilder
-                ] = []
-                configuration_builder_configs = rule_config.get(
-                    "expectation_configuration_builders"
-                )
-                for configuration_builder_config in configuration_builder_configs:
-                    expectation_configuration_builders.append(
+            parameter_builders: List[ParameterBuilder] = []
+            parameter_builder_configs = rule_config.get("parameter_builders")
+            if parameter_builder_configs:
+                for parameter_builder_config in parameter_builder_configs:
+                    parameter_builders.append(
                         instantiate_class_from_config(
-                            configuration_builder_config,
+                            parameter_builder_config,
                             runtime_environment={"data_context": data_context},
                             config_defaults={
-                                "class_name": "DefaultExpectationConfigurationBuilder",
-                                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                                "module_name": "great_expectations.rule_based_profiler.parameter_builder"
                             },
                         )
                     )
 
-                variables: Optional[ParameterContainer] = None
-                if variable_configs:
-                    variables = build_parameter_container_for_variables(
-                        variable_configs=variable_configs
-                    )
-
-                self._rules.append(
-                    Rule(
-                        name=rule_name,
-                        domain_builder=domain_builder,
-                        parameter_builders=parameter_builders,
-                        expectation_configuration_builders=expectation_configuration_builders,
-                        variables=variables,
+            expectation_configuration_builders: List[
+                ExpectationConfigurationBuilder
+            ] = []
+            configuration_builder_configs = rule_config.get(
+                "expectation_configuration_builders"
+            )
+            for configuration_builder_config in configuration_builder_configs:
+                expectation_configuration_builders.append(
+                    instantiate_class_from_config(
+                        configuration_builder_config,
+                        runtime_environment={"data_context": data_context},
+                        config_defaults={
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        },
                     )
                 )
 
-    @property
-    def data_context(self):
-        return self._data_context
+            variables: Optional[ParameterContainer] = None
+            if variables_configs:
+                variables = build_parameter_container_for_variables(
+                    variables_configs=variables_configs
+                )
+
+            self._rules.append(
+                Rule(
+                    name=rule_name,
+                    domain_builder=domain_builder,
+                    parameter_builders=parameter_builders,
+                    expectation_configuration_builders=expectation_configuration_builders,
+                    variables=variables,
+                )
+            )
 
     def profile(
         self,
@@ -195,8 +184,12 @@ class Profiler:
             )
         suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         for rule in self._rules:
-            expectation_configurations = rule.evaluate(validator, batch_ids)
+            expectation_configurations = rule.generate(validator, batch_ids)
             for expectation_configuration in expectation_configurations:
                 suite.add_expectation(expectation_configuration)
 
         return suite
+
+    @property
+    def data_context(self):
+        return self._data_context

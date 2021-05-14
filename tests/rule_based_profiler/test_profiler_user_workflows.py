@@ -157,11 +157,11 @@ def test_alice_profiler_user_workflow_single_batch(
 
         # Instantiate Profiler
         full_profiler_config_dict = yaml.load(profiler_config)
-        rule_configs = full_profiler_config_dict.get("rules")
-        variable_configs = full_profiler_config_dict.get("variables")
+        rules_configs = full_profiler_config_dict.get("rules")
+        variables_configs = full_profiler_config_dict.get("variables")
         profiler = Profiler(
-            rule_configs=rule_configs,
-            variable_configs=variable_configs,
+            rules_configs=rules_configs,
+            variables_configs=variables_configs,
             data_context=data_context,
         )
 
