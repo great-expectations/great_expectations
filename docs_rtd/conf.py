@@ -48,7 +48,6 @@ extensions = [
     # "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
     "autoapi.extension",
-
 ]
 
 autoapi_type = "python"
