@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [DOCS] Remove broken links
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [MAINTENANCE] Improve robustness of integration test_runner
