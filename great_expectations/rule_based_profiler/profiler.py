@@ -108,10 +108,6 @@ class Profiler:
                 )
             )
 
-    @property
-    def data_context(self):
-        return self._data_context
-
     def profile(
         self,
         *,
@@ -193,3 +189,7 @@ class Profiler:
                 suite.add_expectation(expectation_configuration)
 
         return suite
+
+    @property
+    def data_context(self):
+        return self._data_context
