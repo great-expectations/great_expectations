@@ -104,6 +104,14 @@ rules:
           metric_name: column.mean # per batch metric
           metric_domain_kwargs: $domain.domain_kwargs
         aggregate_fn: stdev # note different than metric computed in metric_configuration
+      - parameter_name: my_max_of_congestion_surcharge_outside_of_domain_builder_domains
+        # This parameter computes the max of the congestion_surcharge column domain, which is outside of the set of domains collected by this Rule's DomainBuilder
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.max
+        metric_domain_kwargs:
+          column: congestion_surcharge
+
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
@@ -133,6 +141,13 @@ rules:
         # min_value: stdev($parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.means) * 0.8
         # max_value: stdev($parameter.my_stdev_of_means_parameter_for_batches_in_previous_full_year.means) * 1.2
         # Note: this would need us to add `stdev()` to our GE language parsing these evaluations
+      - expectation_type: expect_column_max_to_be_between
+        # expect that the column max of any columns collected by the DomainBuilder is greater than the column max of congestion_surcharge
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        min_value: $parameter.my_max_of_congestion_surcharge_outside_of_domain_builder_domains.max
+        max_value: null
 
   my_rule_for_numeric_data:
     # This rule creates several expectations for all numeric column domains. There is some overlap with the my_rule_for_amounts rule
