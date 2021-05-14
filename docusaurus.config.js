@@ -16,7 +16,6 @@ module.exports = {
   themeConfig: {
     prism: {
       theme: require('prism-react-renderer/themes/vsDark'),
-      customCss: require.resolve('./src/css/custom.css'),
     },
     colorMode:{
       disableSwitch: true,
