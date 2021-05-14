@@ -21,14 +21,14 @@ module.exports = {
     colorMode:{
       disableSwitch: true,
     },
-    announcementBar: {
-      id: 'RTD_docs', // Link to RTD Docs
-      content:
-        '🔄 Older Documentation for Great Expectations can be found at the <a href="file:///Users/work/Development/great_expectations/docs_rtd/build/html/index.html">Read the Docs site</a> 🔄',
-      backgroundColor: '#32a852', // Defaults to `#fff`.
-      textColor: '#091E42', // Defaults to `#000`.
-      isCloseable: false, // Defaults to `true`.
-    },
+    // announcementBar: {
+    //   id: 'RTD_docs', // Link to RTD Docs
+    //   content:
+    //     '🔄 Older Documentation for Great Expectations can be found at the <a href="file:///Users/work/Development/great_expectations/docs_rtd/build/html/index.html">Read the Docs site</a> 🔄',
+    //   backgroundColor: '#32a852', // Defaults to `#fff`.
+    //   textColor: '#091E42', // Defaults to `#000`.
+    //   isCloseable: false, // Defaults to `true`.
+    // },
     navbar: {
       title: 'great_expectations',
       logo: {
@@ -60,13 +60,18 @@ module.exports = {
           position: 'right',
           items: [
               {
-                label: "Documentation (1.0.0)",
+                label: "1.0.0",
                 to: 'docs/',
                 //activeBasePath: 'docs',
               },
               {
-                label: "Documentation (0.9.9)",
+                label: "0.9.9",
                 to: 'docs/0.9.9/',
+                //activeBasePath: 'docs',
+              },
+              {
+                label: "0.13.8",
+                href: 'https://docs.greatexpectations.io/en/0.13.8/',
                 //activeBasePath: 'docs',
               },
           ]
