@@ -1,12 +1,11 @@
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch
 from integration.code.connecting_to_your_data.database.util import (
     load_data_into_database,
 )
 
-CONNECTION_STRING = """postgresql+psycopg2://postgres:@localhost/test_ci"""
+CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 load_data_into_database(
     "taxi_data",
     "./data/reports/yellow_tripdata_sample_2019-01.csv",
@@ -15,13 +14,12 @@ load_data_into_database(
 
 context = ge.get_context()
 
-# with a connection_string
 config = """
 name: my_postgres_datasource
 class_name: Datasource
 execution_engine:
   class_name: SqlAlchemyExecutionEngine
-  connection_string: <YOUR_CONNECTION_STRING_HERE>
+  connection_string: postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 data_connectors:
    default_runtime_data_connector_name:
        class_name: RuntimeDataConnector
@@ -31,7 +29,7 @@ data_connectors:
        class_name: InferredAssetSqlDataConnector
        name: whole_table
 """
-config = config.replace("<YOUR_CONNECTION_STRING_HERE>", CONNECTION_STRING)
+config = config.replace("postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>", CONNECTION_STRING)
 
 context.add_datasource(**yaml.load(config))
 
@@ -39,7 +37,7 @@ context.add_datasource(**yaml.load(config))
 batch_request = ge.core.batch.RuntimeBatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="default_name",  # this can be anything that identifies this data_asset for you
+    data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "something_something"},
 )

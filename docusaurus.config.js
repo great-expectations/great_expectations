@@ -15,10 +15,10 @@ module.exports = {
   projectName: 'great_expectations',
   themeConfig: {
     prism: {
-      theme: require('prism-react-renderer/themes/vsDark'),
+      theme: require('prism-react-renderer/themes/vsDark')
     },
-    colorMode:{
-      disableSwitch: true,
+    colorMode: {
+      disableSwitch: true
     },
     // announcementBar: {
     //   id: 'RTD_docs', // Link to RTD Docs
@@ -36,63 +36,63 @@ module.exports = {
       },
       items: [
         {
-          label: "Documentation",
+          label: 'Documentation',
           position: 'right',
           items: [
-              {
-                label: "0.13.10",
-                to: 'docs/',
-                //activeBasePath: 'docs',
-              },
-              {
-                label: "0.13.9",
-                to: 'docs/',
-                //activeBasePath: 'docs',
-              },
-              {
-                label: "0.13.8",
-                href: 'https://docs.greatexpectations.io/en/0.13.8/',
-                //activeBasePath: 'docs',
-              },
+            {
+              label: '0.13.10',
+              to: 'docs/'
+              // activeBasePath: 'docs',
+            },
+            {
+              label: '0.13.9',
+              to: 'docs/'
+              // activeBasePath: 'docs',
+            },
+            {
+              label: '0.13.8',
+              href: 'https://docs.greatexpectations.io/en/0.13.8/'
+              // activeBasePath: 'docs',
+            }
           ]
         },
 
         {
-          label: "Case Studies",
+          label: 'Case Studies',
           position: 'right',
           href: 'https://greatexpectations.io/case-studies'
         },
         {
-          label: "Blog",
+          label: 'Blog',
           position: 'right',
           href: 'https://greatexpectations.io/blog'
         },
 
         {
-          label: "Community",
+          label: 'Community',
           position: 'right',
           items: [
-              {
-                label: "Slack",
-                href: 'https://greatexpectations.io/slack'
+            {
+              label: 'Slack',
+              href: 'https://greatexpectations.io/slack'
 
-              },
-              {
-                label: "Github",
-                href: 'https://github.com/great-expectations/great_expectations'
+            },
+            {
+              label: 'Github',
+              href: 'https://github.com/great-expectations/great_expectations'
 
-              },
-              {
-                label: "Discuss",
-                href: 'https://discuss.greatexpectations.io/'
+            },
+            {
+              label: 'Discuss',
+              href: 'https://discuss.greatexpectations.io/'
 
-              },
-              {
-                label: "Newsletter",
-                href: 'https://greatexpectations.io/newsletter'
-              },
+            },
+            {
+              label: 'Newsletter',
+              href: 'https://greatexpectations.io/newsletter'
+            }
           ]
-        },
+        }
 
       ]
     },
@@ -128,7 +128,7 @@ module.exports = {
               href: 'https://www.youtube.com/c/GreatExpectationsData'
             }
           ]
-        },
+        }
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Superconductive.`
     }
@@ -151,19 +151,19 @@ module.exports = {
         lastVersion: 'current',
         versions: {
 
-          //Example configuration:
-          //<WILL> may have to be fixed
+          // Example configuration:
+          // <WILL> may have to be fixed
           current: {
             label: 'docs',
-            path: 'docs',
+            path: 'docs'
           },
           '0.13.9': {
             label: '0.13.9-docs',
-            path: '0.13.9',
-          },
-        },
+            path: '0.13.9'
+          }
+        }
       }
     ]
-  ],
+  ]
 
 }
