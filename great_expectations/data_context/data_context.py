@@ -1235,9 +1235,15 @@ class BaseDataContext:
             **kwargs,
         )
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        warnings.warn(
+            "get_batch will be deprecated for the V3 Batch Request API in a future version of GE. Please use"
+            "get_batch_list instead.",
+            DeprecationWarning,
+        )
         if len(batch_list) != 1:
             raise ValueError(
-                f"Got {len(batch_list)} batches instead of a single batch."
+                f"Got {len(batch_list)} batches instead of a single batch. If you would like to use a BatchRequest to "
+                f"return multiple batches, please use get_batch_list directly instead of calling get_batch"
             )
         return batch_list[0]
 
@@ -1675,33 +1681,31 @@ class BaseDataContext:
                 expectation_suite_name=create_expectation_suite_with_name
             )
 
-        batch: Batch = cast(
-            Batch,
-            self.get_batch(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_request=batch_request,
-                batch_data=batch_data,
-                data_connector_query=data_connector_query,
-                batch_identifiers=batch_identifiers,
-                limit=limit,
-                index=index,
-                custom_filter_function=custom_filter_function,
-                batch_spec_passthrough=batch_spec_passthrough,
-                sampling_method=sampling_method,
-                sampling_kwargs=sampling_kwargs,
-                splitter_method=splitter_method,
-                splitter_kwargs=splitter_kwargs,
-                runtime_parameters=runtime_parameters,
-                query=query,
-                path=path,
-                batch_filter_parameters=batch_filter_parameters,
-                **kwargs,
-            ),
+        batch_list: List[Batch] = self.get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            **kwargs,
         )
-
-        batch_definition = batch.batch_definition
+        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
+        # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
+        batch_definition = batch_list[-1].batch_definition
         execution_engine = self.datasources[
             batch_definition.datasource_name
         ].execution_engine
@@ -1711,7 +1715,7 @@ class BaseDataContext:
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
             data_context=self,
-            batches=[batch],
+            batches=batch_list,
         )
 
         return validator
