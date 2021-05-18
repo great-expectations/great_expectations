@@ -41,7 +41,7 @@ def docs():
     default=False,
 )
 def docs_build(directory, site_name, view=True, assume_yes=False):
-    """ Build Data Docs for a project."""
+    """Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
     toolkit.send_usage_message(

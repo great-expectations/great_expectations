@@ -54,7 +54,7 @@ class ExpectationSuiteIdentifierSchema(Schema):
 
 
 class BatchIdentifier(DataContextKey):
-    """A BatchIdentifier tracks """
+    """A BatchIdentifier tracks"""
 
     def __init__(
         self,

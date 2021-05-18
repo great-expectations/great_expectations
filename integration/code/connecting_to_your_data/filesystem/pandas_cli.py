@@ -1,5 +1,9 @@
 import great_expectations as ge
-from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists
+from great_expectations.cli.datasource import (
+    check_if_datasource_name_exists,
+    sanitize_yaml_and_save_datasource,
+)
+
 context = ge.get_context()
 
 # this comes as a default setting
@@ -43,4 +47,3 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
-
