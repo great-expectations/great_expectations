@@ -40,6 +40,16 @@ def alice_columnar_table_single_batch():
     my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
+                "expectation_type": "expect_column_values_to_be_of_type",
+                "kwargs": {
+                    "column": "user_id",
+                    "type_": "INTEGER",
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
                 "expectation_type": "expect_column_values_to_be_between",
                 "kwargs": {
                     "min_value": 397433,  # From the data
@@ -58,17 +68,6 @@ def alice_columnar_table_single_batch():
                 "meta": {},
             }
         ),
-        # TODO: Enable this ExpectationConfiguration
-        # ExpectationConfiguration(
-        #     **{
-        #         "expectation_type": "expect_column_values_to_be_of_type",
-        #         "kwargs": {
-        #             "column": "user_id",
-        #             "type_": "INTEGER",
-        #         },
-        #         "meta": {},
-        #     }
-        # ),
     ]
 
     my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
@@ -92,16 +91,16 @@ def alice_columnar_table_single_batch():
     for column_data in my_rule_for_timestamps_column_data:
         my_rule_for_timestamps_expectation_configurations.extend(
             [
-                # ExpectationConfiguration(
-                #     **{
-                #         "expectation_type": "expect_column_values_to_be_of_type",
-                #         "kwargs": {
-                #             "column": my_rule_for_timestamps_column_name,
-                #             "type_": "TIMESTAMP",
-                #         },
-                #         "meta": {},
-                #     }
-                # ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_of_type",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "type_": "TIMESTAMP",
+                        },
+                        "meta": {},
+                    }
+                ),
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_increasing",
