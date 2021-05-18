@@ -1,6 +1,7 @@
 import logging
 import warnings
 from typing import Union
+from uuid import UUID
 
 from dateutil.parser import parse
 
@@ -279,8 +280,10 @@ class SiteSectionIdentifier(DataContextKey):
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_key: str):
+    def __init__(self, configuration_key: Union[str, UUID]):
         super().__init__()
+        if isinstance(configuration_key, UUID):
+            configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
             raise InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
