@@ -1687,12 +1687,12 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
+        ge_cloud_id: Optional[str] = None,
         # the following fous args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -1712,12 +1712,12 @@ class CheckpointConfig(BaseYamlConfig):
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
+            self._ge_cloud_id = ge_cloud_id
             # the following attributes are used by SimpleCheckpoint
             self._site_names = site_names
             self._slack_webhook = slack_webhook
             self._notify_on = notify_on
             self._notify_with = notify_with
-            self._ge_cloud_id = ge_cloud_id
 
         self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name
@@ -1834,6 +1834,10 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def ge_cloud_id(self):
         return self._ge_cloud_id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value: str):
+        self._ge_cloud_id = value
 
     @property
     def name(self):
