@@ -11,7 +11,7 @@ import requests
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import filter_properties_dict, pluralize, singularize
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +20,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def __init__(
         self,
         ge_cloud_base_url,
-        ge_cloud_resource_name,
-        ge_cloud_resource_type,
         ge_cloud_credentials,
+        ge_cloud_resource_type=None,
+        ge_cloud_resource_name=None,
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         store_name=None,
@@ -33,9 +33,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
+        assert ge_cloud_resource_type or ge_cloud_resource_name, "Must provide either ge_cloud_resource_type or " \
+                                                                 "ge_cloud_resource_name"
         self._ge_cloud_base_url = ge_cloud_base_url
-        self._ge_cloud_resource_name = ge_cloud_resource_name
-        self._ge_cloud_resource_type = ge_cloud_resource_type
+        self._ge_cloud_resource_name = ge_cloud_resource_name or pluralize(ge_cloud_resource_type)
+        self._ge_cloud_resource_type = ge_cloud_resource_type or singularize(ge_cloud_resource_name)
         self._ge_cloud_credentials = ge_cloud_credentials
 
         # Initialize with store_backend_id if not part of an HTMLSiteStore
