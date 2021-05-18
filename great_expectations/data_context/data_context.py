@@ -2945,7 +2945,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             configuration_key=name,
         )
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
-        self.checkpoint_store.set(key=key, value=checkpoint_config)
+        checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
+        if self.checkpoint_store.store_backend.__class__.__name__ == "GeCloudStoreBackend":
+            ge_cloud_id = checkpoint_ref.split("/")[-1]
+            new_checkpoint.config.ge_cloud_id = uuid.UUID(ge_cloud_id)
         return new_checkpoint
 
     def get_checkpoint(self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None) -> Union[Checkpoint,
