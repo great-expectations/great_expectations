@@ -87,8 +87,7 @@ rules:
             format: markdown
             content:
               - "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-      # TODO: This expectation should be replaced with the expectation below that references a parameter
-      # TODO: from a specific domain
+      # TODO: This expectation should be replaced with the expectation below that references a parameter from a specific domain
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
@@ -107,11 +106,10 @@ rules:
 #        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
 #        column: $domain.domain_kwargs.column
 #        min_value: $variables.min_timestamp
-        # TODO: How to reference the event_ts domain?
+        # TODO: How to reference the event_ts domain?<Alex>ALEX -- Anthony: ParameterBuilder has access to domain name; hence, fully_qualified_parameter_name can contain column_name (from domain_kwargs).  Would this work?</Alex>
 #        max_value: $parameter.my_max_event_ts.parameter[0].column.max
 #        or
 #        max_value: $parameter.my_max_event_ts.event_ts.column.max
-        # TODO: These additional kwargs are not being handled correctly
 #        meta:
 #         notes:
 #           format: markdown
