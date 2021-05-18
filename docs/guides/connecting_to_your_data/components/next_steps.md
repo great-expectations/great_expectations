@@ -1,3 +1,3 @@
-- With your `Validator`, you can now directly run expectations on your data. Learn about what makes validators special by reading the [Understanding Validators](../../../reference/understanding_validators) article.
-- Learn more about `BatchRequest`s by reading the article on [Understanding BatchRequests](/docs/reference/understanding_batch_requests.md)
+- With your `Validator`, you can now directly run expectations on your data. Learn about what makes validators special by reading the [Understanding Validators](/docs/reference/understanding_validators) article.
+- Learn more about `BatchRequest`s by reading the article on [Understanding BatchRequests](/docs/reference/understanding_batch_requests)
 - Learn more about configuring `Datasources` by reading the [More about configuring Datasources](/docs/reference/more_about_configuring_datasources) article.
