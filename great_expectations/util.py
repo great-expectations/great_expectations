@@ -1,6 +1,8 @@
 import copy
 import cProfile
 import importlib
+import inflect
+import inflection
 import io
 import json
 import logging
@@ -45,6 +47,13 @@ except ModuleNotFoundError:
 
 
 logger = logging.getLogger(__name__)
+
+
+pluralize = inflect.engine().plural
+
+singularize = inflect.engine().singular_noun
+
+underscore = inflection.underscore
 
 
 def profile(func: Callable = None) -> Callable:
