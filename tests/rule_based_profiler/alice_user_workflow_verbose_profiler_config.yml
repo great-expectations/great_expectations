@@ -1,4 +1,6 @@
 variables:
+  integer_type: INTEGER
+  timestamp_type: TIMESTAMP
   max_user_id: 999999999999
   min_timestamp: 2004-10-19 10:23:54
 rules:
@@ -17,6 +19,11 @@ rules:
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
+      - expectation_type: expect_column_values_to_be_of_type
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        type_: $variables.integer_type
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
@@ -27,12 +34,6 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        # TODO: Get the below expectation type to work
-  #     - expectation_type: expect_column_values_to_be_of_type
-  #       class_name: DefaultExpectationConfigurationBuilder
-  #       module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-  #       column: $domain.domain_kwargs.column
-  #       type_: INTEGER
   my_rule_for_timestamps:
     class_name: Rule
     module_name: great_expectations.rule_based_profiler.rule
@@ -62,13 +63,11 @@ rules:
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
-#      - expectation_type: expect_column_values_to_be_of_type
-#        class_name: DefaultExpectationConfigurationBuilder
-#        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-#        column: $domain.domain_kwargs.column
-        # TODO: This is getting passed as a parameter name for some reason
-        # great_expectations.exceptions.exceptions.ProfilerExecutionError: Unable to get value for parameter name "TIMESTAMP" -- parameter names must start with $ (e.g., "$TIMESTAMP").
-#        type_: TIMESTAMP
+      - expectation_type: expect_column_values_to_be_of_type
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        type_: $variables.timestamp_type
       - expectation_type: expect_column_values_to_be_increasing
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder

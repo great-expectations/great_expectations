@@ -14,7 +14,6 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
-# TODO: <Alex>ALEX -- this class is not used anywhere in the codebase.</Alex>
 class MetricParameterBuilder(ParameterBuilder):
     """Class utilized for obtaining a resolved (evaluated) metric (which is labeled a 'parameter') using domain kwargs, value
     kwargs, and a metric name"""
