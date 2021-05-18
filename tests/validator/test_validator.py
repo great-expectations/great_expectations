@@ -1,4 +1,3 @@
-import datetime
 from typing import Any, Dict, List, Set, Union
 
 import pandas as pd
@@ -6,7 +5,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core import ExpectationSuite, IDDict
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -19,7 +18,6 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.datasource import BaseDatasource, Datasource, LegacyDatasource
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -593,7 +591,7 @@ def test_validator_set_active_batch(multi_batch_taxi_validator):
     ).success
 
 
-def test_validator_load_batch_from_batch_request(yellow_trip_pandas_data_context):
+def test_validator_load_additional_batch_to_validator(yellow_trip_pandas_data_context):
     context: DataContext = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
@@ -625,12 +623,8 @@ def test_validator_load_batch_from_batch_request(yellow_trip_pandas_data_context
         data_connector_query={"batch_filter_parameters": {"month": "02"}},
     )
 
-    datasource: Union[LegacyDatasource, BaseDatasource] = context.datasources[
-        feb_batch_request.datasource_name
-    ]
-    validator.load_batch_from_batch_request(
-        datasource=datasource, batch_request=feb_batch_request
-    )
+    new_batch = context.get_batch_list(batch_request=feb_batch_request)
+    validator.load_batch(new_batch)
 
     updated_batch_markers: BatchMarkers = validator.active_batch_markers
     assert (

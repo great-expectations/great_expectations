@@ -29,7 +29,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
-from great_expectations.datasource import DataConnector
+from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -687,17 +687,15 @@ class Validator:
         """Getter for config value"""
         return self._validator_config.get(key)
 
-    def load_batch_from_batch_request(self, datasource, batch_request):
-        batches = datasource.get_batch_list_from_batch_request(batch_request)
-
-        for batch in batches:
+    def load_batch(self, batch_list: List[Batch]):
+        for batch in batch_list:
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
             # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
             # execution_engine. The final active_batch_id will be that of the final batch loaded.
             self.active_batch_id = batch.id
 
-        return batches
+        return batch_list
 
     @property
     def batches(self):
