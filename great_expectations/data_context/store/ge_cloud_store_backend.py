@@ -63,7 +63,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_url = self.get_url_for_key(key=key)
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": f"Bearer {self.ge_cloud_credentials['access_token']}",
+            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
         }
         response = requests.get(ge_cloud_url, headers=headers)
         return response.json()
@@ -76,7 +76,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "data": {
                 "type": self.ge_cloud_resource_type,
                 "attributes": {
-                    "created_by_id": self.ge_cloud_credentials["user_id"],
                     "account_id": self.ge_cloud_credentials["account_id"],
                     "checkpoint_config": value.to_json_dict(),
                 },
@@ -85,7 +84,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": f"Bearer {self.ge_cloud_credentials['access_token']}",
+            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
         }
         url = urljoin(
             self.ge_cloud_base_url,
