@@ -128,7 +128,9 @@ class Store:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             if value:
-                value = self.ge_cloud_response_json_dict_to_object_json_str(response_json_dict=value)
+                value = self.ge_cloud_response_json_dict_to_object_json_str(
+                    response_json_dict=value
+                )
         else:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
@@ -144,9 +146,7 @@ class Store:
         elif self.store_backend.__class__.__name__ == "GeCloudStoreBackend":
             # skip serialization
             self._validate_key(key)
-            return self._store_backend.set(
-                self.key_to_tuple(key), value
-            )
+            return self._store_backend.set(self.key_to_tuple(key), value)
         else:
             self._validate_key(key)
             return self._store_backend.set(

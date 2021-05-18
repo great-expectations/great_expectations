@@ -921,9 +921,7 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
-    ge_cloud = fields.Dict(
-        keys=fields.Str(), allow_none=True, required=False
-    )
+    ge_cloud = fields.Dict(keys=fields.Str(), allow_none=True, required=False)
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
@@ -1490,7 +1488,7 @@ class DataContextConfig(BaseYamlConfig):
         anonymous_usage_statistics=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud: Optional[Dict] = None
+        ge_cloud: Optional[Dict] = None,
     ):
         # Set defaults
         if config_version is None:

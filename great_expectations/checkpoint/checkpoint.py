@@ -65,7 +65,7 @@ class Checkpoint:
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None
+        ge_cloud_id: Optional[UUID] = None,
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
@@ -680,7 +680,7 @@ class SimpleCheckpoint(Checkpoint):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id
+            ge_cloud_id=ge_cloud_id,
         ).build()
 
         super().__init__(
@@ -698,7 +698,7 @@ class SimpleCheckpoint(Checkpoint):
             runtime_configuration=checkpoint_config.runtime_configuration,
             validations=checkpoint_config.validations,
             profilers=checkpoint_config.profilers,
-            ge_cloud_id=checkpoint_config.ge_cloud_id
+            ge_cloud_id=checkpoint_config.ge_cloud_id,
         )
 
     def run(

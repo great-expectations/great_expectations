@@ -24,7 +24,9 @@ class CheckpointStore(ConfigurationStore):
         deserialization into a GE object
         """
         ge_cloud_checkpoint_id = response_json_dict["data"]["id"]
-        checkpoint_config_json = response_json_dict["data"]["attributes"]["checkpoint_config"]
+        checkpoint_config_json = response_json_dict["data"]["attributes"][
+            "checkpoint_config"
+        ]
         checkpoint_config_json["ge_cloud_id"] = ge_cloud_checkpoint_id
 
         return json.dumps(checkpoint_config_json)
