@@ -84,7 +84,7 @@ class Profiler:
                 expectation_configuration_builders.append(
                     instantiate_class_from_config(
                         configuration_builder_config,
-                        runtime_environment={"data_context": data_context},
+                        runtime_environment={},
                         config_defaults={
                             "class_name": "DefaultExpectationConfigurationBuilder",
                             "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
