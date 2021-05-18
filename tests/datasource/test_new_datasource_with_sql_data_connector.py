@@ -99,6 +99,12 @@ data_connectors:
                 #     "n_rows": 24,
                 # },
             },
+            'test_runtime_data_connector': {'class_name': 'RuntimeDataConnector',
+                                            'data_asset_count': 0,
+                                            'data_assets': {},
+                                            'example_data_asset_names': [],
+                                            'example_unmatched_data_references': [],
+                                            'unmatched_data_reference_count': 0},
         },
     }
 
@@ -171,6 +177,12 @@ data_connectors:
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
             },
+            'test_runtime_data_connector': {'class_name': 'RuntimeDataConnector',
+                                            'data_asset_count': 0,
+                                            'data_assets': {},
+                                            'example_data_asset_names': [],
+                                            'example_unmatched_data_references': [],
+                                            'unmatched_data_reference_count': 0},
         },
     }
 

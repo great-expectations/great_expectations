@@ -1,6 +1,7 @@
 import copy
 import logging
 from typing import Any, Dict, List, Optional, Union
+from collections import OrderedDict
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -55,7 +56,10 @@ class BaseDatasource:
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
 
+        # default data_connector is a runtime_data_connector
         self._data_connectors = {}
+        self._build_default_data_connector()
+        #self._data_connectors = {}
 
     def get_batch_from_batch_definition(
         self,
@@ -175,6 +179,35 @@ class BaseDatasource:
                 )
                 batches.append(new_batch)
             return batches
+
+    # <WILL> - this is the default data connector?
+    def _build_default_data_connector(
+        self,
+    ) -> DataConnector:
+
+
+        """Datasource will come with a RuntimeDataConnector by default"""
+
+        config = OrderedDict([('batch_identifiers', ['default_identifier_name',])])
+
+        new_data_connector: DataConnector = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "name": "test_runtime_data_connector",
+                "datasource_name": self.name,
+                "execution_engine": self.execution_engine,
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector",
+                "class_name": "RuntimeDataConnector"
+            }
+        )
+        new_data_connector.data_context_root_directory = (
+            self._data_context_root_directory
+        )
+
+        self.data_connectors["test_runtime_data_connector"] = new_data_connector
+        return new_data_connector
 
     def _build_data_connector_from_config(
         self,
@@ -351,12 +384,18 @@ class Datasource(BaseDatasource):
             data_context_root_directory=data_context_root_directory,
         )
 
-        if data_connectors is None:
-            data_connectors = {}
-        self._data_connectors = data_connectors
+        # <WILL> why is this a bug? well it's because data_connectors comes as a config, which isn't a valid.
+        # in the case of the init, we aren't actually going to be, becaseu the base is going to give us a RuntimeDataConnector by default.
+
+        # if we are adding something that is the same name, then we just overwrite.. that is how it should behave.
+        #if data_connectors is None:
+        #data_connectors = {}
+        #self._data_connectors = data_connectors
+
         self._datasource_config.update(
             {"data_connectors": copy.deepcopy(data_connectors)}
         )
+
         self._init_data_connectors(data_connector_configs=data_connectors)
 
     def _init_data_connectors(
