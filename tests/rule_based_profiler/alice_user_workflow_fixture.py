@@ -127,14 +127,14 @@ def alice_columnar_table_single_batch():
                             "min_value": "2004-10-19T10:23:54",  # From variables
                             "max_value": "2004-10-19T10:23:54",  # From variables
                         },
-                        "meta": {},
-                        # TODO: meta field handling is not yet working
-                        # "meta": {
-                        #     "format": "markdown",
-                        #     "content": [
-                        #         "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-                        #     ],
-                        # },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                                ],
+                            }
+                        },
                     }
                 ),
                 ExpectationConfiguration(
@@ -147,14 +147,14 @@ def alice_columnar_table_single_batch():
                                 "observed_max_time_str"
                             ],  # From data
                         },
-                        "meta": {},
-                        # TODO: meta field handling is not yet working
-                        # "meta": {
-                        #     "format": "markdown",
-                        #     "content": [
-                        #         "### This expectation should be replaced with the below expectation"
-                        #     ],
-                        # },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation should be replaced with the below expectation"
+                                ],
+                            }
+                        },
                     }
                 ),
             ]

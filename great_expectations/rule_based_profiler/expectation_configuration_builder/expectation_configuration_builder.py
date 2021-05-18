@@ -14,10 +14,9 @@ class ExpectationConfigurationBuilder(ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        **kwargs
     ) -> ExpectationConfiguration:
         return self._build_expectation_configuration(
-            domain=domain, variables=variables, parameters=parameters, **kwargs
+            domain=domain, variables=variables, parameters=parameters
         )
 
     @abstractmethod
@@ -26,6 +25,5 @@ class ExpectationConfigurationBuilder(ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        **kwargs
     ) -> ExpectationConfiguration:
         pass
