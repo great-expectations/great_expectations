@@ -109,8 +109,6 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     """
 
     context: DataContext = alice_columnar_table_single_batch_context
-    data_relative_path: str = "../data"
-    data_path: str = os.path.join(context.root_directory, data_relative_path)
     datasource_name: str = "alice_columnar_table_single_batch_datasource"
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
     asset_name: str = "alice_columnar_table_single_batch_data_asset"
@@ -153,33 +151,33 @@ def test_alice_profiler_user_workflow_single_batch(
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
     # Load profiler configs & loop (run tests for each one)
-    for profiler_config in alice_columnar_table_single_batch["profiler_configs"]:
+    profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
-        # Instantiate Profiler
-        full_profiler_config_dict = yaml.load(profiler_config)
-        rules_configs = full_profiler_config_dict.get("rules")
-        variables_configs = full_profiler_config_dict.get("variables")
-        profiler = Profiler(
-            rules_configs=rules_configs,
-            variables_configs=variables_configs,
-            data_context=data_context,
-        )
+    # Instantiate Profiler
+    full_profiler_config_dict = yaml.load(profiler_config)
+    rules_configs = full_profiler_config_dict.get("rules")
+    variables_configs = full_profiler_config_dict.get("variables")
+    profiler = Profiler(
+        rules_configs=rules_configs,
+        variables_configs=variables_configs,
+        data_context=data_context,
+    )
 
-        # Profiler.profile()
-        validator = data_context.get_validator(
-            datasource_name="alice_columnar_table_single_batch_datasource",
-            data_connector_name="alice_columnar_table_single_batch_data_connector",
-            data_asset_name="alice_columnar_table_single_batch_data_asset",
-            create_expectation_suite_with_name=alice_columnar_table_single_batch[
-                "expected_expectation_suite_name"
-            ],
-        )
-        suite = profiler.profile(
-            validator=validator,
-            data_context=data_context,
-            expectation_suite_name=alice_columnar_table_single_batch[
-                "expected_expectation_suite_name"
-            ],
-        )
+    # Profiler.profile()
+    validator = data_context.get_validator(
+        datasource_name="alice_columnar_table_single_batch_datasource",
+        data_connector_name="alice_columnar_table_single_batch_data_connector",
+        data_asset_name="alice_columnar_table_single_batch_data_asset",
+        create_expectation_suite_with_name=alice_columnar_table_single_batch[
+            "expected_expectation_suite_name"
+        ],
+    )
+    suite = profiler.profile(
+        validator=validator,
+        data_context=data_context,
+        expectation_suite_name=alice_columnar_table_single_batch[
+            "expected_expectation_suite_name"
+        ],
+    )
 
-        assert suite == alice_columnar_table_single_batch["expected_expectation_suite"]
+    assert suite == alice_columnar_table_single_batch["expected_expectation_suite"]

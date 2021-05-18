@@ -1,4 +1,3 @@
-import datetime
 from typing import Dict, List
 
 import pytest
@@ -34,23 +33,11 @@ def alice_columnar_table_single_batch():
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__, "alice_user_workflow_verbose_profiler_config.yml"
     )
+    verbose_profiler_config: str
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    # TODO: This "simplified" configuration has outstanding questions and proposed configurations that should be
-    #  answered before it is considered to be a standard configuration.
-
-    simplified_profiler_config_file_path: str = file_relative_path(
-        __file__, "alice_user_workflow_simplified_profiler_config.yml"
-    )
-    with open(simplified_profiler_config_file_path) as f:
-        simplified_profiler_config = f.read()
-
-    profiler_configs: List[str] = []
-    profiler_configs.append(verbose_profiler_config)
-    # profiler_configs.append(simplified_profiler_config)
-
-    my_rule_for_user_ids_expectation_configurations = [
+    my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_be_between",
@@ -84,9 +71,6 @@ def alice_columnar_table_single_batch():
         # ),
     ]
 
-    my_rule_for_timestamps_expectation_configurations: List[
-        ExpectationConfiguration
-    ] = []
     my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
         {
             "column_name": "event_ts",
@@ -101,6 +85,10 @@ def alice_columnar_table_single_batch():
             "observed_max_time_str": "2004-10-19 11:05:22",
         },
     ]
+    my_rule_for_timestamps_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = []
+    column_data: Dict[str, str]
     for column_data in my_rule_for_timestamps_column_data:
         my_rule_for_timestamps_expectation_configurations.extend(
             [
@@ -176,25 +164,21 @@ def alice_columnar_table_single_batch():
     expectation_configurations: List[ExpectationConfiguration] = []
     expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
     expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
-    #
-    # # assert len(expectation_configurations) == 18
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
-    expected_expectation_suite = ExpectationSuite(
+    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name
     )
+    expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         expected_expectation_suite.add_expectation(expectation_configuration)
 
-    # TODO: <Alex>ALEX</Alex>
-    # assert len(expected_expectation_suite.expectations) == 18
-
-    # NOTE that this expectation suite should fail when validated on the data in sample_data_relative_path
+    # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
     # because the device_ts is ahead of the event_ts for the latest event
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
     return {
-        "profiler_configs": profiler_configs,
+        "profiler_config": verbose_profiler_config,
         "expected_expectation_suite_name": expectation_suite_name,
         "expected_expectation_suite": expected_expectation_suite,
         "sample_data_relative_path": sample_data_relative_path,
