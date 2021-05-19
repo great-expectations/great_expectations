@@ -30,7 +30,7 @@ Load your DataContext into memory using the `get_context()` method.
 ```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_example.py#L6
 ```
 
-### 2. Write your YAML Datasource configuration
+### 2. Configure your Datasource
 
 Using this example configuration:
 

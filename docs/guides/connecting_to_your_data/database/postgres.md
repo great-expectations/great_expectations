@@ -25,7 +25,7 @@ First, install the necessary dependencies for Great Expectations to connect to y
 pip install sqlalchemy psycopg2
 ```
 
-### 2. Determine how to add credentials to configuration
+### 2. Add credentials
 
 Great Expectations provides multiple methods of using credentials for accessing databases.
 Options include using an file not checked into source control, environment variables, and using a cloud secret store.
@@ -50,7 +50,7 @@ Load your DataContext into memory using the `get_context()` method.
 ```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L15
 ```
 
-### 4. Write your YAML Datasource configuration
+### 4. Configure your Datasource
 
 Put your connection string in this template:
 
