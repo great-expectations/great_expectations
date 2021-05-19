@@ -46,17 +46,18 @@ control to share it with your team.
 This section describes links to explanations of the foundational concepts used to integrate Great Expectations into your code. It is a glossary
 of the main concepts and classes you will encounter while using Great Expectations.
 
-* [Checkpoints and actions](core_concepts/checkpoints_and_actions)
-* [Data context](core_concepts/checkpoints_and_actions)
-* [Data discovery](core_concepts/checkpoints_and_actions)
-* [Data docs](core_concepts/checkpoints_and_actions)
-* [Dividing data assets into batches](core_concepts/checkpoints_and_actions)
-* [Evaluation parameters](core_concepts/checkpoints_and_actions)
-* [Execution engine](core_concepts/checkpoints_and_actions)
-* [Expectation suite operations](core_concepts/checkpoints_and_actions)
-* [Metrics](core_concepts/checkpoints_and_actions)
-* [Profilers](core_concepts/checkpoints_and_actions)
-* [Validation](core_concepts/checkpoints_and_actions)
+* [Checkpoints and Actions](./checkpoints-and-actions)
+* [Data Context](./data-context)
+* [Data discovery](./data-discovery)
+* [Data Docs](./data-docs)
+* [Datasources](./datasources)
+* [Dividing Data Assets into Batches](./dividing-data-assets-into-batches)
+* [Evaluation Parameters](./evaluation-parameters)
+* [Expectation Suite operations](./expectation-suite-operations)
+* [Metrics](./metrics)
+* [Profilers](./profilers)
+* [Stores](./stores)
+* [Validation](./validation)
 
 
 :::info sam-notes
@@ -64,7 +65,7 @@ I'd suggest removing the "Design Decisions" section below or, for example, movin
 It's lengthy and a lot of unstructured text.
 :::
 
-## Design Decisions
+## Design decisions
 
 
 Great Expectations is designed to help you think and communicate clearly about your data. To do that, we need to rely on
