@@ -106,7 +106,12 @@ rules:
 #        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
 #        column: $domain.domain_kwargs.column
 #        min_value: $variables.min_timestamp
-        # TODO: How to reference the event_ts domain?<Alex>ALEX -- Anthony: ParameterBuilder has access to domain name; hence, fully_qualified_parameter_name can contain column_name (from domain_kwargs).  Would this work?</Alex>
+#        TODO: How to reference the event_ts domain?
+#        <Alex>ALEX -- ParameterBuilder has access to domain name; hence, fully_qualified_parameter_name can contain
+#        column_name (from domain_kwargs).  However, the bigger problem is that the configured domain_builder (an
+#        instance of SimpleColumnSuffixDomainBuilder) creates one domain per column.  But in order to determine whether
+#        or not "event_ts" contains the maximum of all columns that end on the "_ts" suffix, the ParameterBuilder would
+#        have to be able to access fully-qualified parameter names in all domains, which is disallowed (for now).</Alex>
 #        max_value: $parameter.my_max_event_ts.parameter[0].column.max
 #        or
 #        max_value: $parameter.my_max_event_ts.event_ts.column.max
