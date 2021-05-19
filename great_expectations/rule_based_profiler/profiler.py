@@ -144,6 +144,7 @@ class Profiler:
 
         if validator is None:
             if batch:
+                # TODO: <Alex>ALEX -- Note, not specifying an "expectation_suite" explicitly causes: expectation_suite_name = "default" -- this seems problematic.</Alex>
                 validator = Validator(
                     execution_engine=batch.data.execution_engine, batches=[batch]
                 )
@@ -154,6 +155,7 @@ class Profiler:
                         raise ge_exceptions.ProfilerExecutionError(
                             f"batch {batch.id} does not share an execution engine with all other batches in the same batches list."
                         )
+                # TODO: <Alex>ALEX -- Note, not specifying an "expectation_suite" explicitly causes: expectation_suite_name = "default" -- this seems problematic.</Alex>
                 validator = Validator(
                     execution_engine=execution_engine, batches=batches
                 )
@@ -162,7 +164,8 @@ class Profiler:
                     raise ge_exceptions.ProfilerExecutionError(
                         message="Unable to profile using a batch_request if no data_context is provided."
                     )
-                validator = self.data_context.get_validator(batch_request)
+                # TODO: <Alex>ALEX -- Note, not specifying an "expectation_suite" explicitly causes: expectation_suite_name = "default" -- this seems problematic.</Alex>
+                validator = self.data_context.get_validator(batch_request=batch_request)
 
         # Verify that all requested batch_ids are loaded
         if batch_ids is None:
