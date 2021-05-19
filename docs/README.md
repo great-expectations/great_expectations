@@ -66,7 +66,9 @@ The following are a few details about other files docusaurus uses that you may w
 * Headings in a page must be ## (h2) or below (h3, h4, etc) in order to render correctly in a table of contents.
 * Page and directory names should be separated by dashes (-), not underscores (_). E.g. `why-use-ge.md`
 * Every page should have a title element
-* Admonition boxes: I'm currently only using "info" (bright blue by default) and "caution" (yellow)
-* Tabbed content appears to be sensitive to indentation and seems to require 2 spaces
+* Admonition boxes: I'm currently only using "info" (bright blue by default) and "caution" (yellow). Of course, the styling can be customized later.
+* Tabbed content appears to be sensitive to indentation and seems to require **2 spaces**.
+* Code content does not need to be indented and actually takes up more space than necessary when intended. I suggest not indenting the lines in a code block.
 * We should consistently use `*` for unordered lists (based on the old docs which mainly used `*` instead of `-`, and `1.` for ordered lists.
 * Everything in the [old style guide](https://docs.greatexpectations.io/en/latest/contributing/style_guide.html) re: formatting, capitalization, etc. still applies
+* I suggest using "hard wraps" at 120 characters across the docs to make the content more legible while editing. PyCharm and other editors can be set up to use hard wraps while typing, and files can be reformatted too.
