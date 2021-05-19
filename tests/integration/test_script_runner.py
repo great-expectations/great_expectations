@@ -23,6 +23,13 @@ integration_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
     },
+    {
+        "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
+    },
 ]
 
 
