@@ -3,8 +3,8 @@ import datetime
 import decimal
 import logging
 import os
-import uuid
 import sys
+import uuid
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Any, Dict, Iterable, List, Optional, Union
