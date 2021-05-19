@@ -3,8 +3,6 @@ title: How to connect to your data on a filesystem using pandas
 ---
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 This guide will help you connect to your data stored on a filesystem using pandas.
 This will allow you to validate and explore your data.
