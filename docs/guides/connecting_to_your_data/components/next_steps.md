@@ -1,4 +1,4 @@
 - After connecting to data, usually people validate data! **TODO** insert link
-- With your `Validator`, you can now directly run expectations on your data. Learn about what makes validators special by reading the [CORE SKILL ICON] [How to create and edit Expectations with instant feedback from a sample Batch of data](/docs/reference/understanding_validators) article.
-- Learn more about `BatchRequest`s by reading the article on [CORE SKILL ICON] [How to get a Batch of data from a configured Datasource](/docs/reference/understanding_batch_requests)
-- Learn more about configuring `Datasources` by reading the [CORE SKILL ICON] [How to configure a DataConnector to introspect and partition tables in SQL](/docs/reference/more_about_configuring_datasources) article.
+- With your `Validator`, you can now directly run expectations on your data. Learn about what makes validators special by reading the `[CORE SKILL ICON]` [How to create and edit Expectations with instant feedback from a sample Batch of data](/docs/reference/understanding_validators) article.
+- Learn more about `BatchRequest`s by reading the article on `[CORE SKILL ICON]` [How to get a Batch of data from a configured Datasource](/docs/reference/understanding_batch_requests)
+- Learn more about configuring `Datasources` by reading the `[CORE SKILL ICON]` [How to configure a DataConnector to introspect and partition tables in SQL](/docs/reference/more_about_configuring_datasources) article.
