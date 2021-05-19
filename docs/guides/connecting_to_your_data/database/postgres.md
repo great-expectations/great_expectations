@@ -61,7 +61,7 @@ Put your connection string in this template:
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L34
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L37
 ```
 
 :::warning TODO
@@ -86,7 +86,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L37-L51
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L40-L54
 ```
 
   </TabItem>
@@ -95,7 +95,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L54-L67
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L57-L70
 ```
 
   </TabItem>
