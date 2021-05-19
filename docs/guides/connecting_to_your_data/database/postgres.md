@@ -37,7 +37,7 @@ For this guide we will use a `connection_string` like this:
 postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```   
 
-### 3. [CORE SKILL ICON] Instantiate your project's DataContext
+### 3. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
 
 Create a Jupyter notebook or script in the same directory as the `great_expectations/` directory.
 Import these necessary packages and modules.
