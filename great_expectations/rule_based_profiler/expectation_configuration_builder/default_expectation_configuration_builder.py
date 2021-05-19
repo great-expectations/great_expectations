@@ -21,16 +21,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     def __init__(
         self,
         expectation_type: str,
-        expectation_kwargs: Optional[Dict[str, str]] = None,
         meta: Optional[Dict[str, Any]] = None,
         success_on_last_run: Optional[bool] = None,
         **kwargs,
     ):
         self._expectation_type = expectation_type
-        if expectation_kwargs is None:
-            expectation_kwargs = {}
-        self._expectation_kwargs = expectation_kwargs
-        self._expectation_kwargs.update(kwargs)
+        self._expectation_kwargs = kwargs
         if meta is None:
             meta = {}
         self._meta = meta

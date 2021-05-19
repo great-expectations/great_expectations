@@ -51,7 +51,7 @@ rules:
       #   - event_ts
       #   - server_ts
       #   - device_ts
-    parameter_builders: # TODO: <Alex>ALEX Anthony, AJB -- we might need to discuss potentially enriching this.</Alex>
+    parameter_builders:
       - parameter_name: my_max_event_ts
         class_name: MetricParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
