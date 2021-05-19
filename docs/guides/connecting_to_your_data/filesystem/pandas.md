@@ -17,7 +17,7 @@ This will allow you to validate and explore your data.
 
 ## Steps
 
-### 1. Load your project's DataContext into memory
+### 1. [CORE SKILL ICON] Instantiate your project's DataContext
 
 Create a Jupyter notebook or script in the same directory as the `great_expectations/` directory.
 Import these necessary packages and modules.
