@@ -14,7 +14,7 @@ from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -29,6 +29,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -685,6 +686,21 @@ class Validator:
     def get_config_value(self, key):
         """Getter for config value"""
         return self._validator_config.get(key)
+
+    def load_batch(self, batch_list: List[Batch]):
+        for batch in batch_list:
+            self._execution_engine.load_batch_data(batch.id, batch.data)
+            self._batches[batch.id] = batch
+            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
+            # execution_engine. The final active_batch_id will be that of the final batch loaded.
+            self.active_batch_id = batch.id
+
+        return batch_list
+
+    @property
+    def batches(self):
+        """Getter for batches"""
+        return self._batches
 
     @property
     def batches(self) -> Dict[str, Batch]:
