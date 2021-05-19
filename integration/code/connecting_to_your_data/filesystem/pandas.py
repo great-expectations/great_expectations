@@ -35,7 +35,10 @@ batch_request.runtime_parameters[
     "path"
 ] = "./data/reports/yellow_tripdata_sample_2019-01.csv"
 
-batch = context.get_batch(batch_request=batch_request)
-
-# Please note this is only for testing.
-assert isinstance(batch, ge.core.batch.Batch)
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
+print(validator.head())
