@@ -635,3 +635,60 @@ def test_validator_load_additional_batch_to_validator(yellow_trip_pandas_data_co
     assert len(validator.batches) == 2
     assert validator.active_batch_id == "92bcffc67c34a1c9a67e0062ed4a9529"
     assert first_batch_markers != updated_batch_markers
+
+
+def test_instantiate_validator_with_a_list_of_batch_requests(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    jan_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "01"}},
+    )
+
+    feb_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "02"}},
+    )
+
+    validator_two_batch_requests_two_batches: Validator = context.get_validator(
+        batch_request_list=[jan_batch_request, feb_batch_request],
+        expectation_suite=suite,
+    )
+
+    # Instantiate a validator with a single BatchRequest yielding two batches for testing
+    jan_feb_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"index": "0:2"},
+    )
+
+    validator_one_batch_request_two_batches: Validator = context.get_validator(
+        batch_request=jan_feb_batch_request, expectation_suite=suite
+    )
+
+    assert (
+        validator_one_batch_request_two_batches.batches.keys()
+        == validator_two_batch_requests_two_batches.batches.keys()
+    )
+    assert (
+        validator_one_batch_request_two_batches.active_batch_id
+        == validator_two_batch_requests_two_batches.active_batch_id
+    )
+
+    with pytest.raises(ValueError) as ve:
+        validator: Validator = context.get_validator(
+            batch_request=jan_feb_batch_request,
+            batch_request_list=[jan_batch_request, feb_batch_request],
+            expectation_suite=suite,
+        )
+    assert ve.value.args == (
+        "Only one of batch_request or batch_request_list may be specified",
+    )
