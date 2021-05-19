@@ -24,8 +24,8 @@ context.add_datasource(**yaml.load(datasource_yaml))
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource_with_runtime_data_connector",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="default_name",  # this can be anything that identifies this data_asset for you
-    runtime_parameters={"path": "<PATH TO YOUR DATA HERE>"},  # Add your path here.
+    data_asset_name="<YOUR_MEANGINFUL_NAME>",  # this can be anything that identifies this data_asset for you
+    runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your path here.
     batch_identifiers={"default_identifier_name": "something_something"},
 )
 
@@ -35,7 +35,13 @@ batch_request.runtime_parameters[
     "path"
 ] = "./data/reports/yellow_tripdata_sample_2019-01.csv"
 
-batch = context.get_batch(batch_request=batch_request)
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
+print(validator.head())
 
 # Please note this is only for testing.
-assert isinstance(batch, ge.core.batch.Batch)
+assert isinstance(validator, ge.validator.validator.Validator)

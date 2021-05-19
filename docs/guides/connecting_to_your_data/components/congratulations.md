@@ -1,2 +1,2 @@
-You have successfully connected Great Expectations with your data.
 🚀🚀 Congratulations! 🚀🚀
+You successfully connected Great Expectations with your data.

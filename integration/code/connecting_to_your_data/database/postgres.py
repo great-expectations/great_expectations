@@ -14,7 +14,7 @@ load_data_into_database(
 
 context = ge.get_context()
 
-config = """
+datasource_yaml = """
 name: my_postgres_datasource
 class_name: Datasource
 execution_engine:
@@ -29,9 +29,12 @@ data_connectors:
        class_name: InferredAssetSqlDataConnector
        name: whole_table
 """
-config = config.replace("postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>", CONNECTION_STRING)
+datasource_yaml = datasource_yaml.replace(
+    "postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>",
+    CONNECTION_STRING,
+)
 
-context.add_datasource(**yaml.load(config))
+context.add_datasource(**yaml.load(datasource_yaml))
 
 # First test for RuntimeBatchRequest using a query
 batch_request = ge.core.batch.RuntimeBatchRequest(
