@@ -6,6 +6,7 @@ import os
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
+from enum import Enum, EnumMeta
 from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
@@ -215,6 +216,9 @@ def convert_to_json_serializable(data):
 
     elif isinstance(data, RunIdentifier):
         return data.to_json_dict()
+
+    elif isinstance(data, Enum):
+        return data.value
 
     else:
         raise TypeError(
@@ -449,6 +453,61 @@ class S3Url:
     @property
     def url(self):
         return self._parsed.geturl()
+
+
+class MetaClsEnumJoin(EnumMeta):
+    # Reference: "https://stackoverflow.com/questions/33679930/how-to-extend-python-enum".
+    """
+    Metaclass that creates a new `enum.Enum` from multiple existing Enums.
+
+    @code
+        from enum import Enum
+
+        ENUMA = Enum('ENUMA', {'a': 1, 'b': 2})
+        ENUMB = Enum('ENUMB', {'c': 3, 'd': 4})
+        class ENUMJOINED(Enum, metaclass=MetaClsEnumJoin, enums=(ENUMA, ENUMB)):
+            pass
+
+        print(ENUMJOINED.a)
+        print(ENUMJOINED.b)
+        print(ENUMJOINED.c)
+        print(ENUMJOINED.d)
+    @endcode
+    """
+
+    # noinspection PyMethodParameters
+    @classmethod
+    def __prepare__(metaclass, name, bases, enums=None, **kwargs):
+        """
+        Generates the class's namespace.
+        @param enums Iterable of `enum.Enum` classes to include in the new class.  Conflicts will
+            be resolved by overriding existing values defined by Enums earlier in the iterable with
+            values defined by Enums later in the iterable.
+        """
+        # kwargs = {"myArg1": 1, "myArg2": 2}
+        if enums is None:
+            raise ValueError(
+                "Class keyword argument `enums` must be defined to use this metaclass."
+            )
+
+        # noinspection PyArgumentList
+        ret = super().__prepare__(name, bases, **kwargs)
+        for enm in enums:
+            for item in enm:
+                # noinspection PyUnresolvedReferences
+                ret[item.name] = item.value  # Throws `TypeError` if conflict.
+        return ret
+
+    # noinspection PyMethodParameters
+    def __new__(metaclass, name, bases, namespace, **kwargs):
+        return super().__new__(metaclass, name, bases, namespace)
+        # DO NOT send "**kwargs" to "type.__new__".  It won't catch them and
+        # you'll get a "TypeError: type() takes 1 or 3 arguments" exception.
+
+    def __init__(cls, name, bases, namespace, **kwargs):
+        super().__init__(name, bases, namespace)
+        # DO NOT send "**kwargs" to "type.__init__" in Python 3.5 and older.  You'll get a
+        # "TypeError: type.__init__() takes no keyword arguments" exception.
 
 
 def sniff_s3_compression(s3_url: S3Url) -> str:

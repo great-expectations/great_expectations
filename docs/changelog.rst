@@ -6,12 +6,14 @@ Changelog
 
 Develop
 -----------------
-
+* [DOCS] Remove broken links
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
+* [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
 * [MAINTENANCE] Improve robustness of integration test_runner
 * [MAINTENANCE] CLI tests now support click 8.0 and 7.x
+* [ENHANCEMENT] Experimental WIP Rule Based Profiler for single batch workflows (#2788)
 
 0.13.19
 -----------------

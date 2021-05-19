@@ -6,8 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
-from packaging.version import parse as parse_version
-
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
@@ -17,10 +15,10 @@ del get_versions  # isort:skip
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
-    RuntimeDataBatchSpec,
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -30,7 +28,6 @@ from great_expectations.exceptions import (
     InvalidConfigError,
 )
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -376,12 +373,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
-            MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
-            the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column
@@ -621,7 +618,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type="identity"
+                query["domain_kwargs"], domain_type=SemanticDomainTypes.IDENTITY.value
             )
             assert len(query["select"]) == len(query["ids"])
             try:
