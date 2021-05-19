@@ -1,13 +1,15 @@
 ---
 title: How to connect to your data on a filesystem using pandas
 ---
-
+import NextSteps from '../components/next_steps.md'
+import Congratulations from '../components/congratulations.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
 
-This guide will help you connect to your data stored on a filesystem using pandas. This enables you to work with your data in Great Expectations.
+This guide will help you connect to your data stored on a filesystem using pandas.
+This will allow you to validate and explore your data.
 
 :::note Prerequisites: This how-to guide assumes you have already:
 - Completed the [Getting Started Tutorial](../../../tutorials/getting-started/intro.md)
@@ -17,103 +19,55 @@ This guide will help you connect to your data stored on a filesystem using panda
 
 ## Steps
 
-
-
-<Tabs
-  defaultValue="python"
-  values={[
-    {label: 'CLI', value: 'cli'},
-    {label: 'python', value: 'python'},
-  ]}>
-  <TabItem value="cli">
-
-### 1. Run the following CLI command
-
-```console
-great_expectations --v3-api datasource new
-```
-
-
-### 2. Modify your YAML configuration if necessary 
-
-The CLI will go through some steps where you will add the configuration. The notebook will open and will contain the configuration you see here: 
-
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_cli.py#L9-L26
-```
-
-Make sure the information is correct, and make any changes if necessary
-
-### 3. Test the YAML configuration 
-
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_cli.py#L28
-```
-
-### 4. Save Datasource to Data context
-
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_cli.py#L30
-```
-
-### 5. Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
- 
-
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_cli.py#L35-L46
-```
-
-  </TabItem>
-  <TabItem value="python">
-
-
-### 1. Load your project's DataContext into memory
+### 1. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
 
 Create a Jupyter notebook or script in the same directory as the `great_expectations/` directory.
 Import these necessary packages and modules.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L1-L4
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_example.py#L1-L3
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L6
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_example.py#L6
 ```
-
 
 ### 2. Write your YAML Datasource configuration
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L8-L20
+Using this example configuration:
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_example.py#L8-L20
 ```
 
-
-### 3. Save your Datasource configuration to your DataContext
+### 3. Save the Datasource configuration to your DataContext
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L22
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_example.py#L22
 ```
 
+### 4. Test your new Datasource
 
-### 3. Test your new Datasource
 Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
 
-Here is an example BatchRequest which will. Replace it with the path to the file you would liek to read in.  
+Add the path to your CSV in the `path` key under `runtime_parameters`.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_example.py#L24-L44
+```
+
+<Congratulations />
 
 ```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L24-L30
 ```
 
-Get a Validator and print out the top few row. 
+To view the full script [see it on GitHub](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/filesystem/pandas_example.py)
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L38-L44
-```
+If you are working with nonstandard CSVs, read one of these guides:
 
-</TabItem>
-</Tabs>
-
-
-<Congratulations />
+- [How to work with headerless CSVs in pandas](#TODO)
+- [How to work with custom delimited CSVs in pandas](#TODO)
+- [How to work with parquet files in pandas](#TODO)
 
 ## Next Steps
 
 <NextSteps />
-
-## Additional Notes
-
-To view the full script [see it on GitHub](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/postgres.py)

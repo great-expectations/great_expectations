@@ -21,7 +21,7 @@ class BackendDependencies(enum.Enum):
 
 integration_test_matrix = [
     {
-        "user_flow_script": "integration/code/connecting_to_your_data/filesystem/pandas.py",
+        "user_flow_script": "integration/code/connecting_to_your_data/filesystem/pandas_example.py",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "integration/fixtures/runtime_data_taxi_monthly/great_expectations",
         "data_dir": "integration/fixtures/data",

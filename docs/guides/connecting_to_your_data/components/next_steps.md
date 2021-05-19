@@ -1,3 +1,5 @@
-- With your `Validator`, you can now directly run expectations on your data. Learn about what makes validators special by reading the [Understanding Validators](/docs/reference/understanding_validators) article.
-- Learn more about `BatchRequest`s by reading the article on [Understanding BatchRequests](/docs/reference/understanding_batch_requests)
-- Learn more about configuring `Datasources` by reading the [More about configuring Datasources](/docs/reference/more_about_configuring_datasources) article.
+Now that you've connected to your data, you'll want to work on these `[🍏 CORE SKILL ICON]` **core skills**:
+
+- `[🍏 CORE SKILL ICON]` [How to create and edit Expectations with instant feedback from a sample Batch of data](/docs/guides/connecting_to_your_data/core_skills/stub)
+- `[🍏 CORE SKILL ICON]` [How to get a Batch of data from a configured Datasource](/docs/guides/connecting_to_your_data/core_skills/stub)
+- `[🍏 CORE SKILL ICON]` [How to configure a DataConnector to introspect and partition tables in SQL](/docs/guides/connecting_to_your_data/core_skills/stub)
