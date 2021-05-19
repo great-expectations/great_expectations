@@ -16,39 +16,37 @@ suite = context.get_expectation_suite("yellow_trip_data_validations")
 
 # Create a BatchRequest and instantiate a Validator with only the January data
 jan_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"month": "01"}},
-    )
+    datasource_name="taxi_pandas",
+    data_connector_name="monthly",
+    data_asset_name="my_reports",
+    data_connector_query={"batch_filter_parameters": {"month": "01"}},
+)
 
 validator: Validator = context.get_validator(
-        batch_request=jan_batch_request, expectation_suite=suite
-    )
+    batch_request=jan_batch_request, expectation_suite=suite
+)
 assert validator.active_batch_definition.batch_identifiers["month"] == "01"
 
 # Create a Batch from February data, then load it to the instantiated Validator
 feb_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"month": "02"}},
-    )
-
-feb_batch_list: List[Batch] = context.get_batch_list(
-    batch_request=feb_batch_request
+    datasource_name="taxi_pandas",
+    data_connector_name="monthly",
+    data_asset_name="my_reports",
+    data_connector_query={"batch_filter_parameters": {"month": "02"}},
 )
+
+feb_batch_list: List[Batch] = context.get_batch_list(batch_request=feb_batch_request)
 
 validator.load_batch(batch_list=feb_batch_list)
 assert validator.active_batch_definition.batch_identifiers["month"] == "02"
 
 # Create a Batch from March data, then load it to the instantiated Validator
 march_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"month": "03"}},
-    )
+    datasource_name="taxi_pandas",
+    data_connector_name="monthly",
+    data_asset_name="my_reports",
+    data_connector_query={"batch_filter_parameters": {"month": "03"}},
+)
 
 march_batch_list: List[Batch] = context.get_batch_list(
     batch_request=march_batch_request
