@@ -2246,9 +2246,8 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
     assert isinstance(datasource_from_yaml, Datasource)
     assert datasource_from_yaml.__class__.__name__ == "Datasource"
 
-    assert datasource_name in [d["name"] for d in context.list_datasources()]
-    assert datasource_name in context.datasources
-    assert datasource_name in context.get_config()["datasources"]
+    assert datasource_name == context.list_datasources()[0]["name"]
+    assert isinstance(context.datasources[datasource_name], Datasource)
 
     assert isinstance(
         context.get_datasource(datasource_name=datasource_name),
