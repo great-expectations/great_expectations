@@ -23,14 +23,6 @@ class DomainTypes(Enum):
         return False
 
 
-class StructuredDomainTypes(DomainTypes):
-    SCHEMA = "schema"
-    TABLE = "table"
-    COLUMN = "column"
-    COLUMN_PAIR = "column_pair"
-    MULTICOLUMN = "multicolumn"
-
-
 class SemanticDomainTypes(DomainTypes):
     NUMERIC = "numeric"
     TEXT = "text"
@@ -42,9 +34,3 @@ class SemanticDomainTypes(DomainTypes):
     VALUE_SET = "value_set"
     MISCELLANEOUS = "miscellaneous"
     UNKNOWN = "unknown"
-
-
-class MetricDomainTypes(
-    Enum, metaclass=MetaClsEnumJoin, enums=(StructuredDomainTypes, SemanticDomainTypes)
-):
-    pass
