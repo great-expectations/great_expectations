@@ -1,10 +1,12 @@
 ---
 title: How to connect to your data in a postgresql database
 ---
-import NextSteps from '../components/next_steps.md'
-import Congratulations from '../components/congratulations.md'
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
+import NextSteps from '../components/next_steps.md'
+import Congratulations from '../components/congratulations.md'
+
+
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -37,13 +39,12 @@ Please read the article [Credential storage and usage options](../advanced/datab
 
 For this guide we will use a `connection_string` like this:
 
-```                                                                            
+```
 postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```   
 
 ### 3. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
 
-Create a Jupyter notebook or script in the same directory as the `great_expectations/` directory.
 Import these necessary packages and modules.
 
 ```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L1-L3

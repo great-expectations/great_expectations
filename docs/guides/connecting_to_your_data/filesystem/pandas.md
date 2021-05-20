@@ -4,7 +4,6 @@ title: How to connect to your data on a filesystem using pandas
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
 import Prerequisites from '../components/prerequisites.jsx'
-import Preq from '../components/pre.mdx'
 import WhereToRunCode from '../components/where_to_run_code.md'
 
 This guide will help you connect to your data stored on a filesystem using pandas.
@@ -22,7 +21,6 @@ This will allow you to validate and explore your data.
 
 ### 1. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
 
-Create a Jupyter notebook or script in the same directory as the `great_expectations/` directory.
 Import these necessary packages and modules.
 
 ```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_example.py#L1-L3
