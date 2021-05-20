@@ -3,6 +3,7 @@ title: How to connect to your data in a postgresql database
 ---
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
+import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -10,11 +11,11 @@ import TabItem from '@theme/TabItem';
 This guide will help you connect to data in a Postgresql database.
 This will allow you to validate and explore your data.
 
-:::note Prerequisites: This guide assumes you have already:
-- Completed the [Getting Started Tutorial](../../../tutorials/getting-started/intro.md)
-- Have a working installation of Great Expectations.
-- Have access to data in a Postgres database.
-:::
+<Prerequisites>
+
+- Have access to data in a Postgres database
+
+</Prerequisites>
 
 <WhereToRunCode />
 

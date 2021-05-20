@@ -3,16 +3,18 @@ title: How to connect to your data on a filesystem using pandas
 ---
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
+import Prerequisites from '../components/prerequisites.jsx'
+import Preq from '../components/pre.mdx'
 import WhereToRunCode from '../components/where_to_run_code.md'
 
 This guide will help you connect to your data stored on a filesystem using pandas.
 This will allow you to validate and explore your data.
 
-:::note Prerequisites: This how-to guide assumes you have already:
-- Completed the [Getting Started Tutorial](../../../tutorials/getting-started/intro.md)
-- Have a working installation of Great Expectations
+<Prerequisites>
+
 - Have access to data on a filesystem
-:::
+
+</Prerequisites>
 
 <WhereToRunCode />
 
