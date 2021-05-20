@@ -130,16 +130,16 @@ class BaseYamlConfig(SerializableDictDot):
 
 class AssetConfig(DictDot):
     def __init__(
-            self,
-            name=None,
-            class_name=None,
-            module_name=None,
-            bucket=None,
-            prefix=None,
-            delimiter=None,
-            max_keys=None,
-            batch_spec_passthrough=None,
-            **kwargs,
+        self,
+        name=None,
+        class_name=None,
+        module_name=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
+        batch_spec_passthrough=None,
+        **kwargs,
     ):
         if name is not None:
             self.name = name
@@ -202,14 +202,14 @@ class AssetConfigSchema(Schema):
 
 class SorterConfig(DictDot):
     def __init__(
-            self,
-            name,
-            class_name=None,
-            module_name=None,
-            orderby="asc",
-            reference_list=None,
-            datetime_format=None,
-            **kwargs,
+        self,
+        name,
+        class_name=None,
+        module_name=None,
+        orderby="asc",
+        reference_list=None,
+        datetime_format=None,
+        **kwargs,
     ):
         self._name = name
         self._class_name = class_name
@@ -278,22 +278,22 @@ class SorterConfigSchema(Schema):
 
 class DataConnectorConfig(DictDot):
     def __init__(
-            self,
-            class_name,
-            module_name=None,
-            assets=None,
-            base_directory=None,
-            glob_directive=None,
-            default_regex=None,
-            batch_identifiers=None,
-            bucket=None,
-            prefix=None,
-            delimiter=None,
-            max_keys=None,
-            boto3_options=None,
-            sorters=None,
-            batch_spec_passthrough=None,
-            **kwargs,
+        self,
+        class_name,
+        module_name=None,
+        assets=None,
+        base_directory=None,
+        glob_directive=None,
+        default_regex=None,
+        batch_identifiers=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
+        boto3_options=None,
+        sorters=None,
+        batch_spec_passthrough=None,
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
@@ -387,13 +387,13 @@ class DataConnectorConfigSchema(Schema):
         if data["class_name"][0] == "$":
             return
         if ("default_regex" in data) and not (
-                data["class_name"]
-                in [
-                    "InferredAssetFilesystemDataConnector",
-                    "ConfiguredAssetFilesystemDataConnector",
-                    "InferredAssetS3DataConnector",
-                    "ConfiguredAssetS3DataConnector",
-                ]
+            data["class_name"]
+            in [
+                "InferredAssetFilesystemDataConnector",
+                "ConfiguredAssetFilesystemDataConnector",
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
@@ -402,11 +402,11 @@ configuration to continue.
                 """
             )
         if ("glob_directive" in data) and not (
-                data["class_name"]
-                in [
-                    "InferredAssetFilesystemDataConnector",
-                    "ConfiguredAssetFilesystemDataConnector",
-                ]
+            data["class_name"]
+            in [
+                "InferredAssetFilesystemDataConnector",
+                "ConfiguredAssetFilesystemDataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
@@ -415,16 +415,16 @@ configuration to continue.
                 """
             )
         if (
-                "bucket" in data
-                or "prefix" in data
-                or "delimiter" in data
-                or "max_keys" in data
+            "bucket" in data
+            or "prefix" in data
+            or "delimiter" in data
+            or "max_keys" in data
         ) and not (
-                data["class_name"]
-                in [
-                    "InferredAssetS3DataConnector",
-                    "ConfiguredAssetS3DataConnector",
-                ]
+            data["class_name"]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -433,22 +433,22 @@ continue.
                 """
             )
         if (
-                "data_asset_name_prefix" in data
-                or "data_asset_name_suffix" in data
-                or "include_schema_name" in data
-                or "splitter_method" in data
-                or "splitter_kwargs" in data
-                or "sampling_method" in data
-                or "sampling_kwargs" in data
-                or "excluded_tables" in data
-                or "included_tables" in data
-                or "skip_inapplicable_tables" in data
+            "data_asset_name_prefix" in data
+            or "data_asset_name_suffix" in data
+            or "include_schema_name" in data
+            or "splitter_method" in data
+            or "splitter_kwargs" in data
+            or "sampling_method" in data
+            or "sampling_kwargs" in data
+            or "excluded_tables" in data
+            or "included_tables" in data
+            or "skip_inapplicable_tables" in data
         ) and not (
-                data["class_name"]
-                in [
-                    "InferredAssetSqlDataConnector",
-                    "ConfiguredAssetSqlDataConnector",
-                ]
+            data["class_name"]
+            in [
+                "InferredAssetSqlDataConnector",
+                "ConfiguredAssetSqlDataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -465,16 +465,16 @@ continue.
 
 class ExecutionEngineConfig(DictDot):
     def __init__(
-            self,
-            class_name,
-            module_name=None,
-            caching=None,
-            batch_spec_defaults=None,
-            connection_string=None,
-            credentials=None,
-            spark_config=None,
-            boto3_options=None,
-            **kwargs,
+        self,
+        class_name,
+        module_name=None,
+        caching=None,
+        batch_spec_defaults=None,
+        connection_string=None,
+        credentials=None,
+        spark_config=None,
+        boto3_options=None,
+        **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
@@ -527,9 +527,7 @@ class ExecutionEngineConfigSchema(Schema):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
-        if ("connection_string" in data
-            or "credentials" in data
-        ) and not (
+        if ("connection_string" in data or "credentials" in data) and not (
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
@@ -539,7 +537,7 @@ configuration to continue.
                 """
             )
         if "spark_config" in data and not (
-                data["class_name"] == "SparkDFExecutionEngine"
+            data["class_name"] == "SparkDFExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses the "spark_config" key in an execution engine, but only
@@ -556,22 +554,22 @@ configuration to continue.
 
 class DatasourceConfig(DictDot):
     def __init__(
-            self,
-            class_name=None,
-            module_name: Optional[str] = "great_expectations.datasource",
-            execution_engine=None,
-            data_connectors=None,
-            data_asset_type=None,
-            batch_kwargs_generators=None,
-            connection_string=None,
-            credentials=None,
-            introspection=None,
-            tables=None,
-            boto3_options=None,
-            reader_method=None,
-            reader_options=None,
-            limit=None,
-            **kwargs,
+        self,
+        class_name=None,
+        module_name: Optional[str] = "great_expectations.datasource",
+        execution_engine=None,
+        data_connectors=None,
+        data_asset_type=None,
+        batch_kwargs_generators=None,
+        connection_string=None,
+        credentials=None,
+        introspection=None,
+        tables=None,
+        boto3_options=None,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
+        **kwargs,
     ):
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
@@ -678,16 +676,16 @@ class DatasourceConfigSchema(Schema):
         if data["class_name"][0] == "$":
             return
         if (
-                "connection_string" in data
-                or "credentials" in data
-                or "introspection" in data
-                or "tables" in data
+            "connection_string" in data
+            or "credentials" in data
+            or "introspection" in data
+            or "tables" in data
         ) and not (
-                data["class_name"]
-                in [
-                    "SqlAlchemyDatasource",
-                    "SimpleSqlalchemyDatasource",
-                ]
+            data["class_name"]
+            in [
+                "SqlAlchemyDatasource",
+                "SimpleSqlalchemyDatasource",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data source, that are required only by a
@@ -803,22 +801,22 @@ class NotebookTemplateConfigSchema(Schema):
 
 class NotebookConfig(DictDot):
     def __init__(
-            self,
-            class_name,
-            module_name,
-            custom_templates_module,
-            header_markdown=None,
-            footer_markdown=None,
-            table_expectations_header_markdown=None,
-            column_expectations_header_markdown=None,
-            table_expectations_not_found_markdown=None,
-            column_expectations_not_found_markdown=None,
-            authoring_intro_markdown=None,
-            column_expectations_markdown=None,
-            header_code=None,
-            footer_code=None,
-            table_expectation_code=None,
-            column_expectation_code=None,
+        self,
+        class_name,
+        module_name,
+        custom_templates_module,
+        header_markdown=None,
+        footer_markdown=None,
+        table_expectations_header_markdown=None,
+        column_expectations_header_markdown=None,
+        table_expectations_not_found_markdown=None,
+        column_expectations_not_found_markdown=None,
+        authoring_intro_markdown=None,
+        column_expectations_markdown=None,
+        header_code=None,
+        footer_code=None,
+        table_expectation_code=None,
+        column_expectation_code=None,
     ):
         self.class_name = class_name
         self.module_name = module_name
@@ -934,10 +932,10 @@ class DataContextConfigSchema(Schema):
     def handle_error(self, exc, data, **kwargs):
         """Log and raise our custom exception when (de)serialization fails."""
         if (
-                exc
-                and exc.messages
-                and isinstance(exc.messages, dict)
-                and all([key is None for key in exc.messages.keys()])
+            exc
+            and exc.messages
+            and isinstance(exc.messages, dict)
+            and all([key is None for key in exc.messages.keys()])
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
@@ -965,10 +963,10 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and any(
-                [
-                    store_config["class_name"] == "ValidationsStore"
-                    for store_config in data["stores"].values()
-                ]
+            [
+                store_config["class_name"] == "ValidationsStore"
+                for store_config in data["stores"].values()
+            ]
         ):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
@@ -991,13 +989,13 @@ class DataContextConfigSchema(Schema):
             )
 
         if data["config_version"] < CURRENT_GE_CONFIG_VERSION and (
-                "checkpoint_store_name" in data
-                or any(
-            [
-                store_config["class_name"] == "CheckpointStore"
-                for store_config in data["stores"].values()
-            ]
-        )
+            "checkpoint_store_name" in data
+            or any(
+                [
+                    store_config["class_name"] == "CheckpointStore"
+                    for store_config in data["stores"].values()
+                ]
+            )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
@@ -1011,9 +1009,9 @@ class DataContextConfigSchema(Schema):
             )
 
         if (
-                data["config_version"] >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE
-                and "validation_operators" in data
-                and data["validation_operators"] is not None
+            data["config_version"] >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE
+            and "validation_operators" in data
+            and data["validation_operators"] is not None
         ):
             # TODO: <Alex>Add a URL to the migration guide with instructions for how to replace validation_operators with appropriate actions.</Alex>
             logger.warning(
@@ -1122,15 +1120,15 @@ class BaseStoreBackendDefaults(DictDot):
     """
 
     def __init__(
-            self,
-            expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-            validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
-            evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
-            checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
-            data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-            validation_operators: dict = None,
-            stores: dict = None,
-            data_docs_sites: dict = None,
+        self,
+        expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
+        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
+        evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
+        validation_operators: dict = None,
+        stores: dict = None,
+        data_docs_sites: dict = None,
     ):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -1168,20 +1166,20 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
     """
 
     def __init__(
-            self,
-            default_bucket_name: Optional[str] = None,
-            expectations_store_bucket_name: Optional[str] = None,
-            validations_store_bucket_name: Optional[str] = None,
-            data_docs_bucket_name: Optional[str] = None,
-            checkpoint_store_bucket_name: Optional[str] = None,
-            expectations_store_prefix: str = "expectations",
-            validations_store_prefix: str = "validations",
-            data_docs_prefix: str = "data_docs",
-            checkpoint_store_prefix: str = "checkpoints",
-            expectations_store_name: str = "expectations_S3_store",
-            validations_store_name: str = "validations_S3_store",
-            evaluation_parameter_store_name: str = "evaluation_parameter_store",
-            checkpoint_store_name: str = "checkpoint_S3_store",
+        self,
+        default_bucket_name: Optional[str] = None,
+        expectations_store_bucket_name: Optional[str] = None,
+        validations_store_bucket_name: Optional[str] = None,
+        data_docs_bucket_name: Optional[str] = None,
+        checkpoint_store_bucket_name: Optional[str] = None,
+        expectations_store_prefix: str = "expectations",
+        validations_store_prefix: str = "validations",
+        data_docs_prefix: str = "data_docs",
+        checkpoint_store_prefix: str = "checkpoints",
+        expectations_store_name: str = "expectations_S3_store",
+        validations_store_name: str = "validations_S3_store",
+        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_S3_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1253,9 +1251,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """
 
     def __init__(
-            self,
-            root_directory: Optional[str] = None,
-            plugins_directory: Optional[str] = None,
+        self,
+        root_directory: Optional[str] = None,
+        plugins_directory: Optional[str] = None,
     ):
         # Initialize base defaults
         super().__init__()
@@ -1305,25 +1303,25 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
     """
 
     def __init__(
-            self,
-            default_bucket_name: Optional[str] = None,
-            default_project_name: Optional[str] = None,
-            expectations_store_bucket_name: Optional[str] = None,
-            validations_store_bucket_name: Optional[str] = None,
-            data_docs_bucket_name: Optional[str] = None,
-            checkpoint_store_bucket_name: Optional[str] = None,
-            expectations_store_project_name: Optional[str] = None,
-            validations_store_project_name: Optional[str] = None,
-            data_docs_project_name: Optional[str] = None,
-            checkpoint_store_project_name: Optional[str] = None,
-            expectations_store_prefix: str = "expectations",
-            validations_store_prefix: str = "validations",
-            data_docs_prefix: str = "data_docs",
-            checkpoint_store_prefix: str = "checkpoints",
-            expectations_store_name: str = "expectations_GCS_store",
-            validations_store_name: str = "validations_GCS_store",
-            evaluation_parameter_store_name: str = "evaluation_parameter_store",
-            checkpoint_store_name: str = "checkpoint_GCS_store",
+        self,
+        default_bucket_name: Optional[str] = None,
+        default_project_name: Optional[str] = None,
+        expectations_store_bucket_name: Optional[str] = None,
+        validations_store_bucket_name: Optional[str] = None,
+        data_docs_bucket_name: Optional[str] = None,
+        checkpoint_store_bucket_name: Optional[str] = None,
+        expectations_store_project_name: Optional[str] = None,
+        validations_store_project_name: Optional[str] = None,
+        data_docs_project_name: Optional[str] = None,
+        checkpoint_store_project_name: Optional[str] = None,
+        expectations_store_prefix: str = "expectations",
+        validations_store_prefix: str = "validations",
+        data_docs_prefix: str = "data_docs",
+        checkpoint_store_prefix: str = "checkpoints",
+        expectations_store_name: str = "expectations_GCS_store",
+        validations_store_name: str = "validations_GCS_store",
+        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_GCS_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1415,15 +1413,15 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
     """
 
     def __init__(
-            self,
-            default_credentials: Optional[Dict] = None,
-            expectations_store_credentials: Optional[Dict] = None,
-            validations_store_credentials: Optional[Dict] = None,
-            checkpoint_store_credentials: Optional[Dict] = None,
-            expectations_store_name: str = "expectations_database_store",
-            validations_store_name: str = "validations_database_store",
-            evaluation_parameter_store_name: str = "evaluation_parameter_store",
-            checkpoint_store_name: str = "checkpoint_database_store",
+        self,
+        default_credentials: Optional[Dict] = None,
+        expectations_store_credentials: Optional[Dict] = None,
+        validations_store_credentials: Optional[Dict] = None,
+        checkpoint_store_credentials: Optional[Dict] = None,
+        expectations_store_name: str = "expectations_database_store",
+        validations_store_name: str = "validations_database_store",
+        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_database_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1473,27 +1471,27 @@ class DataContextConfig(BaseYamlConfig):
     # _config_schema_class = DataContextConfigSchema
 
     def __init__(
-            self,
-            config_version: Optional[float] = None,
-            datasources: Optional[
-                Union[
-                    Dict[str, DatasourceConfig],
-                    Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
-                ]
-            ] = None,
-            expectations_store_name: Optional[str] = None,
-            validations_store_name: Optional[str] = None,
-            evaluation_parameter_store_name: Optional[str] = None,
-            checkpoint_store_name: Optional[str] = None,
-            plugins_directory: Optional[str] = None,
-            validation_operators=None,
-            stores: Optional[Dict] = None,
-            data_docs_sites: Optional[Dict] = None,
-            notebooks=None,
-            config_variables_file_path: Optional[str] = None,
-            anonymous_usage_statistics=None,
-            store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
-            commented_map: Optional[CommentedMap] = None,
+        self,
+        config_version: Optional[float] = None,
+        datasources: Optional[
+            Union[
+                Dict[str, DatasourceConfig],
+                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
+            ]
+        ] = None,
+        expectations_store_name: Optional[str] = None,
+        validations_store_name: Optional[str] = None,
+        evaluation_parameter_store_name: Optional[str] = None,
+        checkpoint_store_name: Optional[str] = None,
+        plugins_directory: Optional[str] = None,
+        validation_operators=None,
+        stores: Optional[Dict] = None,
+        data_docs_sites: Optional[Dict] = None,
+        notebooks=None,
+        config_variables_file_path: Optional[str] = None,
+        anonymous_usage_statistics=None,
+        store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
+        commented_map: Optional[CommentedMap] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1639,7 +1637,7 @@ class CheckpointConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if not (
-                "name" in data or "validation_operator_name" in data or "batches" in data
+            "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
@@ -1669,28 +1667,28 @@ class CheckpointConfig(BaseYamlConfig):
     # _config_schema_class = CheckpointConfigSchema
 
     def __init__(
-            self,
-            name: Optional[str] = None,
-            config_version: Optional[Union[int, float]] = None,
-            template_name: Optional[str] = None,
-            module_name: Optional[str] = None,
-            class_name: Optional[str] = None,
-            run_name_template: Optional[str] = None,
-            expectation_suite_name: Optional[str] = None,
-            batch_request: Optional[dict] = None,
-            action_list: Optional[List[dict]] = None,
-            evaluation_parameters: Optional[dict] = None,
-            runtime_configuration: Optional[dict] = None,
-            validations: Optional[List[dict]] = None,
-            profilers: Optional[List[dict]] = None,
-            validation_operator_name: Optional[str] = None,
-            batches: Optional[List[dict]] = None,
-            commented_map: Optional[CommentedMap] = None,
-            # the following fous args are used by SimpleCheckpoint
-            site_names: Optional[Union[list, str]] = None,
-            slack_webhook: Optional[str] = None,
-            notify_on: Optional[str] = None,
-            notify_with: Optional[str] = None,
+        self,
+        name: Optional[str] = None,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[dict] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        commented_map: Optional[CommentedMap] = None,
+        # the following fous args are used by SimpleCheckpoint
+        site_names: Optional[Union[list, str]] = None,
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = None,
+        notify_with: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -1722,9 +1720,9 @@ class CheckpointConfig(BaseYamlConfig):
         super().__init__(commented_map=commented_map)
 
     def update(
-            self,
-            other_config: Optional["CheckpointConfig"] = None,
-            runtime_kwargs: Optional[dict] = None,
+        self,
+        other_config: Optional["CheckpointConfig"] = None,
+        runtime_kwargs: Optional[dict] = None,
     ):
         assert other_config is not None or runtime_kwargs is not None, (
             "other_config and runtime_kwargs cannot both " "be None"
@@ -1918,9 +1916,9 @@ class CheckpointConfig(BaseYamlConfig):
 
     @classmethod
     def get_updated_action_list(
-            cls,
-            base_action_list: list,
-            other_action_list: list,
+        cls,
+        base_action_list: list,
+        other_action_list: list,
     ) -> List[dict]:
         base_action_list_dict = {action["name"]: action for action in base_action_list}
         for other_action in other_action_list:
