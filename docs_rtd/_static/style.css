@@ -197,7 +197,8 @@ a {
   transition: all 0.3s ease-in-out;
   overflow: hidden;
   position: relative;
-  margin-right: -24px;
+  width: 180px;
+  right: 30px;
 }
 
 #community-modal ul {
