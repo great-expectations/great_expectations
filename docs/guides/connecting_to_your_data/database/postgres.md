@@ -5,8 +5,6 @@ import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
-
-
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
