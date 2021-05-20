@@ -506,7 +506,6 @@ class ExecutionEngineConfig(DictDot):
         return self._batch_spec_defaults
 
 
-# this is what needs to be changed!
 class ExecutionEngineConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
