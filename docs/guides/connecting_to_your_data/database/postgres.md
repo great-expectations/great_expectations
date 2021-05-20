@@ -3,6 +3,7 @@ title: How to connect to your data in a postgresql database
 ---
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
+import WhereToRunCode from '../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -14,6 +15,8 @@ This will allow you to validate and explore your data.
 - Have a working installation of Great Expectations.
 - Have access to data in a Postgres database.
 :::
+
+<WhereToRunCode />
 
 ## Steps
 
@@ -52,10 +55,47 @@ Load your DataContext into memory using the `get_context()` method.
 
 ### 4. Configure your Datasource
 
+<Tabs
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'python', value:'python'},
+  ]}>
+  <TabItem value="yaml">
+
 Put your connection string in this template:
 
 ```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L17-L31
 ```
+</TabItem>
+<TabItem value="python">
+
+Put your connection string in this template:
+
+```python
+datasource_config = {
+    'name': 'my_postgres_datasource',
+    'class_name': 'Datasource',
+    'execution_engine': {
+        'class_name': 'SqlAlchemyExecutionEngine',
+        'connection_string': 'postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>'
+    },
+    'data_connectors': {
+        'default_runtime_data_connector_name': {
+            'class_name': 'RuntimeDataConnector',
+            'batch_identifiers': ['default_identifier_name']
+        },
+        'default_inferred_data_connector_name': {
+              'class_name': 'InferredAssetSqlDataConnector',
+              'name': 'whole_table'
+        }
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>
 
 ### 5. Save the Datasource configuration to your DataContext
 
