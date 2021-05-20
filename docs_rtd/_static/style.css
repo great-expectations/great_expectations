@@ -231,7 +231,7 @@ a {
   overflow: hidden;
   position: absolute;
   top: 57px;
-  width: 152px;
+  width: 168px;
   right: 0;
 }
 
@@ -243,7 +243,7 @@ a {
 
 #mobile-modal li {
   margin-bottom: 8px;
-  padding: 0 0px 0 16px;
+  padding: 0 8px 0 16px;
   height: 40px;
   border: none !important;
   margin-top: 4px;
