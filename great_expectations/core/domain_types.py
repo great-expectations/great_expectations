@@ -14,13 +14,21 @@ class DomainTypes(Enum):
 
     @classmethod
     def has_member_key(cls, key: Any) -> bool:
-        key_exists: bool = key in cls.__members__
+        key_exists: bool = key in cls.__members__ or str(key).upper() in cls.__members__
         if key_exists:
             hash_op: Optional[Callable] = getattr(key, "__hash__", None)
             if callable(hash_op):
                 return True
             return False
         return False
+
+
+class StructuredDomainTypes(DomainTypes):
+    SCHEMA = "schema"
+    TABLE = "table"
+    COLUMN = "column"
+    COLUMN_PAIR = "column_pair"
+    MULTICOLUMN = "multicolumn"
 
 
 class SemanticDomainTypes(DomainTypes):
@@ -34,3 +42,16 @@ class SemanticDomainTypes(DomainTypes):
     VALUE_SET = "value_set"
     MISCELLANEOUS = "miscellaneous"
     UNKNOWN = "unknown"
+
+
+class MetricDomainTypes(
+    Enum, metaclass=MetaClsEnumJoin, enums=(StructuredDomainTypes, SemanticDomainTypes)
+):
+    @classmethod
+    def has_member_key(cls, key: Any) -> bool:
+        klass: DomainTypes
+        return any(
+            [
+                klass.has_member_key(key=key) for klass in cls.enums
+            ]
+        )
