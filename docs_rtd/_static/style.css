@@ -228,8 +228,10 @@ a {
   height: 0px;
   transition: all 0.3s ease-in-out;
   overflow: hidden;
-  position: relative;
-  top: 37px;
+  position: absolute;
+  top: 57px;
+  width: 152px;
+  right: 0;
 }
 
 #mobile-modal ul {
@@ -280,7 +282,7 @@ a {
 }
 
 /*** Make the API Reference breadcrumbs look kind of normal ***/
-ul.wy-breadcrumbs li code span.pre{
+ul.wy-breadcrumbs li code span.pre {
   font-size: 16px;
   font-family: HKGroteskPro, serif;
   font-weight: 400;
