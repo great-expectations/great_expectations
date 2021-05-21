@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
