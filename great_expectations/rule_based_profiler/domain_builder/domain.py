@@ -9,11 +9,6 @@ from great_expectations.types import SerializableDictDot
 
 @dataclass
 class Domain(SerializableDictDot):
-    # TODO: <Alex>ALEX -- Need to discuss the implication to SemanticDomainTypeDomainBuilder</Alex>
-    # domain_kwargs: Optional[
-    #     Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
-    # ] = None
-    # domain_type: Optional[MetricDomainTypes] = None
     domain_kwargs: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None
 
     def to_json_dict(self) -> dict:

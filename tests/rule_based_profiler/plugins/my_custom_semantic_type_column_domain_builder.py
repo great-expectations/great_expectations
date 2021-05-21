@@ -73,8 +73,6 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
                     "column": column_name,
                     "batch_id": validator.active_batch_id,
                 },
-                # TODO: <Alex>ALEX -- Need to discuss the contents of Domain in RuleBasedProfiler</Alex>
-                # domain_type=SemanticDomainTypes.IDENTITY,
             )
             for column_name in candidate_column_names
         ]

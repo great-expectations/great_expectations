@@ -41,8 +41,6 @@ class ColumnDomainBuilder(DomainBuilder):
                     "column": column_name,
                     "batch_id": validator.active_batch_id,
                 },
-                # TODO: <Alex>ALEX -- Need to discuss the contents of Domain in RuleBasedProfiler</Alex>
-                # domain_type=MetricDomainTypes.COLUMN,
             )
             for column_name in table_column_names
         ]

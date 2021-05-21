@@ -87,9 +87,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                             "column": column_name,
                             "batch_id": validator.active_batch_id,
                         },
-                        # TODO: <Alex>ALEX -- Need to discuss the contents of Domain in RuleBasedProfiler</Alex>
-                        # TODO: <Alex>ALEX -- Need to discuss the process of inferring SemanticDomainTypes and converting to ComputeDomain</Alex>
-                        # domain_type=semantic_domain_type,
                     )
                 )
 
