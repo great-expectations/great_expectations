@@ -26,8 +26,8 @@ See our docs for other methods to organize assets, handle multi-file assets, nam
     DOCS_INTRO = f"""## Customize Your Datasource Configuration
 
 Give your datasource a unique name:"""
-
-    PANDAS_HEADER = f"""\
+    HEADERS = {
+        DatasourceTypes.PANDAS: f"""\
 # Create a new pandas Datasource
 
 Use this notebook and these guides to configure your new pandas Datasource and add it to your project.
@@ -38,9 +38,8 @@ Use this notebook and these guides to configure your new pandas Datasource and a
 - [How to connect to your data on Azure using pandas]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/cloud/azure/pandas/)
 
 - 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
-"""
-
-    SPARK_HEADER = f"""\
+""",
+        DatasourceTypes.SPARK: f"""\
 # Create a new Spark Datasource
 
 Use this notebook and these guides to configure your new Spark Datasource and add it to your project.
@@ -51,9 +50,8 @@ Use this notebook and these guides to configure your new Spark Datasource and ad
 - [How to connect to your data on Azure using spark]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/cloud/azure/spark/)
 
 - 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
-"""
-
-    SQL_HEADER = f"""\
+""",
+        DatasourceTypes.SQL: f"""\
 # Create a new SQL Datasource
 
 Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
@@ -68,7 +66,8 @@ Use this notebook and these guides to configure your new SQL Datasource and add 
 - [How to connect to your data in a Sqlite database]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/database/sqlite)
 
 - 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)
-"""
+""",
+    }
 
     def __init__(
         self,
@@ -87,13 +86,7 @@ Use this notebook and these guides to configure your new SQL Datasource and add 
         self.datasource_name = datasource_name
 
     def _add_header(self):
-        if self.datasource_type == DatasourceTypes.PANDAS:
-            self.add_markdown_cell(self.PANDAS_HEADER)
-        elif self.datasource_type == DatasourceTypes.SPARK:
-            self.add_markdown_cell(self.SPARK_HEADER)
-        elif self.datasource_type == DatasourceTypes.SQL:
-            self.add_markdown_cell(self.SQL_HEADER)
-
+        self.add_markdown_cell(self.HEADERS[self.datasource_type])
         self.add_code_cell(
             """import great_expectations as ge
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists
