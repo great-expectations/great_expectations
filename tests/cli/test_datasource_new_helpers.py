@@ -293,20 +293,27 @@ password = "YOUR_PASSWORD"'''
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
-  password: {password}
-  drivername: snowflake"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
+    password: {password}
+    drivername: snowflake
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -336,26 +343,32 @@ warehouse = ""  # The warehouse name (optional -- leave blank for none)
 role = ""  # The role name (optional -- leave blank for none)
 authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
     assert helper.credentials_snippet() == expected_credentials_snippet
-
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
-  connect_args:
-    authenticator: {authenticator_url}
-  drivername: snowflake"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
+    connect_args:
+      authenticator: {authenticator_url}
+    drivername: snowflake
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -389,21 +402,28 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
-  private_key_path: {private_key_path}
-  private_key_passphrase: {private_key_passphrase}
-  drivername: snowflake"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
+    private_key_path: {private_key_path}
+    private_key_passphrase: {private_key_passphrase}
+    drivername: snowflake
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -445,11 +465,18 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-connection_string: {connection_string}"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  connection_string: {connection_string}
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -487,11 +514,18 @@ connection_string = "YOUR_CONNECTION_STRING"'''
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-connection_string: {connection_string}"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  connection_string: {connection_string}
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
 
     assert helper.verify_libraries_installed() is True
@@ -549,14 +583,17 @@ class_name: Datasource
 execution_engine:
   class_name: PandasExecutionEngine
 data_connectors:
-  {datasource_name}_example_data_connector:
+  default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    datasource_name: {datasource_name}
     base_directory: ../path/to/data
     default_regex:
       group_names: 
         - data_asset_name
       pattern: (.*)
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
 """'''
     )
 

@@ -596,25 +596,25 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
     def _yaml_innards(self) -> str:
         snippet = """
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
 """
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
-            snippet += "  password: {password}"
+            snippet += "    password: {password}"
         elif self.auth_method == SnowflakeAuthMethod.SSO:
             snippet += """\
-  connect_args:
-    authenticator: {authenticator_url}"""
+    connect_args:
+      authenticator: {authenticator_url}"""
         elif self.auth_method == SnowflakeAuthMethod.KEY_PAIR:
             snippet += """\
-  private_key_path: {private_key_path}
-  private_key_passphrase: {private_key_passphrase}"""
+    private_key_path: {private_key_path}
+    private_key_passphrase: {private_key_passphrase}"""
         return snippet
 
 
@@ -643,7 +643,7 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
         )
 
     def _yaml_innards(self) -> str:
-        return "\nconnection_string: {connection_string}"
+        return "\n  connection_string: {connection_string}"
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
