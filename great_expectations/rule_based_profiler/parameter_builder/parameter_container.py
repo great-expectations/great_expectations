@@ -70,6 +70,7 @@ class ParameterContainer(SerializableDictDot):
     $parameter.date_strings.tolerances.max_abs_error_time_milliseconds
     $parameter.date_strings.tolerances.max_num_conversion_attempts
     $parameter.tolerances.mostly
+    $parameter.tolerances.financial.usd
     $mean
     $custom.lang.character_encodings
 

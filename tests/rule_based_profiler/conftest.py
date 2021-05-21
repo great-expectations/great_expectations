@@ -2,13 +2,9 @@ from typing import Any, Dict
 
 import pytest
 
-# TODO: <Alex>ALEX -- We need to add tests involving "SemanticDomainTypes" (not only "StructuredDomainTypes").</Alex>
-# noinspection PyUnresolvedReferences
-from great_expectations.core.domain_types import (
-    SemanticDomainTypes,
-    StructuredDomainTypes,
-)
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+
+# noinspection PyUnresolvedReferences
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     ParameterNode,
@@ -19,6 +15,8 @@ from great_expectations.rule_based_profiler.rule.rule import Rule
 from tests.rule_based_profiler.alice_user_workflow_fixture import (
     alice_columnar_table_single_batch,
 )
+
+# noinspection PyUnresolvedReferences
 from tests.rule_based_profiler.bob_user_workflow_fixture import (
     bob_columnar_table_multi_batch,
 )
@@ -29,7 +27,6 @@ from tests.rule_based_profiler.bob_user_workflow_fixture import (
 def column_Age_structured_type_domain():
     return Domain(
         domain_kwargs={"column": "Age", "batch_id": "1234567890"},
-        domain_type=StructuredDomainTypes.COLUMN,
     )
 
 
@@ -38,7 +35,6 @@ def column_Age_structured_type_domain():
 def column_Date_structured_type_domain():
     return Domain(
         domain_kwargs={"column": "Date", "batch_id": "1234567890"},
-        domain_type=StructuredDomainTypes.COLUMN,
     )
 
 
@@ -76,12 +72,21 @@ def multi_part_name_parameter_container():
         details=None,
         descendants=None,
     )
+    financial_tolerances_parameter_node: ParameterNode = ParameterNode(
+        attributes={
+            "usd": 1.0,
+        },
+        details=None,
+        descendants=None,
+    )
     tolerances_parameter_node: ParameterNode = ParameterNode(
         attributes={
             "mostly": 9.1e-1,
         },
         details=None,
-        descendants=None,
+        descendants={
+            "financial": financial_tolerances_parameter_node,
+        },
     )
     date_strings_tolerances_parameter_node: ParameterNode = ParameterNode(
         attributes={
@@ -165,6 +170,10 @@ def parameter_values_eight_parameters_multiple_depths():
             "details": None,
         },
         "$parameter.tolerances.mostly": {"value": 9.1e-1, "details": None},
+        "$parameter.tolerances.financial.usd": {
+            "value": 1.0,
+            "details": None,
+        },
         "$mean": {"value": 6.5e-1, "details": None},
     }
     return parameter_values

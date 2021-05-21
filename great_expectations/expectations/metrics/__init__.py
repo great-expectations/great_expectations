@@ -12,4 +12,13 @@ from .map_metric import (
     column_condition_partial,
     column_function_partial,
 )
+from .metric_provider import (
+    MetricConfiguration,
+    MetricDomainTypes,
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+    MetricProvider,
+    metric_partial,
+    metric_value,
+)
 from .table_metrics import *

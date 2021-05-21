@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain_types import SemanticDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
@@ -9,6 +8,7 @@ from great_expectations.rule_based_profiler.domain_builder.column_domain_builder
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
     InferredSemanticDomainType,
+    SemanticDomainTypes,
 )
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
@@ -46,6 +46,17 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
 
+        column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.column_types",
+                metric_domain_kwargs={},
+                metric_value_kwargs={
+                    "include_nested": True,
+                },
+                metric_dependencies=None,
+            )
+        )
+
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
@@ -63,7 +74,8 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         for column_name in table_column_names:
             inferred_semantic_domain_type = (
                 self.infer_semantic_domain_type_from_table_column_type(
-                    validator=validator, column_name=column_name
+                    column_types_dict_list=column_types_dict_list,
+                    column_name=column_name,
                 )
             )
             semantic_domain_type = inferred_semantic_domain_type.semantic_domain_type
@@ -75,7 +87,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                             "column": column_name,
                             "batch_id": validator.active_batch_id,
                         },
-                        domain_type=semantic_domain_type,
                     )
                 )
 
@@ -84,29 +95,20 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     # This method (default implementation) can be overwritten (with different implementation mechanisms) by subclasses.
     # noinspection PyMethodMayBeStatic
     def infer_semantic_domain_type_from_table_column_type(
-        self, validator: Validator, column_name: str
+        self, column_types_dict_list: List[Dict[str, Any]], column_name: str
     ) -> InferredSemanticDomainType:
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
-        column_types_dict_list: List[Dict[str, Any]] = list(
+        column_types_dict_list = list(
             filter(
                 lambda column_type_dict: column_name in column_type_dict,
-                validator.get_metric(
-                    metric=MetricConfiguration(
-                        metric_name="table.column_types",
-                        metric_domain_kwargs={},
-                        metric_value_kwargs={
-                            "include_nested": True,
-                        },
-                        metric_dependencies=None,
-                    )
-                ),
+                column_types_dict_list,
             )
         )
         if len(column_types_dict_list) != 1:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Error: {len(column_types_dict_list)} columns were found while obtaining semantic type \
-    information.  Please ensure that the specified column name refers to exactly one column.
-    """
+information.  Please ensure that the specified column name refers to exactly one column.
+"""
             )
 
         column_type: str = cast(str, column_types_dict_list[0][column_name]).upper()

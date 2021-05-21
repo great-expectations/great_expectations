@@ -8,7 +8,6 @@ import pandas as pd
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
-from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.exceptions import ExecutionEngineError, GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
@@ -41,6 +40,21 @@ class BatchData:
     def head(self, *args, **kwargs):
         # CONFLICT ON PURPOSE. REMOVE.
         return pd.DataFrame({})
+
+
+class MetricFunctionTypes(Enum):
+    VALUE = "value"
+    MAP_VALUES = "value"  # "map_values"
+    WINDOW_VALUES = "value"  # "window_values"
+    AGGREGATE_VALUE = "value"  # "aggregate_value"
+
+
+class MetricDomainTypes(Enum):
+    IDENTITY = "identity"
+    COLUMN = "column"
+    COLUMN_PAIR = "column_pair"
+    MULTICOLUMN = "multicolumn"
+    TABLE = "table"
 
 
 class ExecutionEngine(ABC):
@@ -370,10 +384,3 @@ class MetricPartialFunctionTypes(Enum):
             return "condition"
         elif self.name in ["AGGREGATE_FN"]:
             return "aggregate_fn"
-
-
-class MetricFunctionTypes(Enum):
-    VALUE = "value"
-    MAP_VALUES = "value"  # "map_values"
-    WINDOW_VALUES = "value"  # "window_values"
-    AGGREGATE_VALUE = "value"  # "aggregate_value"

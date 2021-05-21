@@ -11,11 +11,11 @@ from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
-from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 
 from ..exceptions import (
     BatchKwargsError,
@@ -545,7 +545,7 @@ Please check your config."""
         for aggregate in aggregates.values():
             compute_domain_kwargs = aggregate["domain_kwargs"]
             df, _, _ = self.get_compute_domain(
-                compute_domain_kwargs, domain_type=SemanticDomainTypes.IDENTITY.value
+                compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
             )
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []
