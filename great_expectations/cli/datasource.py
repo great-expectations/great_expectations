@@ -538,8 +538,8 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
         return (
             super()._yaml_innards()
             + """
-  query:
-    sslmode: prefer"""
+    query:
+      sslmode: prefer"""
         )
 
 

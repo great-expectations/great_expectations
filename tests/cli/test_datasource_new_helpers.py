@@ -29,29 +29,30 @@ username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
-
     assert (
         helper.yaml_snippet()
         == '''f"""
-    name: {datasource_name}
-    class_name: Datasource
-    execution_engine:
-      class_name: SqlAlchemyExecutionEngine
-      credentials:
-        host: {host}
-        port: '{port}'
-        username: {username}
-        password: {password}
-        database: {database}
-    data_connectors:
-      default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - default_identifier_name
-      default_inferred_data_connector_name:
-        class_name: InferredAssetSqlDataConnector
-        name: whole_table"""'''
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
+
+
 
     renderer = helper.get_notebook_renderer(empty_data_context)
     assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
@@ -67,21 +68,30 @@ password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
+    print(helper.yaml_snippet())
+
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  drivername: stuff"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    drivername: stuff
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -105,17 +115,24 @@ database = "YOUR_DATABASE"'''
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  drivername: mysql+pymysql"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    drivername: mysql+pymysql
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -155,17 +172,24 @@ database = "postgres"'''
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  drivername: postgresql"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    drivername: postgresql
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -198,25 +222,31 @@ username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
-
-    assert (
+    assert(
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  query:
-    sslmode: prefer
-  drivername: postgresql+psycopg2"""'''
-    )
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    query:
+      sslmode: prefer
+    drivername: postgresql+psycopg2
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""''')
+
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
     assert mock_emit.call_args_list == [
@@ -567,14 +597,17 @@ class_name: Datasource
 execution_engine:
   class_name: SparkDFExecutionEngine
 data_connectors:
-  {datasource_name}_example_data_connector:
+  default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    datasource_name: {datasource_name}
     base_directory: ../path/to/data
     default_regex:
       group_names: 
         - data_asset_name
       pattern: (.*)
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
 """'''
     )
 
