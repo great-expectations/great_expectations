@@ -1,7 +1,6 @@
 from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
