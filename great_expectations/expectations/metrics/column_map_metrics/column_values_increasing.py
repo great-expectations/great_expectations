@@ -3,13 +3,13 @@ from typing import Any, Dict, Optional, Tuple
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (

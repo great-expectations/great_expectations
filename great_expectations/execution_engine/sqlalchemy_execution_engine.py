@@ -18,7 +18,6 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -28,6 +27,7 @@ from great_expectations.exceptions import (
     InvalidConfigError,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -618,7 +618,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type=SemanticDomainTypes.IDENTITY.value
+                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY.value
             )
             assert len(query["select"]) == len(query["ids"])
             try:

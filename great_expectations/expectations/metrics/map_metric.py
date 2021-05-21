@@ -7,11 +7,11 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
@@ -525,7 +525,7 @@ def _pandas_column_map_condition_values(
     ) = metrics["unexpected_condition"]
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -592,7 +592,7 @@ def _pandas_column_map_series_and_domain_values(
     ), "map_series and condition must have the same accessor kwargs"
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -658,7 +658,7 @@ def _pandas_map_condition_index(
 
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -708,7 +708,7 @@ def _pandas_column_map_condition_value_counts(
 
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -777,7 +777,7 @@ def _pandas_map_condition_rows(
 
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -847,7 +847,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type=SemanticDomainTypes.IDENTITY.value
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
     temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
     if execution_engine.dialect == "mssql":
@@ -921,7 +921,7 @@ def _sqlalchemy_column_map_condition_values(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type=SemanticDomainTypes.IDENTITY.value
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -968,7 +968,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type=SemanticDomainTypes.IDENTITY.value
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -1009,7 +1009,7 @@ def _sqlalchemy_map_condition_rows(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type=SemanticDomainTypes.IDENTITY.value
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
 
     query = (
@@ -1057,7 +1057,7 @@ def _spark_map_condition_unexpected_count_value(
     )
     (df, _, _) = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
@@ -1077,7 +1077,7 @@ def spark_column_map_condition_values(
     )
     (df, _, _) = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1119,7 +1119,7 @@ def _spark_column_map_condition_value_counts(
     )
     (df, _, _) = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1159,7 +1159,7 @@ def _spark_map_condition_rows(
     )
     (df, _, _) = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=SemanticDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 

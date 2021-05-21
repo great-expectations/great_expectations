@@ -4,7 +4,6 @@ from typing import Any, Dict, Tuple
 
 import numpy as np
 
-from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.core.util import (
     convert_to_json_serializable,
     get_sql_dialect_floating_point_infinity_value,
@@ -14,6 +13,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
 )

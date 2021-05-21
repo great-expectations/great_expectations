@@ -1,7 +1,7 @@
 from typing import Iterable, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain_types import StructuredDomainTypes
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
@@ -69,7 +69,8 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
                     "column": column_name,
                     "batch_id": validator.active_batch_id,
                 },
-                domain_type=StructuredDomainTypes.COLUMN,
+                # TODO: <Alex>ALEX -- Need to discuss the contents of Domain in RuleBasedProfiler</Alex>
+                # domain_type=MetricDomainTypes.COLUMN,
             )
             for column_name in candidate_column_names
         ]

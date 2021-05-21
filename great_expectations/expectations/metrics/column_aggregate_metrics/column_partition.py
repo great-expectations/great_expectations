@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,

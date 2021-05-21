@@ -4,9 +4,9 @@ from typing import Any, Callable, Dict, Optional, Type
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sparkdf_execution_engine import (

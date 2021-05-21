@@ -17,10 +17,10 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
