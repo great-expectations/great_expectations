@@ -2,16 +2,9 @@ from typing import Any, Dict
 
 import pytest
 
-# TODO: <Alex>ALEX -- We need to add tests involving "MetricDomainTypes".</Alex>
-# noinspection PyUnresolvedReferences
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 
-# TODO: <Alex>ALEX -- We need to add tests involving "SemanticDomainTypes".</Alex>
 # noinspection PyUnresolvedReferences
-from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
-    SemanticDomainTypes,
-)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     ParameterNode,
@@ -22,6 +15,8 @@ from great_expectations.rule_based_profiler.rule.rule import Rule
 from tests.rule_based_profiler.alice_user_workflow_fixture import (
     alice_columnar_table_single_batch,
 )
+
+# noinspection PyUnresolvedReferences
 from tests.rule_based_profiler.bob_user_workflow_fixture import (
     bob_columnar_table_multi_batch,
 )
@@ -32,8 +27,6 @@ from tests.rule_based_profiler.bob_user_workflow_fixture import (
 def column_Age_structured_type_domain():
     return Domain(
         domain_kwargs={"column": "Age", "batch_id": "1234567890"},
-        # TODO: <Alex>ALEX -- Need to discuss the contents of Domain in RuleBasedProfiler</Alex>
-        # domain_type=MetricDomainTypes.COLUMN,
     )
 
 
@@ -42,8 +35,6 @@ def column_Age_structured_type_domain():
 def column_Date_structured_type_domain():
     return Domain(
         domain_kwargs={"column": "Date", "batch_id": "1234567890"},
-        # TODO: <Alex>ALEX -- Need to discuss the contents of Domain in RuleBasedProfiler</Alex>
-        # domain_type=MetricDomainTypes.COLUMN,
     )
 
 
