@@ -11,22 +11,7 @@ DOCS_BASE_URL = "https://knoxpod.netlify.app"
 
 
 class DatasourceNewNotebookRenderer(BaseNotebookRenderer):
-    SQL_DOCS = """\
-### For SQL based Datasources:
-
-Here we are creating an example configuration using `SimpleSqlalchemyDatasource` based on the database backend you specified in the CLI.
-
-Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control."""
-
-    FILES_DOCS = """### For files based Datasources:
-Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just an example and you may customize this as you wish!
-
-See our docs for other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, etc."""
-
-    DOCS_INTRO = f"""## Customize Your Datasource Configuration
-
-Give your datasource a unique name:"""
-    HEADERS = {
+    INTRO_MARKDOWN_BY_DATASOURCE_TYPE = {
         DatasourceTypes.PANDAS: f"""\
 # Create a new pandas Datasource
 
@@ -37,8 +22,7 @@ Use this notebook and these guides to configure your new pandas Datasource and a
 - [How to connect to your data on GCS using pandas]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/cloud/gcs/pandas/)
 - [How to connect to your data on Azure using pandas]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/cloud/azure/pandas/)
 
-- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
-""",
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#) """,
         DatasourceTypes.SPARK: f"""\
 # Create a new Spark Datasource
 
@@ -49,8 +33,7 @@ Use this notebook and these guides to configure your new Spark Datasource and ad
 - [How to connect to your data on GCS using spark]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/cloud/gcs/spark/)
 - [How to connect to your data on Azure using spark]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/cloud/azure/spark/)
 
-- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
-""",
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#) """,
         DatasourceTypes.SQL: f"""\
 # Create a new SQL Datasource
 
@@ -65,8 +48,25 @@ Use this notebook and these guides to configure your new SQL Datasource and add 
 - [How to connect to your data in a Snowflake database]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/database/snowflake)
 - [How to connect to your data in a Sqlite database]({DOCS_BASE_URL}/docs/guides/connecting_to_your_data/database/sqlite)
 
-- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)
-""",
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+    }
+
+    DOCS_INTRO = "## Customize Your Datasource Configuration\nGive your datasource a unique name:"
+
+    FILES_BASED_DOCS = """### For files based Datasources:
+Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just an example and you may customize this as you wish!
+
+See our docs for other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, etc."""
+
+    DOCS_MARKDOWN_BY_DATASOURCE_TYPE = {
+        DatasourceTypes.PANDAS: FILES_BASED_DOCS,
+        DatasourceTypes.SPARK: FILES_BASED_DOCS,
+        DatasourceTypes.SQL: """\
+### For SQL based Datasources:
+
+Here we are creating an example configuration using `SimpleSqlalchemyDatasource` based on the database backend you specified in the CLI.
+
+Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control.""",
     }
 
     def __init__(
@@ -86,7 +86,9 @@ Use this notebook and these guides to configure your new SQL Datasource and add 
         self.datasource_name = datasource_name
 
     def _add_header(self):
-        self.add_markdown_cell(self.HEADERS[self.datasource_type])
+        self.add_markdown_cell(
+            self.INTRO_MARKDOWN_BY_DATASOURCE_TYPE[self.datasource_type]
+        )
         self.add_code_cell(
             """import great_expectations as ge
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists
@@ -96,11 +98,9 @@ context = ge.get_context()""",
     def _add_docs_cell(self):
         self.add_markdown_cell(self.DOCS_INTRO)
         self.add_code_cell(f'datasource_name = "{self.datasource_name}"')
-
-        if self.datasource_type in [DatasourceTypes.PANDAS, DatasourceTypes.SPARK]:
-            self.add_markdown_cell(self.FILES_DOCS)
-        elif self.datasource_type == DatasourceTypes.SQL:
-            self.add_markdown_cell(self.SQL_DOCS)
+        self.add_markdown_cell(
+            self.DOCS_MARKDOWN_BY_DATASOURCE_TYPE[self.datasource_type]
+        )
 
     def _add_sql_credentials_cell(self):
         self.add_code_cell(self.sql_credentials_code_snippet)

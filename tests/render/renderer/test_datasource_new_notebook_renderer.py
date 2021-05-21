@@ -34,8 +34,7 @@ Use this notebook and these guides to configure your new pandas Datasource and a
 - [How to connect to your data on GCS using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/gcs/pandas/)
 - [How to connect to your data on Azure using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/azure/pandas/)
 
-- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
-""",
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#) """,
                 "metadata": {},
             }
         ]
@@ -52,8 +51,7 @@ Use this notebook and these guides to configure your new Spark Datasource and ad
 - [How to connect to your data on GCS using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/gcs/spark/)
 - [How to connect to your data on Azure using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/azure/spark/)
 
-- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
-""",
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#) """,
                 "metadata": {},
             }
         ]
@@ -74,8 +72,7 @@ Use this notebook and these guides to configure your new SQL Datasource and add 
 - [How to connect to your data in a Snowflake database]({docs_base_url}/docs/guides/connecting_to_your_data/database/snowflake)
 - [How to connect to your data in a Sqlite database]({docs_base_url}/docs/guides/connecting_to_your_data/database/sqlite)
 
-- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)
-""",
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
                 "metadata": {},
             }
         ]
@@ -92,9 +89,7 @@ Use this notebook and these guides to configure your new SQL Datasource and add 
         customize_docs_cell = [
             {
                 "cell_type": "markdown",
-                "source": """## Customize Your Datasource Configuration
-
-Give your datasource a unique name:""",
+                "source": "## Customize Your Datasource Configuration\nGive your datasource a unique name:",
                 "metadata": {},
             }
         ]
