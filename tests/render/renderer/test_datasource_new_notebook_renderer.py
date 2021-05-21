@@ -2,7 +2,10 @@ import nbformat
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.datasource.types import DatasourceTypes
+from great_expectations.datasource.types import (
+    DatasourceTypes,
+    SupportedDatabaseBackends,
+)
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
@@ -20,7 +23,6 @@ def construct_datasource_new_notebook_assets(docs_base_url):
         datasource_name: str,
         datasource_yaml: str,
     ):
-
         pandas_header = [
             {
                 "cell_type": "markdown",
@@ -55,7 +57,36 @@ Use this notebook and these guides to configure your new Spark Datasource and ad
                 "metadata": {},
             }
         ]
-        sql_header = [
+        # TODO taylor test specific types
+        sql_bigquery_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a Bigquery database]({docs_base_url}/docs/guides/connecting_to_your_data/database/bigquery)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_mysql_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a MySQL database]({docs_base_url}/docs/guides/connecting_to_your_data/database/mysql)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_other_header = [
             {
                 "cell_type": "markdown",
                 "source": f"""\
@@ -64,13 +95,49 @@ Use this notebook and these guides to configure your new Spark Datasource and ad
 Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
 
 - [How to connect to your data in a Athena database]({docs_base_url}/docs/guides/connecting_to_your_data/database/athena)
-- [How to connect to your data in a Bigquery database]({docs_base_url}/docs/guides/connecting_to_your_data/database/bigquery)
 - [How to connect to your data in a MSSQL database]({docs_base_url}/docs/guides/connecting_to_your_data/database/mssql)
-- [How to connect to your data in a MySQL database]({docs_base_url}/docs/guides/connecting_to_your_data/database/mysql)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_postgres_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
 - [How to connect to your data in a Postgres database]({docs_base_url}/docs/guides/connecting_to_your_data/database/postgres)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_redshift_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
 - [How to connect to your data in a Redshift database]({docs_base_url}/docs/guides/connecting_to_your_data/database/redshift)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_snowflake_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
 - [How to connect to your data in a Snowflake database]({docs_base_url}/docs/guides/connecting_to_your_data/database/snowflake)
-- [How to connect to your data in a Sqlite database]({docs_base_url}/docs/guides/connecting_to_your_data/database/sqlite)
 
 - 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
                 "metadata": {},
@@ -192,7 +259,12 @@ you can use `context.add_datasource()` and specify all the required parameters."
         return {
             "pandas_header": pandas_header,
             "spark_header": spark_header,
-            "sql_header": sql_header,
+            "sql_bigquery_header": sql_bigquery_header,
+            "sql_mysql_header": sql_mysql_header,
+            "sql_other_header": sql_other_header,
+            "sql_postgres_header": sql_postgres_header,
+            "sql_redshift_header": sql_redshift_header,
+            "sql_snowflake_header": sql_snowflake_header,
             "imports": imports,
             "customize_docs_cell": customize_docs_cell,
             "datasource_name_cell": datasource_name_cell,
@@ -315,7 +387,20 @@ def test_render_datasource_new_notebook_with_spark_Datasource(
     assert obs == expected
 
 
+@pytest.mark.parametrize(
+    "database, sql_intro",
+    [
+        (SupportedDatabaseBackends.BIGQUERY, "sql_bigquery_header"),
+        (SupportedDatabaseBackends.MYSQL, "sql_mysql_header"),
+        (SupportedDatabaseBackends.OTHER, "sql_other_header"),
+        (SupportedDatabaseBackends.POSTGRES, "sql_postgres_header"),
+        (SupportedDatabaseBackends.REDSHIFT, "sql_redshift_header"),
+        (SupportedDatabaseBackends.SNOWFLAKE, "sql_snowflake_header"),
+    ],
+)
 def test_render_datasource_new_notebook_with_sql_Datasource(
+    database,
+    sql_intro,
     empty_data_context,
     construct_datasource_new_notebook_assets,
 ):
@@ -335,6 +420,7 @@ def test_render_datasource_new_notebook_with_sql_Datasource(
         datasource_yaml=datasource_yaml,
         datasource_name=datasource_name,
         sql_credentials_snippet='host = "localhost"',
+        database=database,
     )
     obs: nbformat.NotebookNode = datasource_new_notebook_renderer.render()
 
@@ -345,7 +431,7 @@ def test_render_datasource_new_notebook_with_sql_Datasource(
     )
 
     expected_cells = (
-        datasource_new_notebook_assets["sql_header"]
+        datasource_new_notebook_assets[sql_intro]
         + datasource_new_notebook_assets["imports"]
         + datasource_new_notebook_assets["customize_docs_cell"]
         + datasource_new_notebook_assets["datasource_name_cell"]
