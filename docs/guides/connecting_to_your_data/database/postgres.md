@@ -17,19 +17,21 @@ This will allow you to validate and explore your data.
 
 </Prerequisites>
 
-<WhereToRunCode />
-
 ## Steps
 
-### 1. Install required dependencies
+### 1. Choose how to run the code in this guide
 
-First, install the necessary dependencies for Great Expectations to connect to your postgres database.
+<WhereToRunCode />
+
+### 2. Install required dependencies
+
+First, install the necessary dependencies for Great Expectations to connect to your postgres database by running the following in your terminal:
 
 ```console
 pip install sqlalchemy psycopg2
 ```
 
-### 2. Add credentials
+### 3. Add credentials
 
 Great Expectations provides multiple methods of using credentials for accessing databases.
 Options include using an file not checked into source control, environment variables, and using a cloud secret store.
@@ -41,21 +43,22 @@ For this guide we will use a `connection_string` like this:
 postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```   
 
-### 3. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L1-L3
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L1-L3
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L15
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L15
 ```
 
-### 4. Configure your Datasource
+### 5. Configure your Datasource
 
 <Tabs
+  groupId="yaml-or-python"
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
@@ -65,44 +68,47 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L17-L31
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L17-L31
 ```
+
 </TabItem>
 <TabItem value="python">
 
 Put your connection string in this template:
 
-```python
-datasource_config = {
-    'name': 'my_postgres_datasource',
-    'class_name': 'Datasource',
-    'execution_engine': {
-        'class_name': 'SqlAlchemyExecutionEngine',
-        'connection_string': 'postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>'
-    },
-    'data_connectors': {
-        'default_runtime_data_connector_name': {
-            'class_name': 'RuntimeDataConnector',
-            'batch_identifiers': ['default_identifier_name']
-        },
-        'default_inferred_data_connector_name': {
-              'class_name': 'InferredAssetSqlDataConnector',
-              'name': 'whole_table'
-        }
-    }
-}
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L17-L34
 ```
 
 </TabItem>
 
 </Tabs>
 
-### 5. Save the Datasource configuration to your DataContext
+### 6. Save the Datasource configuration to your DataContext
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L37
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'python', value:'python'},
+  ]}>
+  <TabItem value="yaml">
+
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L37
 ```
+
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L41
+```
+
+</TabItem>
+</Tabs>
+
+
 
 :::warning TODO
 Using this method secrets may be stored in a `great_expectations.yml` file risking leakage via source control.
@@ -112,7 +118,7 @@ Using this method secrets may be stored in a `great_expectations.yml` file riski
 - Port said function to the data context itself? (probably!)
 :::
 
-### 6. Test your new Datasource
+### 7. Test your new Datasource
 
 Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
 
@@ -126,7 +132,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L40-L54
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L40-L54
 ```
 
   </TabItem>
@@ -135,7 +141,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres.py#L57-L70
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L57-L70
 ```
 
   </TabItem>
@@ -145,7 +151,10 @@ Here is an example of loading data by specifying an existing table name.
 
 ## Additional Notes
 
-To view the full script [see it on GitHub](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/postgres.py)
+To view the full scripts used in this page, see them on GitHub:
+
+- [postgres_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/postgres_yaml_example.py)
+- [postgres_python_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/postgres_python_example.py)
 
 ## Next Steps
 
