@@ -81,12 +81,21 @@ def multi_part_name_parameter_container():
         details=None,
         descendants=None,
     )
+    financial_tolerances_parameter_node: ParameterNode = ParameterNode(
+        attributes={
+            "usd": 1.0,
+        },
+        details=None,
+        descendants=None,
+    )
     tolerances_parameter_node: ParameterNode = ParameterNode(
         attributes={
             "mostly": 9.1e-1,
         },
         details=None,
-        descendants=None,
+        descendants={
+            "financial": financial_tolerances_parameter_node,
+        },
     )
     date_strings_tolerances_parameter_node: ParameterNode = ParameterNode(
         attributes={
@@ -170,6 +179,10 @@ def parameter_values_eight_parameters_multiple_depths():
             "details": None,
         },
         "$parameter.tolerances.mostly": {"value": 9.1e-1, "details": None},
+        "$parameter.tolerances.financial.usd": {
+            "value": 1.0,
+            "details": None,
+        },
         "$mean": {"value": 6.5e-1, "details": None},
     }
     return parameter_values
