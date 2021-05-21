@@ -2,37 +2,144 @@ import nbformat
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.datasource.types import DatasourceTypes
+from great_expectations.datasource.types import (
+    DatasourceTypes,
+    SupportedDatabaseBackends,
+)
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
 
 
 @pytest.fixture
-def construct_datasource_new_notebook_assets():
+def docs_base_url() -> str:
+    # TODO taylor update this
+    return "https://knoxpod.netlify.app"
+
+
+@pytest.fixture
+def construct_datasource_new_notebook_assets(docs_base_url):
     def _construct_datasource_new_notebook_assets(
         datasource_name: str,
         datasource_yaml: str,
     ):
-
         pandas_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.PANDAS.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.PANDAS.value} Datasource and add it to your project.",
+                "source": f"""\
+# Create a new pandas Datasource
+
+Use this notebook and these guides to configure your new pandas Datasource and add it to your project.
+
+- [How to connect to your data on a filesystem using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/filesystem/pandas/)
+- [How to connect to your data on S3 using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/s3/pandas/)
+- [How to connect to your data on GCS using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/gcs/pandas/)
+- [How to connect to your data on Azure using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/azure/pandas/)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#) """,
                 "metadata": {},
             }
         ]
         spark_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.SPARK.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SPARK.value} Datasource and add it to your project.",
+                "source": f"""\
+# Create a new Spark Datasource
+
+Use this notebook and these guides to configure your new Spark Datasource and add it to your project.
+
+- [How to connect to your data on a filesystem using spark]({docs_base_url}/docs/guides/connecting_to_your_data/filesystem/spark/)
+- [How to connect to your data on S3 using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/s3/spark/)
+- [How to connect to your data on GCS using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/gcs/spark/)
+- [How to connect to your data on Azure using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/azure/spark/)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#) """,
                 "metadata": {},
             }
         ]
-        sql_header = [
+        # TODO taylor test specific types
+        sql_bigquery_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.SQL.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SQL.value} Datasource and add it to your project.",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a Bigquery database]({docs_base_url}/docs/guides/connecting_to_your_data/database/bigquery)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_mysql_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a MySQL database]({docs_base_url}/docs/guides/connecting_to_your_data/database/mysql)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_other_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a Athena database]({docs_base_url}/docs/guides/connecting_to_your_data/database/athena)
+- [How to connect to your data in a MSSQL database]({docs_base_url}/docs/guides/connecting_to_your_data/database/mssql)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_postgres_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a Postgres database]({docs_base_url}/docs/guides/connecting_to_your_data/database/postgres)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_redshift_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a Redshift database]({docs_base_url}/docs/guides/connecting_to_your_data/database/redshift)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
+                "metadata": {},
+            }
+        ]
+        sql_snowflake_header = [
+            {
+                "cell_type": "markdown",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a Snowflake database]({docs_base_url}/docs/guides/connecting_to_your_data/database/snowflake)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)""",
                 "metadata": {},
             }
         ]
@@ -49,14 +156,7 @@ def construct_datasource_new_notebook_assets():
         customize_docs_cell = [
             {
                 "cell_type": "markdown",
-                "source": """## Customize Your Datasource Configuration
-
-**If you are new to Great Expectations Datasources,** you should check out our [how-to documentation](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)
-
-**My configuration is not so simple - are there more advanced options?**
-Glad you asked! Datasources are versatile. Please see our [How To Guides](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)!
-
-Give your datasource a unique name:""",
+                "source": "## Customize Your Datasource Configuration\nGive your datasource a unique name:",
                 "metadata": {},
             }
         ]
@@ -75,7 +175,7 @@ Give your datasource a unique name:""",
             {
                 "cell_type": "markdown",
                 "source": """### For files based Datasources:
-Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just a sample, you may customize this as you wish!
+Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just an example and you may customize this as you wish!
 
 See our docs for other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, etc.""",
                 "metadata": {},
@@ -159,7 +259,12 @@ you can use `context.add_datasource()` and specify all the required parameters."
         return {
             "pandas_header": pandas_header,
             "spark_header": spark_header,
-            "sql_header": sql_header,
+            "sql_bigquery_header": sql_bigquery_header,
+            "sql_mysql_header": sql_mysql_header,
+            "sql_other_header": sql_other_header,
+            "sql_postgres_header": sql_postgres_header,
+            "sql_redshift_header": sql_redshift_header,
+            "sql_snowflake_header": sql_snowflake_header,
             "imports": imports,
             "customize_docs_cell": customize_docs_cell,
             "datasource_name_cell": datasource_name_cell,
@@ -282,7 +387,20 @@ def test_render_datasource_new_notebook_with_spark_Datasource(
     assert obs == expected
 
 
+@pytest.mark.parametrize(
+    "database, sql_intro",
+    [
+        (SupportedDatabaseBackends.BIGQUERY, "sql_bigquery_header"),
+        (SupportedDatabaseBackends.MYSQL, "sql_mysql_header"),
+        (SupportedDatabaseBackends.OTHER, "sql_other_header"),
+        (SupportedDatabaseBackends.POSTGRES, "sql_postgres_header"),
+        (SupportedDatabaseBackends.REDSHIFT, "sql_redshift_header"),
+        (SupportedDatabaseBackends.SNOWFLAKE, "sql_snowflake_header"),
+    ],
+)
 def test_render_datasource_new_notebook_with_sql_Datasource(
+    database,
+    sql_intro,
     empty_data_context,
     construct_datasource_new_notebook_assets,
 ):
@@ -302,6 +420,7 @@ def test_render_datasource_new_notebook_with_sql_Datasource(
         datasource_yaml=datasource_yaml,
         datasource_name=datasource_name,
         sql_credentials_snippet='host = "localhost"',
+        database=database,
     )
     obs: nbformat.NotebookNode = datasource_new_notebook_renderer.render()
 
@@ -312,7 +431,7 @@ def test_render_datasource_new_notebook_with_sql_Datasource(
     )
 
     expected_cells = (
-        datasource_new_notebook_assets["sql_header"]
+        datasource_new_notebook_assets[sql_intro]
         + datasource_new_notebook_assets["imports"]
         + datasource_new_notebook_assets["customize_docs_cell"]
         + datasource_new_notebook_assets["datasource_name_cell"]

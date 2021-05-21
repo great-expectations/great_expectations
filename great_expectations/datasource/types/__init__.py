@@ -10,12 +10,11 @@ class DatasourceTypes(enum.Enum):
     SQL = "sqlalchemy"
 
 
-# noinspection SpellCheckingInspection
-class SupportedDatabases(enum.Enum):
+class SupportedDatabaseBackends(enum.Enum):
+    BIGQUERY = "BigQuery"
     MYSQL = "MySQL"
+    OTHER = "other - Do you have a working SQLAlchemy connection string?"
     POSTGRES = "Postgres"
     REDSHIFT = "Redshift"
     SNOWFLAKE = "Snowflake"
-    BIGQUERY = "BigQuery"
-    OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL

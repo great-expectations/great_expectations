@@ -11,7 +11,10 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.data_context.templates import YAMLToString
-from great_expectations.datasource.types import DatasourceTypes
+from great_expectations.datasource.types import (
+    DatasourceTypes,
+    SupportedDatabaseBackends,
+)
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
@@ -29,16 +32,6 @@ except ImportError:
 yaml = YAMLToString()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
-
-
-class SupportedDatabaseBackends(enum.Enum):
-    MYSQL = "MySQL"
-    POSTGRES = "Postgres"
-    REDSHIFT = "Redshift"
-    SNOWFLAKE = "Snowflake"
-    BIGQUERY = "BigQuery"
-    OTHER = "other - Do you have a working SQLAlchemy connection string?"
-    # TODO MSSQL
 
 
 @click.group()
