@@ -9,7 +9,13 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
 
 
 @pytest.fixture
-def construct_datasource_new_notebook_assets():
+def docs_base_url() -> str:
+    # TODO taylor update this
+    return "https://knoxpod.netlify.app"
+
+
+@pytest.fixture
+def construct_datasource_new_notebook_assets(docs_base_url):
     def _construct_datasource_new_notebook_assets(
         datasource_name: str,
         datasource_yaml: str,
@@ -18,21 +24,58 @@ def construct_datasource_new_notebook_assets():
         pandas_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.PANDAS.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.PANDAS.value} Datasource and add it to your project.",
+                "source": f"""\
+# Create a new pandas Datasource
+
+Use this notebook and these guides to configure your new pandas Datasource and add it to your project.
+
+- [How to connect to your data on a filesystem using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/filesystem/pandas/)
+- [How to connect to your data on S3 using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/s3/pandas/)
+- [How to connect to your data on GCS using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/gcs/pandas/)
+- [How to connect to your data on Azure using pandas]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/azure/pandas/)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
+""",
                 "metadata": {},
             }
         ]
         spark_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.SPARK.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SPARK.value} Datasource and add it to your project.",
+                "source": f"""\
+# Create a new Spark Datasource
+
+Use this notebook and these guides to configure your new Spark Datasource and add it to your project.
+
+- [How to connect to your data on a filesystem using spark]({docs_base_url}/docs/guides/connecting_to_your_data/filesystem/spark/)
+- [How to connect to your data on S3 using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/s3/spark/)
+- [How to connect to your data on GCS using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/gcs/spark/)
+- [How to connect to your data on Azure using spark]({docs_base_url}/docs/guides/connecting_to_your_data/cloud/azure/spark/)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition a filesystem or blob store](#)
+""",
                 "metadata": {},
             }
         ]
         sql_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.SQL.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SQL.value} Datasource and add it to your project.",
+                "source": f"""\
+# Create a new SQL Datasource
+
+Use this notebook and these guides to configure your new SQL Datasource and add it to your project.
+
+- [How to connect to your data in a Athena database]({docs_base_url}/docs/guides/connecting_to_your_data/database/athena)
+- [How to connect to your data in a Bigquery database]({docs_base_url}/docs/guides/connecting_to_your_data/database/bigquery)
+- [How to connect to your data in a MSSQL database]({docs_base_url}/docs/guides/connecting_to_your_data/database/mssql)
+- [How to connect to your data in a MySQL database]({docs_base_url}/docs/guides/connecting_to_your_data/database/mysql)
+- [How to connect to your data in a Postgres database]({docs_base_url}/docs/guides/connecting_to_your_data/database/postgres)
+- [How to connect to your data in a Redshift database]({docs_base_url}/docs/guides/connecting_to_your_data/database/redshift)
+- [How to connect to your data in a Snowflake database]({docs_base_url}/docs/guides/connecting_to_your_data/database/snowflake)
+- [How to connect to your data in a Sqlite database]({docs_base_url}/docs/guides/connecting_to_your_data/database/sqlite)
+
+- 🍏 CORE SKILLS ICON [How to configure a DataConnector to introspect and partition tables in SQL](#)
+""",
                 "metadata": {},
             }
         ]
@@ -50,11 +93,6 @@ def construct_datasource_new_notebook_assets():
             {
                 "cell_type": "markdown",
                 "source": """## Customize Your Datasource Configuration
-
-**If you are new to Great Expectations Datasources,** you should check out our [how-to documentation](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)
-
-**My configuration is not so simple - are there more advanced options?**
-Glad you asked! Datasources are versatile. Please see our [How To Guides](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)!
 
 Give your datasource a unique name:""",
                 "metadata": {},
@@ -75,7 +113,7 @@ Give your datasource a unique name:""",
             {
                 "cell_type": "markdown",
                 "source": """### For files based Datasources:
-Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just a sample, you may customize this as you wish!
+Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just an example and you may customize this as you wish!
 
 See our docs for other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, etc.""",
                 "metadata": {},
