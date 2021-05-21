@@ -33,17 +33,24 @@ database = "YOUR_DATABASE"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
-name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}"""'''
+    name: {datasource_name}
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      credentials:
+        host: {host}
+        port: '{port}'
+        username: {username}
+        password: {password}
+        database: {database}
+    data_connectors:
+      default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+      default_inferred_data_connector_name:
+        class_name: InferredAssetSqlDataConnector
+        name: whole_table"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)

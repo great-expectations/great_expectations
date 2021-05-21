@@ -667,7 +667,7 @@ class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
 connection_string = "YOUR_CONNECTION_STRING"'''
 
     def _yaml_innards(self) -> str:
-        return "\nconnection_string: {connection_string}"
+        return "\n  connection_string: {connection_string}"
 
 
 def _get_sql_yaml_helper_class(
