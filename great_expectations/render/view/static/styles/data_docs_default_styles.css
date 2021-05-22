@@ -94,6 +94,10 @@ td .show-scrollbars {
   max-height: 80vh;
 }
 
+tr td:first-child {
+  white-space: nowrap;
+}
+
 /*.show-scrollbars ul {*/
 /*  padding-bottom: 20px*/
 /*}*/

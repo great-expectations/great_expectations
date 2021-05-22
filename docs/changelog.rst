@@ -8,6 +8,7 @@ Develop
 -----------------
 * Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [DOCS] Remove broken links
+* [BUGFIX] Fix DataDoc's styling to prevent column shrinkage with long Batch Kwargs
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [MAINTENANCE] Improve robustness of integration test_runner
