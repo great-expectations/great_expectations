@@ -13,19 +13,8 @@ config_version: 3.0
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
-datasources:
-  taxi_datasource_with_runtime_data_connector:
-    class_name: Datasource
-    execution_engine:
-      class_name: PandasExecutionEngine
-      module_name: great_expectations.execution_engine
-    module_name: great_expectations.datasource
-    data_connectors:
-      default_runtime_data_connector_name:
-        batch_identifiers:
-          - default_identifier_name
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
+datasources: {}
+
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules

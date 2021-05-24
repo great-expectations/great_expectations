@@ -1,136 +1,131 @@
 ---
 title: How to connect to your data on a filesystem using pandas
 ---
-
+import NextSteps from '../components/next_steps.md'
+import Congratulations from '../components/congratulations.md'
+import Prerequisites from '../components/prerequisites.jsx'
+import WhereToRunCode from '../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to your data stored on a filesystem using pandas. This enables you to work with your data in Great Expectations.
+This guide will help you connect to your data stored on a filesystem using pandas.
+This will allow you to validate and explore your data.
 
-:::note Prerequisites: This how-to guide assumes you have already:
-- Completed the [Getting Started Tutorial](../../../tutorials/getting-started/intro.md)
-- Have a working installation of Great Expectations
+<Prerequisites>
+
 - Have access to data on a filesystem
-:::
+
+</Prerequisites>
 
 ## Steps
 
-### 1. Add the datasource to your project
+### 1. Choose how to run the code in this guide
 
-Using this example configuration:
+<WhereToRunCode />
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L8-L22
+### 2. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+
+Import these necessary packages and modules.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L1-L3
 ```
 
-Add the datasource by using the CLI or python APIs:
+Load your DataContext into memory using the `get_context()` method.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L6
+```
+
+### 3. Configure your Datasource
+
+Using this example configuration add in the path to a directory that contains some of your data:
 
 <Tabs
-  defaultValue="python"
+  groupId="yaml-or-python"
+  defaultValue='yaml'
   values={[
-    {label: 'CLI', value: 'cli'},
-    {label: 'python', value: 'python'},
+  {label: 'YAML', value:'yaml'},
+  {label: 'python', value:'python'},
   ]}>
-  <TabItem value="cli">
+  <TabItem value="yaml">
 
-Run this command:
-
-```console
-great_expectations --v3-api datasource new
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L27
 ```
 
-**TODO** flesh out this section - link to an article about how to add a datasource with the CLI?
+Run this code to test your configuration.
 
-In the notebook...
-
-  </TabItem>
-  <TabItem value="python">
-
-Import some libraries
-
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L1-L4
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
 ```
 
-Load a DataContext
+</TabItem>
+<TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L7
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L8-L28
 ```
 
-Save the Datasource configuration you created above into your Data Context
+Run this code to test your configuration.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L23
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L36
 ```
 
 </TabItem>
 </Tabs>
 
-### 3. Write a `BatchRequest`
+If you specified a directory containing CSV files you will see them listed as `Available data_asset_names` in the output.
 
-In a `RuntimeBatchRequest` the `data_asset_name` can be any unique name to identify this batch of data. Please update the `data_asset_name` to something meaningful to you.
+Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
+
+### 4. Save the Datasource configuration to your DataContext
+
+Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
 <Tabs
-  defaultValue="csv"
+  groupId="yaml-or-python"
+  defaultValue='yaml'
   values={[
-    {label: 'CSV', value: 'csv'},
-    {label: 'CSV with custom delimiters', value: 'csv_delimiters'},
-    {label: 'CSV without a header', value: 'csv_headerless'},
+  {label: 'YAML', value:'yaml'},
+  {label: 'python', value:'python'},
   ]}>
-  <TabItem value="csv">
+  <TabItem value="yaml">
 
-Add the path to your csv on a filesystem to the `path` key under `runtime_parameters` and run the following code:
-
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L24-L31
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L37
 ```
 
-  </TabItem>
-  <TabItem value="csv_delimiters">
+</TabItem>
+<TabItem value="python">
 
-  **TODO** do this
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L38
+```
 
-  </TabItem>
-  <TabItem value="csv_headerless">
-
-  **TODO** do this
-
-  </TabItem>
+</TabItem>
 </Tabs>
 
-### 4. Test your datasource configuration by getting a `Batch`
+### 5. Test your new Datasource
 
-Load a `Batch` of your data to test if your `Datasource` configuration works by running the following code:
+Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L39
+Add the path to your CSV in the `path` key under `runtime_parameters`.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L39-L45
+```
+Then load data into the `Validator`.
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L53-L59
 ```
 
-Congratulations! If no errors are shown here, you've just connected to your data on a filesystem using pandas!
-
-:::tip Next steps
-After connecting to data, usually people validate data!
-**TODO** insert link or have this be an include.
-
-Right now a Batch is just Data + Metadata that is recognized by GE. If you want to actually Validate your data with Expectations, you will need a Batch + ExpectationSuite.
-:::
+<Congratulations />
 
 ## Additional Notes
 
-**TODO**
-Consider removing learning-focused material.
+If you are working with nonstandard CSVs, read one of these guides:
 
-:::note What does this configuration contain?
+- [How to work with headerless CSVs in pandas](#TODO)
+- [How to work with custom delimited CSVs in pandas](#TODO)
+- [How to work with parquet files in pandas](#TODO)
 
-- It has a `PandasExecutionEngine` which provides the computing resources that will be used to perform validation on your data.
-- It also has a default `RuntimeDataConnector` named: `default_runtime_data_connector_name` (**TODO** discuss) which will loads your data into a `Batch`.
-- It also has a default batch_identifier : `default_identifier_name` (**TODO** discuss) used to uniquely identify Batches
-:::
+To view the full scripts used in this page, see them on GitHub:
 
-:::note A word about DataConnectors
-A `RuntimeDataconnector` is usually enough to test whether your connection works (as we are doing now), or in cases where you are using Great Expectations to interactively validate a few Batches of Data.
+- [pandas_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py)
+- [pandas_python_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/filesystem/pandas_python_example.py)
 
-Great Expectations also has something called an `ActiveDataConnector` (Configured or Inferred) that can be used to automate the retrieval and validation of Batches while also enabling more sophisticated filtering and sorting. Please look at (**TODO** insert link) for more information.
-:::
+## Next Steps
 
-### Full script
-
-Here is the full script from which snippets were taken.
-
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas.py#L1-L40
-```
+<NextSteps />

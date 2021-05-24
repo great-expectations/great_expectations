@@ -1,12 +1,11 @@
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch
 from integration.code.connecting_to_your_data.database.util import (
     load_data_into_database,
 )
 
-CONNECTION_STRING = """postgresql+psycopg2://postgres:@localhost/test_ci"""
+CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 load_data_into_database(
     "taxi_data",
     "./data/reports/yellow_tripdata_sample_2019-01.csv",
@@ -15,13 +14,12 @@ load_data_into_database(
 
 context = ge.get_context()
 
-# with a connection_string
-config = """
+datasource_yaml = """
 name: my_postgres_datasource
 class_name: Datasource
 execution_engine:
   class_name: SqlAlchemyExecutionEngine
-  connection_string: <YOUR_CONNECTION_STRING_HERE>
+  connection_string: postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 data_connectors:
    default_runtime_data_connector_name:
        class_name: RuntimeDataConnector
@@ -31,15 +29,23 @@ data_connectors:
        class_name: InferredAssetSqlDataConnector
        name: whole_table
 """
-config = config.replace("<YOUR_CONNECTION_STRING_HERE>", CONNECTION_STRING)
 
-context.add_datasource(**yaml.load(config))
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your path directly in the yaml above.
+datasource_yaml = datasource_yaml.replace(
+    "postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>",
+    CONNECTION_STRING,
+)
 
-# First test for RuntimeBatchRequest using a query
+context.test_yaml_config(datasource_yaml)
+
+context.add_datasource(**yaml.load(datasource_yaml))
+
+# Here is a RuntimeBatchRequest using a query
 batch_request = ge.core.batch.RuntimeBatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="default_name",  # this can be anything that identifies this data_asset for you
+    data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "something_something"},
 )
@@ -52,7 +58,7 @@ validator = context.get_validator(
 )
 print(validator.head())
 
-# Second test for BatchRequest naming a table
+# Here is a BatchRequest naming a table
 batch_request = ge.core.batch.BatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -65,3 +71,14 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+assert [ds["name"] for ds in context.list_datasources()] == ["my_postgres_datasource"]
+assert set(
+    context.get_available_data_asset_names()["my_postgres_datasource"][
+        "default_inferred_data_connector_name"
+    ]
+) == {
+    "taxi_data",
+}

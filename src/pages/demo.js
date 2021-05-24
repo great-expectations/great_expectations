@@ -57,7 +57,7 @@ const computeOptions = [
   { value: 'compute-bigquery', label: 'bigquery' },
   { value: 'compute-redshift', label: 'redshift' },
   { value: 'compute-snowflake', label: 'snowflake' },
-  { value: 'compute-athena', label: 'athena' },
+  { value: 'compute-athena', label: 'athena' }
 ]
 
 export default class TOC extends React.Component {
