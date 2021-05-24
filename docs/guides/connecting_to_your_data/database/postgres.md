@@ -117,16 +117,6 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 </Tabs>
 
-
-
-:::warning TODO
-Using this method secrets may be stored in a `great_expectations.yml` file risking leakage via source control.
-
-**Ideas**
-- Use the convenience function the `datasource new` notebooks use?
-- Port said function to the data context itself? (probably!)
-:::
-
 ### 7. Test your new Datasource
 
 Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
