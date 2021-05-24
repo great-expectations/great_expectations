@@ -4,6 +4,7 @@ import decimal
 import logging
 import os
 import sys
+import uuid
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -170,6 +171,9 @@ def convert_to_json_serializable(data):
 
     elif isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
+
+    elif isinstance(data, uuid.UUID):
+        return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
     # https://github.com/numpy/numpy/pull/9505
