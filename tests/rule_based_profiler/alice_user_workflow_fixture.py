@@ -65,12 +65,12 @@ def alice_columnar_table_single_batch():
         ),
     ]
 
-    event_ts_column_data: Dict[str:str] = {
+    event_ts_column_data: Dict[str, str] = {
         "column_name": "event_ts",
         "observed_max_time_str": "2004-10-19 11:05:20",
     }
 
-    my_rule_for_timestamps_column_data: List[Dict[str:str]] = [
+    my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
         event_ts_column_data,
         {"column_name": "server_ts", "observed_max_time_str": "2004-10-19 11:05:20",},
         {"column_name": "device_ts", "observed_max_time_str": "2004-10-19 11:05:22",},
