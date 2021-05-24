@@ -17,6 +17,19 @@ data_connectors:
         class_name: RuntimeDataConnector
         batch_identifiers:
             - default_identifier_name
+  
+  ## <WILL> THIS NEEDS TO BE CHANGED ###
+  default_inferred_data_connector_name:
+    class_name: InferredAssetFilesystemDataConnector
+    base_directory: {base_path}
+    default_regex:
+      group_names: 
+        - data_asset_name
+      pattern: (.*)
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
 """
 
 context.add_datasource(**yaml.load(datasource_yaml))

@@ -1,5 +1,4 @@
 from ..util import verify_dynamic_loading_support
-
 from .actions import (
     EmailAction,
     MicrosoftTeamsNotificationAction,
