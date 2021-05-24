@@ -27,7 +27,7 @@ This will allow you to validate and explore your data.
 
 Import these necessary packages and modules.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L1-L3
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L1-L4
 ```
 
 Load your DataContext into memory using the `get_context()` method.
@@ -103,13 +103,36 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
 
-Add the path to your CSV in the `path` key under `runtime_parameters`.
+<Tabs
+  defaultValue='runtime_batch_request'
+  values={[
+  {label: 'Specify a path to single CSV', value:'runtime_batch_request'},
+  {label: 'Specify a data_asset_name', value:'batch_request'},
+  ]}>
+  <TabItem value="runtime_batch_request">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L39-L45
+Add the path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L40-L46
 ```
 Then load data into the `Validator`.
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L53-L59
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L53-L60
 ```
+
+  </TabItem>
+  <TabItem value="batch_request">
+
+Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L66-L70
+```
+Then load data into the `Validator`.
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L76-L82
+```
+
+  </TabItem>
+</Tabs>
+
 
 <Congratulations />
 
