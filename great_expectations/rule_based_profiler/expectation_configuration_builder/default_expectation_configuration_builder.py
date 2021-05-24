@@ -14,23 +14,18 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     """
     Class which creates ExpectationConfiguration out of a given Expectation type and
-    parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied as expectation_kwargs and
-    kwargs dictionaries).
+    parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied in the kwargs dictionary).
     """
 
     def __init__(
         self,
         expectation_type: str,
-        expectation_kwargs: Optional[Dict[str, str]] = None,
         meta: Optional[Dict[str, Any]] = None,
         success_on_last_run: Optional[bool] = None,
         **kwargs,
     ):
         self._expectation_type = expectation_type
-        if expectation_kwargs is None:
-            expectation_kwargs = {}
-        self._expectation_kwargs = expectation_kwargs
-        self._expectation_kwargs.update(kwargs)
+        self._expectation_kwargs = kwargs
         if meta is None:
             meta = {}
         self._meta = meta
