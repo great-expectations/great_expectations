@@ -41,7 +41,10 @@ def alice_columnar_table_single_batch():
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {"column": "user_id", "type_": "INTEGER",},
+                "kwargs": {
+                    "column": "user_id",
+                    "type_": "INTEGER",
+                },
                 "meta": {},
             }
         ),
@@ -59,7 +62,9 @@ def alice_columnar_table_single_batch():
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {"column": "user_id",},
+                "kwargs": {
+                    "column": "user_id",
+                },
                 "meta": {},
             }
         ),
@@ -72,8 +77,14 @@ def alice_columnar_table_single_batch():
 
     my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
         event_ts_column_data,
-        {"column_name": "server_ts", "observed_max_time_str": "2004-10-19 11:05:20",},
-        {"column_name": "device_ts", "observed_max_time_str": "2004-10-19 11:05:22",},
+        {
+            "column_name": "server_ts",
+            "observed_max_time_str": "2004-10-19 11:05:20",
+        },
+        {
+            "column_name": "device_ts",
+            "observed_max_time_str": "2004-10-19 11:05:22",
+        },
     ]
     my_rule_for_timestamps_expectation_configurations: List[
         ExpectationConfiguration
@@ -95,14 +106,18 @@ def alice_columnar_table_single_batch():
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {"column": column_data["column_name"],},
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
                         "meta": {},
                     }
                 ),
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {"column": column_data["column_name"],},
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
                         "meta": {},
                     }
                 ),
