@@ -70,11 +70,13 @@ def alice_columnar_table_single_batch():
         ),
     ]
 
-    my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
-        {
-            "column_name": "event_ts",
-            "observed_max_time_str": "2004-10-19 11:05:20",
-        },
+    event_ts_column_data: Dict[str: str] = {
+        "column_name": "event_ts",
+        "observed_max_time_str": "2004-10-19 11:05:20",
+    }
+
+    my_rule_for_timestamps_column_data: List[Dict[str: str]] = [
+        event_ts_column_data,
         {
             "column_name": "server_ts",
             "observed_max_time_str": "2004-10-19 11:05:20",
@@ -143,15 +145,15 @@ def alice_columnar_table_single_batch():
                         "kwargs": {
                             "column": column_data["column_name"],
                             "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": column_data[
+                            "max_value": event_ts_column_data[
                                 "observed_max_time_str"
-                            ],  # From data
+                            ],  # Pin to event_ts column
                         },
                         "meta": {
                             "notes": {
                                 "format": "markdown",
                                 "content": [
-                                    "### This expectation should be replaced with the below expectation"
+                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
                                 ],
                             }
                         },
