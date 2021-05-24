@@ -5,7 +5,7 @@ from integration.code.connecting_to_your_data.database.util import (
     load_data_into_database,
 )
 
-CONNECTION_STRING = "postgresql+psycopg2://foo:bar@localhost/test_ci"
+CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 load_data_into_database(
     "taxi_data",
     "./data/reports/yellow_tripdata_sample_2019-01.csv",
