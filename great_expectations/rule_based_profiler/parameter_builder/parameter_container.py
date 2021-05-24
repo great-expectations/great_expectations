@@ -1,5 +1,6 @@
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional
+# TODO: <Alex>ALEX</Alex>
+from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
@@ -7,6 +8,7 @@ from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import DotDict
 
+PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
 DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
     f"$domain.{DOMAIN_KWARGS_PARAMETER_NAME}"
@@ -23,8 +25,9 @@ names must start with $ (e.g., "${fully_qualified_parameter_name}").
         )
 
 
-@dataclass
-class ParameterNode(SerializableDictDot):
+# TODO: <Alex>ALEX</Alex>
+# @dataclass
+class ParameterNode(DotDict):
     """
     ParameterNode is a node of a tree structure.
 
@@ -38,13 +41,19 @@ class ParameterNode(SerializableDictDot):
     Even though, typically, only the leaf nodes (characterized by having no descendants) contain attributes and details,
     intermediate nodes may also have these properties.
     """
-
-    attributes: Optional[DotDict] = None
-    details: Optional[DotDict] = None
-    descendants: Optional[Dict[str, "ParameterNode"]] = None
-
+    #
+    # # TODO: <Alex>ALEX</Alex>
+    # attributes: Optional[DotDict] = None
+    # details: Optional[DotDict] = None
+    # descendants: Optional[Dict[str, "ParameterNode"]] = None
+    # # attributes: Optional[Dict[str, Union[Any, DotDict, "ParameterNode"]]] = None
+    #
+    # def to_json_dict(self) -> dict:
+    #     return convert_to_json_serializable(data=asdict(self))
+    # # TODO: <Alex>ALEX</Alex>
+    #
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=asdict(self))
+        return convert_to_json_serializable(data=self)
 
 
 @dataclass
@@ -181,7 +190,7 @@ def build_parameter_container(
         )
         fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[
             1:
-        ].split(".")
+        ].split(PARAMETER_NAME_SEPARATOR_CHARACTER)
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
         parameter_value = parameter_value_details_dict["value"]
         # The details key is optional; in particular, it is commonly omitted for globally scoped "variables".
@@ -314,7 +323,7 @@ def get_parameter_value(
 
     fully_qualified_parameter_name_as_list: List[
         str
-    ] = fully_qualified_parameter_name.split(".")
+    ] = fully_qualified_parameter_name.split(PARAMETER_NAME_SEPARATOR_CHARACTER)
 
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
