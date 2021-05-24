@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 from great_expectations.rule_based_profiler.rule.rule import Rule
 
 # noinspection PyUnresolvedReferences
+from great_expectations.types.base import DotDict
 from tests.rule_based_profiler.alice_user_workflow_fixture import (
     alice_columnar_table_single_batch,
 )
@@ -43,9 +44,11 @@ def single_part_name_parameter_container():
     return ParameterContainer(
         parameter_nodes={
             "mean": ParameterNode(
-                attributes={
-                    "mean": 5.0,
-                },
+                attributes=DotDict(
+                    {
+                        "mean": 5.0,
+                    },
+                ),
                 details=None,
                 descendants=None,
             ),
@@ -66,57 +69,69 @@ def multi_part_name_parameter_container():
     $mean
     """
     root_mean_node: ParameterNode = ParameterNode(
-        attributes={
-            "mean": 6.5e-1,
-        },
+        attributes=DotDict(
+            {
+                "mean": 6.5e-1,
+            },
+        ),
         details=None,
         descendants=None,
     )
     financial_tolerances_parameter_node: ParameterNode = ParameterNode(
-        attributes={
-            "usd": 1.0,
-        },
+        attributes=DotDict(
+            {
+                "usd": 1.0,
+            },
+        ),
         details=None,
         descendants=None,
     )
     tolerances_parameter_node: ParameterNode = ParameterNode(
-        attributes={
-            "mostly": 9.1e-1,
-        },
+        attributes=DotDict(
+            {
+                "mostly": 9.1e-1,
+            },
+        ),
         details=None,
         descendants={
             "financial": financial_tolerances_parameter_node,
         },
     )
     date_strings_tolerances_parameter_node: ParameterNode = ParameterNode(
-        attributes={
-            "max_abs_error_time_milliseconds": 100,
-            "max_num_conversion_attempts": 5,
-        },
+        attributes=DotDict(
+            {
+                "max_abs_error_time_milliseconds": 100,
+                "max_num_conversion_attempts": 5,
+            },
+        ),
         details=None,
         descendants=None,
     )
     date_strings_parameter_node: ParameterNode = ParameterNode(
-        attributes={
-            "yyyy_mm_dd_hh_mm_ss_tz_date_format": "%Y-%m-%d %H:%M:%S %Z",
-            "yyyy_mm_dd_date_format": "%Y-%m-%d",
-            "mm_yyyy_dd_hh_mm_ss_tz_date_format": "%m-%Y-%d %H:%M:%S %Z",
-            "mm_yyyy_dd_date_format": "%m-%Y-%d",
-        },
-        details={
-            "yyyy_mm_dd_hh_mm_ss_tz_date_format": {
-                "confidence": 7.8e-1,
+        attributes=DotDict(
+            {
+                "yyyy_mm_dd_hh_mm_ss_tz_date_format": "%Y-%m-%d %H:%M:%S %Z",
+                "yyyy_mm_dd_date_format": "%Y-%m-%d",
+                "mm_yyyy_dd_hh_mm_ss_tz_date_format": "%m-%Y-%d %H:%M:%S %Z",
+                "mm_yyyy_dd_date_format": "%m-%Y-%d",
             },
-            "yyyy_mm_dd_date_format": {
-                "confidence": 7.8e-1,
+        ),
+        details=DotDict(
+            {
+                "yyyy_mm_dd_hh_mm_ss_tz_date_format": {
+                    "confidence": 7.8e-1,
+                },
+                "yyyy_mm_dd_date_format": {
+                    "confidence": 7.8e-1,
+                },
+                "mm_yyyy_dd_hh_mm_ss_tz_date_format": {
+                    "confidence": 7.8e-1,
+                },
+                "mm_yyyy_dd_date_format": {
+                    "confidence": 7.8e-1,
+                },
             },
-            "mm_yyyy_dd_hh_mm_ss_tz_date_format": {
-                "confidence": 7.8e-1,
-            },
-            "mm_yyyy_dd_date_format": {
-                "confidence": 7.8e-1,
-            },
-        },
+        ),
         descendants={
             "tolerances": date_strings_tolerances_parameter_node,
         },
@@ -201,9 +216,11 @@ def rule_with_variables_with_parameters(
     multi_part_name_parameter_container,
 ):
     variables_multi_part_name_parameter_node: ParameterNode = ParameterNode(
-        attributes={
-            "false_positive_threshold": 1.0e-2,
-        },
+        attributes=DotDict(
+            {
+                "false_positive_threshold": 1.0e-2,
+            },
+        ),
         details=None,
         descendants=None,
     )

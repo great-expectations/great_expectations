@@ -5,6 +5,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
+from great_expectations.types.base import DotDict
 
 DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
 DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
@@ -38,8 +39,8 @@ class ParameterNode(SerializableDictDot):
     intermediate nodes may also have these properties.
     """
 
-    attributes: Optional[Dict[str, Any]] = None
-    details: Optional[Dict[str, Any]] = None
+    attributes: Optional[DotDict] = None
+    details: Optional[DotDict] = None
     descendants: Optional[Dict[str, "ParameterNode"]] = None
 
     def to_json_dict(self) -> dict:
@@ -253,11 +254,11 @@ def _set_parameter_node_attribute_name_value_pairs(
 ):
     if attribute_value is not None:
         if parameter_node.attributes is None:
-            parameter_node.attributes = {}
+            parameter_node.attributes = DotDict()
         parameter_node.attributes[attribute_name] = attribute_value
     if details is not None:
         if parameter_node.details is None:
-            parameter_node.details = {}
+            parameter_node.details = DotDict()
         parameter_node.details[attribute_name] = details
 
 
