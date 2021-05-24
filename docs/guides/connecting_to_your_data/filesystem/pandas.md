@@ -37,7 +37,7 @@ Load your DataContext into memory using the `get_context()` method.
 
 ### 3. Configure your Datasource
 
-Using this example configuration:
+Using this example configuration add in the path to a directory that contains some of your data:
 
 <Tabs
   groupId="yaml-or-python"
@@ -48,7 +48,7 @@ Using this example configuration:
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L20
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L27
 ```
 
 </TabItem>
@@ -59,6 +59,15 @@ Using this example configuration:
 
 </TabItem>
 </Tabs>
+
+Run this code to test your configuration.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
+```
+
+If you specified a directory containing CSV files you will see them listed as `Available data_asset_names` in the output.
+
+Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
 
 ### 4. Save the Datasource configuration to your DataContext
 
@@ -73,7 +82,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L22
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L37
 ```
 
 </TabItem>
@@ -91,7 +100,10 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Add the path to your CSV in the `path` key under `runtime_parameters`.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L24-L44
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L39-L45
+```
+Then load data into the `Validator`.
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L53-L59
 ```
 
 <Congratulations />
