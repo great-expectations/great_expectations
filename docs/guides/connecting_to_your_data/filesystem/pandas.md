@@ -51,19 +51,26 @@ Using this example configuration add in the path to a directory that contains so
 ```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L27
 ```
 
+Run this code to test your configuration.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
+```
+
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L6-L20
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L8-L28
+```
+
+Run this code to test your configuration.
+
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L36
 ```
 
 </TabItem>
 </Tabs>
 
-Run this code to test your configuration.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
-```
 
 If you specified a directory containing CSV files you will see them listed as `Available data_asset_names` in the output.
 
@@ -88,7 +95,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L22
+```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L38
 ```
 
 </TabItem>
