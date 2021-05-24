@@ -6,9 +6,9 @@ Get an environment to run the code in this guide. Please choose an option below.
 <Tabs
   defaultValue='cli'
   values={[
-  {label: 'CLI', value:'cli'},
-  {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'CLI + filesystem', value:'cli'},
+  {label: 'No CLI + filesystem', value:'yaml'},
+  {label: 'No CLI + no filesystem', value:'python'},
   ]}>
   <TabItem value="cli">
 

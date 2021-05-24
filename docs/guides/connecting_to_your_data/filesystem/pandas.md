@@ -70,8 +70,6 @@ Run this code to test your configuration.
 </TabItem>
 </Tabs>
 
-
-
 If you specified a directory containing CSV files you will see them listed as `Available data_asset_names` in the output.
 
 Feel free to adjust your configuration and re-run `test_yaml_config` as needed.

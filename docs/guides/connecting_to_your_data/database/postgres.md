@@ -70,6 +70,9 @@ Put your connection string in this template:
 
 ```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L17-L31
 ```
+Run this code to test your configuration.
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L40
+```
 
 </TabItem>
 <TabItem value="python">
@@ -78,10 +81,16 @@ Put your connection string in this template:
 
 ```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L17-L34
 ```
+Run this code to test your configuration.
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L40
+```
 
 </TabItem>
-
 </Tabs>
+
+You will see your database tables listed as `Available data_asset_names` in the output.
+
+Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
 
 ### 6. Save the Datasource configuration to your DataContext
 
@@ -96,13 +105,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L37
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L42
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L41
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L42
 ```
 
 </TabItem>
@@ -132,7 +141,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L40-L54
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L45-L59
 ```
 
   </TabItem>
@@ -141,7 +150,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L57-L70
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L62-L73
 ```
 
   </TabItem>
