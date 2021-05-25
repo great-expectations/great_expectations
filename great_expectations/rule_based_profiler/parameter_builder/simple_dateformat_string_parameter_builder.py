@@ -145,11 +145,13 @@ currently loaded in the validator.
                 best_fit_date_format_estimate = format_string
                 best_success_ratio = current_success_ratio
 
-        parameter_values: Dict[str, Dict[str, Any]] = {
+        parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
                 "value": best_fit_date_format_estimate,
-                "details": {"success_ratio": best_success_ratio},
-            },
+                "details": {
+                    "success_ratio": best_success_ratio,
+                },
+            }
         }
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values

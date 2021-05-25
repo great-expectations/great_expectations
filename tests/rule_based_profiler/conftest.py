@@ -43,11 +43,9 @@ def single_part_name_parameter_container():
     return ParameterContainer(
         parameter_nodes={
             "mean": ParameterNode(
-                attributes={
+                {
                     "mean": 5.0,
-                },
-                details=None,
-                descendants=None,
+                }
             ),
         }
     )
@@ -66,73 +64,82 @@ def multi_part_name_parameter_container():
     $mean
     """
     root_mean_node: ParameterNode = ParameterNode(
-        attributes={
+        {
             "mean": 6.5e-1,
-        },
-        details=None,
-        descendants=None,
+        }
     )
     financial_tolerances_parameter_node: ParameterNode = ParameterNode(
-        attributes={
+        {
             "usd": 1.0,
-        },
-        details=None,
-        descendants=None,
+        }
     )
     tolerances_parameter_node: ParameterNode = ParameterNode(
-        attributes={
+        {
             "mostly": 9.1e-1,
-        },
-        details=None,
-        descendants={
             "financial": financial_tolerances_parameter_node,
-        },
+        }
     )
     date_strings_tolerances_parameter_node: ParameterNode = ParameterNode(
-        attributes={
+        {
             "max_abs_error_time_milliseconds": 100,
             "max_num_conversion_attempts": 5,
-        },
-        details=None,
-        descendants=None,
+        }
     )
     date_strings_parameter_node: ParameterNode = ParameterNode(
-        attributes={
-            "yyyy_mm_dd_hh_mm_ss_tz_date_format": "%Y-%m-%d %H:%M:%S %Z",
-            "yyyy_mm_dd_date_format": "%Y-%m-%d",
-            "mm_yyyy_dd_hh_mm_ss_tz_date_format": "%m-%Y-%d %H:%M:%S %Z",
-            "mm_yyyy_dd_date_format": "%m-%Y-%d",
-        },
-        details={
-            "yyyy_mm_dd_hh_mm_ss_tz_date_format": {
-                "confidence": 7.8e-1,
-            },
-            "yyyy_mm_dd_date_format": {
-                "confidence": 7.8e-1,
-            },
-            "mm_yyyy_dd_hh_mm_ss_tz_date_format": {
-                "confidence": 7.8e-1,
-            },
-            "mm_yyyy_dd_date_format": {
-                "confidence": 7.8e-1,
-            },
-        },
-        descendants={
+        {
+            "yyyy_mm_dd_hh_mm_ss_tz_date_format": ParameterNode(
+                {
+                    "value": "%Y-%m-%d %H:%M:%S %Z",
+                    "details": ParameterNode(
+                        {
+                            "confidence": 7.8e-1,
+                        },
+                    ),
+                }
+            ),
+            "yyyy_mm_dd_date_format": ParameterNode(
+                {
+                    "value": "%Y-%m-%d",
+                    "details": ParameterNode(
+                        {
+                            "confidence": 7.8e-1,
+                        },
+                    ),
+                }
+            ),
+            "mm_yyyy_dd_hh_mm_ss_tz_date_format": ParameterNode(
+                {
+                    "value": "%m-%Y-%d %H:%M:%S %Z",
+                    "details": ParameterNode(
+                        {
+                            "confidence": 7.8e-1,
+                        },
+                    ),
+                }
+            ),
+            "mm_yyyy_dd_date_format": ParameterNode(
+                {
+                    "value": "%m-%Y-%d",
+                    "details": ParameterNode(
+                        {
+                            "confidence": 7.8e-1,
+                        },
+                    ),
+                }
+            ),
             "tolerances": date_strings_tolerances_parameter_node,
-        },
+        }
     )
     parameter_multi_part_name_parameter_node: ParameterNode = ParameterNode(
-        attributes=None,
-        descendants={
+        {
             "date_strings": date_strings_parameter_node,
             "tolerances": tolerances_parameter_node,
-        },
+        }
     )
     root_parameter_node: ParameterNode = ParameterNode(
-        attributes=None,
-        descendants={
+        {
             "parameter": parameter_multi_part_name_parameter_node,
-        },
+        }
     )
     return ParameterContainer(
         parameter_nodes={
@@ -144,37 +151,28 @@ def multi_part_name_parameter_container():
 
 @pytest.fixture
 def parameter_values_eight_parameters_multiple_depths():
-    parameter_values: Dict[str, Dict[str, Any]] = {
-        "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format": {
-            "value": "%Y-%m-%d %H:%M:%S %Z",
-            "details": {"confidence": 7.8e-1},
+    parameter_values: Dict[str, Any] = {
+        "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.value": "%Y-%m-%d %H:%M:%S %Z",
+        "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.details": {
+            "confidence": 7.8e-1
         },
-        "$parameter.date_strings.yyyy_mm_dd_date_format": {
-            "value": "%Y-%m-%d",
-            "details": {"confidence": 7.8e-1},
+        "$parameter.date_strings.yyyy_mm_dd_date_format.value": "%Y-%m-%d",
+        "$parameter.date_strings.yyyy_mm_dd_date_format.details": {
+            "confidence": 7.8e-1
         },
-        "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format": {
-            "value": "%m-%Y-%d %H:%M:%S %Z",
-            "details": {"confidence": 7.8e-1},
+        "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.value": "%m-%Y-%d %H:%M:%S %Z",
+        "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.details": {
+            "confidence": 7.8e-1
         },
-        "$parameter.date_strings.mm_yyyy_dd_date_format": {
-            "value": "%m-%Y-%d",
-            "details": {"confidence": 7.8e-1},
+        "$parameter.date_strings.mm_yyyy_dd_date_format.value": "%m-%Y-%d",
+        "$parameter.date_strings.mm_yyyy_dd_date_format.details": {
+            "confidence": 7.8e-1
         },
-        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds": {
-            "value": 100,
-            "details": None,
-        },
-        "$parameter.date_strings.tolerances.max_num_conversion_attempts": {
-            "value": 5,
-            "details": None,
-        },
-        "$parameter.tolerances.mostly": {"value": 9.1e-1, "details": None},
-        "$parameter.tolerances.financial.usd": {
-            "value": 1.0,
-            "details": None,
-        },
-        "$mean": {"value": 6.5e-1, "details": None},
+        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds": 100,
+        "$parameter.date_strings.tolerances.max_num_conversion_attempts": 5,
+        "$parameter.tolerances.mostly": 9.1e-1,
+        "$parameter.tolerances.financial.usd": 1.0,
+        "$mean": 6.5e-1,
     }
     return parameter_values
 
@@ -201,17 +199,14 @@ def rule_with_variables_with_parameters(
     multi_part_name_parameter_container,
 ):
     variables_multi_part_name_parameter_node: ParameterNode = ParameterNode(
-        attributes={
+        {
             "false_positive_threshold": 1.0e-2,
-        },
-        details=None,
-        descendants=None,
+        }
     )
     root_variables_node: ParameterNode = ParameterNode(
-        attributes=None,
-        descendants={
+        {
             "variables": variables_multi_part_name_parameter_node,  # $variables.false_positive_threshold
-        },
+        }
     )
     rule: Rule = Rule(
         name="rule_with_variables_with_parameters",

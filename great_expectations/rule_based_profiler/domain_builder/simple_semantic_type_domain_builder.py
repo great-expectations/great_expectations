@@ -79,7 +79,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 )
             )
             semantic_domain_type = inferred_semantic_domain_type.semantic_domain_type
-            # InferredSemanticDomainType also contains the "details" property capturing metadata about the inference.
+            # InferredSemanticDomainType contains "details" property capturing auxiliary information about inference.
             if semantic_domain_type in semantic_types:
                 domains.append(
                     Domain(
