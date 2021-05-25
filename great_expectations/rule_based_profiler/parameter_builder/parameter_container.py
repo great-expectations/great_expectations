@@ -340,9 +340,8 @@ def _get_parameter_value_from_parameter_container(
     # not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
     # (e.g., ".value") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "value") key is available in
     # "ParameterNode", then return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY"
-    # (e.g., "value") key.  Hence, can use shorthand "$parameter.my_min_user_id.column.min" instead of the explicit
-    # "$parameter.my_min_user_id.column.min.value".  Retrieving the details still requires using the explicit
-    # "$parameter.my_min_user_id.column.min.details".
+    # (e.g., "value") key.  Hence, can use shorthand "$parameter.my_min_user_id" instead of the explicit
+    # "$parameter.my_min_user_id.value".  Retrieving details requires "$parameter.my_min_user_id.details" (explicitly).
     # """
     # if (
     #     not fully_qualified_parameter_name.endswith(
