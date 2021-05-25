@@ -70,48 +70,80 @@ def test_get_parameter_value_valid_parameter_name(
     )
     assert (
         get_parameter_value(
-            fully_qualified_parameter_name=fully_qualified_parameter_name,
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value",
             domain=column_Date_structured_type_domain,
             variables=rule_with_variables_with_parameters.variables,
             parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%Y-%m-%d %H:%M:%S %Z"
     )
+    assert get_parameter_value(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_structured_type_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": 7.8e-1,
+    }
 
     fully_qualified_parameter_name = "$parameter.date_strings.yyyy_mm_dd_date_format"
     assert (
         get_parameter_value(
-            fully_qualified_parameter_name=fully_qualified_parameter_name,
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value",
             domain=column_Date_structured_type_domain,
             variables=rule_with_variables_with_parameters.variables,
             parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%Y-%m-%d"
     )
+    assert get_parameter_value(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_structured_type_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": 7.8e-1,
+    }
 
     fully_qualified_parameter_name = (
         "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format"
     )
     assert (
         get_parameter_value(
-            fully_qualified_parameter_name=fully_qualified_parameter_name,
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value",
             domain=column_Date_structured_type_domain,
             variables=rule_with_variables_with_parameters.variables,
             parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%m-%Y-%d %H:%M:%S %Z"
     )
+    assert get_parameter_value(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_structured_type_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": 7.8e-1,
+    }
 
     fully_qualified_parameter_name = "$parameter.date_strings.mm_yyyy_dd_date_format"
     assert (
         get_parameter_value(
-            fully_qualified_parameter_name=fully_qualified_parameter_name,
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value",
             domain=column_Date_structured_type_domain,
             variables=rule_with_variables_with_parameters.variables,
             parameters=rule_with_variables_with_parameters.parameters,
         )
         == "%m-%Y-%d"
     )
+    assert get_parameter_value(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_structured_type_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": 7.8e-1,
+    }
 
     fully_qualified_parameter_name = (
         "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds"
