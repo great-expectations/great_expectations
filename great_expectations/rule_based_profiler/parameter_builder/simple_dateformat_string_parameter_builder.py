@@ -147,8 +147,8 @@ currently loaded in the validator.
 
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
-                "val": best_fit_date_format_estimate,
-                "metadata": {
+                "value": best_fit_date_format_estimate,
+                "details": {
                     "success_ratio": best_success_ratio,
                 },
             }

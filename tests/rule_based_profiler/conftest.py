@@ -89,8 +89,8 @@ def multi_part_name_parameter_container():
         {
             "yyyy_mm_dd_hh_mm_ss_tz_date_format": ParameterNode(
                 {
-                    "val": "%Y-%m-%d %H:%M:%S %Z",
-                    "metadata": ParameterNode(
+                    "value": "%Y-%m-%d %H:%M:%S %Z",
+                    "details": ParameterNode(
                         {
                             "confidence": 7.8e-1,
                         },
@@ -99,8 +99,8 @@ def multi_part_name_parameter_container():
             ),
             "yyyy_mm_dd_date_format": ParameterNode(
                 {
-                    "val": "%Y-%m-%d",
-                    "metadata": ParameterNode(
+                    "value": "%Y-%m-%d",
+                    "details": ParameterNode(
                         {
                             "confidence": 7.8e-1,
                         },
@@ -109,8 +109,8 @@ def multi_part_name_parameter_container():
             ),
             "mm_yyyy_dd_hh_mm_ss_tz_date_format": ParameterNode(
                 {
-                    "val": "%m-%Y-%d %H:%M:%S %Z",
-                    "metadata": ParameterNode(
+                    "value": "%m-%Y-%d %H:%M:%S %Z",
+                    "details": ParameterNode(
                         {
                             "confidence": 7.8e-1,
                         },
@@ -119,8 +119,8 @@ def multi_part_name_parameter_container():
             ),
             "mm_yyyy_dd_date_format": ParameterNode(
                 {
-                    "val": "%m-%Y-%d",
-                    "metadata": ParameterNode(
+                    "value": "%m-%Y-%d",
+                    "details": ParameterNode(
                         {
                             "confidence": 7.8e-1,
                         },
@@ -152,20 +152,20 @@ def multi_part_name_parameter_container():
 @pytest.fixture
 def parameter_values_eight_parameters_multiple_depths():
     parameter_values: Dict[str, Any] = {
-        "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.val": "%Y-%m-%d %H:%M:%S %Z",
-        "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.metadata": {
+        "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.value": "%Y-%m-%d %H:%M:%S %Z",
+        "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.details": {
             "confidence": 7.8e-1
         },
-        "$parameter.date_strings.yyyy_mm_dd_date_format.val": "%Y-%m-%d",
-        "$parameter.date_strings.yyyy_mm_dd_date_format.metadata": {
+        "$parameter.date_strings.yyyy_mm_dd_date_format.value": "%Y-%m-%d",
+        "$parameter.date_strings.yyyy_mm_dd_date_format.details": {
             "confidence": 7.8e-1
         },
-        "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.val": "%m-%Y-%d %H:%M:%S %Z",
-        "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.metadata": {
+        "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.value": "%m-%Y-%d %H:%M:%S %Z",
+        "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.details": {
             "confidence": 7.8e-1
         },
-        "$parameter.date_strings.mm_yyyy_dd_date_format.val": "%m-%Y-%d",
-        "$parameter.date_strings.mm_yyyy_dd_date_format.metadata": {
+        "$parameter.date_strings.mm_yyyy_dd_date_format.value": "%m-%Y-%d",
+        "$parameter.date_strings.mm_yyyy_dd_date_format.details": {
             "confidence": 7.8e-1
         },
         "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds": 100,

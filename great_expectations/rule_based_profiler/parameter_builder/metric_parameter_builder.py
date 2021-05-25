@@ -107,4 +107,4 @@ class MetricParameterBuilder(ParameterBuilder):
 
     @property
     def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.parameter_name}.{self._metric_name}"
+        return f"$parameter.{self.parameter_name}"

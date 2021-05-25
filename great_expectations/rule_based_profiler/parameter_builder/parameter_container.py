@@ -13,8 +13,8 @@ DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
 DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = f"$domain{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{DOMAIN_KWARGS_PARAMETER_NAME}"
 VARIABLES_KEY: str = f"$variables{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 
-FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "val"
-FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "metadata"
+FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
+FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
 
 
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
@@ -32,13 +32,13 @@ class ParameterNode(DotDict):
 
     Since the descendant nodes are of the same type as their parent node, then each descendant node is also a tree.
 
-    Each node can support the combination of attribute name-value pairs representing values and metadata details
-    containing helpful information regarding how these values were obtained (tolerances, explanations, etc.).
+    Each node can support the combination of attribute name-value pairs representing values and details containing
+    helpful information regarding how these values were obtained (tolerances, explanations, etc.).
 
     See the ParameterContainer documentation for examples of different parameter naming structures supported.
 
     Even though, typically, only the leaf nodes (characterized by having no keys of "ParameterNode" type) store
-    parameter values and metadata details, intermediate nodes may also have these properties.
+    parameter values and details, intermediate nodes may also have these properties.
     """
 
     def to_json_dict(self) -> dict:
@@ -160,9 +160,9 @@ def build_parameter_container(
     :param parameter_values
     Example of the name-value structure for building parameters (matching the type hint in the method signature):
     {
-        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds.val": 100, The actual value can of Any type.
-        # The metadata (details) dictionary is Optional.
-        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds.metadata": {
+        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds.value": 100, # Actual value can of Any type.
+        # The "details" dictionary is Optional.
+        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds.details": {
             "max_abs_error_time_milliseconds": {
                 "confidence": {  # Arbitrary dictionary key
                     "success_ratio": 1.0,  # Arbitrary entries
@@ -170,14 +170,14 @@ def build_parameter_container(
                 }
             },
         },
-        # While highly recommended, the use of ".val" and ".metadata" keys is conventional (it is not enforced).
-        "$parameter.tolerances.mostly": 9.0e-1,  # The key here does not end on ".val" (and no ".metadata" is provided).
+        # While highly recommended, the use of ".value" and ".details" keys is conventional (it is not enforced).
+        "$parameter.tolerances.mostly": 9.0e-1,  # The key here does not end on ".value" and no ".details" is provided.
         ...
     }
     :return parameter_container holds the dictionary of ParameterNode objects corresponding to roots of parameter names
 
     This function loops through the supplied pairs of fully-qualified parameter names and their corresponding values
-    (and any "details" metadata) and builds the tree under a single root-level ParameterNode object for a "name space".
+    (and any "details") and builds the tree under a single root-level ParameterNode object for a "name space".
     In particular, if any ParameterNode object in the tree (starting with the root-level ParameterNode object) already
     exists, it is reused; in other words, ParameterNode objects are unique per part of fully-qualified parameter names.
     """
@@ -337,11 +337,12 @@ def _get_parameter_value_from_parameter_container(
     # TODO: <Alex>ALEX -- leaving the capability below for future considerations.</Alex>
     # """
     # Support a shorthand notation (for use in ExpectationConfigurationBuilder): If fully-qualified parameter name does
-    # not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}" (e.g.,
-    # ".val") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key is available in "ParameterNode", then
-    # return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key.  Hence, can use
-    # shorthand "$parameter.my_min_user_id.column.min" instead of the explicit "$parameter.my_min_user_id.column.min.val".
-    # Retrieving the metadata details still requires using the explicit "$parameter.my_min_user_id.column.min.metadata".
+    # not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
+    # (e.g., ".value") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "value") key is available in
+    # "ParameterNode", then return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY"
+    # (e.g., "value") key.  Hence, can use shorthand "$parameter.my_min_user_id.column.min" instead of the explicit
+    # "$parameter.my_min_user_id.column.min.value".  Retrieving the details still requires using the explicit
+    # "$parameter.my_min_user_id.column.min.details".
     # """
     # if (
     #     not fully_qualified_parameter_name.endswith(
