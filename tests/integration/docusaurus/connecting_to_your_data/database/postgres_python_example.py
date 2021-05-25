@@ -7,7 +7,7 @@ from tests.integration.docusaurus.connecting_to_your_data.database.util import l
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 load_data_into_database(
     "taxi_data",
-    "./data/reports/yellow_tripdata_sample_2019-01.csv",
+    "./data/yellow_trip_data_sample_2019-01.csv",
     CONNECTION_STRING,
 )
 

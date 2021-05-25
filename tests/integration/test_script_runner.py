@@ -24,13 +24,13 @@ integration_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "integration/fixtures/data",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "integration/fixtures/data",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
     },
     {
         "name": "pandas_one_multi_batch_request_one_validator",
@@ -41,7 +41,7 @@ integration_test_matrix = [
     },
     {
         "name": "postgres_runtime_golden_path",
-        "data_dir": "integration/fixtures/data",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
@@ -49,7 +49,7 @@ integration_test_matrix = [
     },
     {
         "name": "postgres_runtime_golden_path",
-        "data_dir": "integration/fixtures/data",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
