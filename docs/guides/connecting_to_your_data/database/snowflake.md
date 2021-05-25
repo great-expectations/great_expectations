@@ -25,7 +25,7 @@ This will allow you to validate and explore your data.
 
 ### 2. Install required dependencies
 
-First, install the necessary dependencies for Great Expectations to connect to your postgres database by running the following in your terminal:
+First, install the necessary dependencies for Great Expectations to connect to your Snowflake database by running the following in your terminal:
 
 ```console
 pip install sqlalchemy
