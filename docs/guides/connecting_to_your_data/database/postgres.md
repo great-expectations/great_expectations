@@ -47,12 +47,12 @@ postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 
 Import these necessary packages and modules.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L1-L3
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L1-L4
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L15
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L16
 ```
 
 ### 5. Configure your Datasource
@@ -68,10 +68,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L17-L31
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L18-L32
 ```
 Run this code to test your configuration.
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L40
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L41
 ```
 
 </TabItem>
@@ -79,18 +79,18 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L17-L34
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L17-L35
 ```
 Run this code to test your configuration.
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L40
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L41
 ```
 
 </TabItem>
 </Tabs>
 
-You will see your database tables listed as `Available data_asset_names` in the output.
+You will see your database tables listed as `Available data_asset_names` in the output of `test_yaml_config()`.
 
-Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
+Feel free to adjust your configuration and re-run `test_yaml_config()` as needed.
 
 ### 6. Save the Datasource configuration to your DataContext
 
@@ -105,13 +105,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L42
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L43
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L42
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_python_example.py#L43
 ```
 
 </TabItem>
@@ -131,7 +131,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L45-L59
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L46-L60
 ```
 
   </TabItem>
@@ -140,7 +140,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L62-L73
+```python file=../../../../integration/code/connecting_to_your_data/database/postgres_yaml_example.py#L65-L77
 ```
 
   </TabItem>

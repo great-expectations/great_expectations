@@ -1,6 +1,7 @@
 from ruamel import yaml
 
 import great_expectations as ge
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from integration.code.connecting_to_your_data.database.util import (
     load_data_into_database,
 )
@@ -42,14 +43,13 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 
 # Here is a RuntimeBatchRequest using a query
-batch_request = ge.core.batch.RuntimeBatchRequest(
+batch_request = RuntimeBatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "something_something"},
 )
-
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
@@ -58,8 +58,11 @@ validator = context.get_validator(
 )
 print(validator.head())
 
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+
 # Here is a BatchRequest naming a table
-batch_request = ge.core.batch.BatchRequest(
+batch_request = BatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve

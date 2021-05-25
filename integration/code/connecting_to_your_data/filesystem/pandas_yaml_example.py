@@ -1,7 +1,7 @@
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 context = ge.get_context()
 
@@ -36,6 +36,7 @@ context.test_yaml_config(datasource_yaml)
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
+# Here is a RuntimeBatchRequest using a path to a single CSV file
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -49,6 +50,28 @@ batch_request = RuntimeBatchRequest(
 batch_request.runtime_parameters[
     "path"
 ] = "./data/reports/yellow_tripdata_sample_2019-01.csv"
+
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
+print(validator.head())
+
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+
+# Here is a BatchRequest naming a data_asset
+batch_request = BatchRequest(
+    datasource_name="taxi_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="<YOUR_DATA_ASSET_NAME>",
+)
+
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your data asset name directly in the BatchRequest above.
+batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
