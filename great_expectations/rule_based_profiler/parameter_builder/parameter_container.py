@@ -158,7 +158,7 @@ def build_parameter_container(
 
     :param parameter_container initialized ParameterContainer for all ParameterNode trees
     :param parameter_values
-    Example of required structure for "parameter_values" (matching the type hint in the method signature):
+    Example of the name-value structure for building parameters (matching the type hint in the method signature):
     {
         "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds.val": 100, The actual value can of Any type.
         # The metadata (details) dictionary is Optional.
