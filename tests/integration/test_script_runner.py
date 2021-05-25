@@ -23,13 +23,13 @@ integration_test_matrix = [
     {
         "user_flow_script": "integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "integration/fixtures/data",
     },
     {
         "user_flow_script": "integration/code/connecting_to_your_data/filesystem/pandas_python_example.py",
         "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "integration/fixtures/data",
     },
     {
@@ -43,7 +43,7 @@ integration_test_matrix = [
         "name": "postgres_runtime_golden_path",
         "data_dir": "integration/fixtures/data",
         "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "integration/code/connecting_to_your_data/database/postgres_yaml_example.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
@@ -51,7 +51,7 @@ integration_test_matrix = [
         "name": "postgres_runtime_golden_path",
         "data_dir": "integration/fixtures/data",
         "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "integration/code/connecting_to_your_data/database/postgres_python_example.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
