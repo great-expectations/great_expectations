@@ -93,10 +93,10 @@ class MetricParameterBuilder(ParameterBuilder):
         }
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
-                "val": validator.get_metric(
+                "value": validator.get_metric(
                     metric=MetricConfiguration(**metric_configuration_arguments)
                 ),
-                "metadata": {
+                "details": {
                     "metric_configuration": metric_configuration_arguments,
                 },
             }
