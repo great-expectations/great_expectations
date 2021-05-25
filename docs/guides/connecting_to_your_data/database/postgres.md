@@ -88,9 +88,9 @@ Run this code to test your configuration.
 </TabItem>
 </Tabs>
 
-You will see your database tables listed as `Available data_asset_names` in the output.
+You will see your database tables listed as `Available data_asset_names` in the output of `test_yaml_config()`.
 
-Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
+Feel free to adjust your configuration and re-run `test_yaml_config()` as needed.
 
 ### 6. Save the Datasource configuration to your DataContext
 
