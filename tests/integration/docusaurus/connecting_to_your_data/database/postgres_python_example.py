@@ -2,9 +2,7 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from integration.code.connecting_to_your_data.database.util import (
-    load_data_into_database,
-)
+from tests.integration.docusaurus.connecting_to_your_data.database.util import load_data_into_database
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 load_data_into_database(
@@ -15,32 +13,32 @@ load_data_into_database(
 
 context = ge.get_context()
 
-datasource_yaml = """
-name: my_postgres_datasource
-class_name: Datasource
-execution_engine:
-  class_name: SqlAlchemyExecutionEngine
-  connection_string: postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
-data_connectors:
-   default_runtime_data_connector_name:
-       class_name: RuntimeDataConnector
-       batch_identifiers:
-           - default_identifier_name
-   default_inferred_data_connector_name:
-       class_name: InferredAssetSqlDataConnector
-       name: whole_table
-"""
+datasource_config = {
+    "name": "my_postgres_datasource",
+    "class_name": "Datasource",
+    "execution_engine": {
+        "class_name": "SqlAlchemyExecutionEngine",
+        "connection_string": "postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>",
+    },
+    "data_connectors": {
+        "default_runtime_data_connector_name": {
+            "class_name": "RuntimeDataConnector",
+            "batch_identifiers": ["default_identifier_name"],
+        },
+        "default_inferred_data_connector_name": {
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "whole_table",
+        },
+    },
+}
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>",
-    CONNECTION_STRING,
-)
+datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
-context.test_yaml_config(datasource_yaml)
+context.test_yaml_config(yaml.dump(datasource_config))
 
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**datasource_config)
 
 # Here is a RuntimeBatchRequest using a query
 batch_request = RuntimeBatchRequest(
@@ -50,6 +48,7 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "something_something"},
 )
+
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
