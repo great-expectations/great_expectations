@@ -78,10 +78,9 @@ rules:
           # Filter for batches for previous full year
           #  using batch_filter_parameters with `year` as one of the parameters
           #  `year` needs to be defined as a group by the data_connector
-          # TODO: is this possible - how do we specify a data_connector (when calling Profiler.profile()?)?
           data_connector_query:
             batch_filter_parameters:
-              year: 2020 # TODO: Can this be relative to the current year? (e.g. specify last year vs the exact year)
+              year: 2020
         metric_configuration:
           metric_name: column.mean # per batch metric
           # Domain kwargs here refer to the current domain being processed - the list of domains coming from the DomainBuilder (here the list of columns filtered by SimpleColumnSuffixDomainBuilder)
@@ -111,7 +110,7 @@ rules:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder
-        # Note: literals are and will continue to be supported (you do not have to add to "variables" first, unless you want to reference in multiple locations):
+        # Note: literals are supported (you do not have to add to "variables" first, unless you want named references or to reference in multiple locations):
         min_value: 0
         max_value: $variables.max_amount
         column: $domain.domain_kwargs.column
@@ -157,7 +156,6 @@ rules:
         - numeric
     parameter_builders:
       # Note: my_column_mean and my_column_min are added as parameters but unused in expectation_configuration_builders - this is OK, we should still accept this as a valid Profiler configuration.
-      # TODO: Maybe in the future we should warn users if there are unused ParameterBuilders in a Profiler configuration.
       - parameter_name: my_column_mean
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder
@@ -177,10 +175,9 @@ rules:
       - parameter_name: false_positive_threshold_min
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder
-        # TODO: Not sure I understand the comment here about unioning - why would we want to add the batches from the call to profile? Wouldn't we expect that this parameter is calculated just from the explicitly defined batch_request below? (if this is useful, maybe there are two modes)
-        batch_request: # this should be unioned with the rest of the batch request from the call to profile
+        batch_request:
           partition_request:
-            # NOTE: interpreted like python slices e.g. most recent 10 batches
+            # Note: interpreted like python slices e.g. most recent 10 batches
             partition_index: "-10:"
         metric_configuration:
           metric_name: column.min
