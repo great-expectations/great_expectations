@@ -43,6 +43,7 @@ rules:
       column_name_suffixes:
         - _ts
     parameter_builders:
+      # unused parameter my_max_ts
       - parameter_name: my_max_ts
         class_name: MetricParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
@@ -55,6 +56,7 @@ rules:
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: event_ts
+      # unused parameter my_min_ts
       - parameter_name: my_min_ts
         class_name: MetricParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
