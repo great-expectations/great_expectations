@@ -1,5 +1,4 @@
 from dataclasses import asdict, dataclass
-# TODO: <Alex>ALEX</Alex>
 from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -8,12 +7,14 @@ from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import DotDict
 
-PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
+FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
+
 DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
-DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
-    f"$domain.{DOMAIN_KWARGS_PARAMETER_NAME}"
-)
-VARIABLES_KEY: str = "$variables."
+DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = f"$domain{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{DOMAIN_KWARGS_PARAMETER_NAME}"
+VARIABLES_KEY: str = f"$variables{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+
+FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "val"
+FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "metadata"
 
 
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
@@ -25,33 +26,21 @@ names must start with $ (e.g., "${fully_qualified_parameter_name}").
         )
 
 
-# TODO: <Alex>ALEX</Alex>
-# @dataclass
 class ParameterNode(DotDict):
     """
     ParameterNode is a node of a tree structure.
 
     Since the descendant nodes are of the same type as their parent node, then each descendant node is also a tree.
 
-    Each node can optionally contain a bag of attribute name-value pairs ("parameter") and "details", with helpful
-    information regarding how these attributes were obtained (tolerances, explanations, etc.).
+    Each node can support the combination of attribute name-value pairs representing values and metadata details
+    containing helpful information regarding how these values were obtained (tolerances, explanations, etc.).
 
     See the ParameterContainer documentation for examples of different parameter naming structures supported.
 
-    Even though, typically, only the leaf nodes (characterized by having no descendants) contain attributes and details,
-    intermediate nodes may also have these properties.
+    Even though, typically, only the leaf nodes (characterized by having no keys of "ParameterNode" type) store
+    parameter values and metadata details, intermediate nodes may also have these properties.
     """
-    #
-    # # TODO: <Alex>ALEX</Alex>
-    # attributes: Optional[DotDict] = None
-    # details: Optional[DotDict] = None
-    # descendants: Optional[Dict[str, "ParameterNode"]] = None
-    # # attributes: Optional[Dict[str, Union[Any, DotDict, "ParameterNode"]]] = None
-    #
-    # def to_json_dict(self) -> dict:
-    #     return convert_to_json_serializable(data=asdict(self))
-    # # TODO: <Alex>ALEX</Alex>
-    #
+
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self)
 
@@ -105,7 +94,28 @@ class ParameterContainer(SerializableDictDot):
     def get_parameter_node(self, parameter_name_root: str) -> Optional[ParameterNode]:
         if self.parameter_nodes is None:
             return None
-        return self.parameter_nodes.get(parameter_name_root)
+        parameter_node: ParameterNode = self._convert_dictionaries_to_parameter_nodes(
+            source=self.parameter_nodes.get(parameter_name_root)
+        )
+        return parameter_node
+
+    def _convert_dictionaries_to_parameter_nodes(
+        self, source: Optional[Any] = None
+    ) -> Optional[Union[Any, ParameterNode]]:
+        if source is None:
+            return None
+
+        if isinstance(source, dict):
+            if not isinstance(source, ParameterNode):
+                source = ParameterNode(source)
+            key: str
+            value: Any
+            for key, value in source.items():
+                source[key] = self._convert_dictionaries_to_parameter_nodes(
+                    source=value
+                )
+
+        return source
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=asdict(self))
@@ -124,12 +134,10 @@ def build_parameter_container_for_variables(
     """
     variable_config_key: str
     variable_config_value: Any
-    parameter_values: Dict[str, Dict[str, Any]] = {}
+    parameter_values: Dict[str, Any] = {}
     for variable_config_key, variable_config_value in variables_configs.items():
         variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
-        parameter_values[variable_config_key] = {
-            "value": variable_config_value,
-        }
+        parameter_values[variable_config_key] = variable_config_value
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     build_parameter_container(
@@ -141,7 +149,7 @@ def build_parameter_container_for_variables(
 
 def build_parameter_container(
     parameter_container: ParameterContainer,
-    parameter_values: Dict[str, Dict[str, Any]],
+    parameter_values: Dict[str, Any],
 ):
     """
     Builds the ParameterNode trees, corresponding to the fully_qualified_parameter_name first-level keys.
@@ -150,21 +158,18 @@ def build_parameter_container(
     :param parameter_values
     Example of required structure for "parameter_values" (matching the type hint in the method signature):
     {
-        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds": {
-            "value": 100, The key must be "value"; the actual value can be of Any type.
-            "details": {  # This dictionary is Optional; however, if present, the key to it must be "details".
-                "max_abs_error_time_milliseconds": {
-                    "confidence": {  # Arbitrary dictionary key
-                        "success_ratio": 1.0,  # Arbitrary entries
-                        "comment": "matched template",  # Arbitrary entries
-                    }
-                },
+        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds.val": 100, The actual value can of Any type.
+        # The metadata (details) dictionary is Optional.
+        "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds.metadata": {
+            "max_abs_error_time_milliseconds": {
+                "confidence": {  # Arbitrary dictionary key
+                    "success_ratio": 1.0,  # Arbitrary entries
+                    "comment": "matched template",  # Arbitrary entries
+                }
             },
         },
-        "$parameter.tolerances.mostly": {
-            "value": 9.0e-1
-            "details": None  # The "details" key is entirely Optional (it is exclusively for informational purposes).
-        },
+        # While highly recommended, the use of ".val" and ".metadata" keys is conventional (it is not enforced).
+        "$parameter.tolerances.mostly": 9.0e-1,  # The key here does not end on ".val" (and no ".metadata" is provided).
         ...
     }
     :return parameter_container holds the dictionary of ParameterNode objects corresponding to roots of parameter names
@@ -176,32 +181,25 @@ def build_parameter_container(
     """
     parameter_node: Optional[ParameterNode]
     fully_qualified_parameter_name: str
-    parameter_value_details_dict: Dict[str, Any]
+    parameter_value: Any
     fully_qualified_parameter_name_as_list: List[str]
     parameter_name_root: str
-    parameter_value: Any
-    parameter_details: Optional[Dict[str, Any]]
     for (
         fully_qualified_parameter_name,
-        parameter_value_details_dict,
+        parameter_value,
     ) in parameter_values.items():
         validate_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name
         )
         fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[
             1:
-        ].split(PARAMETER_NAME_SEPARATOR_CHARACTER)
+        ].split(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER)
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
-        parameter_value = parameter_value_details_dict["value"]
-        # The details key is optional; in particular, it is commonly omitted for globally scoped "variables".
-        parameter_details = parameter_value_details_dict.get("details")
         parameter_node = parameter_container.get_parameter_node(
             parameter_name_root=parameter_name_root
         )
         if parameter_node is None:
-            parameter_node = ParameterNode(
-                attributes=None, details=None, descendants=None
-            )
+            parameter_node = ParameterNode({})
             parameter_container.set_parameter_node(
                 parameter_name_root=parameter_name_root, parameter_node=parameter_node
             )
@@ -209,7 +207,6 @@ def build_parameter_container(
             parameter_node=parameter_node,
             parameter_name_as_list=fully_qualified_parameter_name_as_list,
             parameter_value=parameter_value,
-            details=parameter_details,
         )
 
 
@@ -217,7 +214,6 @@ def _build_parameter_node_tree_for_one_parameter(
     parameter_node: ParameterNode,
     parameter_name_as_list: List[str],
     parameter_value: Any,
-    details: Optional[Any] = None,
 ):
     """
     Recursively builds a tree of ParameterNode objects, creating new ParameterNode objects parsimoniously (i.e., only if
@@ -225,50 +221,23 @@ def _build_parameter_node_tree_for_one_parameter(
     :param parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
     :param parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
     :param parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
-    :param details: metadata/details pertaining to the last part of the fully-qualified parameter name ("leaf node")
     """
     parameter_name_part: str = parameter_name_as_list[0]
 
     # If the fully-qualified parameter name (or "name space") is still compound (i.e., not at "leaf node" / last part),
     # then build the sub-tree, creating the descendant ParameterNode (to hold the sub-tree), if no descendants exist.
     if len(parameter_name_as_list) > 1:
-        if parameter_node.descendants is None:
-            parameter_node.descendants = {}
-        if parameter_name_part not in parameter_node.descendants:
-            parameter_node.descendants[parameter_name_part] = ParameterNode(
-                attributes=None, details=None, descendants=None
-            )
+        if parameter_name_part not in parameter_node:
+            parameter_node[parameter_name_part] = ParameterNode({})
         _build_parameter_node_tree_for_one_parameter(
-            parameter_node=parameter_node.descendants[parameter_name_part],
+            parameter_node=parameter_node[parameter_name_part],
             parameter_name_as_list=parameter_name_as_list[1:],
             parameter_value=parameter_value,
-            details=details,
         )
     else:
-        # If the fully-qualified parameter name (or "name space") is trivial (i.e., at "leaf node" / last part),
-        # then store the supplied attribute name-value pairs as well as the metadata/details in the node's dictionaries.
-        _set_parameter_node_attribute_name_value_pairs(
-            parameter_node=parameter_node,
-            attribute_name=parameter_name_part,
-            attribute_value=parameter_value,
-            details=details,
-        )
-
-
-def _set_parameter_node_attribute_name_value_pairs(
-    parameter_node: ParameterNode,
-    attribute_name: str,
-    attribute_value: Any,
-    details: Optional[Any] = None,
-):
-    if attribute_value is not None:
-        if parameter_node.attributes is None:
-            parameter_node.attributes = DotDict()
-        parameter_node.attributes[attribute_name] = attribute_value
-    if details is not None:
-        if parameter_node.details is None:
-            parameter_node.details = DotDict()
-        parameter_node.details[attribute_name] = details
+        # If the fully-qualified parameter name (or "name space") is trivial (i.e., at "leaf node" / last part), then
+        # store the supplied attribute value into the given ParameterNode using leaf "parameter_name_part" name as key.
+        parameter_node[parameter_name_part] = parameter_value
 
 
 def get_parameter_value(
@@ -276,7 +245,7 @@ def get_parameter_value(
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Any]:
+) -> Optional[Union[Any, ParameterNode]]:
     """
     Get the parameter value from the current rule state using the fully-qualified parameter name.
     A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
@@ -285,7 +254,8 @@ def get_parameter_value(
         :param domain: Union[Domain, List[Domain]] -- current Domain (or List[Domain]) of interest
         :param variables
         :param parameters
-    :return: value
+    :return: Optional[Union[Any, ParameterNode]] object corresponding to the last part of the fully-qualified parameter
+    name supplied as argument -- a value (of type "Any") or a ParameterNode object (containing the sub-tree structure).
     """
     validate_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name
@@ -323,7 +293,9 @@ def get_parameter_value(
 
     fully_qualified_parameter_name_as_list: List[
         str
-    ] = fully_qualified_parameter_name.split(PARAMETER_NAME_SEPARATOR_CHARACTER)
+    ] = fully_qualified_parameter_name.split(
+        FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
+    )
 
     if len(fully_qualified_parameter_name_as_list) == 0:
         return None
@@ -339,7 +311,7 @@ def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name: str,
     fully_qualified_parameter_name_as_list: List[str],
     parameter_container: ParameterContainer,
-) -> Optional[Any]:
+) -> Optional[Union[Any, ParameterNode]]:
     parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
@@ -347,18 +319,34 @@ def _get_parameter_value_from_parameter_container(
         return None
 
     parameter_name_part: Optional[str] = None
+    return_value: Optional[Union[Any, ParameterNode]] = parameter_node
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
-            if (
-                parameter_node.attributes
-                and parameter_name_part in parameter_node.attributes
-            ):
-                return parameter_node.attributes[parameter_name_part]
+            if parameter_name_part in return_value:
+                return_value = return_value[parameter_name_part]
 
-            parameter_node = parameter_node.descendants[parameter_name_part]
     except KeyError:
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
 """
         )
+
+    """
+    Support a shorthand notation (for use in ExpectationConfigurationBuilder): If fully-qualified parameter name does
+    not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}" (e.g.,
+    ".val") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key is available in "ParameterNode", then
+    return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key.  Hence, can use
+    shorthand "$parameter.my_min_user_id.column.min" instead of the explicit "$parameter.my_min_user_id.column.min.val".
+    Retrieving the metadata details still requires using the explicit "$parameter.my_min_user_id.column.min.metadata".
+    """
+    if (
+        not fully_qualified_parameter_name.endswith(
+            f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
+        )
+        and isinstance(return_value, ParameterNode)
+        and FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY in return_value
+    ):
+        return return_value[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
+
+    return return_value

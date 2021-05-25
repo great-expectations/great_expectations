@@ -27,7 +27,7 @@ rules:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.my_min_user_id.column.min
+        min_value: $parameter.my_min_user_id.column.min  # This works with and without ".val" at the end.
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_not_be_null
@@ -93,7 +93,7 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
-        max_value: $parameter.my_max_event_ts.column.max
+        max_value: $parameter.my_max_event_ts.column.max.val  # This works with and without ".val" at the end.
         meta:
           notes:
             format: markdown

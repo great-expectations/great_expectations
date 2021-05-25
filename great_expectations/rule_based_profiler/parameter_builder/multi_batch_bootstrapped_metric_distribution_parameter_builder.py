@@ -110,12 +110,12 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 )
             )
 
-        parameter_values: Dict[str, Dict[str, Any]] = {
+        parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
                 # TODO: Using the first sample for now, but this should be extended for handling multiple batches
-                "value": samples[0],
-                "details": None,
-            },
+                "val": samples[0],
+                "metadata": None,
+            }
         }
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values

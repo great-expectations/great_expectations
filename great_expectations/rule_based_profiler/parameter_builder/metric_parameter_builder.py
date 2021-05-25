@@ -91,15 +91,15 @@ class MetricParameterBuilder(ParameterBuilder):
             "metric_value_kwargs": metric_value_kwargs,
             "metric_dependencies": None,
         }
-        parameter_values: Dict[str, Dict[str, Any]] = {
+        parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
-                "value": validator.get_metric(
+                "val": validator.get_metric(
                     metric=MetricConfiguration(**metric_configuration_arguments)
                 ),
-                "details": {
+                "metadata": {
                     "metric_configuration": metric_configuration_arguments,
                 },
-            },
+            }
         }
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
