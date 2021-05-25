@@ -1,14 +1,15 @@
+import os
+
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations import DataContext
 from integration.code.connecting_to_your_data.database.util import (
     load_data_into_database,
 )
 
-sfAccount = "oca29081.us-east-1"
-sfUser = os.environ.get('SNOWFLAKE_USER')
-sfPswd = os.environ.get('SNOWFLAKE_PW')
+sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+sfUser = os.environ.get("SNOWFLAKE_USER")
+sfPswd = os.environ.get("SNOWFLAKE_PW")
 
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/SUPERCONDUCTIVE/NYC_TAXI?warehouse=COMPUTE_WH"
 load_data_into_database(

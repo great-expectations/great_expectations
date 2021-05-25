@@ -1,14 +1,15 @@
-from ruamel import yaml
 import os
-import great_expectations as ge
 
+from ruamel import yaml
+
+import great_expectations as ge
 from integration.code.connecting_to_your_data.database.util import (
     load_data_into_database,
 )
 
-sfAccount = "oca29081.us-east-1"
-sfUser = os.environ.get('SNOWFLAKE_USER')
-sfPswd = os.environ.get('SNOWFLAKE_PW')
+sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+sfUser = os.environ.get("SNOWFLAKE_USER")
+sfPswd = os.environ.get("SNOWFLAKE_PW")
 
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/SUPERCONDUCTIVE/NYC_TAXI?warehouse=COMPUTE_WH"
 load_data_into_database(
@@ -21,22 +22,22 @@ context = ge.get_context()
 
 
 datasource_config = {
-"name": "my_snowflake_datasource",
-"class_name": "Datasource",
-"execution_engine": {
-  "class_name": "SqlAlchemyExecutionEngine",
-  "connection_string": "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME",
-},
-"data_connectors": {
-   "default_runtime_data_connector_name": {
-       "class_name": "RuntimeDataConnector",
-       "batch_identifiers": ["default_identifier_name"],
-   },
-   "default_inferred_data_connector_name": {
-       "class_name": "InferredAssetSqlDataConnector",
-       "name": "whole_table"
-   },
-},
+    "name": "my_snowflake_datasource",
+    "class_name": "Datasource",
+    "execution_engine": {
+        "class_name": "SqlAlchemyExecutionEngine",
+        "connection_string": "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME",
+    },
+    "data_connectors": {
+        "default_runtime_data_connector_name": {
+            "class_name": "RuntimeDataConnector",
+            "batch_identifiers": ["default_identifier_name"],
+        },
+        "default_inferred_data_connector_name": {
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "whole_table",
+        },
+    },
 }
 
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING

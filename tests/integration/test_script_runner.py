@@ -69,7 +69,6 @@ integration_test_matrix = [
         "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "integration/code/connecting_to_your_data/database/snowflake_yaml_example.py",
     },
-
     # {
     #     "name": "pandas_two_batch_requests_two_validators",
     #     "base_dir": file_relative_path(__file__, "../../"),

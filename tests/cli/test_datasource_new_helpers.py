@@ -52,8 +52,6 @@ data_connectors:
     name: whole_table"""'''
     )
 
-
-
     renderer = helper.get_notebook_renderer(empty_data_context)
     assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
@@ -222,7 +220,7 @@ username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
-    assert(
+    assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
@@ -245,7 +243,8 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""''')
+    name: whole_table"""'''
+    )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
