@@ -94,9 +94,11 @@ class ParameterContainer(SerializableDictDot):
     def get_parameter_node(self, parameter_name_root: str) -> Optional[ParameterNode]:
         if self.parameter_nodes is None:
             return None
+
         parameter_node: ParameterNode = self._convert_dictionaries_to_parameter_nodes(
             source=self.parameter_nodes.get(parameter_name_root)
         )
+
         return parameter_node
 
     def _convert_dictionaries_to_parameter_nodes(
