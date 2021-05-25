@@ -16,7 +16,7 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 yaml = YAML()
 
 
-# TODO: AJB 20210416 Move this fixture, generalize, add to quagga, add more column types
+# TODO: AJB 20210525 This fixture is not yet used but may be helpful to generate batches for unit tests of multibatch workflows. It should probably be extended to add different column types / data.
 @pytest.fixture
 def multibatch_generic_csv_generator():
     """
