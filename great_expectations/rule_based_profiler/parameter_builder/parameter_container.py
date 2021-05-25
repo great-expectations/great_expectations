@@ -334,21 +334,23 @@ def _get_parameter_value_from_parameter_container(
 """
         )
 
-    """
-    Support a shorthand notation (for use in ExpectationConfigurationBuilder): If fully-qualified parameter name does
-    not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}" (e.g.,
-    ".val") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key is available in "ParameterNode", then
-    return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key.  Hence, can use
-    shorthand "$parameter.my_min_user_id.column.min" instead of the explicit "$parameter.my_min_user_id.column.min.val".
-    Retrieving the metadata details still requires using the explicit "$parameter.my_min_user_id.column.min.metadata".
-    """
-    if (
-        not fully_qualified_parameter_name.endswith(
-            f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
-        )
-        and isinstance(return_value, ParameterNode)
-        and FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY in return_value
-    ):
-        return return_value[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
+    # TODO: <Alex>ALEX -- leaving the capability below for future considerations.</Alex>
+    # """
+    # Support a shorthand notation (for use in ExpectationConfigurationBuilder): If fully-qualified parameter name does
+    # not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}" (e.g.,
+    # ".val") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key is available in "ParameterNode", then
+    # return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "val") key.  Hence, can use
+    # shorthand "$parameter.my_min_user_id.column.min" instead of the explicit "$parameter.my_min_user_id.column.min.val".
+    # Retrieving the metadata details still requires using the explicit "$parameter.my_min_user_id.column.min.metadata".
+    # """
+    # if (
+    #     not fully_qualified_parameter_name.endswith(
+    #         f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
+    #     )
+    #     and isinstance(return_value, ParameterNode)
+    #     and FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY in return_value
+    # ):
+    #     return return_value[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
+    # TODO: <Alex>ALEX -- leaving the capability above for future considerations.</Alex>
 
     return return_value
