@@ -10,3 +10,4 @@ def load_data_into_database(
     df = pd.read_csv(csv_path)
     print(f"Creating table {table_name} from {csv_path}")
     df.to_sql(name=table_name, con=engine, index=False)
+    engine.dispose()

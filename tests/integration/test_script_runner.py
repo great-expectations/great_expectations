@@ -55,6 +55,21 @@ integration_test_matrix = [
         "user_flow_script": "integration/code/connecting_to_your_data/database/postgres_python_example.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
+    {
+        "name": "snowflake_runtime_yaml_example",
+        "data_dir": "integration/fixtures/data",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
+        "user_flow_script": "integration/code/connecting_to_your_data/database/snowflake_python_example.py",
+    },
+    {
+        "name": "snowflake_runtime_python_example",
+        "data_dir": "integration/fixtures/data",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
+        "user_flow_script": "integration/code/connecting_to_your_data/database/snowflake_yaml_example.py",
+    },
+
     # {
     #     "name": "pandas_two_batch_requests_two_validators",
     #     "base_dir": file_relative_path(__file__, "../../"),
