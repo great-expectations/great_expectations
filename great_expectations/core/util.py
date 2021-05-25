@@ -4,6 +4,7 @@ import decimal
 import logging
 import os
 import sys
+import uuid
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -170,6 +171,9 @@ def convert_to_json_serializable(data):
 
     elif isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
+
+    elif isinstance(data, uuid.UUID):
+        return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
     # https://github.com/numpy/numpy/pull/9505
@@ -459,6 +463,7 @@ def sniff_s3_compression(s3_url: S3Url) -> str:
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
+    force_reuse_spark_context: Optional[bool] = False,
 ):
     # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
     # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
@@ -491,7 +496,7 @@ def get_or_create_spark_application(
 
     # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
-    if spark_restart_required(
+    if not force_reuse_spark_context and spark_restart_required(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
         desired_spark_config=spark_config,
     ):
@@ -576,7 +581,7 @@ def spark_restart_required(
     ):
         return True
 
-    if not set([(k, v) for k, v in desired_spark_config.items()]).issubset(
+    if not {(k, v) for k, v in desired_spark_config.items()}.issubset(
         current_spark_config
     ):
         return True
