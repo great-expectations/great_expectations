@@ -17,7 +17,7 @@ class BackendDependencies(enum.Enum):
     POSTGRESQL = "POSTGRESQL"
     SPARK = "SPARK"
     SQLALCHEMY = "SQLALCHEMY"
-
+    SNOWFLAKE = "SNOWFLAKE"
 
 integration_test_matrix = [
     {
