@@ -49,12 +49,6 @@ stages:
                 [CIChanged]
                 azure-pipelines.yml
 
-                [ContribChanged]
-                contrib/**
-
-                [ExperimentalChanged]
-                contrib/experimental/**
-
                 [DocsChanged]
                 docs/**
                 integration/**
