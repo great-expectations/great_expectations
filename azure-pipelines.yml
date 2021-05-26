@@ -1,6 +1,7 @@
 trigger:
   - develop
   - main
+  - knoxpod
 
 resources:
   containers:
@@ -72,7 +73,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
