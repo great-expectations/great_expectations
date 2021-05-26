@@ -1,7 +1,6 @@
 trigger:
   - develop
   - main
-  - knoxpod
 
 resources:
   containers:
@@ -48,6 +47,12 @@ stages:
               rules: |
                 [CIChanged]
                 azure-pipelines.yml
+
+                [ContribChanged]
+                contrib/**
+
+                [ExperimentalChanged]
+                contrib/experimental/**
 
                 [DocsChanged]
                 docs/**
@@ -326,10 +331,12 @@ stages:
             displayName: 'pytest'
 
   - stage: docusaurus_tests
-    #dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint]
     pool:
       vmImage: 'ubuntu-latest'
+
     jobs:
+
       - services:
           postgres: postgres
 
