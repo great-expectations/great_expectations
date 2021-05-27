@@ -31,7 +31,7 @@ Slack is about communication, so use public channels whenever possible. This is 
 Great Expectations is a piece of the puzzle when it comes to being a data practitioner and so we want our community to be aware of the other pieces that make up the whole picture. If you plan on sharing an awesome tool or service you have no association with jump into #tools-services. If you are promoting your own please abide by the following rules.
 
 1. You're allowed to;
-    1. Promote your ONLY in tool/service when you introduce yourself.
+    1. Promote your tool ONLY in tool/service when you introduce yourself.
     2. Promote your tool in the tools channel once. Beyond answering questions about the tool multiple postings may be viewed as excessive and receive a warning.
     3. Mention your tool if someone mentions or is organic to a solution.
 2. If you see a partnership opportunity with Great Expectations please DM @Kyle Eaton and @Abe. We would love to create collaborative content and work with you if possible in promoting your product/service. 
