@@ -38,7 +38,7 @@ This section describes the foundational concepts used to integrate Great Expecta
 Expectations and Metrics
 =============================
 
-An **Expectation** is a declarative statements that a computer can evaluate, and that is semantically meaningful to humans, like ``expect_column_values_to_be_unique`` or ``expect_column_mean_to_be_between``.  Expectations are implemented as classes that provide a rich interface to the rest of the library to support validation, profiling, and translation. Those implementations provide a ``_validate`` method that determines whether the Expecation is satisfied by some data, and other methods to support the Great Expectations features.
+An **Expectation** is a declarative statements that a computer can evaluate, and that is semantically meaningful to humans, like ``expect_column_values_to_be_unique`` or ``expect_column_mean_to_be_between``.  Expectations are implemented as classes that provide a rich interface to the rest of the library to support validation, profiling, and translation. Those implementations provide a ``_validate`` method that determines whether the Expectation is satisfied by some data, and other methods to support the Great Expectations features.
 
 A **Metric** is any observable property of data. Expectations are usually evaluated using metrics. A metric could be something simple, like a single statistic (for example the mean of a column), or something more complicated, like the histogram of observed values over some distribution. A ``MetricProvider`` provides the critical translation layer between an individual metric and computing infrastructure that can compute it, like a database or local Pandas DataFrame.
 
