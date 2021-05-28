@@ -46,7 +46,9 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
-                metric_domain_kwargs={},
+                metric_domain_kwargs={
+                    "batch_id": validator.active_batch_id,
+                },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
             )

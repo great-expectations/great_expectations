@@ -698,11 +698,6 @@ class Validator:
         return batch_list
 
     @property
-    def batches(self):
-        """Getter for batches"""
-        return self._batches
-
-    @property
     def batches(self) -> Dict[str, Batch]:
         """Getter for batches"""
         return self._batches
