@@ -10,8 +10,12 @@ from integration.code.connecting_to_your_data.database.util import (
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
 sfUser = os.environ.get("SNOWFLAKE_USER")
 sfPswd = os.environ.get("SNOWFLAKE_PW")
+sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
+sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
-CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/SUPERCONDUCTIVE/NYC_TAXI?warehouse=COMPUTE_WH"
+
+CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 load_data_into_database(
     "taxi_data",
     "/Users/work/Development/great_expectations/integration/fixtures/data/reports/yellow_tripdata_sample_2019-01.csv",
@@ -80,7 +84,9 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_snowflake_datasource"]
-
-# can't provide guarantees that taxi_data will be the only data_asset_name in an external datasource
-# assert set(context.get_available_data_asset_names()["my_snowflake_datasource"]["default_inferred_data_connector_name"]) == {"taxi_data",}
+assert "taxi_data" in set(
+    context.get_available_data_asset_names()["my_snowflake_datasource"][
+        "default_inferred_data_connector_name"
+    ]
+)
 validator.execution_engine.engine.close()

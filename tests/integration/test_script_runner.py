@@ -19,6 +19,7 @@ class BackendDependencies(enum.Enum):
     SQLALCHEMY = "SQLALCHEMY"
     SNOWFLAKE = "SNOWFLAKE"
 
+
 integration_test_matrix = [
     {
         "user_flow_script": "integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py",
@@ -32,13 +33,13 @@ integration_test_matrix = [
         "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
         "data_dir": "integration/fixtures/data",
     },
-    {
-        "name": "pandas_one_multi_batch_request_one_validator",
-        "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
-    },
+    # {
+    #     "name": "pandas_one_multi_batch_request_one_validator",
+    #     "base_dir": file_relative_path(__file__, "../../"),
+    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
+    # },
     {
         "name": "postgres_runtime_golden_path",
         "data_dir": "integration/fixtures/data",
@@ -61,6 +62,7 @@ integration_test_matrix = [
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "integration/code/connecting_to_your_data/database/snowflake_python_example.py",
+        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
         "name": "snowflake_runtime_python_example",
@@ -68,6 +70,7 @@ integration_test_matrix = [
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "integration/code/connecting_to_your_data/database/snowflake_yaml_example.py",
+        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     # {
     #     "name": "pandas_two_batch_requests_two_validators",
@@ -183,3 +186,6 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
         pytest.skip("Skipping mssql tests")
     elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
         pytest.skip("Skipping spark tests")
+
+    elif dependencies == BackendDependencies.SNOWFLAKE and (pytest_args.no_sqlalchemy):
+        pytest.skip("Skipping snowflake tests")
