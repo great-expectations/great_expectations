@@ -49,7 +49,9 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
-                metric_domain_kwargs={},
+                metric_domain_kwargs={
+                    "batch_id": validator.active_batch_id,
+                },
                 metric_value_kwargs={
                     "include_nested": True,
                 },
@@ -60,7 +62,9 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
-                metric_domain_kwargs={},
+                metric_domain_kwargs={
+                    "batch_id": validator.active_batch_id,
+                },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
             )
