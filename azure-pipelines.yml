@@ -361,7 +361,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest -v -m docs --no-spark
+              pytest -v -m docs --no-spark --no-postgresql
             displayName: 'pytest'
             env:
               SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
