@@ -3,9 +3,8 @@ import os
 from ruamel import yaml
 
 import great_expectations as ge
-from .util import (
-    load_data_into_database,
-)
+from tests.integration.docusaurus.connecting_to_your_data.database.util import load_data_into_database
+
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
 sfUser = os.environ.get("SNOWFLAKE_USER")
