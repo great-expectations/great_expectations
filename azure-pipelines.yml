@@ -72,7 +72,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true), eq(variables.isKnoxpod, true))
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -338,7 +338,7 @@ stages:
     jobs:
       - job: test_docs
         # TODO remove CI changed condition
-        #condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isKnoxpod, true))
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isKnoxpod, true))
         variables:
           python.version: '3.8'
         services:
@@ -365,12 +365,14 @@ stages:
               pytest -v -m docs --no-spark
             displayName: 'pytest'
             env:
+              # snowflake credentials
               SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
               SNOWFLAKE_USER: $(SNOWFLAKE_USER)
               SNOWFLAKE_PW: $(SNOWFLAKE_PW)
               SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
               SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
               SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              # todo: add credentials for cloud resources here
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]

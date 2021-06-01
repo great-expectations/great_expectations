@@ -82,5 +82,3 @@ assert "taxi_data" in set(
         "default_inferred_data_connector_name"
     ]
 )
-
-# validator.execution_engine.engine.close()
