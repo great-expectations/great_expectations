@@ -20,7 +20,7 @@ class BackendDependencies(enum.Enum):
     SNOWFLAKE = "SNOWFLAKE"
 
 
-integration_test_matrix = [
+docs_test_matrix = [
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "base_dir": file_relative_path(__file__, "../../"),
@@ -32,27 +32,6 @@ integration_test_matrix = [
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    },
-    # {
-    #     "name": "pandas_one_multi_batch_request_one_validator",
-    #     "base_dir": file_relative_path(__file__, "../../"),
-    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
-    # },
-    {
-        "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
-        "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
-    },
-    {
-        "name": "pandas_multiple_batch_requests_one_validator_one_step",
-        "base_dir": file_relative_path(__file__, "../../"),
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
     },
     {
         "name": "postgres_runtime_golden_path",
@@ -89,16 +68,40 @@ integration_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+    }
+]
+
+integration_test_matrix = [
+    {
+        "name": "pandas_one_multi_batch_request_one_validator",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
     },
-    # {
-    #     "name": "pandas_two_batch_requests_two_validators",
-    #     "base_dir": file_relative_path(__file__, "../../"),
-    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
-    #     "expected_stderrs": "",
-    #     "expected_stdouts": "",
-    # },
+    {
+        "name": "pandas_two_batch_requests_two_validators",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+        "expected_stderrs": "",
+        "expected_stdouts": "",
+    },
+    {
+        "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
+    },
+    {
+        "name": "pandas_multiple_batch_requests_one_validator_one_step",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
+    },
 ]
 
 
@@ -113,11 +116,25 @@ def pytest_parsed_arguments(request):
 
 @pytest.mark.docs
 @pytest.mark.integration
-@pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
+@pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
+    _execute_integration_test(test_configuration, tmp_path)
 
+
+@pytest.mark.integration
+@pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
+def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
+    _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
+    _execute_integration_test(test_configuration, tmp_path)
+
+
+def _execute_integration_test(test_configuration, tmp_path):
+    """
+    Prepare and environment and run integration tests.
+    """
     workdir = os.getcwd()
     try:
         os.chdir(tmp_path)
