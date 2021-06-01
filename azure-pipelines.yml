@@ -1,7 +1,6 @@
 trigger:
   - develop
   - main
-  - knoxpod
 
 resources:
   containers:
@@ -32,7 +31,6 @@ resources:
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
-  isKnoxpod: $[eq(variables['Build.SourceBranch'], '/refs/heads/knoxpod')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
@@ -356,7 +354,7 @@ stages:
 
           # TODO : we took sql-alchemy dependencies. This will need to be re-added as services / containers are added
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt requirements-dev-sqlalchemy.txt 
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
