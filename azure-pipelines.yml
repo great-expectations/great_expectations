@@ -339,9 +339,10 @@ stages:
       - job: test_docs
         # TODO remove CI changed condition
         #condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isKnoxpod, true))
-
         variables:
           python.version: '3.8'
+        services:
+          postgres: postgres
 
         steps:
           - task: UsePythonVersion@0
