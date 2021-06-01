@@ -28,9 +28,7 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<PATH_TO_YOUR_DATA_HERE>", "../data/"
-)
+datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", "../data/")
 
 context.test_yaml_config(datasource_yaml)
 
@@ -47,9 +45,7 @@ batch_request = RuntimeBatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters[
-    "path"
-] = "./data/yellow_trip_data_sample_2019-01.csv"
+batch_request.runtime_parameters["path"] = "./data/yellow_trip_data_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True

@@ -46,6 +46,7 @@ integration_test_matrix = [
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
     {
@@ -54,22 +55,25 @@ integration_test_matrix = [
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
     {
         "name": "snowflake_runtime_yaml_example",
-        "data_dir": "integration/fixtures/data",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "user_flow_script": "tests/integration/code/connecting_to_your_data/database/snowflake_python_example.py",
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
         "name": "snowflake_runtime_python_example",
-        "data_dir": "integration/fixtures/data",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "user_flow_script": "tests/integration/code/connecting_to_your_data/database/snowflake_yaml_example.py",
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     # {
@@ -138,6 +142,16 @@ def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
         )
         script_path = os.path.join(tmp_path, "test_script.py")
         shutil.copyfile(script_source, script_path)
+
+        # Util Script
+        if test_configuration.get("util_script") is not None:
+            script_source = os.path.join(
+                test_configuration.get("base_dir"),
+                test_configuration.get("util_script"),
+            )
+            script_path = os.path.join(tmp_path, "util.py")
+            shutil.copyfile(script_source, script_path)
+
         # Check initial state
 
         # Execute test
