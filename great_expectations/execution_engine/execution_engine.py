@@ -8,7 +8,7 @@ import pandas as pd
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
-from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.exceptions import ExecutionEngineError, GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -40,6 +40,21 @@ class BatchData:
     def head(self, *args, **kwargs):
         # CONFLICT ON PURPOSE. REMOVE.
         return pd.DataFrame({})
+
+
+class MetricFunctionTypes(Enum):
+    VALUE = "value"
+    MAP_VALUES = "value"  # "map_values"
+    WINDOW_VALUES = "value"  # "window_values"
+    AGGREGATE_VALUE = "value"  # "aggregate_value"
+
+
+class MetricDomainTypes(Enum):
+    IDENTITY = "identity"
+    COLUMN = "column"
+    COLUMN_PAIR = "column_pair"
+    MULTICOLUMN = "multicolumn"
+    TABLE = "table"
 
 
 class ExecutionEngine(ABC):
@@ -83,8 +98,8 @@ class ExecutionEngine(ABC):
         self._batch_data_dict = {}
         if batch_data_dict is None:
             batch_data_dict = {}
-        self._load_batch_data_from_dict(batch_data_dict)
         self._active_batch_data_id = None
+        self._load_batch_data_from_dict(batch_data_dict)
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
@@ -118,6 +133,15 @@ class ExecutionEngine(ABC):
         else:
             return None
 
+    @active_batch_data_id.setter
+    def active_batch_data_id(self, batch_id):
+        if batch_id in self.loaded_batch_data_dict.keys():
+            self._active_batch_data_id = batch_id
+        else:
+            raise ExecutionEngineError(
+                f"Unable to set active_batch_data_id to {batch_id}. The may data may not be loaded."
+            )
+
     @property
     def active_batch_data(self):
         """The data from the currently-active batch."""
@@ -130,6 +154,10 @@ class ExecutionEngine(ABC):
     def loaded_batch_data_dict(self):
         """The current dictionary of batches."""
         return self._batch_data_dict
+
+    @property
+    def loaded_batch_data_ids(self):
+        return list(self.loaded_batch_data_dict.keys())
 
     @property
     def config(self) -> dict:
@@ -276,7 +304,7 @@ class ExecutionEngine(ABC):
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
     ) -> Tuple[Any, dict, dict]:
         """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
@@ -356,18 +384,3 @@ class MetricPartialFunctionTypes(Enum):
             return "condition"
         elif self.name in ["AGGREGATE_FN"]:
             return "aggregate_fn"
-
-
-class MetricFunctionTypes(Enum):
-    VALUE = "value"
-    MAP_VALUES = "value"  # "map_values"
-    WINDOW_VALUES = "value"  # "window_values"
-    AGGREGATE_VALUE = "value"  # "aggregate_value"
-
-
-class MetricDomainTypes(Enum):
-    IDENTITY = "identity"
-    COLUMN = "column"
-    COLUMN_PAIR = "column_pair"
-    TABLE = "table"
-    MULTICOLUMN = "multicolumn"
