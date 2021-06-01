@@ -30,15 +30,20 @@ class ParameterNode(DotDict):
     """
     ParameterNode is a node of a tree structure.
 
-    Since the descendant nodes are of the same type as their parent node, then each descendant node is also a tree.
+    The tree is implemented as a nested dictionary that also supports the "dot" notation at every level of hierarchy.
+    Together, these design aspects allow the entire tree to be converted into a JSON object for external compatibility.
 
-    Each node can support the combination of attribute name-value pairs representing values and details containing
-    helpful information regarding how these values were obtained (tolerances, explanations, etc.).
+    Since the descendant nodes (i.e., sub-dictionaries) are of the same type as their parent node, then each descendant
+    node is also a tree (or a sub-tree).  Each node can support the combination of attribute name-value pairs
+    representing values and details containing helpful information regarding how these values were obtained (tolerances,
+    explanations, etc.).  By convention, the "value" key corresponds the parameter value, while the "details" key
+    corresponds the auxiliary details.  These details can be used to set the "meta" key of the ExpectationConfiguration.
 
     See the ParameterContainer documentation for examples of different parameter naming structures supported.
 
     Even though, typically, only the leaf nodes (characterized by having no keys of "ParameterNode" type) store
-    parameter values and details, intermediate nodes may also have these properties.
+    parameter values and details, intermediate nodes may also have these properties.  This is important for supporting
+    the situations where multiple long fully-qualified parameter names have overlapping intermediate parts (see below).
     """
 
     def to_json_dict(self) -> dict:
