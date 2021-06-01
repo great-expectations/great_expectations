@@ -3,7 +3,7 @@ import os
 from ruamel import yaml
 
 import great_expectations as ge
-from integration.code.connecting_to_your_data.database.util import (
+from .util import (
     load_data_into_database,
 )
 
