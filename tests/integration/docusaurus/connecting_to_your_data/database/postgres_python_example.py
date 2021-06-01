@@ -2,14 +2,12 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from integration.code.connecting_to_your_data.database.util import (
-    load_data_into_database,
-)
+from tests.integration.docusaurus.connecting_to_your_data.database.util import load_data_into_database
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 load_data_into_database(
     "taxi_data",
-    "./data/reports/yellow_tripdata_sample_2019-01.csv",
+    "./data/yellow_trip_data_sample_2019-01.csv",
     CONNECTION_STRING,
 )
 

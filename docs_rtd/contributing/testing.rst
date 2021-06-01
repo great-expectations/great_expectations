@@ -118,7 +118,7 @@ Each item under ``datasets`` includes three entries: ``data``, ``schemas``, and 
 
     ``suppress_test_for`` is an optional parameter to disable an Expectation for a specific list of backends.
 
-    See an example below. For other examples
+    See an example below.
 
     .. code-block::
 

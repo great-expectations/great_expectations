@@ -27,12 +27,12 @@ This will allow you to validate and explore your data.
 
 Import these necessary packages and modules.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L1-L4
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L1-L4
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L6
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L6
 ```
 
 ### 3. Configure your Datasource
@@ -48,23 +48,23 @@ Using this example configuration add in the path to a directory that contains so
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L27
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L27
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L8-L28
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py#L8-L28
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L36
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py#L36
 ```
 
 </TabItem>
@@ -87,13 +87,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L37
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L37
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_python_example.py#L38
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py#L38
 ```
 
 </TabItem>
@@ -113,10 +113,10 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Add the path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L40-L46
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L40-L46
 ```
 Then load data into the `Validator`.
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L53-L60
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L53-L60
 ```
 
   </TabItem>
@@ -124,10 +124,10 @@ Then load data into the `Validator`.
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L66-L70
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L66-L70
 ```
 Then load data into the `Validator`.
-```python file=../../../../integration/code/connecting_to_your_data/filesystem/pandas_yaml_example.py#L76-L82
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L76-L82
 ```
 
   </TabItem>
