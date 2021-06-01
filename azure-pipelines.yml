@@ -354,7 +354,7 @@ stages:
 
           # TODO : we took sql-alchemy dependencies. This will need to be re-added as services / containers are added
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt requirements-dev-sqlalchemy.txt 
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt 
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
