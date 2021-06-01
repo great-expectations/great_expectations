@@ -49,12 +49,12 @@ snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?
 
 Import these necessary packages and modules.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_yaml_example.py#L1-L3
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L3-L5
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_yaml_example.py#L20
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L24
 ```
 
 ### 5. Configure your Datasource
@@ -70,10 +70,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_yaml_example.py#L22-L36
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L26-L40
 ```
 Run this code to test your configuration.
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_yaml_example.py#L43
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L47
 ```
 
 </TabItem>
@@ -81,16 +81,16 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_python_example.py#L23-L40
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L27-L44
 ```
 Run this code to test your configuration.
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_python_example.py#L44
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L48
 ```
 
 </TabItem>
 </Tabs>
 
-You will see your database tables listed as `Available data_asset_names` in the output.
+You will see your database tables listed as available `data_asset_names` in the output.
 
 Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
 
@@ -107,13 +107,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_yaml_example.py#L45
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L49
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_python_example.py#L46
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L50
 ```
 
 </TabItem>
@@ -133,7 +133,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_yaml_example.py#L48-L62
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L52-L66
 ```
 
   </TabItem>
@@ -142,7 +142,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../integration/code/connecting_to_your_data/database/snowflake_yaml_example.py#L65-L76
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L70-L81
 ```
 
   </TabItem>
