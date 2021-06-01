@@ -337,8 +337,7 @@ stages:
 
     jobs:
       - job: test_docs
-        # TODO remove CI changed condition
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isDevelop, true))
         variables:
           python.version: '3.8'
         services:
@@ -353,16 +352,16 @@ stages:
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
-          # TODO : we took sql-alchemy dependencies. This will need to be re-added as services / containers are added
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt 
-              pip install --requirement requirements.txt
+              pip install -r requirements-dev-util.txt -r requirements-dev-test.txt -r requirements-dev-sqlalchemy.txt
+              pip install -r requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest -v -m docs --no-spark
+              # TODO enable spark tests
+              pytest -v -m docs --no-spark tests/integration/test_script_runner.py
             displayName: 'pytest'
             env:
               # snowflake credentials
