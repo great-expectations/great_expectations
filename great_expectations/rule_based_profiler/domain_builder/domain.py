@@ -5,6 +5,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types.base import DotDict
 
 
+# TODO: <Alex>ALEX -- multiple inheritance is to be used with caution (potentially fix to use single inheritance)</Alex>
 class Domain(IDDict, DotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(self, domain_kwargs: Optional[Dict[str, Any]] = None):
