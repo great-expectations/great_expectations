@@ -68,7 +68,7 @@ docs_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
-    }
+    },
 ]
 
 integration_test_matrix = [
