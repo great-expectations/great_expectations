@@ -95,7 +95,7 @@ class BatchIdentifierSchema(Schema):
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully qualified expectation_suite_identifer
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifer
     and run_id.
     """
 
@@ -104,7 +104,7 @@ class ValidationResultIdentifier(DataContextKey):
 
         Args:
             expectation_suite_identifier (ExpectationSuiteIdentifier, list, tuple, or dict):
-                identifying information for the fully qualified expectation suite used to validate
+                identifying information for the fully-qualified expectation suite used to validate
             run_id (RunIdentifier): The run_id for which validation occurred
         """
         super().__init__()

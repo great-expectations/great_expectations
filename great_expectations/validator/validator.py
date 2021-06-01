@@ -7,14 +7,14 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 import pandas as pd
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -24,10 +24,12 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -685,20 +687,34 @@ class Validator:
         """Getter for config value"""
         return self._validator_config.get(key)
 
+    def load_batch(self, batch_list: List[Batch]):
+        for batch in batch_list:
+            self._execution_engine.load_batch_data(batch.id, batch.data)
+            self._batches[batch.id] = batch
+            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
+            # execution_engine. The final active_batch_id will be that of the final batch loaded.
+            self.active_batch_id = batch.id
+
+        return batch_list
+
     @property
-    def batches(self):
+    def batches(self) -> Dict[str, Batch]:
         """Getter for batches"""
         return self._batches
 
     @property
-    def active_batch(self):
-        """Getter for active batch"""
-        active_batch_id = self.execution_engine.active_batch_data_id
-        active_batch = self.batches.get(active_batch_id) if active_batch_id else None
-        return active_batch
+    def loaded_batch_ids(self) -> List[str]:
+        return self.execution_engine.loaded_batch_data_ids
 
     @property
-    def active_batch_spec(self):
+    def active_batch(self) -> Batch:
+        """Getter for active batch"""
+        active_batch_id: str = self.execution_engine.active_batch_data_id
+        batch: Batch = self.batches.get(active_batch_id) if active_batch_id else None
+        return batch
+
+    @property
+    def active_batch_spec(self) -> Optional[BatchSpec]:
         """Getter for active batch's batch_spec"""
         if not self.active_batch:
             return None
@@ -706,16 +722,21 @@ class Validator:
             return self.active_batch.batch_spec
 
     @property
-    def active_batch_id(self):
+    def active_batch_id(self) -> str:
         """Getter for active batch id"""
         return self.execution_engine.active_batch_data_id
 
     @active_batch_id.setter
-    def active_batch_id(self, batch_id):
-        if batch_id not in self.batches.keys():
+    def active_batch_id(self, batch_id: str):
+        assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
+        available_batch_ids: Set[str] = set(self.batches.keys()).union(
+            set(self.loaded_batch_ids)
+        )
+        if batch_id not in available_batch_ids:
             raise ValueError(
-                f"batch_id {batch_id} not found in loaded batches. Batches must first be loaded before"
-                f"they can be set as active"
+                f"""batch_id {batch_id} not found in loaded batches.  Batches must first be loaded before they can be \
+set as active.
+"""
             )
         else:
             self.execution_engine._active_batch_data_id = batch_id
