@@ -1,5 +1,7 @@
+import datetime
 from typing import Any, Dict
 
+import pandas as pd
 import pytest
 
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -22,12 +24,35 @@ from tests.rule_based_profiler.bob_user_workflow_fixture import (
 )
 
 
+@pytest.fixture
+def two_column_pandas_test_df():
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "Age": [
+                7,
+                15,
+                21,
+                39,
+                None,
+            ],
+            "Date": [
+                datetime.date(2020, 12, 31),
+                datetime.date(2021, 1, 1),
+                datetime.date(2021, 2, 21),
+                datetime.date(2021, 3, 20),
+                None,
+            ],
+        }
+    )
+    return df
+
+
 # noinspection PyPep8Naming
 @pytest.fixture
 def table_Users_domain():
     return Domain(
         domain_kwargs={
-            "batch_id": "1234567890",
+            "batch_id": "f576df3a81c34925978336d530453bc4",
         }
     )
 
@@ -38,7 +63,7 @@ def column_Age_domain():
     return Domain(
         domain_kwargs={
             "column": "Age",
-            "batch_id": "1234567890",
+            "batch_id": "f576df3a81c34925978336d530453bc4",
         }
     )
 
@@ -49,7 +74,7 @@ def column_Date_domain():
     return Domain(
         domain_kwargs={
             "column": "Date",
-            "batch_id": "1234567890",
+            "batch_id": "f576df3a81c34925978336d530453bc4",
         }
     )
 

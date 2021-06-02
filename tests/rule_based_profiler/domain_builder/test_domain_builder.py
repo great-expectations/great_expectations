@@ -1,10 +1,9 @@
 from typing import List
 
-import pandas as pd
-
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
     DomainBuilder,
     SingleTableDomainBuilder,
 )
@@ -14,7 +13,8 @@ from great_expectations.validator.validator import Validator
 
 
 # noinspection PyPep8Naming
-def test_build_single_table_domain(
+def test_single_table_domain_builder(
+    two_column_pandas_test_df,
     table_Users_domain,
 ):
     batch_definition: BatchDefinition = BatchDefinition(
@@ -24,14 +24,8 @@ def test_build_single_table_domain(
         batch_identifiers=IDDict({}),
     )
 
-    df: pd.DataFrame = pd.DataFrame(
-        {
-            "a": [0, 1, 2, 3, None],
-            "b": [0, 1, 2, 3, None],
-        }
-    )
     validator: Validator = build_pandas_validator_with_data(
-        df=df,
+        df=two_column_pandas_test_df,
         batch_definition=batch_definition,
     )
 
@@ -42,4 +36,63 @@ def test_build_single_table_domain(
     )
 
     assert len(domains) == 1
-    assert domains[0].domain_kwargs.batch_id == "f576df3a81c34925978336d530453bc4"
+    assert domains == [
+        {
+            "domain_kwargs": {
+                "batch_id": "f576df3a81c34925978336d530453bc4",
+            },
+        }
+    ]
+
+    domain: Domain = domains[0]
+    # Assert Domain object equivalence.
+    assert domain == table_Users_domain
+    # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
+    assert domain.domain_kwargs.batch_id == "f576df3a81c34925978336d530453bc4"
+
+
+# noinspection PyPep8Naming
+def test_column_domain_builder(
+    two_column_pandas_test_df,
+    column_Age_domain,
+    column_Date_domain,
+):
+    batch_definition: BatchDefinition = BatchDefinition(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="my_data_asset",
+        batch_identifiers=IDDict({}),
+    )
+
+    validator: Validator = build_pandas_validator_with_data(
+        df=two_column_pandas_test_df,
+        batch_definition=batch_definition,
+    )
+
+    domain_builder: DomainBuilder = ColumnDomainBuilder()
+    domains: List[Domain] = domain_builder.get_domains(
+        validator=validator,
+        batch_ids=None,
+    )
+
+    assert len(domains) == 2
+    assert domains == [
+        {
+            "domain_kwargs": {
+                "column": "Age",
+                "batch_id": "f576df3a81c34925978336d530453bc4",
+            },
+        },
+        {
+            "domain_kwargs": {
+                "column": "Date",
+                "batch_id": "f576df3a81c34925978336d530453bc4",
+            },
+        },
+    ]
+    # Assert Domain object equivalence.
+    domain: Domain
+    domain = domains[0]
+    assert domain == column_Age_domain
+    domain = domains[1]
+    assert domain == column_Date_domain
