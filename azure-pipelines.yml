@@ -45,9 +45,6 @@ stages:
             inputs:
               verbose: true
               rules: |
-                [CIChanged]
-                azure-pipelines.yml
-
                 [ContribChanged]
                 contrib/**
 
