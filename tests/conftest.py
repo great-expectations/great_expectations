@@ -4382,7 +4382,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
             )
         ),
     )
@@ -4397,7 +4397,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
             )
         ),
     )
@@ -4412,7 +4412,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
             )
         ),
     )
