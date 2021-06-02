@@ -969,7 +969,8 @@ def build_pandas_engine(
             "Exactly one of batch_id or batch_definition must be specified."
         )
 
-    batch_id = batch_id or batch_definition.id
+    if batch_id is None:
+        batch_id = batch_definition.id
 
     batch: Batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: PandasExecutionEngine = PandasExecutionEngine(
@@ -1002,7 +1003,8 @@ def build_sa_engine(
             "Exactly one of batch_id or batch_definition must be specified."
         )
 
-    batch_id = batch_id or batch_definition.id
+    if batch_id is None:
+        batch_id = batch_definition.id
 
     table_name: str = "test"
 
@@ -1052,7 +1054,8 @@ def build_spark_engine(
             "Exactly one of batch_id or batch_definition must be specified."
         )
 
-    batch_id = batch_id or batch_definition.id
+    if batch_id is None:
+        batch_id = batch_definition.id
 
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
