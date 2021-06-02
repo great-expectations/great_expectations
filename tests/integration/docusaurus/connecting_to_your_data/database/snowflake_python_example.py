@@ -1,25 +1,35 @@
+import os
+
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 from .util import load_data_into_database
 
-CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
+sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+sfUser = os.environ.get("SNOWFLAKE_USER")
+sfPswd = os.environ.get("SNOWFLAKE_PW")
+sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
+sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+
+
+CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 load_data_into_database(
     "taxi_data",
-    "./data/yellow_trip_data_sample_2019-01.csv",
+    "/Users/work/Development/great_expectations/integration/fixtures/data/reports/yellow_tripdata_sample_2019-01.csv",
     CONNECTION_STRING,
 )
 
 context = ge.get_context()
 
+
 datasource_config = {
-    "name": "my_postgres_datasource",
+    "name": "my_snowflake_datasource",
     "class_name": "Datasource",
     "execution_engine": {
         "class_name": "SqlAlchemyExecutionEngine",
-        "connection_string": "postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>",
+        "connection_string": "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME",
     },
     "data_connectors": {
         "default_runtime_data_connector_name": {
@@ -33,17 +43,15 @@ datasource_config = {
     },
 }
 
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
 context.test_yaml_config(yaml.dump(datasource_config))
 
 context.add_datasource(**datasource_config)
 
-# Here is a RuntimeBatchRequest using a query
-batch_request = RuntimeBatchRequest(
-    datasource_name="my_postgres_datasource",
+# First test for RuntimeBatchRequest using a query
+batch_request = ge.core.batch.RuntimeBatchRequest(
+    datasource_name="my_snowflake_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
@@ -58,12 +66,9 @@ validator = context.get_validator(
 )
 print(validator.head())
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
-
-# Here is a BatchRequest naming a table
-batch_request = BatchRequest(
-    datasource_name="my_postgres_datasource",
+# Second test for BatchRequest naming a table
+batch_request = ge.core.batch.BatchRequest(
+    datasource_name="my_snowflake_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
 )
@@ -77,9 +82,10 @@ print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["my_postgres_datasource"]
+assert [ds["name"] for ds in context.list_datasources()] == ["my_snowflake_datasource"]
 assert "taxi_data" in set(
-    context.get_available_data_asset_names()["my_postgres_datasource"][
+    context.get_available_data_asset_names()["my_snowflake_datasource"][
         "default_inferred_data_connector_name"
     ]
 )
+validator.execution_engine.engine.close()

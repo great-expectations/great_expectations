@@ -336,16 +336,13 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-
-      - services:
-          postgres: postgres
-
       - job: test_docs
-      # TODO remove CI changed condition
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.CIChanged'], true))
-
+        # TODO remove CI changed condition
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
         variables:
           python.version: '3.8'
+        services:
+          postgres: postgres
 
         steps:
           - task: UsePythonVersion@0
@@ -358,15 +355,24 @@ stages:
 
           # TODO : we took sql-alchemy dependencies. This will need to be re-added as services / containers are added
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt 
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest -v -m docs --no-spark --no-postgresql --no-sqlalchemy
+              pytest -v -m docs --no-spark
             displayName: 'pytest'
+            env:
+              # snowflake credentials
+              SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
+              SNOWFLAKE_USER: $(SNOWFLAKE_USER)
+              SNOWFLAKE_PW: $(SNOWFLAKE_PW)
+              SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
+              SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
+              SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              # todo: add credentials for cloud resources here
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
