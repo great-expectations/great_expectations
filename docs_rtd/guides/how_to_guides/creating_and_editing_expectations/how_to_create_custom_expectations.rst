@@ -494,7 +494,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                 def _spark(cls, column, _table, _column_name, **kwargs):
                     """Spark Max Implementation"""
                     types = dict(_table.dtypes)
-                    return F.maxcolumn)
+                    return F.maxcolumn()
 
 
 
