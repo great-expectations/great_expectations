@@ -471,6 +471,7 @@ class ExecutionEngineConfig(DictDot):
         caching=None,
         batch_spec_defaults=None,
         connection_string=None,
+        credentials=None,
         spark_config=None,
         boto3_options=None,
         **kwargs,
@@ -483,6 +484,8 @@ class ExecutionEngineConfig(DictDot):
             self._batch_spec_defaults = batch_spec_defaults
         if connection_string is not None:
             self.connection_string = connection_string
+        if credentials is not None:
+            self.credentials = credentials
         if spark_config is not None:
             self.spark_config = spark_config
         if boto3_options is not None:
@@ -510,6 +513,7 @@ class ExecutionEngineConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_engine")
     connection_string = fields.String(required=False, allow_none=True)
+    credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -522,7 +526,7 @@ class ExecutionEngineConfigSchema(Schema):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
-        if "connection_string" in data and not (
+        if ("connection_string" in data or "credentials" in data) and not (
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(

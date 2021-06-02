@@ -302,14 +302,17 @@ class_name: Datasource
 execution_engine:
   class_name: {self.class_name}
 data_connectors:
-  {{datasource_name}}_example_data_connector:
+  default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    datasource_name: {{datasource_name}}
     base_directory: {self.base_path}
     default_regex:
       group_names: 
         - data_asset_name
       pattern: (.*)
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
 """'''
 
     def prompt(self) -> None:
@@ -402,26 +405,34 @@ database = "{self.database}"'''
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine'''
         yaml_str += self._yaml_innards()
         if self.driver:
             yaml_str += f"""
-  drivername: {self.driver}"""
-        yaml_str += '"""'
+    drivername: {self.driver}"""
+
+        yaml_str += '''
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    name: whole_table"""'''
         return yaml_str
 
     def _yaml_innards(self) -> str:
         """Override if needed."""
         return """
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}"""
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}"""
 
     def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
@@ -527,8 +538,8 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
         return (
             super()._yaml_innards()
             + """
-  query:
-    sslmode: prefer"""
+    query:
+      sslmode: prefer"""
         )
 
 
@@ -585,25 +596,25 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
     def _yaml_innards(self) -> str:
         snippet = """
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
 """
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
-            snippet += "  password: {password}"
+            snippet += "    password: {password}"
         elif self.auth_method == SnowflakeAuthMethod.SSO:
             snippet += """\
-  connect_args:
-    authenticator: {authenticator_url}"""
+    connect_args:
+      authenticator: {authenticator_url}"""
         elif self.auth_method == SnowflakeAuthMethod.KEY_PAIR:
             snippet += """\
-  private_key_path: {private_key_path}
-  private_key_passphrase: {private_key_passphrase}"""
+    private_key_path: {private_key_path}
+    private_key_passphrase: {private_key_passphrase}"""
         return snippet
 
 
@@ -632,7 +643,7 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
         )
 
     def _yaml_innards(self) -> str:
-        return "\nconnection_string: {connection_string}"
+        return "\n  connection_string: {connection_string}"
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
@@ -656,7 +667,7 @@ class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
 connection_string = "YOUR_CONNECTION_STRING"'''
 
     def _yaml_innards(self) -> str:
-        return "\nconnection_string: {connection_string}"
+        return "\n  connection_string: {connection_string}"
 
 
 def _get_sql_yaml_helper_class(
