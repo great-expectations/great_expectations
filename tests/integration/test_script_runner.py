@@ -123,7 +123,9 @@ def _execute_integration_test(test_configuration, tmp_path):
     """
     workdir = os.getcwd()
     try:
-        base_dir = test_configuration.get("base_dir", file_relative_path(__file__, "../../"))
+        base_dir = test_configuration.get(
+            "base_dir", file_relative_path(__file__, "../../")
+        )
         os.chdir(tmp_path)
         # Ensure GE is installed in our environment
         ge_requirement = test_configuration.get("ge_requirement", "great_expectations")
