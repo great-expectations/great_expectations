@@ -9,7 +9,7 @@ yaml = YAML()
 
 @yaml_object(yaml)
 class DotDict(dict):
-    """This class provides dot.notation dot.notation access to dictionary attributes.
+    """This class provides dot.notation access to dictionary attributes.
 
     It is also serializable by the ruamel.yaml library used in Great Expectations for managing
     configuration objects.

@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import pstats
+import re
 import time
 from collections import OrderedDict
 from datetime import datetime
@@ -186,6 +187,7 @@ def verify_dynamic_loading_support(module_name: str, package_name: str = None) -
     :param package_name: the name of a package, to which the given module belongs
     """
     try:
+        # noinspection PyUnresolvedReferences
         module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
             module_name, package=package_name
         )
@@ -944,3 +946,7 @@ def generate_library_json_from_registered_expectations():
         library_json[expectation_name] = report_object
 
     return library_json
+
+
+def delete_blank_lines(text: str) -> str:
+    return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
