@@ -72,7 +72,7 @@ Put your connection string in this template:
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L26-L40
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L47
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L49
 ```
 
 </TabItem>
@@ -106,7 +106,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L49
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L51
 ```
 
 </TabItem>
@@ -132,7 +132,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L52-L66
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L54-L68
 ```
 
   </TabItem>
