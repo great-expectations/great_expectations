@@ -90,7 +90,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                         domain_kwargs={
                             "column": column_name,
                             "batch_id": validator.active_batch_id,
-                        },
+                        }
                     )
                 )
 

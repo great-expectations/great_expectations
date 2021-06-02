@@ -69,7 +69,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
                 domain_kwargs={
                     "column": column_name,
                     "batch_id": validator.active_batch_id,
-                },
+                }
             )
             for column_name in candidate_column_names
         ]
