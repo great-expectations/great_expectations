@@ -24,7 +24,7 @@ class SingleTableDomainBuilder(DomainBuilder):
             Domain(
                 domain_kwargs={
                     "batch_id": validator.active_batch_id,
-                },
+                }
             )
         ]
 

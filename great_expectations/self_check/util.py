@@ -22,7 +22,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
@@ -795,13 +795,22 @@ def get_test_validator_with_data(
         raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
-def build_pandas_validator_with_data(df: pd.DataFrame) -> Validator:
-    batch: Batch = Batch(data=df)
+def build_pandas_validator_with_data(
+    df: pd.DataFrame,
+    batch_definition: Optional[BatchDefinition] = None,
+) -> Validator:
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
 
 
 def build_sa_validator_with_data(
-    df, sa_engine_name, schemas=None, caching=True, table_name=None, sqlite_db_path=None
+    df,
+    sa_engine_name,
+    schemas=None,
+    caching=True,
+    table_name=None,
+    sqlite_db_path=None,
+    batch_definition: Optional[BatchDefinition] = None,
 ):
     dialect_classes = {
         "sqlite": sqlitetypes.dialect,
@@ -892,7 +901,7 @@ def build_sa_validator_with_data(
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
@@ -917,7 +926,9 @@ def modify_locale(func):
 
 
 def build_spark_validator_with_data(
-    df: Union[pd.DataFrame, SparkDataFrame], spark: SparkSession
+    df: Union[pd.DataFrame, SparkDataFrame],
+    spark: SparkSession,
+    batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -930,17 +941,39 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
-    batch: Batch = Batch(data=df)
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark, df=df, batch_id=batch.id
+        spark=spark,
+        df=df,
+        batch_id=batch.id,
     )
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
-def build_pandas_engine(df: pd.DataFrame) -> PandasExecutionEngine:
-    batch: Batch = Batch(data=df)
+def build_pandas_engine(
+    df: pd.DataFrame,
+    batch_id: Optional[str] = None,
+    batch_definition: Optional[BatchDefinition] = None,
+) -> PandasExecutionEngine:
+    if (
+        sum(
+            bool(x)
+            for x in [
+                batch_id is not None,
+                batch_definition is not None,
+            ]
+        )
+        != 1
+    ):
+        raise ValueError(
+            "Exactly one of batch_id or batch_definition must be specified."
+        )
+
+    batch_id = batch_id or batch_definition.id
+
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: PandasExecutionEngine = PandasExecutionEngine(
-        batch_data_dict={batch.id: batch.data}
+        batch_data_dict={batch_id: batch.data}
     )
     return execution_engine
 
@@ -952,7 +985,25 @@ def build_sa_engine(
     if_exists: Optional[str] = "fail",
     index: Optional[bool] = False,
     dtype: Optional[dict] = None,
+    batch_id: Optional[str] = None,
+    batch_definition: Optional[BatchDefinition] = None,
 ) -> SqlAlchemyExecutionEngine:
+    if (
+        sum(
+            bool(x)
+            for x in [
+                batch_id is not None,
+                batch_definition is not None,
+            ]
+        )
+        != 1
+    ):
+        raise ValueError(
+            "Exactly one of batch_id or batch_definition must be specified."
+        )
+
+    batch_id = batch_id or batch_definition.id
+
     table_name: str = "test"
 
     # noinspection PyUnresolvedReferences
@@ -972,10 +1023,9 @@ def build_sa_engine(
     batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
-    batch: Batch = Batch(data=batch_data)
 
     execution_engine = SqlAlchemyExecutionEngine(
-        engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
+        engine=sqlalchemy_engine, batch_data_dict={batch_id: batch_data}
     )
 
     return execution_engine
@@ -983,8 +1033,27 @@ def build_sa_engine(
 
 # Builds a Spark Execution Engine
 def build_spark_engine(
-    spark: SparkSession, df: Union[pd.DataFrame, SparkDataFrame], batch_id: str
+    spark: SparkSession,
+    df: Union[pd.DataFrame, SparkDataFrame],
+    batch_id: Optional[str] = None,
+    batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
+    if (
+        sum(
+            bool(x)
+            for x in [
+                batch_id is not None,
+                batch_definition is not None,
+            ]
+        )
+        != 1
+    ):
+        raise ValueError(
+            "Exactly one of batch_id or batch_definition must be specified."
+        )
+
+    batch_id = batch_id or batch_definition.id
+
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
             [
