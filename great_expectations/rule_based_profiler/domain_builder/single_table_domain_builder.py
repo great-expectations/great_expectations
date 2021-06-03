@@ -8,7 +8,7 @@ from great_expectations.rule_based_profiler.domain_builder.domain_builder import
 from great_expectations.validator.validator import Validator
 
 
-class SingleTableDomainBuilder(DomainBuilder):
+class ActiveBatchTableDomainBuilder(DomainBuilder):
     def _get_domains(
         self,
         *,
