@@ -53,7 +53,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
+            FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out".
             data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
             parameter_name=parameter_name,

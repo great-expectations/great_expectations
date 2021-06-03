@@ -42,6 +42,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         if data_context is None:
             raise ge_exceptions.ProfilerExecutionError(
