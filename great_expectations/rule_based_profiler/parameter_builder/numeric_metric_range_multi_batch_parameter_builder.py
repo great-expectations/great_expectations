@@ -1,4 +1,5 @@
 import copy
+import uuid
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -147,7 +148,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         else:
             metric_value_kwargs = self._metric_value_kwargs
 
-        expectation_suite_name: str = f"tmp_suite_domain_{domain.id}"
+        expectation_suite_name: str = (
+            f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
+        )
         validator_for_metrics_calculations: Validator = self.data_context.get_validator(
             batch_request=self.batch_request,
             create_expectation_suite_with_name=expectation_suite_name,
