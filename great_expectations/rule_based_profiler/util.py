@@ -4,7 +4,10 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 
 
-def get_batch_ids(data_context: DataContext, batch_request: BatchRequest) -> List[str]:
+def get_batch_ids_from_batch_request(
+    data_context: DataContext,
+    batch_request: BatchRequest,
+) -> List[str]:
     datasource_name: str = batch_request.datasource_name
     batch_definitions: List[BatchDefinition] = data_context.get_datasource(
         datasource_name=datasource_name

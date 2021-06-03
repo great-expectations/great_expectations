@@ -8,7 +8,13 @@ from great_expectations.rule_based_profiler.domain_builder.domain_builder import
 from great_expectations.validator.validator import Validator
 
 
-class SingleTableDomainBuilder(DomainBuilder):
+class ActiveBatchTableDomainBuilder(DomainBuilder):
+    """
+    The interface method of ActiveBatchTableDomainBuilder emits a single Domain object, corresponding to the active
+    Batch (hence the name).  Note that for appropriate use-cases, it should be readily possible to build a different
+    implementation, where a separate Domain object is emitted for each individual batch_id (this use-case is deferred).
+    """
+
     def _get_domains(
         self,
         *,
