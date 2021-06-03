@@ -38,7 +38,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR_MEANGINFUL_NAME>",  # this can be anything that identifies this data_asset for you
+    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your path here.
     batch_identifiers={"default_identifier_name": "something_something"},
 )
