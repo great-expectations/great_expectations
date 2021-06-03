@@ -1,5 +1,7 @@
+import datetime
 from typing import Any, Dict
 
+import pandas as pd
 import pytest
 
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -22,19 +24,58 @@ from tests.rule_based_profiler.bob_user_workflow_fixture import (
 )
 
 
+@pytest.fixture
+def two_column_pandas_test_df():
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "Age": [
+                7,
+                15,
+                21,
+                39,
+                None,
+            ],
+            "Date": [
+                datetime.date(2020, 12, 31),
+                datetime.date(2021, 1, 1),
+                datetime.date(2021, 2, 21),
+                datetime.date(2021, 3, 20),
+                None,
+            ],
+        }
+    )
+    return df
+
+
 # noinspection PyPep8Naming
 @pytest.fixture
-def column_Age_structured_type_domain():
+def table_Users_domain():
     return Domain(
-        domain_kwargs={"column": "Age", "batch_id": "1234567890"},
+        domain_kwargs={
+            "batch_id": "f576df3a81c34925978336d530453bc4",
+        }
     )
 
 
 # noinspection PyPep8Naming
 @pytest.fixture
-def column_Date_structured_type_domain():
+def column_Age_domain():
     return Domain(
-        domain_kwargs={"column": "Date", "batch_id": "1234567890"},
+        domain_kwargs={
+            "column": "Age",
+            "batch_id": "f576df3a81c34925978336d530453bc4",
+        }
+    )
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def column_Date_domain():
+    return Domain(
+        domain_kwargs={
+            "column": "Date",
+            "batch_id": "f576df3a81c34925978336d530453bc4",
+        }
     )
 
 
@@ -193,8 +234,8 @@ def rule_without_variables_without_parameters():
 # noinspection PyPep8Naming
 @pytest.fixture
 def rule_with_variables_with_parameters(
-    column_Age_structured_type_domain,
-    column_Date_structured_type_domain,
+    column_Age_domain,
+    column_Date_domain,
     single_part_name_parameter_container,
     multi_part_name_parameter_container,
 ):
@@ -220,7 +261,7 @@ def rule_with_variables_with_parameters(
         ),
     )
     rule._parameters = {
-        column_Age_structured_type_domain.id: single_part_name_parameter_container,
-        column_Date_structured_type_domain.id: multi_part_name_parameter_container,
+        column_Age_domain.id: single_part_name_parameter_container,
+        column_Date_domain.id: multi_part_name_parameter_container,
     }
     return rule
