@@ -202,6 +202,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
                     "max_value": max_value,
                 },
                 "details": {
+                    # Note: the "metric_domain_kwargs" value, used in "details", corresponds to the active Batch.
+                    # While any information can be placed into the "details" dictionary, this judicious choice will
+                    # allow for the relevant "details" to be used as "meta" in ExpectationConfiguration and render well,
+                    # without overwhelming the user (e.g., if instead all "batch_id" values were captured in "details").
                     "metric_configuration": {
                         "metric_name": self._metric_name,
                         "metric_domain_kwargs": metric_domain_kwargs,
