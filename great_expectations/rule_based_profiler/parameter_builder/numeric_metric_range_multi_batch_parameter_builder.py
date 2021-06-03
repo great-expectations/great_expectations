@@ -52,8 +52,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 
         if np.isclose(false_positive_rate, 0.0):
             false_positive_rate = false_positive_rate + NP_EPSILON
-        elif np.isclose(false_positive_rate, 1.0):
-            false_positive_rate = false_positive_rate - NP_EPSILON
 
         self._false_positive_rate = false_positive_rate
 
