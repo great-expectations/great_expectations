@@ -4356,7 +4356,7 @@ def yellow_trip_pandas_data_context(
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "test_data")
+    data_path: str = os.path.join(context_path, "..", "data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(
         file_relative_path(
@@ -4382,7 +4382,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
             )
         ),
     )
@@ -4397,7 +4397,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
             )
         ),
     )
@@ -4412,7 +4412,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
             )
         ),
     )

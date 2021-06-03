@@ -952,28 +952,11 @@ def build_spark_validator_with_data(
 
 def build_pandas_engine(
     df: pd.DataFrame,
-    batch_id: Optional[str] = None,
-    batch_definition: Optional[BatchDefinition] = None,
 ) -> PandasExecutionEngine:
-    if (
-        sum(
-            bool(x)
-            for x in [
-                batch_id is not None,
-                batch_definition is not None,
-            ]
-        )
-        != 1
-    ):
-        raise ValueError(
-            "Exactly one of batch_id or batch_definition must be specified."
-        )
+    batch: Batch = Batch(data=df)
 
-    batch_id = batch_id or batch_definition.id
-
-    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: PandasExecutionEngine = PandasExecutionEngine(
-        batch_data_dict={batch_id: batch.data}
+        batch_data_dict={batch.id: batch.data}
     )
     return execution_engine
 
@@ -985,25 +968,7 @@ def build_sa_engine(
     if_exists: Optional[str] = "fail",
     index: Optional[bool] = False,
     dtype: Optional[dict] = None,
-    batch_id: Optional[str] = None,
-    batch_definition: Optional[BatchDefinition] = None,
 ) -> SqlAlchemyExecutionEngine:
-    if (
-        sum(
-            bool(x)
-            for x in [
-                batch_id is not None,
-                batch_definition is not None,
-            ]
-        )
-        != 1
-    ):
-        raise ValueError(
-            "Exactly one of batch_id or batch_definition must be specified."
-        )
-
-    batch_id = batch_id or batch_definition.id
-
     table_name: str = "test"
 
     # noinspection PyUnresolvedReferences
@@ -1023,9 +988,10 @@ def build_sa_engine(
     batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
+    batch: Batch = Batch(data=batch_data)
 
     execution_engine = SqlAlchemyExecutionEngine(
-        engine=sqlalchemy_engine, batch_data_dict={batch_id: batch_data}
+        engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
     )
 
     return execution_engine
@@ -1052,7 +1018,8 @@ def build_spark_engine(
             "Exactly one of batch_id or batch_definition must be specified."
         )
 
-    batch_id = batch_id or batch_definition.id
+    if batch_id is None:
+        batch_id = batch_definition.id
 
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
