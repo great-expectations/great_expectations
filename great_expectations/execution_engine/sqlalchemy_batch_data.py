@@ -6,8 +6,8 @@ from great_expectations.execution_engine.execution_engine import BatchData
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.sql.elements import quoted_name
     from sqlalchemy.exc import DatabaseError
+    from sqlalchemy.sql.elements import quoted_name
 except ImportError:
     sa = None
     quoted_name = None

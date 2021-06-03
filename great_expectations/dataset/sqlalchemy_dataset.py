@@ -7,11 +7,10 @@ from datetime import datetime
 from functools import wraps
 from typing import Dict, Iterable, List
 
-from sqlalchemy.exc import DatabaseError
-
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from sqlalchemy.exc import DatabaseError
 
 from great_expectations.core.util import (
     convert_to_json_serializable,
