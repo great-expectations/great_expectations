@@ -99,7 +99,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         6. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
         7. Compute the number of standard deviations (as a floating point number rounded to the nearest highest integer)
            needed to create the "band" around the mean so as to achieve the specified false_positive_rate (note that the
-           false_positive_rate of 0.0 would result in an infinite number of standard deviations, hence it is "lifted" by
+           false_positive_rate of 0.0 would result in an infinite number of standard deviations, hence it is "nudged" by
            a small quantity, "epsilon", above 0.0 if false_positive_rate of 0.0 is provided as argument in constructor).
            (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
         8. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
