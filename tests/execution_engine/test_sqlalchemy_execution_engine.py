@@ -21,7 +21,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-from tests.test_utils import get_sqlite_temp_table_names, get_sqlite_table_names
+from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -563,8 +563,9 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
     assert batch_markers.get("ge_load_time") is not None
 
+
 def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
-    
+
     engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
@@ -577,8 +578,16 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    temp_tables = [name for name in get_sqlite_temp_table_names(engine.engine)  if name.startswith('ge_tmp_')]
-    tables = [name for name in get_sqlite_table_names(engine.engine)  if name.startswith('ge_tmp_')]
+    temp_tables = [
+        name
+        for name in get_sqlite_temp_table_names(engine.engine)
+        if name.startswith("ge_tmp_")
+    ]
+    tables = [
+        name
+        for name in get_sqlite_table_names(engine.engine)
+        if name.startswith("ge_tmp_")
+    ]
     assert len(temp_tables) == 0
     assert len(tables) == 0
 
@@ -595,8 +604,16 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
     metrics.update(results)
 
-    temp_tables = [name for name in get_sqlite_temp_table_names(engine.engine)  if name.startswith('ge_tmp_')]
-    tables = [name for name in get_sqlite_table_names(engine.engine)  if name.startswith('ge_tmp_')]
+    temp_tables = [
+        name
+        for name in get_sqlite_temp_table_names(engine.engine)
+        if name.startswith("ge_tmp_")
+    ]
+    tables = [
+        name
+        for name in get_sqlite_table_names(engine.engine)
+        if name.startswith("ge_tmp_")
+    ]
     assert len(temp_tables) == 0
     assert len(tables) == 0
 
@@ -613,9 +630,15 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         metrics=metrics,  # metrics=aggregate_fn_metrics
     )
 
-    temp_tables = [name for name in get_sqlite_temp_table_names(engine.engine)  if name.startswith('ge_tmp_')]
-    tables = [name for name in get_sqlite_table_names(engine.engine)  if name.startswith('ge_tmp_')]
+    temp_tables = [
+        name
+        for name in get_sqlite_temp_table_names(engine.engine)
+        if name.startswith("ge_tmp_")
+    ]
+    tables = [
+        name
+        for name in get_sqlite_table_names(engine.engine)
+        if name.startswith("ge_tmp_")
+    ]
     assert len(temp_tables) == 1
     assert len(tables) == 0
-
-

@@ -861,7 +861,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 temp_table_name,
                 metadata,
                 sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
-                prefixes=['TEMPORARY'],
+                prefixes=["TEMPORARY"],
             )
             temp_table_obj.create(execution_engine.engine, checkfirst=True)
 

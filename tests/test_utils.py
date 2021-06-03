@@ -177,6 +177,7 @@ FROM
     rows = result.fetchall()
     return {row[0] for row in rows}
 
+
 def get_sqlite_table_names(engine):
     result = engine.execute(
         """
