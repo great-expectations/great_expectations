@@ -25,6 +25,11 @@ NP_SQRT_2: float = np.sqrt(2.0)
 
 
 class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
+    """
+    A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
+    using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
+    """
+
     def __init__(
         self,
         parameter_name: str,
@@ -35,6 +40,13 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
     ):
+        """
+        Args:
+            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            data_context: DataContext
+        """
         super().__init__(
             parameter_name=parameter_name,
             data_context=data_context,
@@ -69,6 +81,29 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
             Args:
         :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+
+        The algorithm operates according to the following steps:
+        1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument).  Note
+        that this particular BatchRequest was specified as part of configuration for the present ParameterBuilder class.
+        (This is in contrast to the BatchRequest specified in Checkpoint configuration, or in pipeline, notebook, etc.)
+        2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
+        3. Instantiate the Validator object corresponding to BatchRequest and a temporary expectation_suite_name in
+           order to have access to all Batch objects, on each of which the specified metric_name will be computed.
+        4. While looping through the available batch_ids:
+           4.1: Update the metric_domain_kwargs with the specific batch_id (the iteration variable of the loop).
+           4.2: Create the metric_configuration_arguments using the metric_domain_kwargs from the previous step.
+           4.3: Compute metric_value using the local Validator object (which has access to the required Batch objects).
+           4.4: Insure that the metric_value is numeric (ranges can be computed for numeric-valued metrics only).
+           4.5: Append the value of the computed metric to the list (one for each batch_id -- loop iteration variable).
+        5. Convert the list of floating point metric computation results to a numpy array (for further computations).
+        6. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
+        7. Compute the number of standard deviations (as a floating point number rounded to the nearest highest integer)
+           needed to create the "band" around the mean so as to achieve the specified false_positive_rate (note that the
+           false_positive_rate of 0.0 would result in an infinite number of standard deviations, hence it is "lifted" by
+           a small quantity, "epsilon", above 0.0 if false_positive_rate of 0.0 is provided as argument in constructor).
+           (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
+        8. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
+        9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
         batch_ids: List[str] = self.get_batch_ids(batch_ids=batch_ids)
@@ -77,6 +112,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
+        # Obtaining domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         if isinstance(
             self._metric_domain_kwargs, str
         ) and self._metric_domain_kwargs.startswith("$"):
@@ -89,6 +125,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         else:
             metric_domain_kwargs = self._metric_domain_kwargs
 
+        # Obtaining value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         if (
             self._metric_value_kwargs is not None
             and isinstance(self._metric_value_kwargs, str)

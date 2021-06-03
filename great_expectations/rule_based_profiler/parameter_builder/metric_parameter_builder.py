@@ -15,8 +15,10 @@ from great_expectations.validator.validator import Validator
 
 
 class MetricParameterBuilder(ParameterBuilder):
-    """Class utilized for obtaining a resolved (evaluated) metric (which is labeled a 'parameter') using domain kwargs, value
-    kwargs, and a metric name"""
+    """
+    A Single-Batch implementation for obtaining a resolved (evaluated) metric, using domain_kwargs, value_kwargs, and
+    metric_name as arguments.
+    """
 
     def __init__(
         self,
@@ -57,7 +59,7 @@ class MetricParameterBuilder(ParameterBuilder):
             Args:
         :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
-        # Obtaining any necessary domain kwargs from rule state, otherwise using instance var
+        # Obtaining domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         if isinstance(
             self._metric_domain_kwargs, str
         ) and self._metric_domain_kwargs.startswith("$"):
@@ -70,7 +72,7 @@ class MetricParameterBuilder(ParameterBuilder):
         else:
             metric_domain_kwargs = self._metric_domain_kwargs
 
-        # Obtaining any necessary value kwargs from rule state, otherwise using instance var
+        # Obtaining value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         if (
             self._metric_value_kwargs is not None
             and isinstance(self._metric_value_kwargs, str)
