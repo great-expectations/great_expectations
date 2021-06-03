@@ -7,7 +7,7 @@ version: 2
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-  configuration: docs/conf.py
+  configuration: docs_rtd/conf.py
   fail_on_warning: false  # set to true once builds are no longer producing warnings
 
 # Build documentation with MkDocs
@@ -23,4 +23,4 @@ python:
   version: 3.8
 #   system_packages: true
   install:
-    - requirements: docs/requirements.txt
+    - requirements: docs_rtd/requirements.txt
