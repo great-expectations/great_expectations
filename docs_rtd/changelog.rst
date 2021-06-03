@@ -16,6 +16,9 @@ Develop
 * [MAINTENANCE] Improve robustness of integration test_runner
 * [MAINTENANCE] CLI tests now support click 8.0 and 7.x
 * [ENHANCEMENT] Experimental WIP Rule Based Profiler for single batch workflows (#2788)
+* [MAINTENANCE] Soft launch of alpha docs site
+* [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
+
 
 0.13.19
 -----------------
