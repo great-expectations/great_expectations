@@ -3,9 +3,9 @@ from typing import List
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.rule_based_profiler.domain_builder import (
+    ActiveBatchTableDomainBuilder,
     ColumnDomainBuilder,
     DomainBuilder,
-    ActiveBatchTableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.self_check.util import build_pandas_validator_with_data
