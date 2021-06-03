@@ -67,17 +67,17 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         pass
 
-    def get_batch_ids(self, batch_ids: Optional[List[str]] = None) -> List[str]:
-        if batch_ids is not None:
-            return batch_ids
-
-        batch_ids = get_batch_ids_from_batch_request(
-            data_context=self.data_context, batch_request=self._batch_request
-        )
+    def get_batch_ids(self, validator: Validator) -> Optional[List[str]]:
+        batch_ids: Optional[List[str]]
+        if self._batch_request is None:
+            batch_ids = validator.loaded_batch_ids
+        else:
+            batch_ids = get_batch_ids_from_batch_request(
+                data_context=self.data_context, batch_request=self._batch_request
+            )
 
         return batch_ids
 

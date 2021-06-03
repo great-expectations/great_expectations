@@ -86,7 +86,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
@@ -117,7 +116,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
-        batch_ids: List[str] = self.get_batch_ids(batch_ids=batch_ids)
+        batch_ids: List[str] = self.get_batch_ids(validator=validator)
         if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
@@ -199,7 +198,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         max_value: float = mean + stds_multiplier * std
 
         parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
+            f"$parameter.{self.parameter_name}": {
                 "value": {
                     "min_value": min_value,
                     "max_value": max_value,
@@ -222,7 +221,3 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.parameter_name}"

@@ -55,7 +55,6 @@ class MetricParameterBuilder(ParameterBuilder):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
@@ -97,7 +96,7 @@ class MetricParameterBuilder(ParameterBuilder):
             "metric_dependencies": None,
         }
         parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
+            f"$parameter.{self.parameter_name}": {
                 "value": validator.get_metric(
                     metric=MetricConfiguration(**metric_configuration_arguments)
                 ),
@@ -109,7 +108,3 @@ class MetricParameterBuilder(ParameterBuilder):
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.parameter_name}"

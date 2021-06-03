@@ -115,7 +115,6 @@ class Profiler:
         batch=None,
         batches=None,
         batch_request=None,
-        batch_ids=None,
         data_context=None,
         expectation_suite_name=None,
     ):
@@ -129,7 +128,6 @@ class Profiler:
             :param batch: A Batch object to profile on
             :param batches: A list of Batch objects
             :param batch_request: A Batch request utilized to obtain a Validator Object
-            :param batch_ids: A list of batch_ids to use when profiling (e.g. can be a subset of batches provided via validator, batch, batches, batch_request). If not provided, all batches are used. If a Validator is provided, validator active batch id is used. Note, we also verify that all of these batch_ids are accessible and throw an error if not.
             :param data_context: A DataContext object used to define a great_expectations project environment
             :param expectation_suite_name: A name for returned Expectation suite.
         :return: Set of rule evaluation results in the form of an Expectation suite
@@ -167,27 +165,13 @@ class Profiler:
                 # TODO: <Alex>ALEX -- Note, not specifying an "expectation_suite" explicitly causes: expectation_suite_name = "default" -- this seems problematic.</Alex>
                 validator = self.data_context.get_validator(batch_request=batch_request)
 
-        # Verify that all requested batch_ids are loaded
-        if batch_ids is None:
-            batch_ids = [validator.active_batch_id]
-
-        unloaded_batch_ids = []
-        for batch_id in batch_ids:
-            if batch_id not in validator.loaded_batch_ids:
-                unloaded_batch_ids.append(batch_id)
-
-        if len(unloaded_batch_ids) > 0:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"batch_ids {unloaded_batch_ids} were requested but are not available."
-            )
-
         if expectation_suite_name is None:
             expectation_suite_name = (
                 f"{self.__class__.__name__}_generated_expectation_suite"
             )
         suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         for rule in self._rules:
-            expectation_configurations = rule.generate(validator, batch_ids)
+            expectation_configurations = rule.generate(validator)
             for expectation_configuration in expectation_configurations:
                 suite.add_expectation(expectation_configuration)
 

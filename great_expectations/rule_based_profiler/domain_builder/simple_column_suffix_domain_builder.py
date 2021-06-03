@@ -22,7 +22,6 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         self,
         *,
         validator: Optional[Validator] = None,
-        batch_ids: Optional[List[str]] = None,
     ) -> List[Domain]:
         """
         Find the column suffix for each column and return all domains matching the specified suffix.
