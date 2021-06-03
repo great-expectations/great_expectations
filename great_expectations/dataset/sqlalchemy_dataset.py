@@ -7,6 +7,8 @@ from datetime import datetime
 from functools import wraps
 from typing import Dict, Iterable, List
 
+from sqlalchemy.exc import DatabaseError
+
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
@@ -1337,7 +1339,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         elif engine_dialect == "oracle":
-            stmt = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
+            # oracle 18c introduced PRIVATE temp tables which are transient objects
+            stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {table_name} ON COMMIT PRESERVE DEFINITION AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+            # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
+            # this means an empty table will persist after the db session
+            stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         else:
@@ -1345,7 +1353,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
 
-        self.engine.execute(stmt)
+        if engine_dialect == "oracle":
+            try:
+                self.engine.execute(stmt_1)
+            except DatabaseError:
+                self.engine.execute(stmt_2)
+        else:
+            self.engine.execute(stmt)
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
