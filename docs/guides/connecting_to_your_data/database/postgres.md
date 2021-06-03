@@ -78,7 +78,7 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L16-L33
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L16-L34
 ```
 Run this code to test your configuration.
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L40
