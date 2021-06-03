@@ -850,9 +850,11 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
     temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+    prefixes = ["TEMPORARY"]
     if execution_engine.engine.dialect.name.lower() == "mssql":
         # mssql expects all temporary table names to have a prefix '#'
         temp_table_name = f"#{temp_table_name}"
+        prefixes = []
 
     try:
         with execution_engine.engine.begin():
@@ -861,7 +863,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 temp_table_name,
                 metadata,
                 sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
-                prefixes=["TEMPORARY"],
+                prefixes=prefixes,
             )
             temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
