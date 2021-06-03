@@ -28,6 +28,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     """
     A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
     using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
+
+    This Multi-Batch ParameterBuilder is general in the sense that any metric that computes numbers can be accommodated.
+    On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
+    ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
     """
 
     def __init__(
@@ -45,6 +49,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
+            metric_domain_kwargs: used in MetricConfiguration
+            metric_value_kwargs: used in MetricConfiguration
             data_context: DataContext
         """
         super().__init__(

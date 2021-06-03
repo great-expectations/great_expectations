@@ -33,6 +33,9 @@ class MetricParameterBuilder(ParameterBuilder):
             parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
+            metric_domain_kwargs: used in MetricConfiguration
+            metric_value_kwargs: used in MetricConfiguration
             data_context: DataContext
         """
         super().__init__(
