@@ -15,8 +15,8 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
-    get_parameter_value,
 )
+from great_expectations.rule_based_profiler.util import get_metric_kwargs
 from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -123,32 +123,19 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             )
 
         # Obtaining domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        if isinstance(
-            self._metric_domain_kwargs, str
-        ) and self._metric_domain_kwargs.startswith("$"):
-            metric_domain_kwargs = get_parameter_value(
-                fully_qualified_parameter_name=self._metric_domain_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-        else:
-            metric_domain_kwargs = self._metric_domain_kwargs
-
+        metric_domain_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+            domain=domain,
+            metric_kwargs=self._metric_domain_kwargs,
+            variables=variables,
+            parameters=parameters,
+        )
         # Obtaining value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        if (
-            self._metric_value_kwargs is not None
-            and isinstance(self._metric_value_kwargs, str)
-            and self._metric_value_kwargs.startswith("$")
-        ):
-            metric_value_kwargs = get_parameter_value(
-                fully_qualified_parameter_name=self._metric_value_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-        else:
-            metric_value_kwargs = self._metric_value_kwargs
+        metric_value_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+            domain=domain,
+            metric_kwargs=self._metric_value_kwargs,
+            variables=variables,
+            parameters=parameters,
+        )
 
         expectation_suite_name: str = (
             f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
