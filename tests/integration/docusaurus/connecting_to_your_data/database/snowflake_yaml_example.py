@@ -39,6 +39,8 @@ data_connectors:
        name: whole_table
 """
 
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
     "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>",
     CONNECTION_STRING,

@@ -5,6 +5,7 @@ import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
+import DatabaseCredentials from '../components/adding_database_credentials.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -33,9 +34,7 @@ pip install sqlalchemy psycopg2
 
 ### 3. Add credentials
 
-Great Expectations provides multiple methods of using credentials for accessing databases.
-Options include using an file not checked into source control, environment variables, and using a cloud secret store.
-Please read the article [Credential storage and usage options](../advanced/database_credentials) for instructions on alternatives.
+<DatabaseCredentials />
 
 For this guide we will use a `connection_string` like this:
 
@@ -79,10 +78,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L16-L33
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L16-L34
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L39
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L40
 ```
 
 </TabItem>
@@ -111,7 +110,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L41
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L42
 ```
 
 </TabItem>
