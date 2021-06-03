@@ -87,7 +87,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         that this particular BatchRequest was specified as part of configuration for the present ParameterBuilder class.
         (This is in contrast to the BatchRequest specified in Checkpoint configuration, or in pipeline, notebook, etc.)
         2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
-        3. Instantiate the Validator object corresponding to BatchRequest and a temporary expectation_suite_name in
+        3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
            order to have access to all Batch objects, on each of which the specified metric_name will be computed.
         4. While looping through the available batch_ids:
            4.1: Update the metric_domain_kwargs with the specific batch_id (the iteration variable of the loop).
