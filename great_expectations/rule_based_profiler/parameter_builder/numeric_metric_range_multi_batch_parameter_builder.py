@@ -185,13 +185,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         mean: float = np.mean(metric_values)
         std: float = np.std(metric_values)
 
-        num_stds: Union[float, int] = NP_SQRT_2 * special.erfinv(
+        stds_multiplier: Union[float, int] = NP_SQRT_2 * special.erfinv(
             1.0 - self._false_positive_rate
         )
-        num_stds = float(np.rint(num_stds))
 
-        min_value: float = mean - num_stds * std
-        max_value: float = mean + num_stds * std
+        min_value: float = mean - stds_multiplier * std
+        max_value: float = mean + stds_multiplier * std
 
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
