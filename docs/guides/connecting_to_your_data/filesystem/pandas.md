@@ -53,7 +53,7 @@ Using this example configuration add in the path to a directory that contains so
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L33
 ```
 
 </TabItem>
@@ -87,7 +87,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L37
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
 ```
 
 </TabItem>
@@ -113,10 +113,10 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Add the path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L40-L46
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L38-L44
 ```
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L53-L60
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L50-L56
 ```
 
   </TabItem>
@@ -124,10 +124,10 @@ Then load data into the `Validator`.
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L66-L70
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L62-L66
 ```
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L76-L82
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L72-L78
 ```
 
   </TabItem>
