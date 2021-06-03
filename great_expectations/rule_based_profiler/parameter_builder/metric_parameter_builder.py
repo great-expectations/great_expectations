@@ -99,7 +99,7 @@ class MetricParameterBuilder(ParameterBuilder):
                 "details": {
                     "metric_configuration": metric_configuration_arguments,
                 },
-            }
+            },
         }
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values

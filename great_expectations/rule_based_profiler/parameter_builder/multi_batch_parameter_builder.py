@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -27,7 +27,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         self,
         parameter_name: str,
         data_context: Optional[DataContext] = None,
-        batch_request: Optional[BatchRequest] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
     ):
         """
         Args:
@@ -38,7 +38,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         """
         if data_context is None:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"MultiBatchParameterBuilder requires a data_context, but none was provided."
+                message=f"{self.__class__.__name__} requires a data_context, but none was provided."
             )
 
         super().__init__(
@@ -46,6 +46,8 @@ class MultiBatchParameterBuilder(ParameterBuilder):
             data_context=data_context,
         )
 
+        if isinstance(batch_request, dict):
+            batch_request = BatchRequest(**batch_request)
         self._batch_request = batch_request
 
     @abstractmethod
@@ -70,3 +72,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         )
 
         return batch_ids
+
+    @property
+    def batch_request(self) -> BatchRequest:
+        return self._batch_request
