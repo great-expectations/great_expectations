@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import List
+from typing import List, cast
 
 import pytest
 from ruamel.yaml import YAML
@@ -119,7 +119,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
     asset_name: str = "alice_columnar_table_single_batch_data_asset"
 
-    datasource: Datasource = context.datasources[datasource_name]
+    datasource: Datasource = cast(Datasource, context.datasources[datasource_name])
 
     data_connector: DataConnector = datasource.data_connectors[data_connector_name]
 
