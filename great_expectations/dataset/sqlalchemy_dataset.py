@@ -10,7 +10,6 @@ from typing import Dict, Iterable, List
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from sqlalchemy.exc import DatabaseError
 
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -34,7 +33,7 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.exc import ProgrammingError, DatabaseError
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
