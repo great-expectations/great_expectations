@@ -564,15 +564,33 @@ def test_validator_batch_filter(
     assert batch_definitions_months_set == {"01", "03"}
 
 
-# TODO: <Alex>ALEX -- This test is not fully implemented.</Alex>
 def test_custom_filter_function(
     multi_batch_taxi_validator,
 ):
-    # noinspection PyUnusedLocal
     total_batch_definition_list: List[BatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
     assert len(total_batch_definition_list) == 3
+
+    # Filter to all batch_definitions prior to March
+    jan_feb_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={
+            "custom_filter_function": lambda batch_identifiers: int(
+                batch_identifiers["month"]
+            )
+            < 3
+        }
+    )
+    jan_feb_batch_definition_list: list = (
+        jan_feb_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
+    )
+    assert len(jan_feb_batch_definition_list) == 2
+    batch_definitions_months_set: Set[str] = {
+        v.batch_identifiers["month"] for v in jan_feb_batch_definition_list
+    }
+    assert batch_definitions_months_set == {"01", "02"}
 
 
 def test_validator_set_active_batch(
