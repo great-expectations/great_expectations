@@ -17,7 +17,7 @@ sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 load_data_into_database(
     "taxi_data",
-    "/Users/work/Development/great_expectations/integration/fixtures/data/reports/yellow_tripdata_sample_2019-01.csv",
+    "./data/reports/yellow_tripdata_sample_2019-01.csv",
     CONNECTION_STRING,
 )
 
@@ -43,6 +43,8 @@ datasource_config = {
     },
 }
 
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
 context.test_yaml_config(yaml.dump(datasource_config))
