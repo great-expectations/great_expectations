@@ -15,8 +15,8 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
-    get_parameter_value,
 )
+from great_expectations.rule_based_profiler.util import get_metric_kwargs
 from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -86,7 +86,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
@@ -117,39 +116,26 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
-        batch_ids: List[str] = self.get_batch_ids(batch_ids=batch_ids)
+        batch_ids: List[str] = self.get_batch_ids(validator=validator)
         if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
         # Obtaining domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        if isinstance(
-            self._metric_domain_kwargs, str
-        ) and self._metric_domain_kwargs.startswith("$"):
-            metric_domain_kwargs = get_parameter_value(
-                fully_qualified_parameter_name=self._metric_domain_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-        else:
-            metric_domain_kwargs = self._metric_domain_kwargs
-
+        metric_domain_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+            domain=domain,
+            metric_kwargs=self._metric_domain_kwargs,
+            variables=variables,
+            parameters=parameters,
+        )
         # Obtaining value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        if (
-            self._metric_value_kwargs is not None
-            and isinstance(self._metric_value_kwargs, str)
-            and self._metric_value_kwargs.startswith("$")
-        ):
-            metric_value_kwargs = get_parameter_value(
-                fully_qualified_parameter_name=self._metric_value_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-        else:
-            metric_value_kwargs = self._metric_value_kwargs
+        metric_value_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+            domain=domain,
+            metric_kwargs=self._metric_value_kwargs,
+            variables=variables,
+            parameters=parameters,
+        )
 
         expectation_suite_name: str = (
             f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
@@ -199,7 +185,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         max_value: float = mean + stds_multiplier * std
 
         parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
+            f"$parameter.{self.parameter_name}": {
                 "value": {
                     "min_value": min_value,
                     "max_value": max_value,
@@ -222,7 +208,3 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.parameter_name}"

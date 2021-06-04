@@ -14,7 +14,6 @@ class ColumnDomainBuilder(DomainBuilder):
         self,
         *,
         validator: Optional[Validator] = None,
-        batch_ids: Optional[List[str]] = None,
     ) -> List[Domain]:
         """
         Obtains and returns domains for all columns of a table.

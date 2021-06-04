@@ -32,7 +32,6 @@ def test_active_batch_table_domain_builder(
     domain_builder: DomainBuilder = ActiveBatchTableDomainBuilder()
     domains: List[Domain] = domain_builder.get_domains(
         validator=validator,
-        batch_ids=None,
     )
 
     assert len(domains) == 1
@@ -72,7 +71,6 @@ def test_column_domain_builder(
     domain_builder: DomainBuilder = ColumnDomainBuilder()
     domains: List[Domain] = domain_builder.get_domains(
         validator=validator,
-        batch_ids=None,
     )
 
     assert len(domains) == 2

@@ -8,8 +8,8 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
-    get_parameter_value,
 )
+from great_expectations.rule_based_profiler.util import get_metric_kwargs
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -55,7 +55,6 @@ class MetricParameterBuilder(ParameterBuilder):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
@@ -63,32 +62,19 @@ class MetricParameterBuilder(ParameterBuilder):
         :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
         # Obtaining domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        if isinstance(
-            self._metric_domain_kwargs, str
-        ) and self._metric_domain_kwargs.startswith("$"):
-            metric_domain_kwargs = get_parameter_value(
-                fully_qualified_parameter_name=self._metric_domain_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-        else:
-            metric_domain_kwargs = self._metric_domain_kwargs
-
+        metric_domain_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+            domain=domain,
+            metric_kwargs=self._metric_domain_kwargs,
+            variables=variables,
+            parameters=parameters,
+        )
         # Obtaining value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        if (
-            self._metric_value_kwargs is not None
-            and isinstance(self._metric_value_kwargs, str)
-            and self._metric_value_kwargs.startswith("$")
-        ):
-            metric_value_kwargs = get_parameter_value(
-                fully_qualified_parameter_name=self._metric_value_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-        else:
-            metric_value_kwargs = self._metric_value_kwargs
+        metric_value_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+            domain=domain,
+            metric_kwargs=self._metric_value_kwargs,
+            variables=variables,
+            parameters=parameters,
+        )
 
         metric_configuration_arguments: Dict[str, Any] = {
             "metric_name": self._metric_name,
@@ -97,7 +83,7 @@ class MetricParameterBuilder(ParameterBuilder):
             "metric_dependencies": None,
         }
         parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
+            f"$parameter.{self.parameter_name}": {
                 "value": validator.get_metric(
                     metric=MetricConfiguration(**metric_configuration_arguments)
                 ),
@@ -109,7 +95,3 @@ class MetricParameterBuilder(ParameterBuilder):
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.parameter_name}"

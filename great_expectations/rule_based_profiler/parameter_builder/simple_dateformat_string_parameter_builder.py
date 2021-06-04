@@ -78,12 +78,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
-        if batch_ids is None:
-            batch_ids = [validator.active_batch_id]
+        # TODO: <Alex>ALEX -- this needs to be generalized to use the multi-batch get_batch_ids() utility.</Alex>
+        batch_ids = [validator.active_batch_id]
 
         if len(batch_ids) > 1:
             # By default, the validator will use active batch id (the most recently loaded batch)
@@ -146,7 +145,7 @@ currently loaded in the validator.
                 best_success_ratio = current_success_ratio
 
         parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
+            "$parameter.date_format_string": {
                 "value": best_fit_date_format_estimate,
                 "details": {
                     "success_ratio": best_success_ratio,
@@ -156,7 +155,3 @@ currently loaded in the validator.
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return "$parameter.date_format_string"

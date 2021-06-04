@@ -11,7 +11,10 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
-from great_expectations.rule_based_profiler.util import get_batch_ids_from_batch_request
+from great_expectations.rule_based_profiler.util import (
+    get_batch_ids_from_batch_request,
+    get_batch_ids_from_validator,
+)
 from great_expectations.validator.validator import Validator
 
 
@@ -67,17 +70,17 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         pass
 
-    def get_batch_ids(self, batch_ids: Optional[List[str]] = None) -> List[str]:
-        if batch_ids is not None:
-            return batch_ids
-
-        batch_ids = get_batch_ids_from_batch_request(
-            data_context=self.data_context, batch_request=self._batch_request
-        )
+    def get_batch_ids(self, validator: Validator) -> Optional[List[str]]:
+        batch_ids: Optional[List[str]]
+        if self._batch_request is None:
+            batch_ids = get_batch_ids_from_validator(validator=validator)
+        else:
+            batch_ids = get_batch_ids_from_batch_request(
+                data_context=self.data_context, batch_request=self._batch_request
+            )
 
         return batch_ids
 

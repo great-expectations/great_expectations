@@ -2,9 +2,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
-    ColumnDomainBuilder,
-)
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
     InferredSemanticDomainType,
@@ -13,7 +11,7 @@ from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_dom
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
 
-class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
+class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
     """
     This DomainBuilder utilizes a "best-effort" semantic interpretation of ("storage") columns of a table.
     """
@@ -32,7 +30,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         self,
         *,
         validator: Optional[Validator] = None,
-        batch_ids: Optional[List[str]] = None,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
