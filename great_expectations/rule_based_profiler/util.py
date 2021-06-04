@@ -7,6 +7,11 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     get_parameter_value,
 )
+from great_expectations.validator.validator import Validator
+
+
+def get_batch_ids_from_validator(validator: Validator) -> List[str]:
+    return validator.loaded_batch_ids
 
 
 def get_batch_ids_from_batch_request(
