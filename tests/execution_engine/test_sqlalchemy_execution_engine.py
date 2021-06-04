@@ -565,6 +565,19 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
 
 
 def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
+    def validate_tmp_tables():
+        temp_tables = [
+            name
+            for name in get_sqlite_temp_table_names(engine.engine)
+            if name.startswith("ge_tmp_")
+        ]
+        tables = [
+            name
+            for name in get_sqlite_table_names(engine.engine)
+            if name.startswith("ge_tmp_")
+        ]
+        assert len(temp_tables) == 0
+        assert len(tables) == 0
 
     engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
@@ -578,18 +591,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    temp_tables = [
-        name
-        for name in get_sqlite_temp_table_names(engine.engine)
-        if name.startswith("ge_tmp_")
-    ]
-    tables = [
-        name
-        for name in get_sqlite_table_names(engine.engine)
-        if name.startswith("ge_tmp_")
-    ]
-    assert len(temp_tables) == 0
-    assert len(tables) == 0
+    validate_tmp_tables()
 
     condition_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
@@ -604,18 +606,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
     metrics.update(results)
 
-    temp_tables = [
-        name
-        for name in get_sqlite_temp_table_names(engine.engine)
-        if name.startswith("ge_tmp_")
-    ]
-    tables = [
-        name
-        for name in get_sqlite_table_names(engine.engine)
-        if name.startswith("ge_tmp_")
-    ]
-    assert len(temp_tables) == 0
-    assert len(tables) == 0
+    validate_tmp_tables()
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
@@ -626,19 +617,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         },
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,),
-        metrics=metrics,  # metrics=aggregate_fn_metrics
+        metrics_to_resolve=(desired_metric,), metrics=metrics
     )
 
-    temp_tables = [
-        name
-        for name in get_sqlite_temp_table_names(engine.engine)
-        if name.startswith("ge_tmp_")
-    ]
-    tables = [
-        name
-        for name in get_sqlite_table_names(engine.engine)
-        if name.startswith("ge_tmp_")
-    ]
-    assert len(temp_tables) == 1
-    assert len(tables) == 0
+    validate_tmp_tables()
