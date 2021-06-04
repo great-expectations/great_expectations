@@ -33,7 +33,7 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.exc import ProgrammingError, DatabaseError
+    from sqlalchemy.exc import DatabaseError, ProgrammingError
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
