@@ -129,7 +129,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._metric_domain_kwargs,
-            expected_type=None,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
@@ -139,7 +139,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._metric_value_kwargs,
-            expected_type=None,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
@@ -153,7 +153,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._batch_request,
-            expected_type=dict,
+            expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
@@ -181,7 +181,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             ] = validator_for_metrics_calculations.get_metric(
                 metric=MetricConfiguration(**metric_configuration_arguments)
             )
-
             if not is_numeric(value=metric_value):
                 raise ge_exceptions.ProfilerExecutionError(
                     message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
@@ -201,7 +200,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._false_positive_rate,
-            expected_type=(int, float),
+            expected_return_type=(int, float),
             variables=variables,
             parameters=parameters,
         )
@@ -225,7 +224,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._round_to_nearest_integer,
-            expected_type=bool,
+            expected_return_type=bool,
             variables=variables,
             parameters=parameters,
         )

@@ -31,7 +31,7 @@ def get_parameter_argument_and_validate_return_type(
     domain: Domain,
     *,
     argument: Optional[Union[Any, str]] = None,
-    expected_type: Optional[Union[type, tuple]] = None,
+    expected_return_type: Optional[Union[type, tuple]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
@@ -41,10 +41,10 @@ def get_parameter_argument_and_validate_return_type(
         variables=variables,
         parameters=parameters,
     )
-    if expected_type is not None:
-        if not isinstance(argument, expected_type):
+    if expected_return_type is not None:
+        if not isinstance(argument, expected_return_type):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Argument "{argument}" in must be {str(expected_type)}-valued \
+                message=f"""Argument "{argument}" in must be {str(expected_return_type)}-valued \
 (value of type "{str(type(argument))}" was encountered).
 """
             )

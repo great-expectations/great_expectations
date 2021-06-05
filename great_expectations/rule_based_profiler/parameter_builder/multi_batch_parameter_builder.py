@@ -89,7 +89,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
             ] = get_parameter_argument_and_validate_return_type(
                 domain=domain,
                 argument=self._batch_request,
-                expected_type=dict,
+                expected_return_type=dict,
                 variables=variables,
                 parameters=parameters,
             )

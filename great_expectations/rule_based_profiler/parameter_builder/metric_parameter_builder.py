@@ -69,7 +69,7 @@ class MetricParameterBuilder(ParameterBuilder):
         ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._metric_domain_kwargs,
-            expected_type=None,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
@@ -79,7 +79,7 @@ class MetricParameterBuilder(ParameterBuilder):
         ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._metric_value_kwargs,
-            expected_type=None,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
