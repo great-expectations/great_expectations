@@ -6,8 +6,6 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import DotDict
-
-# TODO: <Alex>ALEX -- checking to see if the presence of this call caused pandas == None</Alex>
 from great_expectations.util import filter_properties_dict
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
@@ -117,8 +115,7 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
-                # TODO: <Alex>ALEX -- checking to see if the presence of this call caused pandas == None</Alex>
-                # filter_properties_dict(properties=source, inplace=True)
+                filter_properties_dict(properties=source, inplace=True)
                 source = ParameterNode(source)
             key: str
             value: Any

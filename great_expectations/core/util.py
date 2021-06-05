@@ -242,7 +242,7 @@ def ensure_json_serializable(data):
         return
 
     try:
-        if not isinstance(data, list) and pd.isna(data):
+        if not isinstance(data, list) and ((data is None) or pd.isna(data)):
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
             # Hence, why we test for `not isinstance(list))`
             return
