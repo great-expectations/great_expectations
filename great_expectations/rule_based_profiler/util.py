@@ -8,7 +8,6 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     get_parameter_value,
 )
-from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validator import Validator
 
 
@@ -48,7 +47,6 @@ def get_parameter_argument_and_validate_return_type(
 (value of type "{str(type(argument))}" was encountered).
 """
             )
-
     return argument
 
 
@@ -82,6 +80,4 @@ def get_parameter_argument(
                     variables=variables,
                     parameters=parameters,
                 )
-    if isinstance(argument, dict):
-        return filter_properties_dict(properties=argument)
     return argument
