@@ -14,6 +14,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids_from_batch_request,
     get_batch_ids_from_validator,
+    get_parameter_argument,
 )
 from great_expectations.validator.validator import Validator
 
@@ -37,7 +38,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         self,
         parameter_name: str,
         data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequest, dict, str]] = None,
     ):
         """
         Args:
@@ -57,8 +58,6 @@ class MultiBatchParameterBuilder(ParameterBuilder):
             data_context=data_context,
         )
 
-        if isinstance(batch_request, dict):
-            batch_request = BatchRequest(**batch_request)
         self._batch_request = batch_request
 
     @abstractmethod
@@ -73,15 +72,29 @@ class MultiBatchParameterBuilder(ParameterBuilder):
     ):
         pass
 
-    def get_batch_ids(self, validator: Validator) -> Optional[List[str]]:
+    def get_batch_ids(
+        self,
+        validator: Optional[Validator] = None,
+        domain: Optional[Domain] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> Optional[List[str]]:
         batch_ids: Optional[List[str]]
         if self._batch_request is None:
             batch_ids = get_batch_ids_from_validator(validator=validator)
         else:
-            batch_ids = get_batch_ids_from_batch_request(
-                data_context=self.data_context, batch_request=self._batch_request
+            # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
+            batch_request: Optional[Union[BatchRequest, str]] = get_parameter_argument(
+                domain=domain,
+                argument=self.batch_request,
+                variables=variables,
+                parameters=parameters,
             )
-
+            if isinstance(batch_request, dict):
+                batch_request = BatchRequest(**batch_request)
+            batch_ids = get_batch_ids_from_batch_request(
+                data_context=self.data_context, batch_request=batch_request
+            )
         return batch_ids
 
     @property

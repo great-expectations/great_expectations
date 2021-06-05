@@ -16,7 +16,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.rule_based_profiler.util import get_metric_kwargs
+from great_expectations.rule_based_profiler.util import get_parameter_argument
 from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -41,9 +41,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        false_positive_rate: Optional[float] = 0.0,
+        false_positive_rate: Optional[Union[float, str]] = 0.0,
         data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequest, dict, str]] = None,
     ):
         """
         Args:
@@ -67,14 +67,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
-
-        if not (0.0 <= false_positive_rate <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"False-Positive Rate for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
-            )
-
-        if np.isclose(false_positive_rate, 0.0):
-            false_positive_rate = false_positive_rate + NP_EPSILON
 
         self._false_positive_rate = false_positive_rate
 
@@ -116,23 +108,28 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
-        batch_ids: List[str] = self.get_batch_ids(validator=validator)
+        batch_ids: List[str] = self.get_batch_ids(
+            validator=validator,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
         if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        # Obtaining domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_domain_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        metric_domain_kwargs: Optional[Union[str, dict]] = get_parameter_argument(
             domain=domain,
-            metric_kwargs=self._metric_domain_kwargs,
+            argument=self._metric_domain_kwargs,
             variables=variables,
             parameters=parameters,
         )
-        # Obtaining value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        metric_value_kwargs: Optional[Union[str, dict]] = get_parameter_argument(
             domain=domain,
-            metric_kwargs=self._metric_value_kwargs,
+            argument=self._metric_value_kwargs,
             variables=variables,
             parameters=parameters,
         )
@@ -140,12 +137,21 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         expectation_suite_name: str = (
             f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
         )
+        # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
+        batch_request: Optional[Union[BatchRequest, str]] = get_parameter_argument(
+            domain=domain,
+            argument=self.batch_request,
+            variables=variables,
+            parameters=parameters,
+        )
+        if isinstance(batch_request, dict):
+            batch_request = BatchRequest(**batch_request)
         validator_for_metrics_calculations: Validator = self.data_context.get_validator(
-            batch_request=self.batch_request,
+            batch_request=batch_request,
             create_expectation_suite_with_name=expectation_suite_name,
         )
 
-        metric_values: List[Union[float, np.float32, np.float64]] = []
+        metric_values: List[Union[int, float, np.float32, np.float64]] = []
         metric_domain_kwargs_with_specific_batch_id: Optional[
             Dict[str, Any]
         ] = copy.deepcopy(metric_domain_kwargs)
@@ -159,7 +165,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
                 "metric_dependencies": None,
             }
             metric_value: Union[
-                Any, float
+                Any, int, float
             ] = validator_for_metrics_calculations.get_metric(
                 metric=MetricConfiguration(**metric_configuration_arguments)
             )
@@ -177,12 +183,32 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         mean: float = np.mean(metric_values)
         std: float = np.std(metric_values)
 
-        stds_multiplier: Union[float, int] = NP_SQRT_2 * special.erfinv(
-            1.0 - self._false_positive_rate
+        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
+        false_positive_rate: Union[Any, str] = get_parameter_argument(
+            domain=domain,
+            argument=self._false_positive_rate,
+            variables=variables,
+            parameters=parameters,
         )
+        if not is_numeric(value=false_positive_rate):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""Argument "false_positive_rate" in {self.__class__.__name__} must be floating-point-valued \
+(value of type "{str(type(false_positive_rate))}" was encountered).
+"""
+            )
+        if not (0.0 <= false_positive_rate <= 1.0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"False-Positive Rate for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+            )
 
-        min_value: float = mean - stds_multiplier * std
-        max_value: float = mean + stds_multiplier * std
+        if np.isclose(false_positive_rate, 0.0):
+            false_positive_rate = false_positive_rate + NP_EPSILON
+
+        true_negative_rate: float = 1.0 - false_positive_rate
+        stds_multiplier: float = NP_SQRT_2 * special.erfinv(true_negative_rate)
+
+        min_value: float = round(mean - stds_multiplier * std)
+        max_value: float = round(mean + stds_multiplier * std)
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {
