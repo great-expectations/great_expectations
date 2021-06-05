@@ -115,7 +115,7 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
-                source = filter_properties_dict(properties=source)
+                filter_properties_dict(properties=source, inplace=True)
                 source = ParameterNode(source)
             key: str
             value: Any
