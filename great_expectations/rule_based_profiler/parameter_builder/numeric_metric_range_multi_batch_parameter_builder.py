@@ -16,7 +16,9 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.rule_based_profiler.util import get_parameter_argument
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_argument_and_validate_return_type,
+)
 from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -42,8 +44,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
+        round_to_nearest_integer: Optional[Union[bool, str]] = False,
         data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[BatchRequest, dict, str]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
     ):
         """
         Args:
@@ -69,6 +72,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
         self._false_positive_rate = false_positive_rate
+        self._round_to_nearest_integer = round_to_nearest_integer
 
     def _build_parameters(
         self,
@@ -120,16 +124,22 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             )
 
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_domain_kwargs: Optional[Union[str, dict]] = get_parameter_argument(
+        metric_domain_kwargs: Optional[
+            Union[str, dict]
+        ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._metric_domain_kwargs,
+            expected_type=None,
             variables=variables,
             parameters=parameters,
         )
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[Union[str, dict]] = get_parameter_argument(
+        metric_value_kwargs: Optional[
+            Union[str, dict]
+        ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._metric_value_kwargs,
+            expected_type=None,
             variables=variables,
             parameters=parameters,
         )
@@ -138,14 +148,16 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
         )
         # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
-        batch_request: Optional[Union[BatchRequest, str]] = get_parameter_argument(
+        batch_request: Optional[
+            Union[BatchRequest, dict, str]
+        ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
-            argument=self.batch_request,
+            argument=self._batch_request,
+            expected_type=dict,
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(batch_request, dict):
-            batch_request = BatchRequest(**batch_request)
+        batch_request = BatchRequest(**batch_request)
         validator_for_metrics_calculations: Validator = self.data_context.get_validator(
             batch_request=batch_request,
             create_expectation_suite_with_name=expectation_suite_name,
@@ -184,18 +196,15 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         std: float = np.std(metric_values)
 
         # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
-        false_positive_rate: Union[Any, str] = get_parameter_argument(
+        false_positive_rate: Union[
+            Any, str
+        ] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._false_positive_rate,
+            expected_type=(int, float),
             variables=variables,
             parameters=parameters,
         )
-        if not is_numeric(value=false_positive_rate):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Argument "false_positive_rate" in {self.__class__.__name__} must be floating-point-valued \
-(value of type "{str(type(false_positive_rate))}" was encountered).
-"""
-            )
         if not (0.0 <= false_positive_rate <= 1.0):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"False-Positive Rate for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
@@ -207,8 +216,23 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         true_negative_rate: float = 1.0 - false_positive_rate
         stds_multiplier: float = NP_SQRT_2 * special.erfinv(true_negative_rate)
 
-        min_value: float = round(mean - stds_multiplier * std)
-        max_value: float = round(mean + stds_multiplier * std)
+        min_value: float = mean - stds_multiplier * std
+        max_value: float = mean + stds_multiplier * std
+
+        # Obtain round_to_nearest_integer boolean directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        round_to_nearest_integer: Union[
+            Any, str
+        ] = get_parameter_argument_and_validate_return_type(
+            domain=domain,
+            argument=self._round_to_nearest_integer,
+            expected_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        if round_to_nearest_integer:
+            min_value = round(min_value)
+            max_value = round(max_value)
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {

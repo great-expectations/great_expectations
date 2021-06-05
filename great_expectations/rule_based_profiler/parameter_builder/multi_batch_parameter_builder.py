@@ -14,7 +14,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids_from_batch_request,
     get_batch_ids_from_validator,
-    get_parameter_argument,
+    get_parameter_argument_and_validate_return_type,
 )
 from great_expectations.validator.validator import Validator
 
@@ -38,7 +38,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         self,
         parameter_name: str,
         data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[BatchRequest, dict, str]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
     ):
         """
         Args:
@@ -84,19 +84,17 @@ class MultiBatchParameterBuilder(ParameterBuilder):
             batch_ids = get_batch_ids_from_validator(validator=validator)
         else:
             # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
-            batch_request: Optional[Union[BatchRequest, str]] = get_parameter_argument(
+            batch_request: Optional[
+                Union[BatchRequest, dict, str]
+            ] = get_parameter_argument_and_validate_return_type(
                 domain=domain,
-                argument=self.batch_request,
+                argument=self._batch_request,
+                expected_type=dict,
                 variables=variables,
                 parameters=parameters,
             )
-            if isinstance(batch_request, dict):
-                batch_request = BatchRequest(**batch_request)
+            batch_request = BatchRequest(**batch_request)
             batch_ids = get_batch_ids_from_batch_request(
                 data_context=self.data_context, batch_request=batch_request
             )
         return batch_ids
-
-    @property
-    def batch_request(self) -> BatchRequest:
-        return self._batch_request

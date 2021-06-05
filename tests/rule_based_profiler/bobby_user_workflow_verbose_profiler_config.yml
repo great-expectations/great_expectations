@@ -20,6 +20,7 @@ rules:
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
+        round_to_nearest_integer: True
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         min_value: $parameter.row_count.value.min_value
