@@ -104,6 +104,94 @@ data_connectors:
     return context
 
 
+@pytest.fixture
+def bobby_columnar_table_multi_batch_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    """
+    # TODO: <Alex>ALEX -- Provide DocString</Alex>
+    """
+    # Reenable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "integration",
+                "fixtures",
+                "yellow_trip_data_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "test_sets",
+                "taxi_yellow_trip_data_samples",
+                "random_subsammples",
+                "yellow_trip_data_7500_lines_sample_2019-01.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "test_sets",
+                "taxi_yellow_trip_data_samples",
+                "random_subsammples",
+                "yellow_trip_data_8500_lines_sample_2019-02.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "test_sets",
+                "taxi_yellow_trip_data_samples",
+                "random_subsammples",
+                "yellow_trip_data_9000_lines_sample_2019-03.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
+            )
+        ),
+    )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
 def test_alice_columnar_table_single_batch_batches_are_accessible(
     monkeypatch,
     alice_columnar_table_single_batch_context,
@@ -199,94 +287,6 @@ def test_alice_profiler_user_workflow_single_batch(
         expectation_suite
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
-
-
-@pytest.fixture
-def bobby_columnar_table_multi_batch_context(
-    tmp_path_factory,
-    monkeypatch,
-) -> DataContext:
-    """
-    # TODO: <Alex>ALEX -- Provide DocString</Alex>
-    """
-    # Reenable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "integration",
-                "fixtures",
-                "yellow_trip_data_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
-            ),
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "random_subsammples",
-                "yellow_trip_data_7500_lines_sample_2019-01.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "random_subsammples",
-                "yellow_trip_data_8500_lines_sample_2019-02.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "random_subsammples",
-                "yellow_trip_data_9000_lines_sample_2019-03.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
-            )
-        ),
-    )
-
-    context: DataContext = DataContext(context_root_dir=context_path)
-    assert context.root_directory == context_path
-
-    return context
 
 
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
