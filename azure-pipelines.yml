@@ -97,9 +97,12 @@ stages:
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
-            Python36-Pandas023:
+            # Python36-Pandas023:
+            #   python.version: '3.6'
+            #   pandas.version: '0.23.4'
+            Python36-Pandas025:
               python.version: '3.6'
-              pandas.version: '0.23.4'
+              pandas.version: '0.25.3'
             Python37-Pandas025:
               python.version: '3.7'
               pandas.version: '0.25.3'
