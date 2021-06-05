@@ -36,6 +36,10 @@ def bobby_columnar_table_multi_batch():
                             "metric_domain_kwargs": {
                                 "batch_id": "021563e94d7866f395288f6e306aed9b"
                             },
+                            # TODO: <Alex>ALEX -- checking to see if removing the NULL keyes below with "filter_properties_dict" caused pandas == None</Alex>
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None
+                            # TODO: <Alex>ALEX -- checking to see if removing the NULL keyes above with "filter_properties_dict" caused pandas == None</Alex>
                         }
                     }
                 },
