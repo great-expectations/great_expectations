@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
@@ -30,6 +31,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._expectation_kwargs = kwargs
         if meta is None:
             meta = {}
+        if not isinstance(meta, dict):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
+(value of type "{str(type())}" was encountered).
+"""
+            )
         self._meta = meta
         self._success_on_last_run = success_on_last_run
 

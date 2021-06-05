@@ -1,3 +1,4 @@
+import copy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -34,6 +35,8 @@ def get_parameter_argument_and_validate_return_type(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
+    if isinstance(argument, dict):
+        argument = dict(copy.deepcopy(argument))
     argument = get_parameter_argument(
         domain=domain,
         argument=argument,
@@ -43,7 +46,7 @@ def get_parameter_argument_and_validate_return_type(
     if expected_return_type is not None:
         if not isinstance(argument, expected_return_type):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Argument "{argument}" in must be {str(expected_return_type)}-valued \
+                message=f"""Argument "{argument}" must be of type "{str(expected_return_type)}" \
 (value of type "{str(type(argument))}" was encountered).
 """
             )
