@@ -8,7 +8,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder.ex
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
-from great_expectations.rule_based_profiler.util import get_parameter_argument
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_argument_and_validate_return_type,
+)
 
 
 class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
@@ -40,17 +42,19 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         parameter_name: str
         fully_qualified_parameter_name: str
         expectation_kwargs: Dict[str, Any] = {
-            parameter_name: get_parameter_argument(
+            parameter_name: get_parameter_argument_and_validate_return_type(
                 domain=domain,
                 argument=fully_qualified_parameter_name,
+                expected_return_type=None,
                 variables=variables,
                 parameters=parameters,
             )
             for parameter_name, fully_qualified_parameter_name in self._expectation_kwargs.items()
         }
-        meta: Dict[str, Any] = get_parameter_argument(
+        meta: Dict[str, Any] = get_parameter_argument_and_validate_return_type(
             domain=domain,
             argument=self._meta,
+            expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
