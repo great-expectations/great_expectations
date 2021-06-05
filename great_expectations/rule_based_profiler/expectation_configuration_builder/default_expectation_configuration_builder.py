@@ -23,7 +23,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
-        success_on_last_run: Optional[bool] = None,
         **kwargs,
     ):
         self._expectation_type = expectation_type
@@ -31,7 +30,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         if meta is None:
             meta = {}
         self._meta = meta
-        self._success_on_last_run = success_on_last_run
 
     def _build_expectation_configuration(
         self,
@@ -62,5 +60,4 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             expectation_type=self._expectation_type,
             kwargs=expectation_kwargs,
             meta=meta,
-            success_on_last_run=self._success_on_last_run,
         )
