@@ -51,7 +51,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         expectation_kwargs: Dict[str, Any] = {
             parameter_name: get_parameter_value_and_validate_return_type(
                 domain=domain,
-                argument=fully_qualified_parameter_name,
+                parameter_reference=fully_qualified_parameter_name,
                 expected_return_type=None,
                 variables=variables,
                 parameters=parameters,
@@ -60,7 +60,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         }
         meta: Dict[str, Any] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            argument=self._meta,
+            parameter_reference=self._meta,
             expected_return_type=dict,
             variables=variables,
             parameters=parameters,

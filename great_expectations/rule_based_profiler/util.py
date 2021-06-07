@@ -30,66 +30,66 @@ def get_batch_ids_from_batch_request(
 def get_parameter_value_and_validate_return_type(
     domain: Domain,
     *,
-    argument: Optional[Union[Any, str]] = None,
+    parameter_reference: Optional[Union[Any, str]] = None,
     expected_return_type: Optional[Union[type, tuple]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
     """
-    This method allows for the argument to be specified as an object or as a fully-qualified parameter name.  In either
-    case, this method can optionally validate that the return value is of the type provided (otherwise, raise an error).
+    This method allows for the parameter_reference to be specified as an object or as a fully-qualified parameter name.
+    In either case, this method can optionally validate that the return value is of the expected_return_type provided.
     """
-    if isinstance(argument, dict):
-        argument = dict(copy.deepcopy(argument))
-    argument = get_parameter_value(
+    if isinstance(parameter_reference, dict):
+        parameter_reference = dict(copy.deepcopy(parameter_reference))
+    parameter_reference = get_parameter_value(
         domain=domain,
-        argument=argument,
+        parameter_reference=parameter_reference,
         variables=variables,
         parameters=parameters,
     )
     if expected_return_type is not None:
-        if not isinstance(argument, expected_return_type):
+        if not isinstance(parameter_reference, expected_return_type):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Argument "{argument}" must be of type "{str(expected_return_type)}" \
-(value of type "{str(type(argument))}" was encountered).
+                message=f"""Argument "{parameter_reference}" must be of type "{str(expected_return_type)}" \
+(value of type "{str(type(parameter_reference))}" was encountered).
 """
             )
-    return argument
+    return parameter_reference
 
 
 def get_parameter_value(
     domain: Domain,
     *,
-    argument: Optional[Union[Any, str]] = None,
+    parameter_reference: Optional[Union[Any, str]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
     """
-    This method allows for the argument to be specified as an object or as a fully-qualified parameter name.  Moreover,
-    if the argument is an object of type "dict", this method will recursively attempt to detect keys, whose values are
-    of the fully-qualified parameter name format and evaluate them accordingly.
+    This method allows for the parameter_reference to be specified as an object or as a fully-qualified parameter name.
+    Moreover, if the parameter_reference argument is an object of type "dict", this method will recursively attempt to
+    detect keys, whose values are of the fully-qualified parameter name format and evaluate them accordingly.
     """
-    if isinstance(argument, dict):
-        for key, value in argument.items():
-            argument[key] = get_parameter_value(
+    if isinstance(parameter_reference, dict):
+        for key, value in parameter_reference.items():
+            parameter_reference[key] = get_parameter_value(
                 domain=domain,
-                argument=value,
+                parameter_reference=value,
                 variables=variables,
                 parameters=parameters,
             )
-    elif isinstance(argument, str) and argument.startswith("$"):
-        argument = get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=argument,
+    elif isinstance(parameter_reference, str) and parameter_reference.startswith("$"):
+        parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=parameter_reference,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(argument, dict):
-            for key, value in argument.items():
-                argument[key] = get_parameter_value(
+        if isinstance(parameter_reference, dict):
+            for key, value in parameter_reference.items():
+                parameter_reference[key] = get_parameter_value(
                     domain=domain,
-                    argument=value,
+                    parameter_reference=value,
                     variables=variables,
                     parameters=parameters,
                 )
-    return argument
+    return parameter_reference

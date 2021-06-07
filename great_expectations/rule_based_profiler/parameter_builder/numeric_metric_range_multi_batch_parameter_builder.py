@@ -131,7 +131,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             Union[str, dict]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            argument=self._metric_domain_kwargs,
+            parameter_reference=self._metric_domain_kwargs,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -141,7 +141,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             Union[str, dict]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            argument=self._metric_value_kwargs,
+            parameter_reference=self._metric_value_kwargs,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -155,7 +155,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             Union[BatchRequest, dict, str]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            argument=self._batch_request,
+            parameter_reference=self._batch_request,
             expected_return_type=dict,
             variables=variables,
             parameters=parameters,
@@ -202,7 +202,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             Any, str
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            argument=self._false_positive_rate,
+            parameter_reference=self._false_positive_rate,
             expected_return_type=(int, float),
             variables=variables,
             parameters=parameters,
@@ -226,7 +226,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             Any, str
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            argument=self._round_to_nearest_integer,
+            parameter_reference=self._round_to_nearest_integer,
             expected_return_type=bool,
             variables=variables,
             parameters=parameters,

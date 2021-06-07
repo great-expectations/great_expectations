@@ -88,7 +88,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
                 Union[BatchRequest, dict, str]
             ] = get_parameter_value_and_validate_return_type(
                 domain=domain,
-                argument=self._batch_request,
+                parameter_reference=self._batch_request,
                 expected_return_type=dict,
                 variables=variables,
                 parameters=parameters,
