@@ -22,7 +22,6 @@ load_data_into_database(
 
 context = ge.get_context()
 
-
 datasource_config = {
     "name": "my_snowflake_datasource",
     "class_name": "Datasource",
