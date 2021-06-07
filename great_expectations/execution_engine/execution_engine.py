@@ -112,7 +112,7 @@ class ExecutionEngine(ABC):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def configure_validator(self, validator):
         """Optionally configure the validator as appropriate for the execution engine."""
