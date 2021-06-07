@@ -53,7 +53,9 @@ stages:
 
                 [DocsChanged]
                 docs/**
-                tests/integration/**
+                tests/integration/docusaurus/**
+                tests/integration/fixtures/**
+                tests/test_sets/**
 
                 [GEChanged]
                 great_expectations/**
