@@ -377,6 +377,9 @@ def test_bobby_profiler_user_workflow_multi_batch(
         datasource_name=datasource_name,
         data_connector_name=data_connector_name,
         data_asset_name=data_asset_name,
+        data_connector_query={
+            "index": -1,
+        },
         create_expectation_suite_with_name=bobby_columnar_table_multi_batch[
             "expected_expectation_suite_name"
         ],
