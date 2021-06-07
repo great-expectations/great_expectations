@@ -57,7 +57,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
-            FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out".
+            FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
+            (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
+            round_to_nearest_integer: user-configured boolean directive for whether or not to round parameter values.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
