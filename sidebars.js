@@ -27,11 +27,6 @@ module.exports = {
       label: 'How to Guides',
       items: [
         {
-          type: 'link',
-          label: 'Interactive How-To Guide',
-          href: '/demo'
-        },
-        {
           type: 'category',
           label: '⚙️ Setting up your Great Expectations',
           items: [
