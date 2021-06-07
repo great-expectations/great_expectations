@@ -7,7 +7,7 @@ from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
-    get_parameter_value,
+    get_parameter_value_by_fully_qualified_parameter_name,
 )
 from great_expectations.validator.validator import Validator
 
@@ -27,7 +27,7 @@ def get_batch_ids_from_batch_request(
     return [batch_definition.id for batch_definition in batch_definitions]
 
 
-def get_parameter_argument_and_validate_return_type(
+def get_parameter_value_and_validate_return_type(
     domain: Domain,
     *,
     argument: Optional[Union[Any, str]] = None,
@@ -37,7 +37,7 @@ def get_parameter_argument_and_validate_return_type(
 ) -> Optional[Any]:
     if isinstance(argument, dict):
         argument = dict(copy.deepcopy(argument))
-    argument = get_parameter_argument(
+    argument = get_parameter_value(
         domain=domain,
         argument=argument,
         variables=variables,
@@ -53,7 +53,7 @@ def get_parameter_argument_and_validate_return_type(
     return argument
 
 
-def get_parameter_argument(
+def get_parameter_value(
     domain: Domain,
     *,
     argument: Optional[Union[Any, str]] = None,
@@ -62,14 +62,14 @@ def get_parameter_argument(
 ) -> Optional[Any]:
     if isinstance(argument, dict):
         for key, value in argument.items():
-            argument[key] = get_parameter_argument(
+            argument[key] = get_parameter_value(
                 domain=domain,
                 argument=value,
                 variables=variables,
                 parameters=parameters,
             )
     elif isinstance(argument, str) and argument.startswith("$"):
-        argument = get_parameter_value(
+        argument = get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=argument,
             domain=domain,
             variables=variables,
@@ -77,7 +77,7 @@ def get_parameter_argument(
         )
         if isinstance(argument, dict):
             for key, value in argument.items():
-                argument[key] = get_parameter_argument(
+                argument[key] = get_parameter_value(
                     domain=domain,
                     argument=value,
                     variables=variables,

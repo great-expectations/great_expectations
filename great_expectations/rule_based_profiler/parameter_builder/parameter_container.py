@@ -249,7 +249,7 @@ def _build_parameter_node_tree_for_one_parameter(
         parameter_node[parameter_name_part] = parameter_value
 
 
-def get_parameter_value(
+def get_parameter_value_by_fully_qualified_parameter_name(
     fully_qualified_parameter_name: str,
     domain: Domain,
     variables: Optional[ParameterContainer] = None,

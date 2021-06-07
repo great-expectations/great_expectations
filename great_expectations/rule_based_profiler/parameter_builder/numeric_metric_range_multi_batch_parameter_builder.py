@@ -17,7 +17,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
-    get_parameter_argument_and_validate_return_type,
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -128,7 +128,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_domain_kwargs: Optional[
             Union[str, dict]
-        ] = get_parameter_argument_and_validate_return_type(
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             argument=self._metric_domain_kwargs,
             expected_return_type=None,
@@ -138,7 +138,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_value_kwargs: Optional[
             Union[str, dict]
-        ] = get_parameter_argument_and_validate_return_type(
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             argument=self._metric_value_kwargs,
             expected_return_type=None,
@@ -152,7 +152,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
         batch_request: Optional[
             Union[BatchRequest, dict, str]
-        ] = get_parameter_argument_and_validate_return_type(
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             argument=self._batch_request,
             expected_return_type=dict,
@@ -199,7 +199,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: Union[
             Any, str
-        ] = get_parameter_argument_and_validate_return_type(
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             argument=self._false_positive_rate,
             expected_return_type=(int, float),
@@ -223,7 +223,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         # Obtain round_to_nearest_integer boolean directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         round_to_nearest_integer: Union[
             Any, str
-        ] = get_parameter_argument_and_validate_return_type(
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             argument=self._round_to_nearest_integer,
             expected_return_type=bool,

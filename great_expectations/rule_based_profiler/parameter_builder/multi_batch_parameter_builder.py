@@ -14,7 +14,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids_from_batch_request,
     get_batch_ids_from_validator,
-    get_parameter_argument_and_validate_return_type,
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.validator.validator import Validator
 
@@ -86,7 +86,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
             # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
             batch_request: Optional[
                 Union[BatchRequest, dict, str]
-            ] = get_parameter_argument_and_validate_return_type(
+            ] = get_parameter_value_and_validate_return_type(
                 domain=domain,
                 argument=self._batch_request,
                 expected_return_type=dict,

@@ -10,7 +10,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
-    get_parameter_argument_and_validate_return_type,
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -66,7 +66,7 @@ class MetricParameterBuilder(ParameterBuilder):
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_domain_kwargs: Optional[
             Union[str, dict]
-        ] = get_parameter_argument_and_validate_return_type(
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             argument=self._metric_domain_kwargs,
             expected_return_type=None,
@@ -76,7 +76,7 @@ class MetricParameterBuilder(ParameterBuilder):
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_value_kwargs: Optional[
             Union[str, dict]
-        ] = get_parameter_argument_and_validate_return_type(
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             argument=self._metric_value_kwargs,
             expected_return_type=None,
