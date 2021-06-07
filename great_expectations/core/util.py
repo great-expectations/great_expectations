@@ -19,6 +19,7 @@ from great_expectations import exceptions as ge_exceptions
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
+from great_expectations.types.base import SerializableDotDict
 
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
@@ -125,7 +126,7 @@ def convert_to_json_serializable(data):
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
-    if isinstance(data, SerializableDictDot):
+    if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
     try:
@@ -238,7 +239,7 @@ def ensure_json_serializable(data):
         test_obj may also be converted in place.
     """
 
-    if isinstance(data, SerializableDictDot):
+    if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return
 
     try:
