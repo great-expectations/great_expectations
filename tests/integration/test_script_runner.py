@@ -15,12 +15,27 @@ class BackendDependencies(enum.Enum):
     MSSQL = "MSSQL"
     PANDAS = "PANDAS"
     POSTGRESQL = "POSTGRESQL"
+    REDSHIFT = "REDSHIFT"
     SPARK = "SPARK"
     SQLALCHEMY = "SQLALCHEMY"
     SNOWFLAKE = "SNOWFLAKE"
 
 
 docs_test_matrix = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",

@@ -6,15 +6,14 @@ import great_expectations as ge
 
 from .util import load_data_into_database
 
-sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
-sfUser = os.environ.get("SNOWFLAKE_USER")
-sfPswd = os.environ.get("SNOWFLAKE_PW")
-sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
-sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
-sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+redshift_username = os.environ.get("REDSHIFT_USERNAME")
+redshift_password = os.environ.get("REDSHIFT_PASSWORD")
+redshift_host = os.environ.get("REDSHIFT_HOST")
+redshift_port = os.environ.get("REDSHIFT_PORT")
+redshift_database = os.environ.get("REDSHIFT_DATABASE")
+redshift_sslmode = os.environ.get("REDSHIFT_SSLMODE")
 
-
-CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+CONNECTION_STRING = f"postgresql+psycopg2://{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_database}?sslmode={redshift_sslmode}"
 load_data_into_database(
     "taxi_data",
     "./data/reports/yellow_tripdata_sample_2019-01.csv",
@@ -29,7 +28,7 @@ datasource_config = {
     "class_name": "Datasource",
     "execution_engine": {
         "class_name": "SqlAlchemyExecutionEngine",
-        "connection_string": "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>",
+        "connection_string": "postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>",
     },
     "data_connectors": {
         "default_runtime_data_connector_name": {
