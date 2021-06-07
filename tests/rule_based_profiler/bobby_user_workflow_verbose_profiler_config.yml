@@ -6,7 +6,7 @@ variables:
     data_connector_name: monthly
     data_asset_name: my_reports
     data_connector_query:
-      index: "0:2"
+      index: ":2"
   false_positive_rate: 1.0e-2
 
 rules:
