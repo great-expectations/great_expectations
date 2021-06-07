@@ -35,6 +35,10 @@ def get_parameter_value_and_validate_return_type(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
+    """
+    This method allows for the argument to be specified as an object or as a fully-qualified parameter name.  In either
+    case, this method can optionally validate that the return value is of the type provided (otherwise, raise an error).
+    """
     if isinstance(argument, dict):
         argument = dict(copy.deepcopy(argument))
     argument = get_parameter_value(
@@ -60,6 +64,11 @@ def get_parameter_value(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
+    """
+    This method allows for the argument to be specified as an object or as a fully-qualified parameter name.  Moreover,
+    if the argument is an object of type "dict", this method will recursively attempt to detect keys, whose values are
+    of the fully-qualified parameter name format and evaluate them accordingly.
+    """
     if isinstance(argument, dict):
         for key, value in argument.items():
             argument[key] = get_parameter_value(
