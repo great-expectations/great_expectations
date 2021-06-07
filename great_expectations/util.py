@@ -913,19 +913,6 @@ def filter_properties_dict(
                 ]
             )
 
-    if clean_nulls and not clean_falsy:
-        keys_for_deletion.extend(
-            [
-                key
-                for key, value in properties.items()
-                if not (
-                    (keep_fields and key in keep_fields)
-                    or (delete_fields and key in delete_fields)
-                    or value is not None
-                )
-            ]
-        )
-
     keys_for_deletion = list(set(keys_for_deletion))
 
     for key in keys_for_deletion:
