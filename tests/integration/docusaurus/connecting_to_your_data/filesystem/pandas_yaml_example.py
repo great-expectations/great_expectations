@@ -88,4 +88,5 @@ assert set(
     "yellow_trip_data_sample_2019-01.csv",
     "yellow_trip_data_sample_2019-02.csv",
     "yellow_trip_data_sample_2019-03.csv",
+    "random_subsamples",
 }
