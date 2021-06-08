@@ -23,7 +23,7 @@ load_data_into_database(
 context = ge.get_context()
 
 datasource_config = {
-    "name": "my_snowflake_datasource",
+    "name": "my_redshift_datasource",
     "class_name": "Datasource",
     "execution_engine": {
         "class_name": "SqlAlchemyExecutionEngine",
@@ -51,7 +51,7 @@ context.add_datasource(**datasource_config)
 
 # First test for RuntimeBatchRequest using a query
 batch_request = ge.core.batch.RuntimeBatchRequest(
-    datasource_name="my_snowflake_datasource",
+    datasource_name="my_redshift_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
@@ -68,7 +68,7 @@ print(validator.head())
 
 # Second test for BatchRequest naming a table
 batch_request = ge.core.batch.BatchRequest(
-    datasource_name="my_snowflake_datasource",
+    datasource_name="my_redshift_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
 )
@@ -82,9 +82,9 @@ print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["my_snowflake_datasource"]
+assert [ds["name"] for ds in context.list_datasources()] == ["my_redshift_datasource"]
 assert "taxi_data" in set(
-    context.get_available_data_asset_names()["my_snowflake_datasource"][
+    context.get_available_data_asset_names()["my_redshift_datasource"][
         "default_inferred_data_connector_name"
     ]
 )

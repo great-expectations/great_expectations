@@ -232,7 +232,9 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
         pytest_args.no_mssql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mssql tests")
+    elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
+        pytest.skip("Skipping redshift tests")
     elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
         pytest.skip("Skipping spark tests")
-    elif dependencies == BackendDependencies.SNOWFLAKE and (pytest_args.no_sqlalchemy):
+    elif dependencies == BackendDependencies.SNOWFLAKE and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping snowflake tests")
