@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
@@ -16,6 +16,16 @@ class SemanticDomainTypes(Enum):
     VALUE_SET = "value_set"
     MISCELLANEOUS = "miscellaneous"
     UNKNOWN = "unknown"
+
+    @classmethod
+    def has_member_key(cls, key: Any) -> bool:
+        key_exists: bool = key in cls.__members__
+        if key_exists:
+            hash_op: Optional[Callable] = getattr(key, "__hash__", None)
+            if callable(hash_op):
+                return True
+            return False
+        return False
 
 
 @dataclass
