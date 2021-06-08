@@ -369,6 +369,13 @@ stages:
               SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
               SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
               SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              # redshift credentials
+              REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+              REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+              REDSHIFT_HOST: $(REDSHIFT_HOST)
+              REDSHIFT_PORT: $(REDSHIFT_PORT)
+              REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+              REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
               # todo: add credentials for cloud resources here
 
   - stage: cli_integration
