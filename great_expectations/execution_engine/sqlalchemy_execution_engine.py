@@ -272,7 +272,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "class_name": self.__class__.__name__,
         }
         self._config.update(kwargs)
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @property
     def credentials(self):

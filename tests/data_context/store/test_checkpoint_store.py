@@ -97,8 +97,10 @@ def test_checkpoint_store(empty_data_context):
 
     assert filter_properties_dict(
         properties=checkpoint_store.get(key=key_0).to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=my_checkpoint_config_0.to_json_dict(),
+        clean_falsy=True,
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
@@ -173,8 +175,10 @@ def test_checkpoint_store(empty_data_context):
 
     assert filter_properties_dict(
         properties=checkpoint_store.get(key=key_1).to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=my_checkpoint_config_1.to_json_dict(),
+        clean_falsy=True,
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
