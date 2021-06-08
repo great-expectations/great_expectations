@@ -119,7 +119,27 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     def list_keys(self):
-        pass
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
+        }
+        url = urljoin(
+            self.ge_cloud_base_url,
+            f"accounts/"
+            f"{self.ge_cloud_credentials['account_id']}/"
+            f"{self.ge_cloud_resource_name}",
+        )
+        try:
+            response = requests.get(url, headers=headers)
+            response_json = response.json()
+            keys = [
+                (resource["id"], ) for resource in
+                response_json.get("data")
+            ]
+            return keys
+        except Exception as e:
+            logger.debug(str(e))
+            raise StoreBackendError("Unable to list keys in GE Cloud Store Backend.")
 
     def get_url_for_key(self, key, protocol=None):
         ge_cloud_id = key[0]
@@ -130,7 +150,43 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return url
 
     def remove_key(self, key):
-        pass
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
+
+        ge_cloud_id = key[0]
+
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
+        }
+
+        data = {
+            "data": {
+                "type": self.ge_cloud_resource_type,
+                "id": ge_cloud_id,
+                "attributes": {
+                    "deleted": True,
+                },
+            }
+        }
+
+        url = urljoin(
+            self.ge_cloud_base_url,
+            f"accounts/"
+            f"{self.ge_cloud_credentials['account_id']}/"
+            f"{self.ge_cloud_resource_name}/"
+            f"{ge_cloud_id}",
+        )
+        try:
+            response = requests.patch(url, json=data, headers=headers)
+            response_status_code = response.status_code
+
+            if response_status_code < 300:
+                return True
+            return False
+        except Exception as e:
+            logger.debug(str(e))
+            raise StoreBackendError("Unable to delete object in GE Cloud Store Backend.")
 
     def _has_key(self, key):
         all_keys = self.list_keys()
