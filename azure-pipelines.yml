@@ -99,11 +99,9 @@ stages:
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
-            # TODO: <Alex>ALEX -- Disabling the below check temporarily (in order to get Azure checks to pass).</Alex>
-            # Python36-Pandas023:
-            #   python.version: '3.6'
-            #   pandas.version: '0.23.4'
-            # TODO: <Alex>ALEX -- Disabling the above check temporarily (in order to get Azure checks to pass).</Alex>
+            Python36-Pandas023:
+              python.version: '3.6'
+              pandas.version: '0.23.4'
             Python37-Pandas025:
               python.version: '3.7'
               pandas.version: '0.25.3'

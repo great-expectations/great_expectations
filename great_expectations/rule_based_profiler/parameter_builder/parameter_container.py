@@ -5,7 +5,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import DotDict
+from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import filter_properties_dict
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
@@ -27,7 +27,7 @@ names must start with $ (e.g., "${fully_qualified_parameter_name}").
         )
 
 
-class ParameterNode(DotDict):
+class ParameterNode(SerializableDotDict):
     """
     ParameterNode is a node of a tree structure.
 
@@ -48,7 +48,7 @@ class ParameterNode(DotDict):
     """
 
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self)
+        return convert_to_json_serializable(data=dict(self))
 
 
 @dataclass
