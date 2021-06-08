@@ -16,8 +16,9 @@ from great_expectations.data_context.store import (
     TupleAzureBlobStoreBackend,
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
-    TupleS3StoreBackend,
+    TupleS3StoreBackend, GeCloudStoreBackend,
 )
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -1044,3 +1045,48 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
     keys = my_store.list_keys()
     # len(keys) == num_keys_to_add + 1 because of the .ge_store_backend_id
     assert len(keys) == num_keys_to_add + 1
+
+
+def test_GeCloudStoreBackend():
+    """
+        What does this test test and why?
+
+        Since GeCloudStoreBackend relies on GE Cloud, we mock requests.post, requests.get, and
+        requests.patch and assert that the right calls are made for set, get, list, and remove_key.
+    """
+    ge_cloud_base_url = "https://app.greatexpectations.io/"
+    ge_cloud_credentials = {
+        "access_token": "58e76bbc3c047aaad031c5678964ffb",
+        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c"
+    }
+    ge_cloud_resource_type = "checkpoint"
+    my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
+        name="my_minimal_simple_checkpoint",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+    )
+
+    with patch("requests.post", autospec=True) as mock_post:
+        my_store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=ge_cloud_resource_type
+        )
+        my_store_backend.set(("my_checkpoint_name",), my_simple_checkpoint_config)
+        mock_post.assert_called_with(
+            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            json={'data': {'type': 'checkpoint', 'attributes': {'account_id': '51379b8b-86d3-4fe7-84e9-e1a52f4a414c',
+                                                                'checkpoint_config': {
+                                                                    'name': 'my_minimal_simple_checkpoint',
+                                                                    'config_version': 1.0, 'template_name': None,
+                                                                    'module_name': 'great_expectations.checkpoint',
+                                                                    'class_name': 'SimpleCheckpoint',
+                                                                    'run_name_template': None,
+                                                                    'expectation_suite_name': None,
+                                                                    'batch_request': None, 'action_list': [],
+                                                                    'evaluation_parameters': {},
+                                                                    'runtime_configuration': {}, 'validations': [],
+                                                                    'profilers': [], 'ge_cloud_id': None}}}},
+            headers={'Content-Type': 'application/vnd.api+json',
+                     'GE-Cloud-API-Token': '58e76bbc3c047aaad031c5678964ffb'}
+        )
