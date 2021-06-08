@@ -11,12 +11,13 @@ from moto import mock_s3
 import tests.test_utils as test_utils
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import (
+    GeCloudStoreBackend,
     InMemoryStoreBackend,
     StoreBackend,
     TupleAzureBlobStoreBackend,
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
-    TupleS3StoreBackend, GeCloudStoreBackend,
+    TupleS3StoreBackend,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -1049,15 +1050,15 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
 
 def test_GeCloudStoreBackend():
     """
-        What does this test test and why?
+    What does this test test and why?
 
-        Since GeCloudStoreBackend relies on GE Cloud, we mock requests.post, requests.get, and
-        requests.patch and assert that the right calls are made for set, get, list, and remove_key.
+    Since GeCloudStoreBackend relies on GE Cloud, we mock requests.post, requests.get, and
+    requests.patch and assert that the right calls are made for set, get, list, and remove_key.
     """
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
         "access_token": "58e76bbc3c047aaad031c5678964ffb",
-        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c"
+        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
     ge_cloud_resource_type = "checkpoint"
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -1066,27 +1067,55 @@ def test_GeCloudStoreBackend():
         config_version=1,
     )
 
+    # test .set
     with patch("requests.post", autospec=True) as mock_post:
         my_store_backend = GeCloudStoreBackend(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type
+            ge_cloud_resource_type=ge_cloud_resource_type,
         )
         my_store_backend.set(("my_checkpoint_name",), my_simple_checkpoint_config)
         mock_post.assert_called_with(
             "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            json={'data': {'type': 'checkpoint', 'attributes': {'account_id': '51379b8b-86d3-4fe7-84e9-e1a52f4a414c',
-                                                                'checkpoint_config': {
-                                                                    'name': 'my_minimal_simple_checkpoint',
-                                                                    'config_version': 1.0, 'template_name': None,
-                                                                    'module_name': 'great_expectations.checkpoint',
-                                                                    'class_name': 'SimpleCheckpoint',
-                                                                    'run_name_template': None,
-                                                                    'expectation_suite_name': None,
-                                                                    'batch_request': None, 'action_list': [],
-                                                                    'evaluation_parameters': {},
-                                                                    'runtime_configuration': {}, 'validations': [],
-                                                                    'profilers': [], 'ge_cloud_id': None}}}},
-            headers={'Content-Type': 'application/vnd.api+json',
-                     'GE-Cloud-API-Token': '58e76bbc3c047aaad031c5678964ffb'}
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+                        "checkpoint_config": {
+                            "name": "my_minimal_simple_checkpoint",
+                            "config_version": 1.0,
+                            "template_name": None,
+                            "module_name": "great_expectations.checkpoint",
+                            "class_name": "SimpleCheckpoint",
+                            "run_name_template": None,
+                            "expectation_suite_name": None,
+                            "batch_request": None,
+                            "action_list": [],
+                            "evaluation_parameters": {},
+                            "runtime_configuration": {},
+                            "validations": [],
+                            "profilers": [],
+                            "ge_cloud_id": None,
+                        },
+                    },
+                }
+            },
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "GE-Cloud-API-Token": "58e76bbc3c047aaad031c5678964ffb",
+            },
         )
+
+        # test .get
+        with patch("requests.get", autospec=True) as mock_get:
+            my_store_backend = GeCloudStoreBackend(
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_credentials=ge_cloud_credentials,
+                ge_cloud_resource_type=ge_cloud_resource_type,
+            )
+            my_store_backend.get(("0ccac18e-7631-4bdd-8a42-3c35cce574c6",))
+            mock_get.assert_called_with(
+                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                headers={'Content-Type': 'application/vnd.api+json', 'GE-Cloud-API-Token': '58e76bbc3c047aaad031c5678964ffb'},
+            )
