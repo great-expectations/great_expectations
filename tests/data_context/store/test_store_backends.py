@@ -1119,3 +1119,34 @@ def test_GeCloudStoreBackend():
                 "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                 headers={'Content-Type': 'application/vnd.api+json', 'GE-Cloud-API-Token': '58e76bbc3c047aaad031c5678964ffb'},
             )
+
+        # test .list_keys
+        with patch("requests.get", autospec=True) as mock_get:
+            my_store_backend = GeCloudStoreBackend(
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_credentials=ge_cloud_credentials,
+                ge_cloud_resource_type=ge_cloud_resource_type,
+            )
+            my_store_backend.list_keys()
+            mock_get.assert_called_with(
+                'https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints',
+                headers={'Content-Type': 'application/vnd.api+json', 'GE-Cloud-API-Token': '58e76bbc3c047aaad031c5678964ffb'},
+            )
+
+        # test .remove_key
+        with patch("requests.patch", autospec=True) as mock_patch:
+            mock_response = mock_patch.return_value
+            mock_response.status_code = 200
+
+            my_store_backend = GeCloudStoreBackend(
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_credentials=ge_cloud_credentials,
+                ge_cloud_resource_type=ge_cloud_resource_type,
+            )
+            my_store_backend.remove_key(("0ccac18e-7631-4bdd-8a42-3c35cce574c6",))
+            mock_patch.assert_called_with(
+                'https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631-4bdd-8a42-3c35cce574c6',
+                json={'data': {'type': 'checkpoint', 'id': '0ccac18e-7631-4bdd-8a42-3c35cce574c6', 'attributes': {
+                    'deleted': True}}},
+                headers={'Content-Type': 'application/vnd.api+json', 'GE-Cloud-API-Token': '58e76bbc3c047aaad031c5678964ffb'},
+            )
