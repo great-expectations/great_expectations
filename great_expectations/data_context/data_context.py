@@ -2942,6 +2942,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
+        ge_cloud_id: Optional[str] = None
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
         checkpoint_config: Union[CheckpointConfig, dict]
@@ -2968,6 +2969,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "slack_webhook": slack_webhook,
             "notify_on": notify_on,
             "notify_with": notify_with,
+            "ge_cloud_id": ge_cloud_id
         }
 
         checkpoint_config = filter_properties_dict(
