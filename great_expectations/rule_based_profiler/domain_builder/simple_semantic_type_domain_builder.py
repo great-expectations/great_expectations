@@ -116,7 +116,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
         column_types_dict_list = list(
             filter(
-                lambda column_type_dict: column_name in column_type_dict,
+                lambda column_type_dict: column_name == column_type_dict["name"],
                 column_types_dict_list,
             )
         )
@@ -127,7 +127,7 @@ information.  Please ensure that the specified column name refers to exactly one
 """
             )
 
-        column_type: str = cast(str, column_types_dict_list[0][column_name]).upper()
+        column_type: str = str(column_types_dict_list[0]["type"]).upper()
 
         semantic_column_type: SemanticDomainTypes
         if column_type in (
@@ -201,7 +201,8 @@ def _parse_semantic_domain_type_argument(
         ]
     if isinstance(semantic_types, SemanticDomainTypes):
         return [semantic_type for semantic_type in [semantic_types]]
-    elif isinstance(semantic_types, List):
+    elif isinstance(semantic_types, list):
+        semantic_type: str
         if all([isinstance(semantic_type, str) for semantic_type in semantic_types]):
             return [
                 SemanticDomainTypes[semantic_type]

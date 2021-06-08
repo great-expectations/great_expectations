@@ -2,6 +2,7 @@
 variables:
   # BatchRequest yielding two batches (January, 2019 and February, 2019 trip data)
   jan_feb_2019_trip_data_batch_request:
+    # DO NOT RE-SPECIFY the triumvirate.
     datasource_name: taxi_pandas
     data_connector_name: monthly
     data_asset_name: my_reports
@@ -27,39 +28,38 @@ rules:
         max_value: $parameter.row_count.value.max_value
         meta:
           profiler_details: $parameter.row_count.details
-  # TODO: <Alex>ALEX -- this is to be implemented/supported next.</Alex>
-#  column_ranges_rule:
-#    domain_builder:
-#      class_name: SimpleSemanticTypeColumnDomainBuilder
-#      semantic_types:
-#        - numeric
-#    parameter_builders:
-#      - parameter_name: min
-#        class_name: NumericMetricRangeMultiBatchParameterBuilder
-#        batch_request: $variables.jan_feb_2019_trip_data_batch_request
-#        metric_name: column.min
-#        metric_domain_kwargs: $domain.domain_kwargs
-#        false_positive_rate: $variables.false_positive_rate
-#      - parameter_name: max
-#        class_name: NumericMetricRangeMultiBatchParameterBuilder
-#        batch_request: $variables.jan_feb_2019_trip_data_batch_request
-#        metric_name: column.max
-#        metric_domain_kwargs: $domain.domain_kwargs
-#        false_positive_rate: $variables.false_positive_rate
-#    expectation_configuration_builders:
-#      - expectation_type: expect_column_min_to_be_between
-#        min_value: $parameter.min.value.min_value
-#        max_value: $parameter.min.value.max_value
-#        # TODO: <Alex>ALEX</Alex>
-#        # mostly: $parameter.min.value.mostly # call it something useful
-#        # TODO: <Alex>ALEX</Alex>
-#        meta:
-#          profiler_details: $parameter.min.details
-#      - expectation_type: expect_column_max_to_be_between
-#        min_value: $parameter.max.value.min_value
-#        max_value: $parameter.max.value.max_value
-#        # TODO: <Alex>ALEX</Alex>
-#        # mostly: $parameter.min.value.mostly # call it something useful
-#        # TODO: <Alex>ALEX</Alex>
-#        meta:
-#          profiler_details: $parameter.max.details
+  column_ranges_rule:
+    domain_builder:
+      class_name: SimpleSemanticTypeColumnDomainBuilder
+      semantic_types:
+        - numeric
+    parameter_builders:
+      - parameter_name: min
+        class_name: NumericMetricRangeMultiBatchParameterBuilder
+        batch_request: $variables.jan_feb_2019_trip_data_batch_request
+        metric_name: column.min
+        metric_domain_kwargs: $domain.domain_kwargs
+        false_positive_rate: $variables.false_positive_rate
+      - parameter_name: max
+        class_name: NumericMetricRangeMultiBatchParameterBuilder
+        batch_request: $variables.jan_feb_2019_trip_data_batch_request
+        metric_name: column.max
+        metric_domain_kwargs: $domain.domain_kwargs
+        false_positive_rate: $variables.false_positive_rate
+    expectation_configuration_builders:
+      - expectation_type: expect_column_min_to_be_between
+        min_value: $parameter.min.value.min_value
+        max_value: $parameter.min.value.max_value
+        # TODO: <Alex>ALEX</Alex>
+        # mostly: $parameter.min.value.mostly # call it something useful
+        # TODO: <Alex>ALEX</Alex>
+        meta:
+          profiler_details: $parameter.min.details
+      - expectation_type: expect_column_max_to_be_between
+        min_value: $parameter.max.value.min_value
+        max_value: $parameter.max.value.max_value
+        # TODO: <Alex>ALEX</Alex>
+        # mostly: $parameter.min.value.mostly # call it something useful
+        # TODO: <Alex>ALEX</Alex>
+        meta:
+          profiler_details: $parameter.max.details
