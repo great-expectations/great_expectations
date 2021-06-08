@@ -18,7 +18,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_credentials,
         ge_cloud_resource_type=None,
         ge_cloud_resource_name=None,
-        suppress_store_backend_id=False,
+        suppress_store_backend_id=True,
         manually_initialize_store_backend_id: str = "",
         store_name=None,
     ):
