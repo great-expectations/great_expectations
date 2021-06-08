@@ -28,6 +28,7 @@ class MetricParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        mostly: Optional[float] = 1.0,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -38,10 +39,12 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            mostly: optional user-configurable tolerance (defaults to the perfect adherence requirement of 1.0).
             data_context: DataContext
         """
         super().__init__(
             parameter_name=parameter_name,
+            mostly=mostly,
             data_context=data_context,
         )
 
@@ -63,9 +66,18 @@ class MetricParameterBuilder(ParameterBuilder):
             Args:
         :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
+        # Obtain mostly from rule state (i.e., variables and parameters); from instance variable otherwise.
+        mostly: Optional[float] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.mostly,
+            expected_return_type=float,
+            variables=variables,
+            parameters=parameters,
+        )
+
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_domain_kwargs: Optional[
-            Union[str, dict]
+            dict
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._metric_domain_kwargs,
@@ -75,7 +87,7 @@ class MetricParameterBuilder(ParameterBuilder):
         )
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_value_kwargs: Optional[
-            Union[str, dict]
+            dict
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._metric_value_kwargs,
@@ -95,6 +107,7 @@ class MetricParameterBuilder(ParameterBuilder):
                 "value": validator.get_metric(
                     metric=MetricConfiguration(**metric_configuration_arguments)
                 ),
+                "mostly": mostly,
                 "details": {
                     "metric_configuration": metric_configuration_arguments,
                 },

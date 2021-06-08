@@ -9,6 +9,7 @@ variables:
     data_connector_query:
       index: ":2"
   false_positive_rate: 1.0e-2
+  mostly: 1.0
 
 rules:
   row_count_rule:
@@ -19,13 +20,19 @@ rules:
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: table.row_count
+        mostly: $variables.mostly
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_to_nearest_integer: True
+        truncate_distribution:
+          - 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         min_value: $parameter.row_count.value.min_value
         max_value: $parameter.row_count.value.max_value
+        mostly: $parameter.row_count.value.mostly
         meta:
           profiler_details: $parameter.row_count.details
   column_ranges_rule:
@@ -38,28 +45,34 @@ rules:
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.min
+        mostly: $variables.mostly
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
+        round_to_nearest_integer: auto
       - parameter_name: max
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.max
+        mostly: $variables.mostly
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
+        round_to_nearest_integer: auto
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
         min_value: $parameter.min.value.min_value
         max_value: $parameter.min.value.max_value
-        # TODO: <Alex>ALEX</Alex>
-        # mostly: $parameter.min.value.mostly # call it something useful
-        # TODO: <Alex>ALEX</Alex>
+        mostly: $parameter.min.value.mostly
         meta:
           profiler_details: $parameter.min.details
       - expectation_type: expect_column_max_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
         min_value: $parameter.max.value.min_value
         max_value: $parameter.max.value.max_value
-        # TODO: <Alex>ALEX</Alex>
-        # mostly: $parameter.min.value.mostly # call it something useful
-        # TODO: <Alex>ALEX</Alex>
+        mostly: $parameter.min.value.mostly
         meta:
           profiler_details: $parameter.max.details

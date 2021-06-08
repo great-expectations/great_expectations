@@ -925,7 +925,7 @@ def filter_properties_dict(
 
 
 def is_numeric(value: Any) -> bool:
-    return value is not None and (is_int(value) or is_float(value))
+    return value is not None and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
