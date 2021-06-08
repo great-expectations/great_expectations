@@ -28,7 +28,7 @@ rules:
         meta:
           profiler_details: $parameter.row_count.details
   # TODO: <Alex>ALEX -- this is to be implemented/supported next.</Alex>
-#  ranges_rule:
+#  column_ranges_rule:
 #    domain_builder:
 #      class_name: SimpleSemanticTypeColumnDomainBuilder
 #      semantic_types:
