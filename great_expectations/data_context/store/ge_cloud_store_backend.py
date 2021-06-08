@@ -33,11 +33,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        assert ge_cloud_resource_type or ge_cloud_resource_name, "Must provide either ge_cloud_resource_type or " \
-                                                                 "ge_cloud_resource_name"
+        assert ge_cloud_resource_type or ge_cloud_resource_name, (
+            "Must provide either ge_cloud_resource_type or " "ge_cloud_resource_name"
+        )
         self._ge_cloud_base_url = ge_cloud_base_url
-        self._ge_cloud_resource_name = ge_cloud_resource_name or pluralize(ge_cloud_resource_type)
-        self._ge_cloud_resource_type = ge_cloud_resource_type or singularize(ge_cloud_resource_name)
+        self._ge_cloud_resource_name = ge_cloud_resource_name or pluralize(
+            ge_cloud_resource_type
+        )
+        self._ge_cloud_resource_type = ge_cloud_resource_type or singularize(
+            ge_cloud_resource_name
+        )
         self._ge_cloud_credentials = ge_cloud_credentials
 
         # Initialize with store_backend_id if not part of an HTMLSiteStore
@@ -63,7 +68,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_url = self.get_url_for_key(key=key)
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
+            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
         }
         response = requests.get(ge_cloud_url, headers=headers)
         return response.json()
@@ -84,7 +89,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
+            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
         }
         url = urljoin(
             self.ge_cloud_base_url,
@@ -121,7 +126,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def list_keys(self):
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
+            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
         }
         url = urljoin(
             self.ge_cloud_base_url,
@@ -132,10 +137,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             response = requests.get(url, headers=headers)
             response_json = response.json()
-            keys = [
-                (resource["id"], ) for resource in
-                response_json.get("data")
-            ]
+            keys = [(resource["id"],) for resource in response_json.get("data")]
             return keys
         except Exception as e:
             logger.debug(str(e))
@@ -157,7 +159,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials['access_token'],
+            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
         }
 
         data = {
@@ -186,7 +188,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return False
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError("Unable to delete object in GE Cloud Store Backend.")
+            raise StoreBackendError(
+                "Unable to delete object in GE Cloud Store Backend."
+            )
 
     def _has_key(self, key):
         all_keys = self.list_keys()

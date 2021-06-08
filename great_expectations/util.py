@@ -1,8 +1,6 @@
 import copy
 import cProfile
 import importlib
-import inflect
-import inflection
 import io
 import json
 import logging
@@ -29,6 +27,8 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional
 
+import inflect
+import inflection
 from dateutil.parser import parse
 from pkg_resources import Distribution
 

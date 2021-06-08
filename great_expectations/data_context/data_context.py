@@ -3054,8 +3054,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         return checkpoint
 
-    def delete_checkpoint(self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None):
-        assert bool(name) ^ bool(ge_cloud_id), "Must provide either name or ge_cloud_id."
+    def delete_checkpoint(
+        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+    ):
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id."
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key=name or ge_cloud_id,
         )
