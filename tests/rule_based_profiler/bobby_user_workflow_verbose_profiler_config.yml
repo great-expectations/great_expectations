@@ -58,5 +58,8 @@ rules:
 #      - expectation_type: expect_column_max_to_be_between
 #        min_value: $parameter.max.value.min_value
 #        max_value: $parameter.max.value.max_value
+#        # TODO: <Alex>ALEX</Alex>
+#        # mostly: $parameter.min.value.mostly # call it something useful
+#        # TODO: <Alex>ALEX</Alex>
 #        meta:
 #          profiler_details: $parameter.max.details
