@@ -59,13 +59,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
+    @property
+    def auth_headers(self):
+        return {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
+        }
+
     def _get(self, key):
         ge_cloud_url = self.get_url_for_key(key=key)
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
-        }
-        response = requests.get(ge_cloud_url, headers=headers)
+        response = requests.get(ge_cloud_url, headers=self.auth_headers)
         return response.json()
 
     def _move(self):
@@ -82,10 +85,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
-        }
         url = urljoin(
             self.ge_cloud_base_url,
             f"accounts/"
@@ -93,7 +92,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{self.ge_cloud_resource_name}",
         )
         try:
-            response = requests.post(url, json=data, headers=headers)
+            response = requests.post(url, json=data, headers=self.auth_headers)
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
@@ -119,10 +118,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     def list_keys(self):
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
-        }
         url = urljoin(
             self.ge_cloud_base_url,
             f"accounts/"
@@ -130,7 +125,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{self.ge_cloud_resource_name}",
         )
         try:
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=self.auth_headers)
             response_json = response.json()
             keys = [(resource["id"],) for resource in response_json.get("data")]
             return keys
@@ -152,11 +147,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         ge_cloud_id = key[0]
 
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "GE-Cloud-API-Token": self.ge_cloud_credentials["access_token"],
-        }
-
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
@@ -175,7 +165,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.patch(url, json=data, headers=headers)
+            response = requests.patch(url, json=data, headers=self.auth_headers)
             response_status_code = response.status_code
 
             if response_status_code < 300:
