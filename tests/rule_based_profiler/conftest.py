@@ -23,6 +23,11 @@ from tests.rule_based_profiler.bob_user_workflow_fixture import (
     bob_columnar_table_multi_batch,
 )
 
+# noinspection PyUnresolvedReferences
+from tests.rule_based_profiler.bobby_user_workflow_fixture import (
+    bobby_columnar_table_multi_batch,
+)
+
 
 @pytest.fixture
 def two_column_pandas_test_df():

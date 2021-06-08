@@ -9,7 +9,9 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.rule_based_profiler.util import get_metric_kwargs
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -61,17 +63,23 @@ class MetricParameterBuilder(ParameterBuilder):
             Args:
         :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
-        # Obtaining domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_domain_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        metric_domain_kwargs: Optional[
+            Union[str, dict]
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            metric_kwargs=self._metric_domain_kwargs,
+            parameter_reference=self._metric_domain_kwargs,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
-        # Obtaining value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[Union[str, dict]] = get_metric_kwargs(
+        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        metric_value_kwargs: Optional[
+            Union[str, dict]
+        ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            metric_kwargs=self._metric_value_kwargs,
+            parameter_reference=self._metric_value_kwargs,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
