@@ -991,6 +991,7 @@ class DataAsset:
                 "batch_parameters": self.batch_parameters,
                 "validation_time": validation_time,
             }
+            meta.update(expectation_meta)
             result = ExpectationSuiteValidationResult(
                 results=results,
                 success=statistics.success,
