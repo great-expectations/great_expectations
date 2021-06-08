@@ -36,8 +36,8 @@ def get_parameter_value_and_validate_return_type(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
     """
-    This method allows for the parameter_reference to be specified as an object or as a fully-qualified parameter name.
-    In either case, this method can optionally validate that the return value is of the expected_return_type provided.
+    This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
+    or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
     """
     if isinstance(parameter_reference, dict):
         parameter_reference = dict(copy.deepcopy(parameter_reference))
@@ -65,9 +65,9 @@ def get_parameter_value(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Any]:
     """
-    This method allows for the parameter_reference to be specified as an object or as a fully-qualified parameter name.
-    Moreover, if the parameter_reference argument is an object of type "dict", this method will recursively attempt to
-    detect keys, whose values are of the fully-qualified parameter name format and evaluate them accordingly.
+    This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
+    or as a fully-qualified parameter name.  Moreover, if the parameter_reference argument is an object of type "dict",
+    it will recursively detect values using the fully-qualified parameter name format and evaluate them accordingly.
     """
     if isinstance(parameter_reference, dict):
         for key, value in parameter_reference.items():
