@@ -273,7 +273,7 @@ def test_suite_new_creates_empty_suite(
     citations = suite.get_citations()
     citations[0].pop("citation_date", None)
     citations[0].pop("interactive", None)
-    assert filter_properties_dict(properties=citations[0]) == {
+    assert filter_properties_dict(properties=citations[0], clean_falsy=True) == {
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
@@ -357,7 +357,7 @@ def test_suite_new_empty_with_no_jupyter(
     citations = suite.get_citations()
     citations[0].pop("citation_date", None)
     citations[0].pop("interactive", None)
-    assert filter_properties_dict(properties=citations[0]) == {
+    assert filter_properties_dict(properties=citations[0], clean_falsy=True) == {
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",

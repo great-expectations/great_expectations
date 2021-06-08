@@ -2167,7 +2167,9 @@ def postgresql_engine(test_backend):
 
 
 @pytest.fixture(scope="function")
-def empty_data_context(tmp_path) -> DataContext:
+def empty_data_context(
+    tmp_path,
+) -> DataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -2865,7 +2867,9 @@ def empty_context_with_checkpoint_v1_stats_enabled(
 
 
 @pytest.fixture
-def titanic_data_context(tmp_path_factory):
+def titanic_data_context(
+    tmp_path_factory,
+) -> DataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -3225,7 +3229,9 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
 
 
 @pytest.fixture(scope="function")
-def titanic_multibatch_data_context(tmp_path):
+def titanic_multibatch_data_context(
+    tmp_path,
+) -> DataContext:
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
@@ -3734,7 +3740,10 @@ def filesystem_csv_data_context_with_validation_operators(
 
 
 @pytest.fixture()
-def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
+def filesystem_csv_data_context(
+    empty_data_context,
+    filesystem_csv_2,
+) -> DataContext:
     empty_data_context.add_datasource(
         "rad_datasource",
         module_name="great_expectations.datasource",
@@ -4343,7 +4352,7 @@ def misc_directory(tmp_path):
 def yellow_trip_pandas_data_context(
     tmp_path_factory,
     monkeypatch,
-):
+) -> DataContext:
     """
     Provides a data context with a data_connector for a pandas datasource which can connect to three months of
     yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
@@ -4356,7 +4365,7 @@ def yellow_trip_pandas_data_context(
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "test_data")
+    data_path: str = os.path.join(context_path, "..", "data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(
         file_relative_path(
@@ -4382,7 +4391,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
             )
         ),
     )
@@ -4397,7 +4406,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
             )
         ),
     )
@@ -4412,7 +4421,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
             )
         ),
     )

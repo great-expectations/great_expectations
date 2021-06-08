@@ -1,0 +1,4 @@
+---
+title: stub
+---
+Stub

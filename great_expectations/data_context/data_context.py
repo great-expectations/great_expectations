@@ -1634,6 +1634,9 @@ class BaseDataContext:
         data_asset_name: Optional[str] = None,
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
+        batch_request_list: List[
+            Optional[Union[BatchRequest, RuntimeBatchRequest]]
+        ] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1680,29 +1683,67 @@ class BaseDataContext:
             expectation_suite = self.create_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name
             )
+        if (
+            sum(
+                bool(x)
+                for x in [batch_request is not None, batch_request_list is not None]
+            )
+            > 1
+        ):
+            raise ValueError(
+                "Only one of batch_request or batch_request_list may be specified"
+            )
+        if batch_request_list:
+            batch_list: List = []
+            for batch_request in batch_request_list:
+                batch_list.extend(
+                    self.get_batch_list(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_request=batch_request,
+                        batch_data=batch_data,
+                        data_connector_query=data_connector_query,
+                        batch_identifiers=batch_identifiers,
+                        limit=limit,
+                        index=index,
+                        custom_filter_function=custom_filter_function,
+                        batch_spec_passthrough=batch_spec_passthrough,
+                        sampling_method=sampling_method,
+                        sampling_kwargs=sampling_kwargs,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                        runtime_parameters=runtime_parameters,
+                        query=query,
+                        path=path,
+                        batch_filter_parameters=batch_filter_parameters,
+                        **kwargs,
+                    )
+                )
+        else:
+            batch_list: List[Batch] = self.get_batch_list(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_request=batch_request,
+                batch_data=batch_data,
+                data_connector_query=data_connector_query,
+                batch_identifiers=batch_identifiers,
+                limit=limit,
+                index=index,
+                custom_filter_function=custom_filter_function,
+                batch_spec_passthrough=batch_spec_passthrough,
+                sampling_method=sampling_method,
+                sampling_kwargs=sampling_kwargs,
+                splitter_method=splitter_method,
+                splitter_kwargs=splitter_kwargs,
+                runtime_parameters=runtime_parameters,
+                query=query,
+                path=path,
+                batch_filter_parameters=batch_filter_parameters,
+                **kwargs,
+            )
 
-        batch_list: List[Batch] = self.get_batch_list(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            batch_data=batch_data,
-            data_connector_query=data_connector_query,
-            batch_identifiers=batch_identifiers,
-            limit=limit,
-            index=index,
-            custom_filter_function=custom_filter_function,
-            batch_spec_passthrough=batch_spec_passthrough,
-            sampling_method=sampling_method,
-            sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
-            runtime_parameters=runtime_parameters,
-            query=query,
-            path=path,
-            batch_filter_parameters=batch_filter_parameters,
-            **kwargs,
-        )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition = batch_list[-1].batch_definition
@@ -2929,7 +2970,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_with": notify_with,
         }
 
-        checkpoint_config = filter_properties_dict(properties=checkpoint_config)
+        checkpoint_config = filter_properties_dict(
+            properties=checkpoint_config, clean_falsy=True
+        )
         new_checkpoint: Union[
             Checkpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
@@ -2997,9 +3040,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
         config: dict = checkpoint_config.to_json_dict()
-        if name is not None:
-            config.update({"name": name})
-        config = filter_properties_dict(properties=config)
+        config.update({"name": name})
+        config = filter_properties_dict(properties=config, clean_falsy=True)
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
             config=config,
             runtime_environment={
