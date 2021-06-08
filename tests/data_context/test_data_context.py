@@ -1897,7 +1897,7 @@ ge_cloud_id:
             }
         ],
         "profilers": [],
-        "ge_cloud_id": None
+        "ge_cloud_id": None,
     }
 
     assert isinstance(checkpoint_from_yaml, Checkpoint)
