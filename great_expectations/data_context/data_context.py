@@ -2970,7 +2970,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_with": notify_with,
         }
 
-        checkpoint_config = filter_properties_dict(properties=checkpoint_config)
+        checkpoint_config = filter_properties_dict(
+            properties=checkpoint_config, clean_falsy=True
+        )
         new_checkpoint: Union[
             Checkpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
@@ -3031,7 +3033,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         config: dict = checkpoint_config.to_json_dict()
         config.update({"name": name})
-        config = filter_properties_dict(properties=config)
+        config = filter_properties_dict(properties=config, clean_falsy=True)
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
             config=config,
             runtime_environment={

@@ -146,8 +146,12 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -234,8 +238,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -341,8 +349,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -396,8 +408,12 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -435,8 +451,12 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -535,8 +555,12 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -650,8 +674,12 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -767,8 +795,12 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -914,8 +946,12 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -1155,8 +1191,12 @@ def test_override_general_defaults(
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -1249,8 +1289,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config)
-    ) == filter_properties_dict(properties=desired_config)
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
     assert DataContext.validate_config(project_config=data_context_config)
 
     data_context = BaseDataContext(project_config=data_context_config)

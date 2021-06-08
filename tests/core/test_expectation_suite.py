@@ -324,7 +324,9 @@ def test_get_citations_not_sorted(baseline_suite):
         sort=False
     )
     for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, inplace=True)
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
         properties_dict.pop("interactive", None)
 
     assert properties_dict_list == [
@@ -344,7 +346,9 @@ def test_get_citations_sorted(baseline_suite):
     baseline_suite.add_citation("second", citation_date="2000-01-02")
     properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(sort=True)
     for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, inplace=True)
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
         properties_dict.pop("interactive", None)
 
     assert properties_dict_list == [
@@ -378,7 +382,9 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
         sort=True, require_batch_kwargs=True
     )
     for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, inplace=True)
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
         properties_dict.pop("interactive", None)
 
     assert properties_dict_list == [

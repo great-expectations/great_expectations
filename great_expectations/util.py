@@ -131,7 +131,7 @@ def get_currently_executing_function_call_arguments(
             "class_name": self.__class__.__name__,
         },
     )
-    filter_properties_dict(properties=self._config, inplace=True)
+    filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
     """
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
@@ -830,7 +830,9 @@ def filter_properties_dict(
     properties: dict,
     keep_fields: Optional[list] = None,
     delete_fields: Optional[list] = None,
-    clean_empty: Optional[bool] = True,
+    clean_nulls: Optional[bool] = True,
+    clean_falsy: Optional[bool] = False,
+    keep_falsy_numerics: Optional[bool] = True,
     inplace: Optional[bool] = False,
 ) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
@@ -839,8 +841,11 @@ def filter_properties_dict(
         properties: source dictionary to be filtered according to the supplied filtering directives
         keep_fields: list of keys that must be retained, with the understanding that all other entries will be deleted
         delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained
-        clean_empty: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
+        clean_nulls: If True, then in addition to other filtering directives, delete entries, whose values are None
+        clean_falsy: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
+        (If the "clean_falsy" argument is specified at "True", then "clean_nulls" is assumed to be "True" as well.)
         inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes
+        keep_falsy_numerics: If True, then in addition to other filtering directives, do not delete zero-valued numerics
 
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
@@ -849,6 +854,9 @@ def filter_properties_dict(
         raise ValueError(
             "Only one of keep_fields and delete_fields filtering directives can be specified."
         )
+
+    if clean_falsy:
+        clean_nulls = True
 
     if not inplace:
         properties = copy.deepcopy(properties)
@@ -865,7 +873,7 @@ def filter_properties_dict(
             [key for key, value in properties.items() if key in delete_fields]
         )
 
-    if clean_empty:
+    if clean_nulls:
         keys_for_deletion.extend(
             [
                 key
@@ -873,11 +881,37 @@ def filter_properties_dict(
                 if not (
                     (keep_fields and key in keep_fields)
                     or (delete_fields and key in delete_fields)
-                    or is_numeric(value=value)
-                    or value
+                    or value is not None
                 )
             ]
         )
+
+    if clean_falsy:
+        if keep_falsy_numerics:
+            keys_for_deletion.extend(
+                [
+                    key
+                    for key, value in properties.items()
+                    if not (
+                        (keep_fields and key in keep_fields)
+                        or (delete_fields and key in delete_fields)
+                        or is_numeric(value=value)
+                        or value
+                    )
+                ]
+            )
+        else:
+            keys_for_deletion.extend(
+                [
+                    key
+                    for key, value in properties.items()
+                    if not (
+                        (keep_fields and key in keep_fields)
+                        or (delete_fields and key in delete_fields)
+                        or value
+                    )
+                ]
+            )
 
     keys_for_deletion = list(set(keys_for_deletion))
 
