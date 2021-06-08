@@ -170,12 +170,14 @@ def test_basic_checkpoint_config_validation(
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.config.to_json_dict(),
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
@@ -187,12 +189,14 @@ def test_basic_checkpoint_config_validation(
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.config.to_json_dict(),
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
@@ -317,8 +321,10 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -445,8 +451,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -537,8 +545,10 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -686,8 +696,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -783,8 +795,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -897,8 +911,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 1
