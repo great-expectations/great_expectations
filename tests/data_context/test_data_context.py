@@ -1816,7 +1816,7 @@ validations:
         index: -1
     expectation_suite_name: newsuite
 profilers: []
-ge_cloud_id: 
+ge_cloud_id:
 """
 
     checkpoint_dir = os.path.join(
