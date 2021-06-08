@@ -39,8 +39,8 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
                 message=f"{self.__class__.__name__} requires a reference to an instance of the Validator class."
             )
 
-        semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        semantic_types: List[
+            SemanticDomainTypes
         ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
 
         column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
@@ -66,37 +66,52 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
                 metric_dependencies=None,
             )
         )
-        domains: List[Domain] = []
-        column_name: str
         # A semantic type is distinguished from the structured column type;
         # An example structured column type would be "integer".  The inferred semantic type would be "id".
-        inferred_semantic_domain_type: InferredSemanticDomainType
-        semantic_domain_type: SemanticDomainTypes
-        for column_name in table_column_names:
-            inferred_semantic_domain_type = (
-                self.infer_semantic_domain_type_from_table_column_type(
+        candidate_column_names: List[str] = list(
+            filter(
+                lambda candidate_column_name: self.is_column_type_semantic(
+                    column_name=candidate_column_name,
                     column_types_dict_list=column_types_dict_list,
-                    column_name=column_name,
-                )
+                    semantic_types=semantic_types,
+                ),
+                table_column_names,
             )
-            semantic_domain_type = inferred_semantic_domain_type.semantic_domain_type
-            # InferredSemanticDomainType contains "details" property capturing auxiliary information about inference.
-            if semantic_domain_type in semantic_types:
-                domains.append(
-                    Domain(
-                        domain_kwargs={
-                            "column": column_name,
-                            "batch_id": validator.active_batch_id,
-                        }
-                    )
-                )
+        )
+
+        column_name: str
+        domains: List[Domain] = [
+            Domain(
+                domain_kwargs={
+                    "column": column_name,
+                    "batch_id": validator.active_batch_id,
+                }
+            )
+            for column_name in candidate_column_names
+        ]
 
         return domains
+
+    def is_column_type_semantic(
+        self,
+        column_name: str,
+        column_types_dict_list: List[Dict[str, Any]],
+        semantic_types: List[SemanticDomainTypes],
+    ):
+        return (
+            self.infer_semantic_domain_type_from_table_column_type(
+                column_types_dict_list=column_types_dict_list,
+                column_name=column_name,
+            ).semantic_domain_type
+            in semantic_types
+        )
 
     # This method (default implementation) can be overwritten (with different implementation mechanisms) by subclasses.
     # noinspection PyMethodMayBeStatic
     def infer_semantic_domain_type_from_table_column_type(
-        self, column_types_dict_list: List[Dict[str, Any]], column_name: str
+        self,
+        column_types_dict_list: List[Dict[str, Any]],
+        column_name: str,
     ) -> InferredSemanticDomainType:
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
         column_types_dict_list = list(
