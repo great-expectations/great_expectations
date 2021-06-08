@@ -1816,6 +1816,7 @@ validations:
         index: -1
     expectation_suite_name: newsuite
 profilers: []
+ge_cloud_id: 
 """
 
     checkpoint_dir = os.path.join(
@@ -1896,6 +1897,7 @@ profilers: []
             }
         ],
         "profilers": [],
+        "ge_cloud_id": None
     }
 
     assert isinstance(checkpoint_from_yaml, Checkpoint)
