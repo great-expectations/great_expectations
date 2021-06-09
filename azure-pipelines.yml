@@ -1,9 +1,9 @@
-trigger: 
+trigger:
   branches:
-    include: 
-      - pre_pr-*
-      - develop
-      - main
+    include:
+    - pre_pr-*
+    - develop
+    - main
 
 resources:
   containers:
