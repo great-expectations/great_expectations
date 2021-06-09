@@ -9,7 +9,7 @@ Develop
 * Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [DOCS] Remove broken links
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
-* [BUGFIX] Using lru_cache in order not to fetch already known secrets #2882 (thanks @Cedric-Magnan)
+* [BUGFIX] Using cache in order not to fetch already known secrets #2882 (thanks @Cedric-Magnan)
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
 * [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
