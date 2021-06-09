@@ -19,6 +19,7 @@ Develop
 * [MAINTENANCE] Soft launch of alpha docs site
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
+* [MAINTENANCE] Allow tests to properly connect to local sqlite db on Windows
 
 0.13.19
 -----------------
