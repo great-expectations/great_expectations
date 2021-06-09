@@ -1277,6 +1277,45 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             ] = root_directory
 
 
+class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
+    """
+    Default store configs for in memory backends.
+
+    This is useful for testing without persistence.
+    """
+
+    def __init__(
+        self,
+    ):
+        # Initialize base defaults
+        super().__init__()
+
+        self.stores = {
+            self.expectations_store_name: {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+            self.validations_store_name: {
+                "class_name": "ValidationsStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+            self.evaluation_parameter_store_name: {
+                "class_name": "EvaluationParameterStore"
+            },
+            self.checkpoint_store_name: {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+        }
+        self.data_docs_sites = {}
+
+
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for Google Cloud Storage (GCS) backends, with some accessible parameters

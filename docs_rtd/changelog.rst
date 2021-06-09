@@ -18,7 +18,7 @@ Develop
 * [ENHANCEMENT] Experimental WIP Rule Based Profiler for single batch workflows (#2788)
 * [MAINTENANCE] Soft launch of alpha docs site
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
-
+* [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 
 0.13.19
 -----------------
