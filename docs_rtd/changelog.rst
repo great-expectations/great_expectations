@@ -8,6 +8,7 @@ Develop
 -----------------
 * Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [DOCS] Remove broken links
+* [DOCS] Fix typo in SlackNotificationAction docstring
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
 * [BUGFIX] Using cache in order not to fetch already known secrets #2882 (thanks @Cedric-Magnan)
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
