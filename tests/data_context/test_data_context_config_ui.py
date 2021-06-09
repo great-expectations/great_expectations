@@ -15,6 +15,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     FilesystemStoreBackendDefaults,
     GCSStoreBackendDefaults,
+    InMemoryStoreBackendDefaults,
     S3StoreBackendDefaults,
 )
 from great_expectations.util import filter_properties_dict
@@ -1304,3 +1305,49 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         ._base_directory
         == "../data/"
     )
+
+
+def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
+    construct_data_context_config,
+):
+    store_backend_defaults = InMemoryStoreBackendDefaults()
+    data_context_config = DataContextConfig(
+        store_backend_defaults=store_backend_defaults,
+    )
+
+    desired_config = {
+        "anonymous_usage_statistics": {
+            "data_context_id": data_context_config.anonymous_usage_statistics.data_context_id,
+            "enabled": True,
+        },
+        "checkpoint_store_name": "checkpoint_store",
+        "config_version": 3.0,
+        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "expectations_store_name": "expectations_store",
+        "stores": {
+            "checkpoint_store": {
+                "class_name": "CheckpointStore",
+                "store_backend": {"class_name": "InMemoryStoreBackend"},
+            },
+            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "expectations_store": {
+                "class_name": "ExpectationsStore",
+                "store_backend": {"class_name": "InMemoryStoreBackend"},
+            },
+            "validations_store": {
+                "class_name": "ValidationsStore",
+                "store_backend": {"class_name": "InMemoryStoreBackend"},
+            },
+        },
+        "validations_store_name": "validations_store",
+    }
+
+    data_context_config_schema = DataContextConfigSchema()
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config),
+        clean_falsy=True,
+    ) == filter_properties_dict(
+        properties=desired_config,
+        clean_falsy=True,
+    )
+    assert DataContext.validate_config(project_config=data_context_config)
