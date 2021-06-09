@@ -123,6 +123,7 @@ def idfn(test_configuration):
 def pytest_parsed_arguments(request):
     return request.config.option
 
+
 @pytest.mark.docs
 @pytest.mark.integration
 @pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
