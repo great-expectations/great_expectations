@@ -107,7 +107,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--docs-tests",
         action="store_true",
-        help="If set, integration tests for docs",
+        help="If set, run integration tests for docs",
     )
 
 
