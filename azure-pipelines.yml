@@ -4,7 +4,6 @@ trigger:
       - pre_pr-*
       - develop
       - main
-      - releases/*
 
 resources:
   containers:
