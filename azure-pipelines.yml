@@ -1,6 +1,9 @@
 trigger:
-  - develop
-  - main
+  branches:
+    include:
+    - pre_pr-*
+    - develop
+    - main
 
 resources:
   containers:
