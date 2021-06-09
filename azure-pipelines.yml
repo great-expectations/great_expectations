@@ -1,5 +1,5 @@
 trigger:
-  - pre_pr-
+  - pre_pr
   - develop
   - main
 
