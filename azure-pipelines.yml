@@ -373,16 +373,16 @@ stages:
               SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
               SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
               # redshift credentials
-              # REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
-              # REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
-              # REDSHIFT_HOST: $(REDSHIFT_HOST)
-              # REDSHIFT_PORT: $(REDSHIFT_PORT)
-              # REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
-              # REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
-              # AWS credentials
-              # AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-              # AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-              # AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+              REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+              REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+              REDSHIFT_HOST: $(REDSHIFT_HOST)
+              REDSHIFT_PORT: $(REDSHIFT_PORT)
+              REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+              REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+              AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
               # todo: add credentials for cloud resources here
 
   - stage: cli_integration
