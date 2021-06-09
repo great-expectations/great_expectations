@@ -123,23 +123,11 @@ def idfn(test_configuration):
 def pytest_parsed_arguments(request):
     return request.config.option
 
-
-def marker_requested(marker):
-    markexpr = pytest.config.getoption("markexpr")
-    if not markexpr or marker not in markexpr.split():
-        return False
-    return eval(markexpr, {}, defaultdict(lambda: False, {marker: True}))
-
-
 @pytest.mark.docs
 @pytest.mark.integration
 @pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
-@pytest.mark.skipif(
-    not marker_requested("docs"), reason="Only run docs tests when requested"
-)
 def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
-
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
     _execute_integration_test(test_configuration, tmp_path)
 
