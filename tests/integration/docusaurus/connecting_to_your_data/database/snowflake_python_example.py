@@ -1,10 +1,9 @@
 import os
 
 from ruamel import yaml
+from util import load_data_into_database
 
 import great_expectations as ge
-
-from util import load_data_into_database
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
 sfUser = os.environ.get("SNOWFLAKE_USER")

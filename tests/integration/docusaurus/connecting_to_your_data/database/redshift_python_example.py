@@ -1,10 +1,9 @@
 import os
 
 from ruamel import yaml
+from util import load_data_into_database
 
 import great_expectations as ge
-
-from util import load_data_into_database
 
 redshift_username = os.environ.get("REDSHIFT_USERNAME")
 redshift_password = os.environ.get("REDSHIFT_PASSWORD")
