@@ -6,15 +6,15 @@ import great_expectations as ge
 
 from .util import load_data_into_database
 
-sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
-sfUser = os.environ.get("SNOWFLAKE_USER")
-sfPswd = os.environ.get("SNOWFLAKE_PW")
-sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
-sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
-sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+redshift_username = os.environ.get("REDSHIFT_USERNAME")
+redshift_password = os.environ.get("REDSHIFT_PASSWORD")
+redshift_host = os.environ.get("REDSHIFT_HOST")
+redshift_port = os.environ.get("REDSHIFT_PORT")
+redshift_database = os.environ.get("REDSHIFT_DATABASE")
+redshift_sslmode = os.environ.get("REDSHIFT_SSLMODE")
 
+CONNECTION_STRING = f"postgresql+psycopg2://{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_database}?sslmode={redshift_sslmode}"
 
-CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 load_data_into_database(
     "taxi_data",
     "./data/reports/yellow_tripdata_sample_2019-01.csv",
@@ -23,37 +23,36 @@ load_data_into_database(
 
 context = ge.get_context()
 
-
-datasource_config = {
-    "name": "my_snowflake_datasource",
-    "class_name": "Datasource",
-    "execution_engine": {
-        "class_name": "SqlAlchemyExecutionEngine",
-        "connection_string": "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>",
-    },
-    "data_connectors": {
-        "default_runtime_data_connector_name": {
-            "class_name": "RuntimeDataConnector",
-            "batch_identifiers": ["default_identifier_name"],
-        },
-        "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "whole_table",
-        },
-    },
-}
+datasource_yaml = f"""
+name: my_redshift_datasource
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  connection_string: postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>
+data_connectors:
+   default_runtime_data_connector_name:
+       class_name: RuntimeDataConnector
+       batch_identifiers:
+           - default_identifier_name
+   default_inferred_data_connector_name:
+       class_name: InferredAssetSqlDataConnector
+       name: whole_table
+"""
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
+datasource_yaml = datasource_yaml.replace(
+    "postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>",
+    CONNECTION_STRING,
+)
 
-context.test_yaml_config(yaml.dump(datasource_config))
+context.test_yaml_config(datasource_yaml)
 
-context.add_datasource(**datasource_config)
+context.add_datasource(**yaml.load(datasource_yaml))
 
 # First test for RuntimeBatchRequest using a query
 batch_request = ge.core.batch.RuntimeBatchRequest(
-    datasource_name="my_snowflake_datasource",
+    datasource_name="my_redshift_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
@@ -70,7 +69,7 @@ print(validator.head())
 
 # Second test for BatchRequest naming a table
 batch_request = ge.core.batch.BatchRequest(
-    datasource_name="my_snowflake_datasource",
+    datasource_name="my_redshift_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
 )
@@ -84,9 +83,9 @@ print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["my_snowflake_datasource"]
+assert [ds["name"] for ds in context.list_datasources()] == ["my_redshift_datasource"]
 assert "taxi_data" in set(
-    context.get_available_data_asset_names()["my_snowflake_datasource"][
+    context.get_available_data_asset_names()["my_redshift_datasource"][
         "default_inferred_data_connector_name"
     ]
 )

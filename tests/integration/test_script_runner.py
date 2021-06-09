@@ -15,12 +15,35 @@ class BackendDependencies(enum.Enum):
     MSSQL = "MSSQL"
     PANDAS = "PANDAS"
     POSTGRESQL = "POSTGRESQL"
+    REDSHIFT = "REDSHIFT"
     SPARK = "SPARK"
     SQLALCHEMY = "SQLALCHEMY"
     SNOWFLAKE = "SNOWFLAKE"
 
 
 docs_test_matrix = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -119,8 +142,14 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
 
 def _execute_integration_test(test_configuration, tmp_path):
     """
-    Prepare and environment and run integration tests.
+    Prepare and environment and run integration tests from a list of tests.
+
+    Note that the only required parameter for a test in the matrix is
+    `user_flow_script` and that all other parameters are optional.
     """
+    assert (
+        "user_flow_script" in test_configuration.keys()
+    ), "a `user_flow_script` is required"
     workdir = os.getcwd()
     try:
         base_dir = test_configuration.get(
@@ -136,14 +165,15 @@ def _execute_integration_test(test_configuration, tmp_path):
         #
 
         # DataContext
-        context_source_dir = os.path.join(
-            base_dir, test_configuration.get("data_context_dir")
-        )
-        test_context_dir = os.path.join(tmp_path, "great_expectations")
-        shutil.copytree(
-            context_source_dir,
-            test_context_dir,
-        )
+        if test_configuration.get("data_context_dir"):
+            context_source_dir = os.path.join(
+                base_dir, test_configuration.get("data_context_dir")
+            )
+            test_context_dir = os.path.join(tmp_path, "great_expectations")
+            shutil.copytree(
+                context_source_dir,
+                test_context_dir,
+            )
 
         # Test Data
         if test_configuration.get("data_dir") is not None:
@@ -217,7 +247,9 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
         pytest_args.no_mssql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mssql tests")
+    elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
+        pytest.skip("Skipping redshift tests")
     elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
         pytest.skip("Skipping spark tests")
-    elif dependencies == BackendDependencies.SNOWFLAKE and (pytest_args.no_sqlalchemy):
+    elif dependencies == BackendDependencies.SNOWFLAKE and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping snowflake tests")
