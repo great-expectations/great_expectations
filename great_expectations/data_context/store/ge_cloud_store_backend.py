@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta
+from typing import Dict, Optional
 from urllib.parse import urljoin
 
 import requests
@@ -14,13 +15,13 @@ logger = logging.getLogger(__name__)
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def __init__(
         self,
-        ge_cloud_base_url,
-        ge_cloud_credentials,
-        ge_cloud_resource_type=None,
-        ge_cloud_resource_name=None,
-        suppress_store_backend_id=True,
-        manually_initialize_store_backend_id: str = "",
-        store_name=None,
+        ge_cloud_credentials: Dict,
+        ge_cloud_base_url: Optional[str] = "https://app.greatexpectations.io/",
+        ge_cloud_resource_type: Optional[str] = None,
+        ge_cloud_resource_name: Optional[str] = None,
+        suppress_store_backend_id: Optional[bool] = True,
+        manually_initialize_store_backend_id: Optional[str] = "",
+        store_name: Optional[str] = None,
     ):
         super().__init__(
             fixed_length_key=True,
