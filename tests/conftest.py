@@ -104,6 +104,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run aws integration tests",
     )
+    parser.addoption(
+        "--docs-tests",
+        action="store_true",
+        help="If set, integration tests for docs",
+    )
 
 
 def build_test_backends_list(metafunc):
@@ -149,12 +154,18 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--aws-integration"):
         # --aws-integration given in cli: do not skip aws-integration tests
         return
+    if config.getoption("--docs-tests"):
+        # --docs-tests given in cli: do not skip documentation integration tests
+        return
     skip_aws_integration = pytest.mark.skip(
         reason="need --aws-integration option to run"
     )
+    skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
     for item in items:
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
+        if "docs" in item.keywords:
+            item.add_marker(skip_docs_integration)
 
 
 @pytest.fixture(autouse=True)
