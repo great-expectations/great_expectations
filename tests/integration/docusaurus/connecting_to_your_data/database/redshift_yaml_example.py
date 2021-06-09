@@ -4,7 +4,7 @@ from ruamel import yaml
 
 import great_expectations as ge
 
-from .util import load_data_into_database
+from util import load_data_into_database
 
 redshift_username = os.environ.get("REDSHIFT_USERNAME")
 redshift_password = os.environ.get("REDSHIFT_PASSWORD")
@@ -16,9 +16,9 @@ redshift_sslmode = os.environ.get("REDSHIFT_SSLMODE")
 CONNECTION_STRING = f"postgresql+psycopg2://{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_database}?sslmode={redshift_sslmode}"
 
 load_data_into_database(
-    "taxi_data",
-    "./data/reports/yellow_tripdata_sample_2019-01.csv",
-    CONNECTION_STRING,
+    table_name="taxi_data",
+    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
+    connection_string=CONNECTION_STRING,
 )
 
 context = ge.get_context()
@@ -89,4 +89,3 @@ assert "taxi_data" in set(
         "default_inferred_data_connector_name"
     ]
 )
-validator.execution_engine.engine.close()

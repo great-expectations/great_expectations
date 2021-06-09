@@ -4,7 +4,7 @@ from ruamel import yaml
 
 import great_expectations as ge
 
-from .util import load_data_into_database
+from util import load_data_into_database
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
 sfUser = os.environ.get("SNOWFLAKE_USER")
@@ -16,9 +16,9 @@ sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 load_data_into_database(
-    "taxi_data",
-    "./data/reports/yellow_tripdata_sample_2019-01.csv",
-    CONNECTION_STRING,
+    table_name="taxi_data",
+    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
+    connection_string=CONNECTION_STRING,
 )
 
 context = ge.get_context()
