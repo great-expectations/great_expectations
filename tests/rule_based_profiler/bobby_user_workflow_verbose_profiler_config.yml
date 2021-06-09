@@ -2,7 +2,8 @@
 variables:
   # BatchRequest yielding two batches (January, 2019 and February, 2019 trip data)
   jan_feb_2019_trip_data_batch_request:
-    # DO NOT RE-SPECIFY the triumvirate.
+    # We want to use the same triumvirate as in the user's batch_request.
+    # However, a bug in Batch creation (not always setting BatchDefinition) is preventing this, until the bug is fixed.
     datasource_name: taxi_pandas
     data_connector_name: monthly
     data_asset_name: my_reports

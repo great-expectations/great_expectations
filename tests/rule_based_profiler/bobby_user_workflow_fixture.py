@@ -26,8 +26,8 @@ def bobby_columnar_table_multi_batch():
             **{
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "kwargs": {
-                    "min_value": 6712,
-                    "max_value": 9288,
+                    "min_value": 6727,
+                    "max_value": 9940,
                     "mostly": 1.0,
                 },
                 "meta": {
@@ -45,6 +45,12 @@ def bobby_columnar_table_multi_batch():
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "VendorID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -56,17 +62,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "VendorID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "VendorID",
+                    "min_value": 4,
+                    "max_value": 4,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -78,39 +84,39 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "VendorID",
-                    "min_value": 4,
-                    "max_value": 4,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "metric_domain_kwargs": {
-                                "column": "passenger_count",
-                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
-                            },
-                        }
-                    }
-                },
                 "kwargs": {
                     "column": "passenger_count",
                     "min_value": -1,
                     "max_value": 2,
                     "mostly": 1.0,
                 },
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": {
+                                "column": "passenger_count",
+                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
+                            },
+                        }
+                    }
+                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "passenger_count",
+                    "min_value": 6,
+                    "max_value": 6,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -122,39 +128,39 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "passenger_count",
-                    "min_value": 6,
-                    "max_value": 6,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "metric_domain_kwargs": {
-                                "column": "trip_distance",
-                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
-                            },
-                        }
-                    }
-                },
                 "kwargs": {
                     "column": "trip_distance",
                     "min_value": 0.0,
                     "max_value": 0.0,
                     "mostly": 1.0,
                 },
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": {
+                                "column": "trip_distance",
+                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
+                            },
+                        }
+                    }
+                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "trip_distance",
+                    "min_value": 23.851853257587763,
+                    "max_value": 68.3948134090789,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -166,17 +172,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "trip_distance",
-                    "min_value": 21.42290366424798,
-                    "max_value": 74.04709633575202,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "RatecodeID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -188,39 +194,39 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "RatecodeID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.max",
-                            "metric_domain_kwargs": {
-                                "column": "RatecodeID",
-                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
-                            },
-                        }
-                    }
-                },
                 "kwargs": {
                     "column": "RatecodeID",
                     "min_value": 4,
                     "max_value": 7,
                     "mostly": 1.0,
                 },
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "metric_domain_kwargs": {
+                                "column": "RatecodeID",
+                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
+                            },
+                        }
+                    }
+                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "PULocationID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -232,17 +238,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "PULocationID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "PULocationID",
+                    "min_value": 265,
+                    "max_value": 265,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -254,17 +260,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "PULocationID",
-                    "min_value": 265,
-                    "max_value": 265,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "DOLocationID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -276,17 +282,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "DOLocationID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "DOLocationID",
+                    "min_value": 265,
+                    "max_value": 265,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -298,43 +304,21 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "DOLocationID",
-                    "min_value": 265,
-                    "max_value": 265,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "metric_domain_kwargs": {
-                                "column": "payment_type",
-                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
-                            },
-                        }
-                    }
-                },
                 "kwargs": {
                     "column": "payment_type",
                     "min_value": 1,
                     "max_value": 1,
                     "mostly": 1.0,
                 },
-            },
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
-                            "metric_name": "column.max",
+                            "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "payment_type",
                                 "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
@@ -342,17 +326,39 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
                 "kwargs": {
                     "column": "payment_type",
                     "min_value": 4,
                     "max_value": 4,
                     "mostly": 1.0,
                 },
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "metric_domain_kwargs": {
+                                "column": "payment_type",
+                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
+                            },
+                        }
+                    }
+                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "fare_amount",
+                    "min_value": -68.59847823682462,
+                    "max_value": 4.931811570157951,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -364,17 +370,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "fare_amount",
-                    "min_value": -76.42535420500796,
-                    "max_value": 3.425354205007963,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "fare_amount",
+                    "min_value": -2209.1828021039673,
+                    "max_value": 4521.849468770634,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -386,17 +392,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "fare_amount",
-                    "min_value": -1982.4939637989423,
-                    "max_value": 5201.493963798943,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "extra",
+                    "min_value": -56.21022384832043,
+                    "max_value": 30.270223848320434,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -408,17 +414,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "extra",
-                    "min_value": -64.84643221486563,
-                    "max_value": 27.136432214865625,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "extra",
+                    "min_value": 3.131022720469251,
+                    "max_value": 9.202310612864082,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -430,39 +436,39 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "extra",
-                    "min_value": 2.530213370563874,
-                    "max_value": 8.969786629436125,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "metric_domain_kwargs": {
-                                "column": "mta_tax",
-                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
-                            },
-                        }
-                    }
-                },
                 "kwargs": {
                     "column": "mta_tax",
                     "min_value": -0.5,
                     "max_value": -0.5,
                     "mostly": 1.0,
                 },
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": {
+                                "column": "mta_tax",
+                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
+                            },
+                        }
+                    }
+                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "mta_tax",
+                    "min_value": -32.10300631283988,
+                    "max_value": 57.77633964617321,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -474,17 +480,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "mta_tax",
-                    "min_value": -28.660721262172405,
-                    "max_value": 66.6707212621724,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "tip_amount",
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -496,17 +502,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "tip_amount",
-                    "min_value": 0.0,
-                    "max_value": 0.0,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "tip_amount",
+                    "min_value": 13.525954664480246,
+                    "max_value": 93.50737866885311,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -518,17 +524,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "tip_amount",
-                    "min_value": 24.40201535478306,
-                    "max_value": 97.29798464521694,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "tolls_amount",
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -540,17 +546,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "tolls_amount",
-                    "min_value": 0.0,
-                    "max_value": 0.0,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "tolls_amount",
+                    "min_value": -369.11158771824796,
+                    "max_value": 753.6649210515812,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -562,39 +568,39 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "tolls_amount",
-                    "min_value": -351.0510116841917,
-                    "max_value": 875.1210116841917,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "metric_domain_kwargs": {
-                                "column": "improvement_surcharge",
-                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
-                            },
-                        }
-                    }
-                },
                 "kwargs": {
                     "column": "improvement_surcharge",
                     "min_value": -0.3,
                     "max_value": -0.3,
                     "mostly": 1.0,
                 },
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": {
+                                "column": "improvement_surcharge",
+                                "batch_id": "92bcffc67c34a1c9a67e0062ed4a9529",
+                            },
+                        }
+                    }
+                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "improvement_surcharge",
+                    "min_value": 0.3,
+                    "max_value": 0.3,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -606,17 +612,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "improvement_surcharge",
-                    "min_value": 0.3,
-                    "max_value": 0.3,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "total_amount",
+                    "min_value": -67.92491675149579,
+                    "max_value": -1.0084165818375368,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -628,17 +634,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "total_amount",
-                    "min_value": -75.25556757557183,
-                    "max_value": -1.8444324244281631,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "total_amount",
+                    "min_value": -1920.1647047134945,
+                    "max_value": 4448.798038046828,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -650,17 +656,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "total_amount",
-                    "min_value": -1405.8960501949803,
-                    "max_value": 4948.54605019498,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "congestion_surcharge",
+                    "min_value": -4.702310612864083,
+                    "max_value": 1.3689772795307495,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -672,17 +678,17 @@ def bobby_columnar_table_multi_batch():
                         }
                     }
                 },
-                "kwargs": {
-                    "column": "congestion_surcharge",
-                    "min_value": -4.4697866294361255,
-                    "max_value": 1.969786629436126,
-                    "mostly": 1.0,
-                },
             },
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_max_to_be_between",
+                "kwargs": {
+                    "column": "congestion_surcharge",
+                    "min_value": -1.3689772795307495,
+                    "max_value": 4.702310612864083,
+                    "mostly": 1.0,
+                },
                 "meta": {
                     "profiler_details": {
                         "metric_configuration": {
@@ -693,12 +699,6 @@ def bobby_columnar_table_multi_batch():
                             },
                         }
                     }
-                },
-                "kwargs": {
-                    "column": "congestion_surcharge",
-                    "min_value": -1.969786629436126,
-                    "max_value": 4.4697866294361255,
-                    "mostly": 1.0,
                 },
             }
         ),

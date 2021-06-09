@@ -1,5 +1,4 @@
 import copy
-import uuid
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -7,7 +6,6 @@ from scipy import special
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     MultiBatchParameterBuilder,
@@ -133,12 +131,15 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
-        batch_ids: List[str] = self.get_batch_ids(
-            validator=validator,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
+        validator_for_metrics_calculations: Validator = (
+            self.get_validator_for_metrics_calculations(
+                validator=validator,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
         )
+        batch_ids: List[str] = validator_for_metrics_calculations.loaded_batch_ids
         if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
@@ -172,25 +173,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
-        )
-
-        expectation_suite_name: str = (
-            f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
-        )
-        # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
-        batch_request: Optional[
-            Union[BatchRequest, dict, str]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._batch_request,
-            expected_return_type=dict,
-            variables=variables,
-            parameters=parameters,
-        )
-        batch_request = BatchRequest(**batch_request)
-        validator_for_metrics_calculations: Validator = self.data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
         )
 
         metric_values: List[Union[int, float, np.float32, np.float64]] = []
