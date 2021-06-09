@@ -67,6 +67,9 @@ validator = context.get_validator(
 )
 print(validator.head())
 
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+
 # Second test for BatchRequest naming a table
 batch_request = ge.core.batch.BatchRequest(
     datasource_name="my_snowflake_datasource",
