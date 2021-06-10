@@ -45,7 +45,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import (
-    GeCloudStoreBackend,
     Store,
     TupleStoreBackend,
 )
