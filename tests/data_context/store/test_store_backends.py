@@ -1,6 +1,7 @@
 import datetime
 import os
 import uuid
+from collections import OrderedDict
 from unittest.mock import patch
 
 import boto3
@@ -1066,6 +1067,11 @@ def test_GeCloudStoreBackend():
         class_name="SimpleCheckpoint",
         config_version=1,
     )
+    my_simple_checkpoint_config_serialized = (
+        my_simple_checkpoint_config.get_schema_class()().dump(
+            my_simple_checkpoint_config
+        )
+    )
 
     # test .set
     with patch("requests.post", autospec=True) as mock_post:
@@ -1074,7 +1080,9 @@ def test_GeCloudStoreBackend():
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=ge_cloud_resource_type,
         )
-        my_store_backend.set(("my_checkpoint_name",), my_simple_checkpoint_config)
+        my_store_backend.set(
+            ("my_checkpoint_name",), my_simple_checkpoint_config_serialized
+        )
         mock_post.assert_called_with(
             "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             json={
@@ -1082,22 +1090,24 @@ def test_GeCloudStoreBackend():
                     "type": "checkpoint",
                     "attributes": {
                         "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "checkpoint_config": {
-                            "name": "my_minimal_simple_checkpoint",
-                            "config_version": 1.0,
-                            "template_name": None,
-                            "module_name": "great_expectations.checkpoint",
-                            "class_name": "SimpleCheckpoint",
-                            "run_name_template": None,
-                            "expectation_suite_name": None,
-                            "batch_request": None,
-                            "action_list": [],
-                            "evaluation_parameters": {},
-                            "runtime_configuration": {},
-                            "validations": [],
-                            "profilers": [],
-                            "ge_cloud_id": None,
-                        },
+                        "checkpoint_config": OrderedDict(
+                            [
+                                ("name", "my_minimal_simple_checkpoint"),
+                                ("config_version", 1.0),
+                                ("template_name", None),
+                                ("module_name", "great_expectations.checkpoint"),
+                                ("class_name", "SimpleCheckpoint"),
+                                ("run_name_template", None),
+                                ("expectation_suite_name", None),
+                                ("batch_request", None),
+                                ("action_list", []),
+                                ("evaluation_parameters", {}),
+                                ("runtime_configuration", {}),
+                                ("validations", []),
+                                ("profilers", []),
+                                ("ge_cloud_id", None),
+                            ]
+                        ),
                     },
                 }
             },
