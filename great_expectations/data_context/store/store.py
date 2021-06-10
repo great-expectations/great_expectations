@@ -2,6 +2,7 @@ import json
 import logging
 
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.store.ge_cloud_store_backend import GeCloudStoreBackend
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
@@ -124,7 +125,7 @@ class Store:
     def get(self, key):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
-        elif self.store_backend.__class__.__name__ == "GeCloudStoreBackend":
+        elif isinstance(self.store_backend, GeCloudStoreBackend):
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             if value:
@@ -143,7 +144,7 @@ class Store:
     def set(self, key, value):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value)
-        elif self.store_backend.__class__.__name__ == "GeCloudStoreBackend":
+        elif isinstance(self.store_backend, GeCloudStoreBackend):
             # skip serialization
             self._validate_key(key)
             return self._store_backend.set(self.key_to_tuple(key), value)
