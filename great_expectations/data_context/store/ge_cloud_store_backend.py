@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 import requests
 
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict, pluralize, singularize
 
@@ -97,7 +98,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
-            return self.get_url_for_key((object_id,))
+            object_url = self.get_url_for_key((object_id,))
+            return GeCloudResourceRef(
+                resource_type=self.ge_cloud_resource_type,
+                ge_cloud_id=object_id,
+                url=object_url
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in GE Cloud Store Backend.")
