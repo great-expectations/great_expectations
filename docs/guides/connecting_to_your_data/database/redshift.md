@@ -52,7 +52,7 @@ postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<S
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L3-L5
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L3-L7
 ```
 
 Load your DataContext into memory using the `get_context()` method.
@@ -145,7 +145,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L70-L81
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L73-L84
 ```
 
   </TabItem>
