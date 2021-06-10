@@ -46,12 +46,12 @@ postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L1-L4
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L1-L5
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L15
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L14
 ```
 
 ### 5. Configure your Datasource
@@ -67,10 +67,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L17-L31
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L16-L30
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L40
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L39
 ```
 
 </TabItem>
@@ -78,10 +78,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L16-L34
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L16-L33
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L40
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L39
 ```
 
 </TabItem>
@@ -104,13 +104,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L42
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L41
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L42
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L41
 ```
 
 </TabItem>
@@ -130,7 +130,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L45-L59
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L44-L57
 ```
 
   </TabItem>
@@ -139,7 +139,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L64-L75
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L63-L74
 ```
 
   </TabItem>
@@ -151,8 +151,8 @@ Here is an example of loading data by specifying an existing table name.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [postgres_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/postgres_yaml_example.py)
-- [postgres_python_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/postgres_python_example.py)
+- [postgres_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py)
+- [postgres_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py)
 
 ## Next Steps
 

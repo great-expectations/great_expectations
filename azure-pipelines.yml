@@ -1,6 +1,9 @@
 trigger:
-  - develop
-  - main
+  branches:
+    include:
+    - pre_pr-*
+    - develop
+    - main
 
 resources:
   containers:
@@ -53,7 +56,9 @@ stages:
 
                 [DocsChanged]
                 docs/**
-                tests/integration/**
+                tests/integration/docusaurus/**
+                tests/integration/fixtures/**
+                tests/test_sets/**
 
                 [GEChanged]
                 great_expectations/**
@@ -357,7 +362,8 @@ stages:
           - script: |
               pip install pytest pytest-azurepipelines
               # TODO enable spark tests
-              pytest -v -m docs --no-spark tests/integration/test_script_runner.py
+              # TODO enable sqlalchemy once cloud resources are working again
+              pytest -v --docs-tests -m docs --no-spark --no-sqlalchemy tests/integration/test_script_runner.py
             displayName: 'pytest'
             env:
               # snowflake credentials
@@ -367,6 +373,17 @@ stages:
               SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
               SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
               SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              # redshift credentials
+              REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+              REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+              REDSHIFT_HOST: $(REDSHIFT_HOST)
+              REDSHIFT_PORT: $(REDSHIFT_PORT)
+              REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+              REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
               # todo: add credentials for cloud resources here
 
   - stage: cli_integration

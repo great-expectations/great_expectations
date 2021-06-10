@@ -97,7 +97,7 @@ class EvaluationParameterStore(MetricStore):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def get_bind_params(self, run_id):
         params = {}

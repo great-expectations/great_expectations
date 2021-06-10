@@ -48,7 +48,7 @@ snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L3-L5
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L1-L7
 ```
 
 Load your DataContext into memory using the `get_context()` method.
@@ -141,7 +141,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L72-L83
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L75-L86
 ```
 
   </TabItem>
@@ -153,8 +153,8 @@ Here is an example of loading data by specifying an existing table name.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [snowflake_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/snowflake_yaml_example.py)
-- [snowflake_python_example.py](https://github.com/great-expectations/great_expectations/blob/knoxpod/integration/code/connecting_to_your_data/database/snowflake_python_example.py)
+- [snowflake_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py)
+- [snowflake_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py)
 
 ## Next Steps
 

@@ -1693,55 +1693,35 @@ class BaseDataContext:
             raise ValueError(
                 "Only one of batch_request or batch_request_list may be specified"
             )
-        if batch_request_list:
-            batch_list: List = []
-            for batch_request in batch_request_list:
-                batch_list.extend(
-                    self.get_batch_list(
-                        datasource_name=datasource_name,
-                        data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name,
-                        batch_request=batch_request,
-                        batch_data=batch_data,
-                        data_connector_query=data_connector_query,
-                        batch_identifiers=batch_identifiers,
-                        limit=limit,
-                        index=index,
-                        custom_filter_function=custom_filter_function,
-                        batch_spec_passthrough=batch_spec_passthrough,
-                        sampling_method=sampling_method,
-                        sampling_kwargs=sampling_kwargs,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
-                        runtime_parameters=runtime_parameters,
-                        query=query,
-                        path=path,
-                        batch_filter_parameters=batch_filter_parameters,
-                        **kwargs,
-                    )
+
+        if not batch_request_list:
+            batch_request_list = [batch_request]
+
+        batch_list: List = []
+        for batch_request in batch_request_list:
+            batch_list.extend(
+                self.get_batch_list(
+                    datasource_name=datasource_name,
+                    data_connector_name=data_connector_name,
+                    data_asset_name=data_asset_name,
+                    batch_request=batch_request,
+                    batch_data=batch_data,
+                    data_connector_query=data_connector_query,
+                    batch_identifiers=batch_identifiers,
+                    limit=limit,
+                    index=index,
+                    custom_filter_function=custom_filter_function,
+                    batch_spec_passthrough=batch_spec_passthrough,
+                    sampling_method=sampling_method,
+                    sampling_kwargs=sampling_kwargs,
+                    splitter_method=splitter_method,
+                    splitter_kwargs=splitter_kwargs,
+                    runtime_parameters=runtime_parameters,
+                    query=query,
+                    path=path,
+                    batch_filter_parameters=batch_filter_parameters,
+                    **kwargs,
                 )
-        else:
-            batch_list: List[Batch] = self.get_batch_list(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_request=batch_request,
-                batch_data=batch_data,
-                data_connector_query=data_connector_query,
-                batch_identifiers=batch_identifiers,
-                limit=limit,
-                index=index,
-                custom_filter_function=custom_filter_function,
-                batch_spec_passthrough=batch_spec_passthrough,
-                sampling_method=sampling_method,
-                sampling_kwargs=sampling_kwargs,
-                splitter_method=splitter_method,
-                splitter_kwargs=splitter_kwargs,
-                runtime_parameters=runtime_parameters,
-                query=query,
-                path=path,
-                batch_filter_parameters=batch_filter_parameters,
-                **kwargs,
             )
 
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
@@ -2970,7 +2950,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_with": notify_with,
         }
 
-        checkpoint_config = filter_properties_dict(properties=checkpoint_config)
+        checkpoint_config = filter_properties_dict(
+            properties=checkpoint_config, clean_falsy=True
+        )
         new_checkpoint: Union[
             Checkpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
@@ -3031,7 +3013,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         config: dict = checkpoint_config.to_json_dict()
         config.update({"name": name})
-        config = filter_properties_dict(properties=config)
+        config = filter_properties_dict(properties=config, clean_falsy=True)
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
             config=config,
             runtime_environment={
