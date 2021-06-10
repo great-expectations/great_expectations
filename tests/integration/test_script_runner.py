@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+from collections import defaultdict
 
 import pytest
 
@@ -200,8 +201,8 @@ def _execute_integration_test(test_configuration, tmp_path):
                 base_dir,
                 test_configuration.get("util_script"),
             )
-            script_path = os.path.join(tmp_path, "util.py")
-            shutil.copyfile(script_source, script_path)
+            util_script_path = os.path.join(tmp_path, "util.py")
+            shutil.copyfile(script_source, util_script_path)
 
         # Check initial state
 
