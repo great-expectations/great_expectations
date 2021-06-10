@@ -4,6 +4,7 @@ from ruamel import yaml
 from util import load_data_into_database
 
 import great_expectations as ge
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
 sfUser = os.environ.get("SNOWFLAKE_USER")
@@ -50,7 +51,7 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 
 # First test for RuntimeBatchRequest using a query
-batch_request = ge.core.batch.RuntimeBatchRequest(
+batch_request = RuntimeBatchRequest(
     datasource_name="my_snowflake_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
@@ -70,7 +71,7 @@ print(validator.head())
 assert isinstance(validator, ge.validator.validator.Validator)
 
 # Second test for BatchRequest naming a table
-batch_request = ge.core.batch.BatchRequest(
+batch_request = BatchRequest(
     datasource_name="my_snowflake_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve

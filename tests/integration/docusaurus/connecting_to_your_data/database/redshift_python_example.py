@@ -4,6 +4,7 @@ from ruamel import yaml
 from util import load_data_into_database
 
 import great_expectations as ge
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 redshift_username = os.environ.get("REDSHIFT_USERNAME")
 redshift_password = os.environ.get("REDSHIFT_PASSWORD")
@@ -49,7 +50,7 @@ context.test_yaml_config(yaml.dump(datasource_config))
 context.add_datasource(**datasource_config)
 
 # First test for RuntimeBatchRequest using a query
-batch_request = ge.core.batch.RuntimeBatchRequest(
+batch_request = RuntimeBatchRequest(
     datasource_name="my_redshift_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
@@ -69,7 +70,7 @@ print(validator.head())
 assert isinstance(validator, ge.validator.validator.Validator)
 
 # Second test for BatchRequest naming a table
-batch_request = ge.core.batch.BatchRequest(
+batch_request = BatchRequest(
     datasource_name="my_redshift_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
