@@ -362,7 +362,8 @@ stages:
           - script: |
               pip install pytest pytest-azurepipelines
               # TODO enable spark tests
-              pytest -v -m docs --no-spark tests/integration/test_script_runner.py
+              # TODO enable sqlalchemy once cloud resources are working again
+              pytest -v --docs-tests -m docs --no-spark --no-sqlalchemy tests/integration/test_script_runner.py
             displayName: 'pytest'
             env:
               # snowflake credentials
