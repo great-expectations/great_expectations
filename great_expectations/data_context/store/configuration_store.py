@@ -5,6 +5,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -90,6 +91,10 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
+        if isinstance(self.store_backend, GeCloudStoreBackend):
+            # GeCloudStoreBackend expects a json str
+            config_schema = value.get_schema_class()()
+            return config_schema.dump(value)
         return value.to_yaml_str()
 
     def deserialize(self, key, value):

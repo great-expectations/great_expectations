@@ -143,10 +143,6 @@ class Store:
     def set(self, key, value):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value)
-        elif isinstance(self.store_backend, GeCloudStoreBackend):
-            # skip serialization
-            self._validate_key(key)
-            return self._store_backend.set(self.key_to_tuple(key), value)
         else:
             self._validate_key(key)
             return self._store_backend.set(
