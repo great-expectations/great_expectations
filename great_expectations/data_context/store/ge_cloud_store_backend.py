@@ -102,7 +102,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return GeCloudResourceRef(
                 resource_type=self.ge_cloud_resource_type,
                 ge_cloud_id=object_id,
-                url=object_url
+                url=object_url,
             )
         except Exception as e:
             logger.debug(str(e))

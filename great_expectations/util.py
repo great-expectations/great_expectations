@@ -32,8 +32,9 @@ from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
 from great_expectations.exceptions import (
+    GreatExpectationsError,
     PluginClassNotFoundError,
-    PluginModuleNotFoundError, GreatExpectationsError,
+    PluginModuleNotFoundError,
 )
 from great_expectations.expectations.registry import _registered_expectations
 
@@ -76,8 +77,10 @@ def pluralize(singular_ge_noun):
     try:
         return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
     except KeyError:
-        raise GreatExpectationsError(f"Unable to pluralize '{singular_ge_noun}'. Please update "
-                                     f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT")
+        raise GreatExpectationsError(
+            f"Unable to pluralize '{singular_ge_noun}'. Please update "
+            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
+        )
 
 
 def singularize(plural_ge_noun):
@@ -87,8 +90,10 @@ def singularize(plural_ge_noun):
     try:
         return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
     except KeyError:
-        raise GreatExpectationsError(f"Unable to singularize '{plural_ge_noun}'. Please update "
-                                     f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT.")
+        raise GreatExpectationsError(
+            f"Unable to singularize '{plural_ge_noun}'. Please update "
+            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
+        )
 
 
 def underscore(word: str) -> str:
@@ -108,8 +113,8 @@ def underscore(word: str) -> str:
         'IoError'
 
     """
-    word = re.sub(r"([A-Z]+)([A-Z][a-z])", r'\1_\2', word)
-    word = re.sub(r"([a-z\d])([A-Z])", r'\1_\2', word)
+    word = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", word)
+    word = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", word)
     word = word.replace("-", "_")
     return word.lower()
 

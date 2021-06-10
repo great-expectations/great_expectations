@@ -102,9 +102,7 @@ class ConfigurationStore(Store):
         if isinstance(value, str):
             config: CommentedMap = yaml.load(value)
         try:
-            return self._configuration_class.from_commented_map(
-                commented_map=config
-            )
+            return self._configuration_class.from_commented_map(commented_map=config)
         except ge_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
