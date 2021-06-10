@@ -48,9 +48,16 @@ def two_column_pandas_test_df():
                 datetime.date(2021, 3, 20),
                 None,
             ],
+            "Description": [
+                "child",
+                "teenager",
+                "young adult",
+                "adult",
+                None,
+            ],
         }
     )
-    return df
+    return df.convert_dtypes()
 
 
 # noinspection PyPep8Naming
@@ -85,6 +92,19 @@ def column_Date_domain():
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Date",
+            "batch_id": "f576df3a81c34925978336d530453bc4",
+        },
+        meta=None,
+    )
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def column_Description_domain():
+    return Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs={
+            "column": "Description",
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
         meta=None,

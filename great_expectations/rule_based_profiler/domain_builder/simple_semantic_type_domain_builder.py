@@ -197,6 +197,7 @@ def _parse_semantic_domain_type_argument(
 
     semantic_type: Union[str, SemanticDomainTypes]
     if isinstance(semantic_types, str):
+        semantic_types = semantic_type.upper()
         return [
             SemanticDomainTypes[semantic_type] for semantic_type in [semantic_types]
         ]
@@ -204,6 +205,7 @@ def _parse_semantic_domain_type_argument(
         return [semantic_type for semantic_type in [semantic_types]]
     elif isinstance(semantic_types, list):
         if all([isinstance(semantic_type, str) for semantic_type in semantic_types]):
+            semantic_types = [semantic_type.upper() for semantic_type in semantic_types]
             return [
                 SemanticDomainTypes[semantic_type] for semantic_type in semantic_types
             ]

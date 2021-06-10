@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from typing import Any, Dict, Optional, Union
 
 from great_expectations.core import IDDict
@@ -63,8 +64,13 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
                 f"""Unrecognized meta key(s): "{str(meta_keys - Domain.RECOGNIZED_KEYS)}" detected.
 """
             )
-
-        self._meta = meta
+        for key, value in meta.items():
+            if not isinstance(value, Enum):
+                raise ValueError(
+                    f"""All Domain meta values must be of type Enum \
+(value of type "{str(type(value))}" for key "{key}" was detected).
+"""
+                )
 
         super().__init__(
             domain_type=domain_type,
@@ -81,8 +87,9 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         json_dict: dict = {
             "domain_type": self["domain_type"].value,
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
+            "meta": {key: value.value for key, value in self["meta"].items()},
         }
-        return json_dict
+        return filter_properties_dict(properties=json_dict, clean_falsy=True)
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -96,6 +103,9 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             or (isinstance(other, dict) and self.to_json_dict() == other)
             or (self.__str__() == str(other))
         )
+
+    def __ne__(self, other):
+        return not self.__eq__(other=other)
 
     def _convert_dictionaries_to_domain_kwargs(
         self, source: Optional[Any] = None
