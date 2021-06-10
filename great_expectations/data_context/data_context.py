@@ -44,7 +44,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store import Store, TupleStoreBackend, GeCloudStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -62,6 +62,7 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
+from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -2991,11 +2992,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
-        if (
-            self.checkpoint_store.store_backend.__class__.__name__
-            == "GeCloudStoreBackend"
-        ):
-            ge_cloud_id = checkpoint_ref.split("/")[-1]
+        if isinstance(checkpoint_ref, GeCloudIdAwareRef):
+            ge_cloud_id = checkpoint_ref.ge_cloud_id
             new_checkpoint.config.ge_cloud_id = uuid.UUID(ge_cloud_id)
         return new_checkpoint
 
