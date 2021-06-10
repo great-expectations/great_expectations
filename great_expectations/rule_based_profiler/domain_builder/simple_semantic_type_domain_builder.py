@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -197,19 +197,14 @@ def _parse_semantic_domain_type_argument(
     semantic_type: Union[str, SemanticDomainTypes]
     if isinstance(semantic_types, str):
         return [
-            SemanticDomainTypes[semantic_type]
-            for semantic_type in [semantic_types]
-            if SemanticDomainTypes.has_member_key(key=semantic_type)
+            SemanticDomainTypes[semantic_type] for semantic_type in [semantic_types]
         ]
     if isinstance(semantic_types, SemanticDomainTypes):
         return [semantic_type for semantic_type in [semantic_types]]
     elif isinstance(semantic_types, list):
-        semantic_type: str
         if all([isinstance(semantic_type, str) for semantic_type in semantic_types]):
             return [
-                SemanticDomainTypes[semantic_type]
-                for semantic_type in semantic_types
-                if SemanticDomainTypes.has_member_key(key=semantic_type)
+                SemanticDomainTypes[semantic_type] for semantic_type in semantic_types
             ]
         elif all(
             [
