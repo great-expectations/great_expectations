@@ -1057,7 +1057,7 @@ def test_GeCloudStoreBackend():
     """
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
-        "access_token": "58e76bbc3c047aaad031c5678964ffb",
+        "access_token": "1234",
         "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
     ge_cloud_resource_type = "checkpoint"
