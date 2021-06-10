@@ -94,7 +94,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         domains: List[Domain] = [
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,
-                meta={
+                details={
                     "inferred_semantic_domain_type": table_column_name_to_inferred_semantic_domain_type_mapping[
                         column_name
                     ],

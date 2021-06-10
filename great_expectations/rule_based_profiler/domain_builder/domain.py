@@ -18,7 +18,7 @@ class DomainKwargs(SerializableDotDict):
 
 
 class Domain(SerializableDotDict):
-    RECOGNIZED_KEYS: set = {
+    RECOGNIZED_DETAILS_KEYS: set = {
         "inferred_semantic_domain_type",
         "custom_semantic_domain_type",
     }
@@ -28,7 +28,7 @@ class Domain(SerializableDotDict):
         self,
         domain_type: Union[str, MetricDomainTypes, SemanticDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
-        meta: Optional[Dict[str, Any]] = None,
+        details: Optional[Dict[str, Any]] = None,
     ):
         if isinstance(domain_type, str):
             try:
@@ -55,19 +55,19 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             self._convert_dictionaries_to_domain_kwargs(source=domain_kwargs)
         )
 
-        if meta is None:
-            meta = {}
+        if details is None:
+            details = {}
 
-        meta_keys: set = set(meta.keys())
-        if not meta_keys <= Domain.RECOGNIZED_KEYS:
+        details_keys: set = set(details.keys())
+        if not details_keys <= Domain.RECOGNIZED_DETAILS_KEYS:
             raise ValueError(
-                f"""Unrecognized meta key(s): "{str(meta_keys - Domain.RECOGNIZED_KEYS)}" detected.
+                f"""Unrecognized details key(s): "{str(details_keys - Domain.RECOGNIZED_DETAILS_KEYS)}" detected.
 """
             )
-        for key, value in meta.items():
+        for key, value in details.items():
             if not isinstance(value, Enum):
                 raise ValueError(
-                    f"""All Domain meta values must be of type Enum \
+                    f"""All Domain details values must be of type Enum \
 (value of type "{str(type(value))}" for key "{key}" was detected).
 """
                 )
@@ -75,7 +75,7 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         super().__init__(
             domain_type=domain_type,
             domain_kwargs=domain_kwargs_dot_dict,
-            meta=meta,
+            details=details,
         )
 
     # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
@@ -87,7 +87,7 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         json_dict: dict = {
             "domain_type": self["domain_type"].value,
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
-            "meta": {key: value.value for key, value in self["meta"].items()},
+            "details": {key: value.value for key, value in self["details"].items()},
         }
         return filter_properties_dict(properties=json_dict, clean_falsy=True)
 

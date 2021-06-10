@@ -34,30 +34,39 @@ from tests.rule_based_profiler.bobby_user_workflow_fixture import (
 def two_column_pandas_test_df():
     df: pd.DataFrame = pd.DataFrame(
         {
-            "Age": [
-                7,
-                15,
-                21,
-                39,
-                None,
-            ],
-            "Date": [
-                datetime.date(2020, 12, 31),
-                datetime.date(2021, 1, 1),
-                datetime.date(2021, 2, 21),
-                datetime.date(2021, 3, 20),
-                None,
-            ],
-            "Description": [
-                "child",
-                "teenager",
-                "young adult",
-                "adult",
-                None,
-            ],
+            "Age": pd.Series(
+                [
+                    7,
+                    15,
+                    21,
+                    39,
+                    None,
+                ],
+                dtype="Int64",
+            ),
+            "Date": pd.Series(
+                [
+                    datetime.date(2020, 12, 31),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 2, 21),
+                    datetime.date(2021, 3, 20),
+                    None,
+                ],
+                dtype="datetime64[ns]",
+            ),
+            "Description": pd.Series(
+                [
+                    "child",
+                    "teenager",
+                    "young adult",
+                    "adult",
+                    None,
+                ],
+                dtype="object",
+            ),
         }
     )
-    return df.convert_dtypes()
+    return df
 
 
 # noinspection PyPep8Naming
@@ -68,7 +77,7 @@ def table_Users_domain():
         domain_kwargs={
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
-        meta=None,
+        details=None,
     )
 
 
@@ -81,7 +90,7 @@ def column_Age_domain():
             "column": "Age",
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
-        meta=None,
+        details=None,
     )
 
 
@@ -94,7 +103,7 @@ def column_Date_domain():
             "column": "Date",
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
-        meta=None,
+        details=None,
     )
 
 
@@ -107,7 +116,7 @@ def column_Description_domain():
             "column": "Description",
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
-        meta=None,
+        details=None,
     )
 
 

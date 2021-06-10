@@ -149,7 +149,7 @@ def test_simple_semantic_type_column_domain_builder(
                 "column": "Age",
                 "batch_id": "f576df3a81c34925978336d530453bc4",
             },
-            "meta": {
+            "details": {
                 "inferred_semantic_domain_type": "numeric",
             },
         },
@@ -159,7 +159,7 @@ def test_simple_semantic_type_column_domain_builder(
                 "column": "Description",
                 "batch_id": "f576df3a81c34925978336d530453bc4",
             },
-            "meta": {
+            "details": {
                 "inferred_semantic_domain_type": "text",
             },
         },
@@ -170,7 +170,7 @@ def test_simple_semantic_type_column_domain_builder(
     assert domain == Domain(
         domain_type=column_Age_domain.domain_type,
         domain_kwargs=column_Age_domain.domain_kwargs,
-        meta={
+        details={
             "inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC,
         },
     )
@@ -178,7 +178,7 @@ def test_simple_semantic_type_column_domain_builder(
     assert domain == Domain(
         domain_type=column_Description_domain.domain_type,
         domain_kwargs=column_Description_domain.domain_kwargs,
-        meta={
+        details={
             "inferred_semantic_domain_type": SemanticDomainTypes.TEXT,
         },
     )

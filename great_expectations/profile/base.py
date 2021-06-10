@@ -161,6 +161,8 @@ class ProfilerTypeMapping:
         "StringType",
         "string",
         "str",
+        "object",
+        "dtype('O')",
     ]
     BOOLEAN_TYPE_NAMES = [
         "BOOLEAN",
@@ -185,6 +187,8 @@ class ProfilerTypeMapping:
         "DateType",
         "datetime64",
         "datetime64[ns]",
+        "timedelta[ns]",
+        "<M8[ns]",
     ]
     BINARY_TYPE_NAMES = [
         "BINARY",
