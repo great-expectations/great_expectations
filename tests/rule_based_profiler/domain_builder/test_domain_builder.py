@@ -37,6 +37,7 @@ def test_active_batch_table_domain_builder(
     assert len(domains) == 1
     assert domains == [
         {
+            "domain_type": "table",
             "domain_kwargs": {
                 "batch_id": "f576df3a81c34925978336d530453bc4",
             },
@@ -76,12 +77,14 @@ def test_column_domain_builder(
     assert len(domains) == 2
     assert domains == [
         {
+            "domain_type": "column",
             "domain_kwargs": {
                 "column": "Age",
                 "batch_id": "f576df3a81c34925978336d530453bc4",
             },
         },
         {
+            "domain_type": "column",
             "domain_kwargs": {
                 "column": "Date",
                 "batch_id": "f576df3a81c34925978336d530453bc4",

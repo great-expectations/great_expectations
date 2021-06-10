@@ -4,6 +4,7 @@ from typing import Any, Dict
 import pandas as pd
 import pytest
 
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 
 # noinspection PyUnresolvedReferences
@@ -56,9 +57,10 @@ def two_column_pandas_test_df():
 @pytest.fixture
 def table_Users_domain():
     return Domain(
+        domain_type=MetricDomainTypes.TABLE,
         domain_kwargs={
             "batch_id": "f576df3a81c34925978336d530453bc4",
-        }
+        },
     )
 
 
@@ -66,10 +68,11 @@ def table_Users_domain():
 @pytest.fixture
 def column_Age_domain():
     return Domain(
+        domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Age",
             "batch_id": "f576df3a81c34925978336d530453bc4",
-        }
+        },
     )
 
 
@@ -77,10 +80,11 @@ def column_Age_domain():
 @pytest.fixture
 def column_Date_domain():
     return Domain(
+        domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Date",
             "batch_id": "f576df3a81c34925978336d530453bc4",
-        }
+        },
     )
 
 

@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
@@ -69,6 +70,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         column_name: str
         domains: List[Domain] = [
             Domain(
+                domain_type=MetricDomainTypes.COLUMN,
                 domain_kwargs={
                     "column": column_name,
                     "batch_id": validator.active_batch_id,
