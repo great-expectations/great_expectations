@@ -61,6 +61,7 @@ def table_Users_domain():
         domain_kwargs={
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
+        meta=None,
     )
 
 
@@ -73,6 +74,7 @@ def column_Age_domain():
             "column": "Age",
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
+        meta=None,
     )
 
 
@@ -85,6 +87,7 @@ def column_Date_domain():
             "column": "Date",
             "batch_id": "f576df3a81c34925978336d530453bc4",
         },
+        meta=None,
     )
 
 

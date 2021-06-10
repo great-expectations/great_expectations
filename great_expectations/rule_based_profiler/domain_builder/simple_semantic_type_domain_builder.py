@@ -67,23 +67,38 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
                 metric_dependencies=None,
             )
         )
+
+        column_name: str
+
         # A semantic type is distinguished from the structured column type;
         # An example structured column type would be "integer".  The inferred semantic type would be "id".
+        table_column_name_to_inferred_semantic_domain_type_mapping: Dict[
+            str, SemanticDomainTypes
+        ] = {
+            column_name: self.infer_semantic_domain_type_from_table_column_type(
+                column_types_dict_list=column_types_dict_list,
+                column_name=column_name,
+            ).semantic_domain_type
+            for column_name in table_column_names
+        }
         candidate_column_names: List[str] = list(
             filter(
-                lambda candidate_column_name: self.is_column_type_semantic(
-                    column_name=candidate_column_name,
-                    column_types_dict_list=column_types_dict_list,
-                    semantic_types=semantic_types,
-                ),
+                lambda candidate_column_name: table_column_name_to_inferred_semantic_domain_type_mapping[
+                    candidate_column_name
+                ]
+                in semantic_types,
                 table_column_names,
             )
         )
 
-        column_name: str
         domains: List[Domain] = [
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,
+                meta={
+                    "inferred_semantic_domain_type": table_column_name_to_inferred_semantic_domain_type_mapping[
+                        column_name
+                    ],
+                },
                 domain_kwargs={
                     "column": column_name,
                     "batch_id": validator.active_batch_id,
@@ -93,20 +108,6 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         ]
 
         return domains
-
-    def is_column_type_semantic(
-        self,
-        column_name: str,
-        column_types_dict_list: List[Dict[str, Any]],
-        semantic_types: List[SemanticDomainTypes],
-    ):
-        return (
-            self.infer_semantic_domain_type_from_table_column_type(
-                column_types_dict_list=column_types_dict_list,
-                column_name=column_name,
-            ).semantic_domain_type
-            in semantic_types
-        )
 
     # This method (default implementation) can be overwritten (with different implementation mechanisms) by subclasses.
     # noinspection PyMethodMayBeStatic

@@ -17,43 +17,60 @@ class DomainKwargs(SerializableDotDict):
 
 
 class Domain(SerializableDotDict):
+    RECOGNIZED_KEYS: set = {
+        "inferred_semantic_domain_type",
+        "custom_semantic_domain_type",
+    }
+
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(
         self,
         domain_type: Union[str, MetricDomainTypes, SemanticDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
+        meta: Optional[Dict[str, Any]] = None,
     ):
-        if not domain_type:
-            raise ValueError("Cannot instantiate Domain (domain_type is required).")
-
-        if domain_kwargs is None:
-            domain_kwargs = DomainKwargs({})
-        elif isinstance(domain_kwargs, dict):
-            domain_kwargs = DomainKwargs(domain_kwargs)
-
         if isinstance(domain_type, str):
-            if SemanticDomainTypes.has_member_key(key=domain_type):
-                domain_type = SemanticDomainTypes[domain_type]
-            else:
-                try:
-                    domain_type = MetricDomainTypes[domain_type]
-                except (TypeError, KeyError) as e:
-                    raise ValueError(
-                        f""" \
+            try:
+                domain_type = MetricDomainTypes[domain_type]
+            except (TypeError, KeyError) as e:
+                raise ValueError(
+                    f""" \
 {e}: Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(domain_type))}" is not supported).
-                        """
-                    )
-        elif not isinstance(domain_type, (MetricDomainTypes, SemanticDomainTypes)):
+                    """
+                )
+        elif not isinstance(domain_type, MetricDomainTypes):
             raise ValueError(
                 f""" \
 Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(domain_type))}" is not supported).
                 """
             )
 
+        if domain_kwargs is None:
+            domain_kwargs = DomainKwargs({})
+        elif isinstance(domain_kwargs, dict):
+            domain_kwargs = DomainKwargs(domain_kwargs)
+
         domain_kwargs_dot_dict: SerializableDotDict = (
             self._convert_dictionaries_to_domain_kwargs(source=domain_kwargs)
         )
-        super().__init__(domain_type=domain_type, domain_kwargs=domain_kwargs_dot_dict)
+
+        if meta is None:
+            meta = {}
+
+        meta_keys: set = set(meta.keys())
+        if not meta_keys <= Domain.RECOGNIZED_KEYS:
+            raise ValueError(
+                f"""Unrecognized meta key(s): "{str(meta_keys - Domain.RECOGNIZED_KEYS)}" detected.
+"""
+            )
+
+        self._meta = meta
+
+        super().__init__(
+            domain_type=domain_type,
+            domain_kwargs=domain_kwargs_dot_dict,
+            meta=meta,
+        )
 
     # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
     @property
