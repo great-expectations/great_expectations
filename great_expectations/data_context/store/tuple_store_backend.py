@@ -300,7 +300,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
         try:
             with open(filepath) as infile:
-                contents: str = infile.read()
+                contents: str = infile.read().rstrip("\n")
         except FileNotFoundError:
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
