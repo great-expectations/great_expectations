@@ -5,6 +5,7 @@ import logging
 import os
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
+from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
@@ -64,6 +65,7 @@ class Checkpoint:
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
+        ge_cloud_id: Optional[UUID] = None,
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
@@ -86,6 +88,7 @@ class Checkpoint:
                 "runtime_configuration": runtime_configuration,
                 "validations": validations,
                 "profilers": profilers,
+                "ge_cloud_id": ge_cloud_id,
                 # Next two fields are for LegacyCheckpoint configuration
                 "validation_operator_name": validation_operator_name,
                 "batches": batches,
@@ -109,6 +112,10 @@ class Checkpoint:
     @property
     def action_list(self) -> List[Dict]:
         return self._config.action_list
+
+    @property
+    def ge_cloud_id(self) -> UUID:
+        return self._config.ge_cloud_id
 
     # TODO: (Rob) should we type the big validation dicts for better validation/prevent duplication
     def get_substituted_config(
@@ -646,6 +653,7 @@ class SimpleCheckpoint(Checkpoint):
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
+        ge_cloud_id: Optional[UUID] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Optional[Union[str, List[str]]] = "all",
         slack_webhook: Optional[str] = None,
@@ -672,6 +680,7 @@ class SimpleCheckpoint(Checkpoint):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
+            ge_cloud_id=ge_cloud_id,
         ).build()
 
         super().__init__(
@@ -689,6 +698,7 @@ class SimpleCheckpoint(Checkpoint):
             runtime_configuration=checkpoint_config.runtime_configuration,
             validations=checkpoint_config.validations,
             profilers=checkpoint_config.profilers,
+            ge_cloud_id=checkpoint_config.ge_cloud_id,
         )
 
     def run(
