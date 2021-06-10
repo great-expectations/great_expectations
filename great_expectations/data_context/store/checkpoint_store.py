@@ -1,6 +1,7 @@
 import json
 import logging
 import random
+from typing import Dict
 
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -18,18 +19,18 @@ class CheckpointStore(ConfigurationStore):
 
     _configuration_class = CheckpointConfig
 
-    def ge_cloud_response_json_dict_to_object_json_str(self, response_json_dict):
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a json str appropriate for
+        This method takes full json response from GE cloud and outputs a dict appropriate for
         deserialization into a GE object
         """
-        ge_cloud_checkpoint_id = response_json_dict["data"]["id"]
-        checkpoint_config_json = response_json_dict["data"]["attributes"][
+        ge_cloud_checkpoint_id = response_json["data"]["id"]
+        checkpoint_config_dict = response_json["data"]["attributes"][
             "checkpoint_config"
         ]
-        checkpoint_config_json["ge_cloud_id"] = ge_cloud_checkpoint_id
+        checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
 
-        return json.dumps(checkpoint_config_json)
+        return checkpoint_config_dict
 
     def serialization_self_check(self, pretty_print: bool):
         test_checkpoint_name: str = "test-name-" + "".join(
