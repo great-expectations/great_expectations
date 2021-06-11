@@ -2,7 +2,7 @@ trigger:
   branches:
     include:
     - pre_pr_docs-*
-    - develop
+    #- develop
     #- main
 
 resources:
