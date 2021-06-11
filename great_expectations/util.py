@@ -32,6 +32,7 @@ from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
 from great_expectations.exceptions import (
+    GreatExpectationsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -46,6 +47,76 @@ except ModuleNotFoundError:
 
 
 logger = logging.getLogger(__name__)
+
+
+SINGULAR_TO_PLURAL_LOOKUP_DICT = {
+    "batch": "batches",
+    "checkpoint": "checkpoints",
+    "data_asset": "data_assets",
+    "expectation": "expectations",
+    "expectation_suite": "expectation_suites",
+    "expectation_suite_validation_result": "expectation_suite_validation_results",
+    "expectation_validation_result": "expectation_validation_results",
+}
+
+PLURAL_TO_SINGULAR_LOOKUP_DICT = {
+    "batches": "batch",
+    "checkpoints": "checkpoint",
+    "data_assets": "data_asset",
+    "expectations": "expectation",
+    "expectation_suites": "expectation_suite",
+    "expectation_suite_validation_results": "expectation_suite_validation_result",
+    "expectation_validation_results": "expectation_validation_result",
+}
+
+
+def pluralize(singular_ge_noun):
+    """
+    Pluralizes a Great Expectations singular noun
+    """
+    try:
+        return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
+    except KeyError:
+        raise GreatExpectationsError(
+            f"Unable to pluralize '{singular_ge_noun}'. Please update "
+            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
+        )
+
+
+def singularize(plural_ge_noun):
+    """
+    Singularizes a Great Expectations plural noun
+    """
+    try:
+        return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
+    except KeyError:
+        raise GreatExpectationsError(
+            f"Unable to singularize '{plural_ge_noun}'. Please update "
+            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
+        )
+
+
+def underscore(word: str) -> str:
+    """
+    **Borrowed from inflection.underscore**
+    Make an underscored, lowercase form from the expression in the string.
+
+    Example::
+
+        >>> underscore("DeviceType")
+        'device_type'
+
+    As a rule of thumb you can think of :func:`underscore` as the inverse of
+    :func:`camelize`, though there are cases where that does not hold::
+
+        >>> camelize(underscore("IOError"))
+        'IoError'
+
+    """
+    word = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", word)
+    word = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", word)
+    word = word.replace("-", "_")
+    return word.lower()
 
 
 def profile(func: Callable = None) -> Callable:

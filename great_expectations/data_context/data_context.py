@@ -62,6 +62,7 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
+from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -1693,55 +1694,35 @@ class BaseDataContext:
             raise ValueError(
                 "Only one of batch_request or batch_request_list may be specified"
             )
-        if batch_request_list:
-            batch_list: List = []
-            for batch_request in batch_request_list:
-                batch_list.extend(
-                    self.get_batch_list(
-                        datasource_name=datasource_name,
-                        data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name,
-                        batch_request=batch_request,
-                        batch_data=batch_data,
-                        data_connector_query=data_connector_query,
-                        batch_identifiers=batch_identifiers,
-                        limit=limit,
-                        index=index,
-                        custom_filter_function=custom_filter_function,
-                        batch_spec_passthrough=batch_spec_passthrough,
-                        sampling_method=sampling_method,
-                        sampling_kwargs=sampling_kwargs,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
-                        runtime_parameters=runtime_parameters,
-                        query=query,
-                        path=path,
-                        batch_filter_parameters=batch_filter_parameters,
-                        **kwargs,
-                    )
+
+        if not batch_request_list:
+            batch_request_list = [batch_request]
+
+        batch_list: List = []
+        for batch_request in batch_request_list:
+            batch_list.extend(
+                self.get_batch_list(
+                    datasource_name=datasource_name,
+                    data_connector_name=data_connector_name,
+                    data_asset_name=data_asset_name,
+                    batch_request=batch_request,
+                    batch_data=batch_data,
+                    data_connector_query=data_connector_query,
+                    batch_identifiers=batch_identifiers,
+                    limit=limit,
+                    index=index,
+                    custom_filter_function=custom_filter_function,
+                    batch_spec_passthrough=batch_spec_passthrough,
+                    sampling_method=sampling_method,
+                    sampling_kwargs=sampling_kwargs,
+                    splitter_method=splitter_method,
+                    splitter_kwargs=splitter_kwargs,
+                    runtime_parameters=runtime_parameters,
+                    query=query,
+                    path=path,
+                    batch_filter_parameters=batch_filter_parameters,
+                    **kwargs,
                 )
-        else:
-            batch_list: List[Batch] = self.get_batch_list(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_request=batch_request,
-                batch_data=batch_data,
-                data_connector_query=data_connector_query,
-                batch_identifiers=batch_identifiers,
-                limit=limit,
-                index=index,
-                custom_filter_function=custom_filter_function,
-                batch_spec_passthrough=batch_spec_passthrough,
-                sampling_method=sampling_method,
-                sampling_kwargs=sampling_kwargs,
-                splitter_method=splitter_method,
-                splitter_kwargs=splitter_kwargs,
-                runtime_parameters=runtime_parameters,
-                query=query,
-                path=path,
-                batch_filter_parameters=batch_filter_parameters,
-                **kwargs,
             )
 
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
@@ -2942,6 +2923,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
         checkpoint_config: Union[CheckpointConfig, dict]
@@ -2968,6 +2950,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "slack_webhook": slack_webhook,
             "notify_on": notify_on,
             "notify_with": notify_with,
+            "ge_cloud_id": ge_cloud_id,
         }
 
         checkpoint_config = filter_properties_dict(
@@ -2988,12 +2971,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             configuration_key=name,
         )
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
-        self.checkpoint_store.set(key=key, value=checkpoint_config)
+        checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
+        if isinstance(checkpoint_ref, GeCloudIdAwareRef):
+            ge_cloud_id = checkpoint_ref.ge_cloud_id
+            new_checkpoint.config.ge_cloud_id = uuid.UUID(ge_cloud_id)
         return new_checkpoint
 
-    def get_checkpoint(self, name: str) -> Union[Checkpoint, LegacyCheckpoint]:
+    def get_checkpoint(
+        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+    ) -> Union[Checkpoint, LegacyCheckpoint]:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name,
+            configuration_key=name or ge_cloud_id,
         )
         try:
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
@@ -3032,7 +3020,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
         config: dict = checkpoint_config.to_json_dict()
-        config.update({"name": name})
+        if name:
+            config.update({"name": name})
         config = filter_properties_dict(properties=config, clean_falsy=True)
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
             config=config,
@@ -3046,9 +3035,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         return checkpoint
 
-    def delete_checkpoint(self, name: str):
+    def delete_checkpoint(
+        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+    ):
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id."
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name,
+            configuration_key=name or ge_cloud_id,
         )
         try:
             self.checkpoint_store.remove_key(key=key)

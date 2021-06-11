@@ -14,7 +14,7 @@ from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch, BatchDefinition
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -29,7 +29,6 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
-from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
