@@ -25,7 +25,7 @@ Please delete options that are not relevant.
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
-- [ ] I have added unit tests where applicable and made sure that new and existing tests are passing.
+- [ ] I have added [unit tests](https://docs.greatexpectations.io/en/latest/contributing/testing.html#contributing-testing-writing-unit-tests) where applicable and made sure that new and existing tests are passing.
 - [ ] I have run any local integration tests and made sure that nothing is broken.
 
 
