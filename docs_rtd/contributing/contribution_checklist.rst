@@ -55,7 +55,7 @@ Once your code is ready, please go through the following checklist before submit
         If your PR contains **only** changes to ``contrib`` directory (community contributed Expectations), please skip this step.
 
     * Please add a bullet point to ``docs/changelog.rst``, in the ``develop`` section.
-        * Please group in the following order: [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE]
+        * Please group in the following order: [BREAKING], [FEATURE], [BUGFIX], [DOCS], [MAINTENANCE]
     * You can see the past Changelog here: :ref:`changelog`
 
 
@@ -79,10 +79,9 @@ When you’re done with your work...
         * Add a tag to help categorize the PR:
 
             * [BUGFIX] for PRs that address minor bugs without changing behavior, 
-            * [ENHANCEMENT] for PRs that enhance an existing feature, 
-            * [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix, 
+            * [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix,
             * [DOCS] for PRs that focus on improving documentation, or 
-            * [MAINTENANCE] for PRs that focus on updating repository settings or related chores.
+            * [MAINTENANCE] for PRs that focus on updating repository settings or related chores. This status is used internally.
 
         * Summarize your changes using a few clear sentences (sometimes screenshots are nice too!). A good guide is to aim for a collection of commit message summaries that provide more details about what your changes do, like "Fixed handling of malformed datasource configuration" or "Improved docstrings for store module"
         * Finally, in the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place, e.g. "Closes #123", linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
