@@ -40,7 +40,7 @@ stages:
     - stage: docusaurus_tests
       pool:
         vmImage: 'ubuntu-latest'
-    jobs:
+      jobs:
       - job: test_docs
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
         variables:
