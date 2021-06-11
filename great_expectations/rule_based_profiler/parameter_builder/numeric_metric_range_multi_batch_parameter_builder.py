@@ -45,7 +45,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         round_decimals: Optional[Union[int, str]] = False,
-        mostly: Optional[float] = 1.0,
         truncate_distribution: Optional[
             Union[List[Union[Optional[int], Optional[float]]], str]
         ] = None,
@@ -68,13 +67,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_distribution: user-configured directive for whether or not to allow the computed parameter values
             (i.e., min_value, max_value) to take on negative values when packaged on output.
-            mostly: optional user-configurable tolerance (defaults to the perfect adherence requirement of 1.0).
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
             parameter_name=parameter_name,
-            mostly=mostly,
             data_context=data_context,
             batch_request=batch_request,
         )
@@ -152,15 +149,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
                 variables=variables,
                 parameters=parameters,
             )
-        )
-
-        # Obtain mostly from rule state (i.e., variables and parameters); from instance variable otherwise.
-        mostly: Optional[float] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.mostly,
-            expected_return_type=float,
-            variables=variables,
-            parameters=parameters,
         )
 
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
@@ -310,7 +298,6 @@ positive integer, or must be omitted (or set to None).
                 "value": {
                     "min_value": min_value,
                     "max_value": max_value,
-                    "mostly": mostly,
                 },
                 "details": {
                     # Note: the "metric_domain_kwargs" value, used in "details", corresponds to the active Batch.

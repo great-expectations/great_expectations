@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -31,7 +31,6 @@ class ParameterBuilder(ABC):
     def __init__(
         self,
         parameter_name: str,
-        mostly: Optional[float] = 1.0,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -41,12 +40,10 @@ class ParameterBuilder(ABC):
             parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
-            mostly: optional user-configurable tolerance (defaults to the perfect adherence requirement of 1.0).
             data_context: DataContext
         """
 
         self._parameter_name = parameter_name
-        self._mostly = mostly
         self._data_context = data_context
 
     def build_parameters(
@@ -81,10 +78,6 @@ class ParameterBuilder(ABC):
     @property
     def parameter_name(self) -> str:
         return self._parameter_name
-
-    @property
-    def mostly(self) -> float:
-        return self._mostly
 
     @property
     def data_context(self) -> DataContext:

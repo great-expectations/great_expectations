@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -37,7 +37,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         threshold: Optional[float] = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
-        mostly: Optional[float] = 1.0,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -50,13 +49,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will REPLACE the default
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
-            mostly: optional user-configurable tolerance (defaults to the perfect adherence requirement of 1.0).
             data_context: DataContext
         """
 
         super().__init__(
             parameter_name=parameter_name,
-            mostly=mostly,
             data_context=data_context,
         )
 
@@ -147,7 +144,6 @@ currently loaded in the validator.
                 best_fit_date_format_estimate = format_string
                 best_success_ratio = current_success_ratio
 
-        # TODO: <Alex>ALEX -- Add "mostly" to computed parameter value dictionary.</Alex>
         parameter_values: Dict[str, Any] = {
             "$parameter.date_format_string": {
                 "value": best_fit_date_format_estimate,

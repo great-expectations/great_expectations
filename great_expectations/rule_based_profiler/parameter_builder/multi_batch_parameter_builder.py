@@ -36,7 +36,6 @@ class MultiBatchParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         parameter_name: str,
-        mostly: Optional[float] = 1.0,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
@@ -45,7 +44,6 @@ class MultiBatchParameterBuilder(ParameterBuilder):
             parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
-            mostly: optional user-configurable tolerance (defaults to the perfect adherence requirement of 1.0).
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -56,7 +54,6 @@ class MultiBatchParameterBuilder(ParameterBuilder):
 
         super().__init__(
             parameter_name=parameter_name,
-            mostly=mostly,
             data_context=data_context,
         )
 
