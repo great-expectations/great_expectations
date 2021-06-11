@@ -44,7 +44,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
-        round_precision_decimals: Optional[Union[int, str]] = False,
+        round_decimals: Optional[Union[int, str]] = False,
         mostly: Optional[float] = 1.0,
         truncate_distribution: Optional[
             Union[List[Union[Optional[int], Optional[float]]], str]
@@ -63,7 +63,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
-            round_precision_decimals: user-configured non-negative integer indicating the number of decimals of the
+            round_decimals: user-configured non-negative integer indicating the number of decimals of the
             rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_distribution: user-configured directive for whether or not to allow the computed parameter values
@@ -85,7 +85,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 
         self._false_positive_rate = false_positive_rate
 
-        self._round_precision_decimals = round_precision_decimals
+        self._round_decimals = round_decimals
 
         if not truncate_distribution:
             truncate_distribution = [None, None]
@@ -212,23 +212,21 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 
             metric_values.append(metric_value)
 
-        # Obtain round_precision_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
-        round_precision_decimals: Optional[
+        # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        round_decimals: Optional[
             Union[Any]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._round_precision_decimals,
+            parameter_reference=self._round_decimals,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
-        if round_precision_decimals is None:
-            round_precision_decimals = MAX_DECIMALS
-        elif not isinstance(round_precision_decimals, int) or (
-            round_precision_decimals < 0
-        ):
+        if round_decimals is None:
+            round_decimals = MAX_DECIMALS
+        elif not isinstance(round_decimals, int) or (round_decimals < 0):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "round_precision_decimals" for {self.__class__.__name__} can be 0 or a
+                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
             )
@@ -238,7 +236,7 @@ positive integer, or must be omitted (or set to None).
                 for metric_value in metric_values
             ]
         ):
-            round_precision_decimals = 0
+            round_decimals = 0
 
         # Obtain truncate_distribution directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         truncate_distribution: List[
@@ -295,12 +293,12 @@ positive integer, or must be omitted (or set to None).
         min_value: float = mean - stds_multiplier * std
         max_value: float = mean + stds_multiplier * std
 
-        if round_precision_decimals == 0:
+        if round_decimals == 0:
             min_value = round(min_value)
             max_value = round(max_value)
         else:
-            min_value = round(min_value, round_precision_decimals)
-            max_value = round(max_value, round_precision_decimals)
+            min_value = round(min_value, round_decimals)
+            max_value = round(max_value, round_decimals)
 
         if truncate_distribution[0] is not None:
             min_value = max(min_value, truncate_distribution[0])
