@@ -38,8 +38,8 @@ class DomainBuilder(ABC):
         """
         _get_domains is the primary workhorse for the DomainBuilder
 
-        IMPORTANT: If an implementation sets "batch_id": my_batch_id in "Domain.domain_kwargs" and also calls
-        "validator.get_metric()" as part of its logic, then "MetricConfiguration" must also set "batch_id" as follows:
+        IMPORTANT: If an implementation of DomainBuilder sets "batch_id": my_batch_id in "Domain.domain_kwargs" and also
+        calls "validator.get_metric()" in its logic, then "MetricConfiguration" must also set "batch_id" as follows:
         validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="my_metric",

@@ -124,15 +124,13 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-# TODO: <Alex>ALEX -- Disabling the below test temporarily (in order to get Azure checks to pass).</Alex>
-# @pytest.mark.docs
-# @pytest.mark.integration
-# @pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
-# @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
-# def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
-#     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
-#     _execute_integration_test(test_configuration, tmp_path)
-# TODO: <Alex>ALEX -- Disabling the above test temporarily (in order to get Azure checks to pass).</Alex>
+@pytest.mark.docs
+@pytest.mark.integration
+@pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
+def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
+    _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
+    _execute_integration_test(test_configuration, tmp_path)
 
 
 @pytest.mark.integration
