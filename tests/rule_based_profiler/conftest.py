@@ -42,7 +42,7 @@ def two_column_pandas_test_df():
                     39,
                     None,
                 ],
-                dtype=pd.Int64Dtype(),
+                dtype="float64",
             ),
             "Date": pd.Series(
                 [
@@ -52,7 +52,7 @@ def two_column_pandas_test_df():
                     datetime.date(2021, 3, 20),
                     None,
                 ],
-                dtype="datetime64[ns]",
+                dtype="object",
             ),
             "Description": pd.Series(
                 [
@@ -66,6 +66,7 @@ def two_column_pandas_test_df():
             ),
         }
     )
+    df["Date"] = pd.to_datetime(df["Date"])
     return df
 
 
