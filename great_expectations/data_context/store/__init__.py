@@ -5,6 +5,7 @@ from .store_backend import (  # isort:skip
     StoreBackend,
     InMemoryStoreBackend,
 )
+from .ge_cloud_store_backend import GeCloudStoreBackend  # isort:skip
 from .tuple_store_backend import (  # isort:skip
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
@@ -24,6 +25,7 @@ from .validations_store import ValidationsStore  # isort:skip
 from .query_store import SqlAlchemyQueryStore  # isort:skip
 from .html_site_store import HtmlSiteStore  # isort:skip
 
+
 for module_name, package_name in [
     (".store", "great_expectations.data_context.store"),
     (".validations_store", "great_expectations.data_context.store"),
@@ -35,5 +37,6 @@ for module_name, package_name in [
     (".store_backend", "great_expectations.data_context.store"),
     (".tuple_store_backend", "great_expectations.data_context.store"),
     (".database_store_backend", "great_expectations.data_context.store"),
+    (".ge_cloud_store_backend", "great_expectations.data_context.store"),
 ]:
     verify_dynamic_loading_support(module_name=module_name, package_name=package_name)

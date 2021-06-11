@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Update pr template and remove enhancement feature type
 * Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [DOCS] Remove broken links
 * [DOCS] Fix typo in SlackNotificationAction docstring
@@ -21,6 +22,8 @@ Develop
 * [MAINTENANCE] Soft launch of alpha docs site
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
+* [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
+* [MAINTENANCE] DOCS integration tests have moved to a new pipeline
 
 0.13.19
 -----------------

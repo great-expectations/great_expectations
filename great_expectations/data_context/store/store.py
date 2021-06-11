@@ -1,6 +1,11 @@
+import json
 import logging
+from typing import Dict
 
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudStoreBackend,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
@@ -55,6 +60,13 @@ class Store:
                 "Invalid StoreBackend configuration: expected a StoreBackend instance."
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
+
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        return response_json
 
     def _validate_key(self, key):
         # STORE_BACKEND_ID_KEY always validated
@@ -116,13 +128,19 @@ class Store:
     def get(self, key):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
-        else:
+        elif isinstance(self.store_backend, GeCloudStoreBackend):
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             if value:
-                return self.deserialize(key, value)
-            else:
-                return None
+                value = self.ge_cloud_response_json_to_object_dict(response_json=value)
+        else:
+            self._validate_key(key)
+            value = self._store_backend.get(self.key_to_tuple(key))
+
+        if value:
+            return self.deserialize(key, value)
+        else:
+            return None
 
     def set(self, key, value):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
