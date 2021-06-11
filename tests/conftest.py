@@ -4018,6 +4018,20 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
 
 
 @pytest.fixture
+def test_cases_for_sql_data_connector_mssql_execution_engine(sa):
+    if sa is None:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+    conn_str: str = r"mssql+pyodbc://SA:ReallyStrongPwd1234%^&*@localhost:1433/ge_test_db?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true"
+
+    engine: sa.engine.Engine = sa.create_engine(conn_str)
+
+    conn: sa.engine.Connection = engine.connect()
+
+    return SqlAlchemyExecutionEngine(name="test_mssql_execution_engine", engine=conn)
+
+
+@pytest.fixture
 def test_folder_connection_path_csv(tmp_path_factory):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_csv"))
