@@ -24,7 +24,7 @@ rules:
         mostly: $variables.mostly
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
-        round_to_nearest_integer: True
+        round_precision_decimals: 0
         truncate_distribution:
           - 0
     expectation_configuration_builders:
@@ -49,7 +49,7 @@ rules:
         mostly: $variables.mostly
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
-        round_to_nearest_integer: auto
+        round_precision_decimals: 2
       - parameter_name: max
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
@@ -57,7 +57,7 @@ rules:
         mostly: $variables.mostly
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
-        round_to_nearest_integer: auto
+        round_precision_decimals: 2
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
