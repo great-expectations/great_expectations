@@ -403,6 +403,27 @@ tables:
     # Here we should test getting another batch
 
 
+def test_introspect_db_mssql(test_cases_for_sql_data_connector_mssql_execution_engine):
+    print(test_cases_for_sql_data_connector_mssql_execution_engine.engine.engine.url)
+    config = {
+        "connection_string": test_cases_for_sql_data_connector_mssql_execution_engine.engine.engine.url,
+        "introspection": {"whole_table": {"data_asset_name_suffix": "__whole_table"}},
+        "module_name": "great_expectations.datasource",
+        "class_name": "SimpleSqlalchemyDatasource",
+        "name": "my_test_datasource",
+    }
+    runtime_environment = {
+        "name": "whole_table",
+        "datasource_name": "my_test_datasource",
+        "execution_engine": test_cases_for_sql_data_connector_mssql_execution_engine,
+    }
+    config_defaults = {"module_name": "great_expectations.datasource.data_connector"}
+    my_data_source = instantiate_class_from_config(
+        config, runtime_environment, config_defaults
+    )
+    print(my_data_source)
+
+
 # Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # Note: Abe 2020111: this test currently only uses a sqlite fixture.

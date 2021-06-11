@@ -243,11 +243,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
                 for view_name in inspector.get_view_names(schema=schema_name):
 
-                    if (ignore_information_schemas_and_system_tables) and (
-                        table_name in system_tables
-                    ):
-                        continue
-
                     tables.append(
                         {
                             "schema_name": schema_name,
