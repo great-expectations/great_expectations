@@ -1618,6 +1618,7 @@ class CheckpointConfigSchema(Schema):
             "slack_webhook",
             "notify_on",
             "notify_with",
+            "ge_cloud_id",
         )
         ordered = True
 
@@ -1629,6 +1630,7 @@ class CheckpointConfigSchema(Schema):
         "notify_with",
     ]
 
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
@@ -1722,6 +1724,7 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
+        ge_cloud_id: Optional[str] = None,
         # the following fous args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
@@ -1746,6 +1749,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
+            self._ge_cloud_id = ge_cloud_id
             # the following attributes are used by SimpleCheckpoint
             self._site_names = site_names
             self._slack_webhook = slack_webhook
@@ -1863,6 +1867,14 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
+
+    @property
+    def ge_cloud_id(self):
+        return self._ge_cloud_id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value: str):
+        self._ge_cloud_id = value
 
     @property
     def name(self):
