@@ -4,6 +4,7 @@ from typing import Any, Dict
 import pandas as pd
 import pytest
 
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 
 # noinspection PyUnresolvedReferences
@@ -30,25 +31,42 @@ from tests.rule_based_profiler.bobby_user_workflow_fixture import (
 
 
 @pytest.fixture
-def two_column_pandas_test_df():
+def pandas_test_df():
     df: pd.DataFrame = pd.DataFrame(
         {
-            "Age": [
-                7,
-                15,
-                21,
-                39,
-                None,
-            ],
-            "Date": [
-                datetime.date(2020, 12, 31),
-                datetime.date(2021, 1, 1),
-                datetime.date(2021, 2, 21),
-                datetime.date(2021, 3, 20),
-                None,
-            ],
+            "Age": pd.Series(
+                [
+                    7,
+                    15,
+                    21,
+                    39,
+                    None,
+                ],
+                dtype="float64",
+            ),
+            "Date": pd.Series(
+                [
+                    datetime.date(2020, 12, 31),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 2, 21),
+                    datetime.date(2021, 3, 20),
+                    None,
+                ],
+                dtype="object",
+            ),
+            "Description": pd.Series(
+                [
+                    "child",
+                    "teenager",
+                    "young adult",
+                    "adult",
+                    None,
+                ],
+                dtype="object",
+            ),
         }
     )
+    df["Date"] = pd.to_datetime(df["Date"])
     return df
 
 
@@ -56,9 +74,11 @@ def two_column_pandas_test_df():
 @pytest.fixture
 def table_Users_domain():
     return Domain(
+        domain_type=MetricDomainTypes.TABLE,
         domain_kwargs={
             "batch_id": "f576df3a81c34925978336d530453bc4",
-        }
+        },
+        details=None,
     )
 
 
@@ -66,10 +86,12 @@ def table_Users_domain():
 @pytest.fixture
 def column_Age_domain():
     return Domain(
+        domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Age",
             "batch_id": "f576df3a81c34925978336d530453bc4",
-        }
+        },
+        details=None,
     )
 
 
@@ -77,10 +99,25 @@ def column_Age_domain():
 @pytest.fixture
 def column_Date_domain():
     return Domain(
+        domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Date",
             "batch_id": "f576df3a81c34925978336d530453bc4",
-        }
+        },
+        details=None,
+    )
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def column_Description_domain():
+    return Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs={
+            "column": "Description",
+            "batch_id": "f576df3a81c34925978336d530453bc4",
+        },
+        details=None,
     )
 
 
