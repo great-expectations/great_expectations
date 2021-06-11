@@ -22,7 +22,7 @@ Develop
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
-
+* [MAINTENANCE] DOCS integration tests have moved to a new pipeline
 
 0.13.19
 -----------------
