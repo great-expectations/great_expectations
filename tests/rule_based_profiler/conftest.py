@@ -42,7 +42,7 @@ def two_column_pandas_test_df():
                     39,
                     None,
                 ],
-                dtype="Int64",
+                dtype=pd.Int64Dtype(),
             ),
             "Date": pd.Series(
                 [
