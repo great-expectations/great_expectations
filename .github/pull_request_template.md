@@ -21,7 +21,7 @@ Previous Design Review notes:
 ### Definition of Done
 Please delete options that are not relevant.
 
-- [ ] My code follows the style guidelines of this project
+- [ ] My code follows the Great Expectations [style guide](https://docs.greatexpectations.io/en/latest/contributing/style_guide.html?highlight=style%20guide)
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
