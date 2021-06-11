@@ -7,6 +7,7 @@ Changelog
 0.13.19
 -----------------
 * [BUGFIX] Fix packaging error breaking V3 CLI suite commands (#2719)
+* [BUGFIX] Fix table_name referenced before assigment when creating new datasource (#2898)
 
 0.13.18
 -----------------
