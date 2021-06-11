@@ -2,8 +2,6 @@ trigger:
   branches:
     include:
     - pre_pr_docs-*
-    #- develop
-    #- main
 
 resources:
   containers:
