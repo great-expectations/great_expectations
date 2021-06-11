@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from typing import Any, Dict, Optional, Union
 
 from great_expectations.core import IDDict
@@ -18,11 +17,6 @@ class DomainKwargs(SerializableDotDict):
 
 
 class Domain(SerializableDotDict):
-    RECOGNIZED_DETAILS_KEYS: set = {
-        "inferred_semantic_domain_type",
-        "custom_semantic_domain_type",
-    }
-
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(
         self,
@@ -57,20 +51,6 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
 
         if details is None:
             details = {}
-
-        details_keys: set = set(details.keys())
-        if not details_keys <= Domain.RECOGNIZED_DETAILS_KEYS:
-            raise ValueError(
-                f"""Unrecognized details key(s): "{str(details_keys - Domain.RECOGNIZED_DETAILS_KEYS)}" detected.
-"""
-            )
-        for key, value in details.items():
-            if not isinstance(value, Enum):
-                raise ValueError(
-                    f"""All Domain details values must be of type Enum \
-(value of type "{str(type(value))}" for key "{key}" was detected).
-"""
-                )
 
         super().__init__(
             domain_type=domain_type,

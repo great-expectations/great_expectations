@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Update pr template and remove enhancement feature type
 * Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [DOCS] Remove broken links
 * [DOCS] Fix typo in SlackNotificationAction docstring
