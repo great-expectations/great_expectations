@@ -31,7 +31,7 @@ from tests.rule_based_profiler.bobby_user_workflow_fixture import (
 
 
 @pytest.fixture
-def two_column_pandas_test_df():
+def pandas_test_df():
     df: pd.DataFrame = pd.DataFrame(
         {
             "Age": pd.Series(

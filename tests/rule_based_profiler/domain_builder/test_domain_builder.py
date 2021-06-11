@@ -18,7 +18,7 @@ from great_expectations.validator.validator import Validator
 
 # noinspection PyPep8Naming
 def test_active_batch_table_domain_builder(
-    two_column_pandas_test_df,
+    pandas_test_df,
     table_Users_domain,
 ):
     batch_definition: BatchDefinition = BatchDefinition(
@@ -29,7 +29,7 @@ def test_active_batch_table_domain_builder(
     )
 
     validator: Validator = build_pandas_validator_with_data(
-        df=two_column_pandas_test_df,
+        df=pandas_test_df,
         batch_definition=batch_definition,
     )
 
@@ -57,7 +57,7 @@ def test_active_batch_table_domain_builder(
 
 # noinspection PyPep8Naming
 def test_column_domain_builder(
-    two_column_pandas_test_df,
+    pandas_test_df,
     column_Age_domain,
     column_Date_domain,
     column_Description_domain,
@@ -70,7 +70,7 @@ def test_column_domain_builder(
     )
 
     validator: Validator = build_pandas_validator_with_data(
-        df=two_column_pandas_test_df,
+        df=pandas_test_df,
         batch_definition=batch_definition,
     )
 
@@ -115,7 +115,7 @@ def test_column_domain_builder(
 
 # noinspection PyPep8Naming
 def test_simple_semantic_type_column_domain_builder(
-    two_column_pandas_test_df,
+    pandas_test_df,
     column_Age_domain,
     column_Description_domain,
 ):
@@ -127,7 +127,7 @@ def test_simple_semantic_type_column_domain_builder(
     )
 
     validator: Validator = build_pandas_validator_with_data(
-        df=two_column_pandas_test_df,
+        df=pandas_test_df,
         batch_definition=batch_definition,
     )
 
