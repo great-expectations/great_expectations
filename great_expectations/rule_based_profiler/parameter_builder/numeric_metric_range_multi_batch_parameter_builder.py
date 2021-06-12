@@ -37,6 +37,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
     """
 
+    RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
+        "lower_bound",
+        "upper_bound",
+    }
+
     def __init__(
         self,
         parameter_name: str,
@@ -46,7 +51,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         round_decimals: Optional[Union[int, str]] = False,
         truncate_distribution: Optional[
-            Union[List[Union[Optional[int], Optional[float]]], str]
+            Union[Dict[str, Union[Optional[int], Optional[float]]], str]
         ] = None,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
@@ -66,7 +71,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_distribution: user-configured directive for whether or not to allow the computed parameter values
-            (i.e., min_value, max_value) to take on negative values when packaged on output.
+            (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -85,11 +90,21 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self._round_decimals = round_decimals
 
         if not truncate_distribution:
-            truncate_distribution = [None, None]
-        elif (
-            isinstance(truncate_distribution, list) and len(truncate_distribution) == 1
-        ):
-            truncate_distribution = [truncate_distribution[0], None]
+            truncate_distribution = {
+                "lower_bound": None,
+                "upper_bound": None,
+            }
+        else:
+            truncate_distribution_keys: set = set(truncate_distribution.keys())
+            if (
+                not truncate_distribution_keys
+                <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
+            ):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f"""Unrecognized truncate_distribution_keys key(s) in {self.__class__.__name__}:
+"{str(truncate_distribution_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" detected.
+"""
+                )
         self._truncate_distribution = truncate_distribution
 
     def _build_parameters(
@@ -227,28 +242,28 @@ positive integer, or must be omitted (or set to None).
             round_decimals = 0
 
         # Obtain truncate_distribution directive from rule state (i.e., variables and parameters); from instance variable otherwise.
-        truncate_distribution: List[
-            Union[Optional[int], Optional[float]]
+        truncate_distribution: Dict[
+            str, Union[Optional[int], Optional[float]]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._truncate_distribution,
-            expected_return_type=list,
+            expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
-        distribution_boundary: Union[int, float]
-        if not len(truncate_distribution) == 2 and all(
+        distribution_boundary: Optional[Union[int, float]]
+        if not all(
             [
                 (
                     distribution_boundary is None
                     or is_numeric(value=distribution_boundary)
                 )
-                for distribution_boundary in truncate_distribution
+                for distribution_boundary in truncate_distribution.values()
             ]
         ):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_distribution" for {self.__class__.__name__} must specify the
-[min, max] closed interval, where either boundary is a numeric value (or None).
+[lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
 """
             )
 
@@ -288,10 +303,16 @@ positive integer, or must be omitted (or set to None).
             min_value = round(min_value, round_decimals)
             max_value = round(max_value, round_decimals)
 
-        if truncate_distribution[0] is not None:
-            min_value = max(min_value, truncate_distribution[0])
-        if truncate_distribution[1] is not None:
-            max_value = min(max_value, truncate_distribution[1])
+        lower_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "lower_bound"
+        )
+        upper_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "upper_bound"
+        )
+        if lower_bound is not None:
+            min_value = max(min_value, lower_bound)
+        if upper_bound is not None:
+            max_value = min(max_value, upper_bound)
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {

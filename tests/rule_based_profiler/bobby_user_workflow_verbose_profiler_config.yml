@@ -24,8 +24,8 @@ rules:
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
-        truncate_distribution: # TODO: ALEX: Use lower_bound and upper_bound value (dictionary)
-          - 0
+        truncate_distribution:
+          lower_bound: 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
