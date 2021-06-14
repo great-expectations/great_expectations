@@ -1,5 +1,9 @@
+from abc import ABC, abstractmethod
 import copy
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+
+import numpy as np
+import random
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -75,3 +79,47 @@ def get_parameter_value(
                     parameters=parameters,
                 )
     return parameter_reference
+
+
+class BootstrapStandardErrorEstimator(ABC):
+    def __init__(
+        self,
+        sample_size_n: int,
+    ):
+        """
+        # TODO: <Alex>ALEX -- Docstring</Alex>
+        """
+        self._sample_size_n = sample_size_n
+
+    # sample_mean = []
+    # for i in range(50):
+    #     y = random.sample(x.tolist(), 4)
+    #     avg = np.mean(y)
+    #     sample_mean.append(avg)
+    #
+    # print(np.mean(sample_mean))
+    '''
+>>> import scipy.stats
+>>> scipy.stats.norm.ppf(0.975)
+1.959963984540054
+>>> scipy.stats.norm.ppf(1.0)
+inf
+>>> scipy.stats.norm.ppf(0.0)
+-inf
+>>> scipy.stats.norm.ppf(0.5)
+0.0
+>>> '''
+
+    def generate_random_sample_indexes(
+        self,
+    ) -> List[int]:
+        permutation: List[int] = np.arange(self.sample_size_n)
+        return random.choices(permutation, k=self.sample_size_n)
+
+    @abstractmethod
+    def compute_statistic(self) -> Union[float, np.float32, np.float64]:
+        pass
+
+    @property
+    def sample_size_n(self) -> int:
+        return self._sample_size_n

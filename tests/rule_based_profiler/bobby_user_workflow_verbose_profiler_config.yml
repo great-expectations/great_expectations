@@ -2,7 +2,7 @@
 variables:
   # BatchRequest yielding two batches (January, 2019 and February, 2019 trip data)
   jan_feb_2019_trip_data_batch_request:
-    # We want to use the same triumvirate as in the user's batch_request.
+    # We want to use the same triumvirate as in the user's batch_request (i.e., the one passed in the Validator).
     # However, a bug in Batch creation (not always setting BatchDefinition) is preventing this, until the bug is fixed.
     datasource_name: taxi_pandas
     data_connector_name: monthly
@@ -17,7 +17,7 @@ rules:
     domain_builder:
       class_name: ActiveBatchTableDomainBuilder
     parameter_builders:
-      - parameter_name: row_count
+      - parameter_name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: table.row_count
@@ -30,25 +30,25 @@ rules:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.row_count.value.min_value
-        max_value: $parameter.row_count.value.max_value
+        min_value: $parameter.row_count_range.value.min_value
+        max_value: $parameter.row_count_range.value.max_value
         mostly: $variables.mostly
         meta:
-          profiler_details: $parameter.row_count.details
+          profiler_details: $parameter.row_count_range.details
   column_ranges_rule:
     domain_builder:
       class_name: SimpleSemanticTypeColumnDomainBuilder
       semantic_types:
         - numeric
     parameter_builders:
-      - parameter_name: min
+      - parameter_name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
-      - parameter_name: max
+      - parameter_name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.max
@@ -60,17 +60,17 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.min.value.min_value
-        max_value: $parameter.min.value.max_value
+        min_value: $parameter.min_range.value.min_value
+        max_value: $parameter.min_range.value.max_value
         mostly: $variables.mostly
         meta:
-          profiler_details: $parameter.min.details
+          profiler_details: $parameter.min_range.details
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.max.value.min_value
-        max_value: $parameter.max.value.max_value
+        min_value: $parameter.max_range.value.min_value
+        max_value: $parameter.max_range.value.max_value
         mostly: $variables.mostly
         meta:
-          profiler_details: $parameter.max.details
+          profiler_details: $parameter.max_range.details
