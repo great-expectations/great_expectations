@@ -187,8 +187,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             parameters=parameters,
         )
 
-        metric_values: List[
-            Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
         ] = []
         metric_domain_kwargs_with_specific_batch_id: Optional[
             Dict[str, Any]
