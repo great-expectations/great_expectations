@@ -77,7 +77,7 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.get(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.get("boto3_options", {})
+        boto3_options: dict = kwargs.pop("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
