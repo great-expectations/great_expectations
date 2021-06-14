@@ -1,26 +1,27 @@
 import os
 
+from google.oauth2 import service_account
 from ruamel import yaml
 from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
-from google.oauth2 import service_account
-
-credentials = service_account.Credentials.from_service_account_file('/Users/work/Development/creds/superconductive-internal-ba8ee4857de2.json')
+credentials = service_account.Credentials.from_service_account_file(
+    "/Users/work/Development/creds/superconductive-internal-ba8ee4857de2.json"
+)
 
 # Google BigQuery config
-gcp_credentials = os.environ.get('GCP_CREDENTIALS')
-gcp_project = os.environ.get('GCP_PROJECT')
-bigquery_dataset = os.environ.get('GCP_BIGQUERY_DATASET')
-bigquery_table = os.environ.get('GCP_BIGQUERY_TABLE')
+gcp_credentials = os.environ.get("GCP_CREDENTIALS")
+gcp_project = os.environ.get("GCP_PROJECT")
+bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
+bigquery_table = os.environ.get("GCP_BIGQUERY_TABLE")
 
-gcp_project="superconductive-internal"
-bigquery_dataset="demo"
-table="taxi_data"
+gcp_project = "superconductive-internal"
+bigquery_dataset = "demo"
+table = "taxi_data"
 
-CONNECTION_STRING = f'bigquery://{gcp_project}/{bigquery_dataset}'
+CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 load_data_into_database(
     table_name="taxi_data",
@@ -64,9 +65,7 @@ batch_request = RuntimeBatchRequest(
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "something_something"},
-    batch_spec_passthrough={
-        "bigquery_temp_table": "ge_temp"
-    }
+    batch_spec_passthrough={"bigquery_temp_table": "ge_temp"},
 )
 
 context.create_expectation_suite(
@@ -85,9 +84,7 @@ batch_request = BatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
-    batch_spec_passthrough={
-        "bigquery_temp_table": "ge_temp"
-    }
+    batch_spec_passthrough={"bigquery_temp_table": "ge_temp"},
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
