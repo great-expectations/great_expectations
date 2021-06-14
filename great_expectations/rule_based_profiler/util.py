@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
 import copy
+import random
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
-import random
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -98,7 +98,7 @@ class BootstrapStandardErrorEstimator(ABC):
     #     sample_mean.append(avg)
     #
     # print(np.mean(sample_mean))
-    '''
+    """
 >>> import scipy.stats
 >>> scipy.stats.norm.ppf(0.975)
 1.959963984540054
@@ -108,7 +108,7 @@ inf
 -inf
 >>> scipy.stats.norm.ppf(0.5)
 0.0
->>> '''
+>>> """
 
     def generate_random_sample_indexes(
         self,
