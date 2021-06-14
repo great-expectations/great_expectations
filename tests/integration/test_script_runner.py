@@ -83,6 +83,11 @@ docs_test_matrix = [
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/template/example_template.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    # },
 ]
 
 integration_test_matrix = [
