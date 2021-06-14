@@ -270,8 +270,8 @@ positive integer, or must be omitted (or set to None).
 
         metric_values = np.array(metric_values, dtype=np.float64)
 
-        mean: np.float64 = np.mean(metric_values)
-        std: np.float64 = np.std(metric_values)
+        mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
+        std: Union[np.ndarray, np.float64] = np.std(metric_values)
 
         # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: Union[
