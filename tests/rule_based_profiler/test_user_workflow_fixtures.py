@@ -33,8 +33,7 @@ def test_bobby_fixture_generation(
         bobby_columnar_table_multi_batch["expected_expectation_suite"],
         ExpectationSuite,
     )
-    # TODO: <Alex>ALEX</Alex>
     assert (
         len(bobby_columnar_table_multi_batch["expected_expectation_suite"].expectations)
-        == 1
+        == 31
     )

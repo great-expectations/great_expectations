@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain

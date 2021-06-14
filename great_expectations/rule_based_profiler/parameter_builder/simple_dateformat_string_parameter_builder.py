@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext

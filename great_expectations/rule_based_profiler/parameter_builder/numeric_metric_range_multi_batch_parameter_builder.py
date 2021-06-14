@@ -1,5 +1,4 @@
 import copy
-import uuid
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -7,7 +6,6 @@ from scipy import special
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     MultiBatchParameterBuilder,
@@ -19,12 +17,14 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.util import is_numeric
+from great_expectations.util import is_int, is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-NP_EPSILON: float = np.finfo(float).eps
-NP_SQRT_2: float = np.sqrt(2.0)
+NP_EPSILON: np.float64 = np.finfo(float).eps
+NP_SQRT_2: np.float64 = np.sqrt(2.0)
+
+MAX_DECIMALS: int = 9
 
 
 class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
@@ -37,6 +37,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
     """
 
+    RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
+        "lower_bound",
+        "upper_bound",
+    }
+
     def __init__(
         self,
         parameter_name: str,
@@ -44,7 +49,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
-        round_to_nearest_integer: Optional[Union[bool, str]] = False,
+        round_decimals: Optional[Union[int, str]] = False,
+        truncate_distribution: Optional[
+            Union[Dict[str, Union[Optional[int], Optional[float]]], str]
+        ] = None,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
@@ -59,8 +67,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
-            round_to_nearest_integer: user-configured boolean directive for whether or not to round the computed
-            parameter values (i.e., min_value, max_value) to the nearest integer prior to packaging them on output.
+            round_decimals: user-configured non-negative integer indicating the number of decimals of the
+            rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
+            output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
+            truncate_distribution: user-configured directive for whether or not to allow the computed parameter values
+            (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -75,7 +86,26 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
         self._false_positive_rate = false_positive_rate
-        self._round_to_nearest_integer = round_to_nearest_integer
+
+        self._round_decimals = round_decimals
+
+        if not truncate_distribution:
+            truncate_distribution = {
+                "lower_bound": None,
+                "upper_bound": None,
+            }
+        else:
+            truncate_distribution_keys: set = set(truncate_distribution.keys())
+            if (
+                not truncate_distribution_keys
+                <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
+            ):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f"""Unrecognized truncate_distribution_keys key(s) in {self.__class__.__name__}:
+"{str(truncate_distribution_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" detected.
+"""
+                )
+        self._truncate_distribution = truncate_distribution
 
     def _build_parameters(
         self,
@@ -115,16 +145,26 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
-        batch_ids: List[str] = self.get_batch_ids(
-            validator=validator,
+        batch_ids_for_metrics_calculations: Optional[
+            List[str]
+        ] = self.get_batch_ids_for_metrics_calculations(
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        if not batch_ids:
+        if not batch_ids_for_metrics_calculations:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
+
+        validator_for_metrics_calculations: Validator = (
+            self.get_validator_for_metrics_calculations(
+                validator=validator,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
+        )
 
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_domain_kwargs: Optional[
@@ -147,31 +187,16 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             parameters=parameters,
         )
 
-        expectation_suite_name: str = (
-            f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
-        )
-        # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
-        batch_request: Optional[
-            Union[BatchRequest, dict, str]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._batch_request,
-            expected_return_type=dict,
-            variables=variables,
-            parameters=parameters,
-        )
-        batch_request = BatchRequest(**batch_request)
-        validator_for_metrics_calculations: Validator = self.data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
-        )
-
-        metric_values: List[Union[int, float, np.float32, np.float64]] = []
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+        ] = []
         metric_domain_kwargs_with_specific_batch_id: Optional[
             Dict[str, Any]
         ] = copy.deepcopy(metric_domain_kwargs)
+        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
         batch_id: str
-        for batch_id in batch_ids:
+        for batch_id in batch_ids_for_metrics_calculations:
             metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
             metric_configuration_arguments: Dict[str, Any] = {
                 "metric_name": self._metric_name,
@@ -179,9 +204,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
                 "metric_value_kwargs": metric_value_kwargs,
                 "metric_dependencies": None,
             }
-            metric_value: Union[
-                Any, int, float
-            ] = validator_for_metrics_calculations.get_metric(
+            metric_value = validator_for_metrics_calculations.get_metric(
                 metric=MetricConfiguration(**metric_configuration_arguments)
             )
             if not is_numeric(value=metric_value):
@@ -191,11 +214,64 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 """
                 )
 
-            metric_values.append(float(metric_value))
+            metric_values.append(metric_value)
+
+        # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        round_decimals: Optional[
+            Union[Any]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._round_decimals,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        if round_decimals is None:
+            round_decimals = MAX_DECIMALS
+        elif not isinstance(round_decimals, int) or (round_decimals < 0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+positive integer, or must be omitted (or set to None).
+"""
+            )
+        if all(
+            [
+                np.issubdtype(type(metric_value), np.integer)
+                for metric_value in metric_values
+            ]
+        ):
+            round_decimals = 0
+
+        # Obtain truncate_distribution directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        truncate_distribution: Dict[
+            str, Union[Optional[int], Optional[float]]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._truncate_distribution,
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
+        )
+        distribution_boundary: Optional[Union[int, float]]
+        if not all(
+            [
+                (
+                    distribution_boundary is None
+                    or is_numeric(value=distribution_boundary)
+                )
+                for distribution_boundary in truncate_distribution.values()
+            ]
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "truncate_distribution" for {self.__class__.__name__} must specify the
+[lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
+"""
+            )
 
         metric_values = np.array(metric_values, dtype=np.float64)
-        mean: float = np.mean(metric_values)
-        std: float = np.std(metric_values)
+
+        mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
+        std: Union[np.ndarray, np.float64] = np.std(metric_values)
 
         # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: Union[
@@ -216,25 +292,28 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             false_positive_rate = false_positive_rate + NP_EPSILON
 
         true_negative_rate: float = 1.0 - false_positive_rate
-        stds_multiplier: float = NP_SQRT_2 * special.erfinv(true_negative_rate)
+        stds_multiplier: np.float64 = NP_SQRT_2 * special.erfinv(true_negative_rate)
 
         min_value: float = mean - stds_multiplier * std
         max_value: float = mean + stds_multiplier * std
 
-        # Obtain round_to_nearest_integer boolean directive from rule state (i.e., variables and parameters); from instance variable otherwise.
-        round_to_nearest_integer: Union[
-            Any, str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._round_to_nearest_integer,
-            expected_return_type=bool,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if round_to_nearest_integer:
+        if round_decimals == 0:
             min_value = round(min_value)
             max_value = round(max_value)
+        else:
+            min_value = round(min_value, round_decimals)
+            max_value = round(max_value, round_decimals)
+
+        lower_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "lower_bound"
+        )
+        upper_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "upper_bound"
+        )
+        if lower_bound is not None:
+            min_value = max(min_value, lower_bound)
+        if upper_bound is not None:
+            max_value = min(max_value, upper_bound)
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {
