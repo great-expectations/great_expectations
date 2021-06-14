@@ -12,6 +12,7 @@ from great_expectations.data_context.util import file_relative_path
 
 
 class BackendDependencies(enum.Enum):
+    BIGQUERY = "BIGQUERY"
     MYSQL = "MYSQL"
     MSSQL = "MSSQL"
     PANDAS = "PANDAS"
@@ -23,6 +24,20 @@ class BackendDependencies(enum.Enum):
 
 
 docs_test_matrix = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py",
     #     "extra_backend_dependencies": BackendDependencies.SPARK,
@@ -45,44 +60,44 @@ docs_test_matrix = [
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
     # },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
-    },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+    # },
 ]
 
 integration_test_matrix = [
@@ -248,6 +263,8 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
         pytest_args.no_mssql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mssql tests")
+    elif dependencies == BackendDependencies.BIGQUERY and pytest_args.no_sqlalchemy:
+        pytest.skip("Skipping bigquery tests")
     elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping redshift tests")
     elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
