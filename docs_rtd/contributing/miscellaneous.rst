@@ -48,7 +48,7 @@ GE core team members use this checklist to ship releases.
 5. Update the ``changelog.rst``: move all things under the ``Develop`` heading under a new heading with the new release number. NOTE: You should remove the ``Develop`` heading for the released version, it will be replaced in step #12.
 
   * Verify that any changes to requirements are specifically identified in the changelog
-  * Double check the grouping / order of changes matches [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE] and that all changes since the last release are mentioned or summarized in a bullet.
+  * Double check the grouping / order of changes matches [BREAKING], [FEATURE], [BUGFIX], [DOCS], [MAINTENANCE] and that all changes since the last release are mentioned or summarized in a bullet.
   * Make sure to shout out community contributions in the changelog! E.g. after the change title add ``(thanks @<contributor_id>)``
 
 6. Submit this as a PR against ``develop``
