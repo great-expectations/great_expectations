@@ -85,7 +85,7 @@ def get_parameter_value(
 class NumericStatisticEstimator(ABC):
     @property
     @abstractmethod
-    def data_sample_identifiers(
+    def sample_identifiers(
         self,
     ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
         """
@@ -94,9 +94,33 @@ class NumericStatisticEstimator(ABC):
         pass
 
     @abstractmethod
+    def generate_distribution_sample(
+        self,
+        randomized_sample_identifiers: List[
+            Union[
+                bytes,
+                str,
+                int,
+                float,
+                complex,
+                tuple,
+                frozenset,
+            ]
+        ],
+    ) -> Union[
+        np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
+    ]:
+        """
+        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
+        :parameter: randomized_sample_identifiers -- List of Hashable objects
+        :return: np.float64
+        """
+        pass
+
+    @abstractmethod
     def compute_numeric_statistic(
         self,
-        randomized_data_sample_identifiers: List[
+        randomized_sample_identifiers: List[
             Union[
                 bytes,
                 str,
@@ -110,7 +134,7 @@ class NumericStatisticEstimator(ABC):
     ) -> np.float64:
         """
         Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
-        :parameter: randomized_data_sample_identifiers -- List of Hashable objects
+        :parameter: randomized_sample_identifiers -- List of Hashable objects
         :return: np.float64
         """
         pass
@@ -145,19 +169,14 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
 
         self._optimal_num_bootstrap_samples_estimations = []
 
-    def compute_bootstrapped_statistic_mean_and_std(self) -> Dict[str, np.float64]:
+    def compute_bootstrapped_statistic_samples(self) -> np.ndarray:
         optimal_num_bootstrap_samples: int = (
             self._estimate_optimal_num_bootstrap_samples()
         )
-        bootstrap_samples = self._generate_bootstrap_samples(
+        bootstrap_samples: np.ndarray = self._generate_bootstrap_samples(
             num_bootstrap_samples=optimal_num_bootstrap_samples
         )
-        return {
-            "mean": self._bootstrapped_sample_mean(bootstrap_samples=bootstrap_samples),
-            "std": self._bootstrapped_sample_standard_error(
-                bootstrap_samples=bootstrap_samples
-            ),
-        }
+        return bootstrap_samples
 
     def _estimate_optimal_num_bootstrap_samples(
         self,
@@ -262,9 +281,9 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
                 tuple,
                 frozenset,
             ]
-        ] = self._numeric_statistic_estimator.data_sample_identifiers
+        ] = self._numeric_statistic_estimator.sample_identifiers
         idx: int
-        randomized_data_sample_identifiers: List[
+        randomized_sample_identifiers: List[
             Union[
                 bytes,
                 str,
@@ -277,7 +296,7 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
         ] = [original_data_sample_ids[idx] for idx in random_sample_indexes]
         computed_sample_statistic: np.float64 = (
             self._numeric_statistic_estimator.compute_numeric_statistic(
-                randomized_data_sample_identifiers=randomized_data_sample_identifiers
+                randomized_sample_identifiers=randomized_sample_identifiers
             )
         )
         return computed_sample_statistic
@@ -325,16 +344,6 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
         )
         return sample_kurtosis
 
-    def _bootstrapped_sample_standard_error(
-        self,
-        bootstrap_samples: np.ndarray,
-    ) -> np.float64:
-        return np.sqrt(
-            self._bootstrapped_sample_standard_variance(
-                bootstrap_samples=bootstrap_samples
-            )
-        )
-
     def _bootstrapped_sample_standard_variance(
         self,
         bootstrap_samples: np.ndarray,
@@ -356,15 +365,15 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
         return sample_standard_variance
 
     @staticmethod
-    def _bootstrapped_sample_mean(
-        bootstrap_samples: np.ndarray,
-    ) -> np.float64:
-        sample_mean: Union[np.ndarray, np.float64] = np.mean(bootstrap_samples)
-        return np.float64(sample_mean)
-
-    @staticmethod
     def _bootstrapped_sample_variance(
         bootstrap_samples: np.ndarray,
     ) -> np.float64:
         sample_variance: Union[np.ndarray, np.float64] = np.var(bootstrap_samples)
         return np.float64(sample_variance)
+
+    @staticmethod
+    def _bootstrapped_sample_mean(
+        bootstrap_samples: np.ndarray,
+    ) -> np.float64:
+        sample_mean: Union[np.ndarray, np.float64] = np.mean(bootstrap_samples)
+        return np.float64(sample_mean)

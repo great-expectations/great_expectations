@@ -15,6 +15,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
+    BootstrappingStandardErrorOptimizationBasedEstimator,
     NumericStatisticEstimator,
     get_parameter_value_and_validate_return_type,
 )
@@ -45,7 +46,7 @@ class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
 
     # This property is a required interface method.
     @property
-    def data_sample_identifiers(
+    def sample_identifiers(
         self,
     ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
         """
@@ -55,44 +56,16 @@ class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
         return self._batch_ids
 
     # This is a required interface method.
-    def compute_numeric_statistic(
-        self,
-        randomized_data_sample_identifiers: List[
-            Union[
-                bytes,
-                str,
-                int,
-                float,
-                complex,
-                tuple,
-                frozenset,
-            ]
-        ],
-    ) -> np.float64:
-        """
-        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
-        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
-        :parameter: randomized_data_sample_identifiers -- List of Hashable objects
-        :return: np.float64
-        """
-        metric_values: Union[
-            np.ndarray,
-            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = self.compute_metrics_for_batch_ids(
-            batch_ids=randomized_data_sample_identifiers
-        )
-        metric_values = np.array(metric_values, dtype=np.float64)
-        mean: np.float64 = np.mean(metric_values)
-        return mean
-
-    def compute_metrics_for_batch_ids(
+    def generate_distribution_sample(
         self,
         batch_ids: List[str],
-    ) -> List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]:
+    ) -> Union[
+        np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
+    ]:
         """
         # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
         Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
-        :parameter: randomized_data_sample_identifiers -- List of Hashable objects
+        :parameter: randomized_sample_identifiers -- List of Hashable objects
         :return: np.float64
         """
         metric_domain_kwargs_with_specific_batch_id: Optional[
@@ -125,6 +98,35 @@ class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
 
         return metric_values
 
+    # This is a required interface method.
+    def compute_numeric_statistic(
+        self,
+        randomized_sample_identifiers: List[
+            Union[
+                bytes,
+                str,
+                int,
+                float,
+                complex,
+                tuple,
+                frozenset,
+            ]
+        ],
+    ) -> np.float64:
+        """
+        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
+        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
+        :parameter: randomized_sample_identifiers -- List of Hashable objects
+        :return: np.float64
+        """
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+        ] = self.generate_distribution_sample(batch_ids=randomized_sample_identifiers)
+        metric_values = np.array(metric_values, dtype=np.float64)
+        mean: np.float64 = np.mean(metric_values)
+        return mean
+
 
 class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     """
@@ -135,6 +137,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
     """
+
+    RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
+        "single",
+        "bootstrap",
+    }
 
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
@@ -147,11 +154,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        sampling_method: Optional[str] = "bootstrap",
         false_positive_rate: Optional[Union[float, str]] = 0.0,
-        round_decimals: Optional[Union[int, str]] = False,
         truncate_distribution: Optional[
             Union[Dict[str, Union[Optional[int], Optional[float]]], str]
         ] = None,
+        round_decimals: Optional[Union[int, str]] = False,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
@@ -163,14 +171,16 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass or bootstrap methods.</Alex>
+            sampling_method: choice of the sampling algorithm: "single" (one observation) or "bootstrap" (default)
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
-            rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
-            output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_distribution: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
+            rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
+            output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -184,27 +194,28 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
 
-        self._false_positive_rate = false_positive_rate
+        self._sampling_method = sampling_method
 
-        self._round_decimals = round_decimals
+        self._false_positive_rate = false_positive_rate
 
         if not truncate_distribution:
             truncate_distribution = {
                 "lower_bound": None,
                 "upper_bound": None,
             }
-        else:
-            truncate_distribution_keys: set = set(truncate_distribution.keys())
-            if (
-                not truncate_distribution_keys
-                <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
-            ):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""Unrecognized truncate_distribution_keys key(s) in {self.__class__.__name__}:
+        truncate_distribution_keys: set = set(truncate_distribution.keys())
+        if (
+            not truncate_distribution_keys
+            <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""Unrecognized truncate_distribution_keys key(s) in {self.__class__.__name__}:
 "{str(truncate_distribution_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" detected.
 """
-                )
+            )
         self._truncate_distribution = truncate_distribution
+
+        self._round_decimals = round_decimals
 
     def _build_parameters(
         self,
@@ -235,6 +246,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
            4.5: Append the value of the computed metric to the list (one for each batch_id -- loop iteration variable).
         5. Convert the list of floating point metric computation results to a numpy array (for further computations).
         6. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
+        # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass or bootstrap methods.</Alex>
         7. Compute the number of standard deviations (as a floating point number rounded to the nearest highest integer)
            needed to create the "band" around the mean so as to achieve the specified false_positive_rate (note that the
            false_positive_rate of 0.0 would result in an infinite number of standard deviations, hence it is "nudged" by
@@ -271,7 +283,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._metric_domain_kwargs,
-            expected_return_type=None,
+            expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
@@ -286,80 +298,78 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             parameters=parameters,
         )
 
-        estimator: NumericMetricRangeMultiBatchStatisticEstimator = (
-            NumericMetricRangeMultiBatchStatisticEstimator(
-                batch_ids=batch_ids_for_metrics_calculations,
-                validator=validator_for_metrics_calculations,
-                metric_name=self._metric_name,
-                metric_domain_kwargs=metric_domain_kwargs,
-                metric_value_kwargs=metric_value_kwargs,
+        # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        sampling_method: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._sampling_method,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (
+            sampling_method
+            in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of 
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{sampling_method}" was detected).
+"""
             )
+
+        estimator: Union[
+            NumericMetricRangeMultiBatchStatisticEstimator,
+            BootstrappingStandardErrorOptimizationBasedEstimator,
+        ] = NumericMetricRangeMultiBatchStatisticEstimator(
+            batch_ids=batch_ids_for_metrics_calculations,
+            validator=validator_for_metrics_calculations,
+            metric_name=self._metric_name,
+            metric_domain_kwargs=metric_domain_kwargs,
+            metric_value_kwargs=metric_value_kwargs,
         )
 
         metric_values: Union[
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = estimator.compute_metrics_for_batch_ids(
+        ] = estimator.generate_distribution_sample(
             batch_ids=batch_ids_for_metrics_calculations
         )
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
 
-        # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
-        round_decimals: Optional[
-            Union[Any]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._round_decimals,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        if round_decimals is None:
-            round_decimals = MAX_DECIMALS
-        elif not isinstance(round_decimals, int) or (round_decimals < 0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
-positive integer, or must be omitted (or set to None).
-"""
-            )
-        if all(
-            [
-                np.issubdtype(type(metric_value), np.integer)
-                for metric_value in metric_values
-            ]
-        ):
-            round_decimals = 0
-
-        # Obtain truncate_distribution directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         truncate_distribution: Dict[
             str, Union[Optional[int], Optional[float]]
-        ] = get_parameter_value_and_validate_return_type(
+        ] = self._get_truncate_distribution_using_heuristics(
+            metric_values=metric_values,
             domain=domain,
-            parameter_reference=self._truncate_distribution,
-            expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
-        distribution_boundary: Optional[Union[int, float]]
-        if not all(
-            [
-                (
-                    distribution_boundary is None
-                    or is_numeric(value=distribution_boundary)
-                )
-                for distribution_boundary in truncate_distribution.values()
-            ]
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "truncate_distribution" for {self.__class__.__name__} must specify the
-[lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
-"""
-            )
+        lower_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "lower_bound"
+        )
+        upper_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "upper_bound"
+        )
 
-        metric_values = np.array(metric_values, dtype=np.float64)
+        round_decimals: int = self._get_round_decimals_using_heuristics(
+            metric_values=metric_values,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        if sampling_method == "bootstrap":
+            estimator = BootstrappingStandardErrorOptimizationBasedEstimator(
+                numeric_statistic_estimator=estimator,
+                sample_size=len(batch_ids_for_metrics_calculations),
+                bootstrapped_statistic_deviation_bound=1.0e-1,
+                prob_bootstrapped_statistic_deviation_outside_bound=5.0e-2,
+            )
+            metric_values = estimator.compute_bootstrapped_statistic_samples()
+        else:
+            metric_values = np.array(metric_values, dtype=np.float64)
 
         mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
-        std: Union[np.ndarray, np.float64] = np.std(metric_values)
+        std: Union[np.ndarray, np.float64] = self._standard_error(samples=metric_values)
 
         # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: Union[
@@ -392,12 +402,6 @@ positive integer, or must be omitted (or set to None).
             min_value = round(min_value, round_decimals)
             max_value = round(max_value, round_decimals)
 
-        lower_bound: Optional[Union[int, float]] = truncate_distribution.get(
-            "lower_bound"
-        )
-        upper_bound: Optional[Union[int, float]] = truncate_distribution.get(
-            "upper_bound"
-        )
         if lower_bound is not None:
             min_value = max(min_value, lower_bound)
         if upper_bound is not None:
@@ -427,3 +431,125 @@ positive integer, or must be omitted (or set to None).
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
+
+    def _standard_error(
+        self,
+        samples: np.ndarray,
+    ) -> np.float64:
+        return np.sqrt(self._standard_variance(samples=samples))
+
+    def _standard_variance(
+        self,
+        samples: np.ndarray,
+    ) -> np.float64:
+        num_samples: int = samples.size
+        if num_samples < 2:
+            raise ValueError(
+                f"""Number of samples in {self.__class__.__name__} must be an integer greater than 1 \
+(the value {num_samples} was encountered).
+"""
+            )
+
+        sample_variance: np.float64 = np.var(samples)
+        sample_standard_variance: np.float64 = np.float64(
+            num_samples * sample_variance / (num_samples - 1)
+        )
+        return sample_standard_variance
+
+    def _get_truncate_distribution_using_heuristics(
+        self,
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+        ],
+        domain: Domain,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> Dict[str, Union[Optional[int], Optional[float]]]:
+        # Obtain truncate_distribution directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        truncate_distribution: Dict[
+            str, Union[Optional[int], Optional[float]]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._truncate_distribution,
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
+        )
+        distribution_boundary: Optional[Union[int, float]]
+        if not all(
+            [
+                (
+                    distribution_boundary is None
+                    or is_numeric(value=distribution_boundary)
+                )
+                for distribution_boundary in truncate_distribution.values()
+            ]
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "truncate_distribution" for {self.__class__.__name__} must specify the
+[lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
+"""
+            )
+
+        lower_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "lower_bound"
+        )
+        upper_bound: Optional[Union[int, float]] = truncate_distribution.get(
+            "upper_bound"
+        )
+        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        if lower_bound is None and all(
+            [metric_value > NP_EPSILON for metric_value in metric_values]
+        ):
+            lower_bound = 0.0
+        if upper_bound is None and all(
+            [metric_value < (-NP_EPSILON) for metric_value in metric_values]
+        ):
+            upper_bound = 0.0
+
+        return {
+            "lower_bound": lower_bound,
+            "upper_bound": upper_bound,
+        }
+
+    def _get_round_decimals_using_heuristics(
+        self,
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+        ],
+        domain: Domain,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> int:
+        # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        round_decimals: Optional[
+            Union[Any]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._round_decimals,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        if round_decimals is None:
+            round_decimals = MAX_DECIMALS
+        elif not isinstance(round_decimals, int) or (round_decimals < 0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+positive integer, or must be omitted (or set to None).
+"""
+            )
+        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        if all(
+            [
+                np.issubdtype(type(metric_value), np.integer)
+                for metric_value in metric_values
+            ]
+        ):
+            round_decimals = 0
+
+        return round_decimals
