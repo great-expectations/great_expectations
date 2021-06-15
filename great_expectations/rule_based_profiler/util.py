@@ -116,8 +116,6 @@ class NumericStatisticEstimator(ABC):
 
 
 class BootstrappingStandardErrorOptimizationBasedEstimator:
-    BOOTSTRAPPED_STATISTIC_DEVIATION_STANDARD_VARIANCE_INITIAL: np.float64 = 5.0e-1
-
     def __init__(
         self,
         numeric_statistic_estimator: NumericStatisticEstimator,
@@ -219,22 +217,27 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
             )
         )
 
-        statistic_deviation_standard_variance: np.float64
+        excess_kurtosis: Optional[np.float64]
         if bootstrap_samples is None:
-            statistic_deviation_standard_variance = (
-                self.BOOTSTRAPPED_STATISTIC_DEVIATION_STANDARD_VARIANCE_INITIAL
-            )
+            excess_kurtosis = np.float64(0.0)
         else:
-            statistic_deviation_standard_variance = (
-                self._bootstrapped_statistic_deviation_standard_variance(
-                    bootstrap_samples=bootstrap_samples
-                )
+            excess_kurtosis = self._bootstrapped_sample_excess_kurtosis(
+                bootstrap_samples=bootstrap_samples
             )
+
+        statistic_deviation_standard_variance: np.float64 = (
+            self._bootstrapped_statistic_deviation_standard_variance(
+                excess_kurtosis=excess_kurtosis
+            )
+        )
 
         bootstrap_samples_fractional: np.float64 = np.float64(
             quantile_complement_prob_outside_bound_divided_by_2
             * statistic_deviation_standard_variance
-            / self._bootstrapped_statistic_deviation_bound
+            / (
+                self._bootstrapped_statistic_deviation_bound
+                * self._bootstrapped_statistic_deviation_bound
+            )
         )
         bootstrap_samples: int = round(bootstrap_samples_fractional)
 
@@ -278,19 +281,11 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
         )
         return computed_sample_statistic
 
+    @staticmethod
     def _bootstrapped_statistic_deviation_standard_variance(
-        self,
-        bootstrap_samples: np.ndarray,
+        excess_kurtosis: Optional[np.float64] = 0.0,
     ) -> np.float64:
-        return np.float64(
-            (
-                2.0
-                + self._bootstrapped_sample_excess_kurtosis(
-                    bootstrap_samples=bootstrap_samples
-                )
-            )
-            / 4.0
-        )
+        return np.float64((2.0 + excess_kurtosis) / 4.0)
 
     def _bootstrapped_sample_excess_kurtosis(
         self,
@@ -319,13 +314,13 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
         bootstrap_samples_mean_removed_power_4: np.ndarray = np.power(
             bootstrap_samples_mean_removed, 4
         )
-        sample_kurtosis: np.float64 = np.sum(
-            bootstrap_samples_mean_removed_power_4
-        ) / np.power(
+        sample_kurtosis: np.float64 = np.sum(bootstrap_samples_mean_removed_power_4) / (
             self._bootstrapped_sample_standard_variance(
                 bootstrap_samples=bootstrap_samples
-            ),
-            2,
+            )
+            * self._bootstrapped_sample_standard_variance(
+                bootstrap_samples=bootstrap_samples
+            )
         )
         return sample_kurtosis
 
