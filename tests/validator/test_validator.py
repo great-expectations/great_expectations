@@ -234,7 +234,48 @@ def test_graph_validate(basic_datasource):
     ]
 
 
-# this might indicate that we need to validate configuration a little more strictly prior to actually validating
+def test_graph_validate_with_exception(basic_datasource):
+    def mock_error(*args, **kwargs):
+        raise Exception("Mock Error")
+
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
+    )
+
+    validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
+    validator.build_metric_dependency_graph = mock_error
+    
+    result = validator.graph_validate(configurations=[expectation_configuration])
+
+    assert len(result) == 1
+    assert result[0].expectation_config is not None
+
 def test_graph_validate_with_bad_config(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
@@ -269,6 +310,7 @@ def test_graph_validate_with_bad_config(basic_datasource):
         str(eee.value)
         == 'Error: The column "not_in_table" in BatchData does not exist.'
     )
+
 
 
 # Tests that runtime configuration actually works during graph validation
