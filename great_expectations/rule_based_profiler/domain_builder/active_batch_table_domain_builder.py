@@ -6,45 +6,34 @@ from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
-class ColumnDomainBuilder(DomainBuilder):
+class ActiveBatchTableDomainBuilder(DomainBuilder):
+    """
+    The interface method of ActiveBatchTableDomainBuilder emits a single Domain object, corresponding to the active
+    Batch (hence the name).  Note that for appropriate use-cases, it should be readily possible to build a different
+    implementation, where a separate Domain object is emitted for each individual batch_id (this use-case is deferred).
+    """
+
     def _get_domains(
         self,
         *,
         validator: Optional[Validator] = None,
+        batch_ids: Optional[List[str]] = None,
     ) -> List[Domain]:
-        """
-        Obtains and returns domains for all columns of a table.
-        """
         if validator is None:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"{self.__class__.__name__} requires a reference to an instance of the Validator class."
             )
 
-        table_column_names: List[str] = validator.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs={
-                    "batch_id": validator.active_batch_id,
-                },
-                metric_value_kwargs=None,
-                metric_dependencies=None,
-            )
-        )
-
-        column_name: str
         domains: List[Domain] = [
             Domain(
-                domain_type=MetricDomainTypes.COLUMN,
+                domain_type=MetricDomainTypes.TABLE,
                 domain_kwargs={
-                    "column": column_name,
                     "batch_id": validator.active_batch_id,
                 },
             )
-            for column_name in table_column_names
         ]
 
         return domains
