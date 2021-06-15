@@ -1,25 +1,15 @@
 import os
 
-from google.oauth2 import service_account
 from ruamel import yaml
 from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
-credentials = service_account.Credentials.from_service_account_file(
-    "/Users/work/Development/creds/superconductive-internal-ba8ee4857de2.json"
-)
-
 # Google BigQuery config
-gcp_credentials = os.environ.get("GCP_CREDENTIALS")
+# TODO : configure additional environment variables for Azure pipeline to perform full integration tests on bigquery data.
 gcp_project = os.environ.get("GCP_PROJECT")
 bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
-bigquery_table = os.environ.get("GCP_BIGQUERY_TABLE")
-
-gcp_project = "superconductive-internal"
-bigquery_dataset = "demo"
-table = "taxi_data"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
@@ -49,7 +39,6 @@ datasource_config = {
         },
     },
 }
-
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
@@ -58,14 +47,23 @@ context.test_yaml_config(yaml.dump(datasource_config))
 
 context.add_datasource(**datasource_config)
 
-# First test for RuntimeBatchRequest using a query
+# First test for RuntimeBatchRequest using a query. bigquery_temp_table name is generated automatically
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
-    runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
+    runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "something_something"},
-    batch_spec_passthrough={"bigquery_temp_table": "ge_temp"},
+)
+
+# Second test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
+batch_request = RuntimeBatchRequest(
+    datasource_name="my_bigquery_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="default_name",  # this can be anything that identifies this data
+    runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
+    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_spec_passthrough={"bigquery_temp_table": "ge_temp"}, # this is the name of the table you would like to use a 'temp_table'
 )
 
 context.create_expectation_suite(
@@ -79,12 +77,19 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 
-# Second test for BatchRequest naming a table
+# First test for BatchRequest naming a table, bigquery_temp_table name is generated automatically
 batch_request = BatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
-    batch_spec_passthrough={"bigquery_temp_table": "ge_temp"},
+)
+
+# Second test for BatchRequest naming a table. bigquery_temp_table name is passed in as batch_spec_passthrough
+batch_request = BatchRequest(
+    datasource_name="my_bigquery_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+    batch_spec_passthrough={"bigquery_temp_table": "ge_temp"}, # this is the name of the table you would like to use a 'temp_table'
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True

@@ -47,14 +47,14 @@ bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L1-L8
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L1-L7
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L32
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L22
 ```
- 
+
 ### 5. Configure your Datasource
 
 <Tabs
@@ -68,10 +68,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L34-L48
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L24-L38
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L57
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L47
 ```
 
 </TabItem>
@@ -79,10 +79,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L34-L51
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L24-L41
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L57
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L46
 ```
 
 </TabItem>
@@ -106,13 +106,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L59
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L49
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L59
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L48
 ```
 
 </TabItem>
@@ -133,7 +133,15 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L62-L77
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L52-L58
+```
+
+:::note
+Currently BigQuery does not allow for the creation of temporary tables as the result of a query.  Therefore, Great Expectations will automatically create a permanent table with a random UUID in the `GCP_PROJECT` and `BIGQUERY_DATASET` defined in the connection string.
+Great Expectations also allows for a named table to be used as a temporary table, and the name can be passed in as a `batch_spec_passthrough` parameter. In the following example we are using a table named `ge_temp`.
+:::  
+
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L61-L76
 ```
 
   </TabItem>
@@ -142,8 +150,17 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L83-L95
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L81-L85
 ```
+
+:::note
+Currently BigQuery does not allow for the creation of temporary tables as the result of a query.  Therefore, Great Expectations will automatically create a permanent table with a random UUID in the `GCP_PROJECT` and `BIGQUERY_DATASET` defined in the connection string.
+Great Expectations also allows for a named table to be used as a temporary table, and the name can be passed in as a `batch_spec_passthrough` parameter. In the following example we are using a table named `ge_temp`.
+:::
+
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L88-L100
+```
+
 
   </TabItem>
 </Tabs>
