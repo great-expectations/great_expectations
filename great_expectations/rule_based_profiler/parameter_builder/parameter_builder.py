@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -54,7 +54,6 @@ class ParameterBuilder(ABC):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         self._build_parameters(
             parameter_container=parameter_container,
@@ -62,7 +61,6 @@ class ParameterBuilder(ABC):
             validator=validator,
             variables=variables,
             parameters=parameters,
-            batch_ids=batch_ids,
         )
 
     @abstractmethod
@@ -74,7 +72,6 @@ class ParameterBuilder(ABC):
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         pass
 
@@ -89,8 +86,3 @@ class ParameterBuilder(ABC):
     @property
     def name(self) -> str:
         return f"{self.parameter_name}_parameter_builder"
-
-    @property
-    @abstractmethod
-    def fully_qualified_parameter_name(self) -> str:
-        pass
