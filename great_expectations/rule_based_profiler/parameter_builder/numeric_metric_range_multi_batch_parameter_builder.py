@@ -31,45 +31,19 @@ MAX_DECIMALS: int = 9
 class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
     def __init__(
         self,
-        domain: Domain,
         batch_ids: List[str],
         validator: Validator,
         metric_name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]],
-        metric_value_kwargs: Optional[Union[str, dict]],
-        variables: Optional[ParameterContainer],
-        parameters: Optional[Dict[str, ParameterContainer]],
+        metric_domain_kwargs: Optional[dict],
+        metric_value_kwargs: Optional[dict],
     ):
         self._batch_ids = batch_ids
         self._validator = validator
-
         self._metric_name = metric_name
+        self._metric_domain_kwargs = metric_domain_kwargs
+        self._metric_value_kwargs = metric_value_kwargs
 
-        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        self._metric_domain_kwargs: Optional[
-            Union[str, dict]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=metric_domain_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        self._metric_value_kwargs: Optional[
-            Union[str, dict]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=metric_value_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        self._domain = domain
-        self._variables = variables
-        self._parameters = parameters
-
+    # This property is a required interface method.
     @property
     def data_sample_identifiers(
         self,
@@ -80,6 +54,7 @@ class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
         """
         return self._batch_ids
 
+    # This is a required interface method.
     def compute_numeric_statistic(
         self,
         randomized_data_sample_identifiers: List[
@@ -149,14 +124,6 @@ class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
             metric_values.append(metric_value)
 
         return metric_values
-
-    @property
-    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
-        return self._metric_domain_kwargs
-
-    @property
-    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
-        return self._metric_value_kwargs
 
 
 class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
@@ -298,16 +265,34 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             )
         )
 
+        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        metric_domain_kwargs: Optional[
+            dict
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._metric_domain_kwargs,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        metric_value_kwargs: Optional[
+            dict
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._metric_value_kwargs,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
         estimator: NumericMetricRangeMultiBatchStatisticEstimator = (
             NumericMetricRangeMultiBatchStatisticEstimator(
-                domain=domain,
                 batch_ids=batch_ids_for_metrics_calculations,
                 validator=validator_for_metrics_calculations,
                 metric_name=self._metric_name,
-                metric_domain_kwargs=self._metric_domain_kwargs,
-                metric_value_kwargs=self._metric_value_kwargs,
-                variables=variables,
-                parameters=parameters,
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=metric_value_kwargs,
             )
         )
 
@@ -431,8 +416,8 @@ positive integer, or must be omitted (or set to None).
                     # without overwhelming the user (e.g., if instead all "batch_id" values were captured in "details").
                     "metric_configuration": {
                         "metric_name": self._metric_name,
-                        "metric_domain_kwargs": estimator.metric_domain_kwargs,
-                        "metric_value_kwargs": estimator.metric_value_kwargs,
+                        "metric_domain_kwargs": metric_domain_kwargs,
+                        "metric_value_kwargs": metric_value_kwargs,
                         "metric_dependencies": None,
                     },
                 },
