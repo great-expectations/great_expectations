@@ -270,11 +270,12 @@ def test_graph_validate_with_exception(basic_datasource):
 
     validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
     validator.build_metric_dependency_graph = mock_error
-    
+
     result = validator.graph_validate(configurations=[expectation_configuration])
 
     assert len(result) == 1
     assert result[0].expectation_config is not None
+
 
 def test_graph_validate_with_bad_config(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
@@ -310,7 +311,6 @@ def test_graph_validate_with_bad_config(basic_datasource):
         str(eee.value)
         == 'Error: The column "not_in_table" in BatchData does not exist.'
     )
-
 
 
 # Tests that runtime configuration actually works during graph validation
