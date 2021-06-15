@@ -27,8 +27,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
 
     This is an abstract class in the sense that instead of implementing the interface method, "_build_parameters()",
     this method will remain abstract (for subclasses to implement) and the present class will contain useful utilities
-    for the subclasses.  For example, getting the effective list of batch IDs (whether or not it was passed as argument
-    or obtained from the configured BatchRequest parameter).  The reason for this design is that parameter naming is
+    for the subclasses.  For example, getting the effective list of batch IDs (to be obtained from the configured BatchRequest parameter).  The reason for this design is that parameter naming is
     specific to the convention between the ParameterBuilder and ExpectationConfigurationBuilder employed in a specific
     use-case (i.e., parameter names are created with the ultimate usage by the ExpectationConfigurationBuilder in mind).
     """
