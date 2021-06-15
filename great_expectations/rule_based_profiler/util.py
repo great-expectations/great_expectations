@@ -83,8 +83,9 @@ def get_parameter_value(
 
 
 class NumericStatisticEstimator(ABC):
+    @property
     @abstractmethod
-    def get_original_data_sample_ids(
+    def data_sample_identifiers(
         self,
     ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
         """
@@ -261,7 +262,7 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
                 tuple,
                 frozenset,
             ]
-        ] = self._numeric_statistic_estimator.get_original_data_sample_ids()
+        ] = self._numeric_statistic_estimator.data_sample_identifiers
         idx: int
         randomized_data_sample_identifiers: List[
             Union[

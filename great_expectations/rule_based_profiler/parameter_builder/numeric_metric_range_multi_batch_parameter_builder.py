@@ -15,6 +15,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
+    NumericStatisticEstimator,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_int, is_numeric
@@ -25,6 +26,137 @@ NP_EPSILON: np.float64 = np.finfo(float).eps
 NP_SQRT_2: np.float64 = np.sqrt(2.0)
 
 MAX_DECIMALS: int = 9
+
+
+class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
+    def __init__(
+        self,
+        domain: Domain,
+        batch_ids: List[str],
+        validator: Validator,
+        metric_name: str,
+        metric_domain_kwargs: Optional[Union[str, dict]],
+        metric_value_kwargs: Optional[Union[str, dict]],
+        variables: Optional[ParameterContainer],
+        parameters: Optional[Dict[str, ParameterContainer]],
+    ):
+        self._batch_ids = batch_ids
+        self._validator = validator
+
+        self._metric_name = metric_name
+
+        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        self._metric_domain_kwargs: Optional[
+            Union[str, dict]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=metric_domain_kwargs,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        self._metric_value_kwargs: Optional[
+            Union[str, dict]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=metric_value_kwargs,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        self._domain = domain
+        self._variables = variables
+        self._parameters = parameters
+
+    @property
+    def data_sample_identifiers(
+        self,
+    ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
+        """
+        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
+        :return: List of Hashable objects
+        """
+        return self._batch_ids
+
+    def compute_numeric_statistic(
+        self,
+        randomized_data_sample_identifiers: List[
+            Union[
+                bytes,
+                str,
+                int,
+                float,
+                complex,
+                tuple,
+                frozenset,
+            ]
+        ],
+    ) -> np.float64:
+        """
+        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
+        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
+        :parameter: randomized_data_sample_identifiers -- List of Hashable objects
+        :return: np.float64
+        """
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+        ] = self.compute_metrics_for_batch_ids(
+            batch_ids=randomized_data_sample_identifiers
+        )
+        metric_values = np.array(metric_values, dtype=np.float64)
+        mean: np.float64 = np.mean(metric_values)
+        return mean
+
+    def compute_metrics_for_batch_ids(
+        self,
+        batch_ids: List[str],
+    ) -> List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]:
+        """
+        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
+        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
+        :parameter: randomized_data_sample_identifiers -- List of Hashable objects
+        :return: np.float64
+        """
+        metric_domain_kwargs_with_specific_batch_id: Optional[
+            Dict[str, Any]
+        ] = copy.deepcopy(self._metric_domain_kwargs)
+        metric_values: List[
+            Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        ] = []
+        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        batch_id: str
+        for batch_id in batch_ids:
+            metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
+            metric_configuration_arguments: Dict[str, Any] = {
+                "metric_name": self._metric_name,
+                "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
+                "metric_value_kwargs": self._metric_value_kwargs,
+                "metric_dependencies": None,
+            }
+            metric_value = self._validator.get_metric(
+                metric=MetricConfiguration(**metric_configuration_arguments)
+            )
+            if not is_numeric(value=metric_value):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
+(value of type "{str(type(metric_value))}" was computed).
+"""
+                )
+
+            metric_values.append(metric_value)
+
+        return metric_values
+
+    @property
+    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_domain_kwargs
+
+    @property
+    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_value_kwargs
 
 
 class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
@@ -166,55 +298,26 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             )
         )
 
-        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_domain_kwargs: Optional[
-            Union[str, dict]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_domain_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[
-            Union[str, dict]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_value_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        estimator: NumericMetricRangeMultiBatchStatisticEstimator = (
+            NumericMetricRangeMultiBatchStatisticEstimator(
+                domain=domain,
+                batch_ids=batch_ids_for_metrics_calculations,
+                validator=validator_for_metrics_calculations,
+                metric_name=self._metric_name,
+                metric_domain_kwargs=self._metric_domain_kwargs,
+                metric_value_kwargs=self._metric_value_kwargs,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         metric_values: Union[
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = []
-        metric_domain_kwargs_with_specific_batch_id: Optional[
-            Dict[str, Any]
-        ] = copy.deepcopy(metric_domain_kwargs)
+        ] = estimator.compute_metrics_for_batch_ids(
+            batch_ids=batch_ids_for_metrics_calculations
+        )
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
-        batch_id: str
-        for batch_id in batch_ids_for_metrics_calculations:
-            metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
-            metric_configuration_arguments: Dict[str, Any] = {
-                "metric_name": self._metric_name,
-                "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
-                "metric_value_kwargs": metric_value_kwargs,
-                "metric_dependencies": None,
-            }
-            metric_value = validator_for_metrics_calculations.get_metric(
-                metric=MetricConfiguration(**metric_configuration_arguments)
-            )
-            if not is_numeric(value=metric_value):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(type(metric_value))}" was computed).
-"""
-                )
-
-            metric_values.append(metric_value)
 
         # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         round_decimals: Optional[
@@ -328,8 +431,8 @@ positive integer, or must be omitted (or set to None).
                     # without overwhelming the user (e.g., if instead all "batch_id" values were captured in "details").
                     "metric_configuration": {
                         "metric_name": self._metric_name,
-                        "metric_domain_kwargs": metric_domain_kwargs,
-                        "metric_value_kwargs": metric_value_kwargs,
+                        "metric_domain_kwargs": estimator.metric_domain_kwargs,
+                        "metric_value_kwargs": estimator.metric_value_kwargs,
                         "metric_dependencies": None,
                     },
                 },
