@@ -108,7 +108,7 @@ def get_batch_request(
     batch_spec_passthrough.update(_get_batch_spec_passthrough(datasource=datasource))
     batch_request["batch_spec_passthrough"] = batch_spec_passthrough
 
-    filter_properties_dict(properties=batch_request, inplace=True)
+    filter_properties_dict(properties=batch_request, clean_falsy=True, inplace=True)
 
     return batch_request
 
