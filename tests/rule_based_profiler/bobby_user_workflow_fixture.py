@@ -21,7 +21,9 @@ def bobby_columnar_table_multi_batch():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_rule_expectation_configurations: List[ExpectationConfiguration] = [
+    my_row_count_range_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
         ExpectationConfiguration(
             **{
                 "kwargs": {"min_value": 6179, "max_value": 9821, "mostly": 1.0},
@@ -38,6 +40,11 @@ def bobby_columnar_table_multi_batch():
                 },
             }
         ),
+    ]
+
+    my_column_ranges_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
         ExpectationConfiguration(
             **{
                 "kwargs": {
@@ -702,18 +709,88 @@ def bobby_columnar_table_multi_batch():
 
     expectation_configurations: List[ExpectationConfiguration] = []
 
-    expectation_configurations.extend(my_row_count_rule_expectation_configurations)
+    expectation_configurations.extend(
+        my_row_count_range_rule_expectation_configurations_oneshot_sampling_method
+    )
+    expectation_configurations.extend(
+        my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
+    )
 
-    expectation_suite_name: str = "bobby_columnar_table_multi_batch"
-    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name
+    expectation_suite_name_oneshot_sampling_method: str = (
+        "bobby_columnar_table_multi_batch_oneshot_sampling_method"
+    )
+    expected_expectation_suite_oneshot_sampling_method: ExpectationSuite = (
+        ExpectationSuite(
+            expectation_suite_name=expectation_suite_name_oneshot_sampling_method
+        )
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
-        expected_expectation_suite.add_expectation(expectation_configuration)
+        expected_expectation_suite_oneshot_sampling_method.add_expectation(
+            expectation_configuration
+        )
+
+    expectation_suite_name_bootstrap_sampling_method: str = (
+        "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
+    )
+
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: float = (
+        8000
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
+        380
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
+        2.6
+    )
+
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
+        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        - (
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
+            * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+        )
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_min_value: int = round(
+        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value
+        - 5e-1
+        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_max_value: int = round(
+        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value
+        + 5e-1
+        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+    )
+
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value: int = round(
+        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        + (
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
+            * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+        )
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_min_value: int = round(
+        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value
+        - 5e-1
+        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_max_value: int = round(
+        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value
+        + 5e-1
+        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+    )
 
     return {
         "profiler_config": verbose_profiler_config,
-        "expected_expectation_suite_name": expectation_suite_name,
-        "expected_expectation_suite": expected_expectation_suite,
+        "test_configuration_oneshot_sampling_method": {
+            "expectation_suite_name": expectation_suite_name_oneshot_sampling_method,
+            "expected_expectation_suite": expected_expectation_suite_oneshot_sampling_method,
+        },
+        "test_configuration_bootstrap_sampling_method": {
+            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+            "expect_table_row_count_to_be_between_min_value_min_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_min_value,
+            "expect_table_row_count_to_be_between_min_value_max_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_max_value,
+            "expect_table_row_count_to_be_between_max_value_min_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_min_value,
+            "expect_table_row_count_to_be_between_max_value_max_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_max_value,
+        },
     }

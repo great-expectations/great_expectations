@@ -13,7 +13,7 @@ variables:
   mostly: 1.0
 
 rules:
-  row_count_rule:
+  row_count_range_rule:
     domain_builder:
       class_name: ActiveBatchTableDomainBuilder
     parameter_builders:

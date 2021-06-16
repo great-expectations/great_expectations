@@ -295,7 +295,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     bobby_columnar_table_multi_batch,
 ):
     """
-    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX -- Provide DocString</Alex>
     What does this test and why?
     """
 
@@ -355,7 +355,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     assert month == 3
 
 
-def test_bobby_profiler_user_workflow_multi_batch(
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
     bobby_columnar_table_multi_batch_context,
     bobby_columnar_table_multi_batch,
 ):
@@ -381,8 +381,8 @@ def test_bobby_profiler_user_workflow_multi_batch(
             "index": -1,
         },
         create_expectation_suite_with_name=bobby_columnar_table_multi_batch[
-            "expected_expectation_suite_name"
-        ],
+            "test_configuration_oneshot_sampling_method"
+        ]["expectation_suite_name"],
     )
 
     profiler: Profiler = Profiler(
@@ -394,11 +394,93 @@ def test_bobby_profiler_user_workflow_multi_batch(
 
     expectation_suite: ExpectationSuite = profiler.profile(
         expectation_suite_name=bobby_columnar_table_multi_batch[
-            "expected_expectation_suite_name"
-        ],
+            "test_configuration_oneshot_sampling_method"
+        ]["expectation_suite_name"],
     )
 
     assert (
         expectation_suite
-        == bobby_columnar_table_multi_batch["expected_expectation_suite"]
+        == bobby_columnar_table_multi_batch[
+            "test_configuration_oneshot_sampling_method"
+        ]["expected_expectation_suite"]
+    )
+
+
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
+    bobby_columnar_table_multi_batch_context,
+    bobby_columnar_table_multi_batch,
+):
+    # Load data context
+    data_context: DataContext = bobby_columnar_table_multi_batch_context
+    # Load profiler configs & loop (run tests for each one)
+    profiler_config: str = bobby_columnar_table_multi_batch["profiler_config"]
+
+    # Instantiate Profiler
+    full_profiler_config_dict: dict = yaml.load(profiler_config)
+    rules_configs: dict = full_profiler_config_dict.get("rules")
+    variables_configs: dict = full_profiler_config_dict.get("variables")
+
+    row_count_range_rule: dict = rules_configs["row_count_range_rule"]
+    parameter_builders: dict = row_count_range_rule["parameter_builders"]
+    row_count_range_parameter: dict = parameter_builders[0]
+    row_count_range_parameter["sampling_method"] = "bootstrap"
+    rules_configs = {
+        "row_count_range_rule": row_count_range_rule,
+    }
+
+    datasource_name: str = "taxi_pandas"
+    data_connector_name: str = "monthly"
+    data_asset_name: str = "my_reports"
+
+    validator: Validator = data_context.get_validator(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
+        data_connector_query={
+            "index": -1,
+        },
+        create_expectation_suite_with_name=bobby_columnar_table_multi_batch[
+            "test_configuration_oneshot_sampling_method"
+        ]["expectation_suite_name"],
+    )
+
+    profiler: Profiler = Profiler(
+        validator=validator,
+        rules_configs=rules_configs,
+        variables_configs=variables_configs,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.profile(
+        expectation_suite_name=bobby_columnar_table_multi_batch[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expectation_suite_name"],
+    )
+    expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
+        expectation_suite.to_json_dict()["expectations"][0]["kwargs"]
+    )
+    min_value = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+        "min_value"
+    ]
+    max_value = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+        "max_value"
+    ]
+
+    assert (
+        bobby_columnar_table_multi_batch[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_min_value_min_value"]
+        < min_value
+        < bobby_columnar_table_multi_batch[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_min_value_max_value"]
+    )
+    assert (
+        bobby_columnar_table_multi_batch[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_max_value_min_value"]
+        < max_value
+        < bobby_columnar_table_multi_batch[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_max_value_max_value"]
     )
