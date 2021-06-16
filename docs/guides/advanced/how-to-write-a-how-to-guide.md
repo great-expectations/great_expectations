@@ -1,92 +1,81 @@
 ---
 title: How to write a how-to-guide
 ---
+import HowToTemplate from './how-to-template.md';
 
 This guide shows how to create a new how-to guide in Great Expectations. By writing guides with consistent structure and styling, you can get your PRs approved faster and make the Great Expectations docs discoverable, useful, and maintainable.
 
 ## Steps
 
-1. Copy the How-to guide template file to the appropriate subdirectory of docs/guides/how_to_guides/, and rename it.
+1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](Contributing Setting up)
+   
+2. Copy the How-to guide template file to the appropriate subdirectory of `docs/guides/`, and rename it.
 
-2. Write a title and purpose paragraph.
+3. Write a title and purpose paragraph.
 
-3. Decide whether you’re writing a code-heavy or process-heavy guide, and adjust your formatting appropriately.
+4. Decide whether you’re writing a code-heavy or process-heavy guide, and adjust your formatting appropriately.
 
-4. Fill out the Prerequisites info box (see How-to guide template file). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something”.
+5. Fill out the Prerequisites info box (see [How-to guide template file](HowToTemplate)). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something”.
 
-5. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate. These will typically be included in a separate file that is in the `great_expectations/test/integrations` folder and be referenced in the how-to-doc.  For additional details, please see the "Structure of a How-to-guide" section below.  
+6. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate. 
+    - These will typically be included in a separate file that is in the `great_expectations/test/integrations` folder and be referenced in the how-to-doc. For additional details, please see the "Structure of a How-to-guide" section below.  
  
-6. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
+7. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 
-7. Scan your article to make sure it follows the Style guide. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+8. Scan your article to make sure it follows the [Style guide](??). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 
-8. Locally run integration tests for any code that was included as part of the guide.
-
-9. Submit your PR!
-
-# Additional Notes
+9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](Contributing Testing)
+   
+10. Submit your PR! If there are any additional integrations that need to be run, then please add this to your PR message. 
 
 ## Purpose of a how-to guide
-The purpose of a how-to guide is to replicate, **NOT** to teach or explain. Teaching and explaining Great Expectations concepts are covered in the **Core Concepts** reference section.
 
-Assume that the user has a working deployment of Great Expectations, whether it is set up on the file system by runing `great_expectations init` or configured in-memory. 
+- The purpose of a how-to guide is to replicate, **NOT** to teach or explain. Teaching and explaining Great Expectations concepts are covered in the **Core Concepts** reference section.
 
-Assume that the user is already familiar with core concepts in Great Expectations: Expectations, Data Contexts, Validation, Datasources, etc. etc. You don’t need to spend any time explaining these things.
+- Assume that the user has a working deployment of Great Expectations, whether it is set up on the file system by running `great_expectations init` or configured in-memory. 
 
-If you’re integrating with another system, assume that the user is familiar with that system. ie. If you’re writing the "How to configure a Snowflake Datasource," don’t spend any words explaining Snowflake or any of its core concepts.
+- Assume that the user is already familiar with core concepts in Great Expectations: Expectations, Data Contexts, Validation, Datasources, etc. etc. You don’t need to spend any time explaining these things.
 
-If there are important, non-obvious principles for how Great Expectations relates to other systems, you may include them in the guide. If they are short (1-2 sentences, max), they can go in the Steps section. Otherwise, please put them in Additional Notes.
+- If you’re integrating with another system, assume that the user is familiar with that system. ie. If you’re writing the "How to configure a Snowflake Datasource," don’t spend any words explaining Snowflake or any of its core concepts.
 
-Remember, the goal is to help users successfully replicate specific steps as simply as possible. Surprisingly often, it turns out to best to not include explanation at all, since it can distract from the main purpose of the guide. If you feel you must include it, shorter is better.
+- If there are important, non-obvious principles for how Great Expectations relates to other systems, you may include them in the guide. If they are short (1-2 sentences, max), they can go in the Steps section. Otherwise, please put them in Additional Notes.
 
+- Remember, the goal is to help users successfully replicate specific steps as simply as possible. Surprisingly often, it turns out to best to not include explanation at all, since it can distract from the main purpose of the guide. If you feel you must include it, shorter is better.
 
-## Structure of a how-to guide
+## Code-heavy vs process-heavy guides
 
-With rare exceptions, How-to guides follow this structure:
+Broadly speaking, there are two kinds of How-to Guides: code-heavy and process-heavy. All guides are about following a specific sequence of steps. In code-heavy guides, most or all of the steps are expressed in technical syntax: code snippets, JSON or YAML objects, CLI commands, etc. In process-heavy guides, many of the steps are things that must be done manually.
 
-Title
+Most guides are code-heavy. When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication. (This guide happens to be process-heavy, because it’s about writing.)
 
-Purpose
+#### Indentation, bolding, and code blocks For code-heavy guides
 
-Steps
+* Treat the first sentence of each step like a header.
 
-Additional Notes (optional)
+    * Use short, complete, imperative sentences: (“Paste the YAML snippet into your config file”, “Run great_expectations init”)
 
-Additional Resources (optional)
+    * Header text should be bold.
+    
 
-Title: “How to X”. See the Style guide for specific guidance on how to phrase and format titles.
+* Indent content within steps.
 
-Purpose paragraph: A single, short paragraph to state the purpose of the guide, and motivate it if necessary.
+* Any time the user needs to do something, it should be in a code block.
 
-“This guide will help you publish an Data Docs site directly to S3. Publishing a site this way makes reviewing and acting on Validation Results easy in a team, and provides a central location to review Expectations.”
+    * Please follow this convention even if the text in the code block is somewhat redundant against the text of the step.
 
-Sometimes motivation can be a simple statement of purpose:
+    * Clear, sequential code blocks are easy for the eye to follow. They encourage a health copy-and-modify development pattern.
 
-“This guide will help you connect to a MongoDB Datasource.”
+    * All of these styles are modeled in the How-to guide template file. If you use that template as your guide, you’ll be off to a very good start.
 
-If the user has data in Mongo and wants to configure a Datasource, no additional justification is needed.
+#### For process-heavy guides
 
-Steps: Steps describe the golden path steps for successful replication.
+* Do not separate headers or bold first sentences.
 
-Most steps will include inline code, such as a bash command, or an example yml snippet or two.
+* Avoid big blocks of text without visual cues for how to read it. Indentation and sub-bullets are your friends.
 
-Most steps will also require user input, such as a connection string that needs to be replace, or a step that allows for testing (such as running `test_yaml_config()). 
+* When including a code block, please follow the same conventions as for code-heavy guides.
 
-Snippets should be as short as possible, but no shorter. In general, you can think of the snippet like a diff: what needs to change to accomplish this step?
-
-We currently require that any new how-to-guides be integration tested. This means that the script that demonstrates what is being shown in the how-to-guide will live in the `tests/integration` folder
-
-and will run with our integration tests. For more details please refer to the section below. 
-
-Steps should be linear. “Do A, then B, then C.” Avoid complex loops and/or branching. If loops or branching are needed, it is likely a sign that the scope of the guide is too big. In that case, consider options for splitting it into more than one how-to guide.
-
-Additional notes: This section covers errata that would be distracting to include in Steps. It’s fine for it to be empty.
-
-Additional resources: Additional resources, usually external (i.e. not within the Great Expectations documentation) and usually shown as a list. To avoid link rot, please use this section sparingly, and prefer links to stable, well-maintained resources.
-
-All of these styles are modeled in the this .rst file.
-
-Using tabs to differentiate guides for different APIs.
+####  Using tabs to differentiate guides for different APIs.
 
 During the process of writing documentation for Great Expectations 0.13, there rose a need to differentiate between documentation for GE up to 0.12.x, and GE 0.13 and beyond.
 
@@ -110,47 +99,75 @@ import TabItem from '@theme/TabItem';
 </Tabs>;
 ```
 
+## Structure of a how-to guide
 
-## How to test a code-centric how-to-guide
+We are currently requiring that all how-to-guides be tested and integrated. This ensures that whatever content is presented in the how-to-guide are most up-to-date with the most recent code changes, 
+and whatever code or configuration that is shown in the guides are accurate and tested.
 
+### Scripts
 
-## Code-heavy vs process-heavy guides#
-Broadly speaking, there are two kinds of How-to Guides: code-heavy and process-heavy. All guides are about following a specific sequence of steps. In code-heavy guides, most or all of the steps are expressed in technical syntax: code snippets, JSON or YAML objects, CLI commands, etc. In process-heavy guides, many of the steps are things that must be done manually.
+You should generally begin writing a how-to-guide by writing a script that performs the action you are trying to explain.
 
-Most guides are code-heavy. When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication. (This guide happens to be process-heavy, because it’s about writing.)
+  An example can be found in: `tests/integration/docusaurus/template/script_example.py`
 
-Indentation, bolding, and code blocks For code-heavy guides
+The script should generally include the following steps: 
 
-Treat the first sentence of each step like a header.
+  1. Setting up a GE context, either from a file or in-memory (link to relevant guides)
+  2. Performing the action you are explaining the how-to-guide.  
+    - there are examples for how you can add a Datasource and query it using a `BatchReques
+  3. Some basic assertions to ensure that the code was executed correctly.
 
-Use short, complete, imperative sentences: (“Paste the YAML snippet into your config file”, “Run great_expectations init”)
+This script will be referenced in the how-to-guide, so you may want to add some replacements for code snippets that should be replaced by the user. Again some examples can be found in `tests/integration/docusaurus` folder. 
+  
+### How-to-guide
+ 
+Begin Writing the how-to-guide around the script you wrote in the previous step. The structure of the guide will generally be:
 
-Header text should be bold.
+1. Title
 
-Avoid links or inline code in headers, since RST files do not support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
+2. Purpose
 
-Indent content within steps.
+3. Steps
 
-Any time the user needs to do something, it should be in a code block.
+4. Additional Notes (optional)
 
-Please follow this convention even if the text in the code block is somewhat redundant against the text of the step.
+5. Additional Resources (optional)
 
-Clear, sequential code blocks are easy for the eye to follow. They encourage a health copy-and-modify development pattern.
+**Title**: “How to X” See the Style guide for specific guidance on how to phrase and format titles.
 
-All of these styles are modeled in the How-to guide template file. If you use that template as your guide, you’ll be off to a very good start.
+**Purpose paragraph**: A single, short paragraph to state the purpose of the guide, and motivate it if necessary.
 
-For process-heavy guides
+- “This guide will help you publish an Data Docs site directly to S3. Publishing a site this way makes reviewing and acting on Validation Results easy in a team, and provides a central location to review Expectations.”
 
-Do not separate headers or bold first sentences.
+Sometimes motivation can be a simple statement of purpose:
 
-Avoid big blocks of text without visual cues for how to read it. Indentation and sub-bullets are your friends.
+- “This guide will help you connect to a MongoDB Datasource.”
 
-When including a code block, please follow the same conventions as for code-heavy guides.
+If the user has data in Mongo and wants to configure a Datasource, no additional justification is needed.
 
-All of these styles are modeled in the this .rst file.
+**Steps**: Steps describe the golden path steps for successful replication.
 
-Using tabs to differentiate guides for different APIs During the process of writing documentation for Great Expectations 0.13, there rose a need to differentiate between documentation for GE up to 0.12.x, and GE 0.13 and beyond.
+- Most steps will include inline code, such as a bash command, or an example yml snippet or two. These can be referenced in the how-to-guide itself using relative imports. 
 
-The use of content-tabs allows for both documentation to co-exist in the same how-to-doc.
+- The following snippet displays line 1- line 7 of the `script_example.py` file.  
 
-The following code snippet shows how two tabs (tab0 and tab1) can be created with the associated title and content. For more information on content-tabs, please refer to the following link : https://sphinxcontrib-contentui.readthedocs.io/en/latest/tabs.html
+```markdown
+  ```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L7```
+```
+
+- Most steps will also require user input, such as a connection string that needs to be replaced, or a step that allows for testing (such as running `test_yaml_config()). 
+
+- Snippets should be as short as possible, but no shorter. In general, you can think of the snippet like a diff: what needs to change to accomplish this step?
+
+- We currently require that any new how-to-guides be integration tested. This means that the script that demonstrates what is being shown in the how-to-guide will live in the `tests/integration` folder and will run with our integration tests. For more details please refer to the section below. 
+
+- Steps should be linear. “Do A, then B, then C.” Avoid complex loops and/or branching. If loops or branching are needed, it is likely a sign that the scope of the guide is too big. In that case, consider options for splitting it into more than one how-to guide.
+
+**Additional notes**: This section covers errata that would be distracting to include in Steps. It’s fine for it to be empty.
+
+**Additional resources**: Additional resources, usually external (i.e. not within the Great Expectations documentation) and usually shown as a list. To avoid link rot, please use this section sparingly, and prefer links to stable, well-maintained resources.
+
+### Tests
+
+- 
+

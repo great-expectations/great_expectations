@@ -4,7 +4,8 @@ title: TEMPLATE How to guide {stub}
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide is a stub. We all know that it will be useful, but no one has made time to write it yet.
+This guide will help you {do something.} {That something is important or useful, because of some reason.}
+
 
 :::info Admonition from Mr. Dickens
 "Whether I shall turn out to be the hero of my own life, or whether that station will be held by anybody else, these pages must show."
