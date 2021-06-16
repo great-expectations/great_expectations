@@ -15,7 +15,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
-    BootstrappingStandardErrorOptimizationBasedEstimator,
+    BootstrappedStandardErrorOptimizationBasedEstimator,
     SingleNumericStatisticCalculator,
     get_parameter_value_and_validate_return_type,
 )
@@ -357,7 +357,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         )
 
         if sampling_method == "bootstrap":
-            bootstrapped_estimator: BootstrappingStandardErrorOptimizationBasedEstimator = BootstrappingStandardErrorOptimizationBasedEstimator(
+            bootstrapped_estimator: BootstrappedStandardErrorOptimizationBasedEstimator = BootstrappedStandardErrorOptimizationBasedEstimator(
                 statistic_calculator=statistic_calculator,
                 sample_size=len(batch_ids_for_metrics_calculations),
                 bootstrapped_statistic_deviation_bound=1.0e-1,

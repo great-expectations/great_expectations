@@ -140,7 +140,7 @@ class SingleNumericStatisticCalculator(ABC):
         pass
 
 
-class BootstrappingStandardErrorOptimizationBasedEstimator:
+class BootstrappedStandardErrorOptimizationBasedEstimator:
     def __init__(
         self,
         statistic_calculator: SingleNumericStatisticCalculator,
