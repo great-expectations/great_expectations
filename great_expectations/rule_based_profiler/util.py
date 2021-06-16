@@ -82,7 +82,7 @@ def get_parameter_value(
     return parameter_reference
 
 
-class NumericStatisticEstimator(ABC):
+class SingleNumericStatisticCalculator(ABC):
     @property
     @abstractmethod
     def sample_identifiers(
@@ -143,7 +143,7 @@ class NumericStatisticEstimator(ABC):
 class BootstrappingStandardErrorOptimizationBasedEstimator:
     def __init__(
         self,
-        numeric_statistic_estimator: NumericStatisticEstimator,
+        statistic_calculator: SingleNumericStatisticCalculator,
         sample_size: int,
         bootstrapped_statistic_deviation_bound: Optional[float] = 1.0e-1,
         prob_bootstrapped_statistic_deviation_outside_bound: Optional[float] = 5.0e-2,
@@ -151,7 +151,7 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
         """
         # TODO: <Alex>ALEX -- Docstring</Alex>
         """
-        self._numeric_statistic_estimator = numeric_statistic_estimator
+        self._statistic_calculator = statistic_calculator
         if sample_size < 2:
             raise ValueError(
                 f"""Argument "sample_size" in {self.__class__.__name__} must be an integer greater than 1 \
@@ -281,7 +281,7 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
                 tuple,
                 frozenset,
             ]
-        ] = self._numeric_statistic_estimator.sample_identifiers
+        ] = self._statistic_calculator.sample_identifiers
         idx: int
         randomized_sample_identifiers: List[
             Union[
@@ -295,7 +295,7 @@ class BootstrappingStandardErrorOptimizationBasedEstimator:
             ]
         ] = [original_data_sample_ids[idx] for idx in random_sample_indexes]
         computed_sample_statistic: np.float64 = (
-            self._numeric_statistic_estimator.compute_numeric_statistic(
+            self._statistic_calculator.compute_numeric_statistic(
                 randomized_sample_identifiers=randomized_sample_identifiers
             )
         )

@@ -16,7 +16,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 )
 from great_expectations.rule_based_profiler.util import (
     BootstrappingStandardErrorOptimizationBasedEstimator,
-    NumericStatisticEstimator,
+    SingleNumericStatisticCalculator,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_int, is_numeric
@@ -29,7 +29,7 @@ NP_SQRT_2: np.float64 = np.sqrt(2.0)
 MAX_DECIMALS: int = 9
 
 
-class NumericMetricRangeMultiBatchStatisticEstimator(NumericStatisticEstimator):
+class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalculator):
     def __init__(
         self,
         batch_ids: List[str],
@@ -316,21 +316,20 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 """
             )
 
-        estimator: Union[
-            NumericMetricRangeMultiBatchStatisticEstimator,
-            BootstrappingStandardErrorOptimizationBasedEstimator,
-        ] = NumericMetricRangeMultiBatchStatisticEstimator(
-            batch_ids=batch_ids_for_metrics_calculations,
-            validator=validator_for_metrics_calculations,
-            metric_name=self._metric_name,
-            metric_domain_kwargs=metric_domain_kwargs,
-            metric_value_kwargs=metric_value_kwargs,
+        statistic_calculator: NumericMetricRangeMultiBatchStatisticCalculator = (
+            NumericMetricRangeMultiBatchStatisticCalculator(
+                batch_ids=batch_ids_for_metrics_calculations,
+                validator=validator_for_metrics_calculations,
+                metric_name=self._metric_name,
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=metric_value_kwargs,
+            )
         )
 
         metric_values: Union[
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = estimator.generate_distribution_sample(
+        ] = statistic_calculator.generate_distribution_sample(
             batch_ids=batch_ids_for_metrics_calculations
         )
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
@@ -358,13 +357,15 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         )
 
         if sampling_method == "bootstrap":
-            estimator = BootstrappingStandardErrorOptimizationBasedEstimator(
-                numeric_statistic_estimator=estimator,
+            bootstrapped_estimator: BootstrappingStandardErrorOptimizationBasedEstimator = BootstrappingStandardErrorOptimizationBasedEstimator(
+                statistic_calculator=statistic_calculator,
                 sample_size=len(batch_ids_for_metrics_calculations),
                 bootstrapped_statistic_deviation_bound=1.0e-1,
                 prob_bootstrapped_statistic_deviation_outside_bound=5.0e-2,
             )
-            metric_values = estimator.compute_bootstrapped_statistic_samples()
+            metric_values = (
+                bootstrapped_estimator.compute_bootstrapped_statistic_samples()
+            )
         else:
             metric_values = np.array(metric_values, dtype=np.float64)
 
