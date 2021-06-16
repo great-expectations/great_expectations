@@ -96,7 +96,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     # For most Expectations, it will be the same as the `condition_metric_name` defined in the Metric class above
     map_metric = "column_values.not_contain_special_character"
 
-    # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
+    # This is a list of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ( "mostly",)
 
     default_kwarg_values = {
@@ -104,7 +104,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     }
 
 
-# This method defines a prescriptive Renderer
+# This method defines a prescriptive Renderer.
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
