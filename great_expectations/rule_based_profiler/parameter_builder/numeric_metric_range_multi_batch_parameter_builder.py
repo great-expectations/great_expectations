@@ -7,6 +7,12 @@ from scipy import special
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.estimators import (
+    BootstrappedStandardErrorOptimizationBasedEstimator,  # isort:skip
+)
+from great_expectations.rule_based_profiler.estimators import (
+    SingleNumericStatisticCalculator,  # isort:skip
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     MultiBatchParameterBuilder,
 )
@@ -16,11 +22,9 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 )
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
-    BootstrappedStandardErrorOptimizationBasedEstimator,
-    SingleNumericStatisticCalculator,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.util import is_int, is_numeric
+from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
