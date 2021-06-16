@@ -111,3 +111,46 @@ import TabItem from '@theme/TabItem';
 ```
 
 
+## How to test a code-centric how-to-guide
+
+
+## Code-heavy vs process-heavy guides#
+Broadly speaking, there are two kinds of How-to Guides: code-heavy and process-heavy. All guides are about following a specific sequence of steps. In code-heavy guides, most or all of the steps are expressed in technical syntax: code snippets, JSON or YAML objects, CLI commands, etc. In process-heavy guides, many of the steps are things that must be done manually.
+
+Most guides are code-heavy. When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication. (This guide happens to be process-heavy, because it’s about writing.)
+
+Indentation, bolding, and code blocks For code-heavy guides
+
+Treat the first sentence of each step like a header.
+
+Use short, complete, imperative sentences: (“Paste the YAML snippet into your config file”, “Run great_expectations init”)
+
+Header text should be bold.
+
+Avoid links or inline code in headers, since RST files do not support nesting them within bolded text. If your header must include text that would normally be a link or inline code, please repeat it in the body text, and use a link or code block there.
+
+Indent content within steps.
+
+Any time the user needs to do something, it should be in a code block.
+
+Please follow this convention even if the text in the code block is somewhat redundant against the text of the step.
+
+Clear, sequential code blocks are easy for the eye to follow. They encourage a health copy-and-modify development pattern.
+
+All of these styles are modeled in the How-to guide template file. If you use that template as your guide, you’ll be off to a very good start.
+
+For process-heavy guides
+
+Do not separate headers or bold first sentences.
+
+Avoid big blocks of text without visual cues for how to read it. Indentation and sub-bullets are your friends.
+
+When including a code block, please follow the same conventions as for code-heavy guides.
+
+All of these styles are modeled in the this .rst file.
+
+Using tabs to differentiate guides for different APIs During the process of writing documentation for Great Expectations 0.13, there rose a need to differentiate between documentation for GE up to 0.12.x, and GE 0.13 and beyond.
+
+The use of content-tabs allows for both documentation to co-exist in the same how-to-doc.
+
+The following code snippet shows how two tabs (tab0 and tab1) can be created with the associated title and content. For more information on content-tabs, please refer to the following link : https://sphinxcontrib-contentui.readthedocs.io/en/latest/tabs.html
