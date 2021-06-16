@@ -93,7 +93,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     }
 
     # This is the id string of the Metric used by this Expectation.
-    # For most Expectations, it will be the same as the `condition_metric_name` defined in the Metric class above.
+    # For most Expectations, it will be the same as the `condition_metric_name` defined in the Metric class above
     map_metric = "column_values.not_contain_special_character"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
