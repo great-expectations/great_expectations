@@ -61,9 +61,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for the Expectation
-    examples = [
-        {
-            "data": {
+    examples = [{"data":{
                 "mostly_no_special_character": ["apple@", "pear$!", "%banana%", "maxwell", "neil armstrong", 234],
             },
             "tests": [
