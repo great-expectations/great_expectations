@@ -15,6 +15,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
+    NP_EPSILON,
     BootstrappedStandardErrorOptimizationBasedEstimator,
     SingleNumericStatisticCalculator,
     get_parameter_value_and_validate_return_type,
@@ -23,7 +24,6 @@ from great_expectations.util import is_int, is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-NP_EPSILON: np.float64 = np.finfo(float).eps
 NP_SQRT_2: np.float64 = np.sqrt(2.0)
 
 MAX_DECIMALS: int = 9
@@ -139,7 +139,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     """
 
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
-        "single",
+        "oneshot",
         "bootstrap",
     }
 
@@ -171,8 +171,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
-            # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass or bootstrap methods.</Alex>
-            sampling_method: choice of the sampling algorithm: "single" (one observation) or "bootstrap" (default)
+            # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass (oneshot) or bootstrap methods.</Alex>
+            sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
@@ -246,7 +246,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
            4.5: Append the value of the computed metric to the list (one for each batch_id -- loop iteration variable).
         5. Convert the list of floating point metric computation results to a numpy array (for further computations).
         6. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
-        # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass or bootstrap methods.</Alex>
+        # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass (oneshot) or bootstrap methods.</Alex>
         7. Compute the number of standard deviations (as a floating point number rounded to the nearest highest integer)
            needed to create the "band" around the mean so as to achieve the specified false_positive_rate (note that the
            false_positive_rate of 0.0 would result in an infinite number of standard deviations, hence it is "nudged" by

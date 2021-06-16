@@ -13,6 +13,8 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 
+NP_EPSILON: np.float64 = np.finfo(float).eps
+
 
 def get_parameter_value_and_validate_return_type(
     domain: Domain,
@@ -181,7 +183,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
     def _estimate_optimal_num_bootstrap_samples(
         self,
     ) -> int:
-        optimal_num_bootstrap_samples: int = self._estimate_num_bootstrap_samples(
+        optimal_num_bootstrap_samples: int = self._estimate_min_num_bootstrap_samples(
             bootstrap_samples=None
         )
         self._optimal_num_bootstrap_samples_estimations.append(
@@ -200,7 +202,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             bootstrap_samples = self._generate_bootstrap_samples(
                 num_bootstrap_samples=optimal_num_bootstrap_samples
             )
-            optimal_num_bootstrap_samples = self._estimate_num_bootstrap_samples(
+            optimal_num_bootstrap_samples = self._estimate_min_num_bootstrap_samples(
                 bootstrap_samples=bootstrap_samples
             )
             self._optimal_num_bootstrap_samples_estimations.append(
@@ -228,12 +230,12 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
         bootstrap_samples = np.array(bootstrap_samples, dtype=np.float64)
         return bootstrap_samples
 
-    def _estimate_num_bootstrap_samples(
+    def _estimate_min_num_bootstrap_samples(
         self, bootstrap_samples: Optional[np.ndarray] = None
     ) -> int:
         quantile_complement_prob_outside_bound_divided_by_2: np.float64 = (
             scipy.stats.norm.ppf(
-                1.0 - self._prob_bootstrapped_statistic_deviation_outside_bound
+                1.0 - self._prob_bootstrapped_statistic_deviation_outside_bound / 2.0
             )
         )
 
@@ -244,6 +246,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             excess_kurtosis = self._bootstrapped_sample_excess_kurtosis(
                 bootstrap_samples=bootstrap_samples
             )
+            excess_kurtosis = max(excess_kurtosis, np.float64(0.0))
 
         statistic_deviation_standard_variance: np.float64 = (
             self._bootstrapped_statistic_deviation_standard_variance(
@@ -328,19 +331,21 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
 """
             )
         sample_mean: np.float64 = self._bootstrapped_sample_mean(
-            bootstrap_samples=num_bootstrap_samples
+            bootstrap_samples=bootstrap_samples
         )
         bootstrap_samples_mean_removed: np.ndarray = bootstrap_samples - sample_mean
         bootstrap_samples_mean_removed_power_4: np.ndarray = np.power(
             bootstrap_samples_mean_removed, 4
         )
-        sample_kurtosis: np.float64 = np.sum(bootstrap_samples_mean_removed_power_4) / (
+        sample_standard_variance: np.float64 = (
             self._bootstrapped_sample_standard_variance(
                 bootstrap_samples=bootstrap_samples
             )
-            * self._bootstrapped_sample_standard_variance(
-                bootstrap_samples=bootstrap_samples
-            )
+        )
+        sample_kurtosis: np.float64 = np.sum(bootstrap_samples_mean_removed_power_4) / (
+            (num_bootstrap_samples - 1)
+            * sample_standard_variance
+            * sample_standard_variance
         )
         return sample_kurtosis
 
@@ -357,7 +362,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             )
 
         sample_variance: np.float64 = self._bootstrapped_sample_variance(
-            bootstrap_samples=num_bootstrap_samples
+            bootstrap_samples=bootstrap_samples
         )
         sample_standard_variance: np.float64 = np.float64(
             num_bootstrap_samples * sample_variance / (num_bootstrap_samples - 1)
@@ -368,7 +373,9 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
     def _bootstrapped_sample_variance(
         bootstrap_samples: np.ndarray,
     ) -> np.float64:
-        sample_variance: Union[np.ndarray, np.float64] = np.var(bootstrap_samples)
+        sample_variance: Union[np.ndarray, np.float64] = (
+            np.var(bootstrap_samples) + NP_EPSILON
+        )
         return np.float64(sample_variance)
 
     @staticmethod
