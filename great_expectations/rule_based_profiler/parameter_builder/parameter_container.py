@@ -5,7 +5,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import DotDict
+from great_expectations.types.base import SerializableDotDict
+from great_expectations.util import filter_properties_dict
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 
@@ -26,7 +27,7 @@ names must start with $ (e.g., "${fully_qualified_parameter_name}").
         )
 
 
-class ParameterNode(DotDict):
+class ParameterNode(SerializableDotDict):
     """
     ParameterNode is a node of a tree structure.
 
@@ -47,7 +48,7 @@ class ParameterNode(DotDict):
     """
 
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self)
+        return convert_to_json_serializable(data=dict(self))
 
 
 @dataclass
@@ -114,6 +115,7 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
+                filter_properties_dict(properties=source, inplace=True)
                 source = ParameterNode(source)
             key: str
             value: Any
@@ -247,7 +249,7 @@ def _build_parameter_node_tree_for_one_parameter(
         parameter_node[parameter_name_part] = parameter_value
 
 
-def get_parameter_value(
+def get_parameter_value_by_fully_qualified_parameter_name(
     fully_qualified_parameter_name: str,
     domain: Domain,
     variables: Optional[ParameterContainer] = None,

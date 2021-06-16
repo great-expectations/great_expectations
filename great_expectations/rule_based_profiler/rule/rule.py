@@ -48,20 +48,20 @@ class Rule:
         self._parameters = {}
 
     def generate(
-        self, validator: Validator, batch_ids: Optional[List[str]] = None
+        self,
+        validator: Validator,
     ) -> List[ExpectationConfiguration]:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
         ConfigurationBuilder available based on the instantiation.
 
         :param validator: A Validator object utilized to obtain domain
-        :param batch_ids: Batch Identifiers used to specify evaluated batches of data
         :return: List of Corresponding Expectation Configurations representing every configured rule
         """
         expectation_configurations: List[ExpectationConfiguration] = []
 
         domains: List[Domain] = self._domain_builder.get_domains(
-            validator=validator, batch_ids=batch_ids
+            validator=validator,
         )
 
         domain: Domain
@@ -78,7 +78,6 @@ class Rule:
                     validator=validator,
                     variables=self.variables,
                     parameters=self.parameters,
-                    batch_ids=batch_ids,
                 )
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
