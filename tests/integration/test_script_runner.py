@@ -69,11 +69,6 @@ docs_test_matrix = [
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
-    """
-    FIXME(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running.
-    Per discussion with Will, issue appears to be on the Snowflake side as opposed to something in our code.
-    Commenting out until we figure out the issue.
-    """
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -89,6 +84,11 @@ docs_test_matrix = [
     #     "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     # },
 ]
+"""
+FIXME(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
+Per discussion with Will, issue appears to be on the Snowflake side as opposed to something in our code.
+Commenting out until we figure out the issue.
+"""
 
 integration_test_matrix = [
     {
