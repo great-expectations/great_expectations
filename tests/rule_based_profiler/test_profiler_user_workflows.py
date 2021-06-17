@@ -420,6 +420,17 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap
     rules_configs: dict = full_profiler_config_dict.get("rules")
     variables_configs: dict = full_profiler_config_dict.get("variables")
 
+    # Extract only the "row_count_range_rule" from the configuration and set the "sampling_method" of its only
+    # "parameter_builder" (an instance of NumericMetricRangeMultiBatchParameterBuilder) to be the "bootstrap" method.
+    # The reason for this manipulation is that even though the default value of the "sampling_method" is "bootstrap",
+    # it is set to "oneshot" in the test configuration of every "parameter_builder" (for those that are instances of
+    # NumericMetricRangeMultiBatchParameterBuilder) in order for the large expectation suite fixture, created for the
+    # parametric ("oneshot") mode of the NumericMetricRangeMultiBatchParameterBuilder class to be applicable (coverage).
+    # The "Bobby" profiler use case, applied to the Taxi data, outputs 1 table expectation and 30 column expectations.
+    # The present test of the "bootstrap" sampling method uses the expectation suite containing only one expectation,
+    # because setting up the statistical assertions (and the required fixtures with the tolerances) is very laborious.
+    # In the future, additional of the "bootstrap" sampling method should be created using domain builders that generate
+    # a small number of domains (ideally, only one domain) so as to make the building of test fixtures more manageable.
     row_count_range_rule: dict = rules_configs["row_count_range_rule"]
     parameter_builders: dict = row_count_range_rule["parameter_builders"]
     row_count_range_parameter: dict = parameter_builders[0]
