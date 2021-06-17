@@ -18,7 +18,7 @@ class SingleNumericStatisticCalculator(ABC):
     @abstractmethod
     def generate_distribution_sample(
         self,
-        randomized_sample_identifiers: List[
+        randomized_data_point_identifiers: List[
             Union[
                 bytes,
                 str,
@@ -34,7 +34,7 @@ class SingleNumericStatisticCalculator(ABC):
     ]:
         """
         Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
-        :parameter: randomized_sample_identifiers -- List of Hashable objects
+        :parameter: randomized_data_point_identifiers -- List of Hashable objects
         :return: np.float64
         """
         pass
@@ -42,7 +42,7 @@ class SingleNumericStatisticCalculator(ABC):
     @abstractmethod
     def compute_numeric_statistic(
         self,
-        randomized_sample_identifiers: List[
+        randomized_data_point_identifiers: List[
             Union[
                 bytes,
                 str,
@@ -56,7 +56,7 @@ class SingleNumericStatisticCalculator(ABC):
     ) -> np.float64:
         """
         Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
-        :parameter: randomized_sample_identifiers -- List of Hashable objects
+        :parameter: randomized_data_point_identifiers -- List of Hashable objects
         :return: np.float64
         """
         pass

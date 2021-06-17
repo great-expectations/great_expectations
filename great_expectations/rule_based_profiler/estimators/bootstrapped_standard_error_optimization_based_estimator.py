@@ -154,7 +154,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             ]
         ] = self._statistic_calculator.sample_identifiers
         idx: int
-        randomized_sample_identifiers: List[
+        randomized_data_point_identifiers: List[
             Union[
                 bytes,
                 str,
@@ -167,7 +167,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
         ] = [original_data_sample_ids[idx] for idx in random_sample_indexes]
         computed_sample_statistic: np.float64 = (
             self._statistic_calculator.compute_numeric_statistic(
-                randomized_sample_identifiers=randomized_sample_identifiers
+                randomized_data_point_identifiers=randomized_data_point_identifiers
             )
         )
         return computed_sample_statistic

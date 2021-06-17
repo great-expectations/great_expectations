@@ -48,29 +48,45 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
 
-    # This property is a required interface method.
     @property
     def sample_identifiers(
         self,
     ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
         """
-        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
-        :return: List of Hashable objects
+        This property is a required interface method of the SingleNumericStatisticCalculator class.
+
+        In the abstract, it must return the list consisting of hashable objects, which identify the data.
+        For the multi-batch profiling case, this translates into the list of batch_id (string-valued) references.
+
+        :return: List of Hashable objects (here, batch_ids)
         """
         return self._batch_ids
 
-    # This is a required interface method.
     def generate_distribution_sample(
         self,
-        batch_ids: List[str],
+        randomized_data_point_identifiers: List[
+            Union[
+                bytes,
+                str,
+                int,
+                float,
+                complex,
+                tuple,
+                frozenset,
+            ]
+        ],
     ) -> Union[
         np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
     ]:
         """
-        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
-        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
-        :parameter: randomized_sample_identifiers -- List of Hashable objects
-        :return: np.float64
+        This method is a required interface method of the SingleNumericStatisticCalculator class.
+
+        Given a randomized list of data point identifiers, it computes metrics corresponding to each data point and
+        returns the collection of these metrics as a sample of the distribution, where the dimensionality of
+        the sample of the distribution is equal to the number of the identifiers provided (variable length is accepted).
+
+        :parameter: randomized_data_point_identifiers -- List of Hashable objects (here, batch_ids)
+        :return: An array-like (or list-like) collection of floating point numbers, representing the distribution sample
         """
         metric_domain_kwargs_with_specific_batch_id: Optional[
             Dict[str, Any]
@@ -80,7 +96,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         ] = []
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
         batch_id: str
-        for batch_id in batch_ids:
+        for batch_id in randomized_data_point_identifiers:
             metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
             metric_configuration_arguments: Dict[str, Any] = {
                 "metric_name": self._metric_name,
@@ -102,10 +118,9 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
 
         return metric_values
 
-    # This is a required interface method.
     def compute_numeric_statistic(
         self,
-        randomized_sample_identifiers: List[
+        randomized_data_point_identifiers: List[
             Union[
                 bytes,
                 str,
@@ -118,15 +133,20 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         ],
     ) -> np.float64:
         """
-        # TODO: <Alex>ALEX -- Improve this DocString.</Alex>
-        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
-        :parameter: randomized_sample_identifiers -- List of Hashable objects
-        :return: np.float64
+        This method is a required interface method of the SingleNumericStatisticCalculator class.
+
+        Given a randomized list of data point identifiers, it samples the distribution and computes a statistic for that
+        sample.  Any single-valued numeric statistic that is a function of the data points is acceptable.
+
+        :parameter: randomized_data_point_identifiers -- List of Hashable objects (here, batch_ids)
+        :return: np.float64 -- scalar measure of the distribution sample (here, the sample mean of data point metrics)
         """
         metric_values: Union[
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = self.generate_distribution_sample(batch_ids=randomized_sample_identifiers)
+        ] = self.generate_distribution_sample(
+            randomized_data_point_identifiers=randomized_data_point_identifiers
+        )
         metric_values = np.array(metric_values, dtype=np.float64)
         mean: np.float64 = np.mean(metric_values)
         return mean
@@ -334,7 +354,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
         ] = statistic_calculator.generate_distribution_sample(
-            batch_ids=batch_ids_for_metrics_calculations
+            randomized_data_point_identifiers=batch_ids_for_metrics_calculations
         )
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
 
