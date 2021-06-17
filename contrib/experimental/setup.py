@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 with open(os.path.join(os.path.dirname(__file__), "./PACKAGE_VERSION")) as versionfile:
     version = versionfile.read().strip()
 
-long_description = "Great Expectations community contributions package. (See https://github.com/great-expectations/great_expectations for full description)."
+long_description = "Great Expectations community.md contributions package. (See https://github.com/great-expectations/great_expectations for full description)."
 
 config = {
     "description": "Always know what to expect from your data.",

@@ -226,7 +226,7 @@ module.exports = {
             { type: 'doc', id: 'guides/advanced/how-to-configure-notebooks-generated-by-suite-edit' },
             { type: 'doc', id: 'guides/advanced/how-to-use-the-project-check-config-command' },
             { type: 'doc', id: 'guides/advanced/how-to-use-the-great-expectations-command-line-interface-(cli)' },
-            { type: 'doc', id: 'guides/advanced/how-to-add-support-for-a-new-sqlalchemy-dialect' },
+            { type: 'doc', id: 'guides/advanced/how-to-add-support-for-a-new-sqlalchemy-dialect.md' },
             { type: 'doc', id: 'guides/advanced/how-to-add-comments-to-a-page-on-docs.greatexpectations.io' },
             { type: 'doc', id: 'guides/advanced/how-to-use-the-great-expectation-docker-images' },
             { type: 'doc', id: 'guides/advanced/how-to-write-a-how-to-guide' },

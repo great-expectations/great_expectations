@@ -1263,7 +1263,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         WARNING: this feature is new in v0.4.
-        It hasn't been tested in all SQL dialects, and may change based on community feedback.
+        It hasn't been tested in all SQL dialects, and may change based on community.md feedback.
         :param custom_sql:
         """
 
