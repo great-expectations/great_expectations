@@ -152,7 +152,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
                 tuple,
                 frozenset,
             ]
-        ] = self._statistic_calculator.sample_identifiers
+        ] = self._statistic_calculator.data_point_identifiers
         idx: int
         randomized_data_point_identifiers: List[
             Union[

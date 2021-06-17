@@ -7,10 +7,12 @@ import numpy as np
 class SingleNumericStatisticCalculator(ABC):
     @property
     @abstractmethod
-    def sample_identifiers(
+    def data_point_identifiers(
         self,
     ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
         """
+        This property must return the list consisting of hashable objects, which identify the data points.
+
         :return: List of Hashable objects
         """
         pass

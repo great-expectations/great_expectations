@@ -49,13 +49,13 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         self._metric_value_kwargs = metric_value_kwargs
 
     @property
-    def sample_identifiers(
+    def data_point_identifiers(
         self,
     ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
         """
         This property is a required interface method of the SingleNumericStatisticCalculator class.
 
-        In the abstract, it must return the list consisting of hashable objects, which identify the data.
+        In the abstract, it must return the list consisting of hashable objects, which identify the data points.
         For the multi-batch profiling case, this translates into the list of batch_id (string-valued) references.
 
         :return: List of Hashable objects (here, batch_ids)
