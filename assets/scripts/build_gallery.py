@@ -22,7 +22,7 @@ logger.setLevel(logging.DEBUG)
 
 def execute_shell_command(command: str) -> int:
     """
-    Wrap subprocess command in a try/except block to provide a convenient method for pip installing dependencies.
+    Wrap subprocess command in a try/except block to provide a convenient method for pip installation dependencies.
 
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error

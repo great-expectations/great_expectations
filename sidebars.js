@@ -24,6 +24,34 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Core Skills',
+      items: [
+        'core_skills/how-to-instantiate-a-data-context',
+        'core_skills/how-to-create-a-new-expectation-suite-using-the-cli',
+        'core_skills/how-to-get-a-batch-of-data-from-a-configured-datasource',
+        'core_skills/how-to-create-a-batch-of-data-from-a-single-file-or-in-memory-dataframe',
+        'core_skills/how-to-configure-a-dataconnector-to-introspect-and-partition-tables-in-sql',
+        'core_skills/how-to-configure-a-dataconnector-to-introspect-and-partition-a-file-system-or-blob-store'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Deployment Patterns',
+      items: [
+        'deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
+        'deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster',
+        {
+        type: 'category',
+        label: 'Contributing',
+        items: [
+            'guides/setup/contributing/how-to-add-a-new-deployment-pattern-document',
+            'guides/setup/contributing/how-to-contribute-to-an-existing-deployment-pattern-document'
+        ]
+      }
+      ]
+    },
+    {
+      type: 'category',
       label: 'How to Guides',
       items: [
         {
@@ -32,11 +60,11 @@ module.exports = {
           items: [
             {
               type: 'category',
-              label: 'Installing',
+              label: 'Installation',
               items: [
-                'guides/setup/installing/local',
-                'guides/setup/installing/databricks',
-                'guides/setup/installing/spark-emr'
+                'guides/setup/installation/local',
+                'guides/setup/installation/databricks',
+                'guides/setup/installation/spark-emr'
               ]
             },
             {
@@ -45,12 +73,9 @@ module.exports = {
               items: [
                 'guides/setup/configuring-data-contexts/how-to-create-a-new-data-context-with-the-cli',
                 'guides/setup/configuring-data-contexts/how-to-configure-datacontext-components-using-test_yaml_config',
-                'guides/setup/configuring-data-contexts/how-to-use-a-yaml-file-or-environment-variables-to-populate-credentials',
-                'guides/setup/configuring-data-contexts/how-to-populate-credentials-from-a-secrets-store',
+                'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables',
+                'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-secrets-store',
                 'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file',
-                'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
-                'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-on-databricks-spark-cluster'
-
               ]
             },
             {
@@ -74,14 +99,12 @@ module.exports = {
               type: 'category',
               label: 'Configuring Data Docs',
               items: [
-                'guides/setup/configuring-data-docs/how-to-add-comments-to-expectations-and-display-them-in-data-docs',
-                'guides/setup/configuring-data-docs/how-to-create-renderers-for-custom-expectations',
                 'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-a-filesystem',
                 'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-azure-blob-storage',
                 'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-gcs',
                 'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-amazon-s3'
               ]
-            }
+            },
           ]
         },
         {
@@ -123,43 +146,6 @@ module.exports = {
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' }
               ]
             },
-
-            {
-              type: 'category',
-              label: '🍏 Core Skills',
-              items: [
-                {
-                  type: 'category',
-                  label: '✳️  How to get a Batch of data from a configured Datasource',
-                  items: [{ type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
-                },
-
-                {
-                  type: 'category',
-                  label: '✳️  How to create a Batch of data from a single file or in-memory dataframe',
-                  items: [{ type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
-                },
-
-                {
-                  type: 'category',
-                  label: '✳️  How to configure a DataConnector to introspect and partition tables in SQL',
-                  items: [{ type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
-                },
-                {
-                  type: 'category',
-                  label: '✳️  How to configure a DataConnector to introspect and partition a file system or blob store',
-                  items: [{ type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
-                }
-
-              ]
-
-            },
-
-            {
-              type: 'category',
-              label: '🏢 Contributing',
-              items: [{ type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' }]
-            },
             {
               type: 'category',
               label: '🔬 Advanced',
@@ -173,7 +159,6 @@ module.exports = {
           type: 'category',
           label: 'Creating and editing Expectations for your data',
           items: [
-            { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' },
             { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-without-a-sample-batch' },
             { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-without-the-cli' },
             { type: 'doc', id: 'guides/expectations/how-to-edit-an-expectation-suite-with-the-cli' },
@@ -188,7 +173,14 @@ module.exports = {
             { type: 'doc', id: 'guides/expectations/how-to-create-expectations-that-span-multiple-batches-using-evaluation-parameters' },
             { type: 'doc', id: 'guides/expectations/how-to-contribute-a-new-expectation-to-great-expectations' },
             { type: 'doc', id: 'guides/expectations/how-to-create-parameterized-expectations-super-fast' },
-            { type: 'doc', id: 'guides/expectations/how-to-dynamically-load-evaluation-parameters-from-a-database' }
+            { type: 'doc', id: 'guides/expectations/how-to-dynamically-load-evaluation-parameters-from-a-database' },
+            { type: 'category',
+              label: 'Advanced',
+              items:[
+                'guides/expectations/advanced/how-to-add-comments-to-expectations-and-display-them-in-data-docs',
+                'guides/expectations/advanced/how-to-create-renderers-for-custom-expectations',
+              ]
+            }
           ]
         },
         {
@@ -253,7 +245,7 @@ module.exports = {
           type: 'category',
           label: 'Reference',
           items: [
-            { type: 'doc', id: 'guides/setup/installing/local' }
+            { type: 'doc', id: 'guides/setup/installation/local' }
 
           ]
         }
@@ -268,7 +260,7 @@ module.exports = {
           type: 'category',
           label: 'Community',
           items: [
-            { type: 'doc', id: 'guides/setup/installing/local' }
+            { type: 'doc', id: 'guides/setup/installation/local' }
 
           ]
         }
@@ -283,7 +275,7 @@ module.exports = {
           type: 'category',
           label: 'Contributingt',
           items: [
-            { type: 'doc', id: 'guides/setup/installing/local' }
+            { type: 'doc', id: 'guides/setup/installation/local' }
 
           ]
         }
@@ -298,7 +290,7 @@ module.exports = {
           type: 'category',
           label: 'Changelog',
           items: [
-            { type: 'doc', id: 'guides/setup/installing/local' }
+            { type: 'doc', id: 'guides/setup/installation/local' }
 
           ]
         }
