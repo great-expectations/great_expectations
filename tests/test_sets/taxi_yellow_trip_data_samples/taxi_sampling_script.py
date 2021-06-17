@@ -8,10 +8,11 @@ If you'd like to run this script, please download your desired CSVs' from the ab
 in a directory (see 'INPUT_DIR' below) before program execution.
 """
 
-from typing import List
-import re
-import numpy as np
 import os
+import re
+from typing import List
+
+import numpy as np
 import pandas as pd
 import tqdm
 
