@@ -35,9 +35,12 @@ class SingleNumericStatisticCalculator(ABC):
         np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
     ]:
         """
-        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
+        Given a randomized list of data point identifiers, it computes metrics corresponding to each data point and
+        returns the collection of these metrics as a sample of the distribution, where the dimensionality of
+        the sample of the distribution is equal to the number of the identifiers provided (variable length is accepted).
+
         :parameter: randomized_data_point_identifiers -- List of Hashable objects
-        :return: np.float64
+        :return: An array-like (or list-like) collection of floating point numbers, representing the distribution sample
         """
         pass
 
@@ -57,8 +60,10 @@ class SingleNumericStatisticCalculator(ABC):
         ],
     ) -> np.float64:
         """
-        Computes numeric statistic from unique identifiers of data samples (a unique identifier must be hashable).
+        Given a randomized list of data point identifiers, it samples the distribution and computes a statistic for that
+        sample.  Any single-valued numeric statistic that is a function of the data points is acceptable.
+
         :parameter: randomized_data_point_identifiers -- List of Hashable objects
-        :return: np.float64
+        :return: np.float64 -- scalar measure of the distribution sample, characterized by the data point identifiers
         """
         pass
