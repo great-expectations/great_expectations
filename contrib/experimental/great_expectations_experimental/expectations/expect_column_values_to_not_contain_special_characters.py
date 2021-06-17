@@ -44,7 +44,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
-    """Expect column entries to not contain special characters.
+    """Expect column entries to not contain special characters
     Args:
         column (str): \
             The column name
