@@ -441,9 +441,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self,
         samples: np.ndarray,
     ) -> np.float64:
-        return np.sqrt(self._standard_variance(samples=samples))
+        return np.sqrt(self._standard_variance_unbiased(samples=samples))
 
-    def _standard_variance(
+    def _standard_variance_unbiased(
         self,
         samples: np.ndarray,
     ) -> np.float64:
@@ -455,11 +455,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 """
             )
 
-        sample_variance: np.float64 = np.var(samples)
-        sample_standard_variance: np.float64 = np.float64(
-            num_samples * sample_variance / (num_samples - 1)
-        )
-        return sample_standard_variance
+        return num_samples * (np.var(samples) + NP_EPSILON) / (num_samples - 1)
 
     def _get_truncate_distribution_using_heuristics(
         self,

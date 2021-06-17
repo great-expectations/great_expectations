@@ -206,7 +206,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             bootstrap_samples_mean_removed, 4
         )
         sample_standard_variance: np.float64 = (
-            self._bootstrapped_sample_standard_variance(
+            self._bootstrapped_sample_standard_variance_unbiased(
                 bootstrap_samples=bootstrap_samples
             )
         )
@@ -217,7 +217,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
         )
         return sample_kurtosis
 
-    def _bootstrapped_sample_standard_variance(
+    def _bootstrapped_sample_standard_variance_unbiased(
         self,
         bootstrap_samples: np.ndarray,
     ) -> np.float64:
@@ -229,7 +229,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
 """
             )
 
-        sample_variance: np.float64 = self._bootstrapped_sample_variance(
+        sample_variance: np.float64 = self._bootstrapped_sample_variance_biased(
             bootstrap_samples=bootstrap_samples
         )
         sample_standard_variance: np.float64 = np.float64(
@@ -238,7 +238,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
         return sample_standard_variance
 
     @staticmethod
-    def _bootstrapped_sample_variance(
+    def _bootstrapped_sample_variance_biased(
         bootstrap_samples: np.ndarray,
     ) -> np.float64:
         sample_variance: Union[np.ndarray, np.float64] = (
