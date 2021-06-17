@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import List, Optional, Union
 
@@ -8,6 +9,8 @@ from great_expectations.rule_based_profiler.estimators import (
     SingleNumericStatisticCalculator,
 )
 from great_expectations.rule_based_profiler.util import NP_EPSILON
+
+logger = logging.getLogger(__name__)
 
 
 class BootstrappedStandardErrorOptimizationBasedEstimator:
@@ -63,21 +66,23 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
     def __init__(
         self,
         statistic_calculator: SingleNumericStatisticCalculator,
-        sample_size: int,
+        num_data_points: int,
         bootstrapped_statistic_deviation_bound: Optional[float] = 1.0e-1,
         prob_bootstrapped_statistic_deviation_outside_bound: Optional[float] = 5.0e-2,
     ):
         """
-        # TODO: <Alex>ALEX -- Docstring</Alex>
+        :param statistic_calculator SingleNumericStatisticCalculator -- used to generate samples of the distribution,
+        given the data points, and to compute a scalar-valued statistic on a sample of the distribution.
+        :param num_data_points: int -- number of data points available for generating samples of the distribution.
         """
         self._statistic_calculator = statistic_calculator
-        if sample_size < 2:
+        if num_data_points < 2:
             raise ValueError(
-                f"""Argument "sample_size" in {self.__class__.__name__} must be an integer greater than 1 \
-(the value {sample_size} was encountered).
+                f"""Argument "num_data_points" in {self.__class__.__name__} must be an integer greater than 1 \
+(the value {num_data_points} was encountered).
 """
             )
-        self._sample_size = sample_size
+        self._num_data_points = num_data_points
 
         self._bootstrapped_statistic_deviation_bound = (
             bootstrapped_statistic_deviation_bound
@@ -112,6 +117,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             self._optimal_num_bootstrap_samples_estimations
         )
 
+        idx: int = 2
         while (
             current_max_optimal_num_bootstrap_samples
             > previous_max_optimal_num_bootstrap_samples
@@ -131,6 +137,15 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             current_max_optimal_num_bootstrap_samples = max(
                 self._optimal_num_bootstrap_samples_estimations
             )
+            idx = idx + 1
+
+        logger.info(
+            f"""The optimal number of bootsrap samples, sufficient for achieving the maximum fractional deviation of \
+{self._bootstrapped_statistic_deviation_bound} with the probability of \
+{1.0 - self._prob_bootstrapped_statistic_deviation_outside_bound} in the estimate of the given statistic, is \
+{current_max_optimal_num_bootstrap_samples} (the algorithm converged in {idx} steps).
+"""
+        )
 
         return current_max_optimal_num_bootstrap_samples
 
@@ -186,8 +201,8 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
     def _generate_random_sample_indexes(
         self,
     ) -> List[int]:
-        permutation: List[int] = np.arange(self._sample_size)
-        return random.choices(permutation, k=self._sample_size)
+        permutation: List[int] = np.arange(self._num_data_points)
+        return random.choices(permutation, k=self._num_data_points)
 
     def _compute_statistic_for_random_sample(self) -> np.float64:
         random_sample_indexes: List[int] = self._generate_random_sample_indexes()
