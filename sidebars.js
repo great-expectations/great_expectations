@@ -83,6 +83,8 @@ module.exports = {
                 'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables',
                 'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-secrets-store',
                 'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file',
+                'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
+                'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-on-databricks-spark-cluster',
               ]
             },
             {
