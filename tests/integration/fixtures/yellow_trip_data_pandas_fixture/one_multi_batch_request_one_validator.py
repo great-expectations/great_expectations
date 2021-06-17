@@ -38,7 +38,7 @@ pre_dec_batch_filter: BatchFilter = build_batch_filter(
         "custom_filter_function": lambda batch_identifiers: int(
             batch_identifiers["month"]
         )
-        < 12
+        < 12 and batch_identifiers["year"] == "2019"
     }
 )
 pre_dec_batch_definition_list: list = (

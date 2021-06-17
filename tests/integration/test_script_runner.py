@@ -86,7 +86,7 @@ docs_test_matrix = [
 ]
 
 """
-FIXME(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
+TODO(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
 Per discussion with Will, issue appears to be on the Snowflake side as opposed to something in our code.
 Commenting out until we figure out the issue.
 """
