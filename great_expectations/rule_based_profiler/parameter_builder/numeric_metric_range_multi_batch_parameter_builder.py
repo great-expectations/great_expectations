@@ -34,6 +34,11 @@ MAX_DECIMALS: int = 9
 
 
 class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalculator):
+    """
+    This class implements all abstract methods, defined in SingleNumericStatisticCalculator, which are required by the
+    statistical algorithm, implemented in the BootstrappedStandardErrorOptimizationBasedEstimator class.
+    """
+
     def __init__(
         self,
         batch_ids: List[str],
@@ -160,6 +165,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     This Multi-Batch ParameterBuilder is general in the sense that any metric that computes numbers can be accommodated.
     On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
+
+    The implementation supports two methods of estimating parameter values from data:
+    * bootstrapped (default) -- a mini-max non-parametric technique, which maximizes the probability that the estimated
+      parameter will minimally deviate from its ideal value and determines the optimal number of samples automatically.
+    * one-shot -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
+      and the standard error using the queried batches as the single sample of the distribution (fast, but inaccurate).
     """
 
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
@@ -195,8 +206,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
-            # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass (oneshot) or bootstrap methods.</Alex>
             sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
+            (please see the documentation in BootstrappedStandardErrorOptimizationBasedEstimator and references therein)
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
@@ -252,13 +263,14 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
     ):
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
-            Args:
-        :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+
+        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
 
         The algorithm operates according to the following steps:
         1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument).  Note
         that this particular BatchRequest was specified as part of configuration for the present ParameterBuilder class.
-        (This is in contrast to the BatchRequest specified in Checkpoint configuration, or in pipeline, notebook, etc.)
+        (This is in contrast to the BatchRequest used to instantiate the passed in Validator argument, and/or specified
+        in a Checkpoint configuration, and/or in a pipeline, a Jupyter notebook, etc.)
         2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
         3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
            order to have access to all Batch objects, on each of which the specified metric_name will be computed.
@@ -268,16 +280,18 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
            4.3: Compute metric_value using the local Validator object (which has access to the required Batch objects).
            4.4: Insure that the metric_value is numeric (ranges can be computed for numeric-valued metrics only).
            4.5: Append the value of the computed metric to the list (one for each batch_id -- loop iteration variable).
-        5. Convert the list of floating point metric computation results to a numpy array (for further computations).
-        6. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
+        5. Using the configured directives and/or heuristics, determine whether or not the ranges should be clipped.
+        6. Using the configured directives and/or heuristics, if the return values should be rounded to nearest integer.
+        7. Convert the list of floating point metric computation results to a numpy array (for further computations).
+        8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
         # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass (oneshot) or bootstrap methods.</Alex>
-        7. Compute the number of standard deviations (as a floating point number rounded to the nearest highest integer)
+        9. Compute the number of standard deviations (as a floating point number rounded to the nearest highest integer)
            needed to create the "band" around the mean so as to achieve the specified false_positive_rate (note that the
            false_positive_rate of 0.0 would result in an infinite number of standard deviations, hence it is "nudged" by
            a small quantity, "epsilon", above 0.0 if false_positive_rate of 0.0 is provided as argument in constructor).
            (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
-        8. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
-        9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
+        10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
+        11. Setup the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
         batch_ids_for_metrics_calculations: Optional[
