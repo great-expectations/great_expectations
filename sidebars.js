@@ -47,15 +47,14 @@ module.exports = {
             'core_skills/expectations/how-to-create-and-edit-expectations-with-a-profiler',
             'core_skills/expectations/how-to-create-and-edit-expectations-with-instant-feedback from-a-sample-batch-of-data'
           ]
-      },
-      {
-        type: 'category',
-        label: 'Validating Your Data',
-        items: [
-          'core_skills/validation/how-to-validate-data-by-running-a-checkpoint'
-        ]
-    },
-
+        },
+        {
+          type: 'category',
+          label: 'Validating Your Data',
+          items: [
+            'core_skills/validation/how-to-validate-data-by-running-a-checkpoint'
+          ]
+        }
       ]
     },
     {
@@ -64,7 +63,7 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: '⚙️ Setting up your Great Expectations',
+          label: '⚙️ Setting up Great Expectations',
           items: [
             {
               type: 'category',
