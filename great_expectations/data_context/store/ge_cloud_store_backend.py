@@ -86,7 +86,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 },
             }
         }
-
+        # This generic url template doesnt seem to support the suite_validation_result api:
+        # "/accounts/<uuid:account_id>/users/<uuid:user_id>/checkpoints/<uuid:checkpoint_id>/runs/<uuid:run_id>/suite-validation-result",
         url = urljoin(
             self.ge_cloud_base_url,
             f"accounts/"
