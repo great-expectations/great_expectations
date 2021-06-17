@@ -168,7 +168,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 
     The implementation supports two methods of estimating parameter values from data:
     * bootstrapped (default) -- a mini-max non-parametric technique, which maximizes the probability that the estimated
-      parameter will minimally deviate from its ideal value and determines the optimal number of samples automatically.
+      parameter will minimally deviate from its actual value and determines the optimal number of samples automatically.
     * one-shot -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
       and the standard error using the queried batches as the single sample of the distribution (fast, but inaccurate).
     """

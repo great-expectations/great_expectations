@@ -11,6 +11,55 @@ from great_expectations.rule_based_profiler.util import NP_EPSILON
 
 
 class BootstrappedStandardErrorOptimizationBasedEstimator:
+    """
+    This bootstrapped estimator is based on the theory presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
+    @article{Andrews2000a,
+        added-at = {2008-04-25T10:38:44.000+0200},
+        author = {Andrews, Donald W. K. and Buchinsky, Moshe},
+        biburl = {https://www.bibsonomy.org/bibtex/28e2f0a58cdb95e39659921f989a17bdd/smicha},
+        day = 01,
+        interhash = {778746398daa9ba63bdd95391f1efd37},
+        intrahash = {8e2f0a58cdb95e39659921f989a17bdd},
+        journal = {Econometrica},
+        keywords = {imported},
+        month = Jan,
+        note = {doi: 10.1111/1468-0262.00092},
+        number = 1,
+        pages = {23--51},
+        timestamp = {2008-04-25T10:38:52.000+0200},
+        title = {A Three-step Method for Choosing the Number of Bootstrap Repetitions},
+        url = {http://www.blackwell-synergy.com/doi/abs/10.1111/1468-0262.00092},
+        volume = 68,
+        year = 2000
+    }
+    The article outlines a three-step minimax procedure that relies on the Central Limit Theorem (C.L.T.) along with the
+    bootsrap sampling technique (please see https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for background) for
+    computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
+    probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
+
+    The paper provides existence and convergence proof of the three-step algorithm for a variety of figures of merit
+    (e.g., standard error, confidence intervals, and others).  The present implementation focuses on optimizing the
+    standard error measure.  For example, if the statistic_calculator (see below) returns the mean of the sample of a
+    distribution as its numeric statistic, then the algorithm will compute the number of bootstrap samples that is
+    optimal (i.e., neither too small nor too large) for ensuring that the probability of the event that the deviation of
+    this quantity (i.e., the mean) from its actual (ideal, or theoretical) value is fractionally within a (configurable)
+    bound close to unity (the parameter controlling how close this probability should be to unity is also configurable).
+
+    The essence of the technique assumes that the bootstrapped samples of the distribution are identically distributed,
+    and uses the C.L.T. and the characteristics of the Normal distribution (please refer to
+    https://en.wikipedia.org/wiki/Normal_distribution and the links and references therein for background) to relate
+    the number of bootstrapped samples to the required quantile, while the variance of the Normal distribution is shown
+    theoretically to be equal to the excess kurtosis of the Normal distribution function.  Consequently, in the first
+    step, the variance is set to correspond to the excess kurtosis of zero to obtain the initial number of bootstrapped
+    samples required.  In the second step, this number is used to generate the bootstrap samples.  In the third step,
+    these samples are used to compute the updated excess kurtosis value, thereby yielding the final (optimum) number of
+    the bootstrap samples.  For extra assurance, the code below iterates between steps two and three until the maximum
+    of all intermediate numbers of bootstrap samples does not change between the successive iterations of the algorithm.
+
+    The public method of this class, "compute_bootstrapped_statistic_samples()",  determines the optimal number of
+    bootstrap samples (given the configured tolerances, initialized in the constructor) and returns them to the caller.
+    """
+
     def __init__(
         self,
         statistic_calculator: SingleNumericStatisticCalculator,
