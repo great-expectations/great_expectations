@@ -59,6 +59,9 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
     the bootstrap samples.  For extra assurance, the code below iterates between steps two and three until the maximum
     of all intermediate numbers of bootstrap samples does not change between the successive iterations of the algorithm.
 
+    (Please refer to https://en.wikipedia.org/wiki/Central_limit_theorem for background on the Central Limit Theorem and
+    to https://en.wikipedia.org/wiki/Kurtosis for background on kurtosis and extra kurtosis.)
+
     The public method of this class, "compute_bootstrapped_statistic_samples()",  determines the optimal number of
     bootstrap samples (given the configured tolerances, initialized in the constructor) and returns them to the caller.
     """
@@ -121,6 +124,7 @@ closed interval."
     def _estimate_optimal_num_bootstrap_samples(
         self,
     ) -> int:
+        # There are no bootstrapped samples initially; hence, assume zero excess kurtosis (i.e., Normal distribution).
         optimal_num_bootstrap_samples: int = self._estimate_min_num_bootstrap_samples(
             bootstrap_samples=None
         )
@@ -134,6 +138,7 @@ closed interval."
         )
 
         idx: int = 2
+        # Iterate until the maximum of the list of minimum estimates of the number of bootstrapped samples converges.
         while (
             current_max_optimal_num_bootstrap_samples
             > previous_max_optimal_num_bootstrap_samples
@@ -256,6 +261,11 @@ closed interval."
     def _bootstrapped_statistic_deviation_standard_variance(
         excess_kurtosis: Optional[np.float64] = 0.0,
     ) -> np.float64:
+        """
+        The authors of "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf" prove the optimality of the formula, implemented
+        in this method, which expresses the the variance of the deviation of the statistic from its actual value as a
+        function of the excess kurtosis of the distribution underlying the bootstrapped samples of the statistic.
+        """
         return np.float64((2.0 + excess_kurtosis) / 4.0)
 
     def _bootstrapped_sample_excess_kurtosis(
