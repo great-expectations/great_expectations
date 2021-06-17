@@ -192,7 +192,7 @@ module.exports = {
               type: 'category',
               label: 'Working with Validators (name TBD)',
               items: [
-                { type: 'doc', id: 'guides/validation/validators/stub' }
+                { type: 'doc', id: 'guides/validation/validation_actions/stub' }
               ]
             },
             {
