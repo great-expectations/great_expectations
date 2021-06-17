@@ -129,6 +129,10 @@ def convert_to_json_serializable(data):
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
+    # Handling "float(nan)" separately is required by Python-3.6 and Pandas-0.23 versions.
+    if isinstance(data, float) and np.isnan(data):
+        return None
+
     if isinstance(data, (str, int, float, bool)):
         # No problem to encode json
         return data
@@ -154,12 +158,6 @@ def convert_to_json_serializable(data):
         # to the number of digits for which the string representation will equal the float representation
         return [convert_to_json_serializable(x) for x in data.tolist()]
 
-    # Note: This clause has to come after checking for np.ndarray or we get:
-    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
-    if data is None:
-        # No problem to encode json
-        return data
-
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
@@ -177,6 +175,12 @@ def convert_to_json_serializable(data):
     if np.issubdtype(type(data), np.floating):
         # Note: Use np.floating to avoid FutureWarning from numpy
         return float(round(data, sys.float_info.dig))
+
+    # Note: This clause has to come after checking for np.ndarray or we get:
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    if data is None:
+        # No problem to encode json
+        return data
 
     try:
         if not isinstance(data, list) and pd.isna(data):
@@ -265,12 +269,6 @@ def ensure_json_serializable(data):
         _ = [ensure_json_serializable(x) for x in data.tolist()]
         return
 
-    # Note: This clause has to come after checking for np.ndarray or we get:
-    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
-    if data is None:
-        # No problem to encode json
-        return
-
     if isinstance(data, (datetime.datetime, datetime.date)):
         return
 
@@ -284,6 +282,12 @@ def ensure_json_serializable(data):
 
     if np.issubdtype(type(data), np.floating):
         # Note: Use np.floating to avoid FutureWarning from numpy
+        return
+
+    # Note: This clause has to come after checking for np.ndarray or we get:
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
+    if data is None:
+        # No problem to encode json
         return
 
     try:
