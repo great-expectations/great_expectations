@@ -405,7 +405,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             bootstrapped_estimator: BootstrappedStandardErrorOptimizationBasedEstimator = BootstrappedStandardErrorOptimizationBasedEstimator(
                 statistic_calculator=statistic_calculator,
                 num_data_points=len(batch_ids_for_metrics_calculations),
-                bootstrapped_statistic_deviation_bound=1.0e-1,
+                fractional_bootstrapped_statistic_deviation_bound=1.0e-1,
                 prob_bootstrapped_statistic_deviation_outside_bound=5.0e-2,
             )
             metric_values = (

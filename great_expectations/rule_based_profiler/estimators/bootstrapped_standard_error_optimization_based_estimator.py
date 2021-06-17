@@ -67,13 +67,17 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
         self,
         statistic_calculator: SingleNumericStatisticCalculator,
         num_data_points: int,
-        bootstrapped_statistic_deviation_bound: Optional[float] = 1.0e-1,
+        fractional_bootstrapped_statistic_deviation_bound: Optional[float] = 1.0e-1,
         prob_bootstrapped_statistic_deviation_outside_bound: Optional[float] = 5.0e-2,
     ):
         """
         :param statistic_calculator SingleNumericStatisticCalculator -- used to generate samples of the distribution,
         given the data points, and to compute a scalar-valued statistic on a sample of the distribution.
         :param num_data_points: int -- number of data points available for generating samples of the distribution.
+        :param fractional_bootstrapped_statistic_deviation_bound -- maximum fractional deviation of the statistic from
+        its actual value (even though the actual value is unknown, the maximum deviation from it can be specified).
+        :param prob_bootstrapped_statistic_deviation_outside_bound -- maximum acceptable probability that the deviation
+        bound requirement above (for the statistic to deviate from its actual value) is not satisfied (should be small).
         """
         self._statistic_calculator = statistic_calculator
         if num_data_points < 2:
@@ -84,9 +88,21 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             )
         self._num_data_points = num_data_points
 
-        self._bootstrapped_statistic_deviation_bound = (
-            bootstrapped_statistic_deviation_bound
+        if not (0.0 <= fractional_bootstrapped_statistic_deviation_bound <= 1.0):
+            raise ValueError(
+                f"Fractional Bootstrapped Statistic Deviation Bound for {self.__class__.__name__} is outside of \
+[0.0, 1.0] closed interval."
+            )
+        self._fractional_bootstrapped_statistic_deviation_bound = (
+            fractional_bootstrapped_statistic_deviation_bound
         )
+
+        if not (0.0 <= prob_bootstrapped_statistic_deviation_outside_bound <= 1.0):
+            raise ValueError(
+                f"Probability that Bootstrapped Statistic Deviation is Outside of the configured Bound of \
+{self._fractional_bootstrapped_statistic_deviation_bound} for {self.__class__.__name__} is outside of [0.0, 1.0] \
+closed interval."
+            )
         self._prob_bootstrapped_statistic_deviation_outside_bound = (
             prob_bootstrapped_statistic_deviation_outside_bound
         )
@@ -141,7 +157,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
 
         logger.info(
             f"""The optimal number of bootsrap samples, sufficient for achieving the maximum fractional deviation of \
-{self._bootstrapped_statistic_deviation_bound} with the probability of \
+{self._fractional_bootstrapped_statistic_deviation_bound} with the probability of \
 {1.0 - self._prob_bootstrapped_statistic_deviation_outside_bound} in the estimate of the given statistic, is \
 {current_max_optimal_num_bootstrap_samples} (the algorithm converged in {idx} steps).
 """
@@ -190,8 +206,8 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
             quantile_complement_prob_outside_bound_divided_by_2
             * statistic_deviation_standard_variance
             / (
-                self._bootstrapped_statistic_deviation_bound
-                * self._bootstrapped_statistic_deviation_bound
+                self._fractional_bootstrapped_statistic_deviation_bound
+                * self._fractional_bootstrapped_statistic_deviation_bound
             )
         )
         bootstrap_samples: int = round(bootstrap_samples_fractional)
