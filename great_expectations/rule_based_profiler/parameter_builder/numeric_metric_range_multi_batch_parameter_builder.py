@@ -262,36 +262,43 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
+         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
 
-        The algorithm operates according to the following steps:
-        1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument).  Note
-        that this particular BatchRequest was specified as part of configuration for the present ParameterBuilder class.
-        (This is in contrast to the BatchRequest used to instantiate the passed in Validator argument, and/or specified
-        in a Checkpoint configuration, and/or in a pipeline, a Jupyter notebook, etc.)
-        2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
-        3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
-           order to have access to all Batch objects, on each of which the specified metric_name will be computed.
-        4. While looping through the available batch_ids:
-           4.1: Update the metric_domain_kwargs with the specific batch_id (the iteration variable of the loop).
-           4.2: Create the metric_configuration_arguments using the metric_domain_kwargs from the previous step.
-           4.3: Compute metric_value using the local Validator object (which has access to the required Batch objects).
-           4.4: Insure that the metric_value is numeric (ranges can be computed for numeric-valued metrics only).
-           4.5: Append the value of the computed metric to the list (one for each batch_id -- loop iteration variable).
-        5. Using the configured directives and/or heuristics, determine whether or not the ranges should be clipped.
-        6. Using the configured directives and/or heuristics, if the return values should be rounded to nearest integer.
-        7. Convert the list of floating point metric computation results to a numpy array (for further computations).
-        8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
-        # TODO: <Alex>ALEX -- Here, the DocString needs to elaborate regarding single-pass (oneshot) or bootstrap methods.</Alex>
-        9. Compute the number of standard deviations (as a floating point number rounded to the nearest highest integer)
-           needed to create the "band" around the mean so as to achieve the specified false_positive_rate (note that the
-           false_positive_rate of 0.0 would result in an infinite number of standard deviations, hence it is "nudged" by
-           a small quantity, "epsilon", above 0.0 if false_positive_rate of 0.0 is provided as argument in constructor).
-           (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
-        10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
-        11. Setup the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
+         The algorithm operates according to the following steps:
+         1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
+         that this specific BatchRequest was specified as part of configuration for the present ParameterBuilder class.
+         (This is in contrast to the BatchRequest used to instantiate the passed in Validator argument, and/or specified
+         in a Checkpoint configuration, and/or in a pipeline, a Jupyter notebook, etc.)
+         2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
+         3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
+            order to have access to all Batch objects, on each of which the specified metric_name will be computed.
+         4. Instantiate the NumericMetricRangeMultiBatchStatisticCalculator class, which implements metric computations.
+            4.0 While looping through the available batch_ids:
+            4.1: Update the metric_domain_kwargs with the specific batch_id (the iteration variable of the loop).
+            4.2: Create the metric_configuration_arguments using the metric_domain_kwargs from the previous step.
+            4.3: Compute metric_value using the local Validator object (which has access to the required Batch objects).
+            4.4: Insure that the metric_value is numeric (ranges can be computed for numeric-valued metrics only).
+            4.5: Append the value of the computed metric to the list (one for each batch_id -- loop iteration variable).
+         5. Obtain the distribution sample, consisting of the list of metrics, in accordance with the sampling method:
+            If the sampling method is "bootstrap" (default): Sample the distribution an automatically computed, optimal
+            number of times, using randomized lists of batch_ids with replacement (the "bootstrapping" technique).
+            For details, please refer to:
+            * BootstrappedStandardErrorOptimizationBasedEstimator and NumericMetricRangeMultiBatchStatisticCalculator
+            * Scientific article: http://dido.econ.yale.edu/~dwka/pub/p1001.pdf
+            If the sampling method is "oneshot": Use the single list of metrics, generated from the list of batch_ids.
+         6. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
+         7. Using the configured directives and heuristics, determine if return values should be rounded to an integer.
+         8. Convert the list of floating point metric computation results to a numpy array (for further computations).
+         9. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
+        10. Compute the number of standard deviations (as floating point number rounded to the nearest highest integer)
+            needed to create the "band" around the mean for achieving the specified false_positive_rate (note that the
+            false_positive_rate of 0.0 would result in infinite number of standard deviations, hence it is "nudged" by
+            a small quantity ("epsilon") above 0.0 if false_positive_rate of 0.0 is given as argument in constructor).
+            (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
+        11. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
+        12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
         batch_ids_for_metrics_calculations: Optional[
