@@ -109,6 +109,18 @@ closed interval."
         self._prob_bootstrapped_statistic_deviation_outside_bound = (
             prob_bootstrapped_statistic_deviation_outside_bound
         )
+        # Compute the quantile (see https://en.wikipedia.org/wiki/Quantile for background) of the Normal distribution
+        # corresponding to the configured maximum probability that the deviation bound requirement may not be satisfied.
+        # This quantile is used in the calculation of the number of bootstrap samples as a function of the standard
+        # variance of the deviation (which, in turn, depends on the excess kurtosis of the distribution underlying the
+        # bootstrapped samples of the statistic.  The fact that one half of this probability factors in the equation
+        # points to the symmetric nature of the Normal distribution.  (For background on the quantile function of the
+        # standard Normal distribution, ses https://en.wikipedia.org/wiki/Normal_distribution and references therein.)
+        self._quantile_complement_prob_outside_bound_divided_by_2: np.float64 = (
+            scipy.stats.norm.ppf(
+                1.0 - self._prob_bootstrapped_statistic_deviation_outside_bound / 2.0
+            )
+        )
 
         self._optimal_num_bootstrap_samples_estimations = []
 
@@ -186,12 +198,6 @@ closed interval."
     def _estimate_min_num_bootstrap_samples(
         self, bootstrap_samples: Optional[np.ndarray] = None
     ) -> int:
-        quantile_complement_prob_outside_bound_divided_by_2: np.float64 = (
-            scipy.stats.norm.ppf(
-                1.0 - self._prob_bootstrapped_statistic_deviation_outside_bound / 2.0
-            )
-        )
-
         excess_kurtosis: Optional[np.float64]
         if bootstrap_samples is None:
             excess_kurtosis = np.float64(0.0)
@@ -208,7 +214,7 @@ closed interval."
         )
 
         bootstrap_samples_fractional: np.float64 = np.float64(
-            quantile_complement_prob_outside_bound_divided_by_2
+            self._quantile_complement_prob_outside_bound_divided_by_2
             * statistic_deviation_standard_variance
             / (
                 self._fractional_bootstrapped_statistic_deviation_bound
@@ -265,6 +271,12 @@ closed interval."
         The authors of "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf" prove the optimality of the formula, implemented
         in this method, which expresses the the variance of the deviation of the statistic from its actual value as a
         function of the excess kurtosis of the distribution underlying the bootstrapped samples of the statistic.
+
+        As a complement to the formal proof, the proportionality of the variance of the underlying distribution -- and
+        thus of the estimated minimum number of bootstrap samples -- to the kurtosis of the underlying distribution is
+        intuitively plausible.  Since kurtosis is an indication of the "tailness" of the distribution, the corresponding
+        model based on the standard Normal distribution becomes "less sharp" (or "more diffuse"), requiring a larger
+        variance to characterize the model, thereby, leading to a higher estimate for the number of bootstrap samples.
         """
         return np.float64((2.0 + excess_kurtosis) / 4.0)
 
