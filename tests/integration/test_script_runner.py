@@ -84,7 +84,6 @@ docs_test_matrix = [
     #     "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     # },
 ]
-
 """
 TODO(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
 Per discussion with Will, issue appears to be on the Snowflake side as opposed to something in our code.
