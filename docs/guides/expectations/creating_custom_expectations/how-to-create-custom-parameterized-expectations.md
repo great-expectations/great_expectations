@@ -1,5 +1,5 @@
 ---
-title: How to create custom Expectations for SQLAlchemy
+title: How to create custom parameterized Expectations
 ---
 
 This article is a stub.
