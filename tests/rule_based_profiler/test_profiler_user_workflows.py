@@ -80,21 +80,7 @@ def test_alice_profiler_user_workflow_single_batch(
     rules_configs: dict = full_profiler_config_dict.get("rules")
     variables_configs: dict = full_profiler_config_dict.get("variables")
 
-    datasource_name: str = "alice_columnar_table_single_batch_datasource"
-    data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
-    data_asset_name: str = "alice_columnar_table_single_batch_data_asset"
-
-    validator: Validator = data_context.get_validator(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
-        create_expectation_suite_with_name=alice_columnar_table_single_batch[
-            "expected_expectation_suite_name"
-        ],
-    )
-
     profiler: Profiler = Profiler(
-        validator=validator,
         rules_configs=rules_configs,
         variables_configs=variables_configs,
         data_context=data_context,
@@ -192,24 +178,7 @@ def test_bobby_profiler_user_workflow_multi_batch(
     rules_configs: dict = full_profiler_config_dict.get("rules")
     variables_configs: dict = full_profiler_config_dict.get("variables")
 
-    datasource_name: str = "taxi_pandas"
-    data_connector_name: str = "monthly"
-    data_asset_name: str = "my_reports"
-
-    validator: Validator = data_context.get_validator(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
-        data_connector_query={
-            "index": -1,
-        },
-        create_expectation_suite_with_name=bobby_columnar_table_multi_batch[
-            "expected_expectation_suite_name"
-        ],
-    )
-
     profiler: Profiler = Profiler(
-        validator=validator,
         rules_configs=rules_configs,
         variables_configs=variables_configs,
         data_context=data_context,

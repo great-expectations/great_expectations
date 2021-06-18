@@ -1,10 +1,15 @@
+import uuid
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Union
 
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.validator.validator import Validator
 
@@ -32,6 +37,7 @@ class ParameterBuilder(ABC):
         self,
         parameter_name: str,
         data_context: Optional[DataContext] = None,
+        batch_request: Optional[Union[dict, str]] = None,
     ):
         """
         The ParameterBuilder will build parameters for the active domain from the rule.
@@ -41,16 +47,17 @@ class ParameterBuilder(ABC):
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
 
         self._parameter_name = parameter_name
         self._data_context = data_context
+        self._batch_request = batch_request
 
     def build_parameters(
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -58,7 +65,6 @@ class ParameterBuilder(ABC):
         self._build_parameters(
             parameter_container=parameter_container,
             domain=domain,
-            validator=validator,
             variables=variables,
             parameters=parameters,
         )
@@ -68,12 +74,69 @@ class ParameterBuilder(ABC):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         pass
+
+    def get_validator(
+        self,
+        domain: Optional[Domain] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> Optional[Validator]:
+        if self._batch_request is None:
+            return None
+
+        # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
+        batch_request: Optional[
+            Union[BatchRequest, dict, str]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._batch_request,
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
+        )
+        batch_request = BatchRequest(**batch_request)
+
+        expectation_suite_name: str = (
+            f"tmp_parameter_builder_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
+        )
+        return self.data_context.get_validator(
+            batch_request=batch_request,
+            create_expectation_suite_with_name=expectation_suite_name,
+        )
+
+    def get_batch_ids(
+        self,
+        domain: Optional[Domain] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> Optional[List[str]]:
+        if self._batch_request is None:
+            return None
+
+        # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
+        batch_request: Optional[
+            Union[BatchRequest, dict, str]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._batch_request,
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
+        )
+        batch_request = BatchRequest(**batch_request)
+        batch_list: List[Batch] = self.data_context.get_batch_list(
+            batch_request=batch_request
+        )
+
+        batch: Batch
+        batch_ids: List[str] = [batch.id for batch in batch_list]
+
+        return batch_ids
 
     @property
     def parameter_name(self) -> str:
