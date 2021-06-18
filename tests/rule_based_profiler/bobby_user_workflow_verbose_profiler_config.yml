@@ -9,6 +9,7 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
+  sampling_method: bootstrap  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
   nan_raises_exception: False  # Choices: False (default) or True (if False, then NaN is converted to 0.0).
   false_positive_rate: 1.0e-2
   mostly: 1.0
@@ -23,7 +24,7 @@ rules:
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
-        sampling_method: bootstrap  # bootstrap (default) and oneshot are supported
+        sampling_method: $variables.sampling_method
         nan_raises_exception: $variables.nan_raises_exception
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
@@ -49,7 +50,7 @@ rules:
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-        sampling_method: bootstrap
+        sampling_method: $variables.sampling_method
         nan_raises_exception: $variables.nan_raises_exception
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
@@ -58,7 +59,7 @@ rules:
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
-        sampling_method: oneshot
+        sampling_method: $variables.sampling_method
         nan_raises_exception: $variables.nan_raises_exception
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
