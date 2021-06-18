@@ -153,8 +153,8 @@ If you are working with nonstandard CSVs, read one of these guides:
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [spark_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/integration/code/connecting_to_your_data/cloud/spark_s3_yaml_example.py)
-- [spark_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/integration/code/connecting_to_your_data/cloud/spark_s3_python_example.py)
+- [spark_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py)
+- [spark_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py)
 
 ## Next Steps
 
