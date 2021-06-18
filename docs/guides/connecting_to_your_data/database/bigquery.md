@@ -150,7 +150,7 @@ Here is an example of loading data by specifying an existing table name.
 Currently BigQuery does not allow for the creation of temporary tables as the result of a query.  As a workaround, Great Expectations allows for a named permanent table to be used as a "temporary" table, with the name passed in as a `batch_spec_passthrough` parameter. In the following example we are using a table named `ge_temp`.
 :::
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L90-L104
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L74-L88
 ```
 
 
