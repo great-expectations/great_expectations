@@ -516,7 +516,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self,
         samples: np.ndarray,
     ) -> np.float64:
-        standard_variance: np.float64 = self._standard_variance_unbiased(samples=samples)
+        standard_variance: np.float64 = self._standard_variance_unbiased(
+            samples=samples
+        )
 
         if np.isclose(standard_variance, 0.0):
             standard_variance = np.float64(0.0)
