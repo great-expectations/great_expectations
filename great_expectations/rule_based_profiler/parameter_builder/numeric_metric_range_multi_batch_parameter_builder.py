@@ -451,6 +451,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
         std: Union[np.ndarray, np.float64] = self._standard_error(samples=metric_values)
 
+        if np.isclose(std, 0.0):
+            std = 0.0
+
         # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: Union[
             Any, str
