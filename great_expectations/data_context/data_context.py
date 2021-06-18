@@ -3172,42 +3172,73 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         The returned object is determined by return_mode.
         """
+        usage_stats_event: str = "data_context.test_yaml_config"
+
         if pretty_print:
             print("Attempting to instantiate class from config...")
 
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
-        substituted_config_variables: Union[
-            DataContextConfig, dict
-        ] = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-        )
+        try:
+            substituted_config_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                self.config_variables,
+                dict(os.environ),
+            )
 
-        substitutions: dict = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
+            substitutions: dict = {
+                **substituted_config_variables,
+                **dict(os.environ),
+                **self.runtime_environment,
+            }
 
-        config_str_with_substituted_variables: Union[
-            DataContextConfig, dict
-        ] = substitute_all_config_variables(
-            yaml_config,
-            substitutions,
-        )
+            config_str_with_substituted_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                yaml_config,
+                substitutions,
+            )
 
-        config: CommentedMap = yaml.load(config_str_with_substituted_variables)
+            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
 
-        if "class_name" in config:
-            class_name = config["class_name"]
+            if "class_name" in config:
+                class_name = config["class_name"]
+
+        except Exception as e:
+            if (
+                class_name
+                not in self.TEST_YAML_CONFIG_STORE_TYPES
+                + self.TEST_YAML_CONFIG_DATASOURCE_TYPES
+                + [
+                    "Checkpoint",
+                    "SimpleCheckpoint",
+                ]
+            ):
+                # Ensure we do not send the real class name if custom
+                usage_stats_event_payload: Dict[str, str] = {
+                    "class_name": "ERRONEOUS_CONFIG"
+                }
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
 
         instantiated_class: Any
 
-        # Initialize usage stats before try/except
-        usage_stats_event: str = "data_context.test_yaml_config"
         usage_stats_event_payload: dict = {"class_name": class_name}
+        if usage_stats_event_payload[
+            "class_name"
+        ] not in self.TEST_YAML_CONFIG_STORE_TYPES + self.TEST_YAML_CONFIG_DATASOURCE_TYPES + [
+            "Checkpoint",
+            "SimpleCheckpoint",
+        ]:
+            # Ensure we do not send the real class name if custom
+            usage_stats_event_payload["class_name"] = "CUSTOM_CONFIG"
 
         try:
             if class_name in self.TEST_YAML_CONFIG_STORE_TYPES:
@@ -3281,7 +3312,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
             else:
                 # Do not send the real class name if custom
-                usage_stats_event_payload["class_name"] = "RAW_CONFIG"
+                usage_stats_event_payload["class_name"] = "CUSTOM_CONFIG"
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."
                 )
@@ -3315,14 +3346,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             return report_object
 
         except Exception as e:
-            if usage_stats_event_payload[
-                "class_name"
-            ] not in self.TEST_YAML_CONFIG_STORE_TYPES + self.TEST_YAML_CONFIG_DATASOURCE_TYPES + [
-                "Checkpoint",
-                "SimpleCheckpoint",
-            ]:
-                # Ensure we do not send the real class name if custom
-                usage_stats_event_payload["class_name"] = "RAW_CONFIG"
             send_usage_message(
                 data_context=self,
                 event=usage_stats_event,
