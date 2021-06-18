@@ -46,12 +46,18 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         metric_name: str,
         metric_domain_kwargs: Optional[dict],
         metric_value_kwargs: Optional[dict],
+        nan_raises_exception: Optional[bool],
     ):
         self._batch_ids = batch_ids
         self._validator = validator
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+        self._nan_raises_exception = nan_raises_exception
+
+        # Computing metrics once per batch_id and caching the resulting values facilitates instant look up when same
+        # data point (i.e., same batch_id) is reused repeatedly as part of randomly sampling underlying distribution.
+        self._batch_id_metric_value_cache = {}
 
     @property
     def data_point_identifiers(
@@ -102,22 +108,33 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
         batch_id: str
         for batch_id in randomized_data_point_identifiers:
-            metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
-            metric_configuration_arguments: Dict[str, Any] = {
-                "metric_name": self._metric_name,
-                "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
-                "metric_value_kwargs": self._metric_value_kwargs,
-                "metric_dependencies": None,
-            }
-            metric_value = self._validator.get_metric(
-                metric=MetricConfiguration(**metric_configuration_arguments)
-            )
-            if not is_numeric(value=metric_value):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
+            # Attempt to fetch metric_value from cache.  In case of cache miss, compute metric_value and cache it.
+            metric_value = self._batch_id_metric_value_cache.get(batch_id)
+            if metric_value is None:
+                metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
+                metric_configuration_arguments: Dict[str, Any] = {
+                    "metric_name": self._metric_name,
+                    "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
+                    "metric_value_kwargs": self._metric_value_kwargs,
+                    "metric_dependencies": None,
+                }
+                metric_value = self._validator.get_metric(
+                    metric=MetricConfiguration(**metric_configuration_arguments)
+                )
+                if not is_numeric(value=metric_value):
+                    raise ge_exceptions.ProfilerExecutionError(
+                        message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
 (value of type "{str(type(metric_value))}" was computed).
 """
-                )
+                    )
+                if np.isnan(metric_value):
+                    if self._nan_raises_exception:
+                        raise ValueError(
+                            f"""Computation of metric "{self._metric_name}" resulted in NaN ("not a number") value.
+"""
+                        )
+                    metric_value = 0.0
+                self._batch_id_metric_value_cache[batch_id] = metric_value
 
             metric_values.append(metric_value)
 
@@ -189,6 +206,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        nan_raises_exception: Optional[Union[str, bool]] = False,
         sampling_method: Optional[str] = "bootstrap",
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         truncate_distribution: Optional[
@@ -206,6 +224,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            nan_raises_exception: if True, then if the computed metric gives NaN, then exception is raised; otherwise,
+            if False (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
             (please see the documentation in BootstrappedStandardErrorOptimizationBasedEstimator and references therein)
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
@@ -228,6 +248,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+
+        self._nan_raises_exception = nan_raises_exception
 
         self._sampling_method = sampling_method
 
@@ -343,6 +365,17 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             parameters=parameters,
         )
 
+        # Obtain nan_raises_exception from rule state (i.e., variables and parameters); from instance variable otherwise.
+        nan_raises_exception: Optional[
+            bool
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._nan_raises_exception,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
         # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -368,6 +401,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
                 metric_name=self._metric_name,
                 metric_domain_kwargs=metric_domain_kwargs,
                 metric_value_kwargs=metric_value_kwargs,
+                nan_raises_exception=nan_raises_exception,
             )
         )
 
