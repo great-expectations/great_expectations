@@ -2,11 +2,36 @@ import copy
 from typing import Any, Dict, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+
+
+def build_batch_request(
+    batch_request: Optional[Union[dict, str]] = None,
+    domain: Optional[Domain] = None,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+) -> Optional[BatchRequest]:
+    if batch_request is None:
+        return None
+
+    # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
+    materialized_batch_request: Optional[
+        Union[BatchRequest, dict]
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=batch_request,
+        expected_return_type=dict,
+        variables=variables,
+        parameters=parameters,
+    )
+    materialized_batch_request = BatchRequest(**materialized_batch_request)
+
+    return materialized_batch_request
 
 
 def get_parameter_value_and_validate_return_type(

@@ -8,9 +8,7 @@ from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
+from great_expectations.rule_based_profiler.util import build_batch_request
 from great_expectations.validator.validator import Validator
 
 
@@ -89,17 +87,12 @@ class ParameterBuilder(ABC):
         if self._batch_request is None:
             return None
 
-        # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
-        batch_request: Optional[
-            Union[BatchRequest, dict, str]
-        ] = get_parameter_value_and_validate_return_type(
+        batch_request: Optional[BatchRequest] = build_batch_request(
             domain=domain,
-            parameter_reference=self._batch_request,
-            expected_return_type=dict,
+            batch_request=self._batch_request,
             variables=variables,
             parameters=parameters,
         )
-        batch_request = BatchRequest(**batch_request)
 
         expectation_suite_name: str = (
             f"tmp_parameter_builder_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
@@ -118,17 +111,13 @@ class ParameterBuilder(ABC):
         if self._batch_request is None:
             return None
 
-        # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
-        batch_request: Optional[
-            Union[BatchRequest, dict, str]
-        ] = get_parameter_value_and_validate_return_type(
+        batch_request: Optional[BatchRequest] = build_batch_request(
             domain=domain,
-            parameter_reference=self._batch_request,
-            expected_return_type=dict,
+            batch_request=self._batch_request,
             variables=variables,
             parameters=parameters,
         )
-        batch_request = BatchRequest(**batch_request)
+
         batch_list: List[Batch] = self.data_context.get_batch_list(
             batch_request=batch_request
         )
