@@ -32,7 +32,7 @@ module.exports = {
           items: [
             {
               type: 'category',
-              label: 'Installing',
+              label: '🧰 Installing',
               items: [
                 'guides/setup/installing/local',
                 'guides/setup/installing/databricks',
@@ -171,7 +171,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Creating and editing Expectations for your data',
+          label: '✍️ Creating and editing Expectations for your data',
           items: [
             { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-using-the-cli' },
             { type: 'doc', id: 'guides/expectations/how-to-create-a-new-expectation-suite-without-a-sample-batch' },
@@ -281,7 +281,7 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: 'Contributingt',
+          label: 'Contributing',
           items: [
             { type: 'doc', id: 'guides/setup/installing/local' }
 
