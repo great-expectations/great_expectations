@@ -7,8 +7,8 @@ from scipy import special
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MultiBatchParameterBuilder,
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
@@ -27,7 +27,7 @@ NP_SQRT_2: np.float64 = np.sqrt(2.0)
 MAX_DECIMALS: int = 9
 
 
-class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
+class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     """
     A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
     using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
