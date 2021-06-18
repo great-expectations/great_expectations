@@ -9,7 +9,7 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
-  sampling_method: bootstrap  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
+  sampling_method: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
   nan_raises_exception: False  # Choices: False (default) or True (if False, then NaN is converted to 0.0).
   false_positive_rate: 1.0e-2
   mostly: 1.0
