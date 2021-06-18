@@ -10,8 +10,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 
 
 def get_parameter_value_and_validate_return_type(
-    domain: Domain,
-    *,
+    domain: Optional[Domain] = None,
     parameter_reference: Optional[Union[Any, str]] = None,
     expected_return_type: Optional[Union[type, tuple]] = None,
     variables: Optional[ParameterContainer] = None,
@@ -40,8 +39,7 @@ def get_parameter_value_and_validate_return_type(
 
 
 def get_parameter_value(
-    domain: Domain,
-    *,
+    domain: Optional[Domain] = None,
     parameter_reference: Optional[Union[Any, str]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,

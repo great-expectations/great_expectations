@@ -1,4 +1,9 @@
 variables:
+  # BatchRequest yielding exactly one batch
+  alice_single_batch_data_batch_request:
+    datasource_name: alice_columnar_table_single_batch_datasource
+    data_connector_name: alice_columnar_table_single_batch_data_connector
+    data_asset_name: alice_columnar_table_single_batch_data_asset
   integer_type: INTEGER
   timestamp_type: TIMESTAMP
   max_user_id: 999999999999
@@ -10,6 +15,7 @@ rules:
     domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
       class_name: MyCustomSemanticTypeColumnDomainBuilder
       module_name: tests.rule_based_profiler.plugins
+      batch_request: $variables.alice_single_batch_data_batch_request
       semantic_types:
         - user_id
     parameter_builders:
@@ -40,6 +46,7 @@ rules:
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
+      batch_request: $variables.alice_single_batch_data_batch_request
       column_name_suffixes:
         - _ts
     parameter_builders:

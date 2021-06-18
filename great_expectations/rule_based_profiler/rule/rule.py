@@ -61,7 +61,7 @@ class Rule:
         expectation_configurations: List[ExpectationConfiguration] = []
 
         domains: List[Domain] = self._domain_builder.get_domains(
-            validator=validator,
+            variables=self.variables
         )
 
         domain: Domain

@@ -122,7 +122,7 @@ class MultiBatchParameterBuilder(ParameterBuilder):
         batch_request = BatchRequest(**batch_request)
 
         expectation_suite_name: str = (
-            f"tmp_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
+            f"tmp_parameter_builder_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
         )
         return self.data_context.get_validator(
             batch_request=batch_request,
