@@ -1,7 +1,6 @@
 ---
 title: How to write a how-to-guide
 ---
-import HowToTemplate from './how-to-template.md';
 
 This guide shows how to create a new how-to guide in Great Expectations. By writing guides with consistent structure and styling, you can get your PRs approved faster and make the Great Expectations docs discoverable, useful, and maintainable.
 
@@ -11,16 +10,15 @@ Documentation for Great Expectations is built using Docusaurus 2, a modern stati
 
 ## Why run tests this way?
 
-The reason is that we can provide a guarantee that whatever code or configuration is displayed in the how-to-doc is fully integration tested with the most-current version of Great Expectations.  Since Great Expectations is a rapidly-changing codebase, there is a great deal of value making sure that the documentation is always up-to-date with the most current changes. Because the script is so central to writing the guides, we highly recommend that you **write the script first, before writing the how-to-guide**.  [add more content about why this is a good thing]
+The reason is that we can provide a guarantee that whatever code or configuration is displayed in the how-to-doc is fully integration tested with the most-current version of Great Expectations.  Since Great Expectations is a rapidly-changing codebase, there is a great deal of value making sure that the documentation is always up-to-date with the most current changes. Because the script is so central to writing the guides, we highly recommend that you **write the script first, before writing the how-to-guide**.
 
-## What does it mean for contributing?
+## What does it mean for contributors?
 
 Typically, a PR for a how-to-guide will contain the following:
 
 1. The script and integration test.
     - The script will be located with the other integration tests in the `great-expectations/tests/integration/docusaurus` folder.
     - The script will be added to integration tests in the `great-expectation/tests/integration/test_script_runner.py` file
-    - **Note**: the structure of this might change as we as we continue to build-out this part of the code, and run into any inefficiencies.
 
 2. The Markdown file in the `great-expectations/docs` folder.
 
@@ -28,17 +26,22 @@ Typically, a PR for a how-to-guide will contain the following:
 
 An example script is found in `/tests/integration/docusaurus/template/script_example.py`.
 
-```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L9```
+```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L9
+```
 
 It does the following :
 
-1. loads appropriate libraries
-2. loads a `DataContext` from the `great_expectations folder`
-3. makes an assertion about the `DataContext`.
+1. Loads required libraries.
+2. Loads a Data Context from the `great_expectations/` folder.
+3. Makes an assertion about the Data Context.
 
 Your script will likely do more, but this is a great starting point! :)
 
-In order to run your how-to-guide script, you will need to add a path to the `user_flow_script`, `data_context_dir` and `data_dir` (optional).
+# How to run the how-to-guide script
+
+In order to run your how-to-guide script, you will to modify the file at `great-expectation/tests/integration/test_script_runner.py`, which runs the integration tests for documentation.
+
+Each integration test is defined by a dictionary entry similar to the one below:
 
 ```python
 {
@@ -48,23 +51,13 @@ In order to run your how-to-guide script, you will need to add a path to the `us
 },
 ```
 
-- the path to the `user_flow_script` is the path of the script we are adding `pandas_python_example.py` in our case.
+- The path to the `user_flow_script` is the path of the script we are adding `pandas_python_example.py` in our case.
 - `data_context_dir` is a fixture that will be copied into a directory where your script will be run. It will ensure that you can load a `DataContext`, although no additional features will be included.
 - `data_dir` is an optional parameter for data files that you can use in your tests. The example contains the path to the NYC yellow taxi trip data, which is a fixture that is used in many tests for Great Expectations.
 
-
-[ADD MORE ABOUT HOW THE FIXTURES ARE GENERATED]
-    - we are generating a new temp folder?
-    - this folder has whatever files that are in our 'data/' folder copied into it
-    - and then we are copying the test script into this folder too
-
-  [TEMP FOLDER]
-    - great_expectations/
-    - data/
-    - test_script.py
-
 Once the appropriate steps have been added, the tests can be run using the following pytest command:
-  `pytest -v --docs-tests -m docs -no-postgresql --no-spark tests/integration/test_script_runner.py`
+
+`pytest -v --docs-tests -m docs -no-postgresql --no-spark tests/integration/test_script_runner.py`
 
 # How to write a how-to-guide
 
@@ -101,8 +94,11 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 ```markdown
   ```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L7```
 ```
+:::warning
+Make sure that you lint your script before you finalize the line numbers in your Markdown file. This will prevent unintended line changes and save you pain when the linter changes your python file without you realizing it.
 
-- Most steps will also require user input, such as a connection string that needs to be replaced, or a step that allows for testing (such as running `test_yaml_config()).
+:::
+- Most steps will also require user input, such as a connection string that needs to be replaced, or a step that allows for testing (such as running `test_yaml_config()`).
 
 - Snippets should be as short as possible, but no shorter. In general, you can think of the snippet like a diff: what needs to change to accomplish this step?
 
@@ -112,19 +108,21 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 
 **Additional resources**: Additional resources, usually external (i.e. not within the Great Expectations documentation) and usually shown as a list. To avoid link rot, please use this section sparingly, and prefer links to stable, well-maintained resources.
 
-# how to sumbmit a PR
+Once a draft of your guide is written, you can see it rendered on a `localhost` by adding your document to the table-of-contents. In Docusaurus this is done by the [sidebar.js file](https://docusaurus.io/docs/sidebar).
 
-# Additional notes
-- make sure that you lint before you finalize the line numbers because things can change..
-
-# Remaining Questions:
-
-
-########################################################################################
 
 ## Steps
 
-1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](Contributing Setting up)
+
+:::warning
+  Links are broken. Fix the following
+  - [Setting up your dev environment](./how-to-template)
+  - [Style guide](./how-to-template)
+  - [Testing](./how-to-template)
+:::
+
+
+1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](#TODO)
 
 2. Copy the How-to guide template file to the appropriate subdirectory of `docs/guides/`, and rename it.
 
@@ -132,16 +130,16 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 
 4. Decide whether you’re writing a code-heavy or process-heavy guide, and adjust your formatting appropriately.
 
-5. Fill out the Prerequisites info box (see [How-to guide template file](HowToTemplate)). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something”.
+5. Fill out the Prerequisites info box (see [How-to guide template file](./how-to-template)). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something”.
 
 6. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
     - These will typically be included in a separate file that is in the `great_expectations/test/integrations` folder and be referenced in the how-to-doc. For additional details, please see the "Structure of a How-to-guide" section below.  
 
 7. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 
-8. Scan your article to make sure it follows the [Style guide](??). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+8. Scan your article to make sure it follows the [Style guide](#TODO). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 
-9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](Contributing Testing)
+9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](#TODO)
 
 10. Submit your PR! If there are any additional integrations that need to be run, then please add this to your PR message.
 
@@ -215,27 +213,3 @@ import TabItem from '@theme/TabItem';
   <TabItem value="expectations">These are Expectations</TabItem>
 </Tabs>;
 ```
-
-## Structure of a how-to guide
-
-We are currently requiring that all how-to-guides be tested and integrated. This ensures that whatever content is presented in the how-to-guide are most up-to-date with the most recent code changes,
-and whatever code or configuration that is shown in the guides are accurate and tested.
-
-### Scripts
-
-You should generally begin writing a how-to-guide by writing a script that performs the action you are trying to explain.
-
-  An example can be found in: `tests/integration/docusaurus/template/script_example.py`
-
-The script should generally include the following steps:
-
-  1. Setting up a GE context, either from a file or in-memory (link to relevant guides)
-  2. Performing the action you are explaining the how-to-guide.  
-    - there are examples for how you can add a Datasource and query it using a `BatchReques
-  3. Some basic assertions to ensure that the code was executed correctly.
-
-This script will be referenced in the how-to-guide, so you may want to add some replacements for code snippets that should be replaced by the user. Again some examples can be found in `tests/integration/docusaurus` folder.
-
-### Tests
-
--
