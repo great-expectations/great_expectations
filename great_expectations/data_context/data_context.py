@@ -40,6 +40,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
+    send_usage_message,
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import nested_update
@@ -232,6 +233,19 @@ class BaseDataContext:
         "/etc/great_expectations.conf",
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
+    TEST_YAML_CONFIG_STORE_TYPES = [
+        "ExpectationsStore",
+        "ValidationsStore",
+        "HtmlSiteStore",
+        "EvaluationParameterStore",
+        "MetricStore",
+        "SqlAlchemyQueryStore",
+        "CheckpointStore",
+    ]
+    TEST_YAML_CONFIG_DATASOURCE_TYPES = [
+        "Datasource",
+        "SimpleSqlalchemyDatasource",
+    ]
 
     @classmethod
     def validate_config(cls, project_config):
@@ -3191,16 +3205,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         instantiated_class: Any
 
+        # Initialize usage stats before try/except
+        usage_stats_event: str = "data_context.test_yaml_config"
+        usage_stats_event_payload: dict = {"class_name": class_name}
+
         try:
-            if class_name in [
-                "ExpectationsStore",
-                "ValidationsStore",
-                "HtmlSiteStore",
-                "EvaluationParameterStore",
-                "MetricStore",
-                "SqlAlchemyQueryStore",
-                "CheckpointStore",
-            ]:
+            if class_name in self.TEST_YAML_CONFIG_STORE_TYPES:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
                 store_name: str = name or config.get("name") or "my_temp_store"
                 instantiated_class = cast(
@@ -3212,10 +3222,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 store_name = instantiated_class.store_name or store_name
                 self._project_config["stores"][store_name] = config
-            elif class_name in [
-                "Datasource",
-                "SimpleSqlalchemyDatasource",
-            ]:
+
+            elif class_name in self.TEST_YAML_CONFIG_DATASOURCE_TYPES:
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
@@ -3230,6 +3238,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         initialize=True,
                     ),
                 )
+
             elif class_name == "Checkpoint":
                 print(
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
@@ -3271,6 +3280,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
             else:
+                # Do not send the real class name if custom
+                usage_stats_event_payload["class_name"] = "RAW_CONFIG"
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."
                 )
@@ -3282,6 +3293,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     config_defaults={},
                 )
 
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event,
+                event_payload=usage_stats_event_payload,
+                success=True,
+            )
             if pretty_print:
                 print(
                     f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
@@ -3298,6 +3315,20 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             return report_object
 
         except Exception as e:
+            if usage_stats_event_payload[
+                "class_name"
+            ] not in self.TEST_YAML_CONFIG_STORE_TYPES + self.TEST_YAML_CONFIG_DATASOURCE_TYPES + [
+                "Checkpoint",
+                "SimpleCheckpoint",
+            ]:
+                # Ensure we do not send the real class name if custom
+                usage_stats_event_payload["class_name"] = "RAW_CONFIG"
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
             if shorten_tracebacks:
                 traceback.print_exc(limit=1)
             else:
