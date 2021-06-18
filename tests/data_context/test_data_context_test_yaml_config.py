@@ -2,19 +2,24 @@ import datetime
 import json
 import os
 import tempfile
+from unittest import mock
 
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
 
 
-def test_empty_store(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_empty_store(mock_emit, empty_data_context_stats_enabled):
     # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context.test_yaml_config(
+    my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -24,14 +29,27 @@ store_backend:
     class_name: InMemoryStoreBackend
 """
     )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "ExpectationsStore"},
+                "success": True,
+            }
+        ),
+    ]
 
     # assert False
 
 
-def test_config_with_yaml_error(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_config_with_yaml_error(mock_emit, empty_data_context_stats_enabled):
     with pytest.raises(Exception):
         # noinspection PyUnusedLocal
-        my_expectation_store = empty_data_context.test_yaml_config(
+        my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -41,9 +59,24 @@ store_backend:
 EGREGIOUS FORMATTING ERROR
 """
         )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "ERRONEOUS_CONFIG"},
+                "success": False,
+            }
+        ),
+    ]
 
 
-def test_expectations_store_with_filesystem_store_backend(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_expectations_store_with_filesystem_store_backend(
+    mock_emit, empty_data_context_stats_enabled
+):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
         f_.write("\n")
@@ -51,7 +84,7 @@ def test_expectations_store_with_filesystem_store_backend(empty_data_context):
         f_.write("\n")
 
     # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context.test_yaml_config(
+    my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store
 class_name: ExpectationsStore
@@ -61,14 +94,28 @@ store_backend:
     base_directory: {tmp_dir}
 """
     )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "ExpectationsStore"},
+                "success": True,
+            }
+        ),
+    ]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_store_with_filesystem_store_backend(
-    empty_data_context, tmp_path_factory
+    mock_emit, empty_data_context_stats_enabled, tmp_path_factory
 ):
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
     )
+    context: DataContext = empty_data_context_stats_enabled
 
     yaml_config: str = f"""
     store_name: my_checkpoint_store
@@ -80,15 +127,42 @@ def test_checkpoint_store_with_filesystem_store_backend(
         base_directory: {tmp_dir}/checkpoints
     """
 
-    my_checkpoint_store: CheckpointStore = empty_data_context.test_yaml_config(
+    my_checkpoint_store: CheckpointStore = context.test_yaml_config(
         yaml_config=yaml_config,
         return_mode="instantiated_class",
     )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "CheckpointStore"},
+                "success": True,
+            }
+        ),
+    ]
 
-    report_object: dict = empty_data_context.test_yaml_config(
+    report_object: dict = context.test_yaml_config(
         yaml_config=yaml_config,
         return_mode="report_object",
     )
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "CheckpointStore"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "CheckpointStore"},
+                "success": True,
+            }
+        ),
+    ]
 
     assert my_checkpoint_store.config == report_object["config"]
 
@@ -107,20 +181,20 @@ def test_checkpoint_store_with_filesystem_store_backend(
         },
         "overwrite_existing": False,
         "runtime_environment": {
-            "root_directory": f"{empty_data_context.root_directory}",
+            "root_directory": f"{context.root_directory}",
         },
     }
     assert my_checkpoint_store.config == expected_checkpoint_store_config
 
     checkpoint_store_name: str = my_checkpoint_store.config["store_name"]
-    empty_data_context.get_config()["checkpoint_store_name"] = checkpoint_store_name
+    context.get_config()["checkpoint_store_name"] = checkpoint_store_name
 
     assert (
-        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        context.get_config_with_variables_substituted().checkpoint_store_name
         == "my_checkpoint_store"
     )
     assert (
-        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        context.get_config_with_variables_substituted().checkpoint_store_name
         == my_checkpoint_store.config["store_name"]
     )
 
@@ -136,15 +210,20 @@ def test_checkpoint_store_with_filesystem_store_backend(
         },
     }
     assert (
-        empty_data_context.get_config_with_variables_substituted().stores[
-            empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        context.get_config_with_variables_substituted().stores[
+            context.get_config_with_variables_substituted().checkpoint_store_name
         ]
         == expected_checkpoint_store_config
     )
+    # No other usage stats calls
+    assert mock_emit.call_count == 2
 
 
-def test_empty_store2(empty_data_context):
-    empty_data_context.test_yaml_config(
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_empty_store2(mock_emit, empty_data_context_stats_enabled):
+    empty_data_context_stats_enabled.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
 store_backend:
@@ -153,9 +232,22 @@ store_backend:
     class_name: InMemoryStoreBackend
 """
     )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "ValidationsStore"},
+                "success": True,
+            }
+        ),
+    ]
 
 
-def test_datasource_config(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_datasource_config(mock_emit, empty_data_context_stats_enabled):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -174,7 +266,7 @@ def test_datasource_config(empty_data_context):
     )
     print(temp_dir)
 
-    return_obj = empty_data_context.test_yaml_config(
+    return_obj = empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=f"""
 class_name: Datasource
 
@@ -195,6 +287,16 @@ data_connectors:
 """,
         return_mode="report_object",
     )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    ]
 
     print(json.dumps(return_obj, indent=2))
 
@@ -219,9 +321,14 @@ data_connectors:
     #     "example_unmatched_data_references": [],
     #     "unmatched_data_reference_count": 0,
     # }
+    # No other usage stats calls
+    assert mock_emit.call_count == 1
 
 
-def test_error_states(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_error_states(mock_emit, empty_data_context_stats_enabled):
     first_config: str = """
 class_name: Datasource
 
@@ -230,19 +337,43 @@ execution_engine:
 """
 
     with pytest.raises(ge_exceptions.DatasourceInitializationError) as excinfo:
-        empty_data_context.test_yaml_config(yaml_config=first_config)
+        empty_data_context_stats_enabled.test_yaml_config(yaml_config=first_config)
         # print(excinfo.value.message)
         # shortened_message_len = len(excinfo.value.message)
         # print("="*80)
 
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": False,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
-    empty_data_context.test_yaml_config(
+    empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=first_config,
         shorten_tracebacks=True,
     )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.append(
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": False,
+            }
+        ),
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     # For good measure, do it again, with a different config and a different type of error
+    # Note this erroneous key/value does not cause an error and is removed from the Datasource config
     temp_dir = str(tempfile.mkdtemp())
     second_config = f"""
 class_name: Datasource
@@ -264,15 +395,33 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    datasource = empty_data_context.test_yaml_config(yaml_config=second_config)
+    datasource = empty_data_context_stats_enabled.test_yaml_config(
+        yaml_config=second_config
+    )
     assert (
         "NOT_A_REAL_KEY"
         not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
     )
+    assert mock_emit.call_count == 3
+    expected_call_args_list.append(
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
-def test_config_variables_in_test_yaml_config(empty_data_context, sa):
-    context = empty_data_context
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_config_variables_in_test_yaml_config(
+    mock_emit, empty_data_context_stats_enabled, sa
+):
+    context: DataContext = empty_data_context_stats_enabled
 
     db_file = file_relative_path(
         __file__,
@@ -305,6 +454,17 @@ introspection:
         "test_cases_for_sql_data_connector.db"
         in my_datasource.execution_engine.connection_string
     )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "SimpleSqlalchemyDatasource"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     report_object = context.test_yaml_config(first_config, return_mode="report_object")
     print(json.dumps(report_object, indent=2))
@@ -313,13 +473,27 @@ introspection:
         "count",
         "my_very_awesome_data_connector",
     }
+    assert mock_emit.call_count == 2
+    expected_call_args_list.append(
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "SimpleSqlalchemyDatasource"},
+                "success": True,
+            }
+        ),
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_golden_path_sql_datasource_configuration(
-    sa, empty_data_context, test_connectable_postgresql_db
+    mock_emit, empty_data_context_stats_enabled, sa, test_connectable_postgresql_db
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     os.chdir(context.root_directory)
 
@@ -351,6 +525,18 @@ introspection:
         yaml_config=yaml_config,
         return_mode="report_object",
     )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "SimpleSqlalchemyDatasource"},
+                "success": False,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
     print(json.dumps(report_object, indent=2))
     print(context.datasources)
 

@@ -144,7 +144,8 @@ TEST_YAML_CONFIG_TYPES = (
     + BaseDataContext.TEST_YAML_CONFIG_DATASOURCE_TYPES
     + ["Checkpoint", "SimpleCheckpoint"]
     + [
-        "RAW_CONFIG",
+        "CUSTOM_CONFIG",
+        "ERRONEOUS_CONFIG",
     ]
 )
 valid_usage_statistics_messages = {
