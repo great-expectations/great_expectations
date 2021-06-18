@@ -365,6 +365,16 @@ datasource_sqlalchemy_connect_payload = {
     "additionalProperties": False,
 }
 
+test_yaml_config_payload_schema = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "class_name": {"type": "string", "maxLength": 256},
+    },
+    "required": ["class_name"],
+    "additionalProperties": False,
+}
+
 usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/schema#",
     "definitions": {
@@ -385,6 +395,7 @@ usage_statistics_record_schema = {
         "cli_payload": cli_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
+        "test_yaml_config_payload": test_yaml_config_payload_schema,
     },
     "type": "object",
     "properties": {
@@ -462,6 +473,15 @@ usage_statistics_record_schema = {
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["data_context.test_yaml_config"],
+                },
+                "event_payload": {"$ref": "#/definitions/test_yaml_config_payload"},
             },
         },
         {
