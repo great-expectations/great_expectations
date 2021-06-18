@@ -5,6 +5,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -82,7 +83,7 @@ class ConfigurationStore(Store):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
         self._overwrite_existing = overwrite_existing
 
@@ -90,14 +91,18 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
+        if isinstance(self.store_backend, GeCloudStoreBackend):
+            # GeCloudStoreBackend expects a json str
+            config_schema = value.get_schema_class()()
+            return config_schema.dump(value)
         return value.to_yaml_str()
 
     def deserialize(self, key, value):
-        config_commented_map_from_yaml: CommentedMap = yaml.load(value)
+        config = value
+        if isinstance(value, str):
+            config: CommentedMap = yaml.load(value)
         try:
-            return self._configuration_class.from_commented_map(
-                commented_map=config_commented_map_from_yaml
-            )
+            return self._configuration_class.from_commented_map(commented_map=config)
         except ge_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise

@@ -263,7 +263,7 @@ class BatchRequestBase(DictDot):
                     type(json_dict["runtime_parameters"]["batch_data"])
                 )
 
-        filter_properties_dict(properties=json_dict, inplace=True)
+        filter_properties_dict(properties=json_dict, clean_falsy=True, inplace=True)
 
         return json_dict
 

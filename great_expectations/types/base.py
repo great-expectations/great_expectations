@@ -45,3 +45,14 @@ class DotDict(dict):
     def to_yaml(cls, representer, node):
         """Use dict representation for DotDict (and subtypes by default)"""
         return representer.represent_dict(node)
+
+
+class SerializableDotDict(DotDict):
+    """
+    Analogously to the way "SerializableDictDot" extends "DictDot" to provide JSON serialization, the present class,
+    "SerializableDotDict" extends "DotDict" to provide JSON-serializable version of the "DotDict" class as well.
+    Since "DotDict" is already YAML-serializable, "SerializableDotDict" is both YAML-serializable and JSON-serializable.
+    """
+
+    def to_json_dict(self) -> dict:
+        raise NotImplementedError
