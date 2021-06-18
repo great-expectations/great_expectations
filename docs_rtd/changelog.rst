@@ -24,6 +24,7 @@ Develop
 * [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
 * [MAINTENANCE] DOCS integration tests have moved to a new pipeline
 * [BUGFIX] Fix serialization error in DataDocs rendering
+* [BUGFIX] Fix datadocs rendering issue where 0 value was displayed as `--`
 
 0.13.19
 -----------------
