@@ -32,7 +32,7 @@ class Profiler:
         self,
         validator: Validator,
         *,
-        profiler_config: Dict[str, Dict[str, Dict]] = {},
+        profiler_config: Optional[Dict[str, Dict[str, Dict]]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -49,7 +49,6 @@ class Profiler:
         """
         self._validator = validator
         self._data_context = data_context
-
         self._rules = []
 
         rules_configs: Dict[str, Dict] = profiler_config.get("rules", {})
