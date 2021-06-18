@@ -250,12 +250,10 @@ def test_alice_profiler_user_workflow_single_batch(
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
     # Load profiler configs & loop (run tests for each one)
-    profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
+    yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     # Instantiate Profiler
-    full_profiler_config_dict: dict = yaml.load(profiler_config)
-    rules_configs: dict = full_profiler_config_dict.get("rules")
-    variables_configs: dict = full_profiler_config_dict.get("variables")
+    profiler_config: dict = yaml.load(yaml_config)
 
     datasource_name: str = "alice_columnar_table_single_batch_datasource"
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
@@ -272,8 +270,7 @@ def test_alice_profiler_user_workflow_single_batch(
 
     profiler: Profiler = Profiler(
         validator=validator,
-        rules_configs=rules_configs,
-        variables_configs=variables_configs,
+        profiler_config=profiler_config,
         data_context=data_context,
     )
 
@@ -362,12 +359,10 @@ def test_bobby_profiler_user_workflow_multi_batch(
     # Load data context
     data_context: DataContext = bobby_columnar_table_multi_batch_context
     # Load profiler configs & loop (run tests for each one)
-    profiler_config: str = bobby_columnar_table_multi_batch["profiler_config"]
+    yaml_config: str = bobby_columnar_table_multi_batch["profiler_config"]
 
     # Instantiate Profiler
-    full_profiler_config_dict: dict = yaml.load(profiler_config)
-    rules_configs: dict = full_profiler_config_dict.get("rules")
-    variables_configs: dict = full_profiler_config_dict.get("variables")
+    profiler_config: dict = yaml.load(yaml_config)
 
     datasource_name: str = "taxi_pandas"
     data_connector_name: str = "monthly"
@@ -387,8 +382,7 @@ def test_bobby_profiler_user_workflow_multi_batch(
 
     profiler: Profiler = Profiler(
         validator=validator,
-        rules_configs=rules_configs,
-        variables_configs=variables_configs,
+        profiler_config=profiler_config,
         data_context=data_context,
     )
 
