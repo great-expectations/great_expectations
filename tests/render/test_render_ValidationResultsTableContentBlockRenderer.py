@@ -240,6 +240,20 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
         ),
     )
 
+    evr_success_zero = ExpectationValidationResult(
+        success=True,
+        result={"observed_value": 0},
+        exception_info={
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_be_between",
+            kwargs={"min_value": 0, "max_value": None, "result_format": "SUMMARY"},
+        ),
+    )
+
     # test _get_observed_value when evr.result["observed_value"] exists
     output_1 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
@@ -264,6 +278,12 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
         renderer_type="renderer.diagnostic.observed_value",
     )[1](result=evr_expect_column_values_to_be_null)
     assert output_4 == "100% null"
+    # test _get_observed_value to be 0
+    output_5 = get_renderer_impl(
+        object_name=evr_success_zero.expectation_config.expectation_type,
+        renderer_type="renderer.diagnostic.observed_value",
+    )[1](result=evr_success_zero)
+    assert output_5 == "0"
 
 
 def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
