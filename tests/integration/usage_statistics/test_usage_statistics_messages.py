@@ -5,6 +5,8 @@ from typing import Any, Dict, List
 import pytest
 import requests
 
+from great_expectations.data_context import BaseDataContext
+
 USAGE_STATISTICS_QA_URL = (
     "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
@@ -137,6 +139,14 @@ Whenever a new kind of message is added, an example of that message should be in
 Each message will be sent to the server to ensure it is accepted.
 
 """
+TEST_YAML_CONFIG_TYPES = (
+    BaseDataContext.TEST_YAML_CONFIG_STORE_TYPES
+    + BaseDataContext.TEST_YAML_CONFIG_DATASOURCE_TYPES
+    + ["Checkpoint", "SimpleCheckpoint"]
+    + [
+        "RAW_CONFIG",
+    ]
+)
 valid_usage_statistics_messages = {
     "data_context.__init__": [
         {
@@ -438,6 +448,37 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.5.manual_testing",
         }
     ],
+    # BaseDataContext.test_yaml_config() MESSAGES
+    "data_context.test_yaml_config": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2021-06-18T14:36:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "class_name": class_name,
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+            for class_name in TEST_YAML_CONFIG_TYPES
+        ]
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "class_name": class_name,
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+            for class_name in TEST_YAML_CONFIG_TYPES
+        ],
+    ),
     # CLI INIT COMMANDS
     "cli.init.create": [
         {
