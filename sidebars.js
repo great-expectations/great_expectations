@@ -237,7 +237,7 @@ module.exports = {
             { type: 'doc', id: 'guides/advanced/how-to-add-support-for-a-new-sqlalchemy-dialect' },
             { type: 'doc', id: 'guides/advanced/how-to-add-comments-to-a-page-on-docs.greatexpectations.io' },
             { type: 'doc', id: 'guides/advanced/how-to-use-the-great-expectation-docker-images' },
-            { type: 'doc', id: 'guides/advanced/how-to-write-a-how-to-guide' },
+            { type: 'doc', id: 'guides/advanced/how-to-write-a-how-to-guide-docusaurus' },
             { type: 'doc', id: 'guides/advanced/how-to-template' }
 
           ]
