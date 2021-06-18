@@ -47,16 +47,7 @@ context.test_yaml_config(yaml.dump(datasource_config))
 
 context.add_datasource(**datasource_config)
 
-# First test for RuntimeBatchRequest using a query. bigquery_temp_table name is generated automatically
-batch_request = RuntimeBatchRequest(
-    datasource_name="my_bigquery_datasource",
-    data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="default_name",  # this can be anything that identifies this data
-    runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "something_something"},
-)
-
-# Second test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
+# Test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -79,14 +70,7 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 
-# First test for BatchRequest naming a table, bigquery_temp_table name is generated automatically
-batch_request = BatchRequest(
-    datasource_name="my_bigquery_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
-)
-
-# Second test for BatchRequest naming a table. bigquery_temp_table name is passed in as batch_spec_passthrough
+# Test for BatchRequest naming a table. bigquery_temp_table name is passed in as batch_spec_passthrough
 batch_request = BatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_inferred_data_connector_name",
