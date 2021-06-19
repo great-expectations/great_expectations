@@ -1,16 +1,14 @@
 import copy
 import logging
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-    ParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.parameter_builder import (
     DOMAIN_KWARGS_PARAMETER_NAME,
+    ParameterBuilder,
     ParameterContainer,
     build_parameter_container,
 )
@@ -38,6 +36,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
         data_context: Optional[DataContext] = None,
+        batch_request: Optional[Union[dict, str]] = None,
     ):
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -50,11 +49,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             candidate_strings: a list of candidate date format strings that will REPLACE the default
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
             data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
 
         super().__init__(
             parameter_name=parameter_name,
             data_context=data_context,
+            batch_request=batch_request,
         )
 
         self._domain_kwargs = domain_kwargs
@@ -74,27 +75,33 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
-        # TODO: <Alex>ALEX -- this needs to be generalized to use the multi-batch get_batch_ids() utility.</Alex>
-        batch_ids = [validator.active_batch_id]
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not batch_ids:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
+            )
 
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        # TODO: <Alex>ALEX -- Is the check below still relevant?</Alex>
         if len(batch_ids) > 1:
-            # By default, the validator will use active batch id (the most recently loaded batch)
             logger.warning(
                 f"Parameter Builder {self.name} received {len(batch_ids)} batches but can only process one."
             )
-            if batch_ids[0] not in validator.execution_engine.loaded_batch_data_ids:
-                raise ge_exceptions.ProfilerExecutionError(
-                    f"""Parameter Builder {self.name} cannot build parameters because batch {batch_ids[0]} is not \
-currently loaded in the validator.
-"""
-                )
 
         # TODO: <Alex>ALEX -- type overloading is generally a poor practice; the caller should decide on the type of "metric_domain_kwargs" and call this method accordingly.</Alex>
         # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the

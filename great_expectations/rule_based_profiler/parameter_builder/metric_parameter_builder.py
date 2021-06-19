@@ -1,11 +1,9 @@
 from typing import Any, Dict, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
 )
@@ -29,6 +27,7 @@ class MetricParameterBuilder(ParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         data_context: Optional[DataContext] = None,
+        batch_request: Optional[Union[dict, str]] = None,
     ):
         """
         Args:
@@ -39,10 +38,12 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
             data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
             parameter_name=parameter_name,
             data_context=data_context,
+            batch_request=batch_request,
         )
 
         self._metric_name = metric_name
@@ -53,7 +54,6 @@ class MetricParameterBuilder(ParameterBuilder):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -63,6 +63,12 @@ class MetricParameterBuilder(ParameterBuilder):
             Args:
         :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_domain_kwargs: Optional[
             dict

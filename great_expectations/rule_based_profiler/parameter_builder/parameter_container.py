@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import filter_properties_dict
@@ -251,7 +251,7 @@ def _build_parameter_node_tree_for_one_parameter(
 
 def get_parameter_value_by_fully_qualified_parameter_name(
     fully_qualified_parameter_name: str,
-    domain: Domain,
+    domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Union[Any, ParameterNode]]:
@@ -260,7 +260,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
     Args
         :param fully_qualified_parameter_name: str -- A dot-separated string key starting with $ for fetching parameters
-        :param domain: Union[Domain, List[Domain]] -- current Domain (or List[Domain]) of interest
+        :param domain: Domain -- current Domain of interest
         :param variables
         :param parameters
     :return: Optional[Union[Any, ParameterNode]] object corresponding to the last part of the fully-qualified parameter

@@ -4,9 +4,7 @@ from typing import Any, Dict, Optional, Union
 from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
-    SemanticDomainTypes,
-)
+from great_expectations.rule_based_profiler.domain_builder import SemanticDomainTypes
 from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import filter_properties_dict
 
@@ -80,7 +78,11 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
                 hasattr(other, "to_json_dict")
                 and self.to_json_dict() == other.to_json_dict()
             )
-            or (isinstance(other, dict) and self.to_json_dict() == other)
+            or (
+                isinstance(other, dict)
+                and self.to_json_dict()
+                == filter_properties_dict(properties=other, clean_falsy=True)
+            )
             or (self.__str__() == str(other))
         )
 

@@ -6,7 +6,7 @@ from scipy import special
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.estimators import (
     BootstrappedStandardErrorOptimizationBasedEstimator,  # isort:skip
 )
@@ -14,9 +14,7 @@ from great_expectations.rule_based_profiler.estimators import (
     SingleNumericStatisticCalculator,  # isort:skip
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    MultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
+    ParameterBuilder,
     ParameterContainer,
     build_parameter_container,
 )
@@ -174,7 +172,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         return mean
 
 
-class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
+class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     """
     A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
     using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
@@ -278,7 +276,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -323,25 +320,20 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
-        batch_ids_for_metrics_calculations: Optional[
-            List[str]
-        ] = self.get_batch_ids_for_metrics_calculations(
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        if not batch_ids_for_metrics_calculations:
+        if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        validator_for_metrics_calculations: Validator = (
-            self.get_validator_for_metrics_calculations(
-                validator=validator,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
 
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
@@ -396,8 +388,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
 
         statistic_calculator: NumericMetricRangeMultiBatchStatisticCalculator = (
             NumericMetricRangeMultiBatchStatisticCalculator(
-                batch_ids=batch_ids_for_metrics_calculations,
-                validator=validator_for_metrics_calculations,
+                batch_ids=batch_ids,
+                validator=validator,
                 metric_name=self._metric_name,
                 metric_domain_kwargs=metric_domain_kwargs,
                 metric_value_kwargs=metric_value_kwargs,
@@ -409,7 +401,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
         ] = statistic_calculator.generate_distribution_sample(
-            randomized_data_point_identifiers=batch_ids_for_metrics_calculations
+            randomized_data_point_identifiers=batch_ids
         )
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
 
@@ -438,7 +430,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         if sampling_method == "bootstrap":
             bootstrapped_estimator: BootstrappedStandardErrorOptimizationBasedEstimator = BootstrappedStandardErrorOptimizationBasedEstimator(
                 statistic_calculator=statistic_calculator,
-                num_data_points=len(batch_ids_for_metrics_calculations),
+                num_data_points=len(batch_ids),
                 fractional_bootstrapped_statistic_deviation_bound=1.0e-1,
                 prob_bootstrapped_statistic_deviation_outside_bound=5.0e-2,
             )
