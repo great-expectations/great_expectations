@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data on a S3 using spark
+title: How to connect to data on S3 using Spark
 ---
 
 import NextSteps from '../../components/next_steps.md'

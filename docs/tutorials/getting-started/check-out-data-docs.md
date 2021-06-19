@@ -1,5 +1,5 @@
 ---
-title: Set up data docs
+title: Check out Data Docs 
 ---
 
 ![minimap](minimap.png)

@@ -1,5 +1,5 @@
 ---
-title: Installing great_expectations in Databricks
+title: How to install Great Expectations in Databricks
 ---
 
 This article is a stub.

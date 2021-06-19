@@ -17,7 +17,7 @@ module.exports = {
         'tutorials/getting-started/initialize-a-data-context',
         'tutorials/getting-started/connect-to-data',
         'tutorials/getting-started/create-your-first-expectations',
-        'tutorials/getting-started/set-up-data-docs',
+        'tutorials/getting-started/check-out-data-docs',
         'tutorials/getting-started/validate-your-data',
         'tutorials/getting-started/customize-your-deployment'
       ]
@@ -33,7 +33,7 @@ module.exports = {
           items: [
             'core_skills/connecting_to_your_data/how-to-configure-a-dataconnector-to-introspect-and-partition-a-file-system-or-blob-store',
             'core_skills/connecting_to_your_data/how-to-configure-a-dataconnector-to-introspect-and-partition-tables-in-sql',
-            'core_skills/connecting_to_your_data/how-to-create-a-batch-of-data-from-a-single-file-or-in-memory-dataframe',
+            'core_skills/connecting_to_your_data/how-to-create-a-batch-of-data-from-an-in-memory-spark-or-pandas-dataframe',
             'core_skills/connecting_to_your_data/how-to-create-a-new-expectation-suite-using-the-cli',
             'core_skills/connecting_to_your_data/how-to-get-a-batch-of-data-from-a-configured-datasource'
           ]
@@ -191,7 +191,7 @@ module.exports = {
               items: [
                 'guides/expectations/advanced/how-to-add-comments-to-expectations-and-display-them-in-data-docs',
                 'guides/expectations/advanced/how-to-create-renderers-for-custom-expectations',
-                'guides/expectations/advanced/how-to-create-a-new-expectation-suite-from-a-jsonschema-file',
+                'guides/expectations/advanced/how-to-create-a-new-expectation-suite-by-profiling-from-a-jsonschema-file',
                 'guides/expectations/advanced/how-to-create-expectations-that-span-multiple-batches-using-evaluation-parameters',
                 'guides/expectations/advanced/how-to-dynamically-load-evaluation-parameters-from-a-database'
               ]
@@ -238,6 +238,7 @@ module.exports = {
               items: [
                 'guides/validation/checkpoints/how-to-add-validations-data-or-suites-to-a-checkpoint',
                 'guides/validation/checkpoints/how-to-create-a-new-checkpoint',
+                'guides/validation/checkpoints/how-to-configure-a-new-checkpoint-using-test_yaml_config'
               ]
             },
             {

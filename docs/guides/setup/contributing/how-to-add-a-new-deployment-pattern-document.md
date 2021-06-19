@@ -1,5 +1,5 @@
 ---
-title: How to Add a New Deployment Pattern Document
+title: How to add a new Deployment Pattern document
 ---
 
 This article is a stub.

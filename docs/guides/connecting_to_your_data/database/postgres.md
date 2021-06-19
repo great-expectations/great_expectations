@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data in a postgresql database
+title: How to connect to a Postgresql database
 ---
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
