@@ -14,38 +14,40 @@ from great_expectations.validator.validator import Validator
 context = DataContext()
 suite = context.get_expectation_suite("yellow_trip_data_validations")
 
-# Create a BatchRequest and instantiate a Validator with only the January data
+# Create a BatchRequest and instantiate a Validator with only the January 2019 data
 jan_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
     data_asset_name="my_reports",
-    data_connector_query={"batch_filter_parameters": {"month": "01"}},
+    data_connector_query={"batch_filter_parameters": {"month": "01", "year": "2019"}},
 )
 
 validator: Validator = context.get_validator(
     batch_request=jan_batch_request, expectation_suite=suite
 )
 assert validator.active_batch_definition.batch_identifiers["month"] == "01"
+assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 
-# Create a Batch from February data, then load it to the instantiated Validator
+# Create a Batch from February 2019 data, then load it to the instantiated Validator
 feb_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
     data_asset_name="my_reports",
-    data_connector_query={"batch_filter_parameters": {"month": "02"}},
+    data_connector_query={"batch_filter_parameters": {"month": "02", "year": "2019"}},
 )
 
 feb_batch_list: List[Batch] = context.get_batch_list(batch_request=feb_batch_request)
 
 validator.load_batch(batch_list=feb_batch_list)
 assert validator.active_batch_definition.batch_identifiers["month"] == "02"
+assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 
 # Create a Batch from March data, then load it to the instantiated Validator
 march_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
     data_asset_name="my_reports",
-    data_connector_query={"batch_filter_parameters": {"month": "03"}},
+    data_connector_query={"batch_filter_parameters": {"month": "03", "year": "2019"}},
 )
 
 march_batch_list: List[Batch] = context.get_batch_list(
@@ -54,6 +56,7 @@ march_batch_list: List[Batch] = context.get_batch_list(
 
 validator.load_batch(batch_list=march_batch_list)
 assert validator.active_batch_definition.batch_identifiers["month"] == "03"
+assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 
 
 # Get the list of all batches contained by the Validator for use in the BatchFileter
