@@ -2,7 +2,10 @@ from typing import List
 
 import pytest
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+)
 
 # TODO: Move these fixtures to integration tests
 from great_expectations.data_context.util import file_relative_path

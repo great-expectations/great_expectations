@@ -1,12 +1,36 @@
-import json
+from dataclasses import asdict, dataclass
+from enum import Enum
 from typing import Any, Dict, Optional, Union
+
+import json
 
 from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import SemanticDomainTypes
+from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import filter_properties_dict
+
+
+class SemanticDomainTypes(Enum):
+    NUMERIC = "numeric"
+    TEXT = "text"
+    LOGIC = "logic"
+    DATETIME = "datetime"
+    BINARY = "binary"
+    CURRENCY = "currency"
+    VALUE_SET = "value_set"
+    MISCELLANEOUS = "miscellaneous"
+    UNKNOWN = "unknown"
+
+
+@dataclass
+class InferredSemanticDomainType(SerializableDictDot):
+    semantic_domain_type: Optional[Union[str, SemanticDomainTypes]] = None
+    details: Optional[Dict[str, Any]] = None
+
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(data=asdict(self))
 
 
 class DomainKwargs(SerializableDotDict):

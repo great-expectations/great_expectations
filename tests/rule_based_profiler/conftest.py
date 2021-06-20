@@ -10,14 +10,14 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import Domain
 
 # noinspection PyUnresolvedReferences
+from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
     ParameterNode,
 )
-from great_expectations.rule_based_profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.rule import Rule
 
 # noinspection PyUnresolvedReferences
 from tests.rule_based_profiler.alice_user_workflow_fixture import (
