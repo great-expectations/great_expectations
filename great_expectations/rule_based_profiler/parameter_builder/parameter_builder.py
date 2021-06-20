@@ -1,12 +1,15 @@
-import uuid
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
-from great_expectations.rule_based_profiler.util import build_batch_request
+from great_expectations.rule_based_profiler.util import (
+    get_batch_ids as get_batch_ids_from_batch_request,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_validator as get_validator_from_batch_request,
+)
 from great_expectations.validator.validator import Validator
 
 
@@ -82,22 +85,12 @@ class ParameterBuilder(ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Optional[Validator]:
-        if self._batch_request is None:
-            return None
-
-        batch_request: Optional[BatchRequest] = build_batch_request(
-            domain=domain,
+        return get_validator_from_batch_request(
+            data_context=self.data_context,
             batch_request=self._batch_request,
+            domain=domain,
             variables=variables,
             parameters=parameters,
-        )
-
-        expectation_suite_name: str = (
-            f"tmp_parameter_builder_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
-        )
-        return self.data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
         )
 
     def get_batch_ids(
@@ -106,24 +99,13 @@ class ParameterBuilder(ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Optional[List[str]]:
-        if self._batch_request is None:
-            return None
-
-        batch_request: Optional[BatchRequest] = build_batch_request(
-            domain=domain,
+        return get_batch_ids_from_batch_request(
+            data_context=self.data_context,
             batch_request=self._batch_request,
+            domain=domain,
             variables=variables,
             parameters=parameters,
         )
-
-        batch_list: List[Batch] = self.data_context.get_batch_list(
-            batch_request=batch_request
-        )
-
-        batch: Batch
-        batch_ids: List[str] = [batch.id for batch in batch_list]
-
-        return batch_ids
 
     @property
     def parameter_name(self) -> str:
