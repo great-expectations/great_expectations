@@ -1,8 +1,7 @@
+import json
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Dict, Optional, Union
-
-import json
 
 from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable

@@ -5,11 +5,11 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.domain_builder import (
     Domain,
+    DomainBuilder,
+    InferredSemanticDomainType,
     SemanticDomainTypes,
-    InferredSemanticDomainType
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.validator.validator import MetricConfiguration

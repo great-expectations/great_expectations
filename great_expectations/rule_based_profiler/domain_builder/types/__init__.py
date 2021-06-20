@@ -1,5 +1,1 @@
-from .domain import (
-    Domain,
-    SemanticDomainTypes,
-    InferredSemanticDomainType,
-)
+from .domain import Domain, InferredSemanticDomainType, SemanticDomainTypes

@@ -7,10 +7,7 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.datasource import (
-    DataConnector,
-    Datasource,
-)
+from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler.profiler import Profiler
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
