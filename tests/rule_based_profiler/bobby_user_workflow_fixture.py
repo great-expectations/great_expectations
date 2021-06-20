@@ -784,11 +784,4 @@ def bobby_columnar_table_multi_batch():
             "expectation_suite_name": expectation_suite_name_oneshot_sampling_method,
             "expected_expectation_suite": expected_expectation_suite_oneshot_sampling_method,
         },
-        "test_configuration_bootstrap_sampling_method": {
-            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
-            "expect_table_row_count_to_be_between_min_value_min_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_min_value,
-            "expect_table_row_count_to_be_between_min_value_max_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_max_value,
-            "expect_table_row_count_to_be_between_max_value_min_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_min_value,
-            "expect_table_row_count_to_be_between_max_value_max_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_max_value,
-        },
     }

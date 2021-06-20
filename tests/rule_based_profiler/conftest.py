@@ -1,14 +1,18 @@
 import datetime
 import os
 import shutil
-from typing import Any, Dict
+from typing import Any, Dict, List
 
+import numpy as np
 import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.data_connector.util import (
+    get_filesystem_one_level_directory_glob_path_list,
+)
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 
 # noinspection PyUnresolvedReferences
@@ -32,6 +36,11 @@ from tests.rule_based_profiler.bob_user_workflow_fixture import (
 # noinspection PyUnresolvedReferences
 from tests.rule_based_profiler.bobby_user_workflow_fixture import (
     bobby_columnar_table_multi_batch,
+)
+
+# noinspection PyUnresolvedReferences
+from tests.rule_based_profiler.bobster_user_workflow_fixture import (
+    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 )
 
 yaml = YAML()
@@ -121,7 +130,7 @@ data_connectors:
 
 
 @pytest.fixture
-def bobby_columnar_table_multi_batch_context(
+def bobby_columnar_table_multi_batch_deterministic_data_context(
     tmp_path_factory,
     monkeypatch,
 ) -> DataContext:
@@ -201,6 +210,82 @@ def bobby_columnar_table_multi_batch_context(
             )
         ),
     )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+@pytest.fixture
+def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    """
+    # TODO: <Alex>ALEX -- Provide DocString</Alex>
+    """
+    # Reenable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "integration",
+                "fixtures",
+                "yellow_trip_data_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    base_directory: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_trip_data_samples",
+        ),
+    )
+    file_name_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        base_directory_path=base_directory, glob_directive="*.csv"
+    )
+    file_name_list = sorted(file_name_list)
+    num_files: int = len(file_name_list)
+
+    rnd_num_sample: np.float64
+    output_file_lenths: List[int] = [
+        round(rnd_num_sample)
+        for rnd_num_sample in np.random.normal(loc=5.0e3, scale=1.0e3, size=num_files)
+    ]
+
+    idx: int
+    file_name: str
+
+    output_file_name_length_map: Dict[str, int] = {
+        file_name_list[idx]: output_file_lenths[idx]
+        for idx, file_name in enumerate(file_name_list)
+    }
+
+    csv_source_path: str
+    df: pd.DataFrame
+    for file_name in file_name_list:
+        csv_source_path = os.path.join(base_directory, file_name)
+        df = pd.read_csv(filepath_or_buffer=csv_source_path)
+        df = df.sample(
+            n=output_file_name_length_map[file_name], replace=False, random_state=1
+        )
+        df.to_csv(
+            path_or_buf=os.path.join(context_path, "..", "data", file_name), index=False
+        )
 
     context: DataContext = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path

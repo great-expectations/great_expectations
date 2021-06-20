@@ -100,7 +100,7 @@ def test_alice_profiler_user_workflow_single_batch(
 
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
-    bobby_columnar_table_multi_batch_context,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
 ):
     """
@@ -108,7 +108,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     What does this test and why?
     """
 
-    context: DataContext = bobby_columnar_table_multi_batch_context
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     datasource_name: str = "taxi_pandas"
     data_connector_name: str = "monthly"
@@ -165,11 +165,13 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 
 
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
-    bobby_columnar_table_multi_batch_context,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
 ):
     # Load data context
-    data_context: DataContext = bobby_columnar_table_multi_batch_context
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
     # Load profiler configs & loop (run tests for each one)
     profiler_config: str = bobby_columnar_table_multi_batch["profiler_config"]
 
@@ -198,38 +200,25 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
 
-def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
-    bobby_columnar_table_multi_batch_context,
-    bobby_columnar_table_multi_batch,
+def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
+    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
+    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 ):
     # Load data context
-    data_context: DataContext = bobby_columnar_table_multi_batch_context
+    data_context: DataContext = (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
+    )
     # Load profiler configs & loop (run tests for each one)
-    profiler_config: str = bobby_columnar_table_multi_batch["profiler_config"]
+    profiler_config: str = (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "profiler_config"
+        ]
+    )
 
     # Instantiate Profiler
     full_profiler_config_dict: dict = yaml.load(profiler_config)
     rules_configs: dict = full_profiler_config_dict.get("rules")
     variables_configs: dict = full_profiler_config_dict.get("variables")
-
-    # Extract only the "row_count_range_rule" from the configuration and set the "sampling_method" of its only
-    # "parameter_builder" (an instance of NumericMetricRangeMultiBatchParameterBuilder) to be the "bootstrap" method.
-    # The reason for this manipulation is that even though the default value of the "sampling_method" is "bootstrap",
-    # it is set to "oneshot" in the test configuration of every "parameter_builder" (for those that are instances of
-    # NumericMetricRangeMultiBatchParameterBuilder) in order for the large expectation suite fixture, created for the
-    # parametric ("oneshot") mode of the NumericMetricRangeMultiBatchParameterBuilder class to be applicable (coverage).
-    # The "Bobby" profiler use case, applied to the Taxi data, outputs 1 table expectation and 30 column expectations.
-    # The present test of the "bootstrap" sampling method uses the expectation suite containing only one expectation,
-    # because setting up the statistical assertions (and the required fixtures with the tolerances) is very laborious.
-    # In the future, additional of the "bootstrap" sampling method should be created using domain builders that generate
-    # a small number of domains (ideally, only one domain) so as to make the building of test fixtures more manageable.
-    row_count_range_rule: dict = rules_configs["row_count_range_rule"]
-    parameter_builders: dict = row_count_range_rule["parameter_builders"]
-    row_count_range_parameter: dict = parameter_builders[0]
-    row_count_range_parameter["sampling_method"] = "bootstrap"
-    rules_configs = {
-        "row_count_range_rule": row_count_range_rule,
-    }
 
     profiler: Profiler = Profiler(
         rules_configs=rules_configs,
@@ -238,9 +227,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap
     )
 
     expectation_suite: ExpectationSuite = profiler.profile(
-        expectation_suite_name=bobby_columnar_table_multi_batch[
+        expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
-        ]["expectation_suite_name"],
+        ][
+            "expectation_suite_name"
+        ],
     )
     expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
         expectation_suite.to_json_dict()["expectations"][0]["kwargs"]
@@ -253,20 +244,20 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap
     ]
 
     assert (
-        bobby_columnar_table_multi_batch[
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_min_value_min_value"]
+        ]["expect_table_row_count_to_be_between_min_value_mean_value"]
         < min_value
-        < bobby_columnar_table_multi_batch[
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_min_value_max_value"]
+        ]["expect_table_row_count_to_be_between_mean_value"]
     )
     assert (
-        bobby_columnar_table_multi_batch[
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_max_value_min_value"]
+        ]["expect_table_row_count_to_be_between_mean_value"]
         < max_value
-        < bobby_columnar_table_multi_batch[
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_max_value_max_value"]
+        ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
