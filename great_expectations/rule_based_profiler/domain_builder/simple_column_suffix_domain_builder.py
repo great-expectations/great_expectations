@@ -57,6 +57,9 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
                     "Unrecognized column_name_suffixes directive -- must be a list or a string."
                 )
 
+        # TODO: <Alex>It is error prone to have to specify "batch_id" in two, only loosely related, places in the code.
+        #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
+        batch_id: str = self.get_batch_id(variables=variables)
         metric_domain_kwargs: dict = {
             "batch_id": self.get_batch_id(variables=variables),
         }
@@ -65,7 +68,9 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
-                metric_domain_kwargs=metric_domain_kwargs,
+                metric_domain_kwargs={
+                    "batch_id": batch_id,
+                },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
             )
@@ -85,10 +90,8 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,
                 domain_kwargs={
-                    **{
-                        "column": column_name,
-                    },
-                    **metric_domain_kwargs,
+                    "column": column_name,
+                    "batch_id": batch_id,
                 },
             )
             for column_name in candidate_column_names
