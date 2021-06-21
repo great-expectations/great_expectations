@@ -1,12 +1,9 @@
-import uuid
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
-from great_expectations.rule_based_profiler.util import build_batch_request
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids as get_batch_ids_from_batch_request,
 )
