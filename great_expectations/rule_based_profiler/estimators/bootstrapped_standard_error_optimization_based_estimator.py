@@ -66,6 +66,8 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
     bootstrap samples (given the configured tolerances, initialized in the constructor) and returns them to the caller.
     """
 
+    MAX_ITER: int = 100
+
     def __init__(
         self,
         statistic_calculator: SingleNumericStatisticCalculator,
@@ -155,6 +157,14 @@ closed interval."
             current_max_optimal_num_bootstrap_samples
             > previous_max_optimal_num_bootstrap_samples
         ):
+            if idx > BootstrappedStandardErrorOptimizationBasedEstimator.MAX_ITER:
+                raise ValueError(
+                    f"""The optimal number of bootsrap samples, sufficient for achieving the maximum fractional \
+deviation of {self._fractional_bootstrapped_statistic_deviation_bound} with the probability of \
+{1.0 - self._prob_bootstrapped_statistic_deviation_outside_bound} in the estimate of the given statistic, could not be
+obtained (the algorithm failed to converge after {BootstrappedStandardErrorOptimizationBasedEstimator.MAX_ITER} steps).
+"""
+                )
             bootstrap_samples = self._generate_bootstrap_samples(
                 num_bootstrap_samples=optimal_num_bootstrap_samples
             )
