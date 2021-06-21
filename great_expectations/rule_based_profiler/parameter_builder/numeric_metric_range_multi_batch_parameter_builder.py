@@ -210,7 +210,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         truncate_distribution: Optional[
             Union[Dict[str, Union[Optional[int], Optional[float]]], str]
         ] = None,
-        round_decimals: Optional[Union[int, str]] = False,
+        round_decimals: Optional[Union[int, str]] = None,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
