@@ -24,7 +24,8 @@ Develop
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
 * [MAINTENANCE] DOCS integration tests have moved to a new pipeline
-* [BUGFIX] Fix serialization error in DataDocs rendering
+* [MAINTENANCE] Allow tests to properly connect to local sqlite db on Windows (thanks #shpolina)
+* [BUGFIX] Fix serialization error in DataDocs rendering #2908 (thanks #shpolina)
 
 0.13.19
 -----------------
