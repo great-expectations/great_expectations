@@ -79,7 +79,6 @@ def test_alice_profiler_user_workflow_single_batch(
     profiler_config: dict = yaml.load(yaml_config)
 
     profiler: Profiler = Profiler(
-        validator=validator,
         profiler_config=profiler_config,
         data_context=data_context,
     )
@@ -175,7 +174,6 @@ def test_bobby_profiler_user_workflow_multi_batch(
     profiler_config: dict = yaml.load(yaml_config)
 
     profiler: Profiler = Profiler(
-        validator=validator,
         profiler_config=profiler_config,
         data_context=data_context,
     )
