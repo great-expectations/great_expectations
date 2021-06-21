@@ -5,6 +5,7 @@ from great_expectations.marshmallow__shade.validate import Validator
 from great_expectations.rule_based_profiler.profiler import Profiler
 
 profiler_config = """
+
 # This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_2019-*.csv)
 variables:
   false_positive_rate: 1.0e-2

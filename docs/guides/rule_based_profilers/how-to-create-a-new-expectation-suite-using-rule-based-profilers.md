@@ -93,6 +93,7 @@ Putting together our entire config, with both of our Rules, we get
 
 And if we re-instantiate and re-run our `Profiler`, we'll have an updated suite with a table row count expectation for our table, and column min and column max expectations for each of our numeric columns!
 
+
 ### Glossary of Terms
  Concept/Entity | Definition 
  -------|-------
