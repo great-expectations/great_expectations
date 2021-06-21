@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -30,8 +30,7 @@ class Profiler:
     def __init__(
         self,
         *,
-        variables_configs: Optional[Dict[str, Dict]] = None,
-        rules_configs: Optional[Dict[str, Dict]] = None,
+        profiler_config: Optional[Dict[str, Dict[str, Dict]]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -46,11 +45,12 @@ class Profiler:
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         self._data_context = data_context
-
         self._rules = []
 
+        rules_configs: Dict[str, Dict] = profiler_config.get("rules", {})
         rule_name: str
         rule_config: dict
+
         for rule_name, rule_config in rules_configs.items():
             domain_builder_config: dict = rule_config.get("domain_builder")
 
@@ -108,7 +108,9 @@ class Profiler:
                         )
                     )
 
+            variables_configs: Dict[str, Dict] = profiler_config.get("variables", {})
             variables: Optional[ParameterContainer] = None
+
             if variables_configs:
                 variables = build_parameter_container_for_variables(
                     variables_configs=variables_configs
