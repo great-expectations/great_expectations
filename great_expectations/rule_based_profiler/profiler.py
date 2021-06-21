@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
