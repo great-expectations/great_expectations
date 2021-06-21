@@ -28,6 +28,20 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
+def test_constructor():
+    # default instantiation
+    PandasExecutionEngine()
+
+    # instantiation with custom parameters
+    engine = PandasExecutionEngine(discard_subset_failing_expectations=True)
+    assert "discard_subset_failing_expectations" in engine.config
+    assert engine.config.get("discard_subset_failing_expectations") is True
+    custom_boto3_options = {"region_name": "us-east-1"}
+    engine = PandasExecutionEngine(boto3_options=custom_boto3_options)
+    assert "boto3_options" in engine.config
+    assert engine.config.get("boto3_options")["region_name"] == "us-east-1"
+
+
 def test_reader_fn():
     engine = PandasExecutionEngine()
 
