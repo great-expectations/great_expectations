@@ -7,8 +7,8 @@ from scipy import special
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MultiBatchParameterBuilder,
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
@@ -17,7 +17,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.util import is_int, is_numeric
+from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -27,7 +27,7 @@ NP_SQRT_2: np.float64 = np.sqrt(2.0)
 MAX_DECIMALS: int = 9
 
 
-class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
+class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     """
     A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
     using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
@@ -111,7 +111,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -145,25 +144,20 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
-        batch_ids_for_metrics_calculations: Optional[
-            List[str]
-        ] = self.get_batch_ids_for_metrics_calculations(
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        if not batch_ids_for_metrics_calculations:
+        if not batch_ids:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        validator_for_metrics_calculations: Validator = (
-            self.get_validator_for_metrics_calculations(
-                validator=validator,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
 
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
@@ -196,7 +190,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
         ] = copy.deepcopy(metric_domain_kwargs)
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
         batch_id: str
-        for batch_id in batch_ids_for_metrics_calculations:
+        for batch_id in batch_ids:
             metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
             metric_configuration_arguments: Dict[str, Any] = {
                 "metric_name": self._metric_name,
@@ -204,7 +198,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MultiBatchParameterBuilder):
                 "metric_value_kwargs": metric_value_kwargs,
                 "metric_dependencies": None,
             }
-            metric_value = validator_for_metrics_calculations.get_metric(
+            metric_value = validator.get_metric(
                 metric=MetricConfiguration(**metric_configuration_arguments)
             )
             if not is_numeric(value=metric_value):
