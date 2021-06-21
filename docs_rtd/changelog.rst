@@ -11,6 +11,7 @@ Develop
 * [DOCS] Remove broken links
 * [DOCS] Fix typo in SlackNotificationAction docstring
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
+* [BUGFIX] Fix creation of temp tables for unexpected condition
 * [BUGFIX] Docs integration tests now only run when `--docs-tests` option is specified
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
@@ -23,8 +24,9 @@ Develop
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
 * [MAINTENANCE] DOCS integration tests have moved to a new pipeline
-* [BUGFIX] Fix serialization error in DataDocs rendering
-* [BUGFIX] Fix rendering of observed value in datadocs when the value is 0
+* [BUGFIX] Fix rendering of observed value in datadocs when the value is 0 #2923 (thanks @shpolina)
+* [MAINTENANCE] Allow tests to properly connect to local sqlite db on Windows (thanks @shpolina)
+* [BUGFIX] Fix serialization error in DataDocs rendering #2908 (thanks @shpolina)
 
 0.13.19
 -----------------
