@@ -1,4 +1,9 @@
 variables:
+  # BatchRequest yielding exactly one batch
+  alice_single_batch_data_batch_request:
+    datasource_name: alice_columnar_table_single_batch_datasource
+    data_connector_name: alice_columnar_table_single_batch_data_connector
+    data_asset_name: alice_columnar_table_single_batch_data_asset
   integer_type: INTEGER
   timestamp_type: TIMESTAMP
   max_user_id: 999999999999
@@ -10,12 +15,14 @@ rules:
     domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
       class_name: MyCustomSemanticTypeColumnDomainBuilder
       module_name: tests.rule_based_profiler.plugins
+      batch_request: $variables.alice_single_batch_data_batch_request
       semantic_types:
         - user_id
     parameter_builders:
       - parameter_name: my_min_user_id
         class_name: MetricParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
+        batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
@@ -40,17 +47,20 @@ rules:
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
+      batch_request: $variables.alice_single_batch_data_batch_request
       column_name_suffixes:
         - _ts
     parameter_builders:
       # unused parameter my_max_ts
       - parameter_name: my_max_ts
         class_name: MetricParameterBuilder
+        batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
       - parameter_name: my_max_event_ts
         class_name: MetricParameterBuilder
+        batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
         # Note this parameter builder computes parameters only on the provided domain:
@@ -60,6 +70,7 @@ rules:
       - parameter_name: my_min_ts
         class_name: MetricParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
+        batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:

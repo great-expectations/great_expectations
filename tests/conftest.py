@@ -41,6 +41,7 @@ from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
+    get_sqlite_connection_url,
 )
 from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
@@ -4027,7 +4028,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
         os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
-    engine: sa.engine.Engine = sa.create_engine(f"sqlite:////{db_file_path}")
+    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
     conn: sa.engine.Connection = engine.connect()
 
     # Build a SqlAlchemyDataset using that database
