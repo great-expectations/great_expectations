@@ -575,8 +575,11 @@ introspection:
     # assert my_evr.success
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_golden_path_inferred_asset_pandas_datasource_configuration(
-    empty_data_context, test_df, tmp_path_factory
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -604,12 +607,13 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     os.chdir(context.root_directory)
     import great_expectations as ge
 
     context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
 
     yaml_config = f"""
 class_name: Datasource
@@ -639,6 +643,17 @@ data_connectors:
     )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     my_batch = context.get_batch(
         datasource_name="my_directory_datasource",
@@ -704,9 +719,15 @@ data_connectors:
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
 
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 1
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_golden_path_configured_asset_pandas_datasource_configuration(
-    empty_data_context, test_df, tmp_path_factory
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -736,12 +757,13 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     os.chdir(context.root_directory)
     import great_expectations as ge
 
     context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
 
     yaml_config = f"""
 class_name: Datasource
@@ -795,6 +817,17 @@ data_connectors:
     )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     my_batch = context.get_batch(
         datasource_name="my_directory_datasource",
@@ -860,3 +893,6 @@ data_connectors:
 
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
+
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 1
