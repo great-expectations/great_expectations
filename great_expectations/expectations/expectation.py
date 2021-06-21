@@ -475,7 +475,7 @@ class Expectation(metaclass=MetaExpectation):
         if result_dict is None:
             return "--"
 
-        if result_dict.get("observed_value"):
+        if result_dict.get("observed_value") is not None:
             observed_value = result_dict.get("observed_value")
             if isinstance(observed_value, (int, float)) and not isinstance(
                 observed_value, bool
