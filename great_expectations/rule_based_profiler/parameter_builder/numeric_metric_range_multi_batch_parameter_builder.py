@@ -206,6 +206,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         fill_nan_with_zero: Optional[Union[str, bool]] = True,
         sampling_method: Optional[str] = "bootstrap",
+        num_bootstrap_samples: Optional[Union[int, str]] = None,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         truncate_distribution: Optional[
             Union[Dict[str, Union[Optional[int], Optional[float]]], str]
@@ -226,6 +227,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
             (please see the documentation in BootstrappedStandardErrorOptimizationBasedEstimator and references therein)
+            num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then the
+            optimal number of samples, required by the bootstrap estimator, is automatically determined algorithmically.
+            If specified, then the explicitly configured number of bootstrap iterations overrides the algorithmic way.
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
@@ -250,6 +254,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._fill_nan_with_zero = fill_nan_with_zero
 
         self._sampling_method = sampling_method
+        self._num_bootstrap_samples = num_bootstrap_samples
 
         self._false_positive_rate = false_positive_rate
 
@@ -428,11 +433,22 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         )
 
         if sampling_method == "bootstrap":
+            # Obtain num_bootstrap_samples override from rule state (i.e., variables and parameters); from instance variable otherwise.
+            num_bootstrap_samples: Optional[
+                int
+            ] = get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self._num_bootstrap_samples,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
             bootstrapped_estimator: BootstrappedStandardErrorOptimizationBasedEstimator = BootstrappedStandardErrorOptimizationBasedEstimator(
                 statistic_calculator=statistic_calculator,
                 num_data_points=len(batch_ids),
                 fractional_bootstrapped_statistic_deviation_bound=1.0e-1,
                 prob_bootstrapped_statistic_deviation_outside_bound=5.0e-2,
+                num_bootstrap_samples=num_bootstrap_samples,
             )
             metric_values = (
                 bootstrapped_estimator.compute_bootstrapped_statistic_samples()

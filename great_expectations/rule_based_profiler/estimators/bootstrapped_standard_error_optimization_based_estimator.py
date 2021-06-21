@@ -74,6 +74,7 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
         num_data_points: int,
         fractional_bootstrapped_statistic_deviation_bound: Optional[float] = 1.0e-1,
         prob_bootstrapped_statistic_deviation_outside_bound: Optional[float] = 5.0e-2,
+        num_bootstrap_samples: Optional[int] = None,
     ):
         """
         :param statistic_calculator SingleNumericStatisticCalculator -- used to generate samples of the distribution,
@@ -83,6 +84,8 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
         its actual value (even though the actual value is unknown, the maximum deviation from it can be specified).
         :param prob_bootstrapped_statistic_deviation_outside_bound -- maximum acceptable probability that the deviation
         bound requirement above (for the statistic to deviate from its actual value) is not satisfied (should be small).
+        :param num_bootstrap_samples -- if omitted (default), then the optimal number of iterations for the bootstrap
+        estimator is automatically determined algorithmically; otherwise, the specified number overrides the algorithm.
         """
         self._statistic_calculator = statistic_calculator
         if num_data_points < 2:
@@ -124,32 +127,39 @@ closed interval."
             )
         )
 
-        self._optimal_num_bootstrap_samples_estimations = []
+        if (num_bootstrap_samples is not None) and num_bootstrap_samples < 2:
+            raise ValueError(
+                f"""Argument "num_bootstrap_samples" in {self.__class__.__name__} must be an integer greater than 1 or \
+omitted (the value {num_bootstrap_samples} was encountered).
+"""
+            )
+        self._num_bootstrap_samples = num_bootstrap_samples
 
     def compute_bootstrapped_statistic_samples(self) -> np.ndarray:
-        optimal_num_bootstrap_samples: int = (
-            self._estimate_optimal_num_bootstrap_samples()
-        )
+        num_bootstrap_samples: int
+        if self._num_bootstrap_samples:
+            num_bootstrap_samples = self._num_bootstrap_samples
+        else:
+            num_bootstrap_samples = self._estimate_optimal_num_bootstrap_samples()
+
         bootstrap_samples: np.ndarray = self._generate_bootstrap_samples(
-            num_bootstrap_samples=optimal_num_bootstrap_samples
+            num_bootstrap_samples=num_bootstrap_samples
         )
         return bootstrap_samples
 
     def _estimate_optimal_num_bootstrap_samples(
         self,
     ) -> int:
+        optimal_num_bootstrap_samples_estimations: List[int] = []
+
         # There are no bootstrapped samples initially; hence, assume zero excess kurtosis (i.e., Normal distribution).
         optimal_num_bootstrap_samples: int = self._estimate_min_num_bootstrap_samples(
             bootstrap_samples=None
         )
-        self._optimal_num_bootstrap_samples_estimations.append(
-            optimal_num_bootstrap_samples
-        )
+        optimal_num_bootstrap_samples_estimations.append(optimal_num_bootstrap_samples)
 
         previous_max_optimal_num_bootstrap_samples: int = 0
-        current_max_optimal_num_bootstrap_samples: int = max(
-            self._optimal_num_bootstrap_samples_estimations
-        )
+        current_max_optimal_num_bootstrap_samples: int = optimal_num_bootstrap_samples
 
         idx: int = 2
         # Iterate until the maximum of the list of minimum estimates of the number of bootstrapped samples converges.
@@ -171,14 +181,14 @@ obtained (the algorithm failed to converge after {BootstrappedStandardErrorOptim
             optimal_num_bootstrap_samples = self._estimate_min_num_bootstrap_samples(
                 bootstrap_samples=bootstrap_samples
             )
-            self._optimal_num_bootstrap_samples_estimations.append(
+            optimal_num_bootstrap_samples_estimations.append(
                 optimal_num_bootstrap_samples
             )
             previous_max_optimal_num_bootstrap_samples = (
                 current_max_optimal_num_bootstrap_samples
             )
             current_max_optimal_num_bootstrap_samples = max(
-                self._optimal_num_bootstrap_samples_estimations
+                optimal_num_bootstrap_samples_estimations
             )
             idx = idx + 1
 
