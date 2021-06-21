@@ -32,7 +32,7 @@ module.exports = {
           items: [
             {
               type: 'category',
-              label: '🧰 Installing',
+              label: '🧰 Installation',
               items: [
                 'guides/setup/installing/local',
                 'guides/setup/installing/databricks',

@@ -1,5 +1,5 @@
 ---
-title: Installing great_expectations in Spark EMR cluster
+title: How to install Great Expectations in Spark EMR Cluster
 ---
 import Prerequisites from '/docs/guides/setup/components/install_prereq.jsx'
 import NextSteps from '/docs/guides/setup/components/install_nextsteps.md'
