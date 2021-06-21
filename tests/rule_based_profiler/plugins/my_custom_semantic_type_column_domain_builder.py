@@ -48,15 +48,17 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
-        metric_domain_kwargs: dict = {
-            "batch_id": self.get_batch_id(variables=variables),
-        }
+        # TODO: <Alex>It is error prone to have to specify "batch_id" in two, only loosely related, places in the code.
+        #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
+        batch_id: str = self.get_batch_id(variables=variables)
         table_column_names: List[str] = self.get_validator(
             variables=variables
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
-                metric_domain_kwargs=metric_domain_kwargs,
+                metric_domain_kwargs={
+                    "batch_id": batch_id,
+                },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
             )
@@ -77,10 +79,8 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,
                 domain_kwargs={
-                    **{
-                        "column": column_name,
-                    },
-                    **metric_domain_kwargs,
+                    "column": column_name,
+                    "batch_id": batch_id,
                 },
             )
             for column_name in candidate_column_names

@@ -54,15 +54,17 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
             SemanticDomainTypes
         ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
 
-        metric_domain_kwargs: dict = {
-            "batch_id": self.get_batch_id(variables=variables),
-        }
+        # TODO: <Alex>It is error prone to have to specify "batch_id" in three, loosely related, places in the code.
+        #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
+        batch_id: str = self.get_batch_id(variables=variables)
         column_types_dict_list: List[Dict[str, Any]] = self.get_validator(
             variables=variables
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
-                metric_domain_kwargs=metric_domain_kwargs,
+                metric_domain_kwargs={
+                    "batch_id": batch_id,
+                },
                 metric_value_kwargs={
                     "include_nested": True,
                 },
@@ -75,7 +77,9 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
-                metric_domain_kwargs=metric_domain_kwargs,
+                metric_domain_kwargs={
+                    "batch_id": batch_id,
+                },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
             )
@@ -113,10 +117,8 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
                     ],
                 },
                 domain_kwargs={
-                    **{
-                        "column": column_name,
-                    },
-                    **metric_domain_kwargs,
+                    "column": column_name,
+                    "batch_id": batch_id,
                 },
             )
             for column_name in candidate_column_names
