@@ -728,56 +728,6 @@ def bobby_columnar_table_multi_batch():
             expectation_configuration
         )
 
-    expectation_suite_name_bootstrap_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
-    )
-
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: float = (
-        8000
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
-        380
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
-        2.6
-    )
-
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
-        - (
-            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
-            * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
-        )
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_min_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value
-        - 5e-1
-        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_max_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value
-        + 5e-1
-        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
-    )
-
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
-        + (
-            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
-            * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
-        )
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_min_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value
-        - 5e-1
-        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
-    )
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_max_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value
-        + 5e-1
-        * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
-    )
-
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration_oneshot_sampling_method": {
