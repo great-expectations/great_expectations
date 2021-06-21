@@ -1744,7 +1744,10 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
     assert len(batch) == 3
 
 
-def test_add_checkpoint_from_yaml(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
     """
     What does this test and why?
     We should be able to add a checkpoint directly from a valid yaml configuration.
@@ -1753,7 +1756,7 @@ def test_add_checkpoint_from_yaml(empty_data_context):
     Note: This tests multiple items and could stand to be broken up.
     """
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
     checkpoint_name: str = "my_new_checkpoint"
 
     assert checkpoint_name not in context.list_checkpoints()
@@ -1777,6 +1780,17 @@ validations:
     checkpoint_from_test_yaml_config = context.test_yaml_config(
         checkpoint_yaml_config, name=checkpoint_name
     )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "SimpleCheckpoint"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     # test_yaml_config() no longer stores checkpoints automatically
     assert checkpoint_name not in context.list_checkpoints()
@@ -1905,14 +1919,22 @@ ge_cloud_id:
     assert checkpoint_name in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 1
 
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 1
 
-def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(empty_data_context):
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(
+    mock_emit, empty_data_context_stats_enabled
+):
     """
     What does this test and why?
     Checkpoint yaml should have a valid class_name
     """
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
     checkpoint_name: str = "my_new_checkpoint"
 
     assert checkpoint_name not in context.list_checkpoints()
@@ -1943,14 +1965,28 @@ validations:
 
     assert checkpoint_name not in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 0
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "CUSTOM_CONFIG"},
+                "success": False,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
-def test_add_datasource_from_yaml(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     """
     What does this test and why?
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
     """
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -1974,10 +2010,34 @@ def test_add_datasource_from_yaml(empty_data_context):
     datasource_from_test_yaml_config = context.test_yaml_config(
         example_yaml, name=datasource_name
     )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
 
@@ -2011,9 +2071,30 @@ def test_add_datasource_from_yaml(empty_data_context):
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
     assert datasource_name in context.get_config()["datasources"]
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.__init__",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
-def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_datasource_from_yaml_sql_datasource(
+    mock_emit,
+    sa,
+    test_backends,
+    empty_data_context_stats_enabled,
+):
     """
     What does this test and why?
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
@@ -2022,7 +2103,7 @@ def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_c
     if "postgresql" not in test_backends:
         pytest.skip("test_add_datasource_from_yaml_sql_datasource requires postgresql")
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2047,9 +2128,33 @@ def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_c
     datasource_from_test_yaml_config = context.test_yaml_config(
         example_yaml, name=datasource_name
     )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     # .config not implemented for SimpleSqlalchemyDatasource
     assert datasource_from_test_yaml_config.config == {}
@@ -2141,10 +2246,26 @@ def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_c
         [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
     )
     assert datasource_config.module_name == "great_expectations.datasource"
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.__init__",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_add_datasource_from_yaml_sql_datasource_with_credentials(
-    sa, test_backends, empty_data_context
+    mock_emit, sa, test_backends, empty_data_context_stats_enabled
 ):
     """
     What does this test and why?
@@ -2157,7 +2278,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "test_add_datasource_from_yaml_sql_datasource_with_credentials requires postgresql"
         )
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2173,9 +2294,9 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
         host: localhost
         port: 5432
         username: postgres
-        password: 
+        password:
         database: test_ci
-        drivername: postgresql 
+        drivername: postgresql
     data_connectors:
       default_inferred_data_connector_name:
         class_name: InferredAssetSqlDataConnector
@@ -2189,9 +2310,33 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
     datasource_from_test_yaml_config = context.test_yaml_config(
         example_yaml, name=datasource_name
     )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     assert datasource_from_test_yaml_config.config == {
         "execution_engine": {
@@ -2281,16 +2426,22 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
         ]
     )
 
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 2
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_add_datasource_from_yaml_with_substitution_variables(
-    empty_data_context, monkeypatch
+    mock_emit, empty_data_context_stats_enabled, monkeypatch
 ):
     """
     What does this test and why?
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string containing substitution variables should work as expected.
     """
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2317,9 +2468,33 @@ def test_add_datasource_from_yaml_with_substitution_variables(
         example_yaml, name=datasource_name
     )
 
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"class_name": "Datasource"},
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.add_datasource",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
 
@@ -2353,3 +2528,16 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
     assert datasource_name in context.get_config()["datasources"]
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.__init__",
+                    "event_payload": {},
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
