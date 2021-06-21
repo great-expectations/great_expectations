@@ -2,8 +2,6 @@
 variables:
   # BatchRequest yielding two batches (January, 2019 and February, 2019 trip data)
   jan_feb_2019_trip_data_batch_request:
-    # We want to use the same triumvirate as in the user's batch_request (i.e., the one passed in the Validator).
-    # However, a bug in Batch creation (not always setting BatchDefinition) is preventing this, until the bug is fixed.
     datasource_name: taxi_pandas
     data_connector_name: monthly
     data_asset_name: my_reports
@@ -15,7 +13,7 @@ variables:
 rules:
   row_count_rule:
     domain_builder:
-      class_name: ActiveBatchTableDomainBuilder
+      class_name: TableDomainBuilder
     parameter_builders:
       - parameter_name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
@@ -38,6 +36,13 @@ rules:
   column_ranges_rule:
     domain_builder:
       class_name: SimpleSemanticTypeColumnDomainBuilder
+      # BatchRequest yielding exactly one batch (March, 2019 trip data)
+      batch_request:
+        datasource_name: taxi_pandas
+        data_connector_name: monthly
+        data_asset_name: my_reports
+        data_connector_query:
+          index: -1
       semantic_types:
         - numeric
     parameter_builders:
