@@ -13,6 +13,7 @@ Develop
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
 * [BUGFIX] Fix creation of temp tables for unexpected condition
 * [BUGFIX] Docs integration tests now only run when `--docs-tests` option is specified
+* [BUGFIX] Fix instantiation of PandasExecutionEngine with custom parameters
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
 * [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
