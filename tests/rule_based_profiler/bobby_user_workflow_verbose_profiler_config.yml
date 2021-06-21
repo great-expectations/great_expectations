@@ -9,7 +9,7 @@ variables:
     data_connector_query:
       index: ":-1"
   sampling_method: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
-  nan_raises_exception: False  # Choices: False (default) or True (if False, then NaN is converted to 0.0).
+  fill_nan_with_zero: True  # Choices: True (default) or False (if True, then NaN is converted to 0.0).
   false_positive_rate: 1.0e-2
   mostly: 1.0
 
@@ -24,7 +24,7 @@ rules:
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
         sampling_method: $variables.sampling_method
-        nan_raises_exception: $variables.nan_raises_exception
+        fill_nan_with_zero: $variables.fill_nan_with_zero
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
         truncate_distribution:
@@ -57,7 +57,7 @@ rules:
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         sampling_method: $variables.sampling_method
-        nan_raises_exception: $variables.nan_raises_exception
+        fill_nan_with_zero: $variables.fill_nan_with_zero
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
       - parameter_name: max_range
@@ -66,7 +66,7 @@ rules:
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
         sampling_method: $variables.sampling_method
-        nan_raises_exception: $variables.nan_raises_exception
+        fill_nan_with_zero: $variables.fill_nan_with_zero
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
     expectation_configuration_builders:

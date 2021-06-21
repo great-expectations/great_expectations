@@ -44,14 +44,14 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         metric_name: str,
         metric_domain_kwargs: Optional[dict],
         metric_value_kwargs: Optional[dict],
-        nan_raises_exception: Optional[bool],
+        fill_nan_with_zero: Optional[bool],
     ):
         self._batch_ids = batch_ids
         self._validator = validator
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
-        self._nan_raises_exception = nan_raises_exception
+        self._fill_nan_with_zero = fill_nan_with_zero
 
         # Computing metrics once per batch_id and caching the resulting values facilitates instant look up when same
         # data point (i.e., same batch_id) is reused repeatedly as part of randomly sampling underlying distribution.
@@ -126,7 +126,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
 """
                     )
                 if np.isnan(metric_value):
-                    if self._nan_raises_exception:
+                    if not self._fill_nan_with_zero:
                         raise ValueError(
                             f"""Computation of metric "{self._metric_name}" resulted in NaN ("not a number") value.
 """
@@ -204,7 +204,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        nan_raises_exception: Optional[Union[str, bool]] = False,
+        fill_nan_with_zero: Optional[Union[str, bool]] = True,
         sampling_method: Optional[str] = "bootstrap",
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         truncate_distribution: Optional[
@@ -222,8 +222,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
-            nan_raises_exception: if True, then if the computed metric gives NaN, then exception is raised; otherwise,
-            if False (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
+            fill_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
+            if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
             (please see the documentation in BootstrappedStandardErrorOptimizationBasedEstimator and references therein)
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
@@ -247,7 +247,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
 
-        self._nan_raises_exception = nan_raises_exception
+        self._fill_nan_with_zero = fill_nan_with_zero
 
         self._sampling_method = sampling_method
 
@@ -357,12 +357,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # Obtain nan_raises_exception from rule state (i.e., variables and parameters); from instance variable otherwise.
-        nan_raises_exception: Optional[
+        # Obtain fill_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
+        fill_nan_with_zero: Optional[
             bool
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._nan_raises_exception,
+            parameter_reference=self._fill_nan_with_zero,
             expected_return_type=bool,
             variables=variables,
             parameters=parameters,
@@ -393,7 +393,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 metric_name=self._metric_name,
                 metric_domain_kwargs=metric_domain_kwargs,
                 metric_value_kwargs=metric_value_kwargs,
-                nan_raises_exception=nan_raises_exception,
+                fill_nan_with_zero=fill_nan_with_zero,
             )
         )
 
