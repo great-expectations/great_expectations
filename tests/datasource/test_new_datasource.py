@@ -237,6 +237,9 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report["execution_engine"]["spark_config"].pop("spark.driver.host", None)
     report["execution_engine"]["spark_config"].pop("spark.driver.port", None)
     report["execution_engine"]["spark_config"].pop("spark.submit.pyFiles", None)
+    report["execution_engine"]["spark_config"].pop("spark.app.startTime", None)
+    report["execution_engine"]["spark_config"].pop("spark.sql.warehouse.dir", None)
+
     assert report == {
         "data_connectors": {
             "count": 2,
@@ -908,7 +911,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
                 base_directory: {base_directory}
                 batch_spec_passthrough:
                     reader_options:
-                        header: True 
+                        header: True
                 glob_directive: '*'
                 default_regex:
                     pattern: (.+)\\.csv
