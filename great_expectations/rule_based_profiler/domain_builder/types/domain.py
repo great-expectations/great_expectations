@@ -41,7 +41,7 @@ class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(
         self,
-        domain_type: Union[str, MetricDomainTypes, SemanticDomainTypes],
+        domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
         details: Optional[Dict[str, Any]] = None,
     ):
