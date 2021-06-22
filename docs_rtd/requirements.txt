@@ -61,7 +61,7 @@ pytz==2020.1
 PyYAML==5.4
 pyzmq==19.0.2
 regex==2020.7.14
-requests==2.23.0
+requests==2.25.1
 ruamel.yaml==0.16.10
 ruamel.yaml.clib==0.2.0
 scipy==1.5.2
@@ -92,7 +92,7 @@ traitlets==4.3.3
 typed-ast==1.4.1
 tzlocal==2.1
 Unidecode==1.1.1
-urllib3==1.25.10
+urllib3==1.26.5
 wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.1

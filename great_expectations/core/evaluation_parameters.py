@@ -155,7 +155,7 @@ class EvaluationParameterParser:
             # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
             # fails, but I decided against it to instead require that the *entire* expression evaluates
             # numerically UNLESS there is *exactly one* expression to substitute (see cases where len(L) == 1 in the
-            # parse_evaluation_parameter method
+            # parse_evaluation_parameter method.
             try:
                 return int(op)
             except ValueError:

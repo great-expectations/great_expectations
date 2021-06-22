@@ -51,7 +51,7 @@ module.exports = {
 
             {
               type: 'category',
-              label: 'Installation',
+              label: '🧰 Installation',
               items: [
                 'guides/setup/installation/local',
                 'guides/setup/installation/databricks',
@@ -139,6 +139,13 @@ module.exports = {
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/spark' },
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/pandas' },
                 { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' }
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Contributing',
+              items: [
+                'guides/connecting_to_your_data/contributing/how-to-add-support-for-a-new-sqlalchemy-dialect'
               ]
             },
             {
@@ -242,15 +249,14 @@ module.exports = {
           type: 'category',
           label: '🧰 Miscellaneous',
           items: [
-            { type: 'doc', id: 'guides/miscellaneous/how-to-write-a-how-to-guide'},
             { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-project-check-config-command'},
             { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectations-cli'},
-            { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectation-docker-images'},
             { type: 'doc', id: 'guides/miscellaneous/how-to-quickly-explore-expectations-in-a-notebook'},
-            { type: 'doc', id: 'guides/miscellaneous/how-to-configure-notebooks-generated-by-suite-edit'},
-            { type: 'doc', id: 'guides/miscellaneous/TEMPLATE:How-to-{stub}'},
-            { type: 'doc', id: 'guides/miscellaneous/TEMPLATE:How-to-{do something}'},
-            { type: 'doc', id: 'guides/miscellaneous/TEMPLATE:How-to-connect-to {some kind of data}'},
+            { type: 'doc', id: 'guides/miscellaneous/how-to-configure-notebooks-generated-by-suite-edit' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-add-comments-to-a-page-on-docs.greatexpectations.io' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectation-docker-images' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-write-a-how-to-guide-docusaurus' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-template' }
           ]
         },
       ]

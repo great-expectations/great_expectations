@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
+from great_expectations.core.batch import BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
@@ -8,6 +9,9 @@ from great_expectations.rule_based_profiler.domain_builder.domain_builder import
 )
 from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
     SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
 )
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
@@ -19,11 +23,18 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
+        data_context: DataContext,
+        batch_request: Union[BatchRequest, dict],
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):
+        super().__init__(
+            data_context=data_context,
+            batch_request=batch_request,
+        )
+
         if semantic_types is None:
             semantic_types = ["user_id"]
         self._semantic_types = semantic_types
@@ -36,22 +47,22 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
-        *,
-        validator: Optional[Validator] = None,
-        batch_ids: Optional[List[str]] = None,
+        variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
-        if validator is None:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"{self.__class__.__name__} requires a reference to an instance of the Validator class."
-            )
-
-        table_column_names: List[str] = validator.get_metric(
+        # TODO: <Alex>It is error prone to have to specify "batch_id" in two, only loosely related, places in the code.
+        #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
+        batch_id: str = self.get_batch_id(variables=variables)
+        table_column_names: List[str] = self.get_validator(
+            variables=variables
+        ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
-                metric_domain_kwargs={},
+                metric_domain_kwargs={
+                    "batch_id": batch_id,
+                },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
             )
@@ -73,7 +84,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
                 domain_type=MetricDomainTypes.COLUMN,
                 domain_kwargs={
                     "column": column_name,
-                    "batch_id": validator.active_batch_id,
+                    "batch_id": batch_id,
                 },
             )
             for column_name in candidate_column_names
