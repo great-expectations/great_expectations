@@ -1,4 +1,4 @@
-from .single_numeric_statistic_calculator import (  # isort:skip
+from .single_numeric_statistic_getter import (  # isort:skip
     SingleNumericStatisticGetter,
 )
 
