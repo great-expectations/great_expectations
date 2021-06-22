@@ -74,7 +74,7 @@ stages:
           displayName: 'Update pip'
 
         - script: |
-            pip install -r requirements-dev-util.txt -r requirements-dev-test.txt -r requirements-dev-sqlalchemy.txt
+            pip install -r requirements-dev-util.txt -r requirements-dev-test.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-base.txt
             pip install -r requirements.txt
             pip install .
           displayName: 'Install dependencies'
