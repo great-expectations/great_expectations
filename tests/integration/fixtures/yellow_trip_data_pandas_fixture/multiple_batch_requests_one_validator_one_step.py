@@ -14,26 +14,26 @@ from great_expectations.validator.validator import Validator
 context = DataContext()
 suite = context.get_expectation_suite("yellow_trip_data_validations")
 
-# Create three BatchRequests for Jan, Feb, and March data and instantiate a Validator with all three BatchRequests
+# Create three BatchRequests for Jan, Feb, and March 2019 data and instantiate a Validator with all three BatchRequests
 jan_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
     data_asset_name="my_reports",
-    data_connector_query={"batch_filter_parameters": {"month": "01"}},
+    data_connector_query={"batch_filter_parameters": {"month": "01", "year": "2019"}},
 )
 
 feb_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
     data_asset_name="my_reports",
-    data_connector_query={"batch_filter_parameters": {"month": "02"}},
+    data_connector_query={"batch_filter_parameters": {"month": "02", "year": "2019"}},
 )
 
 march_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
     data_asset_name="my_reports",
-    data_connector_query={"batch_filter_parameters": {"month": "03"}},
+    data_connector_query={"batch_filter_parameters": {"month": "03", "year": "2019"}},
 )
 
 validator: Validator = context.get_validator(
@@ -41,6 +41,7 @@ validator: Validator = context.get_validator(
     expectation_suite=suite,
 )
 assert validator.active_batch_definition.batch_identifiers["month"] == "03"
+assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 
 # Get the list of all batches contained by the Validator for use in the BatchFileter
 total_batch_definition_list: List = [

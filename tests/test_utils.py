@@ -178,6 +178,19 @@ FROM
     return {row[0] for row in rows}
 
 
+def get_sqlite_table_names(engine):
+    result = engine.execute(
+        """
+SELECT
+    name
+FROM
+    sqlite_master
+"""
+    )
+    rows = result.fetchall()
+    return {row[0] for row in rows}
+
+
 def build_in_memory_store_backend(
     module_name: str = "great_expectations.data_context.store",
     class_name: str = "InMemoryStoreBackend",

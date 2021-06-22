@@ -2,6 +2,7 @@ import copy
 import locale
 import logging
 import os
+import platform
 import random
 import string
 import tempfile
@@ -229,6 +230,16 @@ class LockingConnectionCheck:
             return self._is_valid
 
 
+def get_sqlite_connection_url(sqlite_db_path):
+    url = "sqlite://"
+    if sqlite_db_path is not None:
+        extra_slash = ""
+        if platform.system() != "Windows":
+            extra_slash = "/"
+        url = f"{url}/{extra_slash}{sqlite_db_path}"
+    return url
+
+
 def get_dataset(
     dataset_type,
     data,
@@ -270,11 +281,8 @@ def get_dataset(
         if not create_engine:
             return None
 
-        if sqlite_db_path is not None:
-            # Create a new database
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
+
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -826,10 +834,7 @@ def build_sa_validator_with_data(
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
-        if sqlite_db_path is not None:
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path))
     elif sa_engine_name == "postgresql":
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"

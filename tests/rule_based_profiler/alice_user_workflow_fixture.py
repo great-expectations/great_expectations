@@ -163,6 +163,7 @@ def alice_columnar_table_single_batch():
         )
 
     expectation_configurations: List[ExpectationConfiguration] = []
+
     expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
     expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
 

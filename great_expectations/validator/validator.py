@@ -459,6 +459,7 @@ class Validator:
                             "exception_traceback": exception_traceback,
                             "exception_message": str(err),
                         },
+                        expectation_config=configuration,
                     )
                     evrs.append(result)
                 else:
@@ -488,6 +489,7 @@ class Validator:
                             "exception_traceback": exception_traceback,
                             "exception_message": str(err),
                         },
+                        expectation_config=configuration,
                     )
                     evrs.append(result)
                 else:
