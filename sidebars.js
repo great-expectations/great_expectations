@@ -24,7 +24,7 @@ module.exports = {
     },
     {
     type: 'category',
-    label: 'Deployment Pattnerns',
+    label: 'Deployment Patterns',
     items: [
         'deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
         'deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster',
