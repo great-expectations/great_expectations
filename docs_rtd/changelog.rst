@@ -11,6 +11,7 @@ Develop
 * [DOCS] Remove broken links
 * [DOCS] Fix typo in SlackNotificationAction docstring
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
+* [BUGFIX] Using cache in order not to fetch already known secrets #2882 (thanks @Cedric-Magnan)
 * [BUGFIX] Fix creation of temp tables for unexpected condition
 * [BUGFIX] Docs integration tests now only run when `--docs-tests` option is specified
 * [BUGFIX] Fix instantiation of PandasExecutionEngine with custom parameters
@@ -25,6 +26,7 @@ Develop
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
 * [MAINTENANCE] DOCS integration tests have moved to a new pipeline
+* [MAINTENANCE] Pin json-schema version
 * [BUGFIX] Fix rendering of observed value in datadocs when the value is 0 #2923 (thanks @shpolina)
 * [MAINTENANCE] Allow tests to properly connect to local sqlite db on Windows (thanks @shpolina)
 * [BUGFIX] Fix serialization error in DataDocs rendering #2908 (thanks @shpolina)
