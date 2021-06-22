@@ -13,7 +13,6 @@ black==20.8b1  # lint
 boto3>=1.9  # all_tests
 feather-format>=0.4.1  # all_tests
 
-
 flake8==3.8.3  # lint
 flask>=1.0.0 # for s3 test only
 freezegun>=0.3.15  # all_tests
