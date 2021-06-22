@@ -109,7 +109,7 @@ stages:
               python.version: '3.7'
               pandas.version: '0.25.3'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
-              GE_pytest_pip_opts: 'numpy<1.20 --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
               pandas.version: 'latest'
@@ -133,7 +133,7 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              pip install  $(GE_pytest_pip_opts)
+              pip install $(GE_pytest_pip_opts)
               pip install  --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
@@ -170,11 +170,11 @@ stages:
             Python36:
               python.version: '3.6'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: 'pyspark<3.0.0 --requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: 'pyspark<3.0.0 --requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python38:
               python.version: '3.8'
               pandas.version: 'latest'
@@ -251,7 +251,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
+              pip install --requirement requirements-dev-base.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
