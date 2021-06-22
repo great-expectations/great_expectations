@@ -23,38 +23,20 @@ module.exports = {
       ]
     },
     {
-      type: 'category',
-      label: 'Core Skills',
-      items: [
-        'core_skills/how-to-instantiate-a-data-context',
+    type: 'category',
+    label: 'Deployment Pattnerns',
+    items: [
+        'deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
+        'deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster',
+        'deployment_patterns/how-to-run-a-checkpoint-in-airflow',
         {
           type: 'category',
-          label: 'Connecting to Your Data',
-          items: [
-            'core_skills/connecting_to_your_data/how-to-configure-a-dataconnector-to-introspect-and-partition-a-file-system-or-blob-store',
-            'core_skills/connecting_to_your_data/how-to-configure-a-dataconnector-to-introspect-and-partition-tables-in-sql',
-            'core_skills/connecting_to_your_data/how-to-create-a-batch-of-data-from-an-in-memory-spark-or-pandas-dataframe',
-            'core_skills/connecting_to_your_data/how-to-create-a-new-expectation-suite-using-the-cli',
-            'core_skills/connecting_to_your_data/how-to-get-a-batch-of-data-from-a-configured-datasource'
+          label: 'Contributing',
+          items:[
+            'deployment_patterns/contributing/how-to-add-a-new-deployment-pattern-document',
+            'deployment_patterns/contributing/how-to-contribute-to-an-existing-deployment-pattern-document'
           ]
         },
-        {
-          type: 'category',
-          label: 'Creating and editing Expectations',
-          items: [
-            'core_skills/expectations/how-to-create-and-edit-expectations-based-on-domain-knowledge-without-inspecting-data-directly',
-            'core_skills/expectations/how-to-create-and-edit-expectations-in-bulk',
-            'core_skills/expectations/how-to-create-and-edit-expectations-with-a-profiler',
-            'core_skills/expectations/how-to-create-and-edit-expectations-with-instant-feedback from-a-sample-batch-of-data'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Validating Your Data',
-          items: [
-            'core_skills/validation/how-to-validate-data-by-running-a-checkpoint'
-          ]
-        }
       ]
     },
     {
@@ -65,6 +47,8 @@ module.exports = {
           type: 'category',
           label: '⚙️ Setting up Great Expectations',
           items: [
+            'guides/setup/how-to-instantiate-a-data-context',
+
             {
               type: 'category',
               label: 'Installation',
@@ -112,28 +96,17 @@ module.exports = {
                 'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-amazon-s3'
               ]
             },
-            {
-              type: 'category',
-              label: 'Deployment Patterns',
-              items: [
-                'guides/setup/deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
-                'guides/setup/deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster',]
-              },
-            {
-            type: 'category',
-            label: 'Contributing',
-            items: [
-                'guides/setup/contributing/how-to-add-a-new-deployment-pattern-document',
-                'guides/setup/contributing/how-to-contribute-to-an-existing-deployment-pattern-document'
-            ]
-          }
           ]
         },
         {
           type: 'category',
           label: '🔌 Connecting to your data',
           items: [
-
+            'guides/connecting_to_your_data/how-to-configure-a-dataconnector-to-introspect-and-partition-a-file-system-or-blob-store',
+            'guides/connecting_to_your_data/how-to-configure-a-dataconnector-to-introspect-and-partition-tables-in-sql',
+            'guides/connecting_to_your_data/how-to-create-a-batch-of-data-from-an-in-memory-spark-or-pandas-dataframe',
+            'guides/connecting_to_your_data/how-to-create-a-new-expectation-suite-using-the-cli',
+            'guides/connecting_to_your_data/how-to-get-a-batch-of-data-from-a-configured-datasource',
             {
               type: 'category',
               label: '🚀 Database',
@@ -184,7 +157,10 @@ module.exports = {
           type: 'category',
           label: '🧪 Creating and editing Expectations for your data',
           items: [
-
+            'guides/expectations/how-to-create-and-edit-expectations-based-on-domain-knowledge-without-inspecting-data-directly',
+            'guides/expectations/how-to-create-and-edit-expectations-in-bulk',
+            'guides/expectations/how-to-create-and-edit-expectations-with-a-profiler',
+            'guides/expectations/how-to-create-and-edit-expectations-with-instant-feedback from-a-sample-batch-of-data',
             {
               type: 'category',
               label: '🔬 Advanced',
@@ -223,6 +199,7 @@ module.exports = {
           type: 'category',
           label: '✅ Validating your data',
           items: [
+            'guides/validation/how-to-validate-data-by-running-a-checkpoint',
             {
               type: 'category',
               label: 'Advanced',
@@ -315,4 +292,5 @@ module.exports = {
       ]
     }
   ]
+
 }
