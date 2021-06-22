@@ -5,7 +5,7 @@ title: Expectation Suite Operations
 
 :::info sam-notes
 
-I suggest renaming this to "Expectation Suites" or combining it with the Expectation Suites section under "Expectations"
+I suggest renaming this to "Expectation Suites"
 
 :::
 

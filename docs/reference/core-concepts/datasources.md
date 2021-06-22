@@ -2,11 +2,9 @@
 title: Datasources
 ---
 
-
 :::info notes-sam
 I suggest adding a short intro sentence here on what Datasources are.
 :::
-
 
 ## Data Connectors
 
