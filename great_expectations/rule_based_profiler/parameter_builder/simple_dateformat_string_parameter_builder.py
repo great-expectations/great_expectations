@@ -38,6 +38,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
         data_context: Optional[DataContext] = None,
+        batch_request: Optional[Union[dict, str]] = None,
     ):
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -50,11 +51,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             candidate_strings: a list of candidate date format strings that will REPLACE the default
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
             data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
 
         super().__init__(
             parameter_name=parameter_name,
             data_context=data_context,
+            batch_request=batch_request,
         )
 
         self._domain_kwargs = domain_kwargs
@@ -74,28 +77,33 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        validator: Validator,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_ids: Optional[List[str]] = None,
     ):
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
-        if batch_ids is None:
-            batch_ids = [validator.active_batch_id]
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not batch_ids:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
+            )
 
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        # TODO: <Alex>ALEX -- Is the check below still relevant?</Alex>
         if len(batch_ids) > 1:
-            # By default, the validator will use active batch id (the most recently loaded batch)
             logger.warning(
                 f"Parameter Builder {self.name} received {len(batch_ids)} batches but can only process one."
             )
-            if batch_ids[0] not in validator.execution_engine.loaded_batch_data_ids:
-                raise ge_exceptions.ProfilerExecutionError(
-                    f"""Parameter Builder {self.name} cannot build parameters because batch {batch_ids[0]} is not \
-currently loaded in the validator.
-"""
-                )
 
         # TODO: <Alex>ALEX -- type overloading is generally a poor practice; the caller should decide on the type of "metric_domain_kwargs" and call this method accordingly.</Alex>
         # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
@@ -146,7 +154,7 @@ currently loaded in the validator.
                 best_success_ratio = current_success_ratio
 
         parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
+            "$parameter.date_format_string": {
                 "value": best_fit_date_format_estimate,
                 "details": {
                     "success_ratio": best_success_ratio,
@@ -156,7 +164,3 @@ currently loaded in the validator.
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return "$parameter.date_format_string"
