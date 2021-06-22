@@ -370,6 +370,7 @@ test_yaml_config_payload_schema = {
     "type": "object",
     "properties": {
         "class_name": {"type": "string", "maxLength": 256},
+        "diagnostic_info": {"type": "string", "maxLength": 256},
     },
     "required": ["class_name"],
     "additionalProperties": False,

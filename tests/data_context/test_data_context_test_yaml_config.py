@@ -64,7 +64,7 @@ EGREGIOUS FORMATTING ERROR
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "ERRONEOUS_CONFIG"},
+                "event_payload": {"class_name": "YAML_PARSE_ERROR"},
                 "success": False,
             }
         ),

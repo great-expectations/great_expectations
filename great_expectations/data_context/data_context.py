@@ -233,7 +233,7 @@ class BaseDataContext:
         "/etc/great_expectations.conf",
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
-    TEST_YAML_CONFIG_STORE_TYPES = [
+    TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
         "ExpectationsStore",
         "ValidationsStore",
         "HtmlSiteStore",
@@ -242,10 +242,33 @@ class BaseDataContext:
         "SqlAlchemyQueryStore",
         "CheckpointStore",
     ]
-    TEST_YAML_CONFIG_DATASOURCE_TYPES = [
+    TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
         "Datasource",
         "SimpleSqlalchemyDatasource",
     ]
+    TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES = [
+        "InferredAssetFilesystemDataConnector",
+        "ConfiguredAssetFilesystemDataConnector",
+        "InferredAssetS3DataConnector",
+        "ConfiguredAssetS3DataConnector",
+        "InferredAssetSqlDataConnector",
+        "ConfiguredAssetSqlDataConnector",
+    ]
+    TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
+        "Checkpoint",
+        "SimpleCheckpoint",
+    ]
+    ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
+        "SUBSTITUTION_ERROR",
+        "YAML_PARSE_ERROR",
+        "NOT_PROVIDED" "CUSTOM",
+    ]
+    ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
+        TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
+    )
 
     @classmethod
     def validate_config(cls, project_config):
@@ -3173,6 +3196,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         The returned object is determined by return_mode.
         """
         usage_stats_event: str = "data_context.test_yaml_config"
+        usage_stats_event_payload: Dict[str, str] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")
@@ -3200,25 +3224,28 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 yaml_config,
                 substitutions,
             )
+        except Exception as e:
+            # Ensure we do not send the real class name if custom
+            usage_stats_event_payload = {"class_name": "SUBSTITUTION_ERROR"}
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
 
+        try:
             config: CommentedMap = yaml.load(config_str_with_substituted_variables)
 
             if "class_name" in config:
                 class_name = config["class_name"]
 
         except Exception as e:
-            if (
-                class_name
-                not in self.TEST_YAML_CONFIG_STORE_TYPES
-                + self.TEST_YAML_CONFIG_DATASOURCE_TYPES
-                + [
-                    "Checkpoint",
-                    "SimpleCheckpoint",
-                ]
-            ):
+            if class_name not in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES:
                 # Ensure we do not send the real class name if custom
                 usage_stats_event_payload: Dict[str, str] = {
-                    "class_name": "ERRONEOUS_CONFIG"
+                    "class_name": "YAML_PARSE_ERROR"
                 }
             send_usage_message(
                 data_context=self,
@@ -3231,17 +3258,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         instantiated_class: Any
 
         usage_stats_event_payload: dict = {"class_name": class_name}
-        if usage_stats_event_payload[
-            "class_name"
-        ] not in self.TEST_YAML_CONFIG_STORE_TYPES + self.TEST_YAML_CONFIG_DATASOURCE_TYPES + [
-            "Checkpoint",
-            "SimpleCheckpoint",
-        ]:
+        if usage_stats_event_payload["class_name"] is None:
+            usage_stats_event_payload["class_name"] = "NOT_PROVIDED"
+        elif (
+            usage_stats_event_payload["class_name"]
+            not in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        ):
             # Ensure we do not send the real class name if custom
-            usage_stats_event_payload["class_name"] = "CUSTOM_CONFIG"
+            usage_stats_event_payload["class_name"] = "CUSTOM"
 
         try:
-            if class_name in self.TEST_YAML_CONFIG_STORE_TYPES:
+            if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
                 store_name: str = name or config.get("name") or "my_temp_store"
                 instantiated_class = cast(
@@ -3254,7 +3281,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 store_name = instantiated_class.store_name or store_name
                 self._project_config["stores"][store_name] = config
 
-            elif class_name in self.TEST_YAML_CONFIG_DATASOURCE_TYPES:
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
@@ -3310,9 +3337,19 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     data_context=self, **checkpoint_config
                 )
 
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
+                print(
+                    f"\tInstantiating as a DataConnector, since class_name is {class_name}"
+                )
+                instantiated_class = instantiate_class_from_config(
+                    config=config,
+                    runtime_environment={
+                        "root_directory": self.root_directory,
+                    },
+                    config_defaults={},
+                )
+
             else:
-                # Do not send the real class name if custom
-                usage_stats_event_payload["class_name"] = "CUSTOM_CONFIG"
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."
                 )

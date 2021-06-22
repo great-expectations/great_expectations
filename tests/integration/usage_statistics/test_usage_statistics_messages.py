@@ -139,15 +139,6 @@ Whenever a new kind of message is added, an example of that message should be in
 Each message will be sent to the server to ensure it is accepted.
 
 """
-TEST_YAML_CONFIG_TYPES = (
-    BaseDataContext.TEST_YAML_CONFIG_STORE_TYPES
-    + BaseDataContext.TEST_YAML_CONFIG_DATASOURCE_TYPES
-    + ["Checkpoint", "SimpleCheckpoint"]
-    + [
-        "CUSTOM_CONFIG",
-        "ERRONEOUS_CONFIG",
-    ]
-)
 valid_usage_statistics_messages = {
     "data_context.__init__": [
         {
@@ -463,10 +454,11 @@ valid_usage_statistics_messages = {
                 "event": "data_context.test_yaml_config",
                 "event_payload": {
                     "class_name": class_name,
+                    "diagnostic_info": None,
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
-            for class_name in TEST_YAML_CONFIG_TYPES
+            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
         ]
         + [
             {
@@ -474,11 +466,25 @@ valid_usage_statistics_messages = {
                 "success": False,
                 "event_payload": {
                     "class_name": class_name,
+                    "diagnostic_info": None,
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
-            for class_name in TEST_YAML_CONFIG_TYPES
-        ],
+            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        ]
+        # TODO: Add messages for all diagnostic info types
+        #               + [
+        #     {
+        #         "event": "data_context.test_yaml_config",
+        #         "success": False,
+        #         "event_payload": {
+        #             "class_name": class_name,
+        #             "diagnostic_info": None,
+        #         },
+        #         "ge_version": "0.13.20.manual_testing",
+        #     }
+        #     for diagnostic_info in BaseDataContext.ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES
+        # ],
     ),
     # CLI INIT COMMANDS
     "cli.init.create": [

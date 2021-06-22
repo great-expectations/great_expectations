@@ -1970,7 +1970,7 @@ validations:
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "CUSTOM_CONFIG"},
+                "event_payload": {"class_name": "CUSTOM"},
                 "success": False,
             }
         ),
