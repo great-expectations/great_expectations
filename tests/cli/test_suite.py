@@ -41,11 +41,11 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  delete  Delete an expectation suite from the expectation store.
+  delete  Delete an Expectation Suite from the Expectation Store.
   demo    This command is not supported in the v3 (Batch Request) API.
-  edit    Generate a Jupyter notebook for editing an existing Expectation...
-  list    Lists available Expectation Suites.
-  new     Create a new empty Expectation Suite.
+  edit    Edit an existing Expectation Suite.
+  list    List existing Expectation Suites.
+  new     Create a new Expectation Suite.
 """
         in stdout
     )
