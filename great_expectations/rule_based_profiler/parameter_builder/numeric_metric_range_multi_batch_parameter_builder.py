@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Hashable, List, Optional, Union
 
 import numpy as np
 from scipy import special
@@ -60,7 +60,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticGett
     @property
     def data_point_identifiers(
         self,
-    ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
+    ) -> List[Hashable]:
         """
         This property is a required interface method of the SingleNumericStatisticGetter class.
 
@@ -73,17 +73,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticGett
 
     def generate_distribution_sample(
         self,
-        randomized_data_point_identifiers: List[
-            Union[
-                bytes,
-                str,
-                int,
-                float,
-                complex,
-                tuple,
-                frozenset,
-            ]
-        ],
+        randomized_data_point_identifiers: List[Hashable],
     ) -> Union[
         np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
     ]:
@@ -140,17 +130,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticGett
 
     def compute_numeric_statistic(
         self,
-        randomized_data_point_identifiers: List[
-            Union[
-                bytes,
-                str,
-                int,
-                float,
-                complex,
-                tuple,
-                frozenset,
-            ]
-        ],
+        randomized_data_point_identifiers: List[Hashable],
     ) -> np.float64:
         """
         This method is a required interface method of the SingleNumericStatisticGetter class.

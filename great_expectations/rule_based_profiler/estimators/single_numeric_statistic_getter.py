@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Union
+from typing import Hashable, List, Union
 
 import numpy as np
 
@@ -9,7 +9,7 @@ class SingleNumericStatisticGetter(ABC):
     @abstractmethod
     def data_point_identifiers(
         self,
-    ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
+    ) -> List[Hashable]:
         """
         This property must return the list consisting of hashable objects, which identify the data points.
 
@@ -20,17 +20,7 @@ class SingleNumericStatisticGetter(ABC):
     @abstractmethod
     def generate_distribution_sample(
         self,
-        randomized_data_point_identifiers: List[
-            Union[
-                bytes,
-                str,
-                int,
-                float,
-                complex,
-                tuple,
-                frozenset,
-            ]
-        ],
+        randomized_data_point_identifiers: List[Hashable],
     ) -> Union[
         np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
     ]:
@@ -47,17 +37,7 @@ class SingleNumericStatisticGetter(ABC):
     @abstractmethod
     def compute_numeric_statistic(
         self,
-        randomized_data_point_identifiers: List[
-            Union[
-                bytes,
-                str,
-                int,
-                float,
-                complex,
-                tuple,
-                frozenset,
-            ]
-        ],
+        randomized_data_point_identifiers: List[Hashable],
     ) -> np.float64:
         """
         Given a randomized list of data point identifiers, it samples the distribution and computes a statistic for that

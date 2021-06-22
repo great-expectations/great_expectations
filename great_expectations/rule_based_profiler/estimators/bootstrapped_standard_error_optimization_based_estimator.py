@@ -1,6 +1,6 @@
 import logging
 import random
-from typing import List, Optional, Union
+from typing import Hashable, List, Optional, Union
 
 import numpy as np
 import scipy.stats
@@ -254,28 +254,12 @@ obtained (the algorithm failed to converge after {BootstrappedStandardErrorOptim
     def _compute_statistic_for_random_sample(self) -> np.float64:
         random_sample_indexes: List[int] = self._generate_random_sample_indexes()
         original_data_sample_ids: List[
-            Union[
-                bytes,
-                str,
-                int,
-                float,
-                complex,
-                tuple,
-                frozenset,
-            ]
+            Hashable
         ] = self._statistic_calculator.data_point_identifiers
         idx: int
-        randomized_data_point_identifiers: List[
-            Union[
-                bytes,
-                str,
-                int,
-                float,
-                complex,
-                tuple,
-                frozenset,
-            ]
-        ] = [original_data_sample_ids[idx] for idx in random_sample_indexes]
+        randomized_data_point_identifiers: List[Hashable] = [
+            original_data_sample_ids[idx] for idx in random_sample_indexes
+        ]
         computed_sample_statistic: np.float64 = (
             self._statistic_calculator.compute_numeric_statistic(
                 randomized_data_point_identifiers=randomized_data_point_identifiers
