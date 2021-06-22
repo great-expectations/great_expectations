@@ -56,18 +56,18 @@ When we put it all together, here is what our config with our single `row_count_
 Now let's use our config to profile our data and create a simple Expectation Suite!
 
 First we'll do some basic set-up - set up a DataContext and parse our YAML
-```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L100-L106
+```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L100-L104
 ```
 
 Next, we'll instantiate our Profiler, passing in our config and our DataContext
-```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L108-L112
+```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L106-L109
 ```
 
 Finally, we'll run `profiler.profile()` and save it to a variable. 
-```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L114
+```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L111
 ```
 Then, we can print our suite so we can see how it looks!
-```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L119-L143
+```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L116-L140
 ```
 
 Let's add one more rule to our Rule-Based Profiler config. This Rule will use the DomainBuilder to populate a list of all of the numeric columns in one Batch of taxi data (in this case, the most recent Batch). It will then use our NumericMetricRangeMultiBatchParameterBuilder looking at the three Batches prior to our most recent Batch to get probable ranges for the min and max values for each of those columns. Finally, it will use those ranges to add two ExpectationConfigurations for each of those columns: `expect_column_min_to_be_between` and `expect_column_max_to_be_between`.

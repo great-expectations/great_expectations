@@ -102,12 +102,9 @@ data_context = DataContext()
 
 # Instantiate Profiler
 full_profiler_config_dict: dict = yaml.load(profiler_config)
-rules_configs: dict = full_profiler_config_dict.get("rules")
-variables_configs: dict = full_profiler_config_dict.get("variables")
 
 profiler: Profiler = Profiler(
-    rules_configs=rules_configs,
-    variables_configs=variables_configs,
+    profiler_config=full_profiler_config_dict,
     data_context=data_context,
 )
 
