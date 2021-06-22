@@ -11,6 +11,7 @@ Develop
 * [DOCS] Remove broken links
 * [DOCS] Fix typo in SlackNotificationAction docstring
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
+* [BUGFIX] Using cache in order not to fetch already known secrets #2882 (thanks @Cedric-Magnan)
 * [BUGFIX] Fix creation of temp tables for unexpected condition
 * [BUGFIX] Docs integration tests now only run when `--docs-tests` option is specified
 * [BUGFIX] Fix instantiation of PandasExecutionEngine with custom parameters
