@@ -80,7 +80,11 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
                 hasattr(other, "to_json_dict")
                 and self.to_json_dict() == other.to_json_dict()
             )
-            or (isinstance(other, dict) and self.to_json_dict() == other)
+            or (
+                isinstance(other, dict)
+                and self.to_json_dict()
+                == filter_properties_dict(properties=other, clean_falsy=True)
+            )
             or (self.__str__() == str(other))
         )
 

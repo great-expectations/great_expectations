@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -19,7 +19,6 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container_for_variables,
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
-from great_expectations.validator.validator import Validator
 
 
 class Profiler:
@@ -30,10 +29,8 @@ class Profiler:
 
     def __init__(
         self,
-        validator: Validator,
         *,
-        variables_configs: Optional[Dict[str, Dict]] = None,
-        rules_configs: Optional[Dict[str, Dict]] = None,
+        profiler_config: Optional[Dict[str, Dict[str, Dict]]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -43,18 +40,17 @@ class Profiler:
         These will be used to define profiler computation patterns.
 
         Args:
-            validator: Validator containing loaded Batch objects to be profiled
             variables_configs: Variables from a profiler configuration
             rules_configs: Rule configuration as a dictionary
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
-        self._validator = validator
         self._data_context = data_context
-
         self._rules = []
 
+        rules_configs: Dict[str, Dict] = profiler_config.get("rules", {})
         rule_name: str
         rule_config: dict
+
         for rule_name, rule_config in rules_configs.items():
             domain_builder_config: dict = rule_config.get("domain_builder")
 
@@ -65,7 +61,7 @@ class Profiler:
 
             domain_builder: DomainBuilder = instantiate_class_from_config(
                 config=domain_builder_config,
-                runtime_environment={},
+                runtime_environment={"data_context": data_context},
                 config_defaults={
                     "module_name": "great_expectations.rule_based_profiler.domain_builder"
                 },
@@ -112,7 +108,9 @@ class Profiler:
                         )
                     )
 
+            variables_configs: Dict[str, Dict] = profiler_config.get("variables", {})
             variables: Optional[ParameterContainer] = None
+
             if variables_configs:
                 variables = build_parameter_container_for_variables(
                     variables_configs=variables_configs
@@ -134,8 +132,6 @@ class Profiler:
         expectation_suite_name: Optional[str] = None,
     ) -> ExpectationSuite:
         """
-        Evaluates Profiler object configured with rule set on Batch objects in Validator and returns ExpectationSuite
-
         Args:
             :param expectation_suite_name: A name for returned Expectation suite.
         :return: Set of rule evaluation results in the form of an ExpectationSuite
@@ -151,9 +147,7 @@ class Profiler:
 
         rule: Rule
         for rule in self._rules:
-            expectation_configurations: List[ExpectationConfiguration] = rule.generate(
-                validator=self._validator
-            )
+            expectation_configurations: List[ExpectationConfiguration] = rule.generate()
             expectation_configuration: ExpectationConfiguration
             for expectation_configuration in expectation_configurations:
                 expectation_suite.add_expectation(
