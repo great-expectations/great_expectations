@@ -91,7 +91,7 @@ class SlackNotificationAction(ValidationAction):
 
         - name: send_slack_notification_on_validation_result
         action:
-          class_name: StoreValidationResultAction
+          class_name: SlackNotificationAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
           # or pass in as environment variable
           slack_webhook: ${validation_notification_slack_webhook}

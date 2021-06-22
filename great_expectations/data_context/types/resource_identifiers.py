@@ -1,6 +1,7 @@
 import logging
 import warnings
 from typing import Union
+from uuid import UUID
 
 from dateutil.parser import parse
 
@@ -95,7 +96,7 @@ class BatchIdentifierSchema(Schema):
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully qualified expectation_suite_identifer
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifer
     and run_id.
     """
 
@@ -104,7 +105,7 @@ class ValidationResultIdentifier(DataContextKey):
 
         Args:
             expectation_suite_identifier (ExpectationSuiteIdentifier, list, tuple, or dict):
-                identifying information for the fully qualified expectation suite used to validate
+                identifying information for the fully-qualified expectation suite used to validate
             run_id (RunIdentifier): The run_id for which validation occurred
         """
         super().__init__()
@@ -279,8 +280,10 @@ class SiteSectionIdentifier(DataContextKey):
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_key: str):
+    def __init__(self, configuration_key: Union[str, UUID]):
         super().__init__()
+        if isinstance(configuration_key, UUID):
+            configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
             raise InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
