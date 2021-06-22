@@ -4,7 +4,7 @@ from typing import List, Union
 import numpy as np
 
 
-class SingleNumericStatisticCalculator(ABC):
+class SingleNumericStatisticGetter(ABC):
     @property
     @abstractmethod
     def data_point_identifiers(

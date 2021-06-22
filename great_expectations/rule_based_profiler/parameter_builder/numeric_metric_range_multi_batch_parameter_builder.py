@@ -11,7 +11,7 @@ from great_expectations.rule_based_profiler.estimators import (
     BootstrappedStandardErrorOptimizationBasedEstimator,  # isort:skip
 )
 from great_expectations.rule_based_profiler.estimators import (
-    SingleNumericStatisticCalculator,  # isort:skip
+    SingleNumericStatisticGetter,  # isort:skip
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
@@ -31,9 +31,9 @@ NP_SQRT_2: np.float64 = np.sqrt(2.0)
 MAX_DECIMALS: int = 9
 
 
-class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalculator):
+class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticGetter):
     """
-    This class implements all abstract methods, defined in SingleNumericStatisticCalculator, which are required by the
+    This class implements all abstract methods, defined in SingleNumericStatisticGetter, which are required by the
     statistical algorithm, implemented in the BootstrappedStandardErrorOptimizationBasedEstimator class.
     """
 
@@ -62,7 +62,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         self,
     ) -> List[Union[bytes, str, int, float, complex, tuple, frozenset]]:
         """
-        This property is a required interface method of the SingleNumericStatisticCalculator class.
+        This property is a required interface method of the SingleNumericStatisticGetter class.
 
         In the abstract, it must return the list consisting of hashable objects, which identify the data points.
         For the multi-batch profiling case, this translates into the list of batch_id (string-valued) references.
@@ -88,7 +88,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
     ]:
         """
-        This method is a required interface method of the SingleNumericStatisticCalculator class.
+        This method is a required interface method of the SingleNumericStatisticGetter class.
 
         Given a randomized list of data point identifiers, it computes metrics corresponding to each data point and
         returns the collection of these metrics as a sample of the distribution, where the dimensionality of
@@ -153,7 +153,7 @@ class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticCalc
         ],
     ) -> np.float64:
         """
-        This method is a required interface method of the SingleNumericStatisticCalculator class.
+        This method is a required interface method of the SingleNumericStatisticGetter class.
 
         Given a randomized list of data point identifiers, it samples the distribution and computes a statistic for that
         sample.  Any single-valued numeric statistic that is a function of the data points is acceptable.

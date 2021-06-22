@@ -6,7 +6,7 @@ import numpy as np
 import scipy.stats
 
 from great_expectations.rule_based_profiler.estimators import (
-    SingleNumericStatisticCalculator,
+    SingleNumericStatisticGetter,
 )
 from great_expectations.rule_based_profiler.util import NP_EPSILON
 
@@ -70,14 +70,14 @@ class BootstrappedStandardErrorOptimizationBasedEstimator:
 
     def __init__(
         self,
-        statistic_calculator: SingleNumericStatisticCalculator,
+        statistic_calculator: SingleNumericStatisticGetter,
         num_data_points: int,
         fractional_bootstrapped_statistic_deviation_bound: Optional[float] = 1.0e-1,
         prob_bootstrapped_statistic_deviation_outside_bound: Optional[float] = 5.0e-2,
         num_bootstrap_samples: Optional[int] = None,
     ):
         """
-        :param statistic_calculator SingleNumericStatisticCalculator -- used to generate samples of the distribution,
+        :param statistic_calculator SingleNumericStatisticGetter -- used to generate samples of the distribution,
         given the data points, and to compute a scalar-valued statistic on a sample of the distribution.
         :param num_data_points: int -- number of data points available for generating samples of the distribution.
         :param fractional_bootstrapped_statistic_deviation_bound -- maximum fractional deviation of the statistic from
