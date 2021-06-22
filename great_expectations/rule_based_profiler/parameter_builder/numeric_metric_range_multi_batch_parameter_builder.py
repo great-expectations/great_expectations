@@ -31,7 +31,7 @@ NP_SQRT_2: np.float64 = np.sqrt(2.0)
 MAX_DECIMALS: int = 9
 
 
-class NumericMetricRangeMultiBatchStatisticCalculator(SingleNumericStatisticGetter):
+class NumericMetricRangeMultiBatchStatisticGetter(SingleNumericStatisticGetter):
     """
     This class implements all abstract methods, defined in SingleNumericStatisticGetter, which are required by the
     statistical algorithm, implemented in the BootstrappedStandardErrorOptimizationBasedEstimator class.
@@ -278,7 +278,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
          2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
          3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
             order to have access to all Batch objects, on each of which the specified metric_name will be computed.
-         4. Instantiate the NumericMetricRangeMultiBatchStatisticCalculator class, which implements metric computations.
+         4. Instantiate the NumericMetricRangeMultiBatchStatisticGetter class, which implements metric computations.
             4.0 While looping through the available batch_ids:
             4.1: Update the metric_domain_kwargs with the specific batch_id (the iteration variable of the loop).
             4.2: Create the metric_configuration_arguments using the metric_domain_kwargs from the previous step.
@@ -289,7 +289,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             If the sampling method is "bootstrap" (default): Sample the distribution an automatically computed, optimal
             number of times, using randomized lists of batch_ids with replacement (the "bootstrapping" technique).
             For details, please refer to:
-            * BootstrappedStandardErrorOptimizationBasedEstimator and NumericMetricRangeMultiBatchStatisticCalculator
+            * BootstrappedStandardErrorOptimizationBasedEstimator and NumericMetricRangeMultiBatchStatisticGetter
             * Scientific article: http://dido.econ.yale.edu/~dwka/pub/p1001.pdf
             If the sampling method is "oneshot": Use the single list of metrics, generated from the list of batch_ids.
          6. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
@@ -371,8 +371,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 """
             )
 
-        statistic_calculator: NumericMetricRangeMultiBatchStatisticCalculator = (
-            NumericMetricRangeMultiBatchStatisticCalculator(
+        statistic_calculator: NumericMetricRangeMultiBatchStatisticGetter = (
+            NumericMetricRangeMultiBatchStatisticGetter(
                 batch_ids=batch_ids,
                 validator=validator,
                 metric_name=self._metric_name,
