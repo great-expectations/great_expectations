@@ -7,6 +7,7 @@ import os
 import re
 import warnings
 from collections import OrderedDict
+from functools import lru_cache
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -233,6 +234,7 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     return template_str
 
 
+@lru_cache(maxsize=None)
 def substitute_value_from_secret_store(value):
     """
     This method takes a value, tries to parse the value to fetch a secret from a secret manager
