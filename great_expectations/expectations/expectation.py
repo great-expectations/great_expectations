@@ -411,12 +411,6 @@ class Expectation(metaclass=MetaExpectation):
             # "sampled" unexpected values
             total_count = 0
             for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
-                if not isinstance(unexpected_count_dict, dict):
-                    # handles case: "partial_exception_counts requires a hashable type"
-                    # this case is also now deprecated (because the error is moved to an errors key
-                    # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
-                    # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
-                    continue
                 value = unexpected_count_dict.get("value")
                 count = unexpected_count_dict.get("count")
                 total_count += count
@@ -475,7 +469,7 @@ class Expectation(metaclass=MetaExpectation):
         if result_dict is None:
             return "--"
 
-        if result_dict.get("observed_value"):
+        if result_dict.get("observed_value") is not None:
             observed_value = result_dict.get("observed_value")
             if isinstance(observed_value, (int, float)) and not isinstance(
                 observed_value, bool

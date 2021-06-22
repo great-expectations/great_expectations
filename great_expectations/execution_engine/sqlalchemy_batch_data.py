@@ -140,11 +140,6 @@ class SqlAlchemyBatchData(BatchData):
                 # mssql expects all temporary table names to have a prefix '#'
                 if engine.dialect.name.lower() == "mssql":
                     generated_table_name = f"#{generated_table_name}"
-                if engine.dialect.name.lower() == "bigquery":
-                    raise ValueError(
-                        "No BigQuery dataset specified.  Include bigquery_temp_table in "
-                        "batch_spec_passthrough or a specify a default dataset in engine url"
-                    )
             if selectable is not None:
                 if engine.dialect.name.lower() == "oracle":
                     # oracle query was already passed as a string

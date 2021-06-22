@@ -234,7 +234,49 @@ def test_graph_validate(basic_datasource):
     ]
 
 
-# this might indicate that we need to validate configuration a little more strictly prior to actually validating
+def test_graph_validate_with_exception(basic_datasource):
+    def mock_error(*args, **kwargs):
+        raise Exception("Mock Error")
+
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
+    )
+
+    validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
+    validator.build_metric_dependency_graph = mock_error
+
+    result = validator.graph_validate(configurations=[expectation_configuration])
+
+    assert len(result) == 1
+    assert result[0].expectation_config is not None
+
+
 def test_graph_validate_with_bad_config(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
@@ -457,7 +499,7 @@ def test_head(
 
 @pytest.fixture()
 def multi_batch_taxi_validator(
-    yellow_trip_pandas_data_context: DataContext,
+    yellow_trip_pandas_data_context,
 ) -> Validator:
     context: DataContext = yellow_trip_pandas_data_context
 
@@ -498,7 +540,9 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
     ]
 
 
-def test_validator_batch_filter(multi_batch_taxi_validator):
+def test_validator_batch_filter(
+    multi_batch_taxi_validator,
+):
     total_batch_definition_list: List[BatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
@@ -562,13 +606,38 @@ def test_validator_batch_filter(multi_batch_taxi_validator):
     assert batch_definitions_months_set == {"01", "03"}
 
 
-def test_custom_filter_function(multi_batch_taxi_validator):
+def test_custom_filter_function(
+    multi_batch_taxi_validator,
+):
     total_batch_definition_list: List[BatchDefinition] = [
         v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
+    assert len(total_batch_definition_list) == 3
+
+    # Filter to all batch_definitions prior to March
+    jan_feb_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={
+            "custom_filter_function": lambda batch_identifiers: int(
+                batch_identifiers["month"]
+            )
+            < 3
+        }
+    )
+    jan_feb_batch_definition_list: list = (
+        jan_feb_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
+    )
+    assert len(jan_feb_batch_definition_list) == 2
+    batch_definitions_months_set: Set[str] = {
+        v.batch_identifiers["month"] for v in jan_feb_batch_definition_list
+    }
+    assert batch_definitions_months_set == {"01", "02"}
 
 
-def test_validator_set_active_batch(multi_batch_taxi_validator):
+def test_validator_set_active_batch(
+    multi_batch_taxi_validator,
+):
     jan_min_date = "2019-01-01"
     mar_min_date = "2019-03-01"
     assert (
@@ -591,7 +660,9 @@ def test_validator_set_active_batch(multi_batch_taxi_validator):
     ).success
 
 
-def test_validator_load_additional_batch_to_validator(yellow_trip_pandas_data_context):
+def test_validator_load_additional_batch_to_validator(
+    yellow_trip_pandas_data_context,
+):
     context: DataContext = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
@@ -624,7 +695,7 @@ def test_validator_load_additional_batch_to_validator(yellow_trip_pandas_data_co
     )
 
     new_batch = context.get_batch_list(batch_request=feb_batch_request)
-    validator.load_batch(new_batch)
+    validator.load_batch(batch_list=new_batch)
 
     updated_batch_markers: BatchMarkers = validator.active_batch_markers
     assert (
@@ -684,6 +755,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     )
 
     with pytest.raises(ValueError) as ve:
+        # noinspection PyUnusedLocal
         validator: Validator = context.get_validator(
             batch_request=jan_feb_batch_request,
             batch_request_list=[jan_batch_request, feb_batch_request],
