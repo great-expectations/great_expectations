@@ -159,7 +159,7 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
@@ -194,7 +194,7 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
@@ -225,7 +225,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
