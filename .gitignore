@@ -42,9 +42,7 @@ wheels/
 .installed.cfg
 *.egg
 .vscode/
-my-website/
-p3venv/
-testvenv/
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
