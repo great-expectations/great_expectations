@@ -261,42 +261,10 @@ module.exports = {
         },
       ]
     },
-    {
-      type: 'category',
-      label: 'Reference',
-      collapsed: true,
-      items: [
-            { type: 'doc', id: 'reference/core-concepts' }
-          ]
-    },
-    {
-      type: 'category',
-      label: 'Community Resources',
-      collapsed: true,
-      items: [
-            { type: 'doc', id: 'community' }
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Contributing',
-      collapsed: true,
-      items: [
-        {
-          type: 'doc', id: 'contributing/contributing'
-        }
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Changelog',
-      collapsed: true,
-      items: [
-        {
-          type: 'doc', id: 'changelog'
-        }
-      ]
-    }
-  ]
 
+    { type: 'doc', id: 'reference/core-concepts'},
+    { type: 'doc', id: 'community'},
+    { type: 'doc', id: 'contributing/contributing'},
+    { type: 'doc', id: 'changelog'},
+  ]
 }
