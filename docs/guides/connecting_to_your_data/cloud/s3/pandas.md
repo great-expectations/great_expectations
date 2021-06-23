@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data on a S3 using pandas
+title: How to connect to data on S3 using Pandas
 ---
 
 **TODO** This is a stub
