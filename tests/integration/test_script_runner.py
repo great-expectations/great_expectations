@@ -99,11 +99,11 @@ docs_test_matrix = [
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py",
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_python_example.py",
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     {
