@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data on a filesystem using spark
+title: How to connect to data on a filesystem using Spark
 ---
 
 **TODO** This is a stub

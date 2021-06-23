@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data on a filesystem using pandas
+title: How to connect to data on a filesystem using Pandas
 ---
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'

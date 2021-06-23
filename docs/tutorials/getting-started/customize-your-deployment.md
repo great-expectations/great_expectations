@@ -1,5 +1,5 @@
 ---
-title: Customize your deployment
+title: Optional - Customize your deployment
 ---
 ![minimap](minimap.png)
 
