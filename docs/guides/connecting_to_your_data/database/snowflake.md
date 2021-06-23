@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data in a Snowflake database
+title: How to connect to a Snowflake database
 ---
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'

@@ -74,10 +74,10 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        self.discard_subset_failing_expectations = kwargs.get(
+        self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.get("boto3_options", {})
+        boto3_options: dict = kwargs.pop("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:

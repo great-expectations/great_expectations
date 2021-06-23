@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data that is an in-memory dataframe with Pandas
+title: How to connect to in-memory data in a Pandas dataframe
 ---
 
 **TODO** This is a stub

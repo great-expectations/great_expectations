@@ -113,7 +113,7 @@ def suite_new(
     no_jupyter,
 ):
     """
-    Create a new empty Expectation Suite.
+    Create a new Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
     """
     context: DataContext = ctx.obj.data_context
@@ -399,7 +399,7 @@ def suite_edit(
     no_jupyter,
 ):
     """
-    Generate a Jupyter notebook for editing an existing Expectation Suite.
+    Edit an existing Expectation Suite.
 
     The SUITE argument is required. This is the name you gave to the suite
     when you created it.
@@ -710,7 +710,7 @@ def suite_demo(ctx):
 @click.pass_context
 def suite_delete(ctx, suite):
     """
-    Delete an expectation suite from the expectation store.
+    Delete an Expectation Suite from the Expectation Store.
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -756,7 +756,7 @@ def suite_delete(ctx, suite):
 @suite.command(name="list")
 @click.pass_context
 def suite_list(ctx):
-    """Lists available Expectation Suites."""
+    """List existing Expectation Suites."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
