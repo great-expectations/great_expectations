@@ -125,11 +125,11 @@ df
 Verify your new Datasource by loading your dataframe (seen below in variable `df`) into a `Validator` using a `BatchRequest` with the dataframe passed in as `batch_data`.
 
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L31-L39
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L31-L37
 ```
 
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L41-L47
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L39-L45
 ```
 
 <Congratulations />
