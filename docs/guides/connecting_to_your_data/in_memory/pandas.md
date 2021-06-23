@@ -14,7 +14,7 @@ This will allow you to validate and explore your data.
 
 <Prerequisites>
 
-- Have access to data that can be loaded as a Pandas dataframe
+- Have access to data in a Pandas dataframe
 
 </Prerequisites>
 
@@ -28,12 +28,12 @@ This will allow you to validate and explore your data.
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L1-L6
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L1-L5
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L8
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L7
 ```
 
 
@@ -50,12 +50,12 @@ Using this example configuration we configure a `RuntimeDataConnector` as part o
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L10-L22
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L9-L21
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L24
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L23
 ```
 
 **Note**: Since the Datasource does not have data passed-in until later, the output will show that no `data_asset_names` are currently available. This is to be expected.
@@ -63,12 +63,12 @@ Run this code to test your configuration.
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_python_example.py#L10-L25
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py#L9-L24
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_python_example.py#L27
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py#L26
 ```
 
 **Note**: Since the Datasource does not have data passed-in until later, the output will show that no `data_asset_names` are currently available. This is to be expected.
@@ -90,13 +90,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L26
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L25
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_python_example.py#L29
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py#L28
 ```
 
 </TabItem>
@@ -106,7 +106,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 In most cases you will already have an in-memory dataframe already. For demonstrative purposes, here is a simple dataframe with 3 columns and 3 rows.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L29
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L28
 ```
 
 Which looks like this:
@@ -125,11 +125,11 @@ df
 Verify your new Datasource by loading your dataframe into a `Validator` using a `BatchRequest` with the dataframe passed in as `batch_data`.
 
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L32-L40
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L31-L39
 ```
 
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py#L42-L48
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L41-L47
 ```
 
 <Congratulations />
@@ -138,8 +138,8 @@ Then load data into the `Validator`.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [pandas_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_yaml_example.py)
-- [pandas_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/in-memory/pandas_python_example.py)
+- [pandas_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py)
+- [pandas_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py)
 
 ## Next Steps
 
