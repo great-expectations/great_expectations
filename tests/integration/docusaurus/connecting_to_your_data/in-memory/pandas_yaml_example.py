@@ -33,7 +33,9 @@ batch_request = RuntimeBatchRequest(
     datasource_name="example_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="<YOUR_MEANINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
-    runtime_parameters={"batch_data": df},  # df is the dataframe that we created earlier
+    runtime_parameters={
+        "batch_data": df
+    },  # df is the dataframe that we created earlier
     batch_identifiers={"default_identifier_name": "something_something"},
 )
 
