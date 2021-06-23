@@ -111,7 +111,8 @@ module.exports = {
               type: 'category',
               label: '💭 In-memory',
               items: [
-                { type: 'doc', id: 'guides/connecting_to_your_data/in_memory/pandas' },
+                'guides/connecting_to_your_data/in_memory/pandas',
+                'guides/connecting_to_your_data/in_memory/spark',
               ]
             },
             {
