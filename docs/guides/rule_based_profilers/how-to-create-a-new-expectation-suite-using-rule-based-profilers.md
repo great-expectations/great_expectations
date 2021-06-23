@@ -23,7 +23,7 @@ If you had twelve months of taxi ride data in csvs, a rule in a rule-based profi
 
 Each rule in a rule-based profiler has three types of components:
 **1. DomainBuilders**: A DomainBuilder will inspect some data that you provide to the Profiler, and compile a list of Domains for which you would like to build expectations. 
-**1. ParameterBuilders**: A ParameterBuilder will inspect some data that you provide to the Profiler, and compile a dictionary of Parameters that you can use when construction your ExpectationConfigurations
+**1. ParameterBuilders**: A ParameterBuilder will inspect some data that you provide to the Profiler, and compile a dictionary of Parameters that you can use when constructing your ExpectationConfigurations
 **1. ExpectationConfigurationBuilders**: An ExpectationConfigurationBuilder will take the Domains compiled by the DomainBuilder, and assemble ExpectationConfigurations using Parameters built by the ParameterBuilder
 
 In addition to Rules, a rule-based profiler enables you to specify Variables, which are global and can be used in any of the Rules. For instance, you may want to reference the same BatchRequest or the same tolerance in multiple Rules, and declaring these as Variables will enable you to do so. 
@@ -36,7 +36,7 @@ After that, we'll add our DomainBuilder. In this case, we'll use a TableDomainBu
 ```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L16-L17
 ```
 
-Next, we'll use a NumericMetricRangeMultiBatchParameterBuilder to get an estimate to use for the `min_value` and `max_value` of our `expect_table_row_count_to_be_between` expectation. This ParameterBuilder will take in a BatchRequest consisting of the three Batches prior to our current Batch, and use the row counts of each of those months to get a probable range of row counts that you could use in your ExpectationConfiguration.
+Next, we'll use a NumericMetricRangeMultiBatchParameterBuilder to get an estimate to use for the `min_value` and `max_value` of our `expect_table_row_count_to_be_between` expectation. This ParameterBuilder will take in a BatchRequest consisting of the five Batches prior to our current Batch, and use the row counts of each of those months to get a probable range of row counts that you could use in your ExpectationConfiguration.
 ```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L18-L32
 ```
 
@@ -45,6 +45,7 @@ A Rule can have multiple ParameterBuilders if needed, but in our case, we'll onl
 Finally, you would use an ExpectationConfigurationBuilder to actually build your `expect_table_row_count_to_be_between` expectation, where the Domain is the Domain returned by your TableDomainBuilder (your entire table), and the `min_value` and `max_value` are Parameters returned by your NumericMetricRangeMultiBatchParameterBuilder.
 ```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L33-L41
 ```
+You can see here that we use a special `$` syntax to reference `variables` and `parameters` that have been previously defined in our config. You can see a more thorough description of this syntax in the  docstring for [`ParameterContainer` here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/parameter_builder/parameter_container.py).
 
 When we put it all together, here is what our config with our single `row_count_rule` looks like:
 ```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L10-L41
@@ -67,7 +68,7 @@ Then, we can print our suite so we can see how it looks!
 ```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L116-L140
 ```
 
-Let's add one more rule to our Rule-Based Profiler config. This Rule will use the DomainBuilder to populate a list of all of the numeric columns in one Batch of taxi data (in this case, the most recent Batch). It will then use our NumericMetricRangeMultiBatchParameterBuilder looking at the three Batches prior to our most recent Batch to get probable ranges for the min and max values for each of those columns. Finally, it will use those ranges to add two ExpectationConfigurations for each of those columns: `expect_column_min_to_be_between` and `expect_column_max_to_be_between`.
+Let's add one more rule to our Rule-Based Profiler config. This Rule will use the DomainBuilder to populate a list of all of the numeric columns in one Batch of taxi data (in this case, the most recent Batch). It will then use our NumericMetricRangeMultiBatchParameterBuilder looking at the five Batches prior to our most recent Batch to get probable ranges for the min and max values for each of those columns. Finally, it will use those ranges to add two ExpectationConfigurations for each of those columns: `expect_column_min_to_be_between` and `expect_column_max_to_be_between`.
 
 As before, we will first add the name of our rule, and then specify the DomainBuilder.
 ```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L43-L53
@@ -88,7 +89,7 @@ Putting together our entire config, with both of our Rules, we get
 ```yaml file=../../../tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py#L9-L97
 ```
 
-And if we re-instantiate and re-run our `Profiler`, we'll have an updated suite with a table row count expectation for our table, and column min and column max expectations for each of our numeric columns!
+And if we re-instantiate our `Profiler` with our config which now has two rules, and then we re-run the `Profiler`, we'll have an updated suite with a table row count expectation for our table, and column min and column max expectations for each of our numeric columns!
 
 
 ### Glossary of Terms

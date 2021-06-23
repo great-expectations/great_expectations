@@ -23,7 +23,7 @@ rules:
             data_connector_name: monthly
             data_asset_name: my_reports
             data_connector_query:
-              index: "-4:-1"
+              index: "-6:-1"
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
@@ -59,7 +59,7 @@ rules:
             data_connector_name: monthly
             data_asset_name: my_reports
             data_connector_query:
-              index: "-4:-1"
+              index: "-6:-1"
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
@@ -71,7 +71,7 @@ rules:
             data_connector_name: monthly
             data_asset_name: my_reports
             data_connector_query:
-              index: "-4:-1"
+              index: "-6:-1"
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
@@ -112,7 +112,7 @@ suite = profiler.profile()
 print(suite)
 
 
-"""
+first_rule_suite = """
 {
   "meta": {
     "great_expectations_version": "0.13.19+58.gf8a650720.dirty"
