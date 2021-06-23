@@ -1,18 +1,14 @@
 import copy
-from typing import Any, Dict, Hashable, List, Optional, Union
+from dataclasses import make_dataclass
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from scipy import special
+from scipy.stats import bootstrap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.estimators import (
-    BootstrappedStandardErrorOptimizationBasedEstimator,  # isort:skip
-)
-from great_expectations.rule_based_profiler.estimators import (
-    SingleNumericStatisticGetter,  # isort:skip
-)
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     ParameterContainer,
@@ -30,11 +26,14 @@ NP_SQRT_2: np.float64 = np.sqrt(2.0)
 
 MAX_DECIMALS: int = 9
 
+ConfidenceInterval = make_dataclass("ConfidenceInterval", ["low", "high"])
 
-class NumericMetricRangeMultiBatchStatisticGetter(SingleNumericStatisticGetter):
+
+class NumericMetricRangeMultiBatchStatisticGetter:
     """
-    This class implements all abstract methods, defined in SingleNumericStatisticGetter, which are required by the
-    statistical algorithm, implemented in the BootstrappedStandardErrorOptimizationBasedEstimator class.
+    This class provides methods for combining metric computations for all batches into an array as well as the method
+    that computes the statistic, the "mean" value, of this array, which is desired by the given parameter_builder logic.
+    Note: Every metric computation is carried out exactly once (hence, no caching of metric values is necessary).
     """
 
     def __init__(
@@ -53,39 +52,18 @@ class NumericMetricRangeMultiBatchStatisticGetter(SingleNumericStatisticGetter):
         self._metric_value_kwargs = metric_value_kwargs
         self._fill_nan_with_zero = fill_nan_with_zero
 
-        # Computing metrics once per batch_id and caching the resulting values facilitates instant look up when same
-        # data point (i.e., same batch_id) is reused repeatedly as part of randomly sampling underlying distribution.
-        self._batch_id_metric_value_cache = {}
-
-    @property
-    def data_point_identifiers(
+    def get_metrics(
         self,
-    ) -> List[Hashable]:
-        """
-        This property is a required interface method of the SingleNumericStatisticGetter class.
-
-        In the abstract, it must return the list consisting of hashable objects, which identify the data points.
-        For the multi-batch profiling case, this translates into the list of batch_id (string-valued) references.
-
-        :return: List of Hashable objects (here, batch_ids)
-        """
-        return self._batch_ids
-
-    def generate_distribution_sample(
-        self,
-        randomized_data_point_identifiers: List[Hashable],
+        batch_ids: Optional[List[str]],
     ) -> Union[
         np.ndarray, List[Union[int, np.int32, np.int64, float, np.float32, np.float64]]
     ]:
         """
-        This method is a required interface method of the SingleNumericStatisticGetter class.
+        This method computes the given metric for each Batch (indicated by its respective batch_id) and returns an array
+        comprised of these numeric values.  Error checking and NaN conversion to 0.0 (if configured) is also handled.
 
-        Given a randomized list of data point identifiers, it computes metrics corresponding to each data point and
-        returns the collection of these metrics as a sample of the distribution, where the dimensionality of
-        the sample of the distribution is equal to the number of the identifiers provided (variable length is accepted).
-
-        :parameter: randomized_data_point_identifiers -- List of Hashable objects (here, batch_ids)
-        :return: An array-like (or list-like) collection of floating point numbers, representing the distribution sample
+        :parameter: batch_ids
+        :return: an array-like (or list-like) collection of floating point numbers, representing the distribution sample
         """
         metric_domain_kwargs_with_specific_batch_id: Optional[
             Dict[str, Any]
@@ -95,58 +73,50 @@ class NumericMetricRangeMultiBatchStatisticGetter(SingleNumericStatisticGetter):
         ] = []
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
         batch_id: str
-        for batch_id in randomized_data_point_identifiers:
-            # Attempt to fetch metric_value from cache.  In case of cache miss, compute metric_value and cache it.
-            metric_value = self._batch_id_metric_value_cache.get(batch_id)
-            if metric_value is None:
-                metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
-                metric_configuration_arguments: Dict[str, Any] = {
-                    "metric_name": self._metric_name,
-                    "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
-                    "metric_value_kwargs": self._metric_value_kwargs,
-                    "metric_dependencies": None,
-                }
-                metric_value = self._validator.get_metric(
-                    metric=MetricConfiguration(**metric_configuration_arguments)
-                )
-                if not is_numeric(value=metric_value):
-                    raise ge_exceptions.ProfilerExecutionError(
-                        message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
+        for batch_id in batch_ids:
+            metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
+            metric_configuration_arguments: Dict[str, Any] = {
+                "metric_name": self._metric_name,
+                "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
+                "metric_value_kwargs": self._metric_value_kwargs,
+                "metric_dependencies": None,
+            }
+            metric_value = self._validator.get_metric(
+                metric=MetricConfiguration(**metric_configuration_arguments)
+            )
+            if not is_numeric(value=metric_value):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
 (value of type "{str(type(metric_value))}" was computed).
 """
-                    )
-                if np.isnan(metric_value):
-                    if not self._fill_nan_with_zero:
-                        raise ValueError(
-                            f"""Computation of metric "{self._metric_name}" resulted in NaN ("not a number") value.
+                )
+            if np.isnan(metric_value):
+                if not self._fill_nan_with_zero:
+                    raise ValueError(
+                        f"""Computation of metric "{self._metric_name}" resulted in NaN ("not a number") value.
 """
-                        )
-                    metric_value = 0.0
-                self._batch_id_metric_value_cache[batch_id] = metric_value
+                    )
+                metric_value = 0.0
 
             metric_values.append(metric_value)
 
         return metric_values
 
-    def compute_numeric_statistic(
-        self,
-        randomized_data_point_identifiers: List[Hashable],
-    ) -> np.float64:
-        """
-        This method is a required interface method of the SingleNumericStatisticGetter class.
-
-        Given a randomized list of data point identifiers, it samples the distribution and computes a statistic for that
-        sample.  Any single-valued numeric statistic that is a function of the data points is acceptable.
-
-        :parameter: randomized_data_point_identifiers -- List of Hashable objects (here, batch_ids)
-        :return: np.float64 -- scalar measure of the distribution sample (here, the sample mean of data point metrics)
-        """
+    @staticmethod
+    def statistic(
         metric_values: Union[
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = self.generate_distribution_sample(
-            randomized_data_point_identifiers=randomized_data_point_identifiers
-        )
+        ],
+    ) -> np.float64:
+        """
+        This method computes a statistic for the distribution sample, passed to it in the form of a numeric array.
+        Any single-valued numeric statistic that is a function of all the data points (array elements) is acceptable.
+
+        :parameter: metric_values -- an array-like (or list-like) collection of floating point numbers, representing the
+        distribution sample (e.g., this quantity could be obtained by executing such method as "get_metrics()" above).
+        :return: np.float64 -- scalar measure of the distribution sample (here, the sample mean of data point metrics)
+        """
         metric_values = np.array(metric_values, dtype=np.float64)
         mean: np.float64 = np.mean(metric_values)
         return mean
@@ -162,8 +132,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
 
     The implementation supports two methods of estimating parameter values from data:
-    * bootstrapped (default) -- a mini-max non-parametric technique, which maximizes the probability that the estimated
-      parameter will minimally deviate from its actual value and determines the optimal number of samples automatically.
+    * bootstrapped (default) -- a statistical technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)")
     * one-shot -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
       and the standard error using the queried batches as the single sample of the distribution (fast, but inaccurate).
     """
@@ -206,10 +175,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             fill_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
             if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
-            (please see the documentation in BootstrappedStandardErrorOptimizationBasedEstimator and references therein)
-            num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then the
-            optimal number of samples, required by the bootstrap estimator, is automatically determined algorithmically.
-            If specified, then the explicitly configured number of bootstrap iterations overrides the algorithmic way.
+            num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
+            9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
@@ -285,23 +252,18 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             4.3: Compute metric_value using the local Validator object (which has access to the required Batch objects).
             4.4: Insure that the metric_value is numeric (ranges can be computed for numeric-valued metrics only).
             4.5: Append the value of the computed metric to the list (one for each batch_id -- loop iteration variable).
-         5. Obtain the distribution sample, consisting of the list of metrics, in accordance with the sampling method:
-            If the sampling method is "bootstrap" (default): Sample the distribution an automatically computed, optimal
-            number of times, using randomized lists of batch_ids with replacement (the "bootstrapping" technique).
-            For details, please refer to:
-            * BootstrappedStandardErrorOptimizationBasedEstimator and NumericMetricRangeMultiBatchStatisticGetter
-            * Scientific article: http://dido.econ.yale.edu/~dwka/pub/p1001.pdf
-            If the sampling method is "oneshot": Use the single list of metrics, generated from the list of batch_ids.
-         6. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
-         7. Using the configured directives and heuristics, determine if return values should be rounded to an integer.
-         8. Convert the list of floating point metric computation results to a numpy array (for further computations).
-         9. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
-        10. Compute the number of standard deviations (as floating point number rounded to the nearest highest integer)
+         5. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
+         6. Using the configured directives and heuristics, determine if return values should be rounded to an integer.
+         7. Convert the list of floating point metric computation results to a numpy array (for further computations).
+         Steps 8 -- 10 are for the "oneshot" sampling method only (the "bootstrap" method achieves same automatically):
+         8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
+         9. Compute the number of standard deviations (as floating point number rounded to the nearest highest integer)
             needed to create the "band" around the mean for achieving the specified false_positive_rate (note that the
             false_positive_rate of 0.0 would result in infinite number of standard deviations, hence it is "nudged" by
             a small quantity ("epsilon") above 0.0 if false_positive_rate of 0.0 is given as argument in constructor).
             (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
-        11. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
+        10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
+        11. Return ConfidenceInterval for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
 
@@ -371,6 +333,27 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 """
             )
 
+        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
+        false_positive_rate: Union[
+            Any, str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._false_positive_rate,
+            expected_return_type=(int, float),
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (0.0 <= false_positive_rate <= 1.0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"False-Positive Rate for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+            )
+
+        if np.isclose(false_positive_rate, 0.0):
+            false_positive_rate = false_positive_rate + NP_EPSILON
+
+        true_negative_rate: np.float64 = np.float64(1.0 - false_positive_rate)
+        stds_multiplier: np.float64
+
         statistic_calculator: NumericMetricRangeMultiBatchStatisticGetter = (
             NumericMetricRangeMultiBatchStatisticGetter(
                 batch_ids=batch_ids,
@@ -385,9 +368,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         metric_values: Union[
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = statistic_calculator.generate_distribution_sample(
-            randomized_data_point_identifiers=batch_ids
-        )
+        ] = statistic_calculator.get_metrics(batch_ids=batch_ids)
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
 
         truncate_distribution: Dict[
@@ -412,63 +393,33 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
+        metric_values = np.array(metric_values, dtype=np.float64)
+
+        confidence_interval: ConfidenceInterval
         if sampling_method == "bootstrap":
-            # Obtain num_bootstrap_samples override from rule state (i.e., variables and parameters); from instance variable otherwise.
-            num_bootstrap_samples: Optional[
-                int
-            ] = get_parameter_value_and_validate_return_type(
+            # Use default (bootstrap confidence interval already achieves optimal variance); keep for experimentation.
+            stds_multiplier = np.float64(0.0)
+            confidence_interval = self._get_bootstrap_confidence_interval(
+                metric_values=metric_values,
+                false_positive_rate=false_positive_rate,
                 domain=domain,
-                parameter_reference=self._num_bootstrap_samples,
-                expected_return_type=None,
                 variables=variables,
                 parameters=parameters,
-            )
-            bootstrapped_estimator: BootstrappedStandardErrorOptimizationBasedEstimator = BootstrappedStandardErrorOptimizationBasedEstimator(
-                statistic_calculator=statistic_calculator,
-                num_data_points=len(batch_ids),
-                fractional_bootstrapped_statistic_deviation_bound=1.0e-1,
-                prob_bootstrapped_statistic_deviation_outside_bound=5.0e-2,
-                num_bootstrap_samples=num_bootstrap_samples,
-            )
-            metric_values = (
-                bootstrapped_estimator.compute_bootstrapped_statistic_samples()
+                stds_multiplier=stds_multiplier,
             )
         else:
-            metric_values = np.array(metric_values, dtype=np.float64)
-
-        mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
-        std: Union[np.ndarray, np.float64] = self._standard_error(samples=metric_values)
-
-        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
-        false_positive_rate: Union[
-            Any, str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._false_positive_rate,
-            expected_return_type=(int, float),
-            variables=variables,
-            parameters=parameters,
-        )
-        if not (0.0 <= false_positive_rate <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"False-Positive Rate for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+            stds_multiplier = NP_SQRT_2 * special.erfinv(true_negative_rate)
+            confidence_interval = self._get_oneshot_confidence_interval(
+                metric_values=metric_values,
+                stds_multiplier=stds_multiplier,
             )
-
-        if np.isclose(false_positive_rate, 0.0):
-            false_positive_rate = false_positive_rate + NP_EPSILON
-
-        true_negative_rate: float = 1.0 - false_positive_rate
-        stds_multiplier: np.float64 = NP_SQRT_2 * special.erfinv(true_negative_rate)
-
-        min_value: float = mean - stds_multiplier * std
-        max_value: float = mean + stds_multiplier * std
 
         if round_decimals == 0:
-            min_value = round(min_value)
-            max_value = round(max_value)
+            min_value = round(confidence_interval.low)
+            max_value = round(confidence_interval.high)
         else:
-            min_value = round(min_value, round_decimals)
-            max_value = round(max_value, round_decimals)
+            min_value = round(confidence_interval.low, round_decimals)
+            max_value = round(confidence_interval.high, round_decimals)
 
         if lower_bound is not None:
             min_value = max(min_value, lower_bound)
@@ -498,6 +449,99 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
+        )
+
+    def _get_bootstrap_confidence_interval(
+        self,
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+        ],
+        false_positive_rate: np.float64,
+        domain: Domain,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        stds_multiplier: Optional[np.float64] = 0.0,
+    ):
+        # Obtain num_bootstrap_samples override from rule state (i.e., variables and parameters); from instance variable otherwise.
+        num_bootstrap_samples: Optional[
+            int
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._num_bootstrap_samples,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        rng: np.random.Generator = np.random.default_rng()
+        bootstrap_samples: tuple = (
+            metric_values,
+        )  # bootstrap samples must be in a sequence
+
+        true_negative_rate: np.float64 = np.float64(1.0 - false_positive_rate)
+        confidence_level: np.float64 = np.float64(
+            true_negative_rate + 5.0e-1 * false_positive_rate
+        )
+
+        # noinspection PyPep8Naming
+        BootstrapResult = make_dataclass(
+            "BootstrapResult", ["confidence_interval", "standard_error"]
+        )
+
+        bootstrap_result: BootstrapResult
+        if num_bootstrap_samples is None:
+            bootstrap_result = bootstrap(
+                bootstrap_samples,
+                NumericMetricRangeMultiBatchStatisticGetter.statistic,
+                vectorized=False,
+                confidence_level=confidence_level,
+                random_state=rng,
+            )
+        else:
+            bootstrap_result = bootstrap(
+                bootstrap_samples,
+                NumericMetricRangeMultiBatchStatisticGetter.statistic,
+                vectorized=False,
+                confidence_level=confidence_level,
+                n_resamples=num_bootstrap_samples,
+                random_state=rng,
+            )
+
+        confidence_interval: ConfidenceInterval = bootstrap_result.confidence_interval
+        confidence_interval_low: np.float64 = confidence_interval.low
+        confidence_interval_high: np.float64 = confidence_interval.high
+
+        std: Union[np.ndarray, np.float64] = bootstrap_result.standard_error
+
+        margin_of_error: np.float64 = stds_multiplier * std
+
+        confidence_interval_low -= margin_of_error
+        confidence_interval_high += margin_of_error
+
+        return ConfidenceInterval(
+            low=confidence_interval_low, high=confidence_interval_high
+        )
+
+    def _get_oneshot_confidence_interval(
+        self,
+        metric_values: Union[
+            np.ndarray,
+            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+        ],
+        stds_multiplier: np.float64,
+    ):
+        mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
+        std: Union[np.ndarray, np.float64] = self._standard_error(samples=metric_values)
+
+        margin_of_error: np.float64 = stds_multiplier * std
+
+        confidence_interval_low: np.float64 = mean - margin_of_error
+        confidence_interval_high: np.float64 = mean + margin_of_error
+
+        return ConfidenceInterval(
+            low=confidence_interval_low, high=confidence_interval_high
         )
 
     def _standard_error(
