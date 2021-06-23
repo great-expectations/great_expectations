@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data that is an in-memory dataframe with Spark
+title: How to connect to in-memory data in a Spark dataframe
 ---
 
 **TODO** This is a stub
