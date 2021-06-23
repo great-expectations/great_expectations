@@ -524,7 +524,8 @@ def _pandas_column_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -590,7 +591,8 @@ def _pandas_column_map_series_and_domain_values(
         accessor_domain_kwargs == accessor_domain_kwargs_2
     ), "map_series and condition must have the same accessor kwargs"
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -655,7 +657,8 @@ def _pandas_map_condition_index(
     ) = metrics.get("unexpected_condition")
 
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -704,7 +707,8 @@ def _pandas_column_map_condition_value_counts(
     ) = metrics.get("unexpected_condition")
 
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -772,7 +776,8 @@ def _pandas_map_condition_rows(
     ) = metrics.get("unexpected_condition")
 
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
 
     ###
@@ -842,39 +847,47 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
-    temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-    if execution_engine.dialect == "mssql":
-        # mssql expects all temporary table names to have a prefix '#'
-        temp_table_name = f"#{temp_table_name}"
+
+    count_case_statement: List[sa.sql.elements.Label] = [
+        sa.case(
+            [
+                (
+                    unexpected_condition,
+                    1,
+                )
+            ],
+            else_=0,
+        ).label("condition")
+    ]
 
     try:
-        with execution_engine.engine.begin():
-            metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
-            temp_table_obj: sa.Table = sa.Table(
-                temp_table_name,
-                metadata,
-                sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
-            )
-            temp_table_obj.create(execution_engine.engine, checkfirst=True)
+        if execution_engine.engine.dialect.name.lower() == "mssql":
+            temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
 
-            count_case_statement: List[sa.sql.elements.Label] = [
-                sa.case(
-                    [
-                        (
-                            unexpected_condition,
-                            1,
-                        )
-                    ],
-                    else_=0,
-                ).label("condition")
-            ]
-            inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
-                count_case_statement,
-                sa.select(count_case_statement).select_from(selectable),
-            )
-            execution_engine.engine.execute(inner_case_query)
+            with execution_engine.engine.begin():
+                metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
+                temp_table_obj: sa.Table = sa.Table(
+                    temp_table_name,
+                    metadata,
+                    sa.Column(
+                        "condition", sa.Integer, primary_key=False, nullable=False
+                    ),
+                )
+                temp_table_obj.create(execution_engine.engine, checkfirst=True)
+
+                inner_case_query: sa.sql.dml.Insert = (
+                    temp_table_obj.insert().from_select(
+                        count_case_statement,
+                        sa.select(count_case_statement).select_from(selectable),
+                    )
+                )
+                execution_engine.engine.execute(inner_case_query)
+
+                selectable_count = temp_table_obj
+        else:
+            selectable_count = sa.select(count_case_statement).select_from(selectable)
 
         unexpected_count_query: sa.Select = (
             sa.select(
@@ -882,7 +895,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     sa.func.sum(sa.column("condition")).label("unexpected_count"),
                 ]
             )
-            .select_from(temp_table_obj)
+            .select_from(selectable_count)
             .alias("UnexpectedCountSubquery")
         )
 
@@ -916,7 +929,7 @@ def _sqlalchemy_column_map_condition_values(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -963,7 +976,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -1004,7 +1017,7 @@ def _sqlalchemy_map_condition_rows(
         "unexpected_condition"
     )
     (selectable, _, _,) = execution_engine.get_compute_domain(
-        compute_domain_kwargs, domain_type="identity"
+        compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
     )
 
     query = (
@@ -1051,7 +1064,8 @@ def _spark_map_condition_unexpected_count_value(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
@@ -1070,7 +1084,8 @@ def spark_column_map_condition_values(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1111,7 +1126,8 @@ def _spark_column_map_condition_value_counts(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1150,7 +1166,8 @@ def _spark_map_condition_rows(
         "unexpected_condition"
     )
     (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type="identity"
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 

@@ -17,18 +17,12 @@ from great_expectations.cli.cli_messages import (
     READY_FOR_CUSTOMIZATION,
     RUN_INIT_AGAIN,
     SECTION_SEPARATOR,
-    SLACK_LATER,
-    SLACK_SETUP_COMPLETE,
-    SLACK_SETUP_INTRO,
-    SLACK_SETUP_PROMPT,
-    SLACK_WEBHOOK_PROMPT,
 )
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
 )
-from great_expectations.util import is_sane_slack_webhook
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -118,28 +112,6 @@ def init(ctx, usage_stats):
     cli_message(READY_FOR_CUSTOMIZATION)
     cli_message(HOW_TO_CUSTOMIZE)
     sys.exit(0)
-
-
-def _slack_setup(context):
-    webhook_url = None
-    cli_message(SLACK_SETUP_INTRO)
-    if not click.confirm(SLACK_SETUP_PROMPT, default=True):
-        cli_message(SLACK_LATER)
-        return context
-    else:
-        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
-
-    while not is_sane_slack_webhook(webhook_url):
-        cli_message("That URL was not valid.\n")
-        if not click.confirm(SLACK_SETUP_PROMPT, default=True):
-            cli_message(SLACK_LATER)
-            return context
-        webhook_url = click.prompt(SLACK_WEBHOOK_PROMPT, default="")
-
-    context.save_config_variable("validation_notification_slack_webhook", webhook_url)
-    cli_message(SLACK_SETUP_COMPLETE)
-
-    return context
 
 
 def _get_full_path_to_ge_dir(target_directory):

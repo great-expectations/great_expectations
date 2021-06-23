@@ -7,10 +7,11 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 import pandas as pd
 from dateutil.parser import parse
+from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -23,6 +24,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
@@ -31,7 +33,12 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
@@ -92,6 +99,12 @@ class Validator:
             ), "batches provided to Validator must be Great Expectations Batch objects"
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
+
+        if len(batches) > 1:
+            logger.warning(
+                f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
+                f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
+            )
 
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
@@ -272,15 +285,6 @@ class Validator:
         """Returns the execution engine being used by the validator at the given time"""
         return self._execution_engine
 
-    def head(self, n_rows=5, domain_kwargs=None, fetch_all=False):
-        if domain_kwargs is None:
-            domain_kwargs = {"batch_id": self.execution_engine.active_batch_data_id}
-        return self.get_metric(
-            MetricConfiguration(
-                "table.head", domain_kwargs, {"n_rows": n_rows, "fetch_all": fetch_all}
-            )
-        )
-
     def list_available_expectation_types(self):
         """ Returns a list of all expectations available to the validator"""
         keys = dir(self)
@@ -333,7 +337,7 @@ class Validator:
         self,
         graph: ValidationGraph,
         child_node: MetricConfiguration,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration],
         execution_engine: "ExecutionEngine",
         parent_node: Optional[MetricConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
@@ -455,6 +459,7 @@ class Validator:
                             "exception_traceback": exception_traceback,
                             "exception_message": str(err),
                         },
+                        expectation_config=configuration,
                     )
                     evrs.append(result)
                 else:
@@ -484,6 +489,7 @@ class Validator:
                             "exception_traceback": exception_traceback,
                             "exception_message": str(err),
                         },
+                        expectation_config=configuration,
                     )
                     evrs.append(result)
                 else:
@@ -492,8 +498,16 @@ class Validator:
 
     def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
         done: bool = False
+        pbar = None
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
+            if pbar is None:
+                pbar = tqdm(
+                    total=len(ready_metrics) + len(needed_metrics),
+                    desc="Calculating Metrics",
+                    disable=len(graph._edges) < 3,
+                )
+                pbar.update(0)
             metrics.update(
                 self._resolve_metrics(
                     execution_engine=self._execution_engine,
@@ -502,8 +516,10 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
             )
+            pbar.update(len(ready_metrics))
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
+        pbar.close()
 
         return metrics
 
@@ -672,20 +688,34 @@ class Validator:
         """Getter for config value"""
         return self._validator_config.get(key)
 
+    def load_batch(self, batch_list: List[Batch]):
+        for batch in batch_list:
+            self._execution_engine.load_batch_data(batch.id, batch.data)
+            self._batches[batch.id] = batch
+            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
+            # execution_engine. The final active_batch_id will be that of the final batch loaded.
+            self.active_batch_id = batch.id
+
+        return batch_list
+
     @property
-    def batches(self):
+    def batches(self) -> Dict[str, Batch]:
         """Getter for batches"""
         return self._batches
 
     @property
-    def active_batch(self):
-        """Getter for active batch"""
-        active_batch_id = self.execution_engine.active_batch_data_id
-        active_batch = self.batches.get(active_batch_id) if active_batch_id else None
-        return active_batch
+    def loaded_batch_ids(self) -> List[str]:
+        return self.execution_engine.loaded_batch_data_ids
 
     @property
-    def active_batch_spec(self):
+    def active_batch(self) -> Batch:
+        """Getter for active batch"""
+        active_batch_id: str = self.execution_engine.active_batch_data_id
+        batch: Batch = self.batches.get(active_batch_id) if active_batch_id else None
+        return batch
+
+    @property
+    def active_batch_spec(self) -> Optional[BatchSpec]:
         """Getter for active batch's batch_spec"""
         if not self.active_batch:
             return None
@@ -693,9 +723,24 @@ class Validator:
             return self.active_batch.batch_spec
 
     @property
-    def active_batch_id(self):
+    def active_batch_id(self) -> str:
         """Getter for active batch id"""
         return self.execution_engine.active_batch_data_id
+
+    @active_batch_id.setter
+    def active_batch_id(self, batch_id: str):
+        assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
+        available_batch_ids: Set[str] = set(self.batches.keys()).union(
+            set(self.loaded_batch_ids)
+        )
+        if batch_id not in available_batch_ids:
+            raise ValueError(
+                f"""batch_id {batch_id} not found in loaded batches.  Batches must first be loaded before they can be \
+set as active.
+"""
+            )
+        else:
+            self.execution_engine._active_batch_data_id = batch_id
 
     @property
     def active_batch_markers(self):
@@ -1300,6 +1345,58 @@ class Validator:
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
+
+    def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
+        if domain_kwargs is None:
+            domain_kwargs = {
+                "batch_id": self.execution_engine.active_batch_data_id,
+            }
+
+        columns: List[str] = self.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.columns",
+                metric_domain_kwargs=domain_kwargs,
+            )
+        )
+
+        return columns
+
+    def head(
+        self,
+        n_rows: Optional[int] = 5,
+        domain_kwargs: Optional[Dict[str, Any]] = None,
+        fetch_all: Optional[bool] = False,
+    ) -> pd.DataFrame:
+        if domain_kwargs is None:
+            domain_kwargs = {
+                "batch_id": self.execution_engine.active_batch_data_id,
+            }
+
+        data: Any = self.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.head",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs={
+                    "n_rows": n_rows,
+                    "fetch_all": fetch_all,
+                },
+            )
+        )
+
+        df: pd.DataFrame
+        if isinstance(
+            self.execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
+            df = pd.DataFrame(data=data)
+        elif isinstance(self.execution_engine, SparkDFExecutionEngine):
+            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
+            df = pd.DataFrame(data=rows)
+        else:
+            raise GreatExpectationsError(
+                "Unsupported or unknown ExecutionEngine type encountered in Validator class."
+            )
+
+        return df.reset_index(drop=True, inplace=False)
 
 
 ValidationStatistics = namedtuple(

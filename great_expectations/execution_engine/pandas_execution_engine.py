@@ -19,9 +19,9 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-
-from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 try:
     import boto3
@@ -74,10 +74,10 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        self.discard_subset_failing_expectations = kwargs.get(
+        self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.get("boto3_options", {})
+        boto3_options: dict = kwargs.pop("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
@@ -121,9 +121,15 @@ Notes:
             }
         )
 
-        batch_data: PandasBatchData
+        batch_data: Any
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
+            batch_data = batch_spec.batch_data
+            if isinstance(batch_data, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
+Please check your config."""
+                )
             if isinstance(batch_spec.batch_data, pd.DataFrame):
                 df = batch_spec.batch_data
             elif isinstance(batch_spec.batch_data, PandasBatchData):
@@ -271,7 +277,7 @@ Notes:
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
@@ -280,12 +286,12 @@ Notes:
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
-            MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
-             the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -444,37 +450,32 @@ Notes:
 
     @staticmethod
     def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
+        df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
 
-        return df[df[column_name] == partition_definition[column_name]]
+        return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
     def _split_on_converted_datetime(
         df,
         column_name: str,
-        partition_definition: dict,
+        batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
         stringified_datetime_series = df[column_name].map(
             lambda x: x.strftime(date_format_string)
         )
-        matching_string = partition_definition[column_name]
+        matching_string = batch_identifiers[column_name]
         return df[stringified_datetime_series == matching_string]
 
     @staticmethod
     def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
+        df, column_name: str, divisor: int, batch_identifiers: dict
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_divisor = partition_definition[column_name]
+        matching_divisor = batch_identifiers[column_name]
         matching_rows = df[column_name].map(
             lambda x: int(x / divisor) == matching_divisor
         )
@@ -482,35 +483,28 @@ Notes:
         return df[matching_rows]
 
     @staticmethod
-    def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_mod_value = partition_definition[column_name]
+        matching_mod_value = batch_identifiers[column_name]
         matching_rows = df[column_name].map(lambda x: x % mod == matching_mod_value)
 
         return df[matching_rows]
 
     @staticmethod
     def _split_on_multi_column_values(
-        df,
-        column_names: List[str],
-        partition_definition: dict,
+        df, column_names: List[str], batch_identifiers: dict
     ):
         """Split on the joint values in the named columns"""
 
         subset_df = df.copy()
         for column_name in column_names:
-            value = partition_definition.get(column_name)
+            value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
                     f"In order for PandasExecution to `_split_on_multi_column_values`, "
-                    f"all values in column_names must also exist in partition_definition. "
-                    f"{column_name} was not found in partition_definition."
+                    f"all values in column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
                 )
             subset_df = subset_df[subset_df[column_name] == value]
         return subset_df
@@ -520,7 +514,7 @@ Notes:
         df,
         column_name: str,
         hash_digits: int,
-        partition_definition: dict,
+        batch_identifiers: dict,
         hash_function_name: str = "md5",
     ):
         """Split on the hashed value of the named column"""
@@ -535,7 +529,7 @@ Notes:
             )
         matching_rows = df[column_name].map(
             lambda x: hash_method(str(x).encode()).hexdigest()[-1 * hash_digits :]
-            == partition_definition["hash_value"]
+            == batch_identifiers["hash_value"]
         )
         return df[matching_rows]
 

@@ -21,6 +21,7 @@ try:
     import sqlalchemy as sa
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import Engine, reflection
+    from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
@@ -35,6 +36,7 @@ except ImportError:
     custom_op = None
     Engine = None
     reflection = None
+    Dialect = None
     OperationalError = None
 
 try:
@@ -238,11 +240,12 @@ def get_sqlalchemy_column_metadata(
         return None
 
 
-def column_reflection_fallback(selectable, dialect, sqlalchemy_engine):
+def column_reflection_fallback(
+    selectable: Select, dialect: Dialect, sqlalchemy_engine: Engine
+) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
-    col_info_dict_list: List[Dict]
+    col_info_dict_list: List[Dict[str, str]]
     if dialect.name.lower() == "mssql":
-        type_module = _get_dialect_type_module(dialect)
         # Get column names and types from the database
         # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
         columns_query: str = f"""
@@ -259,23 +262,29 @@ FROM sys.tables AS tab
     ON tab.object_id = col.object_id
     LEFT JOIN sys.types AS t
     ON col.user_type_id = t.user_type_id
+WHERE tab.name = '{selectable}'
 ORDER BY schema_name,
     table_name, 
     column_id
-            """
+"""
         col_info_query: TextClause = sa.text(columns_query)
         col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
             col_info_query
         ).fetchall()
+        # type_module = _get_dialect_type_module(dialect=dialect)
         col_info_dict_list: List[Dict[str, str]] = [
-            {"name": column_name, "type": column_data_type}
+            {
+                "name": column_name,
+                # "type": getattr(type_module, column_data_type.upper())(),
+                "type": column_data_type.upper(),
+            }
             for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
         ]
     else:
         query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
-        col_names = result_object._metadata.keys
+        col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
 

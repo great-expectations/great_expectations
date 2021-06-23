@@ -9,6 +9,11 @@ from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import StoreBackendError
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 
 def test_database_store_backend_schema_spec(caplog, sa, test_backends):
     if "postgresql" not in test_backends:

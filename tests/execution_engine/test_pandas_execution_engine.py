@@ -17,7 +17,7 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -26,6 +26,20 @@ from great_expectations.execution_engine.pandas_execution_engine import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+
+
+def test_constructor():
+    # default instantiation
+    PandasExecutionEngine()
+
+    # instantiation with custom parameters
+    engine = PandasExecutionEngine(discard_subset_failing_expectations=True)
+    assert "discard_subset_failing_expectations" in engine.config
+    assert engine.config.get("discard_subset_failing_expectations") is True
+    custom_boto3_options = {"region_name": "us-east-1"}
+    engine = PandasExecutionEngine(boto3_options=custom_boto3_options)
+    assert "boto3_options" in engine.config
+    assert engine.config.get("boto3_options")["region_name"] == "us-east-1"
 
 
 def test_reader_fn():
@@ -427,9 +441,9 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
     )
     batch_def = BatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
-        data_asset_name="alpha",
         data_connector_name="my_data_connector",
-        partition_definition=PartitionDefinition(index=1),
+        data_asset_name="alpha",
+        batch_identifiers=IDDict(index=1),
         batch_spec_passthrough={
             "reader_method": "read_csv",
             "splitter_method": "_split_on_whole_table",
@@ -443,9 +457,9 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
     # if key does not exist
     batch_def_no_key = BatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
-        data_asset_name="alpha",
         data_connector_name="my_data_connector",
-        partition_definition=PartitionDefinition(index=9),
+        data_asset_name="alpha",
+        batch_identifiers=IDDict(index=9),
         batch_spec_passthrough={
             "reader_method": "read_csv",
             "splitter_method": "_split_on_whole_table",
@@ -494,7 +508,7 @@ def test_get_batch_with_split_on_column_value(test_df):
             splitter_method="_split_on_column_value",
             splitter_kwargs={
                 "column_name": "batch_id",
-                "partition_definition": {"batch_id": 2},
+                "batch_identifiers": {"batch_id": 2},
             },
         )
     )
@@ -507,7 +521,7 @@ def test_get_batch_with_split_on_column_value(test_df):
             splitter_method="_split_on_column_value",
             splitter_kwargs={
                 "column_name": "date",
-                "partition_definition": {"date": datetime.date(2020, 1, 30)},
+                "batch_identifiers": {"date": datetime.date(2020, 1, 30)},
             },
         )
     )
@@ -521,7 +535,7 @@ def test_get_batch_with_split_on_converted_datetime(test_df):
             splitter_method="_split_on_converted_datetime",
             splitter_kwargs={
                 "column_name": "timestamp",
-                "partition_definition": {"timestamp": "2020-01-30"},
+                "batch_identifiers": {"timestamp": "2020-01-30"},
             },
         )
     )
@@ -536,7 +550,7 @@ def test_get_batch_with_split_on_divided_integer(test_df):
             splitter_kwargs={
                 "column_name": "id",
                 "divisor": 10,
-                "partition_definition": {"id": 5},
+                "batch_identifiers": {"id": 5},
             },
         )
     )
@@ -553,7 +567,7 @@ def test_get_batch_with_split_on_mod_integer(test_df):
             splitter_kwargs={
                 "column_name": "id",
                 "mod": 10,
-                "partition_definition": {"id": 5},
+                "batch_identifiers": {"id": 5},
             },
         )
     )
@@ -569,7 +583,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {
+                "batch_identifiers": {
                     "y": 2020,
                     "m": 1,
                     "d": 5,
@@ -588,7 +602,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
                 splitter_method="_split_on_multi_column_values",
                 splitter_kwargs={
                     "column_names": ["I", "dont", "exist"],
-                    "partition_definition": {
+                    "batch_identifiers": {
                         "y": 2020,
                         "m": 1,
                         "d": 5,
@@ -608,7 +622,7 @@ def test_get_batch_with_split_on_hashed_column(test_df):
                 splitter_kwargs={
                     "column_name": "favorite_color",
                     "hash_digits": 1,
-                    "partition_definition": {
+                    "batch_identifiers": {
                         "hash_value": "a",
                     },
                     "hash_function_name": "I_am_not_valid",
@@ -623,7 +637,7 @@ def test_get_batch_with_split_on_hashed_column(test_df):
             splitter_kwargs={
                 "column_name": "favorite_color",
                 "hash_digits": 1,
-                "partition_definition": {
+                "batch_identifiers": {
                     "hash_value": "a",
                 },
                 "hash_function_name": "sha256",
@@ -712,7 +726,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
             splitter_kwargs={
                 "column_name": "id",
                 "divisor": 10,
-                "partition_definition": {"id": 5},
+                "batch_identifiers": {"id": 5},
             },
             sampling_method="_sample_using_mod",
             sampling_kwargs={

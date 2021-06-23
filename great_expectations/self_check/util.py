@@ -2,6 +2,7 @@ import copy
 import locale
 import logging
 import os
+import platform
 import random
 import string
 import tempfile
@@ -22,7 +23,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
@@ -229,6 +230,16 @@ class LockingConnectionCheck:
             return self._is_valid
 
 
+def get_sqlite_connection_url(sqlite_db_path):
+    url = "sqlite://"
+    if sqlite_db_path is not None:
+        extra_slash = ""
+        if platform.system() != "Windows":
+            extra_slash = "/"
+        url = f"{url}/{extra_slash}{sqlite_db_path}"
+    return url
+
+
 def get_dataset(
     dataset_type,
     data,
@@ -270,11 +281,8 @@ def get_dataset(
         if not create_engine:
             return None
 
-        if sqlite_db_path is not None:
-            # Create a new database
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
+
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -313,9 +321,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -376,9 +382,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -435,9 +439,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -507,9 +509,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -670,9 +670,8 @@ def get_test_validator_with_data(
             df = df.astype(pandas_schema)
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            # noinspection PyUnusedLocal
+            table_name = generate_test_table_name()
 
         return build_pandas_validator_with_data(df=df)
 
@@ -796,9 +795,7 @@ def get_test_validator_with_data(
 
         if table_name is None:
             # noinspection PyUnusedLocal
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
 
         return build_spark_validator_with_data(df=spark_df, spark=spark)
 
@@ -806,13 +803,22 @@ def get_test_validator_with_data(
         raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
-def build_pandas_validator_with_data(df: pd.DataFrame) -> Validator:
-    batch: Batch = Batch(data=df)
+def build_pandas_validator_with_data(
+    df: pd.DataFrame,
+    batch_definition: Optional[BatchDefinition] = None,
+) -> Validator:
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
 
 
 def build_sa_validator_with_data(
-    df, sa_engine_name, schemas=None, caching=True, table_name=None, sqlite_db_path=None
+    df,
+    sa_engine_name,
+    schemas=None,
+    caching=True,
+    table_name=None,
+    sqlite_db_path=None,
+    batch_definition: Optional[BatchDefinition] = None,
 ):
     dialect_classes = {
         "sqlite": sqlitetypes.dialect,
@@ -828,10 +834,7 @@ def build_sa_validator_with_data(
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
-        if sqlite_db_path is not None:
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path))
     elif sa_engine_name == "postgresql":
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
@@ -892,9 +895,8 @@ def build_sa_validator_with_data(
                 df[col] = pd.to_datetime(df[col])
 
     if table_name is None:
-        table_name = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-        )
+        table_name = generate_test_table_name()
+
     df.to_sql(
         name=table_name,
         con=engine,
@@ -904,7 +906,7 @@ def build_sa_validator_with_data(
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
@@ -929,7 +931,9 @@ def modify_locale(func):
 
 
 def build_spark_validator_with_data(
-    df: Union[pd.DataFrame, SparkDataFrame], spark: SparkSession
+    df: Union[pd.DataFrame, SparkDataFrame],
+    spark: SparkSession,
+    batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -942,15 +946,20 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
-    batch: Batch = Batch(data=df)
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark, df=df, batch_id=batch.id
+        spark=spark,
+        df=df,
+        batch_id=batch.id,
     )
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
-def build_pandas_engine(df: pd.DataFrame) -> PandasExecutionEngine:
+def build_pandas_engine(
+    df: pd.DataFrame,
+) -> PandasExecutionEngine:
     batch: Batch = Batch(data=df)
+
     execution_engine: PandasExecutionEngine = PandasExecutionEngine(
         batch_data_dict={batch.id: batch.data}
     )
@@ -995,8 +1004,28 @@ def build_sa_engine(
 
 # Builds a Spark Execution Engine
 def build_spark_engine(
-    spark: SparkSession, df: Union[pd.DataFrame, SparkDataFrame], batch_id: str
+    spark: SparkSession,
+    df: Union[pd.DataFrame, SparkDataFrame],
+    batch_id: Optional[str] = None,
+    batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
+    if (
+        sum(
+            bool(x)
+            for x in [
+                batch_id is not None,
+                batch_definition is not None,
+            ]
+        )
+        != 1
+    ):
+        raise ValueError(
+            "Exactly one of batch_id or batch_definition must be specified."
+        )
+
+    if batch_id is None:
+        batch_id = batch_definition.id
+
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
             [
@@ -1952,3 +1981,12 @@ def check_json_test_result(test, result, data_asset=None):
                 raise ValueError(
                     "Invalid test specification: unknown key " + key + " in 'out'"
                 )
+
+
+def generate_test_table_name(
+    default_table_name_prefix: Optional[str] = "test_data_",
+) -> str:
+    table_name: str = default_table_name_prefix + "".join(
+        [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+    )
+    return table_name

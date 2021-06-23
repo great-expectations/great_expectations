@@ -4,11 +4,7 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-    PartitionDefinition,
-)
+from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     InferredAssetFilesystemDataConnector,
@@ -215,8 +211,8 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
-            partition_request={
-                "batch_identifiers": {
+            data_connector_query={
+                "batch_filter_parameters": {
                     "year_dir": "2020",
                     "month_dir": "03",
                 }
@@ -227,7 +223,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 year_dir="2020",
                 month_dir="03",
             ),
@@ -739,7 +735,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}
             ),
         ),
@@ -747,7 +743,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}
             ),
         ),
@@ -755,7 +751,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}
             ),
         ),
@@ -763,7 +759,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}
             ),
         ),
@@ -771,7 +767,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}
             ),
         ),
@@ -779,7 +775,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}
             ),
         ),
@@ -787,7 +783,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}
             ),
         ),

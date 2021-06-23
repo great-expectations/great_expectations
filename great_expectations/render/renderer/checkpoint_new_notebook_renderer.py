@@ -47,6 +47,7 @@ Use this notebook to configure a new Checkpoint and add it to your project:
         self.add_code_cell(
             """from ruamel.yaml import YAML
 import great_expectations as ge
+from pprint import pprint
 
 yaml = YAML()
 context = ge.get_context()
@@ -61,13 +62,7 @@ The following cells show examples for listing your current configuration. You ca
         )
         self.add_code_cell(
             """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets
-
-for datasource_name, datasource in context.datasources.items():
-    print(f"datasource_name: {datasource_name}")
-    for data_connector_name, data_connector in datasource.data_connectors.items():
-        print(f"\tdata_connector_name: {data_connector_name}")
-        for data_asset_name in data_connector.get_available_data_asset_names():
-            print(f"\t\tdata_asset_name: {data_asset_name}")""",
+pprint(context.get_available_data_asset_names())""",
             lint=True,
         )
         self.add_code_cell("context.list_expectation_suite_names()")
@@ -109,7 +104,7 @@ Glad you asked! Checkpoints are very versatile. For example, you can validate ma
                 first_expectation_suite.expectation_suite_name
             )
             sample_yaml_str = f'my_checkpoint_name = "{self.checkpoint_name}" # This was populated from your CLI command.\n\n'
-            sample_yaml_str += f'{self.checkpoint_name}_config = f"""'
+            sample_yaml_str += f'yaml_config = f"""'
             sample_yaml_str += "\nname: {my_checkpoint_name}"
             sample_yaml_str += f"""
 config_version: 1.0
@@ -120,12 +115,12 @@ validations:
       datasource_name: {first_datasource_name}
       data_connector_name: {first_data_connector_name}
       data_asset_name: {first_asset_name}
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: {first_expectation_suite_name}
 """
             sample_yaml_str += '"""'
-            sample_yaml_str += f"\nprint({self.checkpoint_name}_config)"
+            sample_yaml_str += f"\nprint(yaml_config)"
 
             self.add_code_cell(
                 sample_yaml_str,
@@ -147,7 +142,7 @@ This `test_yaml_config()` function is meant to enable fast dev loops. If your co
 If you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters."""
         )
         self.add_code_cell(
-            f"""my_checkpoint = context.test_yaml_config(yaml_config={self.checkpoint_name}_config)""",
+            f"""my_checkpoint = context.test_yaml_config(yaml_config=yaml_config)""",
             lint=True,
         )
 
@@ -168,7 +163,7 @@ You can run the following cell to print out the full yaml configuration. For exa
 Run the following cell to save this Checkpoint to your Checkpoint Store."""
         )
         self.add_code_cell(
-            f"context.add_checkpoint(**yaml.load({self.checkpoint_name}_config))",
+            f"context.add_checkpoint(**yaml.load(yaml_config))",
             lint=True,
         )
 

@@ -8,8 +8,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    BatchRequest,
-    PartitionDefinition,
+    IDDict,
+    RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.new_datasource import Datasource
@@ -31,7 +31,7 @@ def basic_datasource_with_runtime_data_connector():
         test_runtime_data_connector:
             module_name: great_expectations.datasource.data_connector
             class_name: RuntimeDataConnector
-            runtime_keys:
+            batch_identifiers:
                 - pipeline_stage_name
                 - airflow_run_id
                 - custom_key_0
@@ -80,7 +80,7 @@ def test_basic_datasource_runtime_data_connector_error_checking(
         batch_list: List[
             Batch
         ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-            batch_request=BatchRequest(
+            batch_request=RuntimeBatchRequest(
                 datasource_name="non_existent_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
@@ -93,83 +93,65 @@ def test_basic_datasource_runtime_data_connector_error_checking(
         batch_list: List[
             Batch
         ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-            batch_request=BatchRequest(
+            batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_runtime_data_connector.name,
                 data_connector_name="non_existent_data_connector",
                 data_asset_name="my_data_asset",
             )
         )
 
-    # Test for illegal absence of partition_request when batch_data is specified
+    # Test for illegal absence of batch_identifiers when batch_data is specified
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
         ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-            batch_request=BatchRequest(
+            batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_runtime_data_connector.name,
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
-                batch_data=test_df,
-                partition_request=None,
+                runtime_parameters={"batch_data": test_df},
+                batch_identifiers=None,
             )
         )
 
-    # Test for illegal nullity of partition_request["partition_identifiers"] when batch_data is specified
-    partition_request: dict = {"partition_identifiers": None}
+    # Test for illegal falsiness of batch_identifiers when batch_data is specified
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
         ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-            batch_request=BatchRequest(
+            batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_runtime_data_connector.name,
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
-                batch_data=test_df,
-                partition_request=partition_request,
-            )
-        )
-
-    # Test for illegal falsiness of partition_request["partition_identifiers"] when batch_data is specified
-    partition_request: dict = {"partition_identifiers": {}}
-    with pytest.raises(ge_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
-        batch_list: List[
-            Batch
-        ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name=basic_datasource_with_runtime_data_connector.name,
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset",
-                batch_data=test_df,
-                partition_request=partition_request,
+                runtime_parameters={"batch_data": test_df},
+                batch_identifiers=dict(),
             )
         )
 
 
-def test_partition_request_and_runtime_keys_success_all_keys_present(
+def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
     basic_datasource_with_runtime_data_connector,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    partition_request: dict
-    partition_request = {
-        "batch_identifiers": {
-            "pipeline_stage_name": "core_processing",
-            "airflow_run_id": 1234567890,
-            "custom_key_0": "custom_value_0",
-        }
+    batch_identifiers = {
+        "pipeline_stage_name": "core_processing",
+        "airflow_run_id": 1234567890,
+        "custom_key_0": "custom_value_0",
     }
-    # Verify that all keys in partition_request are acceptable as runtime_keys (using batch count).
+
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "batch_data": test_df,
-        "partition_request": partition_request,
-        "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
         Batch
     ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
@@ -178,31 +160,30 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(
     assert len(batch_list) == 1
 
 
-def test_partition_request_and_runtime_keys_error_illegal_keys(
+def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     basic_datasource_with_runtime_data_connector,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    partition_request: dict
-    partition_request = {
-        "batch_identifiers": {
-            "pipeline_stage_name": "core_processing",
-            "airflow_run_id": 1234567890,
-            "custom_key_0": "custom_value_0",
-            "i_am_illegal_key": "i_am_illegal_value",
-        }
+    batch_identifiers = {
+        "pipeline_stage_name": "core_processing",
+        "airflow_run_id": 1234567890,
+        "custom_key_0": "custom_value_0",
+        "i_am_illegal_key": "i_am_illegal_value",
     }
 
-    # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
+    # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
+    # configuration
     # are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "batch_data": test_df,
-        "partition_request": partition_request,
-        "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -211,19 +192,21 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
         ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
-    partition_request = {"partition_identifiers": {"unknown_key": "some_value"}}
 
-    # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
+    batch_identifiers = {"unknown_key": "some_value"}
+    # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
+    # configuration
     # are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "batch_data": test_df,
-        "partition_request": partition_request,
-        "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -238,13 +221,10 @@ def test_set_data_asset_name_for_runtime_data(
     basic_datasource_with_runtime_data_connector,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    partition_request: dict
-    partition_request = {
-        "batch_identifiers": {
-            "pipeline_stage_name": "core_processing",
-            "airflow_run_id": 1234567890,
-            "custom_key_0": "custom_value_0",
-        }
+    batch_identifiers = {
+        "pipeline_stage_name": "core_processing",
+        "airflow_run_id": 1234567890,
+        "custom_key_0": "custom_value_0",
     }
 
     # set : my_runtime_data_asset
@@ -252,11 +232,12 @@ def test_set_data_asset_name_for_runtime_data(
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_runtime_data_asset",
-        "batch_data": test_df,
-        "partition_request": partition_request,
-        "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
         Batch
     ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
@@ -280,21 +261,20 @@ def test_get_batch_definition_list_from_batch_request_length_one(
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request: dict = {
-        "batch_identifiers": {
-            "airflow_run_id": 1234567890,
-        }
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
     }
 
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
-        "batch_data": test_df,
-        "partition_request": partition_request,
-        "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
         Batch
     ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
@@ -316,7 +296,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     )
 
 
-def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_error(
+def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_error(
     basic_datasource_with_runtime_data_connector,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -328,11 +308,12 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": None,
-        "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": None,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
@@ -354,15 +335,14 @@ def test_get_batch_definitions_and_get_batch_basics(
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": {
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            }
+        "runtime_parameters": {
+            "batch_data": test_df,
         },
-        "limit": None,
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        },
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     assert (
         len(
@@ -380,7 +360,7 @@ def test_get_batch_definitions_and_get_batch_basics(
                 "my_datasource",
                 "_pipeline",
                 "_pipeline",
-                partition_definition=PartitionDefinition({"some_random_id": 1}),
+                batch_identifiers=IDDict({"some_random_id": 1}),
             ),
             batch_data=my_df,
         )

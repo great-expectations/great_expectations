@@ -970,7 +970,7 @@ def get_batch_kwargs(
     This method manages the interaction with user necessary to obtain batch_kwargs for a batch of a data asset.
 
     In order to get batch_kwargs this method needs datasource_name, batch_kwargs_generator_name and data_asset_name
-    to combine them into a fully qualified data asset identifier(datasource_name/batch_kwargs_generator_name/data_asset_name).
+    to combine them into a fully-qualified data asset identifier(datasource_name/batch_kwargs_generator_name/data_asset_name).
     All three arguments are optional. If they are present, the method uses their values. Otherwise, the method
     prompts user to enter them interactively. Since it is possible for any of these three components to be
     passed to this method as empty values and to get their values after interacting with user, this method
@@ -980,7 +980,7 @@ def get_batch_kwargs(
     from that list (note: if there are multiple batch_kwargs_generators, user has to choose one first). If a name known to
     the chosen batch_kwargs_generator is selected, the batch_kwargs_generators will be able to yield batch_kwargs. The method also gives user
     an alternative to selecting the data asset name from the batch_kwargs_generators's list - user can type in a name for their
-    data asset. In this case a passthrough batch kwargs batch_kwargs_generators will be used to construct a fully qualified data asset
+    data asset. In this case a passthrough batch kwargs batch_kwargs_generators will be used to construct a fully-qualified data asset
     identifier (note: if the datasource has no passthrough batch_kwargs_generators configured, the method will exist with a failure).
     Since no batch_kwargs_generators can yield batch_kwargs for this data asset name, the method prompts user to specify batch_kwargs
     by choosing a file (if the datasource is pandas or spark) or by writing a SQL query (if the datasource points
@@ -1283,8 +1283,8 @@ You have selected a datasource that is a SQL database. How would you like to spe
             data_asset_name = "custom_sql_query"
 
         elif single_or_multiple_data_asset_selection == "3":  # list it all
-            msg_prompt_warning = fr"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
-                    Would you like to continue?"""
+            msg_prompt_warning: str = fr"""Warning: If you have a large number of tables in your datasource, this may take a very long time.
+Would you like to continue?"""
             confirmation = click.prompt(
                 msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
             )

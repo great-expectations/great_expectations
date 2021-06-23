@@ -4,7 +4,10 @@ import os
 import pandas as pd
 import pytest
 
-from great_expectations.core.batch import BatchSpec
+from great_expectations.core.batch_spec import (
+    RuntimeQueryBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.exceptions import InvalidConfigError
@@ -18,6 +21,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
 
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
@@ -29,7 +38,7 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
     assert my_execution_engine.url == None
 
     my_execution_engine.get_batch_data_and_markers(
-        BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             table_name="table_1",
             schema_name="main",
             sampling_method="_sample_using_limit",
@@ -44,12 +53,12 @@ def test_instantiation_via_url(sa):
         os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
-    assert my_execution_engine.connection_string == None
-    assert my_execution_engine.credentials == None
+    assert my_execution_engine.connection_string is None
+    assert my_execution_engine.credentials is None
     assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
 
     my_execution_engine.get_batch_data_and_markers(
-        BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             table_name="table_partitioned_by_date_column__A",
             sampling_method="_sample_using_limit",
             sampling_kwargs={"n": 5},
@@ -57,7 +66,7 @@ def test_instantiation_via_url(sa):
     )
 
 
-def test_instantiation_via_credentials(sa, test_backends):
+def test_instantiation_via_credentials(sa, test_backends, test_df):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
 
@@ -71,7 +80,7 @@ def test_instantiation_via_credentials(sa, test_backends):
             "database": "test_ci",
         }
     )
-    assert my_execution_engine.connection_string == None
+    assert my_execution_engine.connection_string is None
     assert my_execution_engine.credentials == {
         "username": "postgres",
         "password": "",
@@ -79,11 +88,11 @@ def test_instantiation_via_credentials(sa, test_backends):
         "port": "5432",
         "database": "test_ci",
     }
-    assert my_execution_engine.url == None
+    assert my_execution_engine.url is None
 
     # Note Abe 20201116: Let's add an actual test of get_batch_data_and_markers, which will require setting up test
     # fixtures
-    # my_execution_engine.get_batch_data_and_markers(BatchSpec(
+    # my_execution_engine.get_batch_data_and_markers(batch_spec=BatchSpec(
     #     table_name="main.table_1",
     #     sampling_method="_sample_using_limit",
     #     sampling_kwargs={
@@ -536,3 +545,79 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
             )
         )
         print(e)
+
+
+def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
+    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+    test_df.to_sql("test_table_0", con=my_execution_engine.engine)
+
+    query: str = "SELECT * FROM test_table_0"
+    batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
+        batch_spec=RuntimeQueryBatchSpec(
+            query=query,
+        )
+    )
+
+    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
+    assert batch_markers.get("ge_load_time") is not None
+
+
+def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
+    def validate_tmp_tables():
+        temp_tables = [
+            name
+            for name in get_sqlite_temp_table_names(engine.engine)
+            if name.startswith("ge_tmp_")
+        ]
+        tables = [
+            name
+            for name in get_sqlite_table_names(engine.engine)
+            if name.startswith("ge_tmp_")
+        ]
+        assert len(temp_tables) == 0
+        assert len(tables) == 0
+
+    engine = build_sa_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    validate_tmp_tables()
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    validate_tmp_tables()
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+
+    validate_tmp_tables()
