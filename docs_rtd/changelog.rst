@@ -6,30 +6,35 @@ Changelog
 
 Develop
 -----------------
+
+0.13.20
+-----------------
 * [DOCS] Update pr template and remove enhancement feature type
-* Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [DOCS] Remove broken links
 * [DOCS] Fix typo in SlackNotificationAction docstring
+* [BUGFIX] Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
 * [BUGFIX] Using cache in order not to fetch already known secrets #2882 (thanks @Cedric-Magnan)
 * [BUGFIX] Fix creation of temp tables for unexpected condition
 * [BUGFIX] Docs integration tests now only run when `--docs-tests` option is specified
 * [BUGFIX] Fix instantiation of PandasExecutionEngine with custom parameters
+* [BUGFIX] Fix rendering of observed value in datadocs when the value is 0 #2923 (thanks @shpolina)
+* [BUGFIX] Fix serialization error in DataDocs rendering #2908 (thanks @shpolina)
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
 * [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
-* [MAINTENANCE] Improve robustness of integration test_runner
-* [MAINTENANCE] CLI tests now support click 8.0 and 7.x
 * [ENHANCEMENT] Experimental WIP Rule Based Profiler for single batch workflows (#2788)
-* [MAINTENANCE] Soft launch of alpha docs site
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
-* [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
+* [MAINTENANCE] Improve robustness of integration test_runner
+* [MAINTENANCE] CLI tests now support click 8.0 and 7.x
+* [MAINTENANCE] Soft launch of alpha docs site
 * [MAINTENANCE] DOCS integration tests have moved to a new pipeline
 * [MAINTENANCE] Pin json-schema version
-* [BUGFIX] Fix rendering of observed value in datadocs when the value is 0 #2923 (thanks @shpolina)
 * [MAINTENANCE] Allow tests to properly connect to local sqlite db on Windows (thanks @shpolina)
-* [BUGFIX] Fix serialization error in DataDocs rendering #2908 (thanks @shpolina)
+* [FEATURE] Add GeCloudStoreBackend with support for Checkpoints
+
+
 
 0.13.19
 -----------------
