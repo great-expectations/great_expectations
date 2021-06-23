@@ -102,28 +102,19 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 </Tabs>
 
-### 5. (Optional) Create Example Data
+### 6. Test your new Datasource
 
-In most cases you will already have an in-memory dataframe already. For demonstrative purposes, here is a simple dataframe with 3 columns and 3 rows.
+Verify your new Datasource by loading data from it into a `Validator` using a `RuntimeBatchRequest`.
+
+:::note The dataframe we are using in this example looks like the following
+
+Please feel free to substitute your data.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L28
 ```
+:::
 
-Which looks like this:
-
-```bash
-df
-
-   a  b  c
-0  1  2  3
-1  4  5  6
-2  7  8  9
-```
-
-### 6. Test your new Datasource
-
-Verify your new Datasource by loading your dataframe (seen below in variable `df`) into a `Validator` using a `BatchRequest` with the dataframe passed in as `batch_data`.
-
+Add the variable containing your dataframe (`df` in this example) to the `batch_data` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L31-L37
 ```
