@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Improve parsing of .ge_store_backend_id
 
 0.13.20
 -----------------
