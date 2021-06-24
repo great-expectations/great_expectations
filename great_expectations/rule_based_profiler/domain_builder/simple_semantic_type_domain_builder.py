@@ -56,8 +56,6 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
             SemanticDomainTypes
         ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
 
-        # TODO: <Alex>It is error prone to have to specify "batch_id" in three, loosely related, places in the code.
-        #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
         batch_id: str = self.get_batch_id(variables=variables)
         column_types_dict_list: List[Dict[str, Any]] = self.get_validator(
             variables=variables
@@ -110,6 +108,9 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
             )
         )
 
+        # Note: providing "batch_id" in "Domain.domain_kwargs" is important, because this "domain_kwargs" serves as the
+        # default "metric_domain_kwargs" for "ParameterBuilder" logic.  Hence, it can be used for metric computations
+        # (overridable if "batch_request" and/or "metric_domain_kwargs" override are configured for "ParameterBuilder").
         domains: List[Domain] = [
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,

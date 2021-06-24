@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -19,8 +19,6 @@ class ColumnDomainBuilder(DomainBuilder):
         """
         Obtains and returns domains for all columns of a table.
         """
-        # TODO: <Alex>It is error prone to have to specify "batch_id" in two, only loosely related, places in the code.
-        #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
         batch_id: str = self.get_batch_id(variables=variables)
         table_column_names: List[str] = self.get_validator(
             variables=variables
@@ -35,6 +33,9 @@ class ColumnDomainBuilder(DomainBuilder):
             )
         )
 
+        # Note: providing "batch_id" in "Domain.domain_kwargs" is important, because this "domain_kwargs" serves as the
+        # default "metric_domain_kwargs" for "ParameterBuilder" logic.  Hence, it can be used for metric computations
+        # (overridable if "batch_request" and/or "metric_domain_kwargs" override are configured for "ParameterBuilder").
         column_name: str
         domains: List[Domain] = [
             Domain(
