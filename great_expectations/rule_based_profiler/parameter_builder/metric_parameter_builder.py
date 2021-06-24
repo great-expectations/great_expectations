@@ -1,4 +1,3 @@
-import copy
 from typing import Any, Dict, Optional, Union
 
 from great_expectations import DataContext
@@ -11,6 +10,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
+    build_metric_domain_kwargs,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -72,27 +72,15 @@ class MetricParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        domain_kwargs: dict = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference="$domain.domain_kwargs",
-            expected_return_type=dict,
-            variables=variables,
-            parameters=parameters,
-        )
+        batch_id: str = self.get_batch_id(variables=variables)
 
-        metric_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
-        metric_domain_kwargs_override: Optional[
-            dict
-        ] = get_parameter_value_and_validate_return_type(
+        metric_domain_kwargs: dict = build_metric_domain_kwargs(
+            batch_id=batch_id,
+            metric_domain_kwargs=self._metric_domain_kwargs,
             domain=domain,
-            parameter_reference=self._metric_domain_kwargs,
-            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
-        if metric_domain_kwargs_override:
-            metric_domain_kwargs.update(metric_domain_kwargs_override)
 
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_value_kwargs: Optional[

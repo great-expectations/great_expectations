@@ -33,16 +33,12 @@ class ColumnDomainBuilder(DomainBuilder):
             )
         )
 
-        # Note: providing "batch_id" in "Domain.domain_kwargs" is important, because this "domain_kwargs" serves as the
-        # default "metric_domain_kwargs" for "ParameterBuilder" logic.  Hence, it can be used for metric computations
-        # (overridable if "batch_request" and/or "metric_domain_kwargs" override are configured for "ParameterBuilder").
         column_name: str
         domains: List[Domain] = [
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,
                 domain_kwargs={
                     "column": column_name,
-                    "batch_id": batch_id,
                 },
             )
             for column_name in table_column_names

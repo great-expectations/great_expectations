@@ -1,4 +1,3 @@
-import copy
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Union
 
@@ -12,9 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
+from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -82,6 +79,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     ):
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
@@ -92,29 +95,18 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        validator: Validator = self.get_validator(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
         if len(batch_ids) > 1:
             logger.warning(
                 f"Parameter Builder {self.name} received {len(batch_ids)} batches but will utilize only the first one."
             )
 
-            # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        domain_kwargs: dict = get_parameter_value_and_validate_return_type(
+        metric_domain_kwargs: dict = build_metric_domain_kwargs(
+            batch_id=batch_ids[0],
+            metric_domain_kwargs=None,
             domain=domain,
-            parameter_reference="$domain.domain_kwargs",
-            expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
-
-        metric_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
-
-        metric_domain_kwargs["batch_id"] = batch_ids[0]
 
         count: int = validator.get_metric(
             metric=MetricConfiguration(

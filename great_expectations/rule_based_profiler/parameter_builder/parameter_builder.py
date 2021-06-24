@@ -2,6 +2,7 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -125,6 +126,27 @@ class ParameterBuilder(ABC):
         batch_ids: List[str] = [batch.id for batch in batch_list]
 
         return batch_ids
+
+    def get_batch_id(
+        self,
+        domain: Optional[Domain] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> Optional[str]:
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        num_batch_ids: int = len(batch_ids)
+        if num_batch_ids != 1:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""{self.__class__.__name__}.get_batch_id() expected to return exactly one batch_id \
+({num_batch_ids} were retrieved).
+"""
+            )
+
+        return batch_ids[0]
 
     @property
     def parameter_name(self) -> str:

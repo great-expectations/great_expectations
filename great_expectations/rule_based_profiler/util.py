@@ -34,6 +34,43 @@ def build_batch_request(
     return materialized_batch_request
 
 
+def build_metric_domain_kwargs(
+    batch_id: Optional[str] = None,
+    metric_domain_kwargs: Optional[Union[str, dict]] = None,
+    domain: Optional[Domain] = None,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+):
+    # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+    domain_kwargs: dict = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference="$domain.domain_kwargs",
+        expected_return_type=dict,
+        variables=variables,
+        parameters=parameters,
+    )
+    metric_domain_kwargs_result: dict = copy.deepcopy(domain_kwargs)
+
+    metric_domain_kwargs_override: Optional[
+        dict
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=metric_domain_kwargs,
+        expected_return_type=None,
+        variables=variables,
+        parameters=parameters,
+    )
+    if metric_domain_kwargs_override is None:
+        metric_domain_kwargs_override = {}
+
+    if batch_id:
+        metric_domain_kwargs_override["batch_id"] = batch_id
+
+    metric_domain_kwargs_result.update(metric_domain_kwargs_override)
+
+    return metric_domain_kwargs_result
+
+
 def get_parameter_value_and_validate_return_type(
     domain: Optional[Domain] = None,
     parameter_reference: Optional[Union[Any, str]] = None,

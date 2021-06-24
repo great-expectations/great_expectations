@@ -108,20 +108,16 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
             )
         )
 
-        # Note: providing "batch_id" in "Domain.domain_kwargs" is important, because this "domain_kwargs" serves as the
-        # default "metric_domain_kwargs" for "ParameterBuilder" logic.  Hence, it can be used for metric computations
-        # (overridable if "batch_request" and/or "metric_domain_kwargs" override are configured for "ParameterBuilder").
         domains: List[Domain] = [
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,
+                domain_kwargs={
+                    "column": column_name,
+                },
                 details={
                     "inferred_semantic_domain_type": table_column_name_to_inferred_semantic_domain_type_mapping[
                         column_name
                     ],
-                },
-                domain_kwargs={
-                    "column": column_name,
-                    "batch_id": batch_id,
                 },
             )
             for column_name in candidate_column_names

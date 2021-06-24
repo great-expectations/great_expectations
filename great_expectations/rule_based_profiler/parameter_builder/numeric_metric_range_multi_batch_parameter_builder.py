@@ -1,4 +1,3 @@
-import copy
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -15,6 +14,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
+    build_metric_domain_kwargs,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
@@ -143,6 +143,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         8. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
@@ -154,33 +159,13 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        validator: Validator = self.get_validator(
+        metric_domain_kwargs: dict = build_metric_domain_kwargs(
+            batch_id=None,
+            metric_domain_kwargs=self._metric_domain_kwargs,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-
-        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        domain_kwargs: dict = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference="$domain.domain_kwargs",
-            expected_return_type=dict,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        metric_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
-        metric_domain_kwargs_override: Optional[
-            dict
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_domain_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        if metric_domain_kwargs_override:
-            metric_domain_kwargs.update(metric_domain_kwargs_override)
 
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_value_kwargs: Optional[
@@ -317,6 +302,15 @@ positive integer, or must be omitted (or set to None).
             min_value = max(min_value, lower_bound)
         if upper_bound is not None:
             max_value = min(max_value, upper_bound)
+
+        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        domain_kwargs: dict = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference="$domain.domain_kwargs",
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
+        )
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {
