@@ -97,7 +97,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
                 self.set(
                     key=self.STORE_BACKEND_ID_KEY,
-                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}",
+                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}\n",
                 )
                 return store_id
         except Exception:
