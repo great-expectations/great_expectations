@@ -27,7 +27,6 @@ class ParameterBuilder(ABC):
           - parameter_name: my_parameter
             class_name: MetricParameterBuilder
             metric_name: column.mean
-            metric_domain_kwargs: $domain.domain_kwargs
         ```
     """
 

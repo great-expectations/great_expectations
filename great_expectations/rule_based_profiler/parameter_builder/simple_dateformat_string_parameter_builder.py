@@ -4,15 +4,16 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_NAME,
     ParameterContainer,
     build_parameter_container,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -20,6 +21,7 @@ from great_expectations.validator.validator import Validator
 logger = logging.getLogger(__name__)
 
 
+# TODO: <Alex>ALEX -- This ParameterBuilder example is stale (and would need work prior to using and/or testing).</Alex>
 class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     """Returns the best matching strftime format string for a provided domain."""
 
@@ -33,7 +35,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         parameter_name: str,
-        domain_kwargs: str,
         threshold: Optional[float] = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
@@ -59,8 +60,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             data_context=data_context,
             batch_request=batch_request,
         )
-
-        self._domain_kwargs = domain_kwargs
 
         self._threshold = threshold
 
@@ -99,20 +98,23 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # TODO: <Alex>ALEX -- Is the check below still relevant?</Alex>
         if len(batch_ids) > 1:
             logger.warning(
-                f"Parameter Builder {self.name} received {len(batch_ids)} batches but can only process one."
+                f"Parameter Builder {self.name} received {len(batch_ids)} batches but will utilize only the first one."
             )
 
-        # TODO: <Alex>ALEX -- type overloading is generally a poor practice; the caller should decide on the type of "metric_domain_kwargs" and call this method accordingly.</Alex>
-        # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
-        # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of
-        # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
-        metric_domain_kwargs: Union[
-            str, Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
-        ] = copy.deepcopy(domain[DOMAIN_KWARGS_PARAMETER_NAME])
-        metric_domain_kwargs.update({"batch_id": batch_ids[0]})
+            # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        domain_kwargs: dict = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference="$domain.domain_kwargs",
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        metric_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+
+        metric_domain_kwargs["batch_id"] = batch_ids[0]
 
         count: int = validator.get_metric(
             metric=MetricConfiguration(

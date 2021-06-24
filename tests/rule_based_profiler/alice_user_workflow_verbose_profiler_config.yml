@@ -24,7 +24,6 @@ rules:
         module_name: great_expectations.rule_based_profiler.parameter_builder
         batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
-        metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
         class_name: DefaultExpectationConfigurationBuilder
@@ -57,7 +56,6 @@ rules:
         batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
-        metric_domain_kwargs: $domain.domain_kwargs
       - parameter_name: my_max_event_ts
         class_name: MetricParameterBuilder
         batch_request: $variables.alice_single_batch_data_batch_request
@@ -72,7 +70,6 @@ rules:
         module_name: great_expectations.rule_based_profiler.parameter_builder
         batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
-        metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
         class_name: DefaultExpectationConfigurationBuilder

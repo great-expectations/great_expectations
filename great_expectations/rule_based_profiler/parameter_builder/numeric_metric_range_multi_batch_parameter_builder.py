@@ -46,7 +46,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self,
         parameter_name: str,
         metric_name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
+        metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         round_decimals: Optional[Union[int, str]] = False,
@@ -161,8 +161,17 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         )
 
         # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_domain_kwargs: Optional[
-            Union[str, dict]
+        domain_kwargs: dict = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference="$domain.domain_kwargs",
+            expected_return_type=dict,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        metric_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+        metric_domain_kwargs_override: Optional[
+            dict
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._metric_domain_kwargs,
@@ -170,9 +179,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
+        if metric_domain_kwargs_override:
+            metric_domain_kwargs.update(metric_domain_kwargs_override)
+
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
         metric_value_kwargs: Optional[
-            Union[str, dict]
+            dict
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._metric_value_kwargs,
@@ -185,16 +197,13 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
         ] = []
-        metric_domain_kwargs_with_specific_batch_id: Optional[
-            Dict[str, Any]
-        ] = copy.deepcopy(metric_domain_kwargs)
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
         batch_id: str
         for batch_id in batch_ids:
-            metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
+            metric_domain_kwargs["batch_id"] = batch_id
             metric_configuration_arguments: Dict[str, Any] = {
                 "metric_name": self._metric_name,
-                "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
+                "metric_domain_kwargs": metric_domain_kwargs,
                 "metric_value_kwargs": metric_value_kwargs,
                 "metric_dependencies": None,
             }
@@ -322,7 +331,7 @@ positive integer, or must be omitted (or set to None).
                     # without overwhelming the user (e.g., if instead all "batch_id" values were captured in "details").
                     "metric_configuration": {
                         "metric_name": self._metric_name,
-                        "metric_domain_kwargs": metric_domain_kwargs,
+                        "metric_domain_kwargs": domain_kwargs,
                         "metric_value_kwargs": metric_value_kwargs,
                         "metric_dependencies": None,
                     },

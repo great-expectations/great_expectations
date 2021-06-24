@@ -60,9 +60,6 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         # TODO: <Alex>It is error prone to have to specify "batch_id" in two, only loosely related, places in the code.
         #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
         batch_id: str = self.get_batch_id(variables=variables)
-        metric_domain_kwargs: dict = {
-            "batch_id": self.get_batch_id(variables=variables),
-        }
         table_column_names: List[str] = self.get_validator(
             variables=variables
         ).get_metric(
