@@ -83,47 +83,8 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-assert set(
+assert "yellow_trip_data_sample_2018-01.csv" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
         "default_inferred_data_connector_name"
     ]
-) == {
-    "random_subsamples",
-    "yellow_trip_data_sample_2018-01.csv",
-    "yellow_trip_data_sample_2018-02.csv",
-    "yellow_trip_data_sample_2018-03.csv",
-    "yellow_trip_data_sample_2018-04.csv",
-    "yellow_trip_data_sample_2018-05.csv",
-    "yellow_trip_data_sample_2018-06.csv",
-    "yellow_trip_data_sample_2018-07.csv",
-    "yellow_trip_data_sample_2018-08.csv",
-    "yellow_trip_data_sample_2018-09.csv",
-    "yellow_trip_data_sample_2018-10.csv",
-    "yellow_trip_data_sample_2018-11.csv",
-    "yellow_trip_data_sample_2018-12.csv",
-    "yellow_trip_data_sample_2019-01.csv",
-    "yellow_trip_data_sample_2019-02.csv",
-    "yellow_trip_data_sample_2019-03.csv",
-    "yellow_trip_data_sample_2019-04.csv",
-    "yellow_trip_data_sample_2019-05.csv",
-    "yellow_trip_data_sample_2019-06.csv",
-    "yellow_trip_data_sample_2019-07.csv",
-    "yellow_trip_data_sample_2019-08.csv",
-    "yellow_trip_data_sample_2019-09.csv",
-    "yellow_trip_data_sample_2019-10.csv",
-    "yellow_trip_data_sample_2019-11.csv",
-    "yellow_trip_data_sample_2019-12.csv",
-    "yellow_trip_data_sample_2020-01.csv",
-    "yellow_trip_data_sample_2020-02.csv",
-    "yellow_trip_data_sample_2020-03.csv",
-    "yellow_trip_data_sample_2020-04.csv",
-    "yellow_trip_data_sample_2020-05.csv",
-    "yellow_trip_data_sample_2020-06.csv",
-    "yellow_trip_data_sample_2020-07.csv",
-    "yellow_trip_data_sample_2020-08.csv",
-    "yellow_trip_data_sample_2020-09.csv",
-    "yellow_trip_data_sample_2020-10.csv",
-    "yellow_trip_data_sample_2020-11.csv",
-    "yellow_trip_data_sample_2020-12.csv",
-    "random_subsamples",
-}
+)
