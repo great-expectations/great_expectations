@@ -6,7 +6,7 @@ title: Initialize a data context
 
 ### Install Great Expectations and dependencies
 
-If you haven’t already, install Great Expectations. [Example Local Python](/docs/guides/setup/installing/local)
+If you haven’t already, install Great Expectations. [Example Local Python](/docs/guides/setup/installation/local)
 
 ### Create a Data Context
 

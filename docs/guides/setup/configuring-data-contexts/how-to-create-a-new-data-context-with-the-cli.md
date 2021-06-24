@@ -1,5 +1,5 @@
 ---
-title: How to create a new Data Context with the CLI
+title: How to configure a new Data Context with the CLI
 ---
 
 ### Install Great Expectations and dependencies
