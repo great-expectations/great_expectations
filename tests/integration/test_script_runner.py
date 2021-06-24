@@ -39,6 +39,14 @@ docs_test_matrix = [
     #     "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     # },
     # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py",
     #     "extra_backend_dependencies": BackendDependencies.SPARK,
     # },
