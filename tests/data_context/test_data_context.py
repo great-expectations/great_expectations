@@ -1816,6 +1816,7 @@ validations:
         index: -1
     expectation_suite_name: newsuite
 profilers: []
+ge_cloud_id:
 """
 
     checkpoint_dir = os.path.join(
@@ -1896,6 +1897,7 @@ profilers: []
             }
         ],
         "profilers": [],
+        "ge_cloud_id": None,
     }
 
     assert isinstance(checkpoint_from_yaml, Checkpoint)
@@ -2139,6 +2141,145 @@ def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_c
         [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
     )
     assert datasource_config.module_name == "great_expectations.datasource"
+
+
+def test_add_datasource_from_yaml_sql_datasource_with_credentials(
+    sa, test_backends, empty_data_context
+):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables.
+    In addition, this tests whether the same can be accomplished using credentials with a  Datasource and SqlAlchemyExecutionEngine, rather than a SimpleSqlalchemyDatasource
+    """
+
+    if "postgresql" not in test_backends:
+        pytest.skip(
+            "test_add_datasource_from_yaml_sql_datasource_with_credentials requires postgresql"
+        )
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      credentials:
+        host: localhost
+        port: 5432
+        username: postgres
+        password: 
+        database: test_ci
+        drivername: postgresql 
+    data_connectors:
+      default_inferred_data_connector_name:
+        class_name: InferredAssetSqlDataConnector
+        name: whole_table
+      default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+    """
+
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    assert datasource_from_test_yaml_config.config == {
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "credentials": {
+                "host": "localhost",
+                "port": 5432,
+                "username": "postgres",
+                "password": None,
+                "database": "test_ci",
+                "drivername": "postgresql",
+            },
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "default_inferred_data_connector_name": {
+                "class_name": "InferredAssetSqlDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+            },
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
+                "module_name": "great_expectations.datasource.data_connector",
+            },
+        },
+    }
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "credentials": {
+                "host": "localhost",
+                "port": 5432,
+                "username": "postgres",
+                "password": None,
+                "database": "test_ci",
+                "drivername": "postgresql",
+            },
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "default_inferred_data_connector_name": {
+                "class_name": "InferredAssetSqlDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+            },
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
+                "module_name": "great_expectations.datasource.data_connector",
+            },
+        },
+    }
+
+    assert datasource_from_yaml.name == datasource_name
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name == context.list_datasources()[0]["name"]
+    assert isinstance(context.datasources[datasource_name], Datasource)
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        Datasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # making sure the config is right
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "Datasource"
+    assert datasource_config.execution_engine.credentials == {
+        "host": "localhost",
+        "port": 5432,
+        "username": "postgres",
+        "password": None,
+        "database": "test_ci",
+        "drivername": "postgresql",
+    }
+    assert datasource_config.execution_engine.credentials == OrderedDict(
+        [
+            ("host", "localhost"),
+            ("port", 5432),
+            ("username", "postgres"),
+            ("password", None),
+            ("database", "test_ci"),
+            ("drivername", "postgresql"),
+        ]
+    )
 
 
 def test_add_datasource_from_yaml_with_substitution_variables(

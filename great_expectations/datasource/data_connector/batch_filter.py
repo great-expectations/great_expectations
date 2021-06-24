@@ -112,7 +112,16 @@ def _parse_index(
     elif isinstance(index, str):
         if is_int(value=index):
             return _parse_index(index=int(index))
-        return _parse_index(index=[int(idx_str) for idx_str in index.split(":")])
+        index_as_list: List[Optional[str, int]]
+        if index:
+            index_as_list = index.split(":")
+            if len(index_as_list) == 1:
+                index_as_list = [None, index_as_list[0]]
+        else:
+            index_as_list = []
+        idx_str: str
+        index_as_list = [int(idx_str) if idx_str else None for idx_str in index_as_list]
+        return _parse_index(index=index_as_list)
     else:
         raise ge_exceptions.BatchFilterError(
             f"""The type of index must be an integer (Python "int"), or a list (Python "list") or a tuple
