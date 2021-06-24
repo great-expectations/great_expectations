@@ -58,6 +58,28 @@ class DomainBuilder(ABC):
 
         pass
 
+    def get_validator(
+        self,
+        variables: Optional[ParameterContainer] = None,
+    ) -> Optional[Validator]:
+        if self._batch_request is None:
+            return None
+
+        batch_request: Optional[BatchRequest] = build_batch_request(
+            domain=None,
+            batch_request=self._batch_request,
+            variables=variables,
+            parameters=None,
+        )
+
+        expectation_suite_name: str = (
+            f"tmp_domain_builder_suite_{str(uuid.uuid4())[:8]}"
+        )
+        return self.data_context.get_validator(
+            batch_request=batch_request,
+            create_expectation_suite_with_name=expectation_suite_name,
+        )
+
     def get_batch_id(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -83,28 +105,6 @@ class DomainBuilder(ABC):
             )
 
         return batch_list[0].id
-
-    def get_validator(
-        self,
-        variables: Optional[ParameterContainer] = None,
-    ) -> Optional[Validator]:
-        if self._batch_request is None:
-            return None
-
-        batch_request: Optional[BatchRequest] = build_batch_request(
-            domain=None,
-            batch_request=self._batch_request,
-            variables=variables,
-            parameters=None,
-        )
-
-        expectation_suite_name: str = (
-            f"tmp_domain_builder_suite_{str(uuid.uuid4())[:8]}"
-        )
-        return self.data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
-        )
 
     @property
     def data_context(self) -> DataContext:
