@@ -99,8 +99,24 @@ docs_test_matrix = [
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
         "user_flow_script": "tests/integration/docusaurus/template/script_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
     },
 ]
 """
