@@ -51,7 +51,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "VendorID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -73,7 +72,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "VendorID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -95,7 +93,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "passenger_count",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -117,7 +114,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "passenger_count",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -139,7 +135,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "trip_distance",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -161,7 +156,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "trip_distance",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -183,7 +177,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "RatecodeID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -205,7 +198,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "RatecodeID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -227,7 +219,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "PULocationID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -249,7 +240,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "PULocationID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -271,7 +261,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "DOLocationID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -293,7 +282,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "DOLocationID",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -315,7 +303,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "payment_type",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -337,7 +324,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "payment_type",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -359,7 +345,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "fare_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -381,7 +366,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "fare_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -403,7 +387,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "extra",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -425,7 +408,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "extra",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -447,7 +429,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "mta_tax",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -469,7 +450,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "mta_tax",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -491,7 +471,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "tip_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -513,7 +492,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "tip_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -535,7 +513,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "tolls_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -557,7 +534,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "tolls_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -579,7 +555,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "improvement_surcharge",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -601,7 +576,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "improvement_surcharge",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -623,7 +597,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "total_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -645,7 +618,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "total_amount",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -667,7 +639,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.min",
                             "metric_domain_kwargs": {
                                 "column": "congestion_surcharge",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
@@ -689,7 +660,6 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "column.max",
                             "metric_domain_kwargs": {
                                 "column": "congestion_surcharge",
-                                "batch_id": "021563e94d7866f395288f6e306aed9b",
                             },
                         }
                     }
