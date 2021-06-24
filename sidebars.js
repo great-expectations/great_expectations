@@ -109,6 +109,14 @@ module.exports = {
             'guides/connecting_to_your_data/how-to-get-a-batch-of-data-from-a-configured-datasource',
             {
               type: 'category',
+              label: '💭 In-memory',
+              items: [
+                'guides/connecting_to_your_data/in_memory/pandas',
+                'guides/connecting_to_your_data/in_memory/spark',
+              ]
+            },
+            {
+              type: 'category',
               label: '🚀 Database',
               items: [
                 'guides/connecting_to_your_data/database/athena',
