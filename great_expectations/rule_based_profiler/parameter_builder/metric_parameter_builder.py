@@ -1,5 +1,7 @@
 from typing import Any, Dict, Optional, Union
 
+import numpy as np
+
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -9,11 +11,6 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.rule_based_profiler.util import (
-    build_metric_domain_kwargs,
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
@@ -74,41 +71,28 @@ class MetricParameterBuilder(ParameterBuilder):
 
         batch_id: str = self.get_batch_id(variables=variables)
 
-        metric_domain_kwargs: dict = build_metric_domain_kwargs(
+        metric_computation_result: Dict[
+            str,
+            Union[
+                Union[int, np.int32, np.int64, float, np.float32, np.float64],
+                Dict[str, Any],
+            ],
+        ] = self.get_metric(
             batch_id=batch_id,
+            validator=validator,
+            metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
+            metric_value_kwargs=self._metric_value_kwargs,
+            fill_nan_with_zero=True,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
 
-        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[
-            dict
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_value_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        metric_configuration_arguments: Dict[str, Any] = {
-            "metric_name": self._metric_name,
-            "metric_domain_kwargs": metric_domain_kwargs,
-            "metric_value_kwargs": metric_value_kwargs,
-            "metric_dependencies": None,
-        }
         parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.parameter_name}": {
-                "value": validator.get_metric(
-                    metric=MetricConfiguration(**metric_configuration_arguments)
-                ),
-                "details": {
-                    "metric_configuration": metric_configuration_arguments,
-                },
-            },
+            f"$parameter.{self.parameter_name}": metric_computation_result,
         }
+
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )

@@ -14,11 +14,9 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
-    build_metric_domain_kwargs,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
-from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 NP_EPSILON: np.float64 = np.finfo(float).eps
@@ -159,50 +157,32 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        metric_domain_kwargs: dict = build_metric_domain_kwargs(
-            batch_id=None,
+        metric_computation_result: Dict[
+            str,
+            Union[
+                Union[
+                    np.ndarray,
+                    List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
+                ],
+                Dict[str, Any],
+            ],
+        ] = self.get_metrics(
+            batch_ids=batch_ids,
+            validator=validator,
+            metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
+            metric_value_kwargs=self._metric_value_kwargs,
+            enforce_numeric=True,
+            fill_nan_with_zero=True,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-
-        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[
-            dict
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_value_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
         metric_values: Union[
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = []
-        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
-        batch_id: str
-        for batch_id in batch_ids:
-            metric_domain_kwargs["batch_id"] = batch_id
-            metric_configuration_arguments: Dict[str, Any] = {
-                "metric_name": self._metric_name,
-                "metric_domain_kwargs": metric_domain_kwargs,
-                "metric_value_kwargs": metric_value_kwargs,
-                "metric_dependencies": None,
-            }
-            metric_value = validator.get_metric(
-                metric=MetricConfiguration(**metric_configuration_arguments)
-            )
-            if not is_numeric(value=metric_value):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(type(metric_value))}" was computed).
-"""
-                )
-
-            metric_values.append(metric_value)
+        ] = metric_computation_result["value"]
+        details: Dict[str, Any] = metric_computation_result["details"]
 
         # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         round_decimals: Optional[
@@ -303,33 +283,13 @@ positive integer, or must be omitted (or set to None).
         if upper_bound is not None:
             max_value = min(max_value, upper_bound)
 
-        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        domain_kwargs: dict = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference="$domain.domain_kwargs",
-            expected_return_type=dict,
-            variables=variables,
-            parameters=parameters,
-        )
-
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {
                 "value": {
                     "min_value": min_value,
                     "max_value": max_value,
                 },
-                "details": {
-                    # Note: the "metric_domain_kwargs" value, used in "details", corresponds to the active Batch.
-                    # While any information can be placed into the "details" dictionary, this judicious choice will
-                    # allow for the relevant "details" to be used as "meta" in ExpectationConfiguration and render well,
-                    # without overwhelming the user (e.g., if instead all "batch_id" values were captured in "details").
-                    "metric_configuration": {
-                        "metric_name": self._metric_name,
-                        "metric_domain_kwargs": domain_kwargs,
-                        "metric_value_kwargs": metric_value_kwargs,
-                        "metric_dependencies": None,
-                    },
-                },
+                "details": details,
             },
         }
 

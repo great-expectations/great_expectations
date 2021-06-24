@@ -30,7 +30,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "table.row_count",
-                            "metric_domain_kwargs": {},
+                            "domain_kwargs": {},
                         }
                     }
                 },
@@ -49,7 +49,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "VendorID",
                             },
                         }
@@ -70,7 +70,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "VendorID",
                             },
                         }
@@ -91,7 +91,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "passenger_count",
                             },
                         }
@@ -112,7 +112,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "passenger_count",
                             },
                         }
@@ -133,7 +133,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "trip_distance",
                             },
                         }
@@ -154,7 +154,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "trip_distance",
                             },
                         }
@@ -175,7 +175,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "RatecodeID",
                             },
                         }
@@ -196,7 +196,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "RatecodeID",
                             },
                         }
@@ -217,7 +217,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "PULocationID",
                             },
                         }
@@ -238,7 +238,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "PULocationID",
                             },
                         }
@@ -259,7 +259,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "DOLocationID",
                             },
                         }
@@ -280,7 +280,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "DOLocationID",
                             },
                         }
@@ -301,7 +301,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "payment_type",
                             },
                         }
@@ -322,7 +322,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "payment_type",
                             },
                         }
@@ -343,7 +343,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "fare_amount",
                             },
                         }
@@ -364,7 +364,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "fare_amount",
                             },
                         }
@@ -385,7 +385,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "extra",
                             },
                         }
@@ -406,7 +406,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "extra",
                             },
                         }
@@ -427,7 +427,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "mta_tax",
                             },
                         }
@@ -448,7 +448,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "mta_tax",
                             },
                         }
@@ -469,7 +469,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tip_amount",
                             },
                         }
@@ -490,7 +490,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tip_amount",
                             },
                         }
@@ -511,7 +511,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tolls_amount",
                             },
                         }
@@ -532,7 +532,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tolls_amount",
                             },
                         }
@@ -553,7 +553,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "improvement_surcharge",
                             },
                         }
@@ -574,7 +574,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "improvement_surcharge",
                             },
                         }
@@ -595,7 +595,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "total_amount",
                             },
                         }
@@ -616,7 +616,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "total_amount",
                             },
                         }
@@ -637,7 +637,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "congestion_surcharge",
                             },
                         }
@@ -658,7 +658,7 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "congestion_surcharge",
                             },
                         }
