@@ -259,9 +259,10 @@ class BaseDataContext:
         "SimpleCheckpoint",
     ]
     ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
-        "SUBSTITUTION_ERROR",
-        "YAML_PARSE_ERROR",
-        "NOT_PROVIDED" "CUSTOM",
+        "__substitution_error__",
+        "__yaml_parse_error__",
+        "__not_provided__",
+        "__custom__",
     ]
     ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
         TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
@@ -3226,7 +3227,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
         except Exception as e:
             # Ensure we do not send the real class name if custom
-            usage_stats_event_payload = {"class_name": "SUBSTITUTION_ERROR"}
+            usage_stats_event_payload = {
+                "class_name": None,
+                "diagnostic_info": "__substitution_error__",
+            }
             send_usage_message(
                 data_context=self,
                 event=usage_stats_event,
@@ -3244,8 +3248,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         except Exception as e:
             if class_name not in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES:
                 # Ensure we do not send the real class name if custom
-                usage_stats_event_payload: Dict[str, str] = {
-                    "class_name": "YAML_PARSE_ERROR"
+                usage_stats_event_payload = {
+                    "class_name": None,
+                    "diagnostic_info": "__yaml_parse_error__",
                 }
             send_usage_message(
                 data_context=self,
@@ -3257,15 +3262,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         instantiated_class: Any
 
-        usage_stats_event_payload: dict = {"class_name": class_name}
+        usage_stats_event_payload = {"class_name": class_name, "diagnostic_info": None}
         if usage_stats_event_payload["class_name"] is None:
-            usage_stats_event_payload["class_name"] = "NOT_PROVIDED"
+            usage_stats_event_payload["diagnostic_info"] = "__not_provided__"
         elif (
             usage_stats_event_payload["class_name"]
             not in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
         ):
             # Ensure we do not send the real class name if custom
-            usage_stats_event_payload["class_name"] = "CUSTOM"
+            usage_stats_event_payload = {
+                "class_name": "__custom__",
+                "diagnostic_info": "__custom__",
+            }
 
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:

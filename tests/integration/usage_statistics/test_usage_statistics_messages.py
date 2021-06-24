@@ -472,19 +472,63 @@ valid_usage_statistics_messages = {
             }
             for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
         ]
-        # TODO: Add messages for all diagnostic info types
-        #               + [
-        #     {
-        #         "event": "data_context.test_yaml_config",
-        #         "success": False,
-        #         "event_payload": {
-        #             "class_name": class_name,
-        #             "diagnostic_info": None,
-        #         },
-        #         "ge_version": "0.13.20.manual_testing",
-        #     }
-        #     for diagnostic_info in BaseDataContext.ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES
-        # ],
+        # Diagnostic Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "class_name": None,
+                    "diagnostic_info": "__substitution_error__",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "class_name": None,
+                    "diagnostic_info": "__yaml_parse_error__",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "class_name": None,
+                    "diagnostic_info": "__not_provided__",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "class_name": "__custom__",
+                    "diagnostic_info": "__custom__",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "class_name": None,
+                    "diagnostic_info": "__not_provided__",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "class_name": "__custom__",
+                    "diagnostic_info": "__custom__",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+        ],
     ),
     # CLI INIT COMMANDS
     "cli.init.create": [
