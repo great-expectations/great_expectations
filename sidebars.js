@@ -253,7 +253,26 @@ module.exports = {
           type: 'category',
           label: 'Reference',
           items: [
-            { type: 'doc', id: 'guides/setup/installing/local' }
+            { type: 'doc', id: 'reference/core-concepts' },
+            { type: 'doc', id: 'reference/checkpoints-and-actions' },
+            { type: 'doc', id: 'reference/data-context' },
+            { type: 'doc', id: 'reference/data-discovery' },
+            { type: 'doc', id: 'reference/data-docs' },
+            { type: 'doc', id: 'reference/datasources' },
+            { type: 'doc', id: 'reference/evaluation-parameters' },
+            { type: 'doc', id: 'reference/expectations/conditional-expectations' },
+            { type: 'doc', id: 'reference/expectations/distributional-expectations' },
+            { type: 'doc', id: 'reference/expectations/expectations' },
+            { type: 'doc', id: 'reference/expectations/implemented-expectations' },
+            { type: 'doc', id: 'reference/expectation-suite-operations' },
+            { type: 'doc', id: 'reference/execution-engine' },
+            { type: 'doc', id: 'reference/metrics' },
+            { type: 'doc', id: 'reference/profilers' },
+            { type: 'doc', id: 'reference/expectations/result-format' },
+            { type: 'doc', id: 'reference/expectations/standard-arguments' },
+            { type: 'doc', id: 'reference/stores' },
+            { type: 'doc', id: 'reference/dividing-data-assets-into-batches' },
+            { type: 'doc', id: 'reference/validation' }
 
           ]
         }
