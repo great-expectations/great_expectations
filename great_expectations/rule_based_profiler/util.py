@@ -42,33 +42,22 @@ def build_metric_domain_kwargs(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ):
     # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-    domain_kwargs: dict = get_parameter_value_and_validate_return_type(
-        domain=domain,
-        parameter_reference="$domain.domain_kwargs",
-        expected_return_type=dict,
-        variables=variables,
-        parameters=parameters,
-    )
-    metric_domain_kwargs_result: dict = copy.deepcopy(domain_kwargs)
-
-    metric_domain_kwargs_override: Optional[
-        dict
-    ] = get_parameter_value_and_validate_return_type(
+    metric_domain_kwargs = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=metric_domain_kwargs,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
     )
-    if metric_domain_kwargs_override is None:
-        metric_domain_kwargs_override = {}
+    if metric_domain_kwargs is None:
+        metric_domain_kwargs = {}
+
+    metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
 
     if batch_id:
-        metric_domain_kwargs_override["batch_id"] = batch_id
+        metric_domain_kwargs["batch_id"] = batch_id
 
-    metric_domain_kwargs_result.update(metric_domain_kwargs_override)
-
-    return metric_domain_kwargs_result
+    return metric_domain_kwargs
 
 
 def get_parameter_value_and_validate_return_type(
