@@ -6,6 +6,7 @@ import NextSteps from '../../components/next_steps.md'
 import Congratulations from '../../components/congratulations.md'
 import Prerequisites from '../../components/prerequisites.jsx'
 import WhereToRunCode from '../../components/where_to_run_code.md'
+import SparkDataContextNote from '../../components/spark_data_context_note.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -32,15 +33,7 @@ Import these necessary packages and modules.
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L1-L4
 ```
 
-:::note Load your DataContext into memory
-
-Use one of the guides below based on your deployment:
-
-- [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file)
-- [How to instantiate a Data Context on an EMR Spark cluster](/docs/deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster)
-- [How to instantiate a Data Context on Databricks Spark cluster](/docs/deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster)
-
-:::
+<SparkDataContextNote />
 
 Please proceed only after you have instantiated your `DataContext`.
 
