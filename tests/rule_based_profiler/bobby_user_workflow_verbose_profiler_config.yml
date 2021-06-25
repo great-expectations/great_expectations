@@ -7,6 +7,8 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
+  enforce_numeric_metric: True
+  fill_nan_with_zero: True
   false_positive_rate: 1.0e-2
   mostly: 1.0
 
@@ -19,6 +21,8 @@ rules:
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: table.row_count
+        enforce_numeric_metric: $variables.enforce_numeric_metric
+        fill_nan_with_zero: $variables.fill_nan_with_zero
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
         truncate_distribution:
@@ -50,6 +54,8 @@ rules:
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
+        enforce_numeric_metric: $variables.enforce_numeric_metric
+        fill_nan_with_zero: $variables.fill_nan_with_zero
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
       - parameter_name: max_range
@@ -57,6 +63,8 @@ rules:
         batch_request: $variables.jan_feb_2019_trip_data_batch_request
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
+        enforce_numeric_metric: $variables.enforce_numeric_metric
+        fill_nan_with_zero: $variables.fill_nan_with_zero
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
     expectation_configuration_builders:

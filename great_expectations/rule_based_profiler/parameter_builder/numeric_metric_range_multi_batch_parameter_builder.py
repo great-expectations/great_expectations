@@ -46,6 +46,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        enforce_numeric_metric: Optional[Union[str, bool]] = False,
+        fill_nan_with_zero: Optional[Union[str, bool]] = False,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         round_decimals: Optional[Union[int, str]] = False,
         truncate_distribution: Optional[
@@ -62,6 +64,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
+            fill_nan_with_zero: if set to True, then convert every NaN encountered to 0.0 (raise an exception otherwise)
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
@@ -82,6 +86,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+
+        self._enforce_numeric_metric = enforce_numeric_metric
+        self._fill_nan_with_zero = fill_nan_with_zero
 
         self._false_positive_rate = false_positive_rate
 
@@ -172,8 +179,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
             metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric=True,
-            fill_nan_with_zero=True,
+            enforce_numeric_metric=self._enforce_numeric_metric,
+            fill_nan_with_zero=self._fill_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,

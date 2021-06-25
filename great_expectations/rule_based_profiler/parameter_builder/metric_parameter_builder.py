@@ -26,6 +26,8 @@ class MetricParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        enforce_numeric_metric: Optional[Union[str, bool]] = False,
+        fill_nan_with_zero: Optional[Union[str, bool]] = False,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
@@ -37,6 +39,8 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
+            fill_nan_with_zero: if set to True, then convert every NaN encountered to 0.0 (raise an exception otherwise)
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -49,6 +53,9 @@ class MetricParameterBuilder(ParameterBuilder):
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+
+        self._enforce_numeric_metric = enforce_numeric_metric
+        self._fill_nan_with_zero = fill_nan_with_zero
 
     def _build_parameters(
         self,
@@ -83,8 +90,8 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
             metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric=False,
-            fill_nan_with_zero=True,
+            enforce_numeric_metric=self._enforce_numeric_metric,
+            fill_nan_with_zero=self._fill_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
