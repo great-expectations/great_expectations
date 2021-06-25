@@ -165,7 +165,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             a small quantity ("epsilon") below 1.0 if confidence_level of 1.0 is given as argument in constructor).
             (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
         10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
-        11. Return ConfidenceInterval for the desired metric as estimated by the specified sampling method.
+        11. Return ConfidenceInterval([low, high]) for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
         # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
@@ -353,12 +353,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             )
 
         confidence_interval: ConfidenceInterval = bootstrap_result.confidence_interval
-        confidence_interval_low: np.float64 = confidence_interval.low
-        confidence_interval_high: np.float64 = confidence_interval.high
 
-        return ConfidenceInterval(
-            low=confidence_interval_low, high=confidence_interval_high
-        )
+        return confidence_interval
 
     def _get_oneshot_confidence_interval(
         self,

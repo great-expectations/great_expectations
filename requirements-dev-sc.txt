@@ -1,0 +1,3 @@
+# Packages used for Scientific Computing (Experimental Projects -- Data Science, Statistics, Machine Learning, etc.)
+numpy>=1.21.0  # package
+scipy>=1.7.0  # package
