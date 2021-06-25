@@ -47,8 +47,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        fill_nan_with_zero: Optional[Union[str, bool]] = False,
+        enforce_numeric_metric: Optional[Union[str, bool]] = True,
+        fill_nan_with_zero: Optional[Union[str, bool]] = True,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         round_decimals: Optional[Union[int, str]] = False,
         truncate_distribution: Optional[
