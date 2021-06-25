@@ -62,7 +62,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         sampling_method: Optional[str] = "bootstrap",
         num_bootstrap_samples: Optional[Union[int, str]] = None,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
-        truncate_distribution: Optional[
+        truncate_values: Optional[
             Union[Dict[str, Union[Optional[int], Optional[float]]], str]
         ] = None,
         round_decimals: Optional[Union[int, str]] = None,
@@ -86,7 +86,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
-            truncate_distribution: user-configured directive for whether or not to allow the computed parameter values
+            truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
@@ -110,22 +110,22 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
         self._false_positive_rate = false_positive_rate
 
-        if not truncate_distribution:
-            truncate_distribution = {
+        if not truncate_values:
+            truncate_values = {
                 "lower_bound": None,
                 "upper_bound": None,
             }
-        truncate_distribution_keys: set = set(truncate_distribution.keys())
+        truncate_values_keys: set = set(truncate_values.keys())
         if (
-            not truncate_distribution_keys
+            not truncate_values_keys
             <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
         ):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Unrecognized truncate_distribution_keys key(s) in {self.__class__.__name__}:
-"{str(truncate_distribution_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" detected.
+                message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
+"{str(truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" detected.
 """
             )
-        self._truncate_distribution = truncate_distribution
+        self._truncate_values = truncate_values
 
         self._round_decimals = round_decimals
 
@@ -247,20 +247,16 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         ] = metric_computation_result["value"]
         details: Dict[str, Any] = metric_computation_result["details"]
 
-        truncate_distribution: Dict[
+        truncate_values: Dict[
             str, Union[Optional[int], Optional[float]]
-        ] = self._get_truncate_distribution_using_heuristics(
+        ] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        lower_bound: Optional[Union[int, float]] = truncate_distribution.get(
-            "lower_bound"
-        )
-        upper_bound: Optional[Union[int, float]] = truncate_distribution.get(
-            "upper_bound"
-        )
+        lower_bound: Optional[Union[int, float]] = truncate_values.get("lower_bound")
+        upper_bound: Optional[Union[int, float]] = truncate_values.get("upper_bound")
 
         round_decimals: int = self._get_round_decimals_using_heuristics(
             metric_values=metric_values,
@@ -436,7 +432,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
         return num_samples * (np.var(samples) + NP_EPSILON) / (num_samples - 1)
 
-    def _get_truncate_distribution_using_heuristics(
+    def _get_truncate_values_using_heuristics(
         self,
         metric_values: Union[
             np.ndarray,
@@ -447,12 +443,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
-        # Obtain truncate_distribution directive from rule state (i.e., variables and parameters); from instance variable otherwise.
-        truncate_distribution: Dict[
+        # Obtain truncate_values directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        truncate_values: Dict[
             str, Union[Optional[int], Optional[float]]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._truncate_distribution,
+            parameter_reference=self._truncate_values,
             expected_return_type=dict,
             variables=variables,
             parameters=parameters,
@@ -464,21 +460,17 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                     distribution_boundary is None
                     or is_numeric(value=distribution_boundary)
                 )
-                for distribution_boundary in truncate_distribution.values()
+                for distribution_boundary in truncate_values.values()
             ]
         ):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "truncate_distribution" for {self.__class__.__name__} must specify the
+                message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the
 [lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
 """
             )
 
-        lower_bound: Optional[Union[int, float]] = truncate_distribution.get(
-            "lower_bound"
-        )
-        upper_bound: Optional[Union[int, float]] = truncate_distribution.get(
-            "upper_bound"
-        )
+        lower_bound: Optional[Union[int, float]] = truncate_values.get("lower_bound")
+        upper_bound: Optional[Union[int, float]] = truncate_values.get("upper_bound")
         metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
         if lower_bound is None and all(
             [metric_value > NP_EPSILON for metric_value in metric_values]
