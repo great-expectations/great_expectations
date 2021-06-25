@@ -23,23 +23,6 @@ module.exports = {
       ]
     },
     {
-    type: 'category',
-    label: 'Deployment Patterns',
-    items: [
-        'deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
-        'deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster',
-        'deployment_patterns/how-to-run-a-checkpoint-in-airflow',
-        {
-          type: 'category',
-          label: 'Contributing',
-          items:[
-            'deployment_patterns/contributing/how-to-add-a-new-deployment-pattern-document',
-            'deployment_patterns/contributing/how-to-contribute-to-an-existing-deployment-pattern-document'
-          ]
-        },
-      ]
-    },
-    {
       type: 'category',
       label: 'How to Guides',
       items: [
@@ -66,7 +49,7 @@ module.exports = {
                 'guides/setup/configuring-data-contexts/how-to-configure-datacontext-components-using-test_yaml_config',
                 'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables',
                 'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-secrets-store',
-                'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file',
+                'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file'
               ]
             },
             {
@@ -95,7 +78,7 @@ module.exports = {
                 'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-gcs',
                 'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-amazon-s3'
               ]
-            },
+            }
           ]
         },
         {
@@ -133,20 +116,20 @@ module.exports = {
               type: 'category',
               label: '📁 Filesystem',
               items: [
-                { type: 'doc', id: 'guides/connecting_to_your_data/filesystem/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/filesystem/spark' }
+                'guides/connecting_to_your_data/filesystem/pandas',
+                'guides/connecting_to_your_data/filesystem/spark'
               ]
             },
             {
               type: 'category',
               label: '☁️ Cloud',
               items: [
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/s3/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/s3/spark' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/gcs/spark' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/pandas' },
-                { type: 'doc', id: 'guides/connecting_to_your_data/cloud/azure/spark' }
+                'guides/connecting_to_your_data/cloud/s3/pandas',
+                'guides/connecting_to_your_data/cloud/s3/spark',
+                'guides/connecting_to_your_data/cloud/gcs/pandas',
+                'guides/connecting_to_your_data/cloud/gcs/spark',
+                'guides/connecting_to_your_data/cloud/azure/pandas',
+                'guides/connecting_to_your_data/cloud/azure/spark'
               ]
             },
             {
@@ -205,9 +188,9 @@ module.exports = {
               items: [
                 'guides/expectations/creating_custom_expectations/how-to-create-custom-expectations',
                 'guides/expectations/creating_custom_expectations/how-to-create-custom-expectations-from-a-sql-query',
-                'guides/expectations/creating_custom_expectations/how-to-create-custom-parameterized-expectations',
+                'guides/expectations/creating_custom_expectations/how-to-create-custom-parameterized-expectations'
               ]
-            },
+            }
           ]
         },
         {
@@ -237,7 +220,7 @@ module.exports = {
               type: 'category',
               label: 'Contributing',
               items: [
-                'guides/validation/contributing/how-to-contribute-a-new-validation-action',
+                'guides/validation/contributing/how-to-contribute-a-new-validation-action'
               ]
             },
             {
@@ -248,31 +231,47 @@ module.exports = {
                 'guides/validation/validation_actions/how-to-trigger-email-as-a-validation-action',
                 'guides/validation/validation_actions/how-to-trigger-opsgenie-notifications-as-a-validation-action',
                 'guides/validation/validation_actions/how-to-trigger-slack-notifications-as-a-validation-action',
-                'guides/validation/validation_actions/how-to-update-data-docs-as-a-validation-action',
+                'guides/validation/validation_actions/how-to-update-data-docs-as-a-validation-action'
               ]
-            },
+            }
           ]
         },
         {
           type: 'category',
           label: '🧰 Miscellaneous',
           items: [
-            { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-project-check-config-command'},
-            { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectations-cli'},
-            { type: 'doc', id: 'guides/miscellaneous/how-to-quickly-explore-expectations-in-a-notebook'},
+            { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-project-check-config-command' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectations-cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-quickly-explore-expectations-in-a-notebook' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-configure-notebooks-generated-by-suite-edit' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-add-comments-to-a-page-on-docs.greatexpectations.io' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectation-docker-images' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-write-a-how-to-guide-docusaurus' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-template' }
           ]
-        },
+        }
       ]
     },
-
-    { type: 'doc', id: 'reference/core-concepts'},
-    { type: 'doc', id: 'community'},
-    { type: 'doc', id: 'contributing/contributing'},
-    { type: 'doc', id: 'changelog'},
+    {
+      type: 'category',
+      label: 'Deployment Patterns',
+      items: [
+        'deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
+        'deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster',
+        'deployment_patterns/how-to-run-a-checkpoint-in-airflow',
+        {
+          type: 'category',
+          label: 'Contributing',
+          items: [
+            'deployment_patterns/contributing/how-to-add-a-new-deployment-pattern-document',
+            'deployment_patterns/contributing/how-to-contribute-to-an-existing-deployment-pattern-document'
+          ]
+        }
+      ]
+    },
+    { type: 'doc', id: 'reference/core-concepts' },
+    { type: 'doc', id: 'community' },
+    { type: 'doc', id: 'contributing/contributing' },
+    { type: 'doc', id: 'changelog' }
   ]
 }
