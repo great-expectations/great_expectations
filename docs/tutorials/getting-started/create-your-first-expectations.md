@@ -1,5 +1,5 @@
 ---
-title: Create your first expectations
+title: Create your first Expectations
 ---
 ![minimap](minimap.png)
 

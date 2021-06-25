@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data on a azure using pandas
+title: How to connect to data on Azure using Pandas
 ---
 
 **TODO** This is a stub

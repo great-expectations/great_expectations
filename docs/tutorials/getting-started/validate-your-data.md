@@ -1,5 +1,5 @@
 ---
-title: Validate your data
+title: Validate your data using a Checkpoint
 ---
 
 Validation is the core operation of Great Expectations: “Validate data X against Expectation Y.”
