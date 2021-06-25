@@ -166,7 +166,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 ],
                 Dict[str, Any],
             ],
-        ] = self.get_metrics(
+        ] = self.get_numeric_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name=self._metric_name,

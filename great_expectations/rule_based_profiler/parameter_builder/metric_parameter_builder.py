@@ -77,12 +77,13 @@ class MetricParameterBuilder(ParameterBuilder):
                 Union[int, np.int32, np.int64, float, np.float32, np.float64],
                 Dict[str, Any],
             ],
-        ] = self.get_metric(
+        ] = self.get_numeric_metric(
             batch_id=batch_id,
             validator=validator,
             metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
             metric_value_kwargs=self._metric_value_kwargs,
+            enforce_numeric=False,
             fill_nan_with_zero=True,
             domain=domain,
             variables=variables,

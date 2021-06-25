@@ -157,7 +157,7 @@ class ParameterBuilder(ABC):
 
         return batch_ids[0]
 
-    def get_metric(
+    def get_numeric_metric(
         self,
         batch_id: str,
         validator: Validator,
@@ -226,7 +226,7 @@ class ParameterBuilder(ABC):
             },
         }
 
-    def get_metrics(
+    def get_numeric_metrics(
         self,
         batch_ids: List[str],
         validator: Validator,
@@ -312,6 +312,7 @@ class ParameterBuilder(ABC):
                     "metric_value_kwargs": metric_value_kwargs,
                     "metric_dependencies": None,
                 },
+                "num_batches": len(batch_ids),
             },
         }
 
