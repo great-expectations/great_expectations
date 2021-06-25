@@ -35,6 +35,18 @@ from great_expectations.core.expectation_validation_result import get_metric_kwa
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
+    CheckpointAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
+    DataConnectorAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+    DatasourceAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
+    StoreAnonymizer,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
@@ -3196,7 +3208,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         The returned object is determined by return_mode.
         """
-        usage_stats_event: str = "data_context.test_yaml_config"
+        usage_stats_event_name: str = "data_context.test_yaml_config"
         usage_stats_event_payload: Dict[str, str] = {}
 
         if pretty_print:
@@ -3226,14 +3238,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 substitutions,
             )
         except Exception as e:
-            # Ensure we do not send the real class name if custom
-            usage_stats_event_payload = {
-                "class_name": None,
+            usage_stats_event_payload: dict = {
                 "diagnostic_info": "__substitution_error__",
             }
             send_usage_message(
                 data_context=self,
-                event=usage_stats_event,
+                event=usage_stats_event_name,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
@@ -3246,34 +3256,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 class_name = config["class_name"]
 
         except Exception as e:
-            if class_name not in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES:
-                # Ensure we do not send the real class name if custom
-                usage_stats_event_payload = {
-                    "class_name": None,
-                    "diagnostic_info": "__yaml_parse_error__",
-                }
+            usage_stats_event_payload: dict = {
+                "diagnostic_info": "__yaml_parse_error__",
+            }
             send_usage_message(
                 data_context=self,
-                event=usage_stats_event,
+                event=usage_stats_event_name,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
             raise e
 
         instantiated_class: Any
-
-        usage_stats_event_payload = {"class_name": class_name, "diagnostic_info": None}
-        if usage_stats_event_payload["class_name"] is None:
-            usage_stats_event_payload["diagnostic_info"] = "__not_provided__"
-        elif (
-            usage_stats_event_payload["class_name"]
-            not in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
-        ):
-            # Ensure we do not send the real class name if custom
-            usage_stats_event_payload = {
-                "class_name": "__custom__",
-                "diagnostic_info": "__custom__",
-            }
 
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
@@ -3288,6 +3282,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 store_name = instantiated_class.store_name or store_name
                 self._project_config["stores"][store_name] = config
+
+                store_anonymizer = StoreAnonymizer(self.data_context_id)
+                usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+                    store_name=store_name, store_obj=instantiated_class
+                )
 
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
                 print(
@@ -3305,9 +3304,23 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     ),
                 )
 
-            elif class_name == "Checkpoint":
+                # Roundtrip through schema validator to add missing fields
+                datasource_config = datasourceConfigSchema.load(
+                    instantiated_class.config
+                )
+                full_datasource_config = datasourceConfigSchema.dump(datasource_config)
+
+                datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
+
+                usage_stats_event_payload = (
+                    datasource_anonymizer.anonymize_datasource_info(
+                        name=datasource_name, config=full_datasource_config
+                    )
+                )
+
+            elif class_name in ["Checkpoint", "SimpleCheckpoint"]:
                 print(
-                    f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
+                    f"\tInstantiating as a {class_name}, since class_name is {class_name}"
                 )
 
                 checkpoint_name: str = (
@@ -3322,32 +3335,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 checkpoint_config = checkpoint_config.to_json_dict()
                 checkpoint_config.update({"name": checkpoint_name})
 
-                instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
+                if class_name == "Checkpoint":
+                    instantiated_class = Checkpoint(
+                        data_context=self, **checkpoint_config
+                    )
+                elif class_name == "SimpleCheckpoint":
+                    instantiated_class = SimpleCheckpoint(
+                        data_context=self, **checkpoint_config
+                    )
 
-            elif class_name == "SimpleCheckpoint":
-                print(
-                    f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
-                )
+                checkpoint_anonymizer = CheckpointAnonymizer(self.data_context_id)
 
-                checkpoint_name: str = (
-                    name or config.get("name") or "my_temp_checkpoint"
-                )
-
-                checkpoint_config: Union[CheckpointConfig, dict]
-
-                checkpoint_config = CheckpointConfig.from_commented_map(
-                    commented_map=config
-                )
-                checkpoint_config = checkpoint_config.to_json_dict()
-                checkpoint_config.update({"name": checkpoint_name})
-
-                instantiated_class = SimpleCheckpoint(
-                    data_context=self, **checkpoint_config
+                usage_stats_event_payload = (
+                    checkpoint_anonymizer.anonymize_checkpoint_info(
+                        name=checkpoint_name, config=checkpoint_config
+                    )
                 )
 
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
                 print(
                     f"\tInstantiating as a DataConnector, since class_name is {class_name}"
+                )
+                data_connector_name: str = (
+                    name or config.get("name") or "my_temp_data_connector"
                 )
                 instantiated_class = instantiate_class_from_config(
                     config=config,
@@ -3355,6 +3365,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         "root_directory": self.root_directory,
                     },
                     config_defaults={},
+                )
+
+                data_connector_anonymizer = DataConnectorAnonymizer(
+                    self.data_context_id
+                )
+
+                usage_stats_event_payload = (
+                    data_connector_anonymizer.anonymize_data_connector_info(
+                        name=data_connector_name, config=config
+                    )
                 )
 
             else:
@@ -3368,10 +3388,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     },
                     config_defaults={},
                 )
+                # TODO: AJB 20210625 Check if sub type of a supported type
+                # If class_name is not a supported type, mark as custom
+                usage_stats_event_payload = {"diagnostic_info": "__custom__"}
+
+            if class_name is None:
+                usage_stats_event_payload["diagnostic_info"] = ",".join(
+                    [
+                        usage_stats_event_payload.get("diagnostic_info", ""),
+                        "__class_name_not_provided__",
+                    ]
+                )
 
             send_usage_message(
                 data_context=self,
-                event=usage_stats_event,
+                event=usage_stats_event_name,
                 event_payload=usage_stats_event_payload,
                 success=True,
             )
@@ -3393,7 +3424,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         except Exception as e:
             send_usage_message(
                 data_context=self,
-                event=usage_stats_event,
+                event=usage_stats_event_name,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
