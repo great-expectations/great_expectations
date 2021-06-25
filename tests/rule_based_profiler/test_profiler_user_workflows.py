@@ -1,5 +1,4 @@
 import datetime
-import sys
 from typing import Any, Dict, List, cast
 
 import pandas as pd
@@ -11,6 +10,9 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.util import (
+    is_scipy_stats_bootstrap_loadable,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -166,10 +168,6 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     assert month == 3
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 7),
-    reason="requires Python-3.7 or higher to accommodate minimum required numpy and scipy versions",
-)
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
@@ -205,8 +203,8 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
 
 @pytest.mark.skipif(
-    sys.version_info < (3, 7),
-    reason="requires Python-3.7 or higher to accommodate minimum required numpy and scipy versions",
+    not is_scipy_stats_bootstrap_loadable(),
+    reason='requires "scipy.stats.bootstrap" to be installed',
 )
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,

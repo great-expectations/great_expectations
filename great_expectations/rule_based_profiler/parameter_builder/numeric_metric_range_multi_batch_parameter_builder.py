@@ -1,10 +1,9 @@
 from dataclasses import make_dataclass
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 from scipy import special
-from scipy.stats import bootstrap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -17,9 +16,12 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
+    import_scipy_stats_bootstrap_function,
 )
-from great_expectations.util import is_numeric
+from great_expectations.util import import_library_module, is_numeric
 from great_expectations.validator.validator import Validator
+
+bootstrap: Optional[Callable] = import_scipy_stats_bootstrap_function()
 
 NP_SQRT_2: np.float64 = np.sqrt(2.0)
 

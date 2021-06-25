@@ -375,7 +375,7 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-sc.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
