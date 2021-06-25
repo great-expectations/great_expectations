@@ -1,6 +1,7 @@
 import copy
 import uuid
 from abc import ABC, abstractmethod
+from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -169,13 +170,7 @@ class ParameterBuilder(ABC):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[
-        str,
-        Union[
-            Union[int, np.int32, np.int64, float, np.float32, np.float64],
-            Dict[str, Any],
-        ],
-    ]:
+    ) -> Dict[str, Union[Number, Dict[str, Any]]]:
         metric_domain_kwargs = build_metric_domain_kwargs(
             batch_id=batch_id,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -216,9 +211,7 @@ class ParameterBuilder(ABC):
             "metric_value_kwargs": metric_value_kwargs,
             "metric_dependencies": None,
         }
-        metric_value: Union[
-            int, np.int32, np.int64, float, np.float32, np.float64
-        ] = validator.get_metric(
+        metric_value: Number = validator.get_metric(
             metric=MetricConfiguration(**metric_configuration_arguments)
         )
         if enforce_numeric_metric:
@@ -255,16 +248,7 @@ class ParameterBuilder(ABC):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[
-        str,
-        Union[
-            Union[
-                np.ndarray,
-                List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-            ],
-            Dict[str, Any],
-        ],
-    ]:
+    ) -> Dict[str, Union[Union[np.ndarray, List[Number]], Dict[str, Any]]]:
         domain_kwargs = build_metric_domain_kwargs(
             batch_id=None,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -302,11 +286,9 @@ class ParameterBuilder(ABC):
             parameters=parameters,
         )
 
-        metric_values: List[
-            Union[int, np.int32, np.int64, float, np.float32, np.float64]
-        ] = []
+        metric_values: List[Number] = []
 
-        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        metric_value: Number
         batch_id: str
         for batch_id in batch_ids:
             metric_domain_kwargs["batch_id"] = batch_id

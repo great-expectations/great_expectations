@@ -1,6 +1,5 @@
+from numbers import Number
 from typing import Any, Dict, Optional, Union
-
-import numpy as np
 
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder.domain import Domain
@@ -79,11 +78,7 @@ class MetricParameterBuilder(ParameterBuilder):
         batch_id: str = self.get_batch_id(variables=variables)
 
         metric_computation_result: Dict[
-            str,
-            Union[
-                Union[int, np.int32, np.int64, float, np.float32, np.float64],
-                Dict[str, Any],
-            ],
+            str, Union[Number, Dict[str, Any]]
         ] = self.get_numeric_metric(
             batch_id=batch_id,
             validator=validator,

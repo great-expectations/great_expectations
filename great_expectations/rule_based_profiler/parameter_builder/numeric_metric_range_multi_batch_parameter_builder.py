@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -165,14 +166,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             )
 
         metric_computation_result: Dict[
-            str,
-            Union[
-                Union[
-                    np.ndarray,
-                    List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-                ],
-                Dict[str, Any],
-            ],
+            str, Union[Union[np.ndarray, List[Number]], Dict[str, Any]]
         ] = self.get_numeric_metrics(
             batch_ids=batch_ids,
             validator=validator,
@@ -185,10 +179,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: Union[
-            np.ndarray,
-            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = metric_computation_result["value"]
+        metric_values: Union[np.ndarray, List[Number]] = metric_computation_result[
+            "value"
+        ]
         details: Dict[str, Any] = metric_computation_result["details"]
 
         # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
