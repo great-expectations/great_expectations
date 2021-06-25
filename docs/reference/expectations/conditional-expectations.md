@@ -121,4 +121,4 @@ nature and therefore do not take the `row_condition` argument:
 * :
   func:`expect_table_column_count_to_equal <great_expectations.dataset.dataset.Dataset.expect_table_column_count_to_equal>`
 
-For more information, see the [Data Docs](../data_docs) feature guide.
+For more information, see the [Data Docs](../data-docs) feature guide.
