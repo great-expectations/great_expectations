@@ -30,11 +30,11 @@ ConfidenceInterval = make_dataclass("ConfidenceInterval", ["low", "high"])
 class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     """
     A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
-    using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
+    using domain_kwargs, value_kwargs, metric_name, and confidence_level (tolerance) as arguments.
 
     This Multi-Batch ParameterBuilder is general in the sense that any metric that computes numbers can be accommodated.
     On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
-    ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
+    ranges, which will incorporate the requirements, imposed by the configured confidence_level tolerances.
 
     The implementation supports two methods of estimating parameter values from data:
     * bootstrapped (default) -- a statistical technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)")
@@ -61,7 +61,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         fill_nan_with_zero: Optional[Union[str, bool]] = True,
         sampling_method: Optional[str] = "bootstrap",
         num_bootstrap_samples: Optional[Union[int, str]] = None,
-        false_positive_rate: Optional[Union[float, str]] = 0.0,
+        confidence_level: Optional[Union[float, str]] = 9.5e-1,
         truncate_values: Optional[
             Union[Dict[str, Union[Optional[int], Optional[float]]], str]
         ] = None,
@@ -82,9 +82,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
-            false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
-            FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
-            (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
+            confidence_level: user-configured fraction between 0 and 1
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
@@ -108,7 +106,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._sampling_method = sampling_method
         self._num_bootstrap_samples = num_bootstrap_samples
 
-        self._false_positive_rate = false_positive_rate
+        self._confidence_level = confidence_level
 
         if not truncate_values:
             truncate_values = {
@@ -157,9 +155,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
          Steps 8 -- 10 are for the "oneshot" sampling method only (the "bootstrap" method achieves same automatically):
          8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
          9. Compute the number of standard deviations (as floating point number rounded to the nearest highest integer)
-            needed to create the "band" around the mean for achieving the specified false_positive_rate (note that the
-            false_positive_rate of 0.0 would result in infinite number of standard deviations, hence it is "nudged" by
-            a small quantity ("epsilon") above 0.0 if false_positive_rate of 0.0 is given as argument in constructor).
+            needed to create the "band" around the mean for achieving the specified confidence_level (note that the
+            confidence_level of 1.0 would result in infinite number of standard deviations, hence it is "nudged" by
+            a small quantity ("epsilon") below 1.0 if confidence_level of 1.0 is given as argument in constructor).
             (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
         10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
         11. Return ConfidenceInterval for the desired metric as estimated by the specified sampling method.
@@ -183,26 +181,23 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 """
             )
 
-        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
-        false_positive_rate: Union[
+        # Obtain confidence_level from rule state (i.e., variables and parameters); from instance variable otherwise.
+        confidence_level: Union[
             Any, str
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._false_positive_rate,
+            parameter_reference=self._confidence_level,
             expected_return_type=(int, float),
             variables=variables,
             parameters=parameters,
         )
-        if not (0.0 <= false_positive_rate <= 1.0):
+        if not (0.0 <= confidence_level <= 1.0):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"False-Positive Rate for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        if np.isclose(false_positive_rate, 0.0):
-            false_positive_rate = false_positive_rate + NP_EPSILON
-
-        true_negative_rate: np.float64 = np.float64(1.0 - false_positive_rate)
-        stds_multiplier: np.float64
+        if np.isclose(confidence_level, 1.0):
+            confidence_level = confidence_level - NP_EPSILON
 
         validator: Validator = self.get_validator(
             domain=domain,
@@ -269,21 +264,17 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
         confidence_interval: ConfidenceInterval
         if sampling_method == "bootstrap":
-            # Use default (bootstrap confidence interval already achieves optimal variance); keep for experimentation.
-            stds_multiplier = np.float64(0.0)
             confidence_interval = self._get_bootstrap_confidence_interval(
                 metric_values=metric_values,
-                false_positive_rate=false_positive_rate,
+                confidence_level=confidence_level,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                stds_multiplier=stds_multiplier,
             )
         else:
-            stds_multiplier = NP_SQRT_2 * special.erfinv(true_negative_rate)
             confidence_interval = self._get_oneshot_confidence_interval(
                 metric_values=metric_values,
-                stds_multiplier=stds_multiplier,
+                confidence_level=confidence_level,
             )
 
         if round_decimals == 0:
@@ -318,12 +309,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
         ],
-        false_positive_rate: np.float64,
+        confidence_level: np.float64,
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        stds_multiplier: Optional[np.float64] = 0.0,
     ):
         # Obtain num_bootstrap_samples override from rule state (i.e., variables and parameters); from instance variable otherwise.
         num_bootstrap_samples: Optional[
@@ -341,11 +331,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             metric_values,
         )  # bootstrap samples must be in a sequence
 
-        true_negative_rate: np.float64 = np.float64(1.0 - false_positive_rate)
-        confidence_level: np.float64 = np.float64(
-            true_negative_rate + 5.0e-1 * false_positive_rate
-        )
-
         # noinspection PyPep8Naming
         BootstrapResult = make_dataclass(
             "BootstrapResult", ["confidence_interval", "standard_error"]
@@ -357,7 +342,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 bootstrap_samples,
                 np.mean,
                 vectorized=False,
-                confidence_level=confidence_level,
+                confidence_level=5.0e-1 * (1.0 + confidence_level),
                 random_state=rng,
             )
         else:
@@ -365,7 +350,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 bootstrap_samples,
                 np.mean,
                 vectorized=False,
-                confidence_level=confidence_level,
+                confidence_level=5.0e-1 * (1.0 + confidence_level),
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
             )
@@ -373,13 +358,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         confidence_interval: ConfidenceInterval = bootstrap_result.confidence_interval
         confidence_interval_low: np.float64 = confidence_interval.low
         confidence_interval_high: np.float64 = confidence_interval.high
-
-        std: Union[np.ndarray, np.float64] = bootstrap_result.standard_error
-
-        margin_of_error: np.float64 = stds_multiplier * std
-
-        confidence_interval_low -= margin_of_error
-        confidence_interval_high += margin_of_error
 
         return ConfidenceInterval(
             low=confidence_interval_low, high=confidence_interval_high
@@ -391,11 +369,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             np.ndarray,
             List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
         ],
-        stds_multiplier: np.float64,
+        confidence_level: np.float64,
     ):
         mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
         std: Union[np.ndarray, np.float64] = self._standard_error(samples=metric_values)
 
+        stds_multiplier: np.float64 = NP_SQRT_2 * special.erfinv(confidence_level)
         margin_of_error: np.float64 = stds_multiplier * std
 
         confidence_interval_low: np.float64 = mean - margin_of_error

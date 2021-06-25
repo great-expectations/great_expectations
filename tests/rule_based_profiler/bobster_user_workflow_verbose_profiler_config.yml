@@ -8,7 +8,7 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
-  false_positive_rate: 1.0e-2
+  confidence_level: 9.5e-1
   mostly: 1.0
 
 rules:
@@ -21,7 +21,7 @@ rules:
         batch_request: $variables.jan_2018_thru_nov_2020_monthly_trip_data_batch_request
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
-        false_positive_rate: $variables.false_positive_rate
+        confidence_level: $variables.confidence_level
         round_decimals: 0
         truncate_values:
           lower_bound: 0
