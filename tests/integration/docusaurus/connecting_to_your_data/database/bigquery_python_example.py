@@ -1,7 +1,6 @@
 import os
 
 from ruamel import yaml
-from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -12,6 +11,9 @@ gcp_project = os.environ.get("GCP_PROJECT")
 bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
+
+# This utility is not for general use. It is only to support testing.
+from util import load_data_into_database
 
 load_data_into_database(
     table_name="taxi_data",
