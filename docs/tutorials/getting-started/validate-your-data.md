@@ -1,5 +1,5 @@
 ---
-title: Validate your data
+title: Validate your data using a Checkpoint
 ---
 
 ![minimap](minimap.png)
