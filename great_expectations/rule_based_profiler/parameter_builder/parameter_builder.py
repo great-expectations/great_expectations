@@ -138,7 +138,7 @@ class ParameterBuilder(ABC):
 
         return batch_ids[0]
 
-    def get_numeric_metric(
+    def get_metric(
         self,
         batch_id: str,
         validator: Validator,
@@ -146,11 +146,11 @@ class ParameterBuilder(ABC):
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        fill_nan_with_zero: Optional[Union[str, bool]] = False,
+        replace_nan_with_zero: Optional[Union[str, bool]] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[str, Union[Number, Dict[str, Any]]]:
+    ) -> Dict[str, Union[Any, Number, Dict[str, Any]]]:
         metric_domain_kwargs = build_metric_domain_kwargs(
             batch_id=batch_id,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -176,10 +176,10 @@ class ParameterBuilder(ABC):
             parameters=parameters,
         )
 
-        # Obtain fill_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
-        fill_nan_with_zero = get_parameter_value_and_validate_return_type(
+        # Obtain replace_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
+        replace_nan_with_zero = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=fill_nan_with_zero,
+            parameter_reference=replace_nan_with_zero,
             expected_return_type=bool,
             variables=variables,
             parameters=parameters,
@@ -191,7 +191,7 @@ class ParameterBuilder(ABC):
             "metric_value_kwargs": metric_value_kwargs,
             "metric_dependencies": None,
         }
-        metric_value: Number = validator.get_metric(
+        metric_value: Union[Any, Number] = validator.get_metric(
             metric=MetricConfiguration(**metric_configuration_arguments)
         )
         if enforce_numeric_metric:
@@ -202,7 +202,7 @@ class ParameterBuilder(ABC):
 """
                 )
             if np.isnan(metric_value):
-                if not fill_nan_with_zero:
+                if not replace_nan_with_zero:
                     raise ValueError(
                         f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
 """
@@ -216,7 +216,7 @@ class ParameterBuilder(ABC):
             },
         }
 
-    def get_numeric_metrics(
+    def get_metrics(
         self,
         batch_ids: List[str],
         validator: Validator,
@@ -224,11 +224,11 @@ class ParameterBuilder(ABC):
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        fill_nan_with_zero: Optional[Union[str, bool]] = False,
+        replace_nan_with_zero: Optional[Union[str, bool]] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[str, Union[Union[np.ndarray, List[Number]], Dict[str, Any]]]:
+    ) -> Dict[str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]]:
         domain_kwargs = build_metric_domain_kwargs(
             batch_id=None,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -257,18 +257,18 @@ class ParameterBuilder(ABC):
             parameters=parameters,
         )
 
-        # Obtain fill_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
-        fill_nan_with_zero = get_parameter_value_and_validate_return_type(
+        # Obtain replace_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
+        replace_nan_with_zero = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=fill_nan_with_zero,
+            parameter_reference=replace_nan_with_zero,
             expected_return_type=bool,
             variables=variables,
             parameters=parameters,
         )
 
-        metric_values: List[Number] = []
+        metric_values: List[Union[Any, Number]] = []
 
-        metric_value: Number
+        metric_value: Union[Any, Number]
         batch_id: str
         for batch_id in batch_ids:
             metric_domain_kwargs["batch_id"] = batch_id
@@ -289,7 +289,7 @@ class ParameterBuilder(ABC):
 """
                     )
                 if np.isnan(metric_value):
-                    if not fill_nan_with_zero:
+                    if not replace_nan_with_zero:
                         raise ValueError(
                             f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
 """

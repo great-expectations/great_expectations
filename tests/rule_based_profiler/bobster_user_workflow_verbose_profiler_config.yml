@@ -8,8 +8,6 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
-  enforce_numeric_metric: True  # Choices: False (default) or True (useful for ensuring metrics performing arithmetic).
-  fill_nan_with_zero: True  # Choices: True (default) or False (if True, then NaN is converted to 0.0).
   confidence_level: 9.5e-1
   mostly: 1.0
 
@@ -22,8 +20,6 @@ rules:
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_2018_thru_nov_2020_monthly_trip_data_batch_request
         metric_name: table.row_count
-        enforce_numeric_metric: $variables.enforce_numeric_metric
-        fill_nan_with_zero: $variables.fill_nan_with_zero
         confidence_level: $variables.confidence_level
         round_decimals: 0
         truncate_values:

@@ -60,8 +60,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         sampling_method: Optional[str] = "bootstrap",
-        enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        fill_nan_with_zero: Optional[Union[str, bool]] = False,
+        enforce_numeric_metric: Optional[Union[str, bool]] = True,
+        replace_nan_with_zero: Optional[Union[str, bool]] = True,
         confidence_level: Optional[Union[float, str]] = 9.5e-1,
         num_bootstrap_samples: Optional[Union[int, str]] = None,
         round_decimals: Optional[Union[int, str]] = None,
@@ -81,7 +81,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             metric_value_kwargs: used in MetricConfiguration
             sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
-            fill_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
+            replace_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
             if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             confidence_level: user-configured fraction between 0 and 1
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
@@ -107,7 +107,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._sampling_method = sampling_method
 
         self._enforce_numeric_metric = enforce_numeric_metric
-        self._fill_nan_with_zero = fill_nan_with_zero
+        self._replace_nan_with_zero = replace_nan_with_zero
 
         self._confidence_level = confidence_level
 
@@ -221,22 +221,22 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             )
 
         metric_computation_result: Dict[
-            str, Union[Union[np.ndarray, List[Number]], Dict[str, Any]]
-        ] = self.get_numeric_metrics(
+            str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]
+        ] = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
             metric_value_kwargs=self._metric_value_kwargs,
             enforce_numeric_metric=self._enforce_numeric_metric,
-            fill_nan_with_zero=self._fill_nan_with_zero,
+            replace_nan_with_zero=self._replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        metric_values: Union[np.ndarray, List[Number]] = metric_computation_result[
-            "value"
-        ]
+        metric_values: Union[
+            np.ndarray, List[Union[Any, Number]]
+        ] = metric_computation_result["value"]
         details: Dict[str, Any] = metric_computation_result["details"]
 
         truncate_values: Dict[

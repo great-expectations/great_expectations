@@ -1,7 +1,6 @@
 import os
 
 from ruamel import yaml
-from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -14,6 +13,10 @@ redshift_database = os.environ.get("REDSHIFT_DATABASE")
 redshift_sslmode = os.environ.get("REDSHIFT_SSLMODE")
 
 CONNECTION_STRING = f"postgresql+psycopg2://{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_database}?sslmode={redshift_sslmode}"
+
+# This utility is not for general use. It is only to support testing.
+from util import load_data_into_database
+
 load_data_into_database(
     table_name="taxi_data",
     csv_path="./data/yellow_trip_data_sample_2019-01.csv",

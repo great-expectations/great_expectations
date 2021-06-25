@@ -24,7 +24,7 @@ class MetricParameterBuilder(ParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        fill_nan_with_zero: Optional[Union[str, bool]] = False,
+        replace_nan_with_zero: Optional[Union[str, bool]] = False,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
@@ -37,7 +37,8 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
-            fill_nan_with_zero: if set to True, then convert every NaN encountered to 0.0 (raise an exception otherwise)
+            replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
+            otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -52,7 +53,7 @@ class MetricParameterBuilder(ParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
         self._enforce_numeric_metric = enforce_numeric_metric
-        self._fill_nan_with_zero = fill_nan_with_zero
+        self._replace_nan_with_zero = replace_nan_with_zero
 
     def _build_parameters(
         self,
@@ -76,15 +77,15 @@ class MetricParameterBuilder(ParameterBuilder):
         batch_id: str = self.get_batch_id(variables=variables)
 
         metric_computation_result: Dict[
-            str, Union[Number, Dict[str, Any]]
-        ] = self.get_numeric_metric(
+            str, Union[Any, Number, Dict[str, Any]]
+        ] = self.get_metric(
             batch_id=batch_id,
             validator=validator,
             metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
             metric_value_kwargs=self._metric_value_kwargs,
             enforce_numeric_metric=self._enforce_numeric_metric,
-            fill_nan_with_zero=self._fill_nan_with_zero,
+            replace_nan_with_zero=self._replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
