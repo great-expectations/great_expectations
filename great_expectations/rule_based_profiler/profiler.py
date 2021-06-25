@@ -40,8 +40,7 @@ class Profiler:
         These will be used to define profiler computation patterns.
 
         Args:
-            variables_configs: Variables from a profiler configuration
-            rules_configs: Rule configuration as a dictionary
+            profiler_config: Variables and Rules configuration as a dictionary
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         self._data_context = data_context

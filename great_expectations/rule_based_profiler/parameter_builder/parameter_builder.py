@@ -1,5 +1,6 @@
 import copy
 from abc import ABC, abstractmethod
+from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -137,25 +138,19 @@ class ParameterBuilder(ABC):
 
         return batch_ids[0]
 
-    def get_metric(
+    def get_numeric_metric(
         self,
         batch_id: str,
         validator: Validator,
         metric_name: str,
-        metric_domain_kwargs: Optional[dict] = None,
-        metric_value_kwargs: Optional[dict] = None,
-        enforce_numeric: Optional[bool] = False,
-        fill_nan_with_zero: Optional[bool] = True,
+        metric_domain_kwargs: Optional[Union[str, dict]] = None,
+        metric_value_kwargs: Optional[Union[str, dict]] = None,
+        enforce_numeric_metric: Optional[Union[str, bool]] = False,
+        fill_nan_with_zero: Optional[Union[str, bool]] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[
-        str,
-        Union[
-            Union[int, np.int32, np.int64, float, np.float32, np.float64],
-            Dict[str, Any],
-        ],
-    ]:
+    ) -> Dict[str, Union[Number, Dict[str, Any]]]:
         metric_domain_kwargs = build_metric_domain_kwargs(
             batch_id=batch_id,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -164,27 +159,42 @@ class ParameterBuilder(ABC):
             parameters=parameters,
         )
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[
-            dict
-        ] = get_parameter_value_and_validate_return_type(
+        metric_value_kwargs = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=metric_value_kwargs,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
+
+        # Obtain enforce_numeric_metric from rule state (i.e., variables and parameters); from instance variable otherwise.
+        enforce_numeric_metric = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=enforce_numeric_metric,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        # Obtain fill_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
+        fill_nan_with_zero = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fill_nan_with_zero,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
         metric_configuration_arguments: Dict[str, Any] = {
             "metric_name": metric_name,
             "metric_domain_kwargs": metric_domain_kwargs,
             "metric_value_kwargs": metric_value_kwargs,
             "metric_dependencies": None,
         }
-        metric_value: Union[
-            int, np.int32, np.int64, float, np.float32, np.float64
-        ] = validator.get_metric(
+        metric_value: Number = validator.get_metric(
             metric=MetricConfiguration(**metric_configuration_arguments)
         )
-        if enforce_numeric:
+        if enforce_numeric_metric:
             if not is_numeric(value=metric_value):
                 raise ge_exceptions.ProfilerExecutionError(
                     message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
@@ -206,28 +216,19 @@ class ParameterBuilder(ABC):
             },
         }
 
-    def get_metrics(
+    def get_numeric_metrics(
         self,
         batch_ids: List[str],
         validator: Validator,
         metric_name: str,
-        metric_domain_kwargs: Optional[dict] = None,
-        metric_value_kwargs: Optional[dict] = None,
-        enforce_numeric: Optional[bool] = False,
-        fill_nan_with_zero: Optional[bool] = True,
+        metric_domain_kwargs: Optional[Union[str, dict]] = None,
+        metric_value_kwargs: Optional[Union[str, dict]] = None,
+        enforce_numeric_metric: Optional[Union[str, bool]] = False,
+        fill_nan_with_zero: Optional[Union[str, bool]] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[
-        str,
-        Union[
-            Union[
-                np.ndarray,
-                List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-            ],
-            Dict[str, Any],
-        ],
-    ]:
+    ) -> Dict[str, Union[Union[np.ndarray, List[Number]], Dict[str, Any]]]:
         domain_kwargs = build_metric_domain_kwargs(
             batch_id=None,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -239,9 +240,7 @@ class ParameterBuilder(ABC):
         metric_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
 
         # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[
-            dict
-        ] = get_parameter_value_and_validate_return_type(
+        metric_value_kwargs = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=metric_value_kwargs,
             expected_return_type=None,
@@ -249,11 +248,27 @@ class ParameterBuilder(ABC):
             parameters=parameters,
         )
 
-        metric_values: List[
-            Union[int, np.int32, np.int64, float, np.float32, np.float64]
-        ] = []
+        # Obtain enforce_numeric_metric from rule state (i.e., variables and parameters); from instance variable otherwise.
+        enforce_numeric_metric = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=enforce_numeric_metric,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
 
-        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        # Obtain fill_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
+        fill_nan_with_zero = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fill_nan_with_zero,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        metric_values: List[Number] = []
+
+        metric_value: Number
         batch_id: str
         for batch_id in batch_ids:
             metric_domain_kwargs["batch_id"] = batch_id
@@ -266,7 +281,7 @@ class ParameterBuilder(ABC):
             metric_value = validator.get_metric(
                 metric=MetricConfiguration(**metric_configuration_arguments)
             )
-            if enforce_numeric:
+            if enforce_numeric_metric:
                 if not is_numeric(value=metric_value):
                     raise ge_exceptions.ProfilerExecutionError(
                         message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
@@ -292,6 +307,7 @@ class ParameterBuilder(ABC):
                     "metric_value_kwargs": metric_value_kwargs,
                     "metric_dependencies": None,
                 },
+                "num_batches": len(batch_ids),
             },
         }
 

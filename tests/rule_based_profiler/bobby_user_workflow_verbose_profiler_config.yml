@@ -9,6 +9,7 @@ variables:
     data_connector_query:
       index: ":-1"
   sampling_method: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
+  enforce_numeric_metric: True  # Choices: False (default) or True (useful for ensuring metrics performing arithmetic).
   fill_nan_with_zero: True  # Choices: True (default) or False (if True, then NaN is converted to 0.0).
   confidence_level: 9.9e-1
   mostly: 1.0
@@ -23,6 +24,7 @@ rules:
         batch_request: $variables.jan_feb_2019_monthly_trip_data_batch_request
         metric_name: table.row_count
         sampling_method: $variables.sampling_method
+        enforce_numeric_metric: $variables.enforce_numeric_metric
         fill_nan_with_zero: $variables.fill_nan_with_zero
         confidence_level: $variables.confidence_level
         round_decimals: 0
@@ -56,6 +58,7 @@ rules:
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         sampling_method: $variables.sampling_method
+        enforce_numeric_metric: $variables.enforce_numeric_metric
         fill_nan_with_zero: $variables.fill_nan_with_zero
         confidence_level: $variables.confidence_level
         round_decimals: 2
@@ -65,6 +68,7 @@ rules:
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
         sampling_method: $variables.sampling_method
+        enforce_numeric_metric: $variables.enforce_numeric_metric
         fill_nan_with_zero: $variables.fill_nan_with_zero
         confidence_level: $variables.confidence_level
         round_decimals: 2
