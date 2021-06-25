@@ -441,6 +441,7 @@ valid_usage_statistics_messages = {
         }
     ],
     # BaseDataContext.test_yaml_config() MESSAGES
+    # TODO: AJB 20210625 update these messages per new schema using Anonymizers
     "data_context.test_yaml_config": generate_messages_with_defaults(
         defaults={
             "success": True,

@@ -95,14 +95,24 @@ store_backend:
 """
     )
     assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     assert mock_emit.call_args_list == [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "ExpectationsStore"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ExpectationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
                 "success": True,
             }
-        ),
+        )
     ]
 
 
@@ -287,15 +297,40 @@ data_connectors:
 """,
         return_mode="report_object",
     )
+
+    # Test usage stats messages
     assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
     assert mock_emit.call_args_list == [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "Datasource"},
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
                 "success": True,
             }
-        ),
+        )
     ]
 
     print(json.dumps(return_obj, indent=2))

@@ -289,7 +289,11 @@ def test_basic_checkpoint_config_validation(
     assert len(context.list_checkpoints()) == 0
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
+    mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
@@ -393,6 +397,25 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
+
+    # Test usage stats messages
+    assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_checkpoint_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_checkpoint_name,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        )
+    ]
 
     assert len(data_context.list_checkpoints()) == 0
     data_context.add_checkpoint(**yaml.load(yaml_config))
