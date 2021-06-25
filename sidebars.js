@@ -250,8 +250,15 @@ module.exports = {
       collapsed: true,
       items: [
         {
+	  type: 'category',
+	  label: 'Glossary of Expectations',
+          items: [
+            { type: 'doc', id: 'reference/core-concepts' }
+	  ]
+        },
+	{
           type: 'category',
-          label: 'Reference',
+          label: 'Core Concepts',
           items: [
             { type: 'doc', id: 'reference/core-concepts' },
             { type: 'doc', id: 'reference/checkpoints-and-actions' },
@@ -273,10 +280,32 @@ module.exports = {
             { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing-data-assets-into-batches' },
             { type: 'doc', id: 'reference/validation' }
-
           ]
-        }
-      ]
+        },
+        {
+	  type: 'category',
+	  label: 'Supporting Resouces',
+          items: [
+            { type: 'doc', id: 'reference/core-concepts' }
+	  ]
+        },
+        {
+	  type: 'category',
+	  label: 'Spare Parts',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'reference/core-concepts' }
+	   ]
+        },
+        {
+	  type: 'category',
+	  label: 'API Reference',
+          collapsed: true,
+          items: [
+	    { type: 'doc', id: 'reference/core-concepts' }
+           ]
+       }
+     ]
     },
     {
       type: 'category',
