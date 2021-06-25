@@ -11,6 +11,3 @@ from .metric_parameter_builder import MetricParameterBuilder  # isort:skip
 from .numeric_metric_range_multi_batch_parameter_builder import (  # isort:skip
     NumericMetricRangeMultiBatchParameterBuilder,
 )
-from .simple_dateformat_string_parameter_builder import (  # isort:skip
-    SimpleDateFormatStringParameterBuilder,
-)

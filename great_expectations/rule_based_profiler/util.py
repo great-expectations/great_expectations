@@ -97,6 +97,32 @@ def build_batch_request(
     return materialized_batch_request
 
 
+def build_metric_domain_kwargs(
+    batch_id: Optional[str] = None,
+    metric_domain_kwargs: Optional[Union[str, dict]] = None,
+    domain: Optional[Domain] = None,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+):
+    # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+    metric_domain_kwargs = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=metric_domain_kwargs,
+        expected_return_type=None,
+        variables=variables,
+        parameters=parameters,
+    )
+    if metric_domain_kwargs is None:
+        metric_domain_kwargs = {}
+
+    metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
+
+    if batch_id:
+        metric_domain_kwargs["batch_id"] = batch_id
+
+    return metric_domain_kwargs
+
+
 def get_parameter_value_and_validate_return_type(
     domain: Optional[Domain] = None,
     parameter_reference: Optional[Union[Any, str]] = None,

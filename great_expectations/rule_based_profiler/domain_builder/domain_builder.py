@@ -71,11 +71,11 @@ class DomainBuilder(ABC):
             parameters=None,
         )
 
-    def get_batch_id(
+    def _get_batch_ids(
         self,
         variables: Optional[ParameterContainer] = None,
-    ) -> Optional[str]:
-        batch_ids: List[str] = get_batch_ids_from_batch_request(
+    ) -> Optional[List[str]]:
+        return get_batch_ids_from_batch_request(
             data_context=self.data_context,
             batch_request=self._batch_request,
             domain=None,
@@ -83,10 +83,19 @@ class DomainBuilder(ABC):
             parameters=None,
         )
 
-        num_batches: int = len(batch_ids)
-        if num_batches != 1:
+    def get_batch_id(
+        self,
+        variables: Optional[ParameterContainer] = None,
+    ) -> Optional[str]:
+        batch_ids: Optional[List[str]] = self._get_batch_ids(
+            variables=variables,
+        )
+        num_batch_ids: int = len(batch_ids)
+        if num_batch_ids != 1:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"{self.__class__.__name__} requires exactly one batch ({num_batches} were retrieved)."
+                message=f"""{self.__class__.__name__}.get_batch_id() expected to return exactly one batch_id \
+({num_batch_ids} were retrieved).
+"""
             )
 
         return batch_ids[0]
