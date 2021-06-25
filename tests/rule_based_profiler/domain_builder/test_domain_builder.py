@@ -83,7 +83,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "id",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -91,7 +90,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "event_type",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -99,7 +97,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "user_id",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -107,7 +104,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "event_ts",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -115,7 +111,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "server_ts",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -123,7 +118,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "device_ts",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -131,7 +125,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "user_agent",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -177,7 +170,6 @@ def test_simple_semantic_type_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "event_type",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {"inferred_semantic_domain_type": "numeric"},
         },
@@ -185,7 +177,6 @@ def test_simple_semantic_type_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "user_id",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {"inferred_semantic_domain_type": "numeric"},
         },
