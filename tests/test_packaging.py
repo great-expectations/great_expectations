@@ -47,7 +47,6 @@ def test_requirements_files():
             | requirements_dev_base
             | requirements_dev_sqlalchemy
             | requirements_dev_spark
-            | requirements_dev_sc
         )
         == set()
     )
