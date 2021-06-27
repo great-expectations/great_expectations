@@ -24,42 +24,50 @@ class BackendDependencies(enum.Enum):
 
 
 docs_test_matrix = [
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.REDSHIFT,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.REDSHIFT,
-    },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    # },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -99,8 +107,36 @@ docs_test_matrix = [
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
+        "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
+        "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
         "user_flow_script": "tests/integration/docusaurus/template/script_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
     },
 ]
 """

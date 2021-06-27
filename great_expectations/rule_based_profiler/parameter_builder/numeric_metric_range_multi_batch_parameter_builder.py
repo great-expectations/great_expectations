@@ -1,4 +1,4 @@
-import copy
+from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -18,7 +18,6 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
-from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 NP_EPSILON: np.float64 = np.finfo(float).eps
@@ -46,8 +45,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self,
         parameter_name: str,
         metric_name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
+        metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        enforce_numeric_metric: Optional[Union[str, bool]] = True,
+        replace_nan_with_zero: Optional[Union[str, bool]] = True,
         false_positive_rate: Optional[Union[float, str]] = 0.0,
         round_decimals: Optional[Union[int, str]] = False,
         truncate_distribution: Optional[
@@ -64,6 +65,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
+            replace_nan_with_zero: if set to True, then convert every NaN encountered to 0.0 (raise an exception otherwise)
             false_positive_rate: user-configured fraction between 0 and 1 -- "FP/(FP + TN)" -- where:
             FP stands for "false positives" and TN stands for "true negatives"; this rate specifies allowed "fall-out"
             (in addition, a helpful identity used in this method is: false_positive_rate = 1 - true_negative_rate).
@@ -84,6 +87,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+
+        self._enforce_numeric_metric = enforce_numeric_metric
+        self._replace_nan_with_zero = replace_nan_with_zero
 
         self._false_positive_rate = false_positive_rate
 
@@ -143,6 +149,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         8. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
         9. Set up the arguments for and call build_parameter_container() to store the parameter as part of "rule state".
         """
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
@@ -154,61 +165,24 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        validator: Validator = self.get_validator(
+        metric_computation_result: Dict[
+            str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]
+        ] = self.get_metrics(
+            batch_ids=batch_ids,
+            validator=validator,
+            metric_name=self._metric_name,
+            metric_domain_kwargs=self._metric_domain_kwargs,
+            metric_value_kwargs=self._metric_value_kwargs,
+            enforce_numeric_metric=self._enforce_numeric_metric,
+            replace_nan_with_zero=self._replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-
-        # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_domain_kwargs: Optional[
-            Union[str, dict]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_domain_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[
-            Union[str, dict]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_value_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
         metric_values: Union[
-            np.ndarray,
-            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ] = []
-        metric_domain_kwargs_with_specific_batch_id: Optional[
-            Dict[str, Any]
-        ] = copy.deepcopy(metric_domain_kwargs)
-        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
-        batch_id: str
-        for batch_id in batch_ids:
-            metric_domain_kwargs_with_specific_batch_id["batch_id"] = batch_id
-            metric_configuration_arguments: Dict[str, Any] = {
-                "metric_name": self._metric_name,
-                "metric_domain_kwargs": metric_domain_kwargs_with_specific_batch_id,
-                "metric_value_kwargs": metric_value_kwargs,
-                "metric_dependencies": None,
-            }
-            metric_value = validator.get_metric(
-                metric=MetricConfiguration(**metric_configuration_arguments)
-            )
-            if not is_numeric(value=metric_value):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(type(metric_value))}" was computed).
-"""
-                )
-
-            metric_values.append(metric_value)
+            np.ndarray, List[Union[Any, Number]]
+        ] = metric_computation_result["value"]
+        details: Dict[str, Any] = metric_computation_result["details"]
 
         # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         round_decimals: Optional[
@@ -315,18 +289,7 @@ positive integer, or must be omitted (or set to None).
                     "min_value": min_value,
                     "max_value": max_value,
                 },
-                "details": {
-                    # Note: the "metric_domain_kwargs" value, used in "details", corresponds to the active Batch.
-                    # While any information can be placed into the "details" dictionary, this judicious choice will
-                    # allow for the relevant "details" to be used as "meta" in ExpectationConfiguration and render well,
-                    # without overwhelming the user (e.g., if instead all "batch_id" values were captured in "details").
-                    "metric_configuration": {
-                        "metric_name": self._metric_name,
-                        "metric_domain_kwargs": metric_domain_kwargs,
-                        "metric_value_kwargs": metric_value_kwargs,
-                        "metric_dependencies": None,
-                    },
-                },
+                "details": details,
             },
         }
 

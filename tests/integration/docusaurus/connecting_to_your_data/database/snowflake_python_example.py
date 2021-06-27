@@ -1,7 +1,6 @@
 import os
 
 from ruamel import yaml
-from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -13,8 +12,11 @@ sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
 sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
 sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
-
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+
+# This utility is not for general use. It is only to support testing.
+from util import load_data_into_database
+
 load_data_into_database(
     table_name="taxi_data",
     csv_path="./data/yellow_trip_data_sample_2019-01.csv",
@@ -22,7 +24,6 @@ load_data_into_database(
 )
 
 context = ge.get_context()
-
 
 datasource_config = {
     "name": "my_snowflake_datasource",
