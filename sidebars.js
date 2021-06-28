@@ -309,9 +309,9 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Supporting Resouces',
+          label: 'Supporting Resources',
           items: [
-            { type: 'doc', id: 'reference/core-concepts' }
+            { type: 'doc', id: 'reference/stub' }
           ]
         },
         {
@@ -319,7 +319,7 @@ module.exports = {
           label: 'Spare Parts',
           collapsed: true,
           items: [
-            { type: 'doc', id: 'reference/core-concepts' }
+            { type: 'doc', id: 'reference/stub' }
            ]
         },
         {
@@ -327,7 +327,7 @@ module.exports = {
           label: 'API Reference',
           collapsed: true,
           items: [
-            { type: 'doc', id: 'reference/core-concepts' }
+            { type: 'doc', id: 'reference/stub' }
            ]
        }
      ]

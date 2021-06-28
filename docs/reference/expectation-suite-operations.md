@@ -2,13 +2,6 @@
 title: Expectation Suite Operations
 ---
 
-
-:::info sam-notes
-
-I suggest renaming this to "Expectation Suites" or combining it with the Expectation Suites section under "Expectations"
-
-:::
-
 A Great Expectations Expectation Suite enables you to perform Create, Read, Update, and Delete (CRUD) operations on a
 Suite's Expectations without needing to re-run them. Each of the methods that support a CRUD operation relies on two
 main parameters - `expectation_configuration` and `match_type`.

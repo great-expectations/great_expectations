@@ -3,11 +3,6 @@ title: Datasources
 ---
 
 
-:::info notes-sam
-I suggest adding a short intro sentence here on what Datasources are.
-:::
-
-
 ## Data Connectors
 
 A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The

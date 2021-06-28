@@ -5,14 +5,6 @@ title: Checkpoints and Actions
 
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-:::info sam-notes 
-
-I'd suggest the following changes:
-- Merge this with the page for "Validation" and call it something like "Checkpoints and Validation", for example.
-- I'm not sure if the checkpoint configuration examples actually make sense as part of "core concepts" or if they should
-  go into the how-to guides instead. That would also be a good opportunity to move the code snippets to separate files.
-:::
-
 ## Introduction
 
 :::caution API note

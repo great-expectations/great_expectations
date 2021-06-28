@@ -1,5 +1,5 @@
 ---
-title: Great Expectations core concepts
+title: Great Expectations Core Concepts
 ---
 
 import TOCInline from '@theme/TOCInline';

@@ -2,11 +2,6 @@
 title: Using Data Connectors to divide Data Assets into Batches
 ---
 
-
-:::info sam-notes
-Does this make more sense under "Datasources"?
-:::
-
 To maintain their guarantees for the relationship between Batches, Data Connectors provide configuration options that
 allow them to divide Data Assets into different Batches of data. We use the term "Data Reference" below to describe a
 general pointer to data, like a filesystem path or database view. Batch Identifiers then define a conversion process:

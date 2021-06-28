@@ -1,5 +1,5 @@
 ---
-title: How to use up data docs
+title: How to use data docs
 ---
 
 ![minimap](minimap.png)
