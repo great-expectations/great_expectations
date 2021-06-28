@@ -137,7 +137,7 @@ class Profiler:
         """
         if expectation_suite_name is None:
             expectation_suite_name = (
-                f"tmp_suite_{self.__class__.__name__}_{str(uuid.uuid4())[:8]}"
+                f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
             )
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
