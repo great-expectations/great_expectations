@@ -91,45 +91,9 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_filesystem_datasource"]
-assert set(
-    context.get_available_data_asset_names()["my_filesystem_datasource"][
+assert (
+    "yellow_trip_data_sample_2018-01"
+    in context.get_available_data_asset_names()["my_filesystem_datasource"][
         "default_inferred_data_connector_name"
     ]
-) == {
-    "yellow_trip_data_sample_2019-04",
-    "yellow_trip_data_sample_2020-11",
-    "yellow_trip_data_sample_2018-09",
-    "yellow_trip_data_sample_2020-09",
-    "yellow_trip_data_sample_2018-11",
-    "yellow_trip_data_sample_2019-05",
-    "yellow_trip_data_sample_2018-12",
-    "yellow_trip_data_sample_2018-10",
-    "yellow_trip_data_sample_2020-12",
-    "yellow_trip_data_sample_2018-07",
-    "yellow_trip_data_sample_2019-07",
-    "yellow_trip_data_sample_2018-05",
-    "yellow_trip_data_sample_2019-06",
-    "yellow_trip_data_sample_2020-07",
-    "yellow_trip_data_sample_2019-02",
-    "yellow_trip_data_sample_2018-08",
-    "yellow_trip_data_sample_2018-02",
-    "yellow_trip_data_sample_2018-06",
-    "yellow_trip_data_sample_2018-03",
-    "yellow_trip_data_sample_2020-04",
-    "yellow_trip_data_sample_2019-03",
-    "yellow_trip_data_sample_2020-06",
-    "yellow_trip_data_sample_2019-08",
-    "yellow_trip_data_sample_2019-11",
-    "yellow_trip_data_sample_2020-03",
-    "yellow_trip_data_sample_2019-09",
-    "yellow_trip_data_sample_2020-01",
-    "yellow_trip_data_sample_2019-12",
-    "yellow_trip_data_sample_2018-01",
-    "yellow_trip_data_sample_2019-01",
-    "yellow_trip_data_sample_2020-10",
-    "yellow_trip_data_sample_2020-08",
-    "yellow_trip_data_sample_2020-02",
-    "yellow_trip_data_sample_2020-05",
-    "yellow_trip_data_sample_2019-10",
-    "yellow_trip_data_sample_2018-04",
-}
+)
