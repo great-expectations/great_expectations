@@ -64,6 +64,7 @@ class DomainBuilder(ABC):
         variables: Optional[ParameterContainer] = None,
     ) -> Optional[Validator]:
         return get_validator_from_batch_request(
+            purpose="domain_builder",
             data_context=self.data_context,
             batch_request=self._batch_request,
             domain=None,

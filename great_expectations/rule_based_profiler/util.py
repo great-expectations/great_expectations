@@ -20,6 +20,8 @@ NP_EPSILON: np.float64 = np.finfo(float).eps
 
 
 def get_validator(
+    purpose: str,
+    *,
     data_context: Optional[DataContext] = None,
     batch_request: Optional[Union[BatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
@@ -36,12 +38,14 @@ def get_validator(
         parameters=parameters,
     )
 
-    expectation_suite_name: str = "tmp_suite"
+    expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
-        expectation_suite_name = f"{expectation_suite_name}_{str(uuid.uuid4())[:8]}"
+        expectation_suite_name = (
+            f"{expectation_suite_name}_suite_{str(uuid.uuid4())[:8]}"
+        )
     else:
         expectation_suite_name = (
-            f"{expectation_suite_name}_{domain.id}_{str(uuid.uuid4())[:8]}"
+            f"{expectation_suite_name}_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
         )
 
     return data_context.get_validator(
