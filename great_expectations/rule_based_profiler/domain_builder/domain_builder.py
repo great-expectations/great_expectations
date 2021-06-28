@@ -73,7 +73,7 @@ class DomainBuilder(ABC):
         )
 
         expectation_suite_name: str = (
-            f"tmp_domain_builder_suite_{str(uuid.uuid4())[:8]}"
+            f"tmp.domain_builder_suite_{str(uuid.uuid4())[:8]}"
         )
         return self.data_context.get_validator(
             batch_request=batch_request,
