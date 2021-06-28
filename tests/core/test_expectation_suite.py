@@ -169,9 +169,6 @@ def different_suite(exp1, exp4):
     )
 
 
-yaml = YAML()
-
-
 @pytest.fixture
 def profiler_config():
     # Profiler configuration is pulled from the Bobster use case in tests/rule_based_profiler/
@@ -212,6 +209,7 @@ def profiler_config():
            meta:
              profiler_details: $parameter.row_count_range.details
     """
+    yaml = YAML()
     return yaml.load(yaml_config)
 
 
