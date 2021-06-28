@@ -89,6 +89,7 @@ class ExpectationSuite(SerializableDictDot):
         batch_kwargs: Optional[dict] = None,
         batch_markers: Optional[dict] = None,
         batch_parameters: Optional[dict] = None,
+        profiler_config: Optional[dict] = None,
         citation_date: Optional[Union[str, datetime.datetime]] = None,
     ):
         if "citations" not in self.meta:
@@ -109,6 +110,7 @@ class ExpectationSuite(SerializableDictDot):
                 "batch_kwargs": batch_kwargs,
                 "batch_markers": batch_markers,
                 "batch_parameters": batch_parameters,
+                "profiler_config": profiler_config,
                 "comment": comment,
             }
         )
@@ -195,6 +197,7 @@ class ExpectationSuite(SerializableDictDot):
         sort: Optional[bool] = True,
         require_batch_kwargs: Optional[bool] = False,
         require_batch_request: Optional[bool] = False,
+        require_profiler_config: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         citations: List[Dict[str, Any]] = self.meta.get("citations", [])
         if require_batch_kwargs:
@@ -204,6 +207,10 @@ class ExpectationSuite(SerializableDictDot):
         if require_batch_request:
             citations = self._filter_citations(
                 citations=citations, filter_key="batch_request"
+            )
+        if require_profiler_config:
+            citations = self._filter_citations(
+                citations=citations, filter_key="profiler_config"
             )
         if not sort:
             return citations
