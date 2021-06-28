@@ -87,6 +87,7 @@ def test_alice_profiler_user_workflow_single_batch(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
+        include_citation=False,
     )
 
     assert (
@@ -182,6 +183,7 @@ def test_bobby_profiler_user_workflow_multi_batch(
         expectation_suite_name=bobby_columnar_table_multi_batch[
             "expected_expectation_suite_name"
         ],
+        include_citation=False,
     )
 
     assert (

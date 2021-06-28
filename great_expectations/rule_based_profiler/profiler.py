@@ -43,10 +43,11 @@ class Profiler:
             profiler_config: Variables and Rules configuration as a dictionary
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
+        self._profiler_config = profiler_config
         self._data_context = data_context
         self._rules = []
 
-        rules_configs: Dict[str, Dict] = profiler_config.get("rules", {})
+        rules_configs: Dict[str, Dict] = self._profiler_config.get("rules", {})
         rule_name: str
         rule_config: dict
 
@@ -107,7 +108,9 @@ class Profiler:
                         )
                     )
 
-            variables_configs: Dict[str, Dict] = profiler_config.get("variables", {})
+            variables_configs: Dict[str, Dict] = self._profiler_config.get(
+                "variables", {}
+            )
             variables: Optional[ParameterContainer] = None
 
             if variables_configs:
@@ -129,10 +132,12 @@ class Profiler:
         self,
         *,
         expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
     ) -> ExpectationSuite:
         """
         Args:
             :param expectation_suite_name: A name for returned Expectation suite.
+            :param include_citation: Whether or not to include Profiler's config in metadata
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
         if expectation_suite_name is None:
@@ -143,6 +148,12 @@ class Profiler:
         expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name
         )
+
+        if include_citation:
+            expectation_suite.add_citation(
+                comment="Add Profiler config in metadata",
+                profiler_config=self._profiler_config,
+            )
 
         rule: Rule
         for rule in self._rules:
