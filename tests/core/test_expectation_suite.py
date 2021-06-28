@@ -3,6 +3,7 @@ from copy import copy, deepcopy
 from typing import Any, Dict, List
 
 import pytest
+from ruamel.yaml import YAML
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -168,6 +169,52 @@ def different_suite(exp1, exp4):
     )
 
 
+yaml = YAML()
+
+
+@pytest.fixture
+def profiler_config():
+    # Profiler configuration is pulled from the Bobster use case in tests/rule_based_profiler/
+    yaml_config = """
+    # This profiler is meant to be used on the NYC taxi data:
+    # tests/test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_20(18|19|20)-*.csv
+    variables:
+      # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
+      jan_2018_thru_nov_2020_monthly_trip_data_batch_request:
+        datasource_name: taxi_pandas
+        data_connector_name: monthly
+        data_asset_name: my_reports
+        data_connector_query:
+          index: ":-1"
+      confidence_level: 9.5e-1
+      mostly: 1.0
+
+    rules:
+      row_count_range_rule:
+        domain_builder:
+          class_name: TableDomainBuilder
+        parameter_builders:
+          - parameter_name: row_count_range
+            class_name: NumericMetricRangeMultiBatchParameterBuilder
+            batch_request: $variables.jan_2018_thru_nov_2020_monthly_trip_data_batch_request
+            metric_name: table.row_count
+            confidence_level: $variables.confidence_level
+            round_decimals: 0
+            truncate_values:
+              lower_bound: 0
+        expectation_configuration_builders:
+         - expectation_type: expect_table_row_count_to_be_between
+           class_name: DefaultExpectationConfigurationBuilder
+           module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+           min_value: $parameter.row_count_range.value.min_value
+           max_value: $parameter.row_count_range.value.max_value
+           mostly: $variables.mostly
+           meta:
+             profiler_details: $parameter.row_count_range.details
+    """
+    return yaml.load(yaml_config)
+
+
 def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_suite):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
@@ -309,19 +356,16 @@ def test_add_citation(baseline_suite):
     assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
 
 
-def test_add_citation_with_profiler_config(baseline_suite):
+def test_add_citation_with_profiler_config(baseline_suite, profiler_config):
     assert (
         "citations" not in baseline_suite.meta
         or len(baseline_suite.meta["citations"]) == 0
     )
     baseline_suite.add_citation(
         "adding profiler config citation",
-        profiler_config={"variables": {}, "rules": {}},
+        profiler_config=profiler_config,
     )
-    assert baseline_suite.meta["citations"][0].get("profiler_config") == {
-        "variables": {},
-        "rules": {},
-    }
+    assert baseline_suite.meta["citations"][0].get("profiler_config") == profiler_config
 
 
 def test_get_citations_with_no_citations(baseline_suite):
@@ -417,19 +461,19 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
 
 
 def test_get_citations_with_multiple_citations_containing_profiler_config(
-    baseline_suite,
+    baseline_suite, profiler_config
 ):
     assert "citations" not in baseline_suite.meta
 
     baseline_suite.add_citation(
         "first",
         citation_date="2000-01-01",
-        profiler_config={"variables": {}, "rules": {}},
+        profiler_config=profiler_config,
     )
     baseline_suite.add_citation(
         "second",
         citation_date="2001-01-01",
-        profiler_config={"variables": {}, "rules": {}},
+        profiler_config=profiler_config,
     )
     baseline_suite.add_citation("third", citation_date="2002-01-01")
 
@@ -445,12 +489,12 @@ def test_get_citations_with_multiple_citations_containing_profiler_config(
     assert properties_dict_list == [
         {
             "citation_date": "2000-01-01T00:00:00.000000Z",
-            "profiler_config": {"variables": {}, "rules": {}},
+            "profiler_config": profiler_config,
             "comment": "first",
         },
         {
             "citation_date": "2001-01-01T00:00:00.000000Z",
-            "profiler_config": {"variables": {}, "rules": {}},
+            "profiler_config": profiler_config,
             "comment": "second",
         },
     ]
