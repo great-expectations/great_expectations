@@ -309,6 +309,21 @@ def test_add_citation(baseline_suite):
     assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
 
 
+def test_add_citation_with_profiler_config(baseline_suite):
+    assert (
+        "citations" not in baseline_suite.meta
+        or len(baseline_suite.meta["citations"]) == 0
+    )
+    baseline_suite.add_citation(
+        "adding profiler config citation",
+        profiler_config={"variables": {}, "rules": {}},
+    )
+    assert baseline_suite.meta["citations"][0].get("profiler_config") == {
+        "variables": {},
+        "rules": {},
+    }
+
+
 def test_get_citations_with_no_citations(baseline_suite):
     assert "citations" not in baseline_suite.meta
     assert baseline_suite.get_citations() == []
@@ -396,6 +411,46 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
         {
             "citation_date": "2001-01-01T00:00:00.000000Z",
             "batch_kwargs": {"path": "second"},
+            "comment": "second",
+        },
+    ]
+
+
+def test_get_citations_with_multiple_citations_containing_profiler_config(
+    baseline_suite,
+):
+    assert "citations" not in baseline_suite.meta
+
+    baseline_suite.add_citation(
+        "first",
+        citation_date="2000-01-01",
+        profiler_config={"variables": {}, "rules": {}},
+    )
+    baseline_suite.add_citation(
+        "second",
+        citation_date="2001-01-01",
+        profiler_config={"variables": {}, "rules": {}},
+    )
+    baseline_suite.add_citation("third", citation_date="2002-01-01")
+
+    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
+        sort=True, require_profiler_config=True
+    )
+    for properties_dict in properties_dict_list:
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
+        properties_dict.pop("interactive", None)
+
+    assert properties_dict_list == [
+        {
+            "citation_date": "2000-01-01T00:00:00.000000Z",
+            "profiler_config": {"variables": {}, "rules": {}},
+            "comment": "first",
+        },
+        {
+            "citation_date": "2001-01-01T00:00:00.000000Z",
+            "profiler_config": {"variables": {}, "rules": {}},
             "comment": "second",
         },
     ]
