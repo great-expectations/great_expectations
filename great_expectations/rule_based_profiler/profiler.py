@@ -144,10 +144,6 @@ class Profiler:
             expectation_suite_name=expectation_suite_name
         )
 
-        # TODO: Add expectation_suite.add_citation(
-        # Add optional parameter ( Optional[dict] = profiler config) to ExpectationSuite
-        #
-
         rule: Rule
         for rule in self._rules:
             expectation_configurations: List[ExpectationConfiguration] = rule.generate()
