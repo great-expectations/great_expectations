@@ -254,6 +254,13 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Advanced Tutorials',
+      items: [
+        'tutorials/advanced/rule_based_profilers/how-to-create-a-new-expectation-suite-using-rule-based-profilers'
+      ]
+    },
+    {
+      type: 'category',
       label: 'Deployment Patterns',
       items: [
         'deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',

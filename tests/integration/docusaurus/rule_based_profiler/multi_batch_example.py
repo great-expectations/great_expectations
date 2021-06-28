@@ -5,8 +5,9 @@ from great_expectations.marshmallow__shade.validate import Validator
 from great_expectations.rule_based_profiler.profiler import Profiler
 
 profiler_config = """
+# This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_<YEAR>-<MONTH>.csv)
+# located in tests/test_sets/taxi_yellow_trip_data_samples/
 
-# This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_2019-*.csv)
 variables:
   false_positive_rate: 1.0e-2
   mostly: 1.0
@@ -111,7 +112,7 @@ profiler: Profiler = Profiler(
 suite = profiler.profile()
 print(suite)
 
-
+# Please note that this docstring is here to demonstrate output for docs.
 first_rule_suite = """
 {
   "meta": {
