@@ -20,7 +20,7 @@ resources:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: test_ci
   - container: mssql
-    image: microsoft/mssql-server-linux
+    image: mcr.microsoft.com/mssql/server:2019-latest
     env:
       ACCEPT_EULA: Y
       MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
