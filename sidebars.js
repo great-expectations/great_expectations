@@ -246,7 +246,7 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how-to-configure-notebooks-generated-by-suite-edit' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-add-comments-to-a-page-on-docs.greatexpectations.io' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectation-docker-images' },
-            { type: 'doc', id: 'guides/miscellaneous/how-to-write-a-how-to-guide-docusaurus' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-write-a-how-to-guide' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-template' }
           ]
         }
