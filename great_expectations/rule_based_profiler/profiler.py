@@ -137,7 +137,7 @@ class Profiler:
         """
         Args:
             :param expectation_suite_name: A name for returned Expectation suite.
-            :param include_citation: Whether or not to include Profiler's config in metadata
+            :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
         if expectation_suite_name is None:
@@ -151,7 +151,7 @@ class Profiler:
 
         if include_citation:
             expectation_suite.add_citation(
-                comment="Add Profiler config in metadata",
+                comment="Suite created by Rule-Based Profiler with the following config",
                 profiler_config=self._profiler_config,
             )
 
