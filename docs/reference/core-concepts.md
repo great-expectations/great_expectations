@@ -76,4 +76,4 @@ This config is used in the below diagram to provide a better sense of how the di
 ![Rule-Based Profiler Public Interface Diagram](../guides/images/rule_based_profiler_public_interface_diagram.png)
 
 ### Next Steps
-- You can try out a tutorial that walks you through the set-up of a Rule-Based Profiler here: [How to create a new Expectation Suite using Rule Based Profilers](guides/expectations/advanced/rule_based_profilers/how-to-create-a-new-expectation-suite-using-rule-based-profilers)
+- You can try out a tutorial that walks you through the set-up of a Rule-Based Profiler here: [How to create a new Expectation Suite using Rule Based Profilers](../guides/expectations/advanced/how-to-create-a-new-expectation-suite-using-rule-based-profilers)
