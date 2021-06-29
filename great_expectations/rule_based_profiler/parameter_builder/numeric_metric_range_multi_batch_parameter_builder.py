@@ -150,8 +150,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
          that this specific BatchRequest was specified as part of configuration for the present ParameterBuilder class.
-         (This is in contrast to the BatchRequest used to instantiate the passed in Validator argument, and/or specified
-         in a Checkpoint configuration, and/or in a pipeline, a Jupyter notebook, etc.)
          2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
          3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
             order to have access to all Batch objects, on each of which the specified metric_name will be computed.
