@@ -718,7 +718,7 @@ def bobby_columnar_table_multi_batch():
     profiler_config: dict = yaml.load(verbose_profiler_config)
     expected_expectation_suite.add_citation(
         comment="Suite created by Rule-Based Profiler with the following config",
-        profiler_config=profiler_config
+        profiler_config=profiler_config,
     )
 
     return {
