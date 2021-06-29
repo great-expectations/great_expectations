@@ -4,7 +4,21 @@ title: How to write a how-to-guide
 
 This guide shows how to create a new how-to guide in Great Expectations. By writing guides with consistent structure and styling, you can get your PRs approved faster and make the Great Expectations docs more discoverable, useful, and maintainable.
 
-# Background
+## Purpose of a how-to guide
+
+- The purpose of a how-to guide is to replicate, **NOT** to teach or explain. Teaching and explaining Great Expectations concepts are covered in the **Core Concepts** reference section.
+
+- Assume that the user has a working deployment of Great Expectations, whether it is set up on the file system by running `great_expectations init` or configured in-memory.
+
+- Assume that the user is already familiar with core concepts in Great Expectations: Expectations, Data Contexts, Validation, Datasources, etc. etc. You don’t need to spend any time explaining these things.
+
+- If you’re integrating with another system, assume that the user is familiar with that system. ie. If you’re writing the "How to configure a Snowflake Datasource," don’t spend any words explaining Snowflake or any of its core concepts.
+
+- If there are important, non-obvious principles for how Great Expectations relates to other systems, you may include them in the guide. If they are short (1-2 sentences, max), they can go in the Steps section. Otherwise, please put them in Additional Notes.
+
+- Remember, the goal is to help users successfully replicate specific steps as simply as possible. Surprisingly often, it turns out to best to not include explanation at all, since it can distract from the main purpose of the guide. If you feel you must include it, shorter is better.
+
+# Docusaurus background
 
 Documentation for Great Expectations is built using Docusaurus 2, a modern static website generator.  This allows for documentation to be written and built quickly, and and for the code that is displayed in the how-to-guides to be tested.  This means that whenever a code-snippet or configuration is displayed in the how-to-guide, it is actually part of a script that is fully integration tested.
 
@@ -17,7 +31,7 @@ Testing provides guarantees that code or configuration displayed in the how-to-d
 Typically, a PR for a how-to-guide will contain the following:
 
 1. The script(s) and integration test.
-    - The script will be located with the other integration tests in the `great-expectations/tests/integration/docusaurus` folder.
+    - The script will be located with the other integration tests in the `great-expectations/tests/integration/docusaurus` directory. **Please keep these directory structures the same as the markdown structures for sanity.**
     - The script will be added to integration tests in the `great-expectation/tests/integration/test_script_runner.py` file
 
 2. The Markdown file in the `great-expectations/docs` folder.
@@ -143,20 +157,6 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](#TODO)
 
 10. Submit your PR! If there are any additional integrations that need to be run, then please add this to your PR message.
-
-## Purpose of a how-to guide
-
-- The purpose of a how-to guide is to replicate, **NOT** to teach or explain. Teaching and explaining Great Expectations concepts are covered in the **Core Concepts** reference section.
-
-- Assume that the user has a working deployment of Great Expectations, whether it is set up on the file system by running `great_expectations init` or configured in-memory.
-
-- Assume that the user is already familiar with core concepts in Great Expectations: Expectations, Data Contexts, Validation, Datasources, etc. etc. You don’t need to spend any time explaining these things.
-
-- If you’re integrating with another system, assume that the user is familiar with that system. ie. If you’re writing the "How to configure a Snowflake Datasource," don’t spend any words explaining Snowflake or any of its core concepts.
-
-- If there are important, non-obvious principles for how Great Expectations relates to other systems, you may include them in the guide. If they are short (1-2 sentences, max), they can go in the Steps section. Otherwise, please put them in Additional Notes.
-
-- Remember, the goal is to help users successfully replicate specific steps as simply as possible. Surprisingly often, it turns out to best to not include explanation at all, since it can distract from the main purpose of the guide. If you feel you must include it, shorter is better.
 
 ## Code-heavy vs process-heavy guides
 
