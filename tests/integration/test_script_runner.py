@@ -148,6 +148,12 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
+    {
+        "name": "rule_base_profiler_multi_batch_example",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py.py",
+    },
 ]
 """
 TODO(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
@@ -156,12 +162,6 @@ Commenting out until we figure out the issue.
 """
 
 integration_test_matrix = [
-    {
-        "name": "rule_base_profiler_multi_batch_example",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/docusaurus/rule_based_profiler/multi_batch_example.py",
-    },
     {
         "name": "pandas_one_multi_batch_request_one_validator",
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",

@@ -8,21 +8,21 @@ title: Great Expectations Core Concepts
 
 # Profiling
 
-Great Expectations provides a mechanism to automatically generate expectations, using a feature called a **Profiler**. A Profiler builds an Expectation Suite from one or more Data Assets. It may also validates the data against the newly-generated Expectation Suite to return a Validation Result. There are several Profilers included with Great Expectations.
+Great Expectations provides a mechanism to automatically generate expectations, using a feature called a **Profiler**. A Profiler builds an **Expectation Suite** from one or more **Data Assets**. It may also validates the data against the newly-generated Expectation Suite to return a **Validation Result**. There are several Profilers included with Great Expectations.
 
-A Profiler makes it possible to quickly create a starting point for generating expectations about a Dataset. For example, during the init flow, Great Expectations currently uses the UserConfigurableProfiler to demonstrate important features of Expectations by creating and validating an Expectation Suite that has several different kinds of expectations built from a small sample of data. A Profiler is also critical to generating the Expectation Suites used during profiling.
+A Profiler makes it possible to quickly create a starting point for generating expectations about a Dataset. For example, during the `init` flow, Great Expectations currently uses the **UserConfigurableProfiler** to demonstrate important features of **Expectations** by creating and validating an Expectation Suite that has several different kinds of expectations built from a small sample of data. A Profiler is also critical to generating the Expectation Suites used during profiling.
 
-## Rule-based Profilers
+## Rule-Based Profilers
 
-**Rule-based profilers** allow users to provide a highly configurable specification which is composed of **Rules** to use in order to build an **Expectation Suite** by profiling existing data.
+**Rule-Based profilers** allow users to provide a highly configurable specification which is composed of **Rules** to use in order to build an **Expectation Suite** by profiling existing data.
 
 Imagine you have a table of Sales that comes in every month. You could profile last month's data, inspecting it in order to automatically create a number of expectations that you can use to validate next month's data.  
 
-A **Rule** in a rule-based profiler could say something like "Look at every column in my Sales table, and if that column is numeric, add an `expect_column_values_to_be_between` expectation to my Expectation Suite, where the `min_value` for the expectation is the minimum value for the column, and the `max_value` for the expectation is the maximum value for the column."
+A **Rule** in a rule-based profiler could say something like "Look at every column in my Sales table, and if that column is numeric, add an `expect_column_values_to_be_between` Expectation to my Expectation Suite, where the `min_value` for the Expectation is the minimum value for the column, and the `max_value` for the Expectation is the maximum value for the column."
 
 Each rule in a rule-based profiler has three types of components:
 
-1. **DomainBuilders**: A DomainBuilder will inspect some data that you provide to the Profiler, and compile a list of Domains for which you would like to build expectations. 
+1. **DomainBuilders**: A DomainBuilder will inspect some data that you provide to the Profiler, and compile a list of Domains for which you would like to build expectations
 1. **ParameterBuilders**: A ParameterBuilder will inspect some data that you provide to the Profiler, and compile a dictionary of Parameters that you can use when constructing your ExpectationConfigurations
 1. **ExpectationConfigurationBuilders**: An ExpectationConfigurationBuilder will take the Domains compiled by the DomainBuilder, and assemble ExpectationConfigurations using Parameters built by the ParameterBuilder
 
@@ -73,7 +73,7 @@ rules:
 You can see another example config containing multiple rules here: [alice_user_workflow_verbose_profiler_config.yml](https://github.com/great-expectations/great_expectations/blob/develop/tests/rule_based_profiler/alice_user_workflow_verbose_profiler_config.yml)
 
 This config is used in the below diagram to provide a better sense of how the different parts of the Profiler config fit together. [You can see a larger version of this file here.](https://github.com/great-expectations/great_expectations/blob/develop/docs/guides/images/rule_based_profiler_public_interface_diagram.png)
-![Rule-based Profiler Public Interface Diagram](../guides/images/rule_based_profiler_public_interface_diagram.png)
+![Rule-Based Profiler Public Interface Diagram](../guides/images/rule_based_profiler_public_interface_diagram.png)
 
 ### Next Steps
-- You can try out a tutorial that walks you through the set-up of a Rule-based Profiler here: [How to create a new Expectation Suite using Rule Based Profilers](../tutorials/advanced/rule_based_profilers/how-to-create-a-new-expectation-suite-using-rule-based-profilers)
+- You can try out a tutorial that walks you through the set-up of a Rule-Based Profiler here: [How to create a new Expectation Suite using Rule Based Profilers](guides/expectations/advanced/rule_based_profilers/how-to-create-a-new-expectation-suite-using-rule-based-profilers)

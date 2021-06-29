@@ -112,30 +112,24 @@ suite = profiler.profile()
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs.
-first_rule_suite = """
-{
-  "meta": {
-    "great_expectations_version": "0.13.19+58.gf8a650720.dirty"
-  },
-  "data_asset_type": null,
-  "expectations": [
+assert suite.isEquivalentTo(
     {
-      "kwargs": {
-        "min_value": 10000,
-        "max_value": 10000,
-        "mostly": 1.0
-      },
-      "expectation_type": "expect_table_row_count_to_be_between",
-      "meta": {
-        "profiler_details": {
-          "metric_configuration": {
-            "metric_name": "table.row_count",
-            "metric_domain_kwargs": {}
-          }
-        }
-      }
+        "meta": {"great_expectations_version": "0.13.19+58.gf8a650720.dirty"},
+        "data_asset_type": None,
+        "expectations": [
+            {
+                "kwargs": {"min_value": 10000, "max_value": 10000, "mostly": 1.0},
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "table.row_count",
+                            "metric_domain_kwargs": {},
+                        }
+                    }
+                },
+            }
+        ],
+        "expectation_suite_name": "tmp_suite_Profiler_e66f7cbb",
     }
-  ],
-  "expectation_suite_name": "tmp_suite_Profiler_e66f7cbb"
-}
-"""
+)
