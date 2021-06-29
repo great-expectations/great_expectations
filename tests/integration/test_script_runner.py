@@ -149,6 +149,20 @@ docs_test_matrix = [
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
     {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MYSQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MYSQL,
+    },
+    {
         "name": "rule_base_profiler_multi_batch_example",
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
@@ -317,7 +331,7 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
     ):
         pytest.skip("Skipping postgres tests")
     elif dependencies == BackendDependencies.MYSQL and (
-        pytest_args.no_mysql or pytest_args.no_sqlalchemy
+        not pytest_args.mysql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mysql tests")
     elif dependencies == BackendDependencies.MSSQL and (
