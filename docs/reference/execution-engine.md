@@ -3,14 +3,6 @@ title: Execution Engine
 ---
 
 
-:::info sam-notes
-
-This page exists in the RTD docs but wasn't linked from anywhere. It looks like a draft.
-
-:::
-
-:::note
-
 THE FOLLOWING WAS TAKEN FROM 20201007_execution_engine.md in github.com/superconductive/design The same documentation
 also includes information on:
 
