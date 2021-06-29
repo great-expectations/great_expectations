@@ -158,7 +158,7 @@ module.exports = {
             'guides/expectations/how-to-create-and-edit-expectations-based-on-domain-knowledge-without-inspecting-data-directly',
             'guides/expectations/how-to-create-and-edit-expectations-in-bulk',
             'guides/expectations/how-to-create-and-edit-expectations-with-a-profiler',
-            'guides/expectations/how-to-create-and-edit-expectations-with-instant-feedback from-a-sample-batch-of-data',
+            'guides/expectations/how-to-create-and-edit-expectations-with-instant-feedback-from-a-sample-batch-of-data',
             {
               type: 'category',
               label: '🔬 Advanced',
