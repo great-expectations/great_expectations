@@ -63,6 +63,7 @@ stages:
         python.version: '3.8'
       services:
         postgres: postgres
+        mysql: mysql
 
       steps:
         - task: UsePythonVersion@0
@@ -82,7 +83,7 @@ stages:
             pip install pytest pytest-azurepipelines
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
-            pytest -v --docs-tests -m docs --no-spark tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
