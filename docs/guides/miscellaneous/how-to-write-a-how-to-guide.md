@@ -51,7 +51,7 @@ Each integration test is defined by a dictionary entry similar to the one below:
 },
 ```
 
-- The path to the `user_flow_script` is the path of the script we are adding `pandas_python_example.py` in our case.
+- The path to the `user_flow_script` is the path of the script we are adding; `pandas_python_example.py` in our case.
 - `data_context_dir` is a fixture that will be copied into a directory where your script will be run. It will ensure that you can load a `DataContext`, although no additional features will be included.
 - `data_dir` is an optional parameter for data files that you can use in your tests. The example contains the path to the NYC yellow taxi trip data, which is a fixture that is used in many tests for Great Expectations.
 
