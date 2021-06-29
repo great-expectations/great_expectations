@@ -95,7 +95,7 @@ module.exports = {
               label: '💭 In-memory',
               items: [
                 'guides/connecting_to_your_data/in_memory/pandas',
-                'guides/connecting_to_your_data/in_memory/spark',
+                'guides/connecting_to_your_data/in_memory/spark'
               ]
             },
             {

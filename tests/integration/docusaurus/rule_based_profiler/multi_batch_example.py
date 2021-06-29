@@ -7,7 +7,6 @@ from great_expectations.rule_based_profiler.profiler import Profiler
 profiler_config = """
 # This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_trip_data_samples/
-
 variables:
   false_positive_rate: 1.0e-2
   mostly: 1.0

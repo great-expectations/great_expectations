@@ -47,7 +47,7 @@ rules:
   my_rule_for_numeric_columns: # This is the name of our Rule
     domain_builder:
       batch_request: $variables.my_last_month_sales_batch_request # We use the BatchRequest that we specified in Variables above using this $ syntax
-      class_name: SemanticTypeColumnDomainBuilder
+      class_name: SemanticTypeColumnDomainBuilder # We use this class of DomainBuilder so we can specify the numeric type below
       semantic_types:
         - numeric
     parameter_builders:
@@ -70,4 +70,10 @@ rules:
         mostly: $variables.mostly_default
 ```
 
-[You can see another example config containing multiple rules here.](https://github.com/great-expectations/great_expectations/blob/develop/tests/rule_based_profiler/alice_user_workflow_verbose_profiler_config.yml)
+You can see another example config containing multiple rules here: [alice_user_workflow_verbose_profiler_config.yml](https://github.com/great-expectations/great_expectations/blob/develop/tests/rule_based_profiler/alice_user_workflow_verbose_profiler_config.yml)
+
+This config is used in the below diagram to provide a better sense of how the different parts of the Profiler config fit together. [You can see a larger version of this file here.](https://github.com/great-expectations/great_expectations/blob/develop/docs/guides/images/rule_based_profiler_public_interface_diagram.png)
+![Rule-based Profiler Public Interface Diagram](../guides/images/rule_based_profiler_public_interface_diagram.png)
+
+### Next Steps
+- You can try out a tutorial that walks you through the set-up of a Rule-based Profiler here: [How to create a new Expectation Suite using Rule Based Profilers](../tutorials/advanced/rule_based_profilers/how-to-create-a-new-expectation-suite-using-rule-based-profilers)
