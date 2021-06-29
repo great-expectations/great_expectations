@@ -243,12 +243,16 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
         expectation_suite.to_json_dict()["expectations"][0]["kwargs"]
     )
-    min_value = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-        "min_value"
-    ]
-    max_value = expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-        "max_value"
-    ]
+    min_value: int = (
+        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+            "min_value"
+        ]
+    )
+    max_value: int = (
+        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+            "max_value"
+        ]
+    )
 
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
