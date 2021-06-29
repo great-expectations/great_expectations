@@ -77,7 +77,7 @@ Begin writing the how-to-guide around the script you wrote in the previous step.
 
 **Purpose paragraph**: A single, short paragraph to state the purpose of the guide, and motivate it if necessary.
 
-- “This guide will help you publish an Data Docs site directly to S3. Publishing a site this way makes reviewing and acting on Validation Results easy in a team, and provides a central location to review Expectations.”
+- “This guide will help you publish a Data Docs site directly to S3. Publishing a site this way makes reviewing and acting on Validation Results easy in a team, and provides a central location to review Expectations.”
 
 Sometimes motivation can be a simple statement of purpose:
 
