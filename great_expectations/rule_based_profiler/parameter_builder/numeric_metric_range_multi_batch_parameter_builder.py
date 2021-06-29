@@ -89,10 +89,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
-            truncate_values: user-configured directive for whether or not to allow the computed parameter values
-            (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
+            truncate_values: user-configured directive for whether or not to allow the computed parameter values
+            (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -161,10 +161,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
          7. Convert the list of floating point metric computation results to a numpy array (for further computations).
          Steps 8 -- 10 are for the "oneshot" sampling method only (the "bootstrap" method achieves same automatically):
          8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
-         9. Compute the number of standard deviations (as floating point number rounded to the nearest highest integer)
-            needed to create the "band" around the mean for achieving the specified confidence_level (note that the
-            confidence_level of 1.0 would result in infinite number of standard deviations, hence it is "nudged" by
-            a small quantity ("epsilon") below 1.0 if confidence_level of 1.0 is given as argument in constructor).
+         9. Compute number of standard deviations (as floating point) needed (around the mean) to achieve the specified
+            confidence_level (note that confidence_level of 1.0 would result in infinite number of standard deviations,
+            hence it is "nudged" by small quantity "epsilon" below 1.0 if confidence_level of 1.0 appears as argument).
             (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
         10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
         11. Return ConfidenceInterval([low, high]) for the desired metric as estimated by the specified sampling method.
@@ -341,7 +340,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 bootstrap_samples,
                 np.mean,
                 vectorized=False,
-                confidence_level=5.0e-1 * (1.0 + confidence_level),
+                confidence_level=confidence_level,
                 random_state=rng,
             )
         else:
@@ -349,7 +348,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 bootstrap_samples,
                 np.mean,
                 vectorized=False,
-                confidence_level=5.0e-1 * (1.0 + confidence_level),
+                confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
             )

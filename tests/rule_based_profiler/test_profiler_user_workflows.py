@@ -3,6 +3,7 @@ from typing import Any, Dict, List, cast
 
 import pandas as pd
 import pytest
+from freezegun import freeze_time
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -70,6 +71,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     assert metric_max == 73
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_alice_profiler_user_workflow_single_batch(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
@@ -92,6 +94,7 @@ def test_alice_profiler_user_workflow_single_batch(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
+        include_citation=True,
     )
 
     assert (
@@ -168,6 +171,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     assert month == 3
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
@@ -192,6 +196,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         expectation_suite_name=bobby_columnar_table_multi_batch[
             "test_configuration_oneshot_sampling_method"
         ]["expectation_suite_name"],
+        include_citation=True,
     )
 
     assert (

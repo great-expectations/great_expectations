@@ -8,7 +8,7 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
-  confidence_level: 9.5e-1
+  confidence_level: 9.75e-1
   mostly: 1.0
 
 rules:
