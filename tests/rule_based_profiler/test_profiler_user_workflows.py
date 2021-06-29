@@ -164,6 +164,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     assert month == 3
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_bobby_profiler_user_workflow_multi_batch(
     bobby_columnar_table_multi_batch_context,
     bobby_columnar_table_multi_batch,
