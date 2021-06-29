@@ -166,7 +166,7 @@ docs_test_matrix = [
         "name": "rule_base_profiler_multi_batch_example",
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py.py",
+        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
     },
 ]
 """
