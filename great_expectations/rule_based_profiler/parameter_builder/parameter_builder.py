@@ -105,7 +105,7 @@ class ParameterBuilder(ABC):
         )
 
         expectation_suite_name: str = (
-            f"tmp_parameter_builder_suite_domain_{domain.id}_{str(uuid.uuid4())[:8]}"
+            f"tmp.parameter_builder_domain_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
         )
         return self.data_context.get_validator(
             batch_request=batch_request,
