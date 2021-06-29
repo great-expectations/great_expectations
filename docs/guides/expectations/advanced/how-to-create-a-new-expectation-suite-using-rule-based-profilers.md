@@ -14,7 +14,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 </Prerequisites>
 
 
-### Steps
+## Steps
 ### 1. Create a new Great Expectations project
 - Create a new directory, called `taxi_profiling_tutorial`
 - Within this directory, create another directory called `data`

@@ -111,7 +111,7 @@ profiler: Profiler = Profiler(
 suite = profiler.profile()
 print(suite)
 
-# Please note that this docstring is here to demonstrate output for docs.
+# Please note that this assertion is here to demonstrate output for docs. It is not needed for normal use.
 assert suite.isEquivalentTo(
     {
         "meta": {"great_expectations_version": "0.13.19+58.gf8a650720.dirty"},
