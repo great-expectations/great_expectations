@@ -33,6 +33,11 @@ def test_requirements_files():
             f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)
         }
 
+    with open(file_relative_path(__file__, "../requirements-dev-scicomp.txt")) as req:
+        requirements_dev_scicomp = {
+            f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)
+        }
+
     assert requirements <= requirements_dev
 
     assert requirements_dev_base.intersection(requirements_dev_spark) == set()
@@ -47,6 +52,7 @@ def test_requirements_files():
             | requirements_dev_base
             | requirements_dev_sqlalchemy
             | requirements_dev_spark
+            | requirements_dev_scicomp
         )
         == set()
     )
