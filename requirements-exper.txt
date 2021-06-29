@@ -1,5 +1,0 @@
-# This requirements file should be installed for evaluating rapidly evolving experimental projects (with the assumption that test coverage is largely incomplete).
-
---requirement requirements-dev.txt
-
---requirement requirements-dev-sc.txt

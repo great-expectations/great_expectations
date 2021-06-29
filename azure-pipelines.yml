@@ -113,6 +113,8 @@ stages:
             Python38-PandasLatest:
               python.version: '3.8'
               pandas.version: 'latest'
+              numpy.version: 'latest'
+              scipy.version: 'latest'
               GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
 
         steps:
@@ -127,6 +129,14 @@ stages:
           - bash: pip install pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
+
+          - bash: pip install numpy
+            condition: eq(variables['numpy.version'], 'latest')
+            displayName: 'Install numpy latest'
+
+          - bash: pip install scipy
+            condition: eq(variables['scipy.version'], 'latest')
+            displayName: 'Install scipy latest'
 
           - bash: pip install pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
@@ -375,7 +385,7 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-sc.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
