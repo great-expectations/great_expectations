@@ -61,7 +61,7 @@ Once the appropriate steps have been added, the tests can be run using the follo
 
 # How to write a how-to-guide
 
-Begin Writing the how-to-guide around the script you wrote in the previous step. The structure of the guide will generally be:
+Begin writing the how-to-guide around the script you wrote in the previous step. The structure of the guide will generally be:
 
 1. Title
 
