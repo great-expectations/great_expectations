@@ -2,6 +2,7 @@ import datetime
 from typing import Any, Dict, List, cast
 
 import pandas as pd
+from freezegun import freeze_time
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -66,6 +67,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     assert metric_max == 73
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_alice_profiler_user_workflow_single_batch(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
@@ -87,8 +89,12 @@ def test_alice_profiler_user_workflow_single_batch(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
-        include_citation=False,
+        include_citation=True,
     )
+
+    print(expectation_suite)
+    print("\n\n---\n\n")
+    print(alice_columnar_table_single_batch["expected_expectation_suite"])
 
     assert (
         expectation_suite
@@ -183,7 +189,7 @@ def test_bobby_profiler_user_workflow_multi_batch(
         expectation_suite_name=bobby_columnar_table_multi_batch[
             "expected_expectation_suite_name"
         ],
-        include_citation=False,
+        include_citation=True,
     )
 
     assert (
