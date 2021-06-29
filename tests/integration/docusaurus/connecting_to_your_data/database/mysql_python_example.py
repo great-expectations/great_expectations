@@ -4,7 +4,6 @@ import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"
-# CONNECTION_STRING = "mysql+pymysql://root@127.0.0.1:8889/test_ci"  # TODO REMOVE THIS and UPDATE LINE NUMBERS
 
 # This utility is not for general use. It is only to support testing.
 from util import load_data_into_database

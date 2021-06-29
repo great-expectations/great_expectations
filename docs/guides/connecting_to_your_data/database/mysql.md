@@ -53,7 +53,7 @@ Import these necessary packages and modules.
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L18
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L17
 ```
 
 ### 5. Configure your Datasource
@@ -69,10 +69,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L20-L34
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L19-L33
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L45
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
 ```
 
 </TabItem>
@@ -106,13 +106,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L45
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L45
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L44
 ```
 
 </TabItem>
@@ -132,7 +132,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L48-L61
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L47-L60
 ```
 
   </TabItem>
@@ -141,7 +141,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L67-L78
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L66-L77
 ```
 
   </TabItem>
