@@ -1,1 +1,1 @@
-from .my_custom_expectation_store import MyCustomExpectationsStore
+from .my_custom_expectations_store import MyCustomExpectationsStore

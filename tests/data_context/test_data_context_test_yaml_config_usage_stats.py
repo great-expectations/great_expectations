@@ -36,8 +36,7 @@ def test_test_yaml_config_usage_stats_substitution_error(
     mock_emit, empty_data_context_stats_enabled
 ):
     with pytest.raises(ge_exceptions.MissingConfigVariableError):
-        # noinspection PyUnusedLocal
-        my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
+        _ = empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -71,8 +70,7 @@ def test_test_yaml_config_usage_stats_custom_type(
     a useful usage stats event message.
     """
     data_context: DataContext = empty_data_context_stats_enabled
-    # noinspection PyUnusedLocal
-    my_expectation_store = data_context.test_yaml_config(
+    _ = data_context.test_yaml_config(
         yaml_config="""
 module_name: tests.data_context.fixtures.plugins
 class_name: MyCustomExpectationsStore
