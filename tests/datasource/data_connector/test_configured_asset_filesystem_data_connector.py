@@ -146,12 +146,17 @@ assets:
         # "example_data_reference": {},
     }
     assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
                 "event_payload": {
-                    "class_name": "ConfiguredAssetFilesystemDataConnector"
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
                 },
                 "success": True,
             }
@@ -223,12 +228,16 @@ assets:
         # "example_data_reference": {},
     }
     assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
                 "event_payload": {
-                    "class_name": "ConfiguredAssetFilesystemDataConnector"
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
                 },
                 "success": True,
             }

@@ -158,11 +158,17 @@ def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled
         # "example_data_reference": {},
     }
     assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "ConfiguredAssetS3DataConnector"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetS3DataConnector",
+                },
                 "success": True,
             }
         ),
@@ -238,11 +244,17 @@ assets:
         # "example_data_reference": {},
     }
     assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "ConfiguredAssetS3DataConnector"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetS3DataConnector",
+                },
                 "success": True,
             }
         ),

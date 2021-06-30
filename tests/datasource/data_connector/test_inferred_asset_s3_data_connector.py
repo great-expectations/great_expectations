@@ -382,11 +382,17 @@ default_regex:
         # "example_data_reference": {},
     }
     assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "InferredAssetS3DataConnector"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "InferredAssetS3DataConnector",
+                },
                 "success": True,
             }
         ),
@@ -475,11 +481,17 @@ default_regex:
         # "example_data_reference": {},
     }
     assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "InferredAssetS3DataConnector"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "InferredAssetS3DataConnector",
+                },
                 "success": True,
             }
         ),
