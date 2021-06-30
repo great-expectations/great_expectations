@@ -111,8 +111,8 @@ profiler: Profiler = Profiler(
 suite = profiler.profile()
 print(suite)
 
-# Please note that this assertion is here to demonstrate output for docs. It is not needed for normal use.
-assert suite.isEquivalentTo(
+# Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.
+first_rule_suite = """
     {
         "meta": {"great_expectations_version": "0.13.19+58.gf8a650720.dirty"},
         "data_asset_type": None,
@@ -132,4 +132,4 @@ assert suite.isEquivalentTo(
         ],
         "expectation_suite_name": "tmp_suite_Profiler_e66f7cbb",
     }
-)
+"""
