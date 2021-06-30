@@ -141,7 +141,33 @@ module_name: great_expectations.data_context.store.expectations_store
 def test_test_yaml_config_usage_stats_custom_config_class_name_not_provided(
     mock_emit, empty_data_context_stats_enabled
 ):
-    assert False
+    """
+    What does this test and why?
+    If a class_name is not provided, and we have run into an error state in test_yaml_config() (likely because of the missing class_name) then we should report descriptive diagnostic info.
+    This should be the case even if we are passing in a custom config.
+    """
+    data_context: DataContext = empty_data_context_stats_enabled
+    with pytest.raises(Exception):
+        _ = data_context.test_yaml_config(
+            yaml_config="""
+        module_name: tests.data_context.fixtures.plugins.my_custom_expectations_store
+        store_backend:
+            module_name: great_expectations.data_context.store.store_backend
+            class_name: InMemoryStoreBackend
+        """
+        )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "diagnostic_info": ["__class_name_not_provided__"],
+                },
+                "success": False,
+            }
+        ),
+    ]
 
 
 #     with pytest.raises(Exception):
