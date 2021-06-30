@@ -22,8 +22,8 @@ from great_expectations import DataContext
 # - [x] test_test_yaml_config_usage_stats_data_connector
 # See individual data connector tests e.g. tests.datasource.data_connector.test_configured_asset_filesystem_data_connector.test_instantiation_from_a_config(), etc.
 # - [x] test_test_yaml_config_usage_stats_custom_type
-# - [ ] test_test_yaml_config_usage_stats_custom_type_not_ge_subclass
-# - [ ] test_test_yaml_config_usage_stats_custom_config_class_name_not_provided
+# - [x] test_test_yaml_config_usage_stats_custom_type_not_ge_subclass
+# - [x] test_test_yaml_config_usage_stats_custom_config_class_name_not_provided
 # - [ ] test_test_yaml_config_usage_stats_sqlalchemy_subclass
 # - [x] test_test_yaml_config_usage_stats_class_name_not_provided
 # - [ ] test_test_yaml_config_usage_stats_other_exception
@@ -170,21 +170,31 @@ def test_test_yaml_config_usage_stats_custom_config_class_name_not_provided(
     ]
 
 
-#     with pytest.raises(Exception):
-#         # noinspection PyUnusedLocal
-#         my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
-#             yaml_config="""
-# module_name: great_expectations.data_context.store.expectations_store
-#
-#     """
-#         )
-#     assert mock_emit.call_count == 1
-#     assert mock_emit.call_args_list == [
-#         mock.call(
-#             {
-#                 "event": "data_context.test_yaml_config",
-#                 "event_payload": {"diagnostic_info": "__class_name_not_provided__"},
-#                 "success": False,
-#             }
-#         ),
-#     ]
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_test_yaml_config_usage_stats_custom_type_not_ge_subclass(
+    mock_emit, empty_data_context_stats_enabled
+):
+    """
+    What does this test and why?
+    We should be able to discern the GE parent class for a custom type and construct
+    a useful usage stats event message.
+    """
+    data_context: DataContext = empty_data_context_stats_enabled
+    _ = data_context.test_yaml_config(
+        yaml_config="""
+module_name: tests.data_context.fixtures.plugins
+class_name: MyCustomNonCoreGeClass
+"""
+    )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__custom_not_ge_subclass__"]},
+                "success": True,
+            }
+        ),
+    ]
