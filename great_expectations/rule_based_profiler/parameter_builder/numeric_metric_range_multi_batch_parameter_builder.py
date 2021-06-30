@@ -353,7 +353,20 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
         confidence_interval: ConfidenceInterval = bootstrap_result.confidence_interval
 
-        return confidence_interval
+        confidence_interval_low: np.float64 = confidence_interval.low
+        confidence_interval_high: np.float64 = confidence_interval.high
+
+        std: Union[np.ndarray, np.float64] = bootstrap_result.standard_error
+
+        stds_multiplier: np.float64 = NP_SQRT_2 * special.erfinv(confidence_level)
+        margin_of_error: np.float64 = stds_multiplier * std
+
+        confidence_interval_low -= margin_of_error
+        confidence_interval_high += margin_of_error
+
+        return ConfidenceInterval(
+            low=confidence_interval_low, high=confidence_interval_high
+        )
 
     def _get_oneshot_confidence_interval(
         self,
