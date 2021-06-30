@@ -24,10 +24,12 @@ def bobby_columnar_table_multi_batch():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_rule_expectation_configurations: List[ExpectationConfiguration] = [
+    my_row_count_range_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 6712, "max_value": 9288, "mostly": 1.0},
+                "kwargs": {"min_value": 6179, "max_value": 9821, "mostly": 1.0},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -40,6 +42,11 @@ def bobby_columnar_table_multi_batch():
                 },
             },
         ),
+    ]
+
+    my_column_ranges_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
         ExpectationConfiguration(
             **{
                 "kwargs": {
@@ -60,7 +67,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -82,7 +89,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -104,7 +111,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -126,7 +133,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -148,14 +155,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "trip_distance",
-                    "min_value": 21.42,
-                    "max_value": 74.05,
+                    "min_value": 10.52,
+                    "max_value": 84.95,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -170,7 +177,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -192,7 +199,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -214,7 +221,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -236,7 +243,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -258,7 +265,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -280,7 +287,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -302,7 +309,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -324,7 +331,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -346,14 +353,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "fare_amount",
-                    "min_value": -76.43,
-                    "max_value": 3.43,
+                    "min_value": -92.96,
+                    "max_value": 0.0,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -368,14 +375,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "fare_amount",
-                    "min_value": -1982.49,
-                    "max_value": 5201.49,
+                    "min_value": 0.0,
+                    "max_value": 6689.35,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -390,14 +397,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "extra",
-                    "min_value": -64.85,
-                    "max_value": 27.14,
+                    "min_value": -83.9,
+                    "max_value": 0.0,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -412,14 +419,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "extra",
-                    "min_value": 2.53,
-                    "max_value": 8.97,
+                    "min_value": 1.2,
+                    "max_value": 10.3,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -434,7 +441,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -456,14 +463,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "mta_tax",
-                    "min_value": -28.66,
-                    "max_value": 66.67,
+                    "min_value": 0.0,
+                    "max_value": 86.41,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -478,7 +485,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -500,14 +507,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "tip_amount",
-                    "min_value": 24.4,
-                    "max_value": 97.3,
+                    "min_value": 9.3,
+                    "max_value": 112.4,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -522,7 +529,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -544,14 +551,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "tolls_amount",
-                    "min_value": -351.05,
-                    "max_value": 875.12,
+                    "min_value": 0.0,
+                    "max_value": 1129.07,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -566,7 +573,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -588,7 +595,7 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
@@ -610,14 +617,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "total_amount",
-                    "min_value": -75.26,
-                    "max_value": -1.84,
+                    "min_value": -90.46,
+                    "max_value": 0.0,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -632,14 +639,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "total_amount",
-                    "min_value": -1405.9,
-                    "max_value": 4948.55,
+                    "min_value": 0.0,
+                    "max_value": 6264.59,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -654,14 +661,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "congestion_surcharge",
-                    "min_value": -4.47,
-                    "max_value": 1.97,
+                    "min_value": -5.8,
+                    "max_value": 3.3,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -676,14 +683,14 @@ def bobby_columnar_table_multi_batch():
                         "num_batches": 2,
                     },
                 },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
                 "kwargs": {
                     "column": "congestion_surcharge",
-                    "min_value": -1.97,
-                    "max_value": 4.47,
+                    "min_value": -3.3,
+                    "max_value": 5.8,
                     "mostly": 1.0,
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -704,25 +711,38 @@ def bobby_columnar_table_multi_batch():
 
     expectation_configurations: List[ExpectationConfiguration] = []
 
-    expectation_configurations.extend(my_row_count_rule_expectation_configurations)
+    expectation_configurations.extend(
+        my_row_count_range_rule_expectation_configurations_oneshot_sampling_method
+    )
+    expectation_configurations.extend(
+        my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
+    )
 
-    expectation_suite_name: str = "bobby_columnar_table_multi_batch"
-    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name
+    expectation_suite_name_oneshot_sampling_method: str = (
+        "bobby_columnar_table_multi_batch_oneshot_sampling_method"
+    )
+    expected_expectation_suite_oneshot_sampling_method: ExpectationSuite = (
+        ExpectationSuite(
+            expectation_suite_name=expectation_suite_name_oneshot_sampling_method
+        )
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
-        expected_expectation_suite.add_expectation(expectation_configuration)
+        expected_expectation_suite_oneshot_sampling_method.add_expectation(
+            expectation_configuration
+        )
 
     yaml = YAML()
     profiler_config: dict = yaml.load(verbose_profiler_config)
-    expected_expectation_suite.add_citation(
+    expected_expectation_suite_oneshot_sampling_method.add_citation(
         comment="Suite created by Rule-Based Profiler with the following config",
         profiler_config=profiler_config,
     )
 
     return {
         "profiler_config": verbose_profiler_config,
-        "expected_expectation_suite_name": expectation_suite_name,
-        "expected_expectation_suite": expected_expectation_suite,
+        "test_configuration_oneshot_sampling_method": {
+            "expectation_suite_name": expectation_suite_name_oneshot_sampling_method,
+            "expected_expectation_suite": expected_expectation_suite_oneshot_sampling_method,
+        },
     }

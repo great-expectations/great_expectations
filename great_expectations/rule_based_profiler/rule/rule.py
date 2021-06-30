@@ -2,17 +2,12 @@ import copy
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-    DomainBuilder,
-)
-from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
+from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
 

@@ -6,6 +6,11 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] INTRODUCING MAJOR IMPROVEMENTS to the new Rule-Based Profiler architecture and capabilities (Experimental):
+  - Clean separation of concerns between DomainBuilder and ParameterBuilder logic
+  - Support for both single-batch and multi-batch use-cases showcased
+  - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
+  - Initial documentation
 
 0.13.20
 -----------------
@@ -23,7 +28,7 @@ Develop
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
 * [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
-* [ENHANCEMENT] Experimental WIP Rule Based Profiler for single batch workflows (#2788)
+* [ENHANCEMENT] Experimental WIP Rule-Based Profiler for single batch workflows (#2788)
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [MAINTENANCE] Improve robustness of integration test_runner
