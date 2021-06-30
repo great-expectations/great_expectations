@@ -20,7 +20,7 @@ This guide shows how to create a new how-to guide in Great Expectations. By writ
 
 # Docusaurus background
 
-Documentation for Great Expectations is built using Docusaurus 2, a modern static website generator.  This allows for documentation to be written and built quickly, and and for the code that is displayed in the how-to-guides to be tested.  This means that whenever a code-snippet or configuration is displayed in the how-to-guide, it is actually part of a script that is fully integration tested.
+Documentation for Great Expectations is built using Docusaurus 2, a modern static website generator.  This allows for documentation to be written and built quickly, and for the code that is displayed in the how-to-guides to be tested.  This means that whenever a code-snippet or configuration is displayed in the how-to-guide, it is actually part of a script that is fully integration tested.
 
 ## Why test documentation?
 
