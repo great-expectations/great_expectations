@@ -35,6 +35,7 @@ class DatasourceAnonymizer(Anonymizer):
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
         # Legacy Datasources (<= v0.12)
+        # TODO: 20210629 AJB How to handle custom subclasses?
         if config.get("class_name") in [lc.__name__ for lc in self._legacy_ge_classes]:
             self.anonymize_object_info(
                 anonymized_info_dict=anonymized_info_dict,
@@ -42,6 +43,7 @@ class DatasourceAnonymizer(Anonymizer):
                 object_config=config,
             )
         # Datasources (>= v0.13)
+        # TODO: 20210629 AJB How to handle custom subclasses?
         elif config.get("class_name") in [c.__name__ for c in self._ge_classes]:
             self.anonymize_object_info(
                 anonymized_info_dict=anonymized_info_dict,
@@ -64,3 +66,9 @@ class DatasourceAnonymizer(Anonymizer):
             ]
 
         return anonymized_info_dict
+
+    def is_parent_class_recognized(self, config):
+        return self._is_parent_class_recognized(
+            classes_to_check=self._ge_classes + self._legacy_ge_classes,
+            object_config=config,
+        )

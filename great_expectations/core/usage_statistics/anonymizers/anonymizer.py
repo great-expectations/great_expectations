@@ -67,3 +67,34 @@ class Anonymizer:
             anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
 
         return anonymized_info_dict
+
+    def _is_parent_class_recognized(
+        self,
+        classes_to_check,
+        object_=None,
+        object_class=None,
+        object_config=None,
+    ):
+        """
+        Check if the parent class is a subclass of any core GE class.
+        This private method is intended to be used by anonymizers in a public `is_parent_class_recognized()` method. These anonymizers define and provide the core GE classes_to_check.
+        """
+        assert (
+            object_ or object_class or object_config
+        ), "Must pass either object_ or object_class or object_config."
+        try:
+            if object_class is None and object_ is not None:
+                object_class = object_.__class__
+            elif object_class is None and object_config is not None:
+                object_class_name = object_config.get("class_name")
+                object_module_name = object_config.get("module_name")
+                object_class = load_class(object_class_name, object_module_name)
+
+            for class_to_check in classes_to_check:
+                if issubclass(object_class, class_to_check):
+                    return True
+
+            return False
+
+        except AttributeError:
+            return False

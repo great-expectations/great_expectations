@@ -20,3 +20,9 @@ class CheckpointAnonymizer(Anonymizer):
         )
 
         return anonymized_info_dict
+
+    def is_parent_class_recognized(self, config):
+        return self._is_parent_class_recognized(
+            classes_to_check=self._ge_classes,
+            object_config=config,
+        )
