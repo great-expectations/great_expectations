@@ -2,7 +2,6 @@
 title: Contributing Misc and CLA
 ---
 
-
 Contributor license agreement (CLA)
 When you contribute code, you affirm that the contribution is your original work and that you license the work to the project under the project’s open source license. Whether or not you state this explicitly, by submitting any copyrighted material via pull request, email, or other means you agree to license the material under the project’s open source license and warrant that you have the legal authority to do so.
 
@@ -51,11 +50,11 @@ Run git tag -a <<VERSION>> -m "<<VERSION>>" with the correct new version.
 Push the tag up by running git push origin <<VERSION>> with the correct new version.
 
 Merge main into develop so that the tagged commit becomes part of the history for develop: git checkout develop; git pull; git merge main
+````
 
 On develop, add a new “Develop” section header to changelog.rst, and push the updated file with message “Update changelog for develop”
 
 Create the release on GitHub with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
-````
 
 The deploy step will automatically create a draft for the release.
 
