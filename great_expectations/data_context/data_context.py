@@ -3388,17 +3388,96 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     },
                     config_defaults={},
                 )
-                # TODO: AJB 20210625 Check if sub type of a supported type
-                # If class_name is not a supported type, mark as custom
-                usage_stats_event_payload = {"diagnostic_info": "__custom__"}
 
-            if class_name is None:
-                usage_stats_event_payload["diagnostic_info"] = ",".join(
-                    [
-                        usage_stats_event_payload.get("diagnostic_info", ""),
-                        "__class_name_not_provided__",
-                    ]
+                # If a subclass of a supported type, find the parent class and anonymize
+                store_anonymizer: StoreAnonymizer = StoreAnonymizer(
+                    self.data_context_id
                 )
+                datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
+                    self.data_context_id
+                )
+                checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+                    self.data_context_id
+                )
+                data_connector_anonymizer: DataConnectorAnonymizer = (
+                    DataConnectorAnonymizer(self.data_context_id)
+                )
+                if store_anonymizer.is_parent_class_recognized(
+                    store_obj=instantiated_class
+                ):
+                    store_name: str = name or config.get("name") or "my_temp_store"
+                    store_name = instantiated_class.store_name or store_name
+                    usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+                        store_name=store_name, store_obj=instantiated_class
+                    )
+                elif datasource_anonymizer.is_parent_class_recognized(config=config):
+                    datasource_name: str = (
+                        name or config.get("name") or "my_temp_datasource"
+                    )
+                    # Roundtrip through schema validator to add missing fields
+                    datasource_config = datasourceConfigSchema.load(
+                        instantiated_class.config
+                    )
+                    full_datasource_config = datasourceConfigSchema.dump(
+                        datasource_config
+                    )
+                    usage_stats_event_payload = (
+                        datasource_anonymizer.anonymize_datasource_info(
+                            name=datasource_name, config=full_datasource_config
+                        )
+                    )
+                    # TODO: AJB 20210630 if subclass of SimpleSqlalchemyDatasource then
+                    #  use the appropriate anonymizer. Need to change `is_parent_class_recognized` to also return the type of parent class recognized.
+                    # if class_name == "SimpleSqlalchemyDatasource":
+                    #     usage_stats_event_payload = (
+                    #         datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                    #             name=datasource_name, config=full_datasource_config
+                    #         )
+                    #     )
+                    # else:
+                    #     usage_stats_event_payload = (
+                    #         datasource_anonymizer.anonymize_datasource_info(
+                    #             name=datasource_name, config=full_datasource_config
+                    #         )
+                    #     )
+
+                elif checkpoint_anonymizer.is_parent_class_recognized(config=config):
+                    checkpoint_name: str = (
+                        name or config.get("name") or "my_temp_checkpoint"
+                    )
+                    # Roundtrip through schema validator to add missing fields
+                    checkpoint_config: Union[CheckpointConfig, dict]
+                    checkpoint_config = CheckpointConfig.from_commented_map(
+                        commented_map=config
+                    )
+                    checkpoint_config = checkpoint_config.to_json_dict()
+                    checkpoint_config.update({"name": checkpoint_name})
+                    usage_stats_event_payload = (
+                        checkpoint_anonymizer.anonymize_checkpoint_info(
+                            name=checkpoint_name, config=checkpoint_config
+                        )
+                    )
+
+                elif data_connector_anonymizer.is_parent_class_recognized(
+                    config=config
+                ):
+                    data_connector_name: str = (
+                        name or config.get("name") or "my_temp_data_connector"
+                    )
+                    usage_stats_event_payload = (
+                        data_connector_anonymizer.anonymize_data_connector_info(
+                            name=data_connector_name, config=config
+                        )
+                    )
+
+                else:
+                    # If class_name is not a supported type or subclass of a supported type,
+                    # mark it as custom with no additional information since we can't anonymize
+                    usage_stats_event_payload[
+                        "diagnostic_info"
+                    ] = usage_stats_event_payload.get("diagnostic_info", []) + [
+                        "__custom_not_ge_subclass__"
+                    ]
 
             send_usage_message(
                 data_context=self,
