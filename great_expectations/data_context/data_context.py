@@ -3429,13 +3429,19 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     datasource_name: str = (
                         name or config.get("name") or "my_temp_datasource"
                     )
-                    # Roundtrip through schema validator to add missing fields
-                    datasource_config = datasourceConfigSchema.load(
-                        instantiated_class.config
-                    )
-                    full_datasource_config = datasourceConfigSchema.dump(
-                        datasource_config
-                    )
+                    if datasource_anonymizer.is_parent_class_recognized_v3_api(
+                        config=config
+                    ):
+                        # Roundtrip through schema validator to add missing fields
+                        datasource_config = datasourceConfigSchema.load(
+                            instantiated_class.config
+                        )
+                        full_datasource_config = datasourceConfigSchema.dump(
+                            datasource_config
+                        )
+                    else:
+                        # for v2 api
+                        full_datasource_config = config
                     parent_class_name = (
                         datasource_anonymizer.is_parent_class_recognized(config=config)
                     )
