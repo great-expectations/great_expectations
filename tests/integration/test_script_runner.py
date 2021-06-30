@@ -162,6 +162,12 @@ docs_test_matrix = [
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.MYSQL,
     },
+    {
+        "name": "rule_base_profiler_multi_batch_example",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    },
 ]
 """
 TODO(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
