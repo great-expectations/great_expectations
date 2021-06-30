@@ -24,7 +24,7 @@ from great_expectations import DataContext
 # - [x] test_test_yaml_config_usage_stats_custom_type
 # - [x] test_test_yaml_config_usage_stats_custom_type_not_ge_subclass
 # - [x] test_test_yaml_config_usage_stats_custom_config_class_name_not_provided
-# - [ ] test_test_yaml_config_usage_stats_sqlalchemy_subclass
+# - [x] test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass
 # - [x] test_test_yaml_config_usage_stats_class_name_not_provided
 # - [ ] test_test_yaml_config_usage_stats_other_exception
 
@@ -193,7 +193,67 @@ class_name: MyCustomNonCoreGeClass
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"diagnostic_info": ["__custom_not_ge_subclass__"]},
+                "event_payload": {
+                    "diagnostic_info": ["__custom_subclass_not_core_ge__"]
+                },
+                "success": True,
+            }
+        ),
+    ]
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass(
+    mock_emit, empty_data_context_stats_enabled
+):
+    """
+    What does this test and why?
+    We should be able to discern the GE parent class for a custom type and construct
+    a useful usage stats event message. This should be true for SimpleSqlalchemyDatasources.
+    """
+    data_context: DataContext = empty_data_context_stats_enabled
+    _ = data_context.test_yaml_config(
+        yaml_config="""
+module_name: tests.data_context.fixtures.plugins.my_custom_simple_sqlalchemy_datasource_class
+class_name: MyCustomSimpleSqlalchemyDatasource
+connection_string: sqlite:///some_db.db
+name: some_name
+introspection:
+    my_custom_datasource_name:
+        data_asset_name_suffix: some_suffix
+"""
+    )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized name & class since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_class = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_class"
+    ]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_class": anonymized_class,
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
                 "success": True,
             }
         ),

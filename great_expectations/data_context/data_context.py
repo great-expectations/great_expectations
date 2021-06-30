@@ -273,8 +273,8 @@ class BaseDataContext:
     ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
         "__substitution_error__",
         "__yaml_parse_error__",
-        "__not_provided__",
-        "__custom__",
+        "__custom_subclass_not_core_ge__",
+        "__class_name_not_provided__",
     ]
     ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
         TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
@@ -3307,6 +3307,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
 
                 if class_name == "SimpleSqlalchemyDatasource":
+                    # Use the raw config here, defaults will be added in the anonymizer
                     usage_stats_event_payload = (
                         datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
                             name=datasource_name, config=config
@@ -3410,15 +3411,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 data_connector_anonymizer: DataConnectorAnonymizer = (
                     DataConnectorAnonymizer(self.data_context_id)
                 )
-                if store_anonymizer.is_parent_class_recognized(
-                    store_obj=instantiated_class
+                if (
+                    store_anonymizer.is_parent_class_recognized(
+                        store_obj=instantiated_class
+                    )
+                    is not None
                 ):
                     store_name: str = name or config.get("name") or "my_temp_store"
                     store_name = instantiated_class.store_name or store_name
                     usage_stats_event_payload = store_anonymizer.anonymize_store_info(
                         store_name=store_name, store_obj=instantiated_class
                     )
-                elif datasource_anonymizer.is_parent_class_recognized(config=config):
+                elif (
+                    datasource_anonymizer.is_parent_class_recognized(config=config)
+                    is not None
+                ):
                     datasource_name: str = (
                         name or config.get("name") or "my_temp_datasource"
                     )
@@ -3429,27 +3436,25 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     full_datasource_config = datasourceConfigSchema.dump(
                         datasource_config
                     )
-                    usage_stats_event_payload = (
-                        datasource_anonymizer.anonymize_datasource_info(
-                            name=datasource_name, config=full_datasource_config
-                        )
+                    parent_class_name = (
+                        datasource_anonymizer.is_parent_class_recognized(config=config)
                     )
-                    # TODO: AJB 20210630 if subclass of SimpleSqlalchemyDatasource then
-                    #  use the appropriate anonymizer. Need to change `is_parent_class_recognized` to also return the type of parent class recognized.
-                    # if class_name == "SimpleSqlalchemyDatasource":
-                    #     usage_stats_event_payload = (
-                    #         datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                    #             name=datasource_name, config=full_datasource_config
-                    #         )
-                    #     )
-                    # else:
-                    #     usage_stats_event_payload = (
-                    #         datasource_anonymizer.anonymize_datasource_info(
-                    #             name=datasource_name, config=full_datasource_config
-                    #         )
-                    #     )
+                    if parent_class_name == "SimpleSqlalchemyDatasource":
+                        # Use the raw config here, defaults will be added in the anonymizer
+                        usage_stats_event_payload = datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                            name=datasource_name, config=config
+                        )
+                    else:
+                        usage_stats_event_payload = (
+                            datasource_anonymizer.anonymize_datasource_info(
+                                name=datasource_name, config=full_datasource_config
+                            )
+                        )
 
-                elif checkpoint_anonymizer.is_parent_class_recognized(config=config):
+                elif (
+                    checkpoint_anonymizer.is_parent_class_recognized(config=config)
+                    is not None
+                ):
                     checkpoint_name: str = (
                         name or config.get("name") or "my_temp_checkpoint"
                     )
@@ -3466,8 +3471,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         )
                     )
 
-                elif data_connector_anonymizer.is_parent_class_recognized(
-                    config=config
+                elif (
+                    data_connector_anonymizer.is_parent_class_recognized(config=config)
+                    is not None
                 ):
                     data_connector_name: str = (
                         name or config.get("name") or "my_temp_data_connector"
@@ -3484,7 +3490,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     usage_stats_event_payload[
                         "diagnostic_info"
                     ] = usage_stats_event_payload.get("diagnostic_info", []) + [
-                        "__custom_not_ge_subclass__"
+                        "__custom_subclass_not_core_ge__"
                     ]
 
             send_usage_message(

@@ -1,5 +1,6 @@
 import logging
 from hashlib import md5
+from typing import Optional
 
 from great_expectations.util import load_class
 
@@ -74,10 +75,12 @@ class Anonymizer:
         object_=None,
         object_class=None,
         object_config=None,
-    ):
+    ) -> Optional[str]:
         """
         Check if the parent class is a subclass of any core GE class.
         This private method is intended to be used by anonymizers in a public `is_parent_class_recognized()` method. These anonymizers define and provide the core GE classes_to_check.
+        Returns:
+            The name of the parent class found, or None if no parent class was found
         """
         assert (
             object_ or object_class or object_config
@@ -92,9 +95,9 @@ class Anonymizer:
 
             for class_to_check in classes_to_check:
                 if issubclass(object_class, class_to_check):
-                    return True
+                    return class_to_check.__name__
 
-            return False
+            return None
 
         except AttributeError:
-            return False
+            return None
