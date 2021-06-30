@@ -188,13 +188,13 @@ stages:
             Python38:
               python.version: '3.8'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements.txt --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements.txt --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt'
 # NOTE - 20210621 - JPC - as of this time, snowflake connector does not install on python 3.9; we are not
 # adding integration tests on that platform yet
 #            Python39:
 #              python.version: '3.9'
 #              pandas.version: 'latest'
-#              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements.txt --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt'
+#              GE_pytest_pip_opts: '--requirement requirements.txt --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
