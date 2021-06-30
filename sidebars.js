@@ -351,7 +351,14 @@ module.exports = {
       label: 'Contributing',
       collapsed: true,
       items: [
-	    { type: 'doc', id: 'contributing/contributing' }
+	    { type: 'doc', id: 'contributing/contributing' },
+	    { type: 'doc', id: 'contributing/contributing-setup' },
+	    { type: 'doc', id: 'contributing/contributing-checklist' },
+	    { type: 'doc', id: 'contributing/contributing-github' },
+	    { type: 'doc', id: 'contributing/contributing-test' },
+	    { type: 'doc', id: 'contributing/contributing-maturity' },
+	    { type: 'doc', id: 'contributing/contributing-style' },
+	    { type: 'doc', id: 'contributing/contributing-misc' }
       ]
     },
     {
