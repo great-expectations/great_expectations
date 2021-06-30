@@ -21,18 +21,20 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
     )
 
-    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: float = (
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
         5000
     )
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
-        300
+        4.00e2
     )
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
-        3.67
+        3.00
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        float(
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        )
         - (
             my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
             * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
@@ -40,7 +42,9 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value: int = round(
-        my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        float(
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        )
         + (
             my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
             * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
