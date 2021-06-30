@@ -2,11 +2,9 @@ from numbers import Number
 from typing import Any, Dict, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
 )
@@ -39,7 +37,8 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
-            replace_nan_with_zero: if set to True, then convert every NaN encountered to 0.0 (raise an exception otherwise)
+            replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
+            otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
