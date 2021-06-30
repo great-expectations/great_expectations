@@ -3304,19 +3304,27 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     ),
                 )
 
-                # Roundtrip through schema validator to add missing fields
-                datasource_config = datasourceConfigSchema.load(
-                    instantiated_class.config
-                )
-                full_datasource_config = datasourceConfigSchema.dump(datasource_config)
-
                 datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
 
-                usage_stats_event_payload = (
-                    datasource_anonymizer.anonymize_datasource_info(
-                        name=datasource_name, config=full_datasource_config
+                if class_name == "SimpleSqlalchemyDatasource":
+                    usage_stats_event_payload = (
+                        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                            name=datasource_name, config=config
+                        )
                     )
-                )
+                else:
+                    # Roundtrip through schema validator to add missing fields
+                    datasource_config = datasourceConfigSchema.load(
+                        instantiated_class.config
+                    )
+                    full_datasource_config = datasourceConfigSchema.dump(
+                        datasource_config
+                    )
+                    usage_stats_event_payload = (
+                        datasource_anonymizer.anonymize_datasource_info(
+                            name=datasource_name, config=full_datasource_config
+                        )
+                    )
 
             elif class_name in ["Checkpoint", "SimpleCheckpoint"]:
                 print(
