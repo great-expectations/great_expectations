@@ -158,7 +158,7 @@ module.exports = {
             'guides/expectations/how-to-create-and-edit-expectations-based-on-domain-knowledge-without-inspecting-data-directly',
             'guides/expectations/how-to-create-and-edit-expectations-in-bulk',
             'guides/expectations/how-to-create-and-edit-expectations-with-a-profiler',
-            'guides/expectations/how-to-create-and-edit-expectations-with-instant-feedback from-a-sample-batch-of-data',
+            'guides/expectations/how-to-create-and-edit-expectations-with-instant-feedback-from-a-sample-batch-of-data',
             {
               type: 'category',
               label: '🔬 Advanced',
@@ -269,9 +269,99 @@ module.exports = {
         }
       ]
     },
-    { type: 'doc', id: 'reference/core-concepts' },
-    { type: 'doc', id: 'community' },
-    { type: 'doc', id: 'contributing/contributing' },
-    { type: 'doc', id: 'changelog' }
+    {
+      type: 'category',
+      label: 'Reference',
+      items: [
+        {
+          type: 'category',
+          label: 'Glossary of Expectations',
+          items: [
+            { type: 'doc', id: 'reference/glossary-of-expectations' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Core Concepts',
+          items: [
+            { type: 'doc', id: 'reference/core-concepts' },
+            { type: 'doc', id: 'reference/checkpoints-and-actions' },
+            { type: 'doc', id: 'reference/data-context' },
+            { type: 'doc', id: 'reference/data-discovery' },
+            { type: 'doc', id: 'reference/data-docs' },
+            { type: 'doc', id: 'reference/datasources' },
+            { type: 'doc', id: 'reference/evaluation-parameters' },
+            { type: 'doc', id: 'reference/execution-engine' },
+            {
+              type: 'category',
+              label: 'Expectations',
+              collapsed: true,
+              items: [
+                { type: 'doc', id: 'reference/expectations/conditional-expectations' },
+                { type: 'doc', id: 'reference/expectations/distributional-expectations' },
+                { type: 'doc', id: 'reference/expectations/expectations' },
+                { type: 'doc', id: 'reference/expectations/implemented-expectations' },
+                { type: 'doc', id: 'reference/expectation-suite-operations' },
+               ]
+            },
+            { type: 'doc', id: 'reference/metrics' },
+            { type: 'doc', id: 'reference/profilers' },
+            { type: 'doc', id: 'reference/expectations/result-format' },
+            { type: 'doc', id: 'reference/expectations/standard-arguments' },
+            { type: 'doc', id: 'reference/stores' },
+            { type: 'doc', id: 'reference/dividing-data-assets-into-batches' },
+            { type: 'doc', id: 'reference/validation' },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Supporting Resources',
+          items: [
+            { type: 'doc', id: 'reference/supporting-resources' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Spare Parts',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'reference/spare-parts' }
+           ]
+        },
+        {
+          type: 'category',
+          label: 'API Reference',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'reference/api-reference' }
+           ]
+       }
+     ]
+    },
+    {
+      type: 'category',
+      label: 'Community Resources',
+      collapsed: true,
+      items: [
+	    { type: 'doc', id: 'community' }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Contributing',
+      collapsed: true,
+      items: [
+	    { type: 'doc', id: 'contributing/contributing' }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Changelog',
+      collapsed: true,
+      items: [
+	    { type: 'doc', id: 'changelog' }
+
+      ]
+    },
   ]
 }

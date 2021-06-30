@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import Any, Dict, Optional, Union
 
 from great_expectations import DataContext
@@ -9,11 +10,6 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_containe
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.rule_based_profiler.util import (
-    build_metric_domain_kwargs,
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
@@ -29,6 +25,8 @@ class MetricParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        enforce_numeric_metric: Optional[Union[str, bool]] = False,
+        replace_nan_with_zero: Optional[Union[str, bool]] = False,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
@@ -40,6 +38,8 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
+            replace_nan_with_zero: if set to True, then convert every NaN encountered to 0.0 (raise an exception otherwise)
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -52,6 +52,9 @@ class MetricParameterBuilder(ParameterBuilder):
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+
+        self._enforce_numeric_metric = enforce_numeric_metric
+        self._replace_nan_with_zero = replace_nan_with_zero
 
     def _build_parameters(
         self,
@@ -74,41 +77,25 @@ class MetricParameterBuilder(ParameterBuilder):
 
         batch_id: str = self.get_batch_id(variables=variables)
 
-        metric_domain_kwargs: dict = build_metric_domain_kwargs(
+        metric_computation_result: Dict[
+            str, Union[Any, Number, Dict[str, Any]]
+        ] = self.get_metric(
             batch_id=batch_id,
+            validator=validator,
+            metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
+            metric_value_kwargs=self._metric_value_kwargs,
+            enforce_numeric_metric=self._enforce_numeric_metric,
+            replace_nan_with_zero=self._replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
 
-        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
-        metric_value_kwargs: Optional[
-            dict
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._metric_value_kwargs,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        metric_configuration_arguments: Dict[str, Any] = {
-            "metric_name": self._metric_name,
-            "metric_domain_kwargs": metric_domain_kwargs,
-            "metric_value_kwargs": metric_value_kwargs,
-            "metric_dependencies": None,
-        }
         parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.parameter_name}": {
-                "value": validator.get_metric(
-                    metric=MetricConfiguration(**metric_configuration_arguments)
-                ),
-                "details": {
-                    "metric_configuration": metric_configuration_arguments,
-                },
-            },
+            f"$parameter.{self.parameter_name}": metric_computation_result,
         }
+
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )

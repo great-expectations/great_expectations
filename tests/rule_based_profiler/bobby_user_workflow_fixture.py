@@ -1,6 +1,8 @@
 from typing import List
 
 import pytest
+from freezegun import freeze_time
+from ruamel.yaml import YAML
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 
@@ -9,6 +11,7 @@ from great_expectations.data_context.util import file_relative_path
 
 
 @pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
 def bobby_columnar_table_multi_batch():
     """
     # TODO: <Alex>ALEX -- Add DocString</Alex>
@@ -30,9 +33,10 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "table.row_count",
-                            "metric_domain_kwargs": {},
-                        }
-                    }
+                            "domain_kwargs": {},
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -49,11 +53,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "VendorID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -70,11 +75,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "VendorID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -91,11 +97,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "passenger_count",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -112,11 +119,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "passenger_count",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -133,11 +141,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "trip_distance",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -154,11 +163,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "trip_distance",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -175,11 +185,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "RatecodeID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -196,11 +207,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "RatecodeID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -217,11 +229,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "PULocationID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -238,11 +251,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "PULocationID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -259,11 +273,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "DOLocationID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -280,11 +295,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "DOLocationID",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -301,11 +317,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "payment_type",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -322,11 +339,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "payment_type",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -343,11 +361,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "fare_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -364,11 +383,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "fare_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -385,11 +405,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "extra",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -406,11 +427,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "extra",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -427,11 +449,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "mta_tax",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -448,11 +471,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "mta_tax",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -469,11 +493,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tip_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -490,11 +515,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tip_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -511,11 +537,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tolls_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -532,11 +559,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "tolls_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -553,11 +581,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "improvement_surcharge",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -574,11 +603,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "improvement_surcharge",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -595,11 +625,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "total_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -616,11 +647,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "total_amount",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -637,11 +669,12 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.min",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "congestion_surcharge",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
             },
         ),
@@ -658,13 +691,14 @@ def bobby_columnar_table_multi_batch():
                     "profiler_details": {
                         "metric_configuration": {
                             "metric_name": "column.max",
-                            "metric_domain_kwargs": {
+                            "domain_kwargs": {
                                 "column": "congestion_surcharge",
                             },
-                        }
-                    }
+                        },
+                        "num_batches": 2,
+                    },
                 },
-            }
+            },
         ),
     ]
 
@@ -679,6 +713,13 @@ def bobby_columnar_table_multi_batch():
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         expected_expectation_suite.add_expectation(expectation_configuration)
+
+    yaml = YAML()
+    profiler_config: dict = yaml.load(verbose_profiler_config)
+    expected_expectation_suite.add_citation(
+        comment="Suite created by Rule-Based Profiler with the following config",
+        profiler_config=profiler_config,
+    )
 
     return {
         "profiler_config": verbose_profiler_config,
