@@ -1,5 +1,5 @@
 ---
-title: Connect to data
+title: Connect to Data
 ---
 
 ![minimap](minimap.png)
@@ -48,7 +48,7 @@ Then **execute all cells in the notebook** in order to save the new Datasource. 
 
 When you completed those last few steps, you told Great Expectations that:
 
-+ You want to create a new Datasource called data__dir.
++ You want to create a new Datasource called `data__dir`.
 + You want to use Pandas to read the data from CSV.
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:

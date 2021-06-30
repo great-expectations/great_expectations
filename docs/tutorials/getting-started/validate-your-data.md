@@ -2,14 +2,14 @@
 title: Validate your data using a Checkpoint
 ---
 
-Validation is the core operation of Great Expectations: “Validate data X against Expectation Y.”
+[Validation](...) is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
-In normal usage, the best way to validate data is with a Checkpoint. Checkpoints bundle Batches of data with corresponding Expectation Suites for validation.
+In normal usage, the best way to validate data is with a [Checkpoint](...). Checkpoints bundle [Batches](...) of data with corresponding [Expectation Suites](...) for validation.
 
 Let’s set up our first Checkpoint! **Go back to your terminal** and shut down the Jupyter notebook, if you haven’t yet. Then run the following command:
 
 ````console
-great_expectations checkpoint new staging.chk taxi.demo
+great_expectations --v3-api checkpoint new staging.chk taxi.demo
 ````
 
 From there, you will be prompted by the CLI to configure the Checkpoint:
@@ -63,7 +63,7 @@ If you click through to the validation results page, you will see that the valid
 
 **And this is it!**
 
-We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data. 
+We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data.
 
 Wrap-up and next steps
 In this tutorial, we have covered the following basic capabilities of Great Expectations:
@@ -79,5 +79,3 @@ In this tutorial, we have covered the following basic capabilities of Great Expe
 As a final, **optional step**, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, validation results, and Data Docs.
 
 And if you want to stop here, feel free to join our Slack community to say hi to fellow Great Expectations users in the **[#beginners](https://greatexpectations.io/slack)** channel!
-
-

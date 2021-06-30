@@ -1,96 +1,83 @@
 ---
-title: How to use data docs
+title: How to use Data Docs
 ---
 
-![minimap](minimap.png)
+[Data Docs](...) translate [Expectations](...), [Validation Results](...), and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
 
-Once you have a DataContext, you’ll want to connect to data. In Great Expectations, Datasources simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
+In the previous steps, when you executed the last cell in the Jupyter notebook, Great Expectations used the Expectation Suite you generated to validate the January data batch. It then compiled those validation results to HTML, and opened a browser window with a Data Docs validation results page:
 
-Let’s configure your first Datasource: a connection to the local Postgres database we’ve provided. Follow the next steps in the CLI init flow. (Note the non-standard port ```65432``` for the Postgres connection!):
+![edit](../../images/data_docs_taxi_demo01.png)
 
-````console
-Would you like to configure a Datasource? [Y/n]: <press enter>
+The validation results page shows you the results of using your Expectation Suite to validate a batch of data. In this case, you see the results of validating the `yellow_tripdata_sample_2019-01` file. All Expectations were automatically generated using the Profiler functionality, which we will explain below.
 
-What data would you like Great Expectations to connect to?
-    1. Files on a filesystem (for processing with Pandas or Spark)
-    2. Relational database (SQL)
-: 2
+If you scroll down, you will see all Expectations that were generated for the `passenger_count` column. This includes the Expectation we wanted: **“distinct values must belong to this set: 1, 2, 3, 4, 5, 6”**.
 
-Which database backend are you using?
-    1. MySQL
-    2. Postgres
-    3. Redshift
-    4. Snowflake
-    5. BigQuery
-    6. other - Do you have a working SQLAlchemy connection string?
-: 2
-````
+We also see the **observed values** for this batch, which is exactly the numbers 1 through 6 that we expected. This makes sense, since we’re developing the Expectation using the January data batch.
 
-Give your new Datasource a short name.
-````console
- [my_postgres_db]: <press enter>
-````
+![edit](../../images/data_docs_taxi_demo02.png)
 
-Next, we will configure database credentials and store them in the `my_postgres_db`
-section of this config file: `great_expectations/uncommitted/config_variables.yml`
+**Feel free to click around and explore Data Docs a little more.** You will find two more interesting features:
 
-````console
-Would you like to proceed? [Y/n]: <press enter>
+  1. If you click on the `Home` page, you will see a list of all validation runs.
 
-What is the host for the postgres connection? [localhost]: <press enter>
-What is the port for the postgres connection? [5432]: 65432
-What is the username for the postgres connection? [postgres]: ge_tutorials
-What is the password for the postgres connection?: ge_tutorials <input is hidden>
-What is the database name for the postgres connection? [postgres]: ge_tutorials
-Attempting to connect to your database. This may take a moment...
+  2. The `Home` page also has a tab for your Expectation Suites, which shows you the Expectations you’ve created without any validation results.
 
-The credentials will be saved in uncommitted/config_variables.yml under the key 'my_postgres_db'
+For now, your static site is built and stored locally. In the last step of the tutorial, we’ll explain other options for configuring, hosting and sharing it.
 
-Would you like to proceed? [Y/n]: <press enter>
+### How did we get those Expectations?
 
-Great Expectations connected to your database!
+You can create and edit Expectations using several different workflows. Using an automated [Profiler](...) as we just did is one of the quickest option to get started with an Expectation Suite.
 
-================================================================================
+This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents of the data, and produced an initial set of Expectations. The Profiler considers the following properties, amongst others:
 
-Would you like to profile new Expectations for a single data asset
-within your new Datasource? [Y/n]: n
-````
+  - the data type of the column
 
-That’s it! **You just configured your first Datasource!**
+  - simple statistics like column min, max, mean
 
-Make sure to choose ```n``` at this prompt to exit the```init``` flow for now. Normally, the ```init``` flow takes you through another step to create sample Expectations, but we want to jump straight to creating an Expectation Suite using the ```scaffold``` method next.
+  - the number of times values occur
 
-**Before continuing, let’s stop and unpack what just happened.**
+  - the number of `NULL` values
 
-# Configuring Datasources
-When you completed those last few steps in ```great_expectations init```, you told Great Expectations that:
+If you would like to learn more about how the Profiler works, you can dig deeper here: [`great_expectations.profile.UserConfigurableProfiler`](..)
 
-1. You want to create a new Datasource called ```my_postgres_db```.
+These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you’re not starting from a blank slate.
 
-2. You want to use SqlAlchemy to evaluate your Expectations, hence ```data_asset_type.class_name = SqlAlchemyDataset```. Your database configuration tells the SqlAlchemyDataset to use a Postgres-specific driver.
+Later, you should also take a look at other workflows for Creating and editing Expectations. [Creating and editing Expectations](...) is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
-Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the ```datasources``` header:
+Expectations under the hood
+By default, Expectation Suites are stored in a JSON file in the expectations/ subdirectory of your great_expectations/ folder. You can also configure Great Expectations to store Expectations to other locations, such as S3, Postgres, etc. We’ll come back to these options in the last (optional) step of the tutorial.
 
-````console
-my_postgres_db:
-credentials: ${my_postgres_db}
-data_asset_type:
-  class_name: SqlAlchemyDataset
-  module_name: great_expectations.dataset
-class_name: SqlAlchemyDatasource
-module_name: great_expectations.datasource
-````
+For example, a snippet of the JSON file for the Expectation Suite we just generated will look like this:
 
-In addition, the credentials for the database are stored in ```great_expectations/uncommitted/config_variables.yml```:
+```json
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "taxi.demo",
+  "expectations": [
 
-````console
-my_postgres_db:
-  drivername: postgresql
-  host: localhost
-  port: '65432'
-  username: ge_tutorials
-  password: ge_tutorials
-  database: ge_tutorials
-````
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "passenger_count",
+        "value_set": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "meta": {}
+    },
+  ...
+    ]}
+```
 
-In the future, you can modify or delete your configuration by editing your ```great_expectations.yml``` and ```config_variables.yml``` file directly.
+You can see that the Expectation we just looked at is represented as `expect_column_distinct_values_to_be_in_set`, with the `value_set` containing the numbers 1 through 6. This is how we store the Expectations that are shown in human-readable format in Data Docs.
+
+**Now we only have one problem left to solve:**
+
+How do we use this Expectation Suite to validate that **new** batch of data we have in our February dataset?
+
+In the next step, we will complete the Great Expectations workflow by showing you how to validate a new batch of data with the Expectation Suite you just created!
