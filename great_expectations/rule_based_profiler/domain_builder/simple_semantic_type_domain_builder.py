@@ -5,15 +5,13 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
+from great_expectations.rule_based_profiler.domain_builder import (
+    Domain,
+    DomainBuilder,
     InferredSemanticDomainType,
     SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
-    ParameterContainer,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.validator.validator import MetricConfiguration
 
 
@@ -56,8 +54,6 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
             SemanticDomainTypes
         ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
 
-        # TODO: <Alex>It is error prone to have to specify "batch_id" in three, loosely related, places in the code.
-        #  It will be useful to improve the architecture so as to guide the developer for a more consistent way.</Alex>
         batch_id: str = self.get_batch_id(variables=variables)
         column_types_dict_list: List[Dict[str, Any]] = self.get_validator(
             variables=variables
@@ -113,14 +109,13 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         domains: List[Domain] = [
             Domain(
                 domain_type=MetricDomainTypes.COLUMN,
+                domain_kwargs={
+                    "column": column_name,
+                },
                 details={
                     "inferred_semantic_domain_type": table_column_name_to_inferred_semantic_domain_type_mapping[
                         column_name
                     ],
-                },
-                domain_kwargs={
-                    "column": column_name,
-                    "batch_id": batch_id,
                 },
             )
             for column_name in candidate_column_names

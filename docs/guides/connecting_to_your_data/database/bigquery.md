@@ -47,12 +47,12 @@ bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L1-L7
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L1-L6
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L22
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L24
 ```
 
 ### 5. Configure your Datasource
@@ -68,10 +68,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L24-L38
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L26-L40
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L47
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L49
 ```
 
 </TabItem>
@@ -79,10 +79,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L24-L41
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L26-L43
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L46
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L48
 ```
 
 </TabItem>
@@ -112,12 +112,11 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L48
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L50
 ```
 
 </TabItem>
 </Tabs>
-
 
 ### 7. Test your new Datasource
 
@@ -133,11 +132,11 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-    :::note
+:::note
 Currently BigQuery does not allow for the creation of temporary tables as the result of a query.  As a workaround, Great Expectations allows for a named permanent table to be used as a "temporary" table, with the name passed in as a `batch_spec_passthrough` parameter. In the following example we are using a table named `ge_temp`.
 :::
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L52-L69
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L54-L71
 ```
 
   </TabItem>
@@ -150,7 +149,7 @@ Here is an example of loading data by specifying an existing table name.
 Currently BigQuery does not allow for the creation of temporary tables as the result of a query.  As a workaround, Great Expectations allows for a named permanent table to be used as a "temporary" table, with the name passed in as a `batch_spec_passthrough` parameter. In the following example we are using a table named `ge_temp`.
 :::
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L74-L88
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L76-L90
 ```
 
 
