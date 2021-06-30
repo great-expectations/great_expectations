@@ -1,8 +1,6 @@
-
-
-
-
-
+---
+title: Maturity Levels
+---
 
 Features and code within Great Expectations are separated into three levels of maturity: Experimental, Beta, and Production.
 

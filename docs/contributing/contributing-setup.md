@@ -1,5 +1,5 @@
---
-title: Contributing - Setting up your Dev Environment
+---
+title: Setting up your Dev Environment
 ---
 
 ### Prerequisites

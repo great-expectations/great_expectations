@@ -1,10 +1,13 @@
-Contribution checklist
+---
+title: Contribution Checklist
+---
+
 Following these instructions helps us make sure the code review and merge process go smoothly.
 
 Before submitting a pull request
 Once your code is ready, please go through the following checklist before submitting a pull request.
 
-1. Have you signed the CLA?
+## 1. Have you signed the CLA?
 
 A Contributor License Agreement helps guarantee that contributions to Great Expectations will always remain free and open.
 
@@ -12,7 +15,7 @@ Please see Contributor license agreement (CLA) for more information and instruct
 
 If you’ve included your (physical) mailing address in the CLA, we’ll send you a personalized Great Expectations mug once your first PR is merged!
 
-2. Have you followed the Style Guide for code and comments?
+## 2. Have you followed the Style Guide for code and comments?
 
 The Style Guide is here.
 
@@ -20,7 +23,7 @@ Thanks for helping us keep the codebase and documentation clean and consistent, 
 
 If your PR contains only changes to contrib directory (community contributed Expectations), review your PR against this Acceptance Checklist
 
-3. Is your branch up to date with upstream/develop?
+## 3. Is your branch up to date with upstream/develop?
 
 Update your local repository with the most recent code from the main Great Expectations repository.
 
@@ -38,7 +41,7 @@ Re-run tests to ensure the rebase did not introduce any new issues.
 
 Atlassian and Github both have good tutorials for rebasing: Atlassian’s tutorial, Github’s tutorial.
 
-4. Have you written and run all the tests you need?
+## 4. Have you written and run all the tests you need?
 
 Note:
 
@@ -48,7 +51,7 @@ See Writing unit and integration tests for details on how to write unit tests in
 
 Please make certain to run pytest to verify that all tests pass locally. See Running tests for details.
 
-5. Have you documented all the changes in your PR?
+## 5. Have you documented all the changes in your PR?
 
 Note:
 
@@ -64,7 +67,7 @@ If you’ve checked off all these items, you’re now ready to submit a pull req
 How to submit a pull request
 When you’re done with your work…
 
-1. Create a PR
+## 1. Create a PR
 
 Push to the remote fork of your repo.
 
@@ -90,7 +93,7 @@ Summarize your changes using a few clear sentences (sometimes screenshots are ni
 
 Finally, in the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place, e.g. “Closes #123”, linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
 
-2. Confirm the contributor license agreement (CLA)
+## 2. Confirm the contributor license agreement (CLA)
 
 If you’ve followed the checklist above, you will have already signed the CLA and won’t see the CLA bot.
 
@@ -98,24 +101,21 @@ Otherwise, you will see a comment from the “CLA Bot” on the PR that asks you
 
 Once you’ve signed the form, add a new comment to the PR with the line @cla-bot check. This will trigger the CLA bot to refresh.
 
-3. Verify continuous integration checks
+## 3. Verify continuous integration checks
 
 Wait for the other continuous integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
 
 Fix any issues that are flagged.
 
-4. Wait for a core team member to approve and merge your PR
+## 4. Wait for a core team member to approve and merge your PR
 
 Once all checks pass, a Great Expectations team member will approve your PR and merge it.
 
 GitHub will notify you of comments or a successful merge according to your notification settings.
 
-5. Resolve any issues
+## 5. Resolve any issues
 
 There will probably be discussion about the pull request. It’s normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to help them get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code!
 
-6. Do a victory dance
-
 Congratulations! You’ve just contributed to Great Expectations!
 
-../_images/great_expectations_happy.gif

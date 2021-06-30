@@ -1,3 +1,7 @@
+---
+title: Contributing Style Guide
+---
+
 Note
 
 This style guide will be enforced for all incoming PRs. However, certain legacy areas within the repo do not yet fully adhere to the style guide. We welcome PRs to bring these areas up to code.
