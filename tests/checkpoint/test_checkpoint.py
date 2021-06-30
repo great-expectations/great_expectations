@@ -80,7 +80,7 @@ def test_basic_checkpoint_config_validation(
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "NOT_PROVIDED"},
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
                 "success": False,
             }
         ),
@@ -108,7 +108,9 @@ def test_basic_checkpoint_config_validation(
             mock.call(
                 {
                     "event": "data_context.test_yaml_config",
-                    "event_payload": {"class_name": "NOT_PROVIDED"},
+                    "event_payload": {
+                        "diagnostic_info": ["__class_name_not_provided__"]
+                    },
                     "success": False,
                 }
             ),
@@ -129,7 +131,7 @@ def test_basic_checkpoint_config_validation(
             mock.call(
                 {
                     "event": "data_context.test_yaml_config",
-                    "event_payload": {"class_name": "Checkpoint"},
+                    "event_payload": {"parent_class": "Checkpoint"},
                     "success": False,
                 }
             ),
@@ -164,12 +166,19 @@ def test_basic_checkpoint_config_validation(
         ]
     )
     assert mock_emit.call_count == 4
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[3][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list.extend(
         [
             mock.call(
                 {
                     "event": "data_context.test_yaml_config",
-                    "event_payload": {"class_name": "Checkpoint"},
+                    "event_payload": {
+                        "anonymized_name": anonymized_name,
+                        "parent_class": "Checkpoint",
+                    },
                     "success": True,
                 }
             ),
@@ -257,12 +266,19 @@ def test_basic_checkpoint_config_validation(
         == expected_checkpoint_config
     )
     assert mock_emit.call_count == 5
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[4][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     expected_call_args_list.extend(
         [
             mock.call(
                 {
                     "event": "data_context.test_yaml_config",
-                    "event_payload": {"class_name": "Checkpoint"},
+                    "event_payload": {
+                        "anonymized_name": anonymized_name,
+                        "parent_class": "Checkpoint",
+                    },
                     "success": True,
                 }
             ),
