@@ -24,23 +24,30 @@ def test_empty_store(mock_emit, empty_data_context_stats_enabled):
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
 store_backend:
-
-    module_name: "great_expectations.data_context.store.store_backend"
+    module_name: great_expectations.data_context.store.store_backend
     class_name: InMemoryStoreBackend
 """
     )
     assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     assert mock_emit.call_args_list == [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "ExpectationsStore"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ExpectationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "InMemoryStoreBackend"
+                    },
+                },
                 "success": True,
             }
         ),
     ]
-
-    # assert False
 
 
 @mock.patch(
@@ -64,7 +71,7 @@ EGREGIOUS FORMATTING ERROR
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "YAML_PARSE_ERROR"},
+                "event_payload": {"diagnostic_info": ["__yaml_parse_error__"]},
                 "success": False,
             }
         ),
@@ -142,11 +149,21 @@ def test_checkpoint_store_with_filesystem_store_backend(
         return_mode="instantiated_class",
     )
     assert mock_emit.call_count == 1
+    # Substitute anonymized_name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     assert mock_emit.call_args_list == [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "CheckpointStore"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "CheckpointStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
                 "success": True,
             }
         ),
@@ -161,14 +178,26 @@ def test_checkpoint_store_with_filesystem_store_backend(
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "CheckpointStore"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "CheckpointStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "CheckpointStore"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "CheckpointStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
                 "success": True,
             }
         ),
@@ -243,11 +272,21 @@ store_backend:
 """
     )
     assert mock_emit.call_count == 1
+    # Substitute anonymized_name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
     assert mock_emit.call_args_list == [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "ValidationsStore"},
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ValidationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "InMemoryStoreBackend"
+                    },
+                },
                 "success": True,
             }
         ),
@@ -300,7 +339,7 @@ data_connectors:
 
     # Test usage stats messages
     assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
+    # Substitute anonymized names since it changes for each run
     anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
         "anonymized_name"
     ]
@@ -382,7 +421,7 @@ execution_engine:
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "Datasource"},
+                "event_payload": {"parent_class": "Datasource"},
                 "success": False,
             }
         ),
@@ -400,7 +439,7 @@ execution_engine:
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "Datasource"},
+                "event_payload": {"parent_class": "Datasource"},
                 "success": False,
             }
         ),
@@ -438,11 +477,34 @@ data_connectors:
         not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
     )
     assert mock_emit.call_count == 3
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[2][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[2][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[2][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
     expected_call_args_list.append(
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "Datasource"},
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -490,11 +552,30 @@ introspection:
         in my_datasource.execution_engine.connection_string
     )
     assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "SimpleSqlalchemyDatasource"},
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -513,7 +594,19 @@ introspection:
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "SimpleSqlalchemyDatasource"},
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -560,13 +653,35 @@ introspection:
         yaml_config=yaml_config,
         return_mode="report_object",
     )
-    assert mock_emit.call_count == 1
+    assert mock_emit.call_count == 2
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[1][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_data_connector_name = mock_emit.call_args_list[1][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
     expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "SimpleSqlalchemyDatasource"},
-                "success": False,
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
             }
         ),
     ]
@@ -679,11 +794,34 @@ data_connectors:
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
     assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "Datasource"},
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -853,11 +991,34 @@ data_connectors:
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
     assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
     expected_call_args_list = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
-                "event_payload": {"class_name": "Datasource"},
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
                 "success": True,
             }
         ),
