@@ -3209,7 +3209,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         The returned object is determined by return_mode.
         """
         usage_stats_event_name: str = "data_context.test_yaml_config"
-        usage_stats_event_payload: Dict[str, str] = {}
+        usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")
@@ -3239,7 +3239,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
         except Exception as e:
             usage_stats_event_payload: dict = {
-                "diagnostic_info": "__substitution_error__",
+                "diagnostic_info": ["__substitution_error__"],
             }
             send_usage_message(
                 data_context=self,
@@ -3257,7 +3257,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         except Exception as e:
             usage_stats_event_payload: dict = {
-                "diagnostic_info": "__yaml_parse_error__",
+                "diagnostic_info": ["__yaml_parse_error__"],
             }
             send_usage_message(
                 data_context=self,
@@ -3509,6 +3509,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             return report_object
 
         except Exception as e:
+            if class_name is None:
+                usage_stats_event_payload[
+                    "diagnostic_info"
+                ] = usage_stats_event_payload.get("diagnostic_info", []) + [
+                    "__class_name_not_provided__"
+                ]
+            elif (
+                usage_stats_event_payload.get("parent_class") is None
+                and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+            ):
+                # add parent_class if it doesn't exist and class_name is one of our supported core GE types
+                usage_stats_event_payload["parent_class"] = class_name
             send_usage_message(
                 data_context=self,
                 event=usage_stats_event_name,
