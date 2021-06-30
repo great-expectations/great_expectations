@@ -95,7 +95,7 @@ module.exports = {
               label: '💭 In-memory',
               items: [
                 'guides/connecting_to_your_data/in_memory/pandas',
-                'guides/connecting_to_your_data/in_memory/spark',
+                'guides/connecting_to_your_data/in_memory/spark'
               ]
             },
             {
@@ -167,7 +167,8 @@ module.exports = {
                 'guides/expectations/advanced/how-to-create-renderers-for-custom-expectations',
                 'guides/expectations/advanced/how-to-create-a-new-expectation-suite-by-profiling-from-a-jsonschema-file',
                 'guides/expectations/advanced/how-to-create-expectations-that-span-multiple-batches-using-evaluation-parameters',
-                'guides/expectations/advanced/how-to-dynamically-load-evaluation-parameters-from-a-database'
+                'guides/expectations/advanced/how-to-dynamically-load-evaluation-parameters-from-a-database',
+                'guides/expectations/advanced/how-to-create-a-new-expectation-suite-using-rule-based-profilers'
               ]
             },
             {
