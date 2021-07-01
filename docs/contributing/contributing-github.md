@@ -56,8 +56,6 @@ GitHub will notify you of comments or a successful merge according to your notif
 
 If there are any issues, please address them promptly.
 
-7. Do a victory dance
-
 Congratulations! You’ve just contributed to Great Expectations!
 
 
