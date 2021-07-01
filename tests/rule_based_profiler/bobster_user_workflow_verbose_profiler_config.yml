@@ -9,7 +9,7 @@ variables:
     data_connector_query:
       index: ":-1"
   confidence_level: 9.75e-1
-  mostly: 1.0
+  cross_validation_hold_out: 1.0e-1
 
 rules:
   row_count_range_rule:
@@ -30,6 +30,5 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         min_value: $parameter.row_count_range.value.min_value
         max_value: $parameter.row_count_range.value.max_value
-        mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details

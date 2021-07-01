@@ -1,5 +1,7 @@
 import copy
+import itertools
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
@@ -9,7 +11,10 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
-from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
+from great_expectations.rule_based_profiler.util import (
+    NP_EPSILON,
+    build_metric_domain_kwargs,
+)
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids as get_batch_ids_from_batch_request,
 )
@@ -226,6 +231,7 @@ class ParameterBuilder(ABC):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Optional[Union[str, bool]] = False,
         replace_nan_with_zero: Optional[Union[str, bool]] = False,
+        cross_validation_hold_out: Optional[Union[str, float]] = 0.0,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -267,7 +273,7 @@ class ParameterBuilder(ABC):
             parameters=parameters,
         )
 
-        metric_values: List[Union[Any, Number]] = []
+        metric_values: Dict[str, List[Union[Any, Number]]] = defaultdict(list)
 
         metric_value: Union[Any, Number]
         batch_id: str
@@ -297,10 +303,32 @@ class ParameterBuilder(ABC):
                         )
                     metric_value = 0.0
 
-            metric_values.append(metric_value)
+            metric_values[batch_id].append(metric_value)
+
+        batch_id_splits: Dict[str, List[str]] = self._get_batch_id_splits(
+            batch_ids=batch_ids,
+            cross_validation_hold_out=cross_validation_hold_out,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        batch_ids_training: List[str] = batch_id_splits["training"]
+        batch_ids_cross_validation: List[str] = batch_id_splits["cross_validation"]
+
+        metric_values_training: List[Union[Any, Number]] = list(
+            itertools.chain.from_iterable(
+                [metric_values[batch_id] for batch_id in batch_ids_training]
+            )
+        )
+        metric_values_cross_validation: List[Union[Any, Number]] = list(
+            itertools.chain.from_iterable(
+                [metric_values[batch_id] for batch_id in batch_ids_cross_validation]
+            )
+        )
 
         return {
-            "value": metric_values,
+            "metric_values_training": metric_values_training,
+            "metric_values_cross_validation": metric_values_cross_validation,
             "details": {
                 "metric_configuration": {
                     "metric_name": metric_name,
@@ -308,8 +336,61 @@ class ParameterBuilder(ABC):
                     "metric_value_kwargs": metric_value_kwargs,
                     "metric_dependencies": None,
                 },
-                "num_batches": len(batch_ids),
+                "num_batches_training": len(batch_ids_training),
+                "num_batches_cross_validation": len(batch_ids_cross_validation),
             },
+        }
+
+    def _get_batch_id_splits(
+        self,
+        batch_ids: List[str],
+        cross_validation_hold_out: Union[str, float],
+        domain: Domain,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> Dict[str, List[str]]:
+        # Obtain cross_validation_hold_out from rule state (i.e., variables and parameters); from instance variable otherwise.
+        cross_validation_hold_out = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=cross_validation_hold_out,
+            expected_return_type=float,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (0.0 <= cross_validation_hold_out <= 1.0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The portion of the data set held out for cross-validation in {self.__class__.__name__} is \
+outside of [0.0, 1.0] closed interval.
+"""
+            )
+
+        if np.isclose(cross_validation_hold_out, 1.0):
+            cross_validation_hold_out -= NP_EPSILON
+
+        num_batch_ids: int = len(batch_ids)
+
+        num_cross_validation_batch_ids: int = round(
+            cross_validation_hold_out * num_batch_ids
+        )
+        if num_cross_validation_batch_ids < 0:
+            raise ValueError(
+                f"""Number of Batch data samples for parameter cross-validation in {self.__class__.__name__} must be \
+an integer greater than or equal to 0 (the value {num_cross_validation_batch_ids} was encountered).
+"""
+            )
+
+        num_training_batch_ids: int = num_batch_ids - num_cross_validation_batch_ids
+        if num_training_batch_ids < 2:
+            raise ValueError(
+                f"""Number of Batch data samples for parameter estimation in {self.__class__.__name__} must be an \
+integer greater than 1 (the value {num_training_batch_ids} was encountered).
+"""
+            )
+
+        return {
+            "training": batch_ids[:num_training_batch_ids],
+            "cross_validation": batch_ids[num_training_batch_ids:num_batch_ids:],
         }
 
     @property

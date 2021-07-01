@@ -13,10 +13,6 @@ from great_expectations.data_context.util import file_relative_path
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
 def bobby_columnar_table_multi_batch():
-    """
-    # TODO: <Alex>ALEX -- Add DocString</Alex>
-    """
-
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__, "bobby_user_workflow_verbose_profiler_config.yml"
     )
@@ -29,7 +25,7 @@ def bobby_columnar_table_multi_batch():
     ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 6179, "max_value": 9821, "mostly": 1.0},
+                "kwargs": {"min_value": 6179, "max_value": 9821},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -37,7 +33,8 @@ def bobby_columnar_table_multi_batch():
                             "metric_name": "table.row_count",
                             "domain_kwargs": {},
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             },
@@ -64,7 +61,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "VendorID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -86,7 +84,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "VendorID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -108,7 +107,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "passenger_count",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -130,7 +130,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "passenger_count",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -152,7 +153,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "trip_distance",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -174,7 +176,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "trip_distance",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -196,7 +199,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "RatecodeID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -218,7 +222,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "RatecodeID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -240,7 +245,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "PULocationID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -262,7 +268,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "PULocationID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -284,7 +291,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "DOLocationID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -306,7 +314,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "DOLocationID",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -328,7 +337,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "payment_type",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -350,7 +360,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "payment_type",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -372,7 +383,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "fare_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -394,7 +406,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "fare_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -416,7 +429,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "extra",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -438,7 +452,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "extra",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -460,7 +475,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "mta_tax",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -482,7 +498,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "mta_tax",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -504,7 +521,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "tip_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -526,7 +544,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "tip_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -548,7 +567,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "tolls_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -570,7 +590,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "tolls_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -592,7 +613,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "improvement_surcharge",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -614,7 +636,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "improvement_surcharge",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -636,7 +659,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "total_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -658,7 +682,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "total_amount",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -680,7 +705,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "congestion_surcharge",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             }
@@ -702,7 +728,8 @@ def bobby_columnar_table_multi_batch():
                                 "column": "congestion_surcharge",
                             },
                         },
-                        "num_batches": 2,
+                        "num_batches_training": 2,
+                        "num_batches_cross_validation": 0,
                     },
                 },
             },
@@ -735,7 +762,7 @@ def bobby_columnar_table_multi_batch():
     yaml = YAML()
     profiler_config: dict = yaml.load(verbose_profiler_config)
     expected_expectation_suite_oneshot_sampling_method.add_citation(
-        comment="Suite created by Rule-Based Profiler with the following config",
+        comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=profiler_config,
     )
 

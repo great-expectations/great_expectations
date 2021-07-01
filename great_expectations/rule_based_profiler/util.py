@@ -1,5 +1,6 @@
 import copy
 import uuid
+from numbers import Number
 from types import ModuleType
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -16,7 +17,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.util import import_library_module, is_library_loadable
 from great_expectations.validator.validator import Validator
 
-NP_EPSILON: np.float64 = np.finfo(float).eps
+NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
 
 def get_validator(

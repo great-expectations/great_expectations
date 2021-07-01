@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
     import_scipy_stats_bootstrap_function,
 )
-from great_expectations.util import import_library_module, is_numeric
+from great_expectations.util import is_numeric
 from great_expectations.validator.validator import Validator
 
 bootstrap: Optional[Callable] = import_scipy_stats_bootstrap_function()
@@ -64,14 +64,15 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         sampling_method: Optional[str] = "bootstrap",
         enforce_numeric_metric: Optional[Union[str, bool]] = True,
         replace_nan_with_zero: Optional[Union[str, bool]] = True,
-        confidence_level: Optional[Union[float, str]] = 9.5e-1,
-        num_bootstrap_samples: Optional[Union[int, str]] = None,
-        round_decimals: Optional[Union[int, str]] = None,
+        confidence_level: Optional[Union[str, float]] = 9.5e-1,
+        num_bootstrap_samples: Optional[Union[str, int]] = None,
+        round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
-            Union[Dict[str, Union[Optional[int], Optional[float]]], str]
+            Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
+        cross_validation_hold_out: Optional[Union[str, float]] = 1.0e-1,
         data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[dict, str]] = None,
+        batch_request: Optional[Union[str, dict]] = None,
     ):
         """
         Args:
@@ -85,7 +86,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
             if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
-            confidence_level: user-configured fraction between 0 and 1
+            confidence_level: user-configured fraction between 0 and 1 expressing desired confidence level in estimation
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
@@ -93,6 +94,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
+            cross_validation_hold_out: user-configured fraction between 0 and 1 of dataset held out for cross-validation
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -134,6 +136,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             )
         self._truncate_values = truncate_values
 
+        self._cross_validation_hold_out = cross_validation_hold_out
+
     def _build_parameters(
         self,
         parameter_container: ParameterContainer,
@@ -165,44 +169,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
         10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
         11. Return ConfidenceInterval([low, high]) for the desired metric as estimated by the specified sampling method.
-        12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
+        12. Compute precision of estimate (num_correct / num_total) on portion of dataset held out for cross-validation.
+        13. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
-        # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
-        sampling_method: str = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._sampling_method,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
-        if not (
-            sampling_method
-            in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of 
-{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{sampling_method}" was detected).
-"""
-            )
-
-        # Obtain confidence_level from rule state (i.e., variables and parameters); from instance variable otherwise.
-        confidence_level: Union[
-            Any, str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._confidence_level,
-            expected_return_type=(int, float),
-            variables=variables,
-            parameters=parameters,
-        )
-        if not (0.0 <= confidence_level <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"False-Positive Rate for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
-            )
-
-        if np.isclose(confidence_level, 1.0):
-            confidence_level = confidence_level - NP_EPSILON
-
         validator: Validator = self.get_validator(
             domain=domain,
             variables=variables,
@@ -229,25 +198,66 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             metric_value_kwargs=self._metric_value_kwargs,
             enforce_numeric_metric=self._enforce_numeric_metric,
             replace_nan_with_zero=self._replace_nan_with_zero,
+            cross_validation_hold_out=self._cross_validation_hold_out,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        metric_values: Union[
+        metric_values_training: Union[
             np.ndarray, List[Union[Any, Number]]
-        ] = metric_computation_result["value"]
+        ] = metric_computation_result["metric_values_training"]
+        metric_values_cross_validation: Union[
+            np.ndarray, List[Union[Any, Number]]
+        ] = metric_computation_result["metric_values_cross_validation"]
+        metric_values: Union[np.ndarray, List[Union[Any, Number]]] = (
+            metric_values_training + metric_values_cross_validation
+        )
         details: Dict[str, Any] = metric_computation_result["details"]
 
-        truncate_values: Dict[
-            str, Union[Optional[int], Optional[float]]
-        ] = self._get_truncate_values_using_heuristics(
+        # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        sampling_method: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._sampling_method,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (
+            sampling_method
+            in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of 
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{sampling_method}" was detected).
+"""
+            )
+
+        # Obtain confidence_level from rule state (i.e., variables and parameters); from instance variable otherwise.
+        confidence_level: Union[
+            Any, str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._confidence_level,
+            expected_return_type=float,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (0.0 <= confidence_level <= 1.0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+            )
+
+        if np.isclose(confidence_level, 1.0):
+            confidence_level -= NP_EPSILON
+
+        truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        lower_bound: Optional[Union[int, float]] = truncate_values.get("lower_bound")
-        upper_bound: Optional[Union[int, float]] = truncate_values.get("upper_bound")
+        lower_bound: Optional[float] = truncate_values.get("lower_bound")
+        upper_bound: Optional[float] = truncate_values.get("upper_bound")
 
         round_decimals: int = self._get_round_decimals_using_heuristics(
             metric_values=metric_values,
@@ -256,12 +266,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        metric_values = np.array(metric_values, dtype=np.float64)
+        metric_values_training = np.array(metric_values_training, dtype=np.float64)
 
         confidence_interval: ConfidenceInterval
         if sampling_method == "bootstrap":
             confidence_interval = self._get_bootstrap_confidence_interval(
-                metric_values=metric_values,
+                metric_values=metric_values_training,
                 confidence_level=confidence_level,
                 domain=domain,
                 variables=variables,
@@ -269,21 +279,51 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             )
         else:
             confidence_interval = self._get_oneshot_confidence_interval(
-                metric_values=metric_values,
+                metric_values=metric_values_training,
                 confidence_level=confidence_level,
             )
 
+        min_value: Union[Number, float]
+        max_value: Union[Number, float]
+
         if round_decimals == 0:
-            min_value = round(confidence_interval.low)
-            max_value = round(confidence_interval.high)
+            min_value = round(float(confidence_interval.low))
+            max_value = round(float(confidence_interval.high))
         else:
-            min_value = round(confidence_interval.low, round_decimals)
-            max_value = round(confidence_interval.high, round_decimals)
+            min_value = round(float(confidence_interval.low), round_decimals)
+            max_value = round(float(confidence_interval.high), round_decimals)
 
         if lower_bound is not None:
             min_value = max(min_value, lower_bound)
         if upper_bound is not None:
             max_value = min(max_value, upper_bound)
+
+        precision: float
+        metric_values_cross_validation = np.array(
+            metric_values_cross_validation, dtype=np.float64
+        )
+        num_metric_values_cross_validation: int = metric_computation_result["details"][
+            "num_batches_cross_validation"
+        ]
+        if num_metric_values_cross_validation < 1:
+            precision = 1.0
+        else:
+            metric_value: Union[Number, np.float64]
+            precision = (
+                1.0
+                * len(
+                    list(
+                        filter(
+                            lambda element: element,
+                            [
+                                min_value <= metric_value <= max_value
+                                for metric_value in metric_values_cross_validation
+                            ],
+                        )
+                    )
+                )
+                / num_metric_values_cross_validation
+            )
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {
@@ -292,6 +332,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                     "max_value": max_value,
                 },
                 "details": details,
+                "precision": precision,
             },
         }
 
@@ -301,10 +342,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
     def _get_bootstrap_confidence_interval(
         self,
-        metric_values: Union[
-            np.ndarray,
-            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ],
+        metric_values: Union[np.ndarray, List[Number]],
         confidence_level: np.float64,
         domain: Domain,
         *,
@@ -370,10 +408,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
     def _get_oneshot_confidence_interval(
         self,
-        metric_values: Union[
-            np.ndarray,
-            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ],
+        metric_values: Union[np.ndarray, List[Number]],
         confidence_level: np.float64,
     ):
         mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
@@ -418,10 +453,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
     def _get_truncate_values_using_heuristics(
         self,
-        metric_values: Union[
-            np.ndarray,
-            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ],
+        metric_values: Union[np.ndarray, List[Number]],
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
@@ -429,7 +461,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
         # Obtain truncate_values directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
-            str, Union[Optional[int], Optional[float]]
+            str, Optional[Number]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._truncate_values,
@@ -453,9 +485,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 """
             )
 
-        lower_bound: Optional[Union[int, float]] = truncate_values.get("lower_bound")
-        upper_bound: Optional[Union[int, float]] = truncate_values.get("upper_bound")
-        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        lower_bound: Optional[Number] = truncate_values.get("lower_bound")
+        upper_bound: Optional[Number] = truncate_values.get("upper_bound")
+        metric_value: Union[Number, np.float64]
         if lower_bound is None and all(
             [metric_value > NP_EPSILON for metric_value in metric_values]
         ):
@@ -472,10 +504,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
     def _get_round_decimals_using_heuristics(
         self,
-        metric_values: Union[
-            np.ndarray,
-            List[Union[int, np.int32, np.int64, float, np.float32, np.float64]],
-        ],
+        metric_values: Union[np.ndarray, List[Number]],
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
@@ -499,7 +528,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 positive integer, or must be omitted (or set to None).
 """
             )
-        metric_value: Union[int, np.int32, np.int64, float, np.float32, np.float64]
+        metric_value: Number
         if all(
             [
                 np.issubdtype(type(metric_value), np.integer)
