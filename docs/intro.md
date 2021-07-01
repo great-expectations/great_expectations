@@ -1,5 +1,6 @@
 ---
 title: Welcome
+slug: /
 ---
 
 Welcome to Great Expectations!

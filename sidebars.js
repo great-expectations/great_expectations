@@ -302,7 +302,7 @@ module.exports = {
                 { type: 'doc', id: 'reference/expectations/distributional-expectations' },
                 { type: 'doc', id: 'reference/expectations/expectations' },
                 { type: 'doc', id: 'reference/expectations/implemented-expectations' },
-                { type: 'doc', id: 'reference/expectation-suite-operations' },
+                { type: 'doc', id: 'reference/expectation-suite-operations' }
                ]
             },
             { type: 'doc', id: 'reference/metrics' },
@@ -311,7 +311,7 @@ module.exports = {
             { type: 'doc', id: 'reference/expectations/standard-arguments' },
             { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing-data-assets-into-batches' },
-            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/validation' }
           ]
         },
         {
