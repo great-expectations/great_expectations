@@ -2,14 +2,14 @@
 title: Contributing Misc and CLA
 ---
 
-Contributor license agreement (CLA)
+## Contributor license agreement (CLA)
 When you contribute code, you affirm that the contribution is your original work and that you license the work to the project under the project’s open source license. Whether or not you state this explicitly, by submitting any copyrighted material via pull request, email, or other means you agree to license the material under the project’s open source license and warrant that you have the legal authority to do so.
 
 Please make sure you have signed our Contributor License Agreement (either Individual Contributor License Agreement v1.0 or Software Grant and Corporate Contributor License Agreement (“Agreement”) v1.0).
 
 We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
 
-Release checklist
+## Release checklist
 GE core team members use this checklist to ship releases.
 
 If this is a major release (incrementing either the first or second version number) the manual acceptance testing must be completed.
@@ -78,13 +78,13 @@ Check for open issues in the GE conda-forge repository. If there are open issues
 
 Celebrate! You have successfully released a new version of Great Expectations!!
 
-Beta Release Notes
+## Beta Release Notes
 
 To ship a beta release, follow the above checklist, but use the branch name v0.11.x as the equivalent of main and v0.11.x-develop as the equivalent of develop
 
 Ship the release using beta version numbers when updating the great_expectations/deployment_version and when creating the annotated tag (e.g. 0.11.0b0)
 
-Issue Tags
+## Issue Tags
 We use stalebot to automatically tag issues without activity as stale, and close them if no response is received in one week. Adding the stalebot-exempt tag will prevent the bot from trying to close the issue.
 
 Additionally, we try to add tags to indicate the status of key discussion elements:

@@ -48,7 +48,7 @@ Wait for the other Continuous Integration (CI) checks to go green and watch out 
 
 Fix any issues that are flagged. (For documentation changes, it’s unlikely that you’ll have any issues.)
 
-6. Wait for a core team member to approve and merge your PR
+## 6. Wait for a core team member to approve and merge your PR
 
 Once all checks pass, a Great Expectations team member will approve your PR and merge it.
 
