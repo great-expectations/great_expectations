@@ -207,23 +207,35 @@ class_name: MyCustomNonCoreGeClass
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass(
-    mock_emit, empty_data_context_stats_enabled
+    mock_emit, sa, test_backends, empty_data_context_stats_enabled
 ):
     """
     What does this test and why?
     We should be able to discern the GE parent class for a custom type and construct
     a useful usage stats event message. This should be true for SimpleSqlalchemyDatasources.
     """
+
+    if "postgresql" not in test_backends:
+        pytest.skip(
+            "test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass requires postgresql"
+        )
+
     data_context: DataContext = empty_data_context_stats_enabled
     _ = data_context.test_yaml_config(
         yaml_config="""
 module_name: tests.data_context.fixtures.plugins.my_custom_simple_sqlalchemy_datasource_class
 class_name: MyCustomSimpleSqlalchemyDatasource
-connection_string: sqlite:///some_db.db
 name: some_name
 introspection:
-    my_custom_datasource_name:
-        data_asset_name_suffix: some_suffix
+  whole_table:
+    data_asset_name_suffix: __whole_table
+credentials:
+  drivername: postgresql
+  host: localhost
+  port: '5432'
+  username: postgres
+  password: ''
+  database: postgres
 """
     )
     assert mock_emit.call_count == 1
