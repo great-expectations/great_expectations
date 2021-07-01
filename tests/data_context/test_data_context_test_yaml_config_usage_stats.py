@@ -27,7 +27,6 @@ from great_expectations import DataContext
 # - [x] test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass
 # - [x] test_test_yaml_config_usage_stats_class_name_not_provided
 # - [x] test_test_yaml_config_usage_stats_v2_api_custom_datasource
-# - [ ] test_test_yaml_config_usage_stats_other_exception
 
 
 @mock.patch(

@@ -4,3 +4,4 @@ from .my_custom_simple_sqlalchemy_datasource_class import (
     MyCustomSimpleSqlalchemyDatasource,
 )
 from .my_custom_v2_api_datasource import MyCustomV2ApiDatasource
+from .my_custom_v3_api_datasource import MyCustomV3ApiDatasource
