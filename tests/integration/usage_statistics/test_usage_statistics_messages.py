@@ -441,7 +441,6 @@ valid_usage_statistics_messages = {
         }
     ],
     # BaseDataContext.test_yaml_config() MESSAGES
-    # TODO: AJB 20210625 update these messages per new schema using Anonymizers
     "data_context.test_yaml_config": generate_messages_with_defaults(
         defaults={
             "success": True,
@@ -454,8 +453,9 @@ valid_usage_statistics_messages = {
             {
                 "event": "data_context.test_yaml_config",
                 "event_payload": {
-                    "class_name": class_name,
-                    "diagnostic_info": None,
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": class_name,
+                    "diagnostic_info": [],
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
@@ -466,8 +466,9 @@ valid_usage_statistics_messages = {
                 "event": "data_context.test_yaml_config",
                 "success": False,
                 "event_payload": {
-                    "class_name": class_name,
-                    "diagnostic_info": None,
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": class_name,
+                    "diagnostic_info": [],
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
@@ -479,8 +480,7 @@ valid_usage_statistics_messages = {
                 "event": "data_context.test_yaml_config",
                 "success": False,
                 "event_payload": {
-                    "class_name": None,
-                    "diagnostic_info": "__substitution_error__",
+                    "diagnostic_info": ["__substitution_error__"],
                 },
                 "ge_version": "0.13.20.manual_testing",
             },
@@ -488,8 +488,7 @@ valid_usage_statistics_messages = {
                 "event": "data_context.test_yaml_config",
                 "success": False,
                 "event_payload": {
-                    "class_name": None,
-                    "diagnostic_info": "__yaml_parse_error__",
+                    "diagnostic_info": ["__yaml_parse_error__"],
                 },
                 "ge_version": "0.13.20.manual_testing",
             },
@@ -497,8 +496,7 @@ valid_usage_statistics_messages = {
                 "event": "data_context.test_yaml_config",
                 "success": True,
                 "event_payload": {
-                    "class_name": None,
-                    "diagnostic_info": "__not_provided__",
+                    "diagnostic_info": ["__custom_subclass_not_core_ge__"],
                 },
                 "ge_version": "0.13.20.manual_testing",
             },
@@ -506,8 +504,7 @@ valid_usage_statistics_messages = {
                 "event": "data_context.test_yaml_config",
                 "success": True,
                 "event_payload": {
-                    "class_name": "__custom__",
-                    "diagnostic_info": "__custom__",
+                    "diagnostic_info": ["__class_name_not_provided__"],
                 },
                 "ge_version": "0.13.20.manual_testing",
             },
@@ -515,20 +512,71 @@ valid_usage_statistics_messages = {
                 "event": "data_context.test_yaml_config",
                 "success": False,
                 "event_payload": {
-                    "class_name": None,
-                    "diagnostic_info": "__not_provided__",
+                    "diagnostic_info": ["__class_name_not_provided__"],
                 },
                 "ge_version": "0.13.20.manual_testing",
             },
+        ]
+        # Store Message Types
+        + [
             {
                 "event": "data_context.test_yaml_config",
-                "success": False,
+                "success": True,
                 "event_payload": {
-                    "class_name": "__custom__",
-                    "diagnostic_info": "__custom__",
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "ExpectationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "InMemoryStoreBackend"
+                    },
                 },
                 "ge_version": "0.13.20.manual_testing",
-            },
+            }
+        ]
+        # Datasource Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": "fake_anonymized_name_for_testing",
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": "fake_anonymized_name_for_testing",
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # DataConnector Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # Checkpoint Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "Checkpoint",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
         ],
     ),
     # CLI INIT COMMANDS

@@ -39,7 +39,7 @@ anonymized_datasource_schema = {
         "anonymized_string": anonymized_string_schema,
         "anonymized_class_info": anonymized_class_info_schema,
     },
-    "oneOf": [
+    "anyOf": [
         # v2 (Batch Kwargs) API:
         {
             "type": "object",
@@ -393,19 +393,38 @@ test_yaml_config_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "test-yaml-config",
     "definitions": {
-        "anonymized_store": anonymized_store_schema,
-        "anonymized_datasource": anonymized_datasource_schema,
+        "anonymized_string": anonymized_string_schema,
         "anonymized_class_info": anonymized_class_info_schema,
     },
     "type": "object",
     "properties": {
-        "diagnostic_info": {"type": "string", "maxLength": 256},
+        "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+        "diagnostic_info": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+                "enum": [
+                    "__substitution_error__",
+                    "__yaml_parse_error__",
+                    "__custom_subclass_not_core_ge__",
+                    "__class_name_not_provided__",
+                ],
+            },
+        },
+        # Store
+        "anonymized_store_backend": {"$ref": "#/definitions/anonymized_class_info"},
+        # Datasource v2 (Batch Kwargs) API & v3 (Batch Request) API:
+        "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+        # Datasource v3 (Batch Request) API only:
+        "anonymized_execution_engine": {"$ref": "#/definitions/anonymized_class_info"},
+        "anonymized_data_connectors": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {"$ref": "#/definitions/anonymized_class_info"},
+        },
     },
-    "oneOf": [
-        {"$ref": "#/definitions/anonymized_store"},
-        {"$ref": "#/definitions/anonymized_datasource"},
-        {"$ref": "#/definitions/anonymized_class_info"},
-    ],
     "additionalProperties": False,
 }
 
