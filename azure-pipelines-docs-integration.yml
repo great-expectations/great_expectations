@@ -75,7 +75,7 @@ stages:
           displayName: 'Update pip'
 
         - script: |
-            pip install -r --no-build-isolation requirements-dev.txt
+            pip install --ignore-installed -r requirements-dev.txt
             pip install .
           displayName: 'Install dependencies'
 
