@@ -75,7 +75,7 @@ stages:
           displayName: 'Update pip'
 
         - script: |
-            pip install --no-build-isolation -r requirements-dev.txt
+            cat requirements-dev.txt | xargs pip install -r
             pip install .
           displayName: 'Install dependencies'
 
