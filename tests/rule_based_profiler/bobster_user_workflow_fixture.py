@@ -21,7 +21,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         5000
     )
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
-        1.33e3
+        1.5e3
     )
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
         3.00
