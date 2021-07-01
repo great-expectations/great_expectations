@@ -9,6 +9,9 @@ variables:
     data_connector_query:
       index: ":-1"
   confidence_level: 9.75e-1
+  # Definitions:
+  #   training set -- dataset used to run the estimation algorithm on
+  #   hold-out cross-validation set -- dataset used for evaluating performance of and/or tuning the estimation algorithm
   cross_validation_hold_out: 1.5e-1
 
 rules:
