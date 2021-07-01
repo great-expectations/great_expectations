@@ -370,17 +370,25 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             "BootstrapResult", ["confidence_interval", "standard_error"]
         )
 
-        bootstrap_result: BootstrapResult
+        bootstrap_result_mean: BootstrapResult
+        bootstrap_result_std: BootstrapResult
         if num_bootstrap_samples is None:
-            bootstrap_result = bootstrap(
+            bootstrap_result_mean = bootstrap(
                 bootstrap_samples,
                 np.mean,
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
             )
+            bootstrap_result_std = bootstrap(
+                bootstrap_samples,
+                np.std,
+                vectorized=False,
+                confidence_level=confidence_level,
+                random_state=rng,
+            )
         else:
-            bootstrap_result = bootstrap(
+            bootstrap_result_mean = bootstrap(
                 bootstrap_samples,
                 np.mean,
                 vectorized=False,
@@ -388,22 +396,36 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
             )
+            bootstrap_result_std = bootstrap(
+                bootstrap_samples,
+                np.std,
+                vectorized=False,
+                confidence_level=confidence_level,
+                n_resamples=num_bootstrap_samples,
+                random_state=rng,
+            )
 
-        confidence_interval: ConfidenceInterval = bootstrap_result.confidence_interval
+        confidence_interval_mean: ConfidenceInterval = (
+            bootstrap_result_mean.confidence_interval
+        )
+        confidence_interval_std: ConfidenceInterval = (
+            bootstrap_result_std.confidence_interval
+        )
 
-        confidence_interval_low: np.float64 = confidence_interval.low
-        confidence_interval_high: np.float64 = confidence_interval.high
-
-        std: Union[np.ndarray, np.float64] = bootstrap_result.standard_error
+        confidence_interval_mean_low: np.float64 = confidence_interval_mean.low
+        confidence_interval_mean_high: np.float64 = confidence_interval_mean.high
+        confidence_interval_std_high: np.float64 = confidence_interval_std.high
 
         stds_multiplier: np.float64 = NP_SQRT_2 * special.erfinv(confidence_level)
-        margin_of_error: np.float64 = stds_multiplier * std
+        margin_of_error: np.float64 = np.float64(
+            stds_multiplier * confidence_interval_std_high
+        )
 
-        confidence_interval_low -= margin_of_error
-        confidence_interval_high += margin_of_error
+        confidence_interval_mean_low -= margin_of_error
+        confidence_interval_mean_high += margin_of_error
 
         return ConfidenceInterval(
-            low=confidence_interval_low, high=confidence_interval_high
+            low=confidence_interval_mean_low, high=confidence_interval_mean_high
         )
 
     def _get_oneshot_confidence_interval(

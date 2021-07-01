@@ -9,7 +9,7 @@ variables:
     data_connector_query:
       index: ":-1"
   confidence_level: 9.75e-1
-  cross_validation_hold_out: 1.0e-1
+  cross_validation_hold_out: 1.5e-1
 
 rules:
   row_count_range_rule:
@@ -21,6 +21,7 @@ rules:
         batch_request: $variables.jan_2018_thru_nov_2020_monthly_trip_data_batch_request
         metric_name: table.row_count
         confidence_level: $variables.confidence_level
+        cross_validation_hold_out: $variables.cross_validation_hold_out
         round_decimals: 0
         truncate_values:
           lower_bound: 0
@@ -32,3 +33,5 @@ rules:
         max_value: $parameter.row_count_range.value.max_value
         meta:
           profiler_details: $parameter.row_count_range.details
+        # This attribute is referenced here for testing only; use "precision" if expectation_type supports "mostly".
+        mostly_test: $parameter.row_count_range.precision
