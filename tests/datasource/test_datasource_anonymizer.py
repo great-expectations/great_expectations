@@ -130,6 +130,12 @@ data_connectors:
 
 
 def test_anonymize_datasource_info_v2_api_custom_subclass():
+    """
+    What does this test and why?
+    We should be able to discern the GE parent class for a custom type and construct
+    a useful usage stats event message.
+    Custom v2 API Datasources should continue to be supported.
+    """
     name = "test_pandas_datasource"
     yaml_config = f"""
 module_name: tests.data_context.fixtures.plugins.my_custom_v2_api_datasource

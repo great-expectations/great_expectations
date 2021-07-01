@@ -27,6 +27,7 @@ from great_expectations import DataContext
 # - [x] test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass
 # - [x] test_test_yaml_config_usage_stats_class_name_not_provided
 # - [x] test_test_yaml_config_usage_stats_v2_api_custom_datasource
+# See test_datasource_anonymizer.test_anonymize_datasource_info_v2_api_custom_subclass
 
 
 @mock.patch(
@@ -253,48 +254,6 @@ introspection:
                             "parent_class": "InferredAssetSqlDataConnector",
                         }
                     ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_test_yaml_config_usage_stats_v2_api_custom_datasource(
-    mock_emit, empty_data_context_stats_enabled
-):
-    """
-    What does this test and why?
-    We should be able to discern the GE parent class for a custom type and construct
-    a useful usage stats event message.
-    Custom v2 API Datasources should continue to be supported.
-    """
-    data_context: DataContext = empty_data_context_stats_enabled
-    _ = data_context.test_yaml_config(
-        yaml_config="""
-module_name: tests.data_context.fixtures.plugins.my_custom_v2_api_datasource
-class_name: MyCustomV2ApiDatasource
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized name & class since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_class = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_class"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "PandasDatasource",
-                    "anonymized_class": anonymized_class,
                 },
                 "success": True,
             }
