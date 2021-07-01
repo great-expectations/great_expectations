@@ -253,11 +253,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
             "max_value"
         ]
     )
-    mostly: float = (
-        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
-            "mostly_test"
-        ]
-    )
 
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
@@ -276,10 +271,4 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
-    )
-    assert (
-        mostly
-        >= bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
-        ]["min_precision_on_cross_validation_hold_out_set"]
     )

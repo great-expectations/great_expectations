@@ -10,6 +10,7 @@ variables:
       index: ":-1"
   sampling_method: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
   confidence_level: 9.9e-1
+  mostly: 1.0
 
 rules:
   row_count_range_rule:
@@ -31,6 +32,7 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         min_value: $parameter.row_count_range.value.min_value
         max_value: $parameter.row_count_range.value.max_value
+        mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
   column_ranges_rule:
@@ -69,7 +71,7 @@ rules:
         column: $domain.domain_kwargs.column
         min_value: $parameter.min_range.value.min_value
         max_value: $parameter.min_range.value.max_value
-        mostly: $parameter.max_range.precision
+        mostly: $variables.mostly
         meta:
           profiler_details: $parameter.min_range.details
       - expectation_type: expect_column_max_to_be_between
@@ -78,6 +80,6 @@ rules:
         column: $domain.domain_kwargs.column
         min_value: $parameter.max_range.value.min_value
         max_value: $parameter.max_range.value.max_value
-        mostly: $parameter.max_range.precision
+        mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details
