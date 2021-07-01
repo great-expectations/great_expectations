@@ -4,6 +4,5 @@ This class is used for testing usage_stats messages when the custom class is not
 
 
 class MyCustomNonCoreGeClass:
-
     def self_check(self, pretty_print):
         pass
