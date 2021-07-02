@@ -3,7 +3,6 @@ import os
 import shutil
 import subprocess
 import sys
-from collections import defaultdict
 
 import pytest
 
