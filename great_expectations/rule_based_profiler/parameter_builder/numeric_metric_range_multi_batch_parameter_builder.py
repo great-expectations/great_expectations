@@ -340,6 +340,7 @@ detected.
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
+                method="basic",
             )
             bootstrap_result_std = bootstrap(
                 bootstrap_samples,
@@ -356,6 +357,7 @@ detected.
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
+                method="basic",
             )
             bootstrap_result_std = bootstrap(
                 bootstrap_samples,
