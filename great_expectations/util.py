@@ -496,7 +496,7 @@ def read_excel(
     try:
         df = pd.read_excel(filename, *args, **kwargs)
     except ImportError:
-        raise GreatExpectationsError(
+        raise ImportError(
             "Pandas now requires 'openpyxl' as an optional-dependency to read Excel files. Please use pip or conda to install openpyxl and try again"
         )
 
