@@ -87,7 +87,7 @@ profiler = UserConfigurableProfiler(
 suite = profiler.build_suite()
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-# Create Checkpoint
+# Create first checkpoint on yellow_trip_data_sample_2019-01.csv
 my_checkpoint_config = f"""
 name: my_checkpoint
 config_version: 1.0
@@ -104,15 +104,17 @@ validations:
 """
 my_checkpoint_config = yaml.load(my_checkpoint_config)
 
+# NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
+# In the current test, site_names are set to None because we do not want to update and build data_docs
+# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
 checkpoint = SimpleCheckpoint(
     **my_checkpoint_config, data_context=context, site_names=None
 )
 checkpoint_result = checkpoint.run(site_names=None)
-# NOTE: The following assertion is only for testing and can be ignored by users.
 assert checkpoint_result.run_results
 
 
-# Create Checkpoint
+# Create second checkpoint on yellow_trip_data_sample_2019-02.csv
 my_new_checkpoint_config = f"""
 name: my_new_checkpoint
 config_version: 1.0
@@ -128,12 +130,14 @@ validations:
     expectation_suite_name: taxi.demo
 """
 
-# Note : site_names are set to None because we are not actually updating and building data_docs in this test.
+
 my_new_checkpoint_config = yaml.load(my_new_checkpoint_config)
 
+# NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
+# In the current test, site_names are set to None because we do not want to update and build data_docs
+# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
 new_checkpoint = SimpleCheckpoint(
     **my_new_checkpoint_config, data_context=context, site_names=None
 )
 new_checkpoint_result = new_checkpoint.run(site_names=None)
-# NOTE: The following code is only for testing and can be ignored by users.
 assert new_checkpoint_result.run_results

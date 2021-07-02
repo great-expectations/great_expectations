@@ -20,14 +20,14 @@ This will open a **Jupyter notebook** that will allow you to complete the config
 The Jupyter notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows to configure a Checkpoint to validate the February data:
 
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/test_getting_started.py#L90-L103
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L118-L131
 ```
 
 You can then execute all cells in the notebook in order to store the Checkpoint to your Data Context.
 
 **What just happened?**
 
-- `my_checkpoint` is the name of your new Checkpoint.
+- `my_new_checkpoint` is the name of your new Checkpoint.
 
 - The Checkpoint uses `taxi.demo` as its primary Expectation Suite.
 
@@ -67,6 +67,7 @@ In this tutorial, we have covered the following basic capabilities of Great Expe
 
   - Validating a new batch of data with a Checkpoint
 
-As a final, **optional step**, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, validation results, and Data Docs.
+As a final, **optional step**, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, validation results, and Data Docs. And if you want to stop here, feel free to join our [Slack community](https://greatexpectations.io/slack) to say hi to fellow Great Expectations users in the **#beginners** channel!
 
-And if you want to stop here, feel free to join our [Slack community](https://greatexpectations.io/slack) to say hi to fellow Great Expectations users in the **#beginners** channel!
+Also, if you would like to view the full script used in this Tutorial, see it on GitHub:
+  - [getting_started.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/tutorials/getting-started/getting_started.py)

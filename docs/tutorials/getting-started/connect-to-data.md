@@ -53,7 +53,7 @@ When you completed those last few steps, you told Great Expectations that:
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/test_getting_started.py#L17-L34
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L16-L35
 ```
 
 This datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in ```great_expectations/uncommitted/config_variables.yml```.
