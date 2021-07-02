@@ -57,7 +57,7 @@ ignored_columns = [
     "vendor_id",
     "pickup_datetime",
     "dropoff_datetime",
-    #"passenger_count",
+    # "passenger_count",
     "trip_distance",
     "rate_code_id",
     "store_and_fwd_flag",
