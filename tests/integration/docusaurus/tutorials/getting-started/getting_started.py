@@ -41,10 +41,9 @@ batch_request = BatchRequest(
     datasource_name="data__dir",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="yellow_trip_data_sample_2019-01.csv",
-    limit=1000
+    limit=1000,
 )
-context.create_expectation_suite(
-    expectation_suite_name="taxi.demo")
+context.create_expectation_suite(expectation_suite_name="taxi.demo")
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name="taxi.demo",
