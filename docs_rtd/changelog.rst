@@ -11,6 +11,8 @@ Develop
   - Support for both single-batch and multi-batch use-cases showcased
   - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
   - Initial documentation
+* [BUGFIX] Require openpyxl to run test for read_excel() #2989
+
 
 0.13.21
 -----------------
