@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
     import_scipy_stats_bootstrap_function,
 )
-from great_expectations.util import import_library_module, is_numeric
+from great_expectations.util import is_numeric
 from great_expectations.validator.validator import Validator
 
 bootstrap: Optional[Callable] = import_scipy_stats_bootstrap_function()
@@ -340,6 +340,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
+                method="basic",
             )
         else:
             bootstrap_result = bootstrap(
@@ -349,6 +350,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
+                method="basic",
             )
 
         confidence_interval: ConfidenceInterval = bootstrap_result.confidence_interval
