@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Getting Started with Great Expectations - Updated and is now integration tested
 * [FEATURE] INTRODUCING MAJOR IMPROVEMENTS to the new Rule-Based Profiler architecture and capabilities (Experimental):
   - Clean separation of concerns between DomainBuilder and ParameterBuilder logic
   - Support for both single-batch and multi-batch use-cases showcased
