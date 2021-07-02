@@ -2,7 +2,7 @@
 title: Connect to Data
 ---
 
-![minimap](minimap.png)
+![minimap](../../images/minimap.png)
 
 Once you have a Data Context, you’ll want to connect to data. In Great Expectations, Datasources simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
@@ -53,21 +53,8 @@ When you completed those last few steps, you told Great Expectations that:
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:
 
-````console
-name: my_datasource
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  my_datasource_example_data_connector:
-    class_name: InferredAssetFilesystemDataConnector
-    datasource_name: my_datasource
-    base_directory: ../data
-    default_regex:
-      group_names:
-        - data_asset_name
-      pattern: (.*)
-````
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/test_getting_started.py#L17-L34
+```
 
 This datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in ```great_expectations/uncommitted/config_variables.yml```.
 

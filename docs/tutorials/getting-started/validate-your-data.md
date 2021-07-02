@@ -19,21 +19,8 @@ This will open a **Jupyter notebook** that will allow you to complete the config
 
 The Jupyter notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows to configure a Checkpoint to validate the February data:
 
-```python
-my_checkpoint_config = f"""
-name: {my_checkpoint_name}
-config_version: 1.0
-class_name: SimpleCheckpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
-validations:
-  - batch_request:
-      datasource_name: taxi_data
-      data_connector_name: taxi_data_example_data_connector
-      data_asset_name: yellow_tripdata_sample_2019-02.csv
-      data_connector_query:
-        index: -1
-    expectation_suite_name: taxi.demo
-"""
+
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/test_getting_started.py#L90-L103
 ```
 
 You can then execute all cells in the notebook in order to store the Checkpoint to your Data Context.

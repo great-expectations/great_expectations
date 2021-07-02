@@ -2,7 +2,7 @@
 title: How to use Data Docs
 ---
 
-[Data Docs](...) translate [Expectations](...), [Validation Results](...), and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
+[Data Docs](/docs/reference/data-docs) translate [Expectations](/docs/reference/expectations/expectations), [Validation Results](/docs/reference/validation), and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
 
 In the previous steps, when you executed the last cell in the Jupyter notebook, Great Expectations used the Expectation Suite you generated to validate the January data batch. It then compiled those validation results to HTML, and opened a browser window with a Data Docs validation results page:
 
@@ -26,7 +26,7 @@ For now, your static site is built and stored locally. In the last step of the t
 
 ### How did we get those Expectations?
 
-You can create and edit Expectations using several different workflows. Using an automated [Profiler](...) as we just did is one of the quickest option to get started with an Expectation Suite.
+You can create and edit Expectations using several different workflows. Using an automated [Profiler](/docs/reference/profilers) as we just did is one of the quickest option to get started with an Expectation Suite.
 
 This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents of the data, and produced an initial set of Expectations. The Profiler considers the following properties, amongst others:
 
@@ -38,11 +38,9 @@ This Profiler connected to your data (using the Datasource you configured in the
 
   - the number of `NULL` values
 
-If you would like to learn more about how the Profiler works, you can dig deeper here: [`great_expectations.profile.UserConfigurableProfiler`](..)
-
 These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you’re not starting from a blank slate.
 
-Later, you should also take a look at other workflows for Creating and editing Expectations. [Creating and editing Expectations](...) is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
+Later, you should also take a look at other workflows for Creating Custom Expectations. [Creating Custom Expectations](/docs/guides/expectations/creating_custom_expectations/how-to-create-custom-expectations) is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
 Expectations under the hood
 By default, Expectation Suites are stored in a JSON file in the expectations/ subdirectory of your great_expectations/ folder. You can also configure Great Expectations to store Expectations to other locations, such as S3, Postgres, etc. We’ll come back to these options in the last (optional) step of the tutorial.
