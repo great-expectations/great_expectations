@@ -9,10 +9,10 @@ from great_expectations.profile.user_configurable_profiler import (
 from great_expectations.validator.validator import Validator
 
 context = ge.get_context()
-
+# NOTE: The following assertion is only for testing and can be ignored by users.
 assert context
 
-# adding datasource
+# First configure a new Datasource and add to DataContext
 datasource_yaml = f"""
 name: data__dir
 class_name: Datasource
@@ -36,23 +36,23 @@ data_connectors:
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 
-# creating expectation suite
-batch_request = {
-    "datasource_name": "data__dir",
-    "data_connector_name": "default_inferred_data_connector_name",
-    "data_asset_name": "yellow_trip_data_sample_2019-01.csv",
-    "limit": 1000,
-}
-expectation_suite_name = "taxi.demo"
+# Get Validator by creating ExpectationSuite and passing in BatchRequest
+batch_request = BatchRequest(
+    datasource_name="data__dir",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="yellow_trip_data_sample_2019-01.csv",
+    limit=1000
+)
 context.create_expectation_suite(
-    expectation_suite_name=expectation_suite_name, overwrite_existing=False
-)
+    expectation_suite_name="taxi.demo")
 validator = context.get_validator(
-    batch_request=BatchRequest(**batch_request),
-    expectation_suite_name=expectation_suite_name,
+    batch_request=batch_request,
+    expectation_suite_name="taxi.demo",
 )
+# NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
 
+# Profile the data UserConfigurableProfiler and save resulting ExpectationSuite
 ignored_columns = [
     "vendor_id",
     "pickup_datetime",
@@ -87,8 +87,34 @@ profiler = UserConfigurableProfiler(
 suite = profiler.build_suite()
 validator.save_expectation_suite(discard_failed_expectations=False)
 
+# Create Checkpoint
 my_checkpoint_config = f"""
 name: my_checkpoint
+config_version: 1.0
+class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data__dir
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_trip_data_sample_2019-01.csv
+      data_connector_query:
+        index: -1
+    expectation_suite_name: taxi.demo
+"""
+my_checkpoint_config = yaml.load(my_checkpoint_config)
+
+checkpoint = SimpleCheckpoint(
+    **my_checkpoint_config, data_context=context, site_names=None
+)
+checkpoint_result = checkpoint.run(site_names=None)
+# NOTE: The following assertion is only for testing and can be ignored by users.
+assert checkpoint_result.run_results
+
+
+# Create Checkpoint
+my_new_checkpoint_config = f"""
+name: my_new_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
@@ -103,10 +129,11 @@ validations:
 """
 
 # Note : site_names are set to None because we are not actually updating and building data_docs in this test.
-my_checkpoint_config = yaml.load(my_checkpoint_config)
+my_new_checkpoint_config = yaml.load(my_new_checkpoint_config)
 
-checkpoint = SimpleCheckpoint(
-    **my_checkpoint_config, data_context=context, site_names=None
+new_checkpoint = SimpleCheckpoint(
+    **my_new_checkpoint_config, data_context=context, site_names=None
 )
-checkpoint_result = checkpoint.run(site_names=None)
-assert checkpoint_result.run_results
+new_checkpoint_result = new_checkpoint.run(site_names=None)
+# NOTE: The following code is only for testing and can be ignored by users.
+assert new_checkpoint_result.run_results
