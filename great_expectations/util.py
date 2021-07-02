@@ -493,7 +493,13 @@ def read_excel(
     """
     import pandas as pd
 
-    df = pd.read_excel(filename, *args, **kwargs)
+    try:
+        df = pd.read_excel(filename, *args, **kwargs)
+    except ImportError:
+        raise GreatExpectationsError(
+            "Pandas now requires 'openpyxl' as an optional-dependency to read Excel files. Please use pip or conda to install openpyxl and try again"
+        )
+
     if dataset_class is None:
         verify_dynamic_loading_support(module_name=module_name)
         dataset_class = load_class(class_name=class_name, module_name=module_name)

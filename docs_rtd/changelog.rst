@@ -6,12 +6,14 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Getting Started tutorial and integration tests
 * [FEATURE] INTRODUCING MAJOR IMPROVEMENTS to the new Rule-Based Profiler architecture and capabilities (Experimental):
   - Clean separation of concerns between DomainBuilder and ParameterBuilder logic
   - Support for both single-batch and multi-batch use-cases showcased
   - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
   - Initial documentation
 * [BUGFIX] Skip test for read_excel() if openpyxl is not installed (pandas >= 1.3.0)  #2989
+
 
 0.13.21
 -----------------
