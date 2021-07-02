@@ -4,6 +4,7 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Union
 
+import great_expectations as ge
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -99,21 +100,23 @@ class ExpectationSuite(SerializableDictDot):
             citation_date = parse_string_to_datetime(datetime_string=citation_date)
 
         citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
-        self.meta["citations"].append(
-            {
-                "citation_date": get_datetime_string_from_strftime_format(
-                    format_str="%Y-%m-%dT%H:%M:%S.%fZ", datetime_obj=citation_date
-                ),
-                "batch_request": batch_request,
-                "batch_definition": batch_definition,
-                "batch_spec": batch_spec,
-                "batch_kwargs": batch_kwargs,
-                "batch_markers": batch_markers,
-                "batch_parameters": batch_parameters,
-                "profiler_config": profiler_config,
-                "comment": comment,
-            }
+        citation: Dict[str, Any] = {
+            "citation_date": get_datetime_string_from_strftime_format(
+                format_str="%Y-%m-%dT%H:%M:%S.%fZ", datetime_obj=citation_date
+            ),
+            "batch_request": batch_request,
+            "batch_definition": batch_definition,
+            "batch_spec": batch_spec,
+            "batch_kwargs": batch_kwargs,
+            "batch_markers": batch_markers,
+            "batch_parameters": batch_parameters,
+            "profiler_config": profiler_config,
+            "comment": comment,
+        }
+        ge.util.filter_properties_dict(
+            properties=citation, clean_falsy=True, inplace=True
         )
+        self.meta["citations"].append(citation)
 
     def isEquivalentTo(self, other):
         """
