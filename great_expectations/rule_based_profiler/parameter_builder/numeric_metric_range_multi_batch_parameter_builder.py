@@ -348,6 +348,7 @@ detected.
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
+                method="basic",
             )
         else:
             bootstrap_result_mean = bootstrap(
@@ -366,6 +367,7 @@ detected.
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
+                method="basic",
             )
 
         confidence_interval_mean: ConfidenceInterval = (
