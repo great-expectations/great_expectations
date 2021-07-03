@@ -6,9 +6,11 @@ from great_expectations.rule_based_profiler.profiler import Profiler
 profiler_config = """
 # This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_trip_data_samples/
+
 variables:
   confidence_level: 9.75e-1
   mostly: 1.0
+
 rules:
   row_count_rule:
     domain_builder:
