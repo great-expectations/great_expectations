@@ -185,7 +185,7 @@ def alice_columnar_table_single_batch():
     yaml = YAML()
     profiler_config: dict = yaml.load(verbose_profiler_config)
     expected_expectation_suite.add_citation(
-        comment="Suite created by Rule-Based Profiler with the following config",
+        comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=profiler_config,
     )
 
