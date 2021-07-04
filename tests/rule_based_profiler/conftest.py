@@ -292,6 +292,44 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
 
 @pytest.fixture
+def weekly_taxi_data(tmp_path_factory):
+    weekly_taxi_data: str = str(tmp_path_factory.mktemp("weekly_taxi_data"))
+    base_directory: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_trip_data_samples",
+        ),
+    )
+
+    file_name_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        base_directory_path=base_directory, glob_directive="*.csv"
+    )
+    file_name_list.sort()
+
+    df_list: List[pd.DataFrame] = [
+        pd.read_csv(
+            os.path.join(base_directory, file),
+            index_col=None,
+            header=0,
+            parse_dates=["pickup_datetime", "dropoff_datetime"],
+        )
+        for file in file_name_list
+    ]
+    df: pd.DataFrame = pd.concat(df_list, axis=0, ignore_index=True)
+    df["year-week"] = df["pickup_datetime"].dt.strftime("%Y-%U")
+
+    date: pd.Label
+    weekly_data: pd.DataFrame
+    for date, weekly_data in df.groupby("year-week"):
+        path: str = os.path.join(weekly_taxi_data, f"{date}.csv")
+        weekly_data.to_csv(path, index=False)
+
+    return weekly_taxi_data
+
+
+@pytest.fixture
 def pandas_test_df():
     df: pd.DataFrame = pd.DataFrame(
         {
