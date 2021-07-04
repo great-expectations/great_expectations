@@ -371,7 +371,10 @@ detected.
         else:
             bootstrap_result_low = bootstrap(
                 bootstrap_samples,
-                np.mean,
+                lambda data: np.quantile(
+                    data,
+                    q=quantile_probability_lower,
+                ),
                 vectorized=False,
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
@@ -380,7 +383,10 @@ detected.
             )
             bootstrap_result_high = bootstrap(
                 bootstrap_samples,
-                np.std,
+                lambda data: np.quantile(
+                    data,
+                    q=quantile_probability_upper,
+                ),
                 vectorized=False,
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
