@@ -321,7 +321,14 @@ detected.
             parameters=parameters,
         )
 
+        bootstrap_method: str
+        if np.all(np.isclose(metric_values, metric_values[0])):
+            bootstrap_method = "basic"
+        else:
+            bootstrap_method = "BCa"
+
         rng: np.random.Generator = np.random.default_rng()
+
         bootstrap_samples: tuple = (
             metric_values,
         )  # bootstrap samples must be in a sequence
@@ -331,66 +338,71 @@ detected.
             "BootstrapResult", ["confidence_interval", "standard_error"]
         )
 
-        bootstrap_result_mean: BootstrapResult
-        bootstrap_result_std: BootstrapResult
+        bootstrap_result_low: BootstrapResult
+        bootstrap_result_high: BootstrapResult
+
+        uncertainty_level: float = 1.0 - confidence_level
+        quantile_probability_lower: float = 5.0e-1 * uncertainty_level
+        quantile_probability_upper: float = 1.0 - quantile_probability_lower
+
         if num_bootstrap_samples is None:
-            bootstrap_result_mean = bootstrap(
+            bootstrap_result_low = bootstrap(
                 bootstrap_samples,
-                np.mean,
+                lambda data: np.quantile(
+                    data,
+                    q=quantile_probability_lower,
+                ),
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
-                method="basic",
+                method=bootstrap_method,
             )
-            bootstrap_result_std = bootstrap(
+            bootstrap_result_high = bootstrap(
                 bootstrap_samples,
-                np.std,
+                lambda data: np.quantile(
+                    data,
+                    q=quantile_probability_upper,
+                ),
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
-                method="basic",
+                method=bootstrap_method,
             )
         else:
-            bootstrap_result_mean = bootstrap(
+            bootstrap_result_low = bootstrap(
                 bootstrap_samples,
                 np.mean,
                 vectorized=False,
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
-                method="basic",
+                method=bootstrap_method,
             )
-            bootstrap_result_std = bootstrap(
+            bootstrap_result_high = bootstrap(
                 bootstrap_samples,
                 np.std,
                 vectorized=False,
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
-                method="basic",
+                method=bootstrap_method,
             )
 
-        confidence_interval_mean: ConfidenceInterval = (
-            bootstrap_result_mean.confidence_interval
+        confidence_interval_low: ConfidenceInterval = (
+            bootstrap_result_low.confidence_interval
         )
-        confidence_interval_std: ConfidenceInterval = (
-            bootstrap_result_std.confidence_interval
+        confidence_interval_low_mean: np.float64 = np.mean(
+            [confidence_interval_low.low, confidence_interval_low.high]
         )
-
-        confidence_interval_mean_low: np.float64 = confidence_interval_mean.low
-        confidence_interval_mean_high: np.float64 = confidence_interval_mean.high
-        confidence_interval_std_high: np.float64 = confidence_interval_std.high
-
-        stds_multiplier: np.float64 = NP_SQRT_2 * special.erfinv(confidence_level)
-        margin_of_error: np.float64 = np.float64(
-            stds_multiplier * confidence_interval_std_high
+        confidence_interval_high: ConfidenceInterval = (
+            bootstrap_result_high.confidence_interval
         )
-
-        confidence_interval_mean_low -= margin_of_error
-        confidence_interval_mean_high += margin_of_error
+        confidence_interval_high_mean: np.float64 = np.mean(
+            [confidence_interval_high.low, confidence_interval_high.high]
+        )
 
         return ConfidenceInterval(
-            low=confidence_interval_mean_low, high=confidence_interval_mean_high
+            low=confidence_interval_low_mean, high=confidence_interval_high_mean
         )
 
     def _get_oneshot_confidence_interval(
