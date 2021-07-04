@@ -7,6 +7,7 @@ import Congratulations from '../../components/congratulations.md'
 import Prerequisites from '../../components/prerequisites.jsx'
 import WhereToRunCode from '../../components/where_to_run_code.md'
 import SparkDataContextNote from '../../components/spark_data_context_note.md'
+import SparkAdditionalNotes from '../../components/spark_additional_notes.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -140,11 +141,7 @@ Then load data into the `Validator`.
 
 ## Additional Notes
 
-If you are working with nonstandard CSVs, read one of these guides:
-
-- [How to work with headerless CSVs in spark](#TODO)
-- [How to work with custom delimited CSVs in spark](#TODO)
-- [How to work with parquet files in spark](#TODO)
+<SparkAdditionalNotes />
 
 To view the full scripts used in this page, see them on GitHub:
 

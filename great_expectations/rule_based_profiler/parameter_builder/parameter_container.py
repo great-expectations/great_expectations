@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import filter_properties_dict
@@ -329,8 +329,10 @@ def _get_parameter_value_from_parameter_container(
 
     parameter_name_part: Optional[str] = None
     return_value: Optional[Union[Any, ParameterNode]] = parameter_node
+    parent_parameter_node: Optional[ParameterNode] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
+            parent_parameter_node = return_value
             if parameter_name_part in return_value:
                 return_value = return_value[parameter_name_part]
 
@@ -338,6 +340,12 @@ def _get_parameter_value_from_parameter_container(
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
+"""
+        )
+    if parameter_name_part not in parent_parameter_node:
+        raise KeyError(
+            f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
+"{parameter_name_part}" of fully-qualified parameter name does not exist.
 """
         )
 

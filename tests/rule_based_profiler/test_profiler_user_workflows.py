@@ -2,6 +2,8 @@ import datetime
 from typing import Any, Dict, List, cast
 
 import pandas as pd
+import pytest
+from freezegun import freeze_time
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -9,6 +11,9 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.util import (
+    is_scipy_stats_bootstrap_loadable,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -66,12 +71,14 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     assert metric_max == 73
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_alice_profiler_user_workflow_single_batch(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -87,6 +94,7 @@ def test_alice_profiler_user_workflow_single_batch(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
+        include_citation=True,
     )
 
     assert (
@@ -97,15 +105,17 @@ def test_alice_profiler_user_workflow_single_batch(
 
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
-    bobby_columnar_table_multi_batch_context,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
 ):
     """
-    # TODO: <Alex>ALEX -- Provide DocString</Alex>
     What does this test and why?
+    Batches created in the multibatch_generic_csv_generator fixture should be available using the
+    multibatch_generic_csv_generator_context
+    This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
     """
 
-    context: DataContext = bobby_columnar_table_multi_batch_context
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     datasource_name: str = "taxi_pandas"
     data_connector_name: str = "monthly"
@@ -161,12 +171,16 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     assert month == 3
 
 
-def test_bobby_profiler_user_workflow_multi_batch(
-    bobby_columnar_table_multi_batch_context,
+@freeze_time("09/26/2019 13:42:41")
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
 ):
     # Load data context
-    data_context: DataContext = bobby_columnar_table_multi_batch_context
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = bobby_columnar_table_multi_batch["profiler_config"]
 
@@ -180,11 +194,81 @@ def test_bobby_profiler_user_workflow_multi_batch(
 
     expectation_suite: ExpectationSuite = profiler.profile(
         expectation_suite_name=bobby_columnar_table_multi_batch[
-            "expected_expectation_suite_name"
-        ],
+            "test_configuration_oneshot_sampling_method"
+        ]["expectation_suite_name"],
+        include_citation=True,
     )
 
     assert (
         expectation_suite
-        == bobby_columnar_table_multi_batch["expected_expectation_suite"]
+        == bobby_columnar_table_multi_batch[
+            "test_configuration_oneshot_sampling_method"
+        ]["expected_expectation_suite"]
+    )
+
+
+@pytest.mark.skipif(
+    not is_scipy_stats_bootstrap_loadable(),
+    reason='requires "scipy.stats.bootstrap" to be installed',
+)
+def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
+    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
+    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
+):
+    # Load data context
+    data_context: DataContext = (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
+    )
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+        "profiler_config"
+    ]
+
+    # Instantiate Profiler
+    profiler_config: dict = yaml.load(yaml_config)
+
+    profiler: Profiler = Profiler(
+        profiler_config=profiler_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.profile(
+        expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ][
+            "expectation_suite_name"
+        ],
+    )
+    expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
+        expectation_suite.to_json_dict()["expectations"][0]["kwargs"]
+    )
+    min_value: int = (
+        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+            "min_value"
+        ]
+    )
+    max_value: int = (
+        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+            "max_value"
+        ]
+    )
+
+    assert (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_min_value_mean_value"]
+        < min_value
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_mean_value"]
+    )
+    assert (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_mean_value"]
+        < max_value
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
