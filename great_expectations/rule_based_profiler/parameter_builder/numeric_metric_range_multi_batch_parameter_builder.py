@@ -258,7 +258,13 @@ detected.
         metric_values = np.array(metric_values, dtype=np.float64)
 
         confidence_interval: ConfidenceInterval
-        if sampling_method == "bootstrap":
+
+        if np.all(np.isclose(metric_values, metric_values[0])):
+            # Computation is unnecessary if distribution is degenerate.
+            confidence_interval = ConfidenceInterval(
+                low=metric_values[0], high=metric_values[0]
+            )
+        elif sampling_method == "bootstrap":
             confidence_interval = self._get_bootstrap_confidence_interval(
                 metric_values=metric_values,
                 confidence_level=confidence_level,
@@ -321,12 +327,6 @@ detected.
             parameters=parameters,
         )
 
-        bootstrap_method: str
-        if np.all(np.isclose(metric_values, metric_values[0])):
-            bootstrap_method = "basic"
-        else:
-            bootstrap_method = "BCa"
-
         rng: np.random.Generator = np.random.default_rng()
 
         bootstrap_samples: tuple = (
@@ -355,7 +355,6 @@ detected.
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
-                method=bootstrap_method,
             )
             bootstrap_result_high = bootstrap(
                 bootstrap_samples,
@@ -366,7 +365,6 @@ detected.
                 vectorized=False,
                 confidence_level=confidence_level,
                 random_state=rng,
-                method=bootstrap_method,
             )
         else:
             bootstrap_result_low = bootstrap(
@@ -379,7 +377,6 @@ detected.
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
-                method=bootstrap_method,
             )
             bootstrap_result_high = bootstrap(
                 bootstrap_samples,
@@ -391,7 +388,6 @@ detected.
                 confidence_level=confidence_level,
                 n_resamples=num_bootstrap_samples,
                 random_state=rng,
-                method=bootstrap_method,
             )
 
         confidence_interval_low: ConfidenceInterval = (
