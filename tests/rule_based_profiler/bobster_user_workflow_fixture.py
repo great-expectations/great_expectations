@@ -6,10 +6,6 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.fixture
 def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
-    """
-    # TODO: <Alex>ALEX -- Add DocString</Alex>
-    """
-
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__, "bobster_user_workflow_verbose_profiler_config.yml"
     )
@@ -25,7 +21,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         5000
     )
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
-        4.00e2
+        1.0e3
     )
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
         3.00
