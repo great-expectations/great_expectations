@@ -56,6 +56,13 @@ Based on that information, the CLI added the following entry into your ```great_
 ```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L16-L35
 ```
 
+:::note What does the configuration contain?
+
+- `ExecutionEngine` : The `ExecutionEngine` provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on `ExecutionEngines`, please refer to the following [Core Concepts document](link)
+- `DataConnectors` : The current configuration contains an `InferredAssetFilesystemDataConnector`, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case) and a `RuntimeDataConnector`, which allows you to retrieve a batch of data by defining a `path`.  This tutorial we will focus on the `InferredAssetFilesystemDataConnector`.  For more information on DataConnectors including `RuntimeDataConnectors`, please refer to the following [Core Concepts document](link).
+
+:::
+
 This datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in ```great_expectations/uncommitted/config_variables.yml```.
 
 In the future, you can modify or delete your configuration by editing your ```great_expectations.yml``` and ```config_variables.yml``` files directly.

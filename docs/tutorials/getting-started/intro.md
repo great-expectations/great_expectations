@@ -7,7 +7,7 @@ Welcome to Great Expectations! This tutorial will help you set up your first loc
 :::warning
 The steps described in this tutorial assume you are installing Great Expectations version 0.13.8 or above.
 
-For a tutorial for older versions of Great Expectations, please see older versions of this documentation.
+For a tutorial for older versions of Great Expectations, please see older versions of this documentation, which can be found at [https://docs.greatexpectations.io/](https://docs.greatexpectations.io/en/latest/).
 :::
 
 The tutorial will walk you through the following steps:
