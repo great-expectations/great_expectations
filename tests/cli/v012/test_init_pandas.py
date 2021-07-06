@@ -497,7 +497,10 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
         "- Please check the file and try again or select a different data file."
         in stdout
     )
-    assert ("- Error: File is not a recognized excel file" in stdout) or (
+    assert (
+        "- Error: Excel file format cannot be determined, you must specify an engine manually."
+        in stdout
+    ) or (
         "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
         in stdout
     )
@@ -566,7 +569,10 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         "- Please check the file and try again or select a different data file."
         in stdout
     )
-    assert ("- Error: File is not a recognized excel file" in stdout) or (
+    assert (
+        "- Error: Excel file format cannot be determined, you must specify an engine manually."
+        in stdout
+    ) or (
         "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
         in stdout
     )
