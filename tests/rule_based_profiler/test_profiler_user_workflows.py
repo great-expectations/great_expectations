@@ -2,7 +2,6 @@ import datetime
 from typing import Any, Dict, List, cast
 
 import pandas as pd
-import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
