@@ -64,7 +64,7 @@ GE core team members use this checklist to ship releases.
 
 * Generally, we use the name of the tag (Ex: “0.13.2”) as the release title.
 
-14. Notify [kyle@superconductive.com](kyle@superconductive.com) about any community-contributed PRs that should be celebrated.
+14. Notify kyle@superconductive.com about any community-contributed PRs that should be celebrated.
 
 15. Socialize the release on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
 
