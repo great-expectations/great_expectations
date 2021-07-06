@@ -267,6 +267,9 @@ def get_dataset(
                 elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
                     df[key] = pd.to_datetime(df[key])
                     continue
+                elif value.lower() in ["date"]:
+                    df[key] = pd.to_datetime(df[key]).dt.date
+                    value = "object"
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
