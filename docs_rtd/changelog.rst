@@ -11,6 +11,7 @@ Develop
   - Support for both single-batch and multi-batch use-cases showcased
   - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
   - Initial documentation
+* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 #2989
 * [MAINTENANCE] Instrumented BaseDataContext.test_yaml_config() and updated Anonymizers
 
 0.13.21

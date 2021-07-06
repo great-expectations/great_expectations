@@ -302,8 +302,8 @@ module.exports = {
                 { type: 'doc', id: 'reference/expectations/distributional-expectations' },
                 { type: 'doc', id: 'reference/expectations/expectations' },
                 { type: 'doc', id: 'reference/expectations/implemented-expectations' },
-                { type: 'doc', id: 'reference/expectation-suite-operations' },
-               ]
+                { type: 'doc', id: 'reference/expectation-suite-operations' }
+              ]
             },
             { type: 'doc', id: 'reference/metrics' },
             { type: 'doc', id: 'reference/profilers' },
@@ -311,7 +311,7 @@ module.exports = {
             { type: 'doc', id: 'reference/expectations/standard-arguments' },
             { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing-data-assets-into-batches' },
-            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/validation' }
           ]
         },
         {
@@ -327,7 +327,7 @@ module.exports = {
           collapsed: true,
           items: [
             { type: 'doc', id: 'reference/spare-parts' }
-           ]
+          ]
         },
         {
           type: 'category',
@@ -335,16 +335,16 @@ module.exports = {
           collapsed: true,
           items: [
             { type: 'doc', id: 'reference/api-reference' }
-           ]
-       }
-     ]
+          ]
+        }
+      ]
     },
     {
       type: 'category',
       label: 'Community Resources',
       collapsed: true,
       items: [
-	    { type: 'doc', id: 'community' }
+        { type: 'doc', id: 'community' }
       ]
     },
     {
@@ -352,7 +352,14 @@ module.exports = {
       label: 'Contributing',
       collapsed: true,
       items: [
-	    { type: 'doc', id: 'contributing/contributing' }
+	      { type: 'doc', id: 'contributing/contributing' },
+	      { type: 'doc', id: 'contributing/contributing-setup' },
+	      { type: 'doc', id: 'contributing/contributing-checklist' },
+	      { type: 'doc', id: 'contributing/contributing-github' },
+	      { type: 'doc', id: 'contributing/contributing-test' },
+	      { type: 'doc', id: 'contributing/contributing-maturity' },
+	      { type: 'doc', id: 'contributing/contributing-style' },
+	      { type: 'doc', id: 'contributing/contributing-misc' }
       ]
     },
     {
@@ -360,9 +367,8 @@ module.exports = {
       label: 'Changelog',
       collapsed: true,
       items: [
-	    { type: 'doc', id: 'changelog' }
-
+        { type: 'doc', id: 'changelog' }
       ]
-    },
+    }
   ]
 }
