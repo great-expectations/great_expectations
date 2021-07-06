@@ -1,8 +1,8 @@
-"""
-This class is used for testing usage_stats messages when the custom class is not a core GE class type.
-"""
-
-
 class MyCustomNonCoreGeClass:
+    """
+    This class is used only for testing.
+    E.g. ensuring appropriate usage stats messaging when using plugin functionality when the custom class is not a core GE class type.
+    """
+
     def self_check(self, pretty_print):
         pass

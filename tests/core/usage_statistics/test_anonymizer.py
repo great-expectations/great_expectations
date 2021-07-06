@@ -44,6 +44,10 @@ def test_anonymizer_consistent_salt():
     assert len(anon_name_2) == 32
 
 
+# The following empty classes are used in this test module only.
+# They are used to ensure class hierarchy is appropriately processed by Anonymizer._is_parent_class_recognized()
+
+
 class BaseTestClass:
     pass
 
