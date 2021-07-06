@@ -39,7 +39,7 @@ This is basically just a recap of the previous section on Data Docs! In order to
 
 ![data_docs_failed_validation1](../../../docs/images/data_docs_taxi_failed_validation01.png)
 
-You’ll see that the test suite failed when you ran it against the February data. Awesome!
+You’ll see that the test suite failed when you ran it against the February data.
 
 **What just happened? Why did it fail?? Help!?**
 

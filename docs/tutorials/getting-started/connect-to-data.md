@@ -53,13 +53,13 @@ When you completed those last few steps, you told Great Expectations that:
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L16-L35
+```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L17-L34
 ```
 
 :::note What does the configuration contain?
 
-- `ExecutionEngine` : The `ExecutionEngine` provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on `ExecutionEngines`, please refer to the following [Core Concepts document](link)
-- `DataConnectors` : The current configuration contains an `InferredAssetFilesystemDataConnector`, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case) and a `RuntimeDataConnector`, which allows you to retrieve a batch of data by defining a `path`.  This tutorial we will focus on the `InferredAssetFilesystemDataConnector`.  For more information on DataConnectors including `RuntimeDataConnectors`, please refer to the following [Core Concepts document](link).
+- `ExecutionEngine` : The `ExecutionEngine` provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on `ExecutionEngines`, please refer to the following [Core Concepts document on `ExecutionEngines`](/docs/reference/execution-engine)
+- `DataConnectors` : The current configuration contains an `InferredAssetFilesystemDataConnector`, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case) and a `RuntimeDataConnector`, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will focus on the `InferredAssetFilesystemDataConnector`.  For more information on DataConnectors, please refer to the following [Core Concepts document on `Datasources`](/docs/reference/datasources).
 
 :::
 

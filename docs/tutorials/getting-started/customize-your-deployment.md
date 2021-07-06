@@ -21,10 +21,9 @@ Here’s an overview of the components of a typical Great Expectations deploymen
   * [Options for customizing generated notebooks](/docs/tutorials/getting-started/customize-your-deployment#options-for-customizing-generated-notebooks)
 
 * Integrations to related systems
-  * [Additional Datasources and Generators](/docs/tutorials/getting-started/customize-your-deployment#additional-datasources-and-generators)
+  * [Connecting to Data](/docs/tutorials/getting-started/customize-your-deployment#connecting-to-data)
   * [Options for hosting Data Docs](/docs/tutorials/getting-started/customize-your-deployment#options-for-hosting-data-docs)
-  * [Additional Validation Operators and Actions](/docs/tutorials/getting-started/customize-your-deployment#additional-validation-operators-and-actions)
-  * [Options for triggering Validation](/docs/tutorials/getting-started/customize-your-deployment#options-for-triggering-validation)
+  * [Additional Checkpoints and Actions](/docs/tutorials/getting-started/customize-your-deployment#additional-checkpoints-and-actions)
 
 ## Options for storing Great Expectations configuration
 The simplest way to manage your Great Expectations configuration is usually by committing great_expectations/great_expectations.yml to git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
@@ -64,7 +63,6 @@ Great Expectations generates and provides notebooks as interactive development e
 
 * [How to instantiate a Data Context on an EMR Spark cluster](/docs/deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster)
 * [How to instantiate a Data Context on Databricks Spark cluster](/docs/deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster)
-
 
 ## Connecting to Data
 Great Expectations allows you to connect to data in a wide variety of sources, and the list is constantly getting longer. If you have an idea for a source not listed here, please speak up in the public discussion forum.
