@@ -13,7 +13,8 @@ Develop
   - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
   - Initial documentation
 * [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 #2989
-
+* [BUGFIX] Fix an issue where "compression" was added to reader_options for all files loaded from S3 by PandasExecutionEngine
+* [MAINTENANCE] Instrumented BaseDataContext.test_yaml_config() and updated Anonymizers
 
 0.13.21
 -----------------
