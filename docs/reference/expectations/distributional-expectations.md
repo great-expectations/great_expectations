@@ -68,13 +68,13 @@ results in:
 
 Convenience functions are available to easily construct partition objects from existing data:
 
-* :func:`build_continuous_partition_object <great_expectations.dataset.util.build_continuous_partition_object>`
-* :func:`build_categorical_partition_object <great_expectations.dataset.util.build_categorical_partition_object>`
+* ```build_continuous_partition_object```
+* ```build_categorical_partition_object```
 
 Convenience functions are also provided to validate that an object is valid:
 
-* :func:`is_valid_continuous_partition_object <great_expectations.dataset.util.is_valid_continuous_partition_object>`
-* :func:`is_valid_categorical_partition_object <great_expectations.dataset.util.is_valid_categorical_partition_object>`
+* ```is_valid_continuous_partition_object```
+* ```is_valid_categorical_partition_object```
 
 Tests interpret partition objects literally, so care should be taken when a partition includes a segment with zero
 weight. The convenience methods consequently allow you to include small amounts of residual weight on the "tails" of a
@@ -87,8 +87,7 @@ available as an expectation for both categorical and continuous data (continuous
 the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must
 provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
 
-* :
-  func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_kl_divergence_to_be_less_than>`
+* ```expect_column_kl_divergence_to_be_less_than```
 
 For continuous data, the expect_column_bootstrapped_ks_test_p_value_to_be_greater_than expectation uses
 the [Kolmogorov-Smirnov (KS) test](https://www.youtube.com/watch?v=ZO2RmSkXK3c)/), which compares the actual and
@@ -97,13 +96,11 @@ expected distribution, the test would be overly sensitive to differences when us
 than the size of the partition interval. The expectation consequently uses a bootstrapping method to sample the provided
 data with tunable specificity.
 
-* :
-  func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
+* ```expect_column_bootstrapped_ks_test_p_value_to_be_greater_than```
 
 For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses
 the [Chi-Squared test](https://www.youtube.com/watch?v=7_cs1YlZoug&t=435s>). The Chi-Squared test works with expected
 and observed counts, but that is handled internally in this function -- both the input and output to this function are
 valid partition objects (ie with weights that are probabilities and sum to 1).
 
-* :
-  func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`
+* ```expect_column_chisquare_test_p_value_to_be_greater_than```

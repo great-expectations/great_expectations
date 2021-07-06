@@ -113,12 +113,9 @@ If *'row_condition_string'* is a complex expression, it will be split into sever
 While conditions can be attached to most Expectations, the following Expectations cannot be conditioned by their very
 nature and therefore do not take the `row_condition` argument:
 
-* :func:`expect_column_to_exist <great_expectations.dataset.dataset.Dataset.expect_column_to_exist>`
-* :
-  func:`expect_table_columns_to_match_ordered_list <great_expectations.dataset.dataset.Dataset.expect_table_columns_to_match_ordered_list>`
-* :
-  func:`expect_table_column_count_to_be_between <great_expectations.dataset.dataset.Dataset.expect_table_column_count_to_be_between>`
-* :
-  func:`expect_table_column_count_to_equal <great_expectations.dataset.dataset.Dataset.expect_table_column_count_to_equal>`
+* ```expect_column_to_exist```
+* ```expect_table_columns_to_match_ordered_list```
+* ```expect_table_column_count_to_be_between```
+* ```expect_table_column_count_to_equal```
 
 For more information, see the [Data Docs](../data-docs) feature guide.
