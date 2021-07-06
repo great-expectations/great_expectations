@@ -32,7 +32,7 @@ Steps
 
     .. code-block:: python
 
-        from great_expectations.data_context.types.base import DataContextConfig
+        from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig
         from great_expectations.data_context import BaseDataContext
 
         data_context_config = DataContextConfig(
