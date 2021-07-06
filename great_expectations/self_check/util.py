@@ -322,6 +322,9 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -383,6 +386,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -440,6 +445,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -510,6 +517,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
