@@ -27,6 +27,8 @@ NP_SQRT_2: np.float64 = np.sqrt(2.0)
 
 MAX_DECIMALS: int = 9
 
+DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
+
 ConfidenceInterval = make_dataclass("ConfidenceInterval", ["low", "high"])
 
 
@@ -309,7 +311,7 @@ detected.
 
     def _get_bootstrap_confidence_interval(
         self,
-        metric_values: Union[np.ndarray, List[Number]],
+        metric_values: np.ndarray,
         confidence_level: np.float64,
         domain: Domain,
         *,
@@ -326,86 +328,48 @@ detected.
             variables=variables,
             parameters=parameters,
         )
+        n_resamples: int
+        if num_bootstrap_samples is None:
+            n_resamples = DEFAULT_BOOTSTRAP_NUM_RESAMPLES
+        else:
+            n_resamples = num_bootstrap_samples
 
-        rng: np.random.Generator = np.random.default_rng()
-
-        bootstrap_samples: tuple = (
-            metric_values,
-        )  # bootstrap samples must be in a sequence
-
-        # noinspection PyPep8Naming
-        BootstrapResult = make_dataclass(
-            "BootstrapResult", ["confidence_interval", "standard_error"]
+        return self._compute_bootstrap_estimation_and_return_confidence_interval(
+            metric_values=metric_values,
+            confidence_level=confidence_level,
+            n_resamples=n_resamples,
         )
 
-        bootstrap_result_low: BootstrapResult
-        bootstrap_result_high: BootstrapResult
-
+    @staticmethod
+    def _compute_bootstrap_estimation_and_return_confidence_interval(
+        metric_values: np.ndarray,
+        confidence_level: np.float64,
+        n_resamples: int,
+    ):
         uncertainty_level: float = 1.0 - confidence_level
         quantile_probability_lower: float = 5.0e-1 * uncertainty_level
         quantile_probability_upper: float = 1.0 - quantile_probability_lower
 
-        if num_bootstrap_samples is None:
-            bootstrap_result_low = bootstrap(
-                bootstrap_samples,
-                lambda data: np.quantile(
-                    data,
-                    q=quantile_probability_lower,
-                ),
-                vectorized=False,
-                confidence_level=confidence_level,
-                random_state=rng,
+        bootstraps: np.ndarray = np.random.choice(
+            metric_values, size=(n_resamples, metric_values.size)
+        )
+        low: np.float64 = np.mean(
+            np.quantile(
+                bootstraps,
+                axis=1,
+                q=quantile_probability_lower,
+                interpolation="linear",  # can be omitted ("linear" is default)
             )
-            bootstrap_result_high = bootstrap(
-                bootstrap_samples,
-                lambda data: np.quantile(
-                    data,
-                    q=quantile_probability_upper,
-                ),
-                vectorized=False,
-                confidence_level=confidence_level,
-                random_state=rng,
+        )
+        high: np.float64 = np.mean(
+            np.quantile(
+                bootstraps,
+                axis=1,
+                q=quantile_probability_upper,
+                interpolation="linear",  # can be omitted ("linear" is default)
             )
-        else:
-            bootstrap_result_low = bootstrap(
-                bootstrap_samples,
-                lambda data: np.quantile(
-                    data,
-                    q=quantile_probability_lower,
-                ),
-                vectorized=False,
-                confidence_level=confidence_level,
-                n_resamples=num_bootstrap_samples,
-                random_state=rng,
-            )
-            bootstrap_result_high = bootstrap(
-                bootstrap_samples,
-                lambda data: np.quantile(
-                    data,
-                    q=quantile_probability_upper,
-                ),
-                vectorized=False,
-                confidence_level=confidence_level,
-                n_resamples=num_bootstrap_samples,
-                random_state=rng,
-            )
-
-        confidence_interval_low: ConfidenceInterval = (
-            bootstrap_result_low.confidence_interval
         )
-        confidence_interval_low_mean: np.float64 = np.mean(
-            [confidence_interval_low.low, confidence_interval_low.high]
-        )
-        confidence_interval_high: ConfidenceInterval = (
-            bootstrap_result_high.confidence_interval
-        )
-        confidence_interval_high_mean: np.float64 = np.mean(
-            [confidence_interval_high.low, confidence_interval_high.high]
-        )
-
-        return ConfidenceInterval(
-            low=confidence_interval_low_mean, high=confidence_interval_high_mean
-        )
+        return ConfidenceInterval(low=low, high=high)
 
     def _get_oneshot_confidence_interval(
         self,
