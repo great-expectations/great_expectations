@@ -12,7 +12,7 @@ This guide will help you Install Great Expectations locally for use with python
 
 ### 1. Install required dependencies
 
-First, check that you have a python3 with pip installed
+First, check that you have python3 with pip installed
 
 ```console
 python --version
