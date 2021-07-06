@@ -13,6 +13,25 @@ from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_ran
 )
 
 
+def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
+    data: Dict[str, np.ndarray] = {
+        "normal": np.around(stats.norm.rvs(5000, 1000, size=size)),
+        "uniform": np.around(stats.uniform.rvs(4000, 6000, size=size)),
+        "bimodal": np.around(
+            np.concatenate(
+                [
+                    stats.norm.rvs(4000, 500, size=size // 2),
+                    stats.norm.rvs(6000, 500, size=size // 2),
+                ]
+            )
+        ),
+        "exponential": np.around(
+            stats.gamma.rvs(a=1.5, loc=5000, scale=1000, size=size)
+        ),
+    }
+    return pd.DataFrame(data)
+
+
 # Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.
 def test_standard_deviation_band_around_mean_rule():
     confidence_level: float
@@ -57,22 +76,3 @@ def test_custom_bootstrap_efficacy():
             <= actual_confidence_levels[column]
             <= 1.01 * confidence_level
         )
-
-
-def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
-    data: Dict[str, np.ndarray] = {
-        "normal": np.around(stats.norm.rvs(5000, 1000, size=size)),
-        "uniform": np.around(stats.uniform.rvs(4000, 6000, size=size)),
-        "bimodal": np.around(
-            np.concatenate(
-                [
-                    stats.norm.rvs(4000, 500, size=size // 2),
-                    stats.norm.rvs(6000, 500, size=size // 2),
-                ]
-            )
-        ),
-        "exponential": np.around(
-            stats.gamma.rvs(a=1.5, loc=5000, scale=1000, size=size)
-        ),
-    }
-    return pd.DataFrame(data)

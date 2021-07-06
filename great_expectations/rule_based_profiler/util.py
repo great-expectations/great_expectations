@@ -1,8 +1,7 @@
 import copy
 import uuid
 from numbers import Number
-from types import ModuleType
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
@@ -14,7 +13,6 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from great_expectations.util import import_library_module, is_library_loadable
 from great_expectations.validator.validator import Validator
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
@@ -194,23 +192,3 @@ def get_parameter_value(
                     parameters=parameters,
                 )
     return parameter_reference
-
-
-def import_scipy_stats_bootstrap_function() -> Optional[Callable]:
-    if not is_library_loadable(library_name="scipy.stats"):
-        return None
-
-    scipy_stats: Optional[ModuleType] = import_library_module(module_name="scipy.stats")
-    bootstrap: Optional[Callable] = None
-    if (
-        scipy_stats
-        and hasattr(scipy_stats, "bootstrap")
-        and isinstance(scipy_stats.bootstrap, Callable)
-    ):
-        bootstrap = scipy_stats.bootstrap
-
-    return bootstrap
-
-
-def is_scipy_stats_bootstrap_loadable() -> bool:
-    return import_scipy_stats_bootstrap_function() is not None

@@ -16,12 +16,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
-    import_scipy_stats_bootstrap_function,
 )
 from great_expectations.util import is_numeric
 from great_expectations.validator.validator import Validator
-
-bootstrap: Optional[Callable] = import_scipy_stats_bootstrap_function()
 
 NP_SQRT_2: np.float64 = np.sqrt(2.0)
 
