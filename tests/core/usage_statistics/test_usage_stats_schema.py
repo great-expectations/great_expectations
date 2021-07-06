@@ -9,6 +9,7 @@ from great_expectations.core.usage_statistics.schemas import (
     empty_payload_schema,
     init_payload_schema,
     save_or_edit_expectation_suite_payload_schema,
+    test_yaml_config_payload_schema,
     usage_statistics_record_schema,
 )
 from tests.integration.usage_statistics.test_usage_statistics_messages import (
@@ -57,6 +58,7 @@ def test_comprehensive_list_of_messages():
         "data_context.open_data_docs",
         "data_context.save_expectation_suite",
         "datasource.sqlalchemy.connect",
+        "data_context.test_yaml_config",
     }
 
 
@@ -190,6 +192,23 @@ def test_cli_suite_edit_message():
             jsonschema.validate(
                 message["event_payload"],
                 cli_suite_expectation_suite_payload_schema,
+            )
+
+
+def test_test_yaml_config_messages():
+    usage_stats_records_messages = [
+        "data_context.test_yaml_config",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                test_yaml_config_payload_schema,
             )
 
 
