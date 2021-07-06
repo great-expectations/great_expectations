@@ -42,7 +42,8 @@ These Expectations are not intended to be very smart. Instead, the goal is to qu
 
 Later, you should also take a look at other workflows for Creating Custom Expectations. [Creating Custom Expectations](/docs/guides/expectations/creating_custom_expectations/how-to-create-custom-expectations) is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
-Expectations under the hood
+### Expectations under the hood
+
 By default, Expectation Suites are stored in a JSON file in the expectations/ subdirectory of your great_expectations/ folder. You can also configure Great Expectations to store Expectations to other locations, such as S3, Postgres, etc. We’ll come back to these options in the last (optional) step of the tutorial.
 
 For example, a snippet of the JSON file for the Expectation Suite we just generated will look like this:
