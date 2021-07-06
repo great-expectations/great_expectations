@@ -660,6 +660,9 @@ def get_test_validator_with_data(
                 elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
                     df[key] = pd.to_datetime(df[key])
                     continue
+                elif value.lower() in ["date"]:
+                    df[key] = pd.to_datetime(df[key]).dt.date
+                    value = "object"
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
@@ -891,7 +894,7 @@ def build_sa_validator_with_data(
                         value=[min_value_dbms, max_value_dbms],
                         inplace=True,
                     )
-            elif type_ in ["DATETIME", "TIMESTAMP"]:
+            elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
                 df[col] = pd.to_datetime(df[col])
 
     if table_name is None:

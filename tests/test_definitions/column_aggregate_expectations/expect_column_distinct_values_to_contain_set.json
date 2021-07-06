@@ -150,7 +150,7 @@
     },
     "schemas": {
       "pandas": {
-        "dates": "datetime64",
+        "dates": "date",
         "datetimes": "datetime64"
       },
       "sqlite": {
