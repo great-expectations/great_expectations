@@ -1,6 +1,7 @@
 import datetime
 import os
-from typing import List, Optional
+from collections import defaultdict
+from typing import Dict, List, Optional
 
 import pandas as pd
 import pytest
@@ -145,6 +146,16 @@ data_connectors:
         }
     ]
     return context
+
+
+def test_weekly_taxi_data_generates_correct_number(weekly_taxi_data):
+    files: List[str] = [file for file in os.listdir(weekly_taxi_data)]
+    years: Dict[str, List[str]] = defaultdict(list)
+    for file in files:
+        years[file[:4]].append(file)
+
+    for csvs in years.values():
+        assert len(csvs) == 53
 
 
 def test_batches_are_accessible(
