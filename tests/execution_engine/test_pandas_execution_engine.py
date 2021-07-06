@@ -403,7 +403,8 @@ def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_cs
     test_df_small.to_parquet(path)
     for key in keys:
         if key.endswith(".parquet"):
-            s3.put_object(Bucket=s3_bucket, Body=path, Key=key)
+            with open(path, "rb") as f:
+                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
         else:
             s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
     return s3_bucket, keys
