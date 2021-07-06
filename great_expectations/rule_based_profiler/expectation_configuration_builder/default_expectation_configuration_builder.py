@@ -2,13 +2,11 @@ from typing import Any, Dict, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
+from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
-    ParameterContainer,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )

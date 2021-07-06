@@ -3,7 +3,6 @@ import os
 import shutil
 import subprocess
 import sys
-from collections import defaultdict
 
 import pytest
 
@@ -161,6 +160,12 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.MYSQL,
+    },
+    {
+        "name": "rule_base_profiler_multi_batch_example",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
     },
 ]
 """

@@ -40,13 +40,9 @@ def test_requirements_files():
 
     assert requirements_dev_spark.intersection(requirements_dev_sqlalchemy) == set()
 
-    assert (
-        requirements_dev
-        - (
-            requirements
-            | requirements_dev_base
-            | requirements_dev_sqlalchemy
-            | requirements_dev_spark
-        )
-        == set()
-    )
+    assert requirements_dev - (
+        requirements
+        | requirements_dev_base
+        | requirements_dev_sqlalchemy
+        | requirements_dev_spark
+    ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}

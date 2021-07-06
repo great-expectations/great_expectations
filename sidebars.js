@@ -95,7 +95,7 @@ module.exports = {
               label: '💭 In-memory',
               items: [
                 'guides/connecting_to_your_data/in_memory/pandas',
-                'guides/connecting_to_your_data/in_memory/spark',
+                'guides/connecting_to_your_data/in_memory/spark'
               ]
             },
             {
@@ -167,7 +167,8 @@ module.exports = {
                 'guides/expectations/advanced/how-to-create-renderers-for-custom-expectations',
                 'guides/expectations/advanced/how-to-create-a-new-expectation-suite-by-profiling-from-a-jsonschema-file',
                 'guides/expectations/advanced/how-to-create-expectations-that-span-multiple-batches-using-evaluation-parameters',
-                'guides/expectations/advanced/how-to-dynamically-load-evaluation-parameters-from-a-database'
+                'guides/expectations/advanced/how-to-dynamically-load-evaluation-parameters-from-a-database',
+                'guides/expectations/advanced/how-to-create-a-new-expectation-suite-using-rule-based-profilers'
               ]
             },
             {
@@ -246,7 +247,7 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how-to-configure-notebooks-generated-by-suite-edit' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-add-comments-to-a-page-on-docs.greatexpectations.io' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-use-the-great-expectation-docker-images' },
-            { type: 'doc', id: 'guides/miscellaneous/how-to-write-a-how-to-guide-docusaurus' },
+            { type: 'doc', id: 'guides/miscellaneous/how-to-write-a-how-to-guide' },
             { type: 'doc', id: 'guides/miscellaneous/how-to-template' }
           ]
         }
@@ -301,8 +302,8 @@ module.exports = {
                 { type: 'doc', id: 'reference/expectations/distributional-expectations' },
                 { type: 'doc', id: 'reference/expectations/expectations' },
                 { type: 'doc', id: 'reference/expectations/implemented-expectations' },
-                { type: 'doc', id: 'reference/expectation-suite-operations' },
-               ]
+                { type: 'doc', id: 'reference/expectation-suite-operations' }
+              ]
             },
             { type: 'doc', id: 'reference/metrics' },
             { type: 'doc', id: 'reference/profilers' },
@@ -310,7 +311,7 @@ module.exports = {
             { type: 'doc', id: 'reference/expectations/standard-arguments' },
             { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing-data-assets-into-batches' },
-            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/validation' }
           ]
         },
         {
@@ -326,7 +327,7 @@ module.exports = {
           collapsed: true,
           items: [
             { type: 'doc', id: 'reference/spare-parts' }
-           ]
+          ]
         },
         {
           type: 'category',
@@ -334,16 +335,16 @@ module.exports = {
           collapsed: true,
           items: [
             { type: 'doc', id: 'reference/api-reference' }
-           ]
-       }
-     ]
+          ]
+        }
+      ]
     },
     {
       type: 'category',
       label: 'Community Resources',
       collapsed: true,
       items: [
-	    { type: 'doc', id: 'community' }
+        { type: 'doc', id: 'community' }
       ]
     },
     {
@@ -351,7 +352,7 @@ module.exports = {
       label: 'Contributing',
       collapsed: true,
       items: [
-	    { type: 'doc', id: 'contributing/contributing' }
+        { type: 'doc', id: 'contributing/contributing' }
       ]
     },
     {
@@ -359,9 +360,8 @@ module.exports = {
       label: 'Changelog',
       collapsed: true,
       items: [
-	    { type: 'doc', id: 'changelog' }
-
+        { type: 'doc', id: 'changelog' }
       ]
-    },
+    }
   ]
 }
