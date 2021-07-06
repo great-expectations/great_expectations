@@ -9,7 +9,7 @@ variables:
     data_connector_query:
       index: ":-1"
   sampling_method: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
-  confidence_level: 9.9e-1
+  false_positive_rate: 1.0e-2
   mostly: 1.0
 
 rules:
@@ -22,7 +22,7 @@ rules:
         batch_request: $variables.jan_feb_2019_monthly_trip_data_batch_request
         metric_name: table.row_count
         sampling_method: $variables.sampling_method
-        confidence_level: $variables.confidence_level
+        false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
         truncate_values:
           lower_bound: 0
@@ -32,7 +32,6 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         min_value: $parameter.row_count_range.value.min_value
         max_value: $parameter.row_count_range.value.max_value
-        mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
   column_ranges_rule:
@@ -54,7 +53,7 @@ rules:
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         sampling_method: $variables.sampling_method
-        confidence_level: $variables.confidence_level
+        false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
       - parameter_name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
@@ -62,7 +61,7 @@ rules:
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
         sampling_method: $variables.sampling_method
-        confidence_level: $variables.confidence_level
+        false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between

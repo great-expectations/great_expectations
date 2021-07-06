@@ -1,9 +1,7 @@
-from dataclasses import make_dataclass
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
-from scipy import special
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -15,28 +13,26 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 )
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
+    compute_bootstrap_quantiles,
+    compute_quantiles,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
 from great_expectations.validator.validator import Validator
 
-NP_SQRT_2: np.float64 = np.sqrt(2.0)
-
 MAX_DECIMALS: int = 9
 
 DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
-
-ConfidenceInterval = make_dataclass("ConfidenceInterval", ["low", "high"])
 
 
 class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     """
     A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
-    using domain_kwargs, value_kwargs, metric_name, and confidence_level (tolerance) as arguments.
+    using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
 
     This Multi-Batch ParameterBuilder is general in the sense that any metric that computes numbers can be accommodated.
     On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
-    ranges, which will incorporate the requirements, imposed by the configured confidence_level tolerances.
+    ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
 
     The implementation supports two methods of estimating parameter values from data:
     * bootstrapped (default) -- a statistical technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)")
@@ -63,7 +59,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         sampling_method: Optional[str] = "bootstrap",
         enforce_numeric_metric: Optional[Union[str, bool]] = True,
         replace_nan_with_zero: Optional[Union[str, bool]] = True,
-        confidence_level: Optional[Union[str, float]] = 9.5e-1,
+        false_positive_rate: Optional[Union[str, float]] = 5.0e-2,
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
@@ -84,7 +80,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
             if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
-            confidence_level: user-configured fraction between 0 and 1 expressing desired confidence level in estimation
+            false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+            identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
@@ -110,7 +107,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._enforce_numeric_metric = enforce_numeric_metric
         self._replace_nan_with_zero = replace_nan_with_zero
 
-        self._confidence_level = confidence_level
+        self._false_positive_rate = false_positive_rate
 
         self._num_bootstrap_samples = num_bootstrap_samples
 
@@ -160,11 +157,11 @@ detected.
          Steps 8 -- 10 are for the "oneshot" sampling method only (the "bootstrap" method achieves same automatically):
          8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
          9. Compute number of standard deviations (as floating point) needed (around the mean) to achieve the specified
-            confidence_level (note that confidence_level of 1.0 would result in infinite number of standard deviations,
-            hence it is "nudged" by small quantity "epsilon" below 1.0 if confidence_level of 1.0 appears as argument).
+            false_positive_rate (note that false_positive_rate of 0.0 would result in infinite number of standard deviations,
+            hence it is "nudged" by small quantity "epsilon" above 0.0 if false_positive_rate of 0.0 appears as argument).
             (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
         10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
-        11. Return ConfidenceInterval([low, high]) for the desired metric as estimated by the specified sampling method.
+        11. Return [low, high] for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
         validator: Validator = self.get_validator(
@@ -220,23 +217,23 @@ detected.
 """
             )
 
-        # Obtain confidence_level from rule state (i.e., variables and parameters); from instance variable otherwise.
-        confidence_level: Union[
+        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
+        false_positive_rate: Union[
             Any, str
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._confidence_level,
+            parameter_reference=self._false_positive_rate,
             expected_return_type=float,
             variables=variables,
             parameters=parameters,
         )
-        if not (0.0 <= confidence_level <= 1.0):
+        if not (0.0 <= false_positive_rate <= 1.0):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        if np.isclose(confidence_level, 1.0):
-            confidence_level -= NP_EPSILON
+        if np.isclose(false_positive_rate, 0.0):
+            false_positive_rate += NP_EPSILON
 
         truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
@@ -256,36 +253,35 @@ detected.
 
         metric_values = np.array(metric_values, dtype=np.float64)
 
-        confidence_interval: ConfidenceInterval
+        lower_quantile: Union[Number, float]
+        upper_quantile: Union[Number, float]
 
         if np.all(np.isclose(metric_values, metric_values[0])):
             # Computation is unnecessary if distribution is degenerate.
-            confidence_interval = ConfidenceInterval(
-                low=metric_values[0], high=metric_values[0]
-            )
+            lower_quantile = upper_quantile = metric_values[0]
         elif sampling_method == "bootstrap":
-            confidence_interval = self._get_bootstrap_confidence_interval(
+            lower_quantile, upper_quantile = self._get_bootstrap_estimate(
                 metric_values=metric_values,
-                confidence_level=confidence_level,
+                false_positive_rate=false_positive_rate,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
             )
         else:
-            confidence_interval = self._get_oneshot_confidence_interval(
+            lower_quantile, upper_quantile = compute_quantiles(
                 metric_values=metric_values,
-                confidence_level=confidence_level,
+                false_positive_rate=false_positive_rate,
             )
 
         min_value: Union[Number, float]
         max_value: Union[Number, float]
 
         if round_decimals == 0:
-            min_value = round(float(confidence_interval.low))
-            max_value = round(float(confidence_interval.high))
+            min_value = round(float(lower_quantile))
+            max_value = round(float(upper_quantile))
         else:
-            min_value = round(float(confidence_interval.low), round_decimals)
-            max_value = round(float(confidence_interval.high), round_decimals)
+            min_value = round(float(lower_quantile), round_decimals)
+            max_value = round(float(upper_quantile), round_decimals)
 
         if lower_bound is not None:
             min_value = max(min_value, lower_bound)
@@ -306,15 +302,15 @@ detected.
             parameter_container=parameter_container, parameter_values=parameter_values
         )
 
-    def _get_bootstrap_confidence_interval(
+    def _get_bootstrap_estimate(
         self,
         metric_values: np.ndarray,
-        confidence_level: np.float64,
+        false_positive_rate: np.float64,
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> tuple:
         # Obtain num_bootstrap_samples override from rule state (i.e., variables and parameters); from instance variable otherwise.
         num_bootstrap_samples: Optional[
             int
@@ -331,87 +327,11 @@ detected.
         else:
             n_resamples = num_bootstrap_samples
 
-        return self._compute_bootstrap_estimation_and_return_confidence_interval(
+        return compute_bootstrap_quantiles(
             metric_values=metric_values,
-            confidence_level=confidence_level,
+            false_positive_rate=false_positive_rate,
             n_resamples=n_resamples,
         )
-
-    @staticmethod
-    def _compute_bootstrap_estimation_and_return_confidence_interval(
-        metric_values: np.ndarray,
-        confidence_level: np.float64,
-        n_resamples: int,
-    ):
-        uncertainty_level: float = 1.0 - confidence_level
-        quantile_probability_lower: float = 5.0e-1 * uncertainty_level
-        quantile_probability_upper: float = 1.0 - quantile_probability_lower
-
-        bootstraps: np.ndarray = np.random.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
-        low: np.float64 = np.mean(
-            np.quantile(
-                bootstraps,
-                axis=1,
-                q=quantile_probability_lower,
-                interpolation="linear",  # can be omitted ("linear" is default)
-            )
-        )
-        high: np.float64 = np.mean(
-            np.quantile(
-                bootstraps,
-                axis=1,
-                q=quantile_probability_upper,
-                interpolation="linear",  # can be omitted ("linear" is default)
-            )
-        )
-        return ConfidenceInterval(low=low, high=high)
-
-    def _get_oneshot_confidence_interval(
-        self,
-        metric_values: Union[np.ndarray, List[Number]],
-        confidence_level: np.float64,
-    ):
-        mean: Union[np.ndarray, np.float64] = np.mean(metric_values)
-        std: Union[np.ndarray, np.float64] = self._standard_error(samples=metric_values)
-
-        stds_multiplier: np.float64 = NP_SQRT_2 * special.erfinv(confidence_level)
-        margin_of_error: np.float64 = stds_multiplier * std
-
-        confidence_interval_low: np.float64 = mean - margin_of_error
-        confidence_interval_high: np.float64 = mean + margin_of_error
-
-        return ConfidenceInterval(
-            low=confidence_interval_low, high=confidence_interval_high
-        )
-
-    def _standard_error(
-        self,
-        samples: np.ndarray,
-    ) -> np.float64:
-        standard_variance: np.float64 = self._standard_variance_unbiased(
-            samples=samples
-        )
-
-        if np.isclose(standard_variance, 0.0):
-            standard_variance = np.float64(0.0)
-
-        return np.sqrt(standard_variance)
-
-    def _standard_variance_unbiased(
-        self,
-        samples: np.ndarray,
-    ) -> np.float64:
-        num_samples: int = samples.size
-        if num_samples < 2:
-            raise ValueError(
-                f"""Number of samples in {self.__class__.__name__} must be an integer greater than 1 \
-(the value {num_samples} was encountered).
-"""
-            )
-
-        return num_samples * (np.var(samples) + NP_EPSILON) / (num_samples - 1)
 
     def _get_truncate_values_using_heuristics(
         self,

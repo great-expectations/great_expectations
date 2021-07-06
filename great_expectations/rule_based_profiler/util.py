@@ -192,3 +192,47 @@ def get_parameter_value(
                     parameters=parameters,
                 )
     return parameter_reference
+
+
+def compute_quantiles(
+    metric_values: Union[np.ndarray, List[Number]],
+    false_positive_rate: np.float64,
+) -> tuple:
+    lower_quantile: np.float64 = np.quantile(
+        metric_values,
+        q=5.0e-1 * false_positive_rate,
+        interpolation="linear",  # can be omitted ("linear" is default)
+    )
+    upper_quantile: np.float64 = np.quantile(
+        metric_values,
+        q=1.0 - 5.0e-1 * false_positive_rate,
+        interpolation="linear",  # can be omitted ("linear" is default)
+    )
+    return lower_quantile, upper_quantile
+
+
+def compute_bootstrap_quantiles(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> tuple:
+    bootstraps: np.ndarray = np.random.choice(
+        metric_values, size=(n_resamples, metric_values.size)
+    )
+    lower_quantile: np.float64 = np.mean(
+        np.quantile(
+            bootstraps,
+            axis=1,
+            q=5.0e-1 * false_positive_rate,
+            interpolation="linear",  # can be omitted ("linear" is default)
+        )
+    )
+    upper_quantile: np.float64 = np.mean(
+        np.quantile(
+            bootstraps,
+            axis=1,
+            q=1.0 - 5.0e-1 * false_positive_rate,
+            interpolation="linear",  # can be omitted ("linear" is default)
+        )
+    )
+    return lower_quantile, upper_quantile

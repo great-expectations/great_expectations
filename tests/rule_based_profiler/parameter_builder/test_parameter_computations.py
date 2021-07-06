@@ -3,14 +3,11 @@ from typing import Dict, Optional, Union
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-from scipy import special
 
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
-    NP_SQRT_2,
-    ConfidenceInterval,
-    NumericMetricRangeMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.util import compute_bootstrap_quantiles
 
 
 def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
@@ -32,47 +29,27 @@ def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-# Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.
-def test_standard_deviation_band_around_mean_rule():
-    confidence_level: float
-    stds_multiplier: float
-
-    confidence_level = 0.0
-    stds_multiplier = NP_SQRT_2 * special.erfinv(confidence_level)
-    assert np.isclose(stds_multiplier, 0.0)
-
-    confidence_level = 9.54499736104e-1
-    stds_multiplier = NP_SQRT_2 * special.erfinv(confidence_level)
-    assert np.isclose(stds_multiplier, 2.0)
-
-    confidence_level = 9.97300203937e-1
-    stds_multiplier = NP_SQRT_2 * special.erfinv(confidence_level)
-    assert np.isclose(stds_multiplier, 3.0)
-
-
 def test_custom_bootstrap_efficacy():
     df: pd.DataFrame = _generate_distribution_samples(size=1000)
-    false_positive_rate: float = 1.0e-2
-    confidence_level: np.float64 = np.float64(1.0 - false_positive_rate)
+    false_positive_rate: np.float64 = np.float64(1.0e-2)
     columns: pd.Index = df.columns
     column: str
-    confidence_interval: ConfidenceInterval
-    actual_confidence_levels: Dict[str, Union[float, np.float64]] = {}
+    lower_quantile: np.float64
+    upper_quantile: np.float64
+    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
     for column in columns:
-        confidence_interval = NumericMetricRangeMultiBatchParameterBuilder._compute_bootstrap_estimation_and_return_confidence_interval(
+        (lower_quantile, upper_quantile,) = compute_bootstrap_quantiles(
             metric_values=df[column],
-            confidence_level=confidence_level,
+            false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
         )
-        actual_confidence_levels[column] = (
-            np.sum(
-                df[column].between(confidence_interval.low, confidence_interval.high)
-            )
-            / df.shape[0]
+        actual_false_positive_rates[column] = (
+            1.0
+            - np.sum(df[column].between(lower_quantile, upper_quantile)) / df.shape[0]
         )
         # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
         assert (
-            9.9e-1 * confidence_level
-            <= actual_confidence_levels[column]
-            <= 1.01 * confidence_level
+            9.9e-1 * (1.0 - false_positive_rate)
+            <= (1.0 - actual_false_positive_rates[column])
+            <= 1.01 * (1.0 - false_positive_rate)
         )
