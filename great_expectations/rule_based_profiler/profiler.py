@@ -221,7 +221,7 @@ class Profiler:
 
         if include_citation:
             expectation_suite.add_citation(
-                comment="Suite created by Rule-Based Profiler with the following config",
+                comment="Suite created by Rule-Based Profiler with the configuration included.",
                 profiler_config=self._profiler_config,
             )
 
