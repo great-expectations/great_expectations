@@ -258,7 +258,7 @@ class BatchRequestBase(DictDot):
             json_dict["batch_identifiers"] = self.batch_identifiers
         if self.runtime_parameters is not None:
             json_dict["runtime_parameters"] = self.runtime_parameters
-            if json_dict["runtime_parameters"].get("batch_data"):
+            if json_dict["runtime_parameters"].get("batch_data") is not None:
                 json_dict["runtime_parameters"]["batch_data"] = str(
                     type(json_dict["runtime_parameters"]["batch_data"])
                 )
