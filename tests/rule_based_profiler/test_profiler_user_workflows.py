@@ -1,8 +1,11 @@
 import datetime
 from typing import Any, Dict, List, cast
 
+import numpy as np
 import pandas as pd
+import pytest
 from freezegun import freeze_time
+from packaging import version
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -167,6 +170,10 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     assert month == 3
 
 
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
 @freeze_time("09/26/2019 13:42:41")
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -203,6 +210,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
 
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,

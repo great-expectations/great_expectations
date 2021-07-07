@@ -201,11 +201,13 @@ def compute_quantiles(
     lower_quantile: np.float64 = np.quantile(
         metric_values,
         q=5.0e-1 * false_positive_rate,
+        axis=0,
         interpolation="linear",  # can be omitted ("linear" is default)
     )
     upper_quantile: np.float64 = np.quantile(
         metric_values,
         q=1.0 - 5.0e-1 * false_positive_rate,
+        axis=0,
         interpolation="linear",  # can be omitted ("linear" is default)
     )
     return lower_quantile, upper_quantile
@@ -222,16 +224,16 @@ def compute_bootstrap_quantiles(
     lower_quantile: np.float64 = np.mean(
         np.quantile(
             bootstraps,
-            axis=1,
             q=5.0e-1 * false_positive_rate,
+            axis=1,
             interpolation="linear",  # can be omitted ("linear" is default)
         )
     )
     upper_quantile: np.float64 = np.mean(
         np.quantile(
             bootstraps,
-            axis=1,
             q=1.0 - 5.0e-1 * false_positive_rate,
+            axis=1,
             interpolation="linear",  # can be omitted ("linear" is default)
         )
     )
