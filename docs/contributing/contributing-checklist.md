@@ -58,7 +58,7 @@ If your PR contains **only** changes to `contrib` directory (community contribut
 If your PR contains **only** changes to `contrib` directory (community contributed Expectations), please skip this step.
 :::
 
-* Please add a bullet point to `docs/changelog.rst`, in the develop section.
+* Please add a bullet point to `docs_rtd/changelog.rst`, in the develop section.
 * Please group in the following order:  [FEATURE], [BUGFIX], [DOCS], [MAINTENANCE]
 
 * You can see the past [Changelog](https://github.com/great-expectations/great_expectations/blob/develop/docs_rtd/changelog.rst) here:
@@ -117,4 +117,3 @@ When you’re done with your work…
 * There will probably be discussion about the pull request. It’s normal for a request to require some changes before merging it into the main Great Expectations project. We enjoy working with contributors to help them get their code accepted. There are many approaches to fixing a problem and it is important to find the best approach before writing too much code!
 
 Congratulations! You’ve just contributed to Great Expectations!
-
