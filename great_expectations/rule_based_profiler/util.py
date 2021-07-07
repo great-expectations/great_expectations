@@ -198,15 +198,15 @@ def compute_quantiles(
     metric_values: Union[np.ndarray, List[Number]],
     false_positive_rate: np.float64,
 ) -> tuple:
-    lower_quantile: np.float64 = np.quantile(
+    lower_quantile = np.quantile(
         metric_values,
-        q=5.0e-1 * false_positive_rate,
+        q=(false_positive_rate / 2),
         axis=0,
         interpolation="linear",  # can be omitted ("linear" is default)
     )
-    upper_quantile: np.float64 = np.quantile(
+    upper_quantile = np.quantile(
         metric_values,
-        q=1.0 - 5.0e-1 * false_positive_rate,
+        q=1.0 - (false_positive_rate / 2),
         axis=0,
         interpolation="linear",  # can be omitted ("linear" is default)
     )
@@ -221,18 +221,18 @@ def compute_bootstrap_quantiles(
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
-    lower_quantile: np.float64 = np.mean(
+    lower_quantile = np.mean(
         np.quantile(
             bootstraps,
-            q=5.0e-1 * false_positive_rate,
+            q=false_positive_rate / 2,
             axis=1,
             interpolation="linear",  # can be omitted ("linear" is default)
         )
     )
-    upper_quantile: np.float64 = np.mean(
+    upper_quantile = np.mean(
         np.quantile(
             bootstraps,
-            q=1.0 - 5.0e-1 * false_positive_rate,
+            q=1.0 - (false_positive_rate / 2),
             axis=1,
             interpolation="linear",  # can be omitted ("linear" is default)
         )

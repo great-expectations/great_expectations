@@ -212,7 +212,7 @@ detected.
             in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
         ):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of 
+                message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of
 {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{sampling_method}" was detected).
 """
             )
@@ -231,9 +231,6 @@ detected.
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
-
-        if np.isclose(false_positive_rate, 0.0):
-            false_positive_rate += NP_EPSILON
 
         truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,

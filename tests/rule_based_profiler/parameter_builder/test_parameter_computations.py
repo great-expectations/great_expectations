@@ -31,7 +31,7 @@ def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
 
 def test_custom_bootstrap_efficacy():
     df: pd.DataFrame = _generate_distribution_samples(size=1000)
-    false_positive_rate: np.float64 = np.float64(1.0e-2)
+    false_positive_rate: np.float64 = np.float64(0.01)
     columns: pd.Index = df.columns
     column: str
     lower_quantile: np.float64
@@ -49,7 +49,7 @@ def test_custom_bootstrap_efficacy():
         )
         # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
         assert (
-            9.9e-1 * (1.0 - false_positive_rate)
-            <= (1.0 - actual_false_positive_rates[column])
-            <= 1.01 * (1.0 - false_positive_rate)
+            false_positive_rate - 0.01
+            <= actual_false_positive_rates[column]
+            <= false_positive_rate + 0.01
         )
