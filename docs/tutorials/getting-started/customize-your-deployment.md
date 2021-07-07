@@ -10,7 +10,7 @@ The next step is to customize your deployment by upgrading specific components o
 
 This last section of this tutorial is designed to present you with clear options for upgrading your deployment. For specific implementation steps, please check out the linked How-to guides.
 
-Components
+## Components
 
 Here’s an overview of the components of a typical Great Expectations deployment:
 
