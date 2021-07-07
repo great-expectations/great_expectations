@@ -300,7 +300,7 @@ class ParameterBuilder(ABC):
             metric_values.append(metric_value)
 
         return {
-            "value": metric_values,
+            "metric_values": metric_values,
             "details": {
                 "metric_configuration": {
                     "metric_name": metric_name,
@@ -308,7 +308,7 @@ class ParameterBuilder(ABC):
                     "metric_value_kwargs": metric_value_kwargs,
                     "metric_dependencies": None,
                 },
-                "num_batches": len(batch_ids),
+                "num_batches": len(metric_values),
             },
         }
 
