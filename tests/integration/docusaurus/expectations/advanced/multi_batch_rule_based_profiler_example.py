@@ -8,7 +8,7 @@ profiler_config = """
 # located in tests/test_sets/taxi_yellow_trip_data_samples/
 
 variables:
-  confidence_level: 9.75e-1
+  false_positive_rate: 0.01
   mostly: 1.0
 
 rules:
@@ -26,7 +26,7 @@ rules:
               index: "-6:-1"
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
-        confidence_level: $variables.confidence_level
+        false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
         truncate_values:
           lower_bound: 0
@@ -62,7 +62,7 @@ rules:
               index: "-6:-1"
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-        confidence_level: $variables.confidence_level
+        false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
       - parameter_name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
@@ -74,7 +74,7 @@ rules:
               index: "-6:-1"
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
-        confidence_level: $variables.confidence_level
+        false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
