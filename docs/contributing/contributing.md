@@ -8,7 +8,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 #### 1. Join the community on Slack
 
-* Go to [greatexpectations.io/slack](https://greatexpectations.io/slack) and introduce yourself in the #contributors-contributing channel.
+* Go to [greatexpectations.io/slack](https://greatexpectations.io/slack) and introduce yourself in the `#contributors-contributing` channel.
 
 #### 2. Set up your development environment
 * Follow these instructions to [set up your dev environment](/docs/contributing/contributing-setup).
