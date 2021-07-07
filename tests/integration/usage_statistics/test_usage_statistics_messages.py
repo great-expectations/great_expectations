@@ -5,6 +5,8 @@ from typing import Any, Dict, List
 import pytest
 import requests
 
+from great_expectations.data_context import BaseDataContext
+
 USAGE_STATISTICS_QA_URL = (
     "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
@@ -438,6 +440,145 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.5.manual_testing",
         }
     ],
+    # BaseDataContext.test_yaml_config() MESSAGES
+    "data_context.test_yaml_config": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2021-06-18T14:36:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": class_name,
+                    "diagnostic_info": [],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        ]
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": class_name,
+                    "diagnostic_info": [],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        ]
+        # Diagnostic Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "diagnostic_info": ["__substitution_error__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "diagnostic_info": ["__yaml_parse_error__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "diagnostic_info": ["__custom_subclass_not_core_ge__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "diagnostic_info": ["__class_name_not_provided__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "diagnostic_info": ["__class_name_not_provided__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+        ]
+        # Store Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "ExpectationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "InMemoryStoreBackend"
+                    },
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # Datasource Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": "fake_anonymized_name_for_testing",
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": "fake_anonymized_name_for_testing",
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # DataConnector Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # Checkpoint Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "Checkpoint",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ],
+    ),
     # CLI INIT COMMANDS
     "cli.init.create": [
         {

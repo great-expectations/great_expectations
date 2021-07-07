@@ -1,7 +1,14 @@
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
+
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
 from great_expectations.datasource import PandasDatasource
+
+yaml = YAML()
+
+CONSISTENT_SALT: str = "00000000-0000-0000-0000-00000000a004"
 
 
 class CustomDatasource(PandasDatasource):
@@ -9,18 +16,434 @@ class CustomDatasource(PandasDatasource):
 
 
 def test_datasource_anonymizer():
-    datasource_anonymizer = DatasourceAnonymizer()
-    # n1 = datasource_anonymizer.anonymize_datasource_info("PandasDatasource")
-    # assert n1 == {"parent_class": "PandasDatasource"}
-    #
-    # n2 = datasource_anonymizer.anonymize_datasource_info("CustomDatasource")
-    # datasource_anonymizer_2 = DatasourceAnonymizer()
-    # n3 = datasource_anonymizer_2.anonymize_datasource_info("CustomDatasource")
-    # assert n2["parent_class"] == "PandasDatasource"
-    # assert n3["parent_class"] == "PandasDatasource"
-    # assert len(n3["custom_class"]) == 32
-    # assert n2["custom_class"] != n3["custom_class"]
-    #
-    # # Same anonymizer *does* produce the same result
-    # n4 = datasource_anonymizer.anonymize_datasource_info("CustomDatasource")
-    # assert n4["custom_class"] == n2["custom_class"]
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    n1 = datasource_anonymizer.anonymize_datasource_info(
+        name="test_datasource",
+        config={
+            "name": "test_datasource",
+            "class_name": "PandasDatasource",
+            "module_name": "great_expectations.datasource",
+        },
+    )
+    assert n1 == {
+        "anonymized_name": "04bf89e1fb7495b0904bbd5ae478fbe0",
+        "parent_class": "PandasDatasource",
+    }
+    n2 = datasource_anonymizer.anonymize_datasource_info(
+        name="test_datasource",
+        config={
+            "name": "test_datasource",
+            "class_name": "CustomDatasource",
+            "module_name": "tests.datasource.test_datasource_anonymizer",
+        },
+    )
+    datasource_anonymizer_2 = DatasourceAnonymizer()
+    n3 = datasource_anonymizer_2.anonymize_datasource_info(
+        name="test_datasource",
+        config={
+            "name": "test_datasource",
+            "class_name": "CustomDatasource",
+            "module_name": "tests.datasource.test_datasource_anonymizer",
+        },
+    )
+    assert n2["parent_class"] == "PandasDatasource"
+    assert n3["parent_class"] == "PandasDatasource"
+    print(n3)
+    assert len(n3["anonymized_class"]) == 32
+    assert n2["anonymized_class"] != n3["anonymized_class"]
+
+    # Same anonymizer *does* produce the same result
+    n4 = datasource_anonymizer.anonymize_datasource_info(
+        name="test_datasource",
+        config={
+            "name": "test_datasource",
+            "class_name": "CustomDatasource",
+            "module_name": "tests.datasource.test_datasource_anonymizer",
+        },
+    )
+    assert n4["anonymized_class"] == n2["anonymized_class"]
+
+
+def test_anonymize_datasource_info_v2_api_core_ge_class():
+
+    name = "test_pandas_datasource"
+    config = {
+        "name": name,
+        "class_name": "PandasDatasource",
+        "module_name": "great_expectations.datasource",
+        "data_asset_type": {
+            "module_name": "custom_pandas_dataset",
+            "class_name": "CustomPandasDataset",
+        },
+        "batch_kwargs_generators": {
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": "some_path",
+            }
+        },
+    }
+
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+        name=name, config=config
+    )
+    assert anonymized_datasource == {
+        "anonymized_name": "2642802d79d90ce6d147b0f9f61c3569",
+        "parent_class": "PandasDatasource",
+    }
+
+
+def test_anonymize_datasource_info_v3_api_core_ge_class():
+    name = "test_pandas_datasource"
+    yaml_config = f"""
+class_name: Datasource
+module_name: great_expectations.datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+    module_name: great_expectations.execution_engine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        module_name: great_expectations.datasource.data_connector
+"""
+    config: CommentedMap = yaml.load(yaml_config)
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+        name=name, config=config
+    )
+    assert anonymized_datasource == {
+        "anonymized_data_connectors": [
+            {
+                "anonymized_name": "42af601aeb8a03d76bf468a462cb62f6",
+                "parent_class": "InferredAssetFilesystemDataConnector",
+            }
+        ],
+        "anonymized_execution_engine": {
+            "anonymized_name": "6b8f8c12352592a69083f958369c7151",
+            "parent_class": "PandasExecutionEngine",
+        },
+        "anonymized_name": "2642802d79d90ce6d147b0f9f61c3569",
+        "parent_class": "Datasource",
+    }
+
+
+def test_anonymize_datasource_info_v2_api_custom_subclass():
+    """
+    What does this test and why?
+    We should be able to discern the GE parent class for a custom type and construct
+    a useful usage stats event message.
+    Custom v2 API Datasources should continue to be supported.
+    """
+    name = "test_pandas_datasource"
+    yaml_config = f"""
+module_name: tests.data_context.fixtures.plugins.my_custom_v2_api_datasource
+class_name: MyCustomV2ApiDatasource
+"""
+    config: CommentedMap = yaml.load(yaml_config)
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+        name=name, config=config
+    )
+    assert anonymized_datasource == {
+        "anonymized_class": "c454ace824bf401ea42815c84d0f5717",
+        "anonymized_name": "2642802d79d90ce6d147b0f9f61c3569",
+        "parent_class": "PandasDatasource",
+    }
+
+
+def test_anonymize_datasource_info_v3_api_custom_subclass():
+    name = "test_pandas_datasource"
+    yaml_config = f"""
+module_name: tests.data_context.fixtures.plugins.my_custom_v3_api_datasource
+class_name: MyCustomV3ApiDatasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+    module_name: great_expectations.execution_engine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        module_name: great_expectations.datasource.data_connector
+"""
+    config: CommentedMap = yaml.load(yaml_config)
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+        name=name, config=config
+    )
+    assert anonymized_datasource == {
+        "anonymized_name": "2642802d79d90ce6d147b0f9f61c3569",
+        "anonymized_class": "ae74d1b58a67f5a944bb9cda16a62472",
+        "parent_class": "Datasource",
+        "anonymized_execution_engine": {
+            "anonymized_name": "6b8f8c12352592a69083f958369c7151",
+            "parent_class": "PandasExecutionEngine",
+        },
+        "anonymized_data_connectors": [
+            {
+                "anonymized_name": "42af601aeb8a03d76bf468a462cb62f6",
+                "parent_class": "InferredAssetFilesystemDataConnector",
+            }
+        ],
+    }
+
+
+def test_anonymize_simple_sqlalchemy_datasource():
+    name = "test_simple_sqlalchemy_datasource"
+    yaml_config = f"""
+class_name: SimpleSqlalchemyDatasource
+connection_string: sqlite:///some_db.db
+
+introspection:
+    whole_table_with_limits:
+        sampling_method: _sample_using_limit
+        sampling_kwargs:
+            n: 10
+"""
+    config: CommentedMap = yaml.load(yaml_config)
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    anonymized_datasource = (
+        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+            name=name, config=config
+        )
+    )
+    assert anonymized_datasource == {
+        "anonymized_name": "3be0aacd79b32e22a41949bf607b3e80",
+        "parent_class": "SimpleSqlalchemyDatasource",
+        "anonymized_execution_engine": {"parent_class": "SqlAlchemyExecutionEngine"},
+        "anonymized_data_connectors": [
+            {
+                "anonymized_name": "d6b508db454c47ea40131b0a11415dd4",
+                "parent_class": "InferredAssetSqlDataConnector",
+            }
+        ],
+    }
+
+
+def test_anonymize_custom_simple_sqlalchemy_datasource():
+    name = "test_custom_simple_sqlalchemy_datasource"
+    yaml_config = """
+module_name: tests.data_context.fixtures.plugins.my_custom_simple_sqlalchemy_datasource_class
+class_name: MyCustomSimpleSqlalchemyDatasource
+connection_string: sqlite:///some_db.db
+name: some_name
+introspection:
+    my_custom_datasource_name:
+        data_asset_name_suffix: some_suffix
+"""
+    config: CommentedMap = yaml.load(yaml_config)
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    anonymized_datasource = (
+        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+            name=name, config=config
+        )
+    )
+    assert anonymized_datasource == {
+        "anonymized_name": "d9e0c5f761c6ea5e54000f8c10a1049b",
+        "parent_class": "SimpleSqlalchemyDatasource",
+        "anonymized_class": "aab66054e62007a9ac5afbcacedaf0d2",
+        "anonymized_execution_engine": {"parent_class": "SqlAlchemyExecutionEngine"},
+        "anonymized_data_connectors": [
+            {
+                "anonymized_name": "82b8b59e076789ac1476b2b745ebc268",
+                "parent_class": "InferredAssetSqlDataConnector",
+            }
+        ],
+    }
+
+
+def test_is_parent_class_recognized_yes():
+
+    v2_batch_kwargs_api_datasources = [
+        "PandasDatasource",
+        "SqlAlchemyDatasource",
+        "SparkDFDatasource",
+        "LegacyDatasource",
+    ]
+    v3_batch_request_api_datasources = [
+        "SimpleSqlalchemyDatasource",
+        "Datasource",
+        "BaseDatasource",
+    ]
+    parent_classes = v2_batch_kwargs_api_datasources + v3_batch_request_api_datasources
+    configs = [
+        {
+            "name": "test_datasource",
+            "class_name": parent_class,
+            "module_name": "great_expectations.datasource",
+        }
+        for parent_class in parent_classes
+    ]
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    for idx in range(len(configs)):
+        parent_class = datasource_anonymizer.is_parent_class_recognized(
+            config=configs[idx]
+        )
+        assert parent_class == parent_classes[idx]
+
+
+def test_is_custom_parent_class_recognized_yes():
+    config = {
+        "module_name": "tests.data_context.fixtures.plugins.my_custom_v3_api_datasource",
+        "class_name": "MyCustomV3ApiDatasource",
+    }
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    parent_class = datasource_anonymizer.is_parent_class_recognized(config=config)
+    assert parent_class == "Datasource"
+
+    config = {
+        "module_name": "tests.data_context.fixtures.plugins.my_custom_v2_api_datasource",
+        "class_name": "MyCustomV2ApiDatasource",
+    }
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    parent_class = datasource_anonymizer.is_parent_class_recognized(config=config)
+    assert parent_class == "PandasDatasource"
+
+
+def test_is_parent_class_recognized_no():
+    parent_classes = ["MyCustomNonDatasourceClass", "MyOtherCustomNonDatasourceClass"]
+    configs = [
+        {
+            "name": "test_datasource",
+            "class_name": parent_class,
+            "module_name": "great_expectations.datasource",
+        }
+        for parent_class in parent_classes
+    ]
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    for idx in range(len(configs)):
+        parent_class = datasource_anonymizer.is_parent_class_recognized(
+            config=configs[idx]
+        )
+        assert parent_class != parent_classes[idx]
+        assert parent_class is None
+
+
+def test_is_parent_class_recognized_v2_api_yes():
+    v2_batch_kwargs_api_datasources = [
+        "PandasDatasource",
+        "SqlAlchemyDatasource",
+        "SparkDFDatasource",
+        "LegacyDatasource",
+    ]
+    parent_classes = v2_batch_kwargs_api_datasources
+    configs = [
+        {
+            "name": "test_datasource",
+            "class_name": parent_class,
+            "module_name": "great_expectations.datasource",
+        }
+        for parent_class in parent_classes
+    ]
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    for idx in range(len(configs)):
+        parent_class = datasource_anonymizer.is_parent_class_recognized_v2_api(
+            config=configs[idx]
+        )
+        assert parent_class == parent_classes[idx]
+
+
+def test_is_custom_parent_class_recognized_v2_api_yes():
+    config = {
+        "module_name": "tests.data_context.fixtures.plugins.my_custom_v2_api_datasource",
+        "class_name": "MyCustomV2ApiDatasource",
+    }
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    parent_class = datasource_anonymizer.is_parent_class_recognized_v2_api(
+        config=config
+    )
+    assert parent_class == "PandasDatasource"
+
+
+def test_is_parent_class_recognized_v2_api_no():
+    v3_batch_request_api_datasources = [
+        "SimpleSqlalchemyDatasource",
+        "Datasource",
+        "BaseDatasource",
+    ]
+    custom_non_datsource_classes = [
+        "MyCustomNonDatasourceClass",
+        "MyOtherCustomNonDatasourceClass",
+    ]
+    parent_classes = v3_batch_request_api_datasources + custom_non_datsource_classes
+    configs = [
+        {
+            "name": "test_datasource",
+            "class_name": parent_class,
+            "module_name": "great_expectations.datasource",
+        }
+        for parent_class in parent_classes
+    ]
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    for idx in range(len(configs)):
+        parent_class = datasource_anonymizer.is_parent_class_recognized_v2_api(
+            config=configs[idx]
+        )
+        assert parent_class != parent_classes[idx]
+        assert parent_class is None
+
+
+def test_is_parent_class_recognized_v3_api_yes():
+    v3_batch_request_api_datasources = [
+        "SimpleSqlalchemyDatasource",
+        "Datasource",
+        "BaseDatasource",
+    ]
+    parent_classes = v3_batch_request_api_datasources
+    configs = [
+        {
+            "name": "test_datasource",
+            "class_name": parent_class,
+            "module_name": "great_expectations.datasource",
+        }
+        for parent_class in parent_classes
+    ]
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    for idx in range(len(configs)):
+        parent_class = datasource_anonymizer.is_parent_class_recognized_v3_api(
+            config=configs[idx]
+        )
+        assert parent_class == parent_classes[idx]
+
+
+def test_is_custom_parent_class_recognized_v3_api_yes():
+    config = {
+        "module_name": "tests.data_context.fixtures.plugins.my_custom_v3_api_datasource",
+        "class_name": "MyCustomV3ApiDatasource",
+    }
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    parent_class = datasource_anonymizer.is_parent_class_recognized_v3_api(
+        config=config
+    )
+    assert parent_class == "Datasource"
+
+
+def test_is_parent_class_recognized_v3_api_no():
+    v2_batch_kwargs_api_datasources = [
+        "PandasDatasource",
+        "SqlAlchemyDatasource",
+        "SparkDFDatasource",
+        "LegacyDatasource",
+    ]
+    custom_non_datsource_classes = [
+        "MyCustomNonDatasourceClass",
+        "MyOtherCustomNonDatasourceClass",
+    ]
+    parent_classes = v2_batch_kwargs_api_datasources + custom_non_datsource_classes
+    configs = [
+        {
+            "name": "test_datasource",
+            "class_name": parent_class,
+            "module_name": "great_expectations.datasource",
+        }
+        for parent_class in parent_classes
+    ]
+    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
+    for idx in range(len(configs)):
+        parent_class = datasource_anonymizer.is_parent_class_recognized_v3_api(
+            config=configs[idx]
+        )
+        assert parent_class != parent_classes[idx]
+        assert parent_class is None
