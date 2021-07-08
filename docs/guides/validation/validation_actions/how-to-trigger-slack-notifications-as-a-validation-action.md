@@ -3,7 +3,7 @@ title: How to trigger Slack notifications as a Validation Action
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
-This guide will help you trigger Slack notifications as a `Validation Action`.
+This guide will help you trigger Slack notifications as a [Validation Action](../../../reference/validation.md).
 It will allow you to send a Slack message including information about a Validation Result, including whether or not the Validation succeeded.
 
 <Prerequisites>
