@@ -1,8 +1,8 @@
 ---
-title: Connect to data
+title: Connect to Data
 ---
 
-![minimap](minimap.png)
+![minimap](../../images/minimap.png)
 
 Once you have a Data Context, you’ll want to connect to data. In Great Expectations, Datasources simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
@@ -48,26 +48,20 @@ Then **execute all cells in the notebook** in order to save the new Datasource. 
 
 When you completed those last few steps, you told Great Expectations that:
 
-+ You want to create a new Datasource called data__dir.
++ You want to create a new Datasource called `data__dir`.
 + You want to use Pandas to read the data from CSV.
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:
 
-````console
-name: my_datasource
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  my_datasource_example_data_connector:
-    class_name: InferredAssetFilesystemDataConnector
-    datasource_name: my_datasource
-    base_directory: ../data
-    default_regex:
-      group_names:
-        - data_asset_name
-      pattern: (.*)
-````
+```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L17-L34
+```
+
+:::note What does the configuration contain?
+
+- **ExecutionEngine** : The `ExecutionEngine` provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on `ExecutionEngines`, please refer to the following [Core Concepts document on ExecutionEngines](/docs/reference/execution-engine)
+- **DataConnectors** :  `DataConnectors` facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an `InferredAssetFilesystemDataConnector`, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a `RuntimeDataConnector`, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the `InferredAssetFilesystemDataConnector`.  For more information on `DataConnectors`, please refer to the following [Core Concepts document on Datasources](/docs/reference/datasources).
+
+:::
 
 This datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in ```great_expectations/uncommitted/config_variables.yml```.
 

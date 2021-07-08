@@ -5,12 +5,12 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
+    Domain,
     DomainBuilder,
     SimpleSemanticTypeColumnDomainBuilder,
     TableDomainBuilder,
 )
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
@@ -83,7 +83,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "id",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -91,7 +90,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "event_type",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -99,7 +97,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "user_id",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -107,7 +104,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "event_ts",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -115,7 +111,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "server_ts",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -123,7 +118,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "device_ts",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -131,7 +125,6 @@ def test_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "user_agent",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {},
         },
@@ -177,7 +170,6 @@ def test_simple_semantic_type_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "event_type",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {"inferred_semantic_domain_type": "numeric"},
         },
@@ -185,7 +177,6 @@ def test_simple_semantic_type_column_domain_builder(
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "user_id",
-                "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
             },
             "details": {"inferred_semantic_domain_type": "numeric"},
         },

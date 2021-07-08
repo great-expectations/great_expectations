@@ -1,15 +1,16 @@
-import uuid
 from abc import ABC, abstractmethod
 from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core.batch import Batch, BatchRequest
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
-    ParameterContainer,
+from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.util import (
+    get_batch_ids as get_batch_ids_from_batch_request,
 )
-from great_expectations.rule_based_profiler.util import build_batch_request
+from great_expectations.rule_based_profiler.util import (
+    get_validator as get_validator_from_batch_request,
+)
 from great_expectations.validator.validator import Validator
 
 
@@ -58,53 +59,47 @@ class DomainBuilder(ABC):
 
         pass
 
-    def get_batch_id(
-        self,
-        variables: Optional[ParameterContainer] = None,
-    ) -> Optional[str]:
-        if self._batch_request is None:
-            return None
-
-        batch_request: Optional[BatchRequest] = build_batch_request(
-            domain=None,
-            batch_request=self._batch_request,
-            variables=variables,
-            parameters=None,
-        )
-
-        batch_list: List[Batch] = self.data_context.get_batch_list(
-            batch_request=batch_request
-        )
-
-        num_batches: int = len(batch_list)
-        if num_batches != 1:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"{self.__class__.__name__} requires exactly one batch ({num_batches} were retrieved)."
-            )
-
-        return batch_list[0].id
-
     def get_validator(
         self,
         variables: Optional[ParameterContainer] = None,
     ) -> Optional[Validator]:
-        if self._batch_request is None:
-            return None
-
-        batch_request: Optional[BatchRequest] = build_batch_request(
-            domain=None,
+        return get_validator_from_batch_request(
+            purpose="domain_builder",
+            data_context=self.data_context,
             batch_request=self._batch_request,
+            domain=None,
             variables=variables,
             parameters=None,
         )
 
-        expectation_suite_name: str = (
-            f"tmp_domain_builder_suite_{str(uuid.uuid4())[:8]}"
+    def _get_batch_ids(
+        self,
+        variables: Optional[ParameterContainer] = None,
+    ) -> Optional[List[str]]:
+        return get_batch_ids_from_batch_request(
+            data_context=self.data_context,
+            batch_request=self._batch_request,
+            domain=None,
+            variables=variables,
+            parameters=None,
         )
-        return self.data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
+
+    def get_batch_id(
+        self,
+        variables: Optional[ParameterContainer] = None,
+    ) -> Optional[str]:
+        batch_ids: Optional[List[str]] = self._get_batch_ids(
+            variables=variables,
         )
+        num_batch_ids: int = len(batch_ids)
+        if num_batch_ids != 1:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""{self.__class__.__name__}.get_batch_id() expected to return exactly one batch_id \
+({num_batch_ids} were retrieved).
+"""
+            )
+
+        return batch_ids[0]
 
     @property
     def data_context(self) -> DataContext:

@@ -4,6 +4,42 @@
 Changelog
 #########
 
+Develop
+-----------------
+* [DOCS] Getting Started with Great Expectations - Updated and is now integration tested
+* [FEATURE] INTRODUCING MAJOR IMPROVEMENTS to the new Rule-Based Profiler architecture and capabilities (Experimental):
+  - Clean separation of concerns between DomainBuilder and ParameterBuilder logic
+  - Support for both single-batch and multi-batch use-cases showcased
+  - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
+  - Initial documentation
+* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 #2989
+* [BUGFIX] Fix an issue where "compression" was added to reader_options for all files loaded from S3 by PandasExecutionEngine
+* [MAINTENANCE] Instrumented BaseDataContext.test_yaml_config() and updated Anonymizers
+
+0.13.21
+-----------------
+* [DOCS] correct errors and reference complete example for custom expectations (thanks @jdimatteo)
+* [DOCS] How to connect to : in-memory Pandas Dataframe
+* [DOCS] How to connect to in memory dataframe with spark
+* [DOCS] How to connect to : S3 data using Pandas
+* [DOCS] How to connect to : Sqlite database
+* [DOCS] no longer show util import to users
+* [DOCS] How to connect to data on a filesystem using Spark guide
+* [DOCS] GDOC-102/GDOC-127 Port in References and Tutorials
+* [DOCS] How to connect to a MySQL database
+* [DOCS] improved clarity in how to write guide templates and docs
+* [DOCS] Add documentation for Rule Based Profilers
+* [BUGFIX] Update mssql image version for Azure
+* [MAINTENANCE] Update test-sqlalchemy-latest.yml
+* [MAINTENANCE] Clean Up Design for Configuration and Flow of Rules, Domain Builders, and Parameter Builders
+* [MAINTENANCE] Update Profiler docstring args
+* [MAINTENANCE] Remove date format parameter builder
+* [MAINTENANCE] Move metrics computations to top-level ParameterBuilder
+* [MAINTENANCE] use tmp dot UUID for discardable expectation suite name
+* [MAINTENANCE] Refactor ExpectationSuite to include profiler_config in citations
+* [FEATURE] Add citations to Profiler.profile()
+* [FEATURE] Bootstrapped Range Parameter Builder
+
 0.13.20
 -----------------
 * [DOCS] Update pr template and remove enhancement feature type
@@ -20,7 +56,7 @@ Changelog
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
 * [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
-* [ENHANCEMENT] Experimental WIP Rule Based Profiler for single batch workflows (#2788)
+* [ENHANCEMENT] Experimental WIP Rule-Based Profiler for single batch workflows (#2788)
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [MAINTENANCE] Improve robustness of integration test_runner
