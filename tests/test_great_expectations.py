@@ -25,6 +25,7 @@ from great_expectations.data_asset.data_asset import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
 from great_expectations.exceptions import InvalidCacheValueError
+from great_expectations.util import is_library_loadable
 
 try:
     from unittest import mock
@@ -1014,6 +1015,10 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="openpyxl"),
+        reason="GE uses pandas to read excel files, which requires openpyxl",
+    )
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_excel(

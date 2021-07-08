@@ -28,6 +28,20 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
+def test_constructor():
+    # default instantiation
+    PandasExecutionEngine()
+
+    # instantiation with custom parameters
+    engine = PandasExecutionEngine(discard_subset_failing_expectations=True)
+    assert "discard_subset_failing_expectations" in engine.config
+    assert engine.config.get("discard_subset_failing_expectations") is True
+    custom_boto3_options = {"region_name": "us-east-1"}
+    engine = PandasExecutionEngine(boto3_options=custom_boto3_options)
+    assert "boto3_options" in engine.config
+    assert engine.config.get("boto3_options")["region_name"] == "us-east-1"
+
+
 def test_reader_fn():
     engine = PandasExecutionEngine()
 
@@ -376,6 +390,27 @@ def test_s3_files(s3, s3_bucket, test_df_small_csv):
 
 
 @pytest.fixture
+def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.parquet",
+        "directory/B-2.parquet",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    path = Path(tmpdir) / "file.parquet"
+    test_df_small.to_parquet(path)
+    for key in keys:
+        if key.endswith(".parquet"):
+            with open(path, "rb") as f:
+                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
+        else:
+            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
 def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
     bucket, keys = test_s3_files
     path = keys[0]
@@ -483,6 +518,16 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     full_path = f"s3a://{os.path.join(bucket, path)}"
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
+    df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
+    assert df.dataframe.shape == test_df_small.shape
+
+
+def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
+    bucket, keys = test_s3_files_parquet
+    path = [key for key in keys if key.endswith(".parquet")][0]
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+
+    batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.dataframe.shape == test_df_small.shape
 

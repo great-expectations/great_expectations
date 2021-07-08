@@ -43,6 +43,7 @@ class FilePathDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -54,6 +55,7 @@ class FilePathDataConnector(DataConnector):
             execution_engine (ExecutionEngine): Execution Engine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
             sorters (list): Optional list if you want to sort the data_references
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing FilePathDataConnector "{name}".')
 
@@ -61,6 +63,7 @@ class FilePathDataConnector(DataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         if default_regex is None:

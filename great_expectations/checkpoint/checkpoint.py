@@ -5,6 +5,7 @@ import logging
 import os
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
+from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
@@ -64,11 +65,12 @@ class Checkpoint:
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
+        ge_cloud_id: Optional[UUID] = None,
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
-            raise TypeError("A checkpoint requires a valid DataContext")
+            raise TypeError("A Checkpoint requires a valid DataContext")
         self._data_context = data_context
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -86,6 +88,7 @@ class Checkpoint:
                 "runtime_configuration": runtime_configuration,
                 "validations": validations,
                 "profilers": profilers,
+                "ge_cloud_id": ge_cloud_id,
                 # Next two fields are for LegacyCheckpoint configuration
                 "validation_operator_name": validation_operator_name,
                 "batches": batches,
@@ -109,6 +112,10 @@ class Checkpoint:
     @property
     def action_list(self) -> List[Dict]:
         return self._config.action_list
+
+    @property
+    def ge_cloud_id(self) -> UUID:
+        return self._config.ge_cloud_id
 
     # TODO: (Rob) should we type the big validation dicts for better validation/prevent duplication
     def get_substituted_config(
@@ -332,7 +339,7 @@ class Checkpoint:
             if not validations_present:
                 print(
                     f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
-means you must either update your checkpoint configuration or provide an appropriate validations
+means you must either update your Checkpoint configuration or provide an appropriate validations
 list programmatically (i.e., when your Checkpoint is run).
                     """
                 )
@@ -354,8 +361,8 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_notebook
         title: LegacyCheckpoint - Notebook
         icon:
-        short_description: Run a configured checkpoint from a notebook.
-        description: Run a configured checkpoint from a notebook.
+        short_description: Run a configured Checkpoint from a notebook.
+        description: Run a configured Checkpoint from a notebook.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
         maturity: Experimental (to-be-deprecated in favor of Checkpoint)
         maturity_details:
@@ -369,7 +376,7 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_command_line
         title: LegacyCheckpoint - Command Line
         icon:
-        short_description: Run a configured checkpoint from a command line.
+        short_description: Run a configured Checkpoint from a command line.
         description: Run a configured checkpoint from a command line in a Terminal shell.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
         maturity: Experimental (to-be-deprecated in favor of Checkpoint)
@@ -384,8 +391,8 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_cron_job
         title: LegacyCheckpoint - Cron
         icon:
-        short_description: Deploy a configured checkpoint as a scheduled task with cron.
-        description: Use the Unix crontab command to edit the cron file and add a line that will run checkpoint as a scheduled task.
+        short_description: Deploy a configured Checkpoint as a scheduled task with cron.
+        description: Use the Unix crontab command to edit the cron file and add a line that will run Checkpoint as a scheduled task.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
         maturity: Experimental (to-be-deprecated in favor of Checkpoint)
         maturity_details:
@@ -399,8 +406,8 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_airflow_dag
         title: LegacyCheckpoint - Airflow DAG
         icon:
-        short_description: Run a configured checkpoint in Apache Airflow
-        description: Running a configured checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.
+        short_description: Run a configured Checkpoint in Apache Airflow
+        description: Running a configured Checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html
         maturity: Beta (to-be-deprecated in favor of Checkpoint)
         maturity_details:
@@ -612,7 +619,7 @@ class LegacyCheckpoint(Checkpoint):
                 raise Exception(
                     f"""A batch has no suites associated with it. At least one suite is required.
     - Batch: {json.dumps(batch_kwargs)}
-    - Please add at least one suite to checkpoint {self.name}
+    - Please add at least one suite to Checkpoint {self.name}
 """
                 )
 
@@ -646,6 +653,7 @@ class SimpleCheckpoint(Checkpoint):
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
+        ge_cloud_id: Optional[UUID] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Optional[Union[str, List[str]]] = "all",
         slack_webhook: Optional[str] = None,
@@ -672,6 +680,7 @@ class SimpleCheckpoint(Checkpoint):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
+            ge_cloud_id=ge_cloud_id,
         ).build()
 
         super().__init__(
@@ -689,6 +698,7 @@ class SimpleCheckpoint(Checkpoint):
             runtime_configuration=checkpoint_config.runtime_configuration,
             validations=checkpoint_config.validations,
             profilers=checkpoint_config.profilers,
+            ge_cloud_id=checkpoint_config.ge_cloud_id,
         )
 
     def run(

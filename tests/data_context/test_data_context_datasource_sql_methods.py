@@ -172,28 +172,36 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
             expectation_suite_name="my_expectations",
         )
 
-    # Failed specification using an incomplete BatchRequest
-    with pytest.raises(ValueError):
-        context.get_validator(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=IDDict(batch_filter_parameters={}),
-            ),
-            expectation_suite_name="my_expectations",
+    # A BatchRequest specified without the date batch_filter_parameter will return all 30 batches.
+    assert (
+        len(
+            context.get_validator(
+                batch_request=BatchRequest(
+                    datasource_name="my_sqlite_db",
+                    data_connector_name="daily",
+                    data_asset_name="table_partitioned_by_date_column__A",
+                    data_connector_query=IDDict(batch_filter_parameters={}),
+                ),
+                expectation_suite_name="my_expectations",
+            ).batches
         )
+        == 30
+    )
 
-    # Failed specification using an incomplete BatchRequest
-    with pytest.raises(ValueError):
-        context.get_validator(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-            ),
-            expectation_suite_name="my_expectations",
+    # A BatchRequest specified without a data_connector_query will return all 30 batches.
+    assert (
+        len(
+            context.get_validator(
+                batch_request=BatchRequest(
+                    datasource_name="my_sqlite_db",
+                    data_connector_name="daily",
+                    data_asset_name="table_partitioned_by_date_column__A",
+                ),
+                expectation_suite_name="my_expectations",
+            ).batches
         )
+        == 30
+    )
 
     # Failed specification using an incomplete BatchRequest
     with pytest.raises(TypeError):

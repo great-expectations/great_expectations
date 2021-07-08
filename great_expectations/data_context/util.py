@@ -7,6 +7,7 @@ import os
 import re
 import warnings
 from collections import OrderedDict
+from functools import lru_cache
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -120,7 +121,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         class_instance = class_(**config_with_defaults)
     except TypeError as e:
         raise TypeError(
-            "Couldn't instantiate class : {} with config : \n\t{}\n \n".format(
+            "Couldn't instantiate class: {} with config: \n\t{}\n \n".format(
                 class_name, format_dict_for_error_message(config_with_defaults)
             )
             + str(e)
@@ -233,6 +234,7 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     return template_str
 
 
+@lru_cache(maxsize=None)
 def substitute_value_from_secret_store(value):
     """
     This method takes a value, tries to parse the value to fetch a secret from a secret manager

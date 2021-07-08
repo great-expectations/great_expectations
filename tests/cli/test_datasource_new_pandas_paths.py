@@ -62,15 +62,20 @@ def _run_cli_datasource_new_path_test(
                 "class_name": "PandasExecutionEngine",
             },
             "data_connectors": {
-                "my_datasource_example_data_connector": {
+                "default_inferred_data_connector_name": {
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
                     f"base_directory": f"../../{base_path}",
                     "class_name": "InferredAssetFilesystemDataConnector",
-                }
+                },
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "batch_identifiers": ["default_identifier_name"],
+                },
             },
         }
     ]
