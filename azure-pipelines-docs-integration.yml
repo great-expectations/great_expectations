@@ -47,7 +47,6 @@ stages:
               verbose: true
               rules: |
                 [DocsChanged]
-                /**
                 docs/**
                 tests/integration/docusaurus/**
                 tests/integration/fixtures/**
