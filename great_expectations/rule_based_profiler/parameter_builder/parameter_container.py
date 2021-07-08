@@ -3,9 +3,10 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
+from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import DotDict
+from great_expectations.types.base import SerializableDotDict
+from great_expectations.util import filter_properties_dict
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 
@@ -26,7 +27,7 @@ names must start with $ (e.g., "${fully_qualified_parameter_name}").
         )
 
 
-class ParameterNode(DotDict):
+class ParameterNode(SerializableDotDict):
     """
     ParameterNode is a node of a tree structure.
 
@@ -47,7 +48,7 @@ class ParameterNode(DotDict):
     """
 
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self)
+        return convert_to_json_serializable(data=dict(self))
 
 
 @dataclass
@@ -114,6 +115,7 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
+                filter_properties_dict(properties=source, inplace=True)
                 source = ParameterNode(source)
             key: str
             value: Any
@@ -247,9 +249,9 @@ def _build_parameter_node_tree_for_one_parameter(
         parameter_node[parameter_name_part] = parameter_value
 
 
-def get_parameter_value(
+def get_parameter_value_by_fully_qualified_parameter_name(
     fully_qualified_parameter_name: str,
-    domain: Domain,
+    domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Union[Any, ParameterNode]]:
@@ -258,7 +260,7 @@ def get_parameter_value(
     A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
     Args
         :param fully_qualified_parameter_name: str -- A dot-separated string key starting with $ for fetching parameters
-        :param domain: Union[Domain, List[Domain]] -- current Domain (or List[Domain]) of interest
+        :param domain: Domain -- current Domain of interest
         :param variables
         :param parameters
     :return: Optional[Union[Any, ParameterNode]] object corresponding to the last part of the fully-qualified parameter
@@ -327,8 +329,10 @@ def _get_parameter_value_from_parameter_container(
 
     parameter_name_part: Optional[str] = None
     return_value: Optional[Union[Any, ParameterNode]] = parameter_node
+    parent_parameter_node: Optional[ParameterNode] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
+            parent_parameter_node = return_value
             if parameter_name_part in return_value:
                 return_value = return_value[parameter_name_part]
 
@@ -336,6 +340,12 @@ def _get_parameter_value_from_parameter_container(
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
+"""
+        )
+    if parameter_name_part not in parent_parameter_node:
+        raise KeyError(
+            f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
+"{parameter_name_part}" of fully-qualified parameter name does not exist.
 """
         )
 

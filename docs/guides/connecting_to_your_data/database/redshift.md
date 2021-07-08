@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data in a Redshift database
+title: How to connect to a Redshift database
 ---
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
@@ -40,7 +40,7 @@ pip install psycopg2-binary
 
 <DatabaseCredentials />
 
-For this guide we will use a `connection_string` like this: 
+For this guide we will use a `connection_string` like this:
 
 ```
 postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>
@@ -52,12 +52,12 @@ postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<S
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L3-L5
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L3-L6
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L24
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L26
 ```
 
 ### 5. Configure your Datasource
@@ -73,10 +73,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L26-L40
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L28-L42
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L49
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L51
 ```
 
 </TabItem>
@@ -84,10 +84,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L25-L42
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L28-L45
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L48
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L51
 ```
 
 </TabItem>
@@ -110,13 +110,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L51
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L53
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L50
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L53
 ```
 
 </TabItem>
@@ -136,7 +136,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L54-L68
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L56-L70
 ```
 
   </TabItem>
@@ -145,7 +145,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L70-L81
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L76-L87
 ```
 
   </TabItem>
@@ -163,4 +163,3 @@ To view the full scripts used in this page, see them on GitHub:
 ## Next Steps
 
 <NextSteps />
-

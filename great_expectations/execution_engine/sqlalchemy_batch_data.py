@@ -6,6 +6,7 @@ from great_expectations.execution_engine.execution_engine import BatchData
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.exc import DatabaseError
     from sqlalchemy.sql.elements import quoted_name
 except ImportError:
     sa = None
@@ -139,11 +140,6 @@ class SqlAlchemyBatchData(BatchData):
                 # mssql expects all temporary table names to have a prefix '#'
                 if engine.dialect.name.lower() == "mssql":
                     generated_table_name = f"#{generated_table_name}"
-                if engine.dialect.name.lower() == "bigquery":
-                    raise ValueError(
-                        "No BigQuery dataset specified.  Include bigquery_temp_table in "
-                        "batch_spec_passthrough or a specify a default dataset in engine url"
-                    )
             if selectable is not None:
                 if engine.dialect.name.lower() == "oracle":
                     # oracle query was already passed as a string
@@ -239,11 +235,23 @@ class SqlAlchemyBatchData(BatchData):
                 temp_table_name=temp_table_name, query=query
             )
         elif self.sql_engine_dialect.name.lower() == "oracle":
-            stmt = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
+            # oracle 18c introduced PRIVATE temp tables which are transient objects
+            stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}".format(
+                temp_table_name=temp_table_name, query=query
+            )
+            # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
+            # this means an empty table will persist after the db session
+            stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'.format(
                 temp_table_name=temp_table_name, query=query
             )
-        self._engine.execute(stmt)
+        if self.sql_engine_dialect.name.lower() == "oracle":
+            try:
+                self._engine.execute(stmt_1)
+            except DatabaseError:
+                self._engine.execute(stmt_2)
+        else:
+            self._engine.execute(stmt)

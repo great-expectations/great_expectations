@@ -83,12 +83,8 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-assert set(
+assert "yellow_trip_data_sample_2018-01.csv" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
         "default_inferred_data_connector_name"
     ]
-) == {
-    "yellow_trip_data_sample_2019-01.csv",
-    "yellow_trip_data_sample_2019-02.csv",
-    "yellow_trip_data_sample_2019-03.csv",
-}
+)

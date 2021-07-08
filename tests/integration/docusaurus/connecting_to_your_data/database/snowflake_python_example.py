@@ -3,8 +3,7 @@ import os
 from ruamel import yaml
 
 import great_expectations as ge
-
-from .util import load_data_into_database
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
 sfUser = os.environ.get("SNOWFLAKE_USER")
@@ -13,16 +12,18 @@ sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
 sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
 sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
-
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+
+# This utility is not for general use. It is only to support testing.
+from util import load_data_into_database
+
 load_data_into_database(
-    "taxi_data",
-    "./data/reports/yellow_tripdata_sample_2019-01.csv",
-    CONNECTION_STRING,
+    table_name="taxi_data",
+    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
+    connection_string=CONNECTION_STRING,
 )
 
 context = ge.get_context()
-
 
 datasource_config = {
     "name": "my_snowflake_datasource",
@@ -52,7 +53,7 @@ context.test_yaml_config(yaml.dump(datasource_config))
 context.add_datasource(**datasource_config)
 
 # First test for RuntimeBatchRequest using a query
-batch_request = ge.core.batch.RuntimeBatchRequest(
+batch_request = RuntimeBatchRequest(
     datasource_name="my_snowflake_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
@@ -68,8 +69,11 @@ validator = context.get_validator(
 )
 print(validator.head())
 
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+
 # Second test for BatchRequest naming a table
-batch_request = ge.core.batch.BatchRequest(
+batch_request = BatchRequest(
     datasource_name="my_snowflake_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve

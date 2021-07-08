@@ -27,7 +27,7 @@ resources:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: test_ci
   - container: mssql
-    image: microsoft/mssql-server-linux
+    image: mcr.microsoft.com/mssql/server:2019-latest
     env:
       ACCEPT_EULA: Y
       MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
@@ -69,7 +69,7 @@ stages:
   - stage: os_integration
     variables:
       python.version: '3.x'
-      GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
+      GE_pytest_pip_opts: '--requirement requirements-dev-base.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
 
     jobs:
@@ -159,7 +159,7 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
@@ -194,7 +194,7 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
@@ -225,7 +225,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt

@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data on a gcs using spark
+title: How to connect to data on GCS using Spark
 ---
 
 **TODO** This is a stub

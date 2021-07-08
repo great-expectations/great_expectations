@@ -3,8 +3,7 @@ import os
 from ruamel import yaml
 
 import great_expectations as ge
-
-from .util import load_data_into_database
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 redshift_username = os.environ.get("REDSHIFT_USERNAME")
 redshift_password = os.environ.get("REDSHIFT_PASSWORD")
@@ -15,10 +14,13 @@ redshift_sslmode = os.environ.get("REDSHIFT_SSLMODE")
 
 CONNECTION_STRING = f"postgresql+psycopg2://{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_database}?sslmode={redshift_sslmode}"
 
+# This utility is not for general use. It is only to support testing.
+from util import load_data_into_database
+
 load_data_into_database(
-    "taxi_data",
-    "./data/reports/yellow_tripdata_sample_2019-01.csv",
-    CONNECTION_STRING,
+    table_name="taxi_data",
+    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
+    connection_string=CONNECTION_STRING,
 )
 
 context = ge.get_context()
@@ -51,7 +53,7 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 
 # First test for RuntimeBatchRequest using a query
-batch_request = ge.core.batch.RuntimeBatchRequest(
+batch_request = RuntimeBatchRequest(
     datasource_name="my_redshift_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
@@ -67,8 +69,11 @@ validator = context.get_validator(
 )
 print(validator.head())
 
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+
 # Second test for BatchRequest naming a table
-batch_request = ge.core.batch.BatchRequest(
+batch_request = BatchRequest(
     datasource_name="my_redshift_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
@@ -89,4 +94,3 @@ assert "taxi_data" in set(
         "default_inferred_data_connector_name"
     ]
 )
-validator.execution_engine.engine.close()

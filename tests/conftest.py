@@ -41,6 +41,7 @@ from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
+    get_sqlite_connection_url,
 )
 from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
@@ -104,6 +105,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run aws integration tests",
     )
+    parser.addoption(
+        "--docs-tests",
+        action="store_true",
+        help="If set, run integration tests for docs",
+    )
 
 
 def build_test_backends_list(metafunc):
@@ -149,12 +155,18 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--aws-integration"):
         # --aws-integration given in cli: do not skip aws-integration tests
         return
+    if config.getoption("--docs-tests"):
+        # --docs-tests given in cli: do not skip documentation integration tests
+        return
     skip_aws_integration = pytest.mark.skip(
         reason="need --aws-integration option to run"
     )
+    skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
     for item in items:
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
+        if "docs" in item.keywords:
+            item.add_marker(skip_docs_integration)
 
 
 @pytest.fixture(autouse=True)
@@ -4016,7 +4028,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
         os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
-    engine: sa.engine.Engine = sa.create_engine(f"sqlite:////{db_file_path}")
+    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
     conn: sa.engine.Connection = engine.connect()
 
     # Build a SqlAlchemyDataset using that database

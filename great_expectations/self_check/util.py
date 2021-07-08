@@ -2,6 +2,7 @@ import copy
 import locale
 import logging
 import os
+import platform
 import random
 import string
 import tempfile
@@ -229,6 +230,16 @@ class LockingConnectionCheck:
             return self._is_valid
 
 
+def get_sqlite_connection_url(sqlite_db_path):
+    url = "sqlite://"
+    if sqlite_db_path is not None:
+        extra_slash = ""
+        if platform.system() != "Windows":
+            extra_slash = "/"
+        url = f"{url}/{extra_slash}{sqlite_db_path}"
+    return url
+
+
 def get_dataset(
     dataset_type,
     data,
@@ -256,6 +267,9 @@ def get_dataset(
                 elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
                     df[key] = pd.to_datetime(df[key])
                     continue
+                elif value.lower() in ["date"]:
+                    df[key] = pd.to_datetime(df[key]).dt.date
+                    value = "object"
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
@@ -270,11 +284,8 @@ def get_dataset(
         if not create_engine:
             return None
 
-        if sqlite_db_path is not None:
-            # Create a new database
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
+
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -311,6 +322,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -372,6 +385,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -429,6 +444,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -499,6 +516,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -652,6 +671,9 @@ def get_test_validator_with_data(
                 elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
                     df[key] = pd.to_datetime(df[key])
                     continue
+                elif value.lower() in ["date"]:
+                    df[key] = pd.to_datetime(df[key]).dt.date
+                    value = "object"
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
@@ -826,10 +848,7 @@ def build_sa_validator_with_data(
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
-        if sqlite_db_path is not None:
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path))
     elif sa_engine_name == "postgresql":
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
@@ -886,7 +905,7 @@ def build_sa_validator_with_data(
                         value=[min_value_dbms, max_value_dbms],
                         inplace=True,
                     )
-            elif type_ in ["DATETIME", "TIMESTAMP"]:
+            elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
                 df[col] = pd.to_datetime(df[col])
 
     if table_name is None:

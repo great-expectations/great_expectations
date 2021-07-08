@@ -1,4 +1,4 @@
 ---
-title: How to connect to your data in a MSSQL database
+title: How to connect to a MSSQL database
 ---
 This article is a stub.
