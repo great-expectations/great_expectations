@@ -978,7 +978,6 @@ class DataAsset:
             expectation_suite_name = expectation_suite.expectation_suite_name
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
-            expectation_meta.pop("citations", None)
 
             meta = {
                 "great_expectations_version": ge_version,
