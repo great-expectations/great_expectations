@@ -456,7 +456,6 @@ class Validator:
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
                     result = ExpectationValidationResult(
-                        expectation_config=configuration,
                         success=False,
                         exception_info={
                             "raised_exception": raised_exception,
@@ -487,7 +486,6 @@ class Validator:
                     exception_traceback = traceback.format_exc()
 
                     result = ExpectationValidationResult(
-                        expectation_config=configuration,
                         success=False,
                         exception_info={
                             "raised_exception": raised_exception,
