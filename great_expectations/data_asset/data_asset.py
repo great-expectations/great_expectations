@@ -979,8 +979,6 @@ class DataAsset:
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
             expectation_meta.pop("citations", None)
-            expectation_meta.pop("great_expectations_version", None)
-            expectation_meta.pop("great_expectations.__version__", None)
 
             meta = {
                 "great_expectations_version": ge_version,
@@ -990,8 +988,8 @@ class DataAsset:
                 "batch_markers": self.batch_markers,
                 "batch_parameters": self.batch_parameters,
                 "validation_time": validation_time,
+                "expectation_suite_meta": expectation_meta
             }
-            meta.update(expectation_meta)
             result = ExpectationSuiteValidationResult(
                 results=results,
                 success=statistics.success,
