@@ -1,14 +1,14 @@
 from ruamel import yaml
 
 from great_expectations import DataContext
-from great_expectations.marshmallow__shade.validate import Validator
 from great_expectations.rule_based_profiler.profiler import Profiler
 
 profiler_config = """
 # This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_trip_data_samples/
+
 variables:
-  false_positive_rate: 1.0e-2
+  false_positive_rate: 0.01
   mostly: 1.0
 
 rules:
@@ -28,7 +28,7 @@ rules:
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
-        truncate_distribution:
+        truncate_values:
           lower_bound: 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
@@ -99,16 +99,14 @@ rules:
 
 data_context = DataContext()
 
-
 # Instantiate Profiler
 full_profiler_config_dict: dict = yaml.load(profiler_config)
-
 profiler: Profiler = Profiler(
     profiler_config=full_profiler_config_dict,
     data_context=data_context,
 )
 
-suite = profiler.profile()
+suite = profiler.profile(expectation_suite_name="test_suite_name")
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.

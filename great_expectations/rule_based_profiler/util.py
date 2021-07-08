@@ -1,7 +1,7 @@
 import copy
 import uuid
-from types import ModuleType
-from typing import Any, Callable, Dict, List, Optional, Union
+from numbers import Number
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
@@ -13,10 +13,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from great_expectations.util import import_library_module, is_library_loadable
 from great_expectations.validator.validator import Validator
 
-NP_EPSILON: np.float64 = np.finfo(float).eps
+NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
 
 def get_validator(
@@ -195,21 +194,47 @@ def get_parameter_value(
     return parameter_reference
 
 
-def import_scipy_stats_bootstrap_function() -> Optional[Callable]:
-    if not is_library_loadable(library_name="scipy.stats"):
-        return None
+def compute_quantiles(
+    metric_values: Union[np.ndarray, List[Number]],
+    false_positive_rate: np.float64,
+) -> tuple:
+    lower_quantile = np.quantile(
+        metric_values,
+        q=(false_positive_rate / 2),
+        axis=0,
+        interpolation="linear",  # can be omitted ("linear" is default)
+    )
+    upper_quantile = np.quantile(
+        metric_values,
+        q=1.0 - (false_positive_rate / 2),
+        axis=0,
+        interpolation="linear",  # can be omitted ("linear" is default)
+    )
+    return lower_quantile, upper_quantile
 
-    scipy_stats: Optional[ModuleType] = import_library_module(module_name="scipy.stats")
-    bootstrap: Optional[Callable] = None
-    if (
-        scipy_stats
-        and hasattr(scipy_stats, "bootstrap")
-        and isinstance(scipy_stats.bootstrap, Callable)
-    ):
-        bootstrap = scipy_stats.bootstrap
 
-    return bootstrap
-
-
-def is_scipy_stats_bootstrap_loadable() -> bool:
-    return import_scipy_stats_bootstrap_function() is not None
+def compute_bootstrap_quantiles(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> tuple:
+    bootstraps: np.ndarray = np.random.choice(
+        metric_values, size=(n_resamples, metric_values.size)
+    )
+    lower_quantile = np.mean(
+        np.quantile(
+            bootstraps,
+            q=false_positive_rate / 2,
+            axis=1,
+            interpolation="linear",  # can be omitted ("linear" is default)
+        )
+    )
+    upper_quantile = np.mean(
+        np.quantile(
+            bootstraps,
+            q=1.0 - (false_positive_rate / 2),
+            axis=1,
+            interpolation="linear",  # can be omitted ("linear" is default)
+        )
+    )
+    return lower_quantile, upper_quantile

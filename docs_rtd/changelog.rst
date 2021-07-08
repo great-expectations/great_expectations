@@ -6,11 +6,15 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Getting Started with Great Expectations - Updated and is now integration tested
 * [FEATURE] INTRODUCING MAJOR IMPROVEMENTS to the new Rule-Based Profiler architecture and capabilities (Experimental):
   - Clean separation of concerns between DomainBuilder and ParameterBuilder logic
   - Support for both single-batch and multi-batch use-cases showcased
   - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
   - Initial documentation
+* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 #2989
+* [BUGFIX] Fix an issue where "compression" was added to reader_options for all files loaded from S3 by PandasExecutionEngine
+* [MAINTENANCE] Instrumented BaseDataContext.test_yaml_config() and updated Anonymizers
 
 0.13.21
 -----------------

@@ -462,7 +462,7 @@ class S3Url:
 
 def sniff_s3_compression(s3_url: S3Url) -> str:
     """Attempts to get read_csv compression from s3_url"""
-    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix, "infer")
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix)
 
 
 # noinspection PyPep8Naming

@@ -8,8 +8,7 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
-  confidence_level: 9.75e-1
-  mostly: 1.0
+  false_positive_rate: 5.0e-2
 
 rules:
   row_count_range_rule:
@@ -20,7 +19,7 @@ rules:
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_2018_thru_nov_2020_monthly_trip_data_batch_request
         metric_name: table.row_count
-        confidence_level: $variables.confidence_level
+        false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
         truncate_values:
           lower_bound: 0
@@ -30,6 +29,5 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         min_value: $parameter.row_count_range.value.min_value
         max_value: $parameter.row_count_range.value.max_value
-        mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
