@@ -250,6 +250,7 @@ def get_domain_metrics_dict_by_name(
 
 
 def get_expectation_impl(expectation_name):
+    print(f'\n[ALEX_TEST] REGISTERED_EXPECTATIONS:\n{_registered_expectations}')
     return _registered_expectations.get(expectation_name)
 
 

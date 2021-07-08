@@ -69,10 +69,15 @@ class MetaExpectation(ABCMeta):
     """
 
     def __new__(cls, clsname, bases, attrs):
+        # print(f'\n[ALEX_TEST] REGISTERING_EXPECTATION: {clsname} ; TYPE: {str(type(clsname))}')
         newclass = super().__new__(cls, clsname, bases, attrs)
         if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
+        # TODO: <Alex>ALEX</Alex>
+        else:
+            print(f'\n[ALEX_TEST] NOT_REGISTERING_ABSTRACT_EXPECTATION: {clsname} ; TYPE: {str(type(clsname))}')
+        # TODO: <Alex>ALEX</Alex>
         newclass._register_renderer_functions()
         default_kwarg_values = dict()
         for base in reversed(bases):
