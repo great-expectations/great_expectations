@@ -1156,11 +1156,15 @@ class ExpectationConfiguration(SerializableDictDot):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
+        this_kwargs: dict = convert_to_json_serializable(self.kwargs)
+        other_kwargs: dict = convert_to_json_serializable(other.kwargs)
+        this_meta: dict = convert_to_json_serializable(self.meta)
+        other_meta: dict = convert_to_json_serializable(other.meta)
         return all(
             (
                 self.expectation_type == other.expectation_type,
-                self.kwargs == other.kwargs,
-                self.meta == other.meta,
+                this_kwargs == other_kwargs,
+                this_meta == other_meta,
             )
         )
 

@@ -76,8 +76,7 @@ def test_batch__str__method():
   "batch_request": {
     "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
-    "data_asset_name": "my_data_asset_name",
-    "data_connector_query": null
+    "data_asset_name": "my_data_asset_name"
   },
   "batch_definition": {
     "datasource_name": "my_datasource",

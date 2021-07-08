@@ -54,9 +54,9 @@ def test_s3_suffix(url, expected):
     "url,expected",
     [
         ("s3://bucket/hello/world.csv.gz", "gzip"),
-        ("s3://bucket/hello/world.csv", "infer"),
+        ("s3://bucket/hello/world.csv", None),
         ("s3://bucket/hello/world.csv.xz", "xz"),
-        ("s3://bucket/hello/world", "infer"),
+        ("s3://bucket/hello/world", None),
     ],
 )
 def test_sniff_s3_compression(url, expected):

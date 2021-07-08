@@ -19,9 +19,9 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-
-from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 try:
     import boto3
@@ -74,10 +74,10 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        self.discard_subset_failing_expectations = kwargs.get(
+        self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.get("boto3_options", {})
+        boto3_options: dict = kwargs.pop("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
@@ -150,7 +150,9 @@ Please check your config."""
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             if "compression" not in reader_options.keys():
-                reader_options["compression"] = sniff_s3_compression(s3_url)
+                inferred_compression_param = sniff_s3_compression(s3_url)
+                if inferred_compression_param is not None:
+                    reader_options["compression"] = inferred_compression_param
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
@@ -277,7 +279,7 @@ Please check your config."""
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
@@ -286,12 +288,12 @@ Please check your config."""
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
-            MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
-             the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:

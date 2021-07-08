@@ -6,6 +6,14 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
+from packaging.version import parse as parse_version
+
+from great_expectations._version import get_versions  # isort:skip
+
+__version__ = get_versions()["version"]  # isort:skip
+del get_versions  # isort:skip
+
+
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
@@ -67,10 +75,11 @@ except ImportError:
 try:
     import snowflake.sqlalchemy.snowdialect
 
-    # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
-except (ImportError, KeyError):
+    if sa:
+        # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+except (ImportError, KeyError, AttributeError):
     snowflake = None
 
 try:
@@ -95,7 +104,7 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
@@ -203,7 +212,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "sqlite",
             "oracle",
             "mssql",
-            "oracle",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
@@ -264,7 +272,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "class_name": self.__class__.__name__,
         }
         self._config.update(kwargs)
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @property
     def credentials(self):
@@ -368,12 +376,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
-            MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
-            the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column
@@ -613,7 +621,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type="identity"
+                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY.value
             )
             assert len(query["select"]) == len(query["ids"])
             try:
@@ -764,9 +772,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Select, str]:
         table_name: str = batch_spec["table_name"]
-
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
             split_clause = splitter_fn(
@@ -782,22 +789,42 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
                 # so the business logic for building the query needs to be different.
-
+                if self.engine.dialect.name.lower() == "oracle":
+                    # limit doesn't compile properly for oracle so we will append rownum to query string later
+                    raw_query = (
+                        sa.select("*")
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
+                        )
+                        .where(split_clause)
+                    )
+                    query = str(
+                        raw_query.compile(
+                            self.engine, compile_kwargs={"literal_binds": True}
+                        )
+                    )
+                    query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
+                    return query
+                else:
+                    return (
+                        sa.select("*")
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
+                        )
+                        .where(split_clause)
+                        .limit(batch_spec["sampling_kwargs"]["n"])
+                    )
+            else:
+                sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
                     .select_from(
                         sa.table(table_name, schema=batch_spec.get("schema_name", None))
                     )
-                    .where(split_clause)
-                    .limit(batch_spec["sampling_kwargs"]["n"])
-                )
-
-            else:
-
-                sampler_fn = getattr(self, batch_spec["sampling_method"])
-                return (
-                    sa.select("*")
-                    .select_from(sa.text(table_name))
                     .where(
                         sa.and_(
                             split_clause,
@@ -833,17 +860,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
-        if isinstance(batch_spec, RuntimeQueryBatchSpec):
-            # query != None is already checked when RuntimeQueryBatchSpec is instantiated
-            query: str = batch_spec.query
-            if query:
-                batch_spec.query = "SQLQuery"
-                batch_data = SqlAlchemyBatchData(execution_engine=self, query=query)
-                return batch_data, batch_markers
 
-        selectable: Select = self._build_selectable_from_batch_spec(
-            batch_spec=batch_spec
-        )
         temp_table_name: Optional[str]
         if "bigquery_temp_table" in batch_spec:
             temp_table_name = batch_spec.get("bigquery_temp_table")
@@ -853,14 +870,40 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name = batch_spec.get("table_name", None)
         source_schema_name = batch_spec.get("schema_name", None)
 
-        batch_data = SqlAlchemyBatchData(
-            execution_engine=self,
-            selectable=selectable,
-            temp_table_name=temp_table_name,
-            create_temp_table=batch_spec.get(
-                "create_temp_table", self._create_temp_table
-            ),
-            source_table_name=source_table_name,
-            source_schema_name=source_schema_name,
-        )
+        if isinstance(batch_spec, RuntimeQueryBatchSpec):
+            # query != None is already checked when RuntimeQueryBatchSpec is instantiated
+            query: str = batch_spec.query
+
+            batch_spec.query = "SQLQuery"
+            batch_data = SqlAlchemyBatchData(
+                execution_engine=self,
+                query=query,
+                temp_table_name=temp_table_name,
+                create_temp_table=batch_spec.get(
+                    "create_temp_table", self._create_temp_table
+                ),
+                source_table_name=source_table_name,
+                source_schema_name=source_schema_name,
+            )
+        elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
+            if self.engine.dialect.name.lower() == "oracle":
+                selectable: str = self._build_selectable_from_batch_spec(
+                    batch_spec=batch_spec
+                )
+            else:
+                selectable: Select = self._build_selectable_from_batch_spec(
+                    batch_spec=batch_spec
+                )
+
+            batch_data = SqlAlchemyBatchData(
+                execution_engine=self,
+                selectable=selectable,
+                temp_table_name=temp_table_name,
+                create_temp_table=batch_spec.get(
+                    "create_temp_table", self._create_temp_table
+                ),
+                source_table_name=source_table_name,
+                source_schema_name=source_schema_name,
+            )
+
         return batch_data, batch_markers

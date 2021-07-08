@@ -98,6 +98,26 @@ class BaseDatasource:
             )
         return batch_list[0]
 
+    def get_batch_definition_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[BatchDefinition]:
+        """
+        Validates batch request and utilizes the classes'
+        Data Connectors' property to get a list of batch definition given
+         a batch request
+        Args:
+            :param batch_request: A BatchRequest object used to request a batch
+            :return: A list of batch definitions
+        """
+        self._validate_batch_request(batch_request=batch_request)
+
+        data_connector: DataConnector = self.data_connectors[
+            batch_request.data_connector_name
+        ]
+        return data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
+
     def get_batch_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> List[Batch]:
@@ -202,7 +222,7 @@ class BaseDatasource:
 
     def get_available_data_asset_names(
         self, data_connector_names: Optional[Union[list, str]] = None
-    ) -> dict:
+    ) -> Dict[str, List[str]]:
         """
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be

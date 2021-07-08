@@ -30,6 +30,8 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         if value_set is None:
             # vacuously true
             return True
+        elif len(value_set) == 0:
+            return False
         return column.in_(value_set)
 
     @column_condition_partial(engine=SparkDFExecutionEngine)

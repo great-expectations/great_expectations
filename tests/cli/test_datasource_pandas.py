@@ -10,11 +10,16 @@ from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_cli_datasource_list_on_project_with_no_datasources(
-    caplog, monkeypatch, empty_data_context, filesystem_csv_2
+    mock_emit, caplog, monkeypatch, empty_data_context, filesystem_csv_2
 ):
-    project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    monkeypatch.delenv(
+        "GE_USAGE_STATS", raising=False
+    )  # Undo the project-wide test default
+    context: DataContext = empty_data_context
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -28,16 +33,41 @@ def test_cli_datasource_list_on_project_with_no_datasources(
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
 
+    assert mock_emit.call_count == len(expected_call_args_list)
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_cli_datasource_list_on_project_with_one_datasource(
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     filesystem_csv_2,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    project_root_dir = context.root_directory
-    context = DataContext(project_root_dir)
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -57,11 +87,45 @@ def test_cli_datasource_list_on_project_with_one_datasource(
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
 
+    assert mock_emit.call_count == len(expected_call_args_list)
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_cli_datasource_new(
-    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+    mock_subprocess,
+    mock_emit,
+    caplog,
+    monkeypatch,
+    empty_data_context,
+    filesystem_csv_2,
 ):
+    monkeypatch.delenv(
+        "GE_USAGE_STATS", raising=False
+    )  # Undo the project-wide test default
     context = empty_data_context
     root_dir = context.root_directory
     assert context.list_datasources() == []
@@ -88,6 +152,36 @@ def test_cli_datasource_new(
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.new_ds_choice",
+                "event_payload": {"type": "pandas", "api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
+
     # Run notebook
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
@@ -98,36 +192,52 @@ def test_cli_datasource_new(
     context = DataContext(root_dir)
 
     assert len(context.list_datasources()) == 1
-
     assert context.list_datasources() == [
         {
-            "name": "my_datasource",
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
             "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
-            "execution_engine": {
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "PandasExecutionEngine",
-            },
             "data_connectors": {
-                "my_datasource_example_data_connector": {
+                "default_inferred_data_connector_name": {
+                    "module_name": "great_expectations.datasource.data_connector",
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
-                    "module_name": "great_expectations.datasource.data_connector",
                     "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
-                }
+                },
+                "default_runtime_data_connector_name": {
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "batch_identifiers": ["default_identifier_name"],
+                    "class_name": "RuntimeDataConnector",
+                },
             },
+            "name": "my_datasource",
         }
     ]
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_cli_datasource_new_no_jupyter_writes_notebook(
-    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+    mock_subprocess,
+    mock_emit,
+    caplog,
+    monkeypatch,
+    empty_data_context,
+    filesystem_csv_2,
 ):
+    monkeypatch.delenv(
+        "GE_USAGE_STATS", raising=False
+    )  # Undo the project-wide test default
     context = empty_data_context
     root_dir = context.root_directory
     assert context.list_datasources() == []
@@ -156,6 +266,36 @@ def test_cli_datasource_new_no_jupyter_writes_notebook(
     assert mock_subprocess.call_count == 0
     assert len(context.list_datasources()) == 0
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.new_ds_choice",
+                "event_payload": {"type": "pandas", "api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -198,29 +338,34 @@ def test_cli_datasource_new_with_name_param(
     context = DataContext(root_dir)
 
     assert len(context.list_datasources()) == 1
-
     assert context.list_datasources() == [
         {
-            "name": "foo",
-            "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "execution_engine": {
                 "module_name": "great_expectations.execution_engine",
                 "class_name": "PandasExecutionEngine",
             },
             "data_connectors": {
-                "foo_example_data_connector": {
+                "default_inferred_data_connector_name": {
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
-                }
+                    "base_directory": "../../filesystem_csv_2",
+                },
+                "default_runtime_data_connector_name": {
+                    "batch_identifiers": ["default_identifier_name"],
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "class_name": "RuntimeDataConnector",
+                },
             },
+            "class_name": "Datasource",
+            "name": "foo",
         }
     ]
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -266,32 +411,42 @@ def test_cli_datasource_new_from_misc_directory(
 
     del context
     context = DataContext(root_dir)
+
     assert context.list_datasources() == [
         {
-            "name": "my_datasource",
-            "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "execution_engine": {
                 "module_name": "great_expectations.execution_engine",
                 "class_name": "PandasExecutionEngine",
             },
+            "class_name": "Datasource",
             "data_connectors": {
-                "my_datasource_example_data_connector": {
+                "default_inferred_data_connector_name": {
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                    "base_directory": "../../filesystem_csv_2",
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
+                },
+                "default_runtime_data_connector_name": {
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../filesystem_csv_2",
-                    "class_name": "InferredAssetFilesystemDataConnector",
-                }
+                    "batch_identifiers": ["default_identifier_name"],
+                    "class_name": "RuntimeDataConnector",
+                },
             },
+            "name": "my_datasource",
         }
     ]
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_cli_datasource_delete_on_project_with_one_datasource(
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -314,6 +469,29 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
     assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource deleted successfully." in stdout
 
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
+
     # reload context from disk to see if the datasource was in fact deleted
     root_directory = context.root_directory
     del context
@@ -322,7 +500,11 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -349,6 +531,29 @@ def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
     assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource deleted successfully." in stdout
 
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
+
     # reload context from disk to see if the datasource was in fact deleted
     root_directory = context.root_directory
     del context
@@ -357,7 +562,11 @@ def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_does_not_delete(
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -380,6 +589,29 @@ def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_d
     assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource `my_datasource` was not deleted." in stdout
 
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.end",
+                "event_payload": {"cancelled": True, "api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
+
     # reload context from disk to see if the datasource was in fact deleted
     root_directory = context.root_directory
     del context
@@ -388,7 +620,11 @@ def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_d
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_cli_datasource_delete_with_non_existent_datasource_raises_error(
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -408,3 +644,26 @@ def test_cli_datasource_delete_with_non_existent_datasource_raises_error(
     assert result.exit_code == 1
     assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource foo could not be found." in stdout
+
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)

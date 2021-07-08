@@ -292,7 +292,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def _get(self, key):
         filepath: str = os.path.join(
@@ -300,7 +300,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
         try:
             with open(filepath) as infile:
-                contents: str = infile.read()
+                contents: str = infile.read().rstrip("\n")
         except FileNotFoundError:
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
@@ -505,7 +505,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
@@ -795,7 +795,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def _build_gcs_object_key(self, key):
         if self.platform_specific_separator:

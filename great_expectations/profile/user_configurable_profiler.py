@@ -1,4 +1,3 @@
-import datetime
 import logging
 import math
 
@@ -69,9 +68,10 @@ class UserConfigurableProfiler:
         value_set_threshold: str = "MANY",
     ):
         """
-                The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
-                instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
-                instantiated, if config items change, a new profiler will be needed.
+        The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
+        instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
+        instantiated, if config items change, a new profiler will be needed.
+
         Write an entry on how to use the profiler for the GE docs site
                 Args:
                     profile_dataset: A Great Expectations Dataset or Validator object
@@ -202,6 +202,7 @@ class UserConfigurableProfiler:
 
         """
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+            # noinspection PyProtectedMember
             suite_name = self.profile_dataset._expectation_suite.expectation_suite_name
             self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
 
@@ -846,22 +847,21 @@ class UserConfigurableProfiler:
                         profile_dataset.execution_engine.engine.dialect
                     )
 
-            quantile_result = (
-                profile_dataset.expect_column_quantile_values_to_be_between(
-                    column,
-                    quantile_ranges={
-                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                        "value_ranges": [
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                        ],
-                    },
-                    allow_relative_error=allow_relative_error,
-                    result_format="SUMMARY",
-                )
+            quantile_result = profile_dataset.expect_column_quantile_values_to_be_between(
+                column,
+                quantile_ranges={
+                    "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                    "value_ranges": [
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                    ],
+                },
+                # TODO: <Alex>ALEX -- Tal, could you please fix the issue in the next line?</Alex>
+                allow_relative_error=allow_relative_error,
+                result_format="SUMMARY",
             )
             if quantile_result.exception_info and (
                 quantile_result.exception_info["exception_traceback"]
@@ -1084,6 +1084,7 @@ class UserConfigurableProfiler:
                     column, min_value=pct_unique, max_value=pct_unique
                 )
             else:
+                # noinspection PyProtectedMember
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",

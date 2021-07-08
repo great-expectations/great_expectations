@@ -49,6 +49,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
             sorters (list): Optional list if you want to sort the data_references
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
