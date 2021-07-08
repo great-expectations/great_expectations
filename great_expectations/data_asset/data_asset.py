@@ -987,7 +987,7 @@ class DataAsset:
                 "batch_markers": self.batch_markers,
                 "batch_parameters": self.batch_parameters,
                 "validation_time": validation_time,
-                "expectation_suite_meta": expectation_meta
+                "expectation_suite_meta": expectation_meta,
             }
             result = ExpectationSuiteValidationResult(
                 results=results,
