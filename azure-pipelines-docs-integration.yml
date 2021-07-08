@@ -73,9 +73,6 @@ stages:
 
         - bash: python -m pip install --upgrade pip==20.2.4
           displayName: 'Update pip'
-          
-        - bash: python docs_script.py
-          displayName: 'TEST DOCS SCRIPT'
 
         - script: |
             pip install -r requirements-dev.txt
