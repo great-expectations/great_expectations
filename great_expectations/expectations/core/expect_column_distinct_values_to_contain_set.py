@@ -140,14 +140,15 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             "parse_strings_as_datetimes"
         )
         observed_value_counts = metrics.get("column.value_counts")
-        observed_value_set = set(observed_value_counts.index)
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
         if parse_strings_as_datetimes:
             parsed_value_set = parse_value_set(value_set)
+            observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
         else:
             parsed_value_set = value_set
 
+        observed_value_set = set(observed_value_counts.index)
         expected_value_set = set(parsed_value_set)
 
         return {

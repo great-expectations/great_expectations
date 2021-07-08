@@ -1,99 +1,22 @@
-import os
-import shutil
+import datetime
+from typing import Any, Dict, List, cast
 
+import numpy as np
+import pandas as pd
 import pytest
+from freezegun import freeze_time
+from packaging import version
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler.profiler import Profiler
 from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 yaml = YAML()
-
-# TODO: Move these tests to integration tests
-
-
-@pytest.fixture
-def alice_columnar_table_single_batch_context(
-    monkeypatch, empty_data_context, alice_columnar_table_single_batch
-):
-    context: DataContext = empty_data_context
-    monkeypatch.chdir(context.root_directory)
-    data_relative_path = "../data"
-    data_path = os.path.join(context.root_directory, data_relative_path)
-    os.makedirs(data_path, exist_ok=True)
-
-    # Copy data
-    filename: str = alice_columnar_table_single_batch["sample_data_relative_path"]
-    shutil.copy(
-        file_relative_path(__file__, f"data/{filename}"),
-        str(os.path.join(data_path, filename)),
-    )
-
-    data_connector_base_directory = "./"
-    monkeypatch.setenv("base_directory", data_connector_base_directory)
-    monkeypatch.setenv("data_fixtures_root", data_relative_path)
-
-    datasource_name = "alice_columnar_table_single_batch_datasource"
-    data_connector_name = "alice_columnar_table_single_batch_data_connector"
-    asset_name = "alice_columnar_table_single_batch_data_asset"
-    datasource_config = fr"""
-class_name: Datasource
-module_name: great_expectations.datasource
-execution_engine:
-  module_name: great_expectations.execution_engine
-  class_name: PandasExecutionEngine
-data_connectors:
-  {data_connector_name}:
-    class_name: ConfiguredAssetFilesystemDataConnector
-    assets:
-      {asset_name}:
-        module_name: great_expectations.datasource.data_connector.asset
-        group_names:
-          - filename
-        pattern: (.*)\.csv
-        reader_options:
-          delimiter: ","
-        class_name: Asset
-        base_directory: $data_fixtures_root
-        glob_directive: "*.csv"
-    base_directory: $base_directory
-    module_name: great_expectations.datasource.data_connector
-        """
-
-    context.add_datasource(name=datasource_name, **yaml.load(datasource_config))
-
-    assert context.list_datasources() == [
-        {
-            "class_name": "Datasource",
-            "data_connectors": {
-                data_connector_name: {
-                    "assets": {
-                        asset_name: {
-                            "base_directory": data_relative_path,
-                            "class_name": "Asset",
-                            "glob_directive": "*.csv",
-                            "group_names": ["filename"],
-                            "module_name": "great_expectations.datasource.data_connector.asset",
-                            "pattern": "(.*)\\.csv",
-                        }
-                    },
-                    "base_directory": data_connector_base_directory,
-                    "class_name": "ConfiguredAssetFilesystemDataConnector",
-                    "module_name": "great_expectations.datasource.data_connector",
-                }
-            },
-            "execution_engine": {
-                "class_name": "PandasExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
-            },
-            "module_name": "great_expectations.datasource",
-            "name": datasource_name,
-        }
-    ]
-    return context
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
@@ -109,75 +32,246 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     """
 
     context: DataContext = alice_columnar_table_single_batch_context
+
     datasource_name: str = "alice_columnar_table_single_batch_datasource"
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
-    asset_name: str = "alice_columnar_table_single_batch_data_asset"
+    data_asset_name: str = "alice_columnar_table_single_batch_data_asset"
 
-    datasource = context.datasources[datasource_name]
+    datasource: Datasource = cast(Datasource, context.datasources[datasource_name])
+    data_connector: DataConnector = datasource.data_connectors[data_connector_name]
 
-    data_connector = datasource.data_connectors[data_connector_name]
-
-    file_list = [alice_columnar_table_single_batch["sample_data_relative_path"]]
+    file_list: List[str] = [
+        alice_columnar_table_single_batch["sample_data_relative_path"]
+    ]
 
     assert (
         data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-            data_asset_name=asset_name
+            data_asset_name=data_asset_name
         )
         == file_list
     )
 
-    batch_request_1 = BatchRequest(
+    batch_request_1: BatchRequest = BatchRequest(
         datasource_name=datasource_name,
         data_connector_name=data_connector_name,
-        data_asset_name=asset_name,
+        data_asset_name=data_asset_name,
         data_connector_query={
             "index": -1,
         },
     )
     # Should give most recent batch
-    validator_1 = context.get_validator(
+    validator_1: Validator = context.get_validator(
         batch_request=batch_request_1,
         create_expectation_suite_with_name="my_expectation_suite_name_1",
     )
-    metric_max = validator_1.get_metric(
+    metric_max: int = validator_1.get_metric(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "event_type"})
     )
     assert metric_max == 73
 
 
+@freeze_time("09/26/2019 13:42:41")
 def test_alice_profiler_user_workflow_single_batch(
-    alice_columnar_table_single_batch_context, alice_columnar_table_single_batch
+    alice_columnar_table_single_batch_context,
+    alice_columnar_table_single_batch,
 ):
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     # Load profiler configs & loop (run tests for each one)
-    profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
+    yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     # Instantiate Profiler
-    full_profiler_config_dict = yaml.load(profiler_config)
-    rules_configs = full_profiler_config_dict.get("rules")
-    variables_configs = full_profiler_config_dict.get("variables")
-    profiler = Profiler(
-        rules_configs=rules_configs,
-        variables_configs=variables_configs,
+    profiler_config: dict = yaml.load(yaml_config)
+
+    profiler: Profiler = Profiler(
+        profiler_config=profiler_config,
         data_context=data_context,
     )
 
-    # Profiler.profile()
-    validator = data_context.get_validator(
-        datasource_name="alice_columnar_table_single_batch_datasource",
-        data_connector_name="alice_columnar_table_single_batch_data_connector",
-        data_asset_name="alice_columnar_table_single_batch_data_asset",
-        create_expectation_suite_with_name=alice_columnar_table_single_batch[
-            "expected_expectation_suite_name"
-        ],
-    )
-    suite = profiler.profile(
-        validator=validator,
-        data_context=data_context,
+    expectation_suite: ExpectationSuite = profiler.profile(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
+        include_citation=True,
     )
 
-    assert suite == alice_columnar_table_single_batch["expected_expectation_suite"]
+    assert (
+        expectation_suite
+        == alice_columnar_table_single_batch["expected_expectation_suite"]
+    )
+
+
+def test_bobby_columnar_table_multi_batch_batches_are_accessible(
+    monkeypatch,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch,
+):
+    """
+    What does this test and why?
+    Batches created in the multibatch_generic_csv_generator fixture should be available using the
+    multibatch_generic_csv_generator_context
+    This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
+    """
+
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    datasource_name: str = "taxi_pandas"
+    data_connector_name: str = "monthly"
+    data_asset_name: str = "my_reports"
+
+    datasource: Datasource = cast(Datasource, context.datasources[datasource_name])
+    data_connector: DataConnector = datasource.data_connectors[data_connector_name]
+
+    file_list: List[str] = [
+        "yellow_trip_data_sample_2019-01.csv",
+        "yellow_trip_data_sample_2019-02.csv",
+        "yellow_trip_data_sample_2019-03.csv",
+    ]
+
+    assert (
+        data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+            data_asset_name=data_asset_name
+        )
+        == file_list
+    )
+
+    batch_request_latest: BatchRequest = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
+        data_connector_query={
+            "index": -1,
+        },
+    )
+    validator_latest: Validator = context.get_validator(
+        batch_request=batch_request_latest,
+        create_expectation_suite_with_name="my_expectation_suite_name_1",
+    )
+
+    metric_configuration_arguments: Dict[str, Any] = {
+        "metric_name": "table.row_count",
+        "metric_domain_kwargs": {
+            "batch_id": validator_latest.active_batch_id,
+        },
+        "metric_value_kwargs": None,
+        "metric_dependencies": None,
+    }
+    metric_value: int = validator_latest.get_metric(
+        metric=MetricConfiguration(**metric_configuration_arguments)
+    )
+    assert metric_value == 9000
+
+    # noinspection PyUnresolvedReferences
+    pickup_datetime: datetime.datetime = pd.to_datetime(
+        validator_latest.head(n_rows=1)["pickup_datetime"][0]
+    ).to_pydatetime()
+    month: int = pickup_datetime.month
+    assert month == 3
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch,
+):
+    # Load data context
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = bobby_columnar_table_multi_batch["profiler_config"]
+
+    # Instantiate Profiler
+    profiler_config: dict = yaml.load(yaml_config)
+
+    profiler: Profiler = Profiler(
+        profiler_config=profiler_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.profile(
+        expectation_suite_name=bobby_columnar_table_multi_batch[
+            "test_configuration_oneshot_sampling_method"
+        ]["expectation_suite_name"],
+        include_citation=True,
+    )
+
+    assert (
+        expectation_suite
+        == bobby_columnar_table_multi_batch[
+            "test_configuration_oneshot_sampling_method"
+        ]["expected_expectation_suite"]
+    )
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
+    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
+    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
+):
+    # Load data context
+    data_context: DataContext = (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
+    )
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+        "profiler_config"
+    ]
+
+    # Instantiate Profiler
+    profiler_config: dict = yaml.load(yaml_config)
+
+    profiler: Profiler = Profiler(
+        profiler_config=profiler_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.profile(
+        expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ][
+            "expectation_suite_name"
+        ],
+    )
+    expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
+        expectation_suite.to_json_dict()["expectations"][0]["kwargs"]
+    )
+    min_value: int = (
+        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+            "min_value"
+        ]
+    )
+    max_value: int = (
+        expect_table_row_count_to_be_between_expectation_configuration_kwargs[
+            "max_value"
+        ]
+    )
+
+    assert (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_min_value_mean_value"]
+        < min_value
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_mean_value"]
+    )
+    assert (
+        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_mean_value"]
+        < max_value
+        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
+            "test_configuration_bootstrap_sampling_method"
+        ]["expect_table_row_count_to_be_between_max_value_mean_value"]
+    )
