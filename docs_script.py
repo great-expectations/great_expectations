@@ -1,4 +1,8 @@
+#!/usr/bin python3
+
 """
+Usage: `python docs_script.py docs`
+
 1. Parse all markdown files in docs, using regex to find any Docusaurus links (i.e. ```python file=...#L10-20)
 2. Go to each linked file and use AST to parse imports used there
 3. Filter for only relative imports and determine the paths to those files
@@ -10,10 +14,11 @@ import ast
 import glob
 import os
 import re
+import sys
 from typing import List, Set
 
 
-def find_docusaurus_refs(dir: str = "docs") -> List[str]:
+def find_docusaurus_refs(dir: str) -> List[str]:
     linked_files: Set[str] = set()
     pattern: str = r"\`\`\`[a-zA-Z]+ file"
 
@@ -69,7 +74,7 @@ def get_paths(imports: List[str]) -> List[str]:
 
 
 if __name__ == "__main__":
-    files: List[str] = find_docusaurus_refs()
+    files: List[str] = find_docusaurus_refs(sys.argv[1])
     imports: List[str] = get_imports(files)
     paths: List[str] = get_paths(imports)
     for path in paths:
