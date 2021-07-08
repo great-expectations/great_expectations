@@ -70,7 +70,7 @@ def get_paths(imports: List[str]) -> List[str]:
 
 if __name__ == "__main__":
     files: List[str] = find_docusaurus_refs()
-    imports = get_imports(files)
-    paths = get_paths(imports)
+    imports: List[str] = get_imports(files)
+    paths: List[str] = get_paths(imports)
     for path in paths:
         print(path)
