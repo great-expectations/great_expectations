@@ -62,7 +62,7 @@ Steps
     ```
 
     :::note
-    If the container is called ``$web`` (for [hosting and sharing data docs on Azure blob storage](how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
+    If the container is called ``$web`` (for [hosting and sharing data docs on Azure blob storage](../../setup/configuring-data-docs/how-to-host-and-share-data-docs-on-azure-blob-storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
     :::
 
 4. **Copy existing Validations JSON files to the Azure blob**. (This step is optional).
