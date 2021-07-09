@@ -4,7 +4,7 @@ title: Deploying Great Expectations in a hosted environment without file system 
 
 If you follow the steps of the [Getting Started](../tutorials/getting-started/intro) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
 
-#. The Great Expectations :ref:`command-line interface (CLI)<command_line>` to initialize a Data Context, create Expectation Suites, add Datasources, etc.
+#. The Great Expectations [CLI](../guides/miscellaneous/how-to-use-the-great-expectations-cli) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
 #. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for validation results, etc.
 
 
@@ -27,8 +27,8 @@ The following guides will contain examples for each environment we have tested o
 
 - [AWS EMR](./how-to-instantiate-a-data-context-on-an-emr-spark-cluster)
 - [Databricks](./how-to-instantiate-a-data-context-on-databricks-spark-cluster)
-- TODO: Add reference to "Google Cloud Composer"
-- TODO: Add reference to "Astronomer"
+- :ref:`deployment_google_cloud_composer` <TODO: Convert reference to "Google Cloud Composer" to docusaurus format.>
+- :ref:`deployment_astronomer` <TODO: Convert reference to "Astronomer" to docusaurus format.>
 
 
 Step 2: Create Expectation Suites and add Expectations
