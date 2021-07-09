@@ -15,7 +15,7 @@ This how-to guide assumes that you have already:
 
 1. Open `uncommitted/config_variables.yml` file and add the following variables by adding the following lines:
 
-````console
+````yaml
 smtp_address: [address of the smtp server]
 smtp_port: [port used by the smtp server]
 sender_login: [login used to send the email]
@@ -26,7 +26,7 @@ receiver_emails: [adresses you want to send the email to]  # each address must b
 
 2. Open `great_expectations.yml` and add `send_email_on_validation_result` action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
 
-````console
+````python
 validation_operators:
     action_list_operator:
         # To learn how to configure sending emails during evaluation
@@ -55,9 +55,10 @@ validation_operators:
             sender_password: ${sender_password}
             sender_alias: ${sender_alias}
             receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
-Run your action_list_operator, to validate a batch of data and receive an email on the success or failure of validation suite.
-context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="email_test")
 ````
+
+3. Run your action_list_operator, to validate a batch of data and receive an email on the success or failure of validation suite.
+context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="email_test")
 
 If successful, you should receive an email that looks like this:
 
@@ -69,7 +70,7 @@ If your `great_expectations.yml` contains multiple configurations for Data Docs 
 
 The following example will configure the email to include links Data Docs at local_site and s3_site.
 
-```console
+````yaml
 # Example data_docs_sites configuration
 data_docs_sites:
   local_site:

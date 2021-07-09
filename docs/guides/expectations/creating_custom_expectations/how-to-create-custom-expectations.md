@@ -8,7 +8,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
 This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps!
 
-See also this (complete example)[https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py].
+See also this [complete example](https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py).
 
 
 :::note Prerequisites
@@ -19,20 +19,21 @@ This how-to guide assumes you have already:
 
 Modular Expectations are new in version 0.13. They utilize a class structure that is significantly easier to build than ever before and are explained below!
 
-Plan Metric Dependencies
+#### 1. Plan Metric Dependencies
 
-In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric Naming Conventions, see our guide on metric naming conventions.
+In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric Naming Conventions, see our guide on [metric naming conventions](/docs/reference/metrics).
 
 Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation.
 
 Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
 
-Implement your Metric
+#### 2. Implement your Metric
 
 If your metric does not yet exist within the framework, you will need to implement it yourself within a new file - a task that is quick and simple within the new modular framework.
 
 Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects. (Other implementations can be found in the dictionary of metrics).
 
+````console
 from great_expectations.execution_engine import (
    PandasExecutionEngine,
    SparkDFExecutionEngine,
@@ -64,24 +65,27 @@ class ColumnCustomMax(ColumnMetricProvider):
         """Spark Max Implementation"""
         types = dict(_table.dtypes)
         return F.maxcolumn()
-Define Parameters
+````
+
+#### 3. Define Parameters
 
 We have already reached the point where we can start building our Expectation!
 
 The structure of a Modular Expectation now exists within its own specialized class - indicating it will usually exist in a separate file from the Metric. This structure has 3 fundamental components: Metric Dependencies, Configuration Validation, and Expectation Validation. In this step, we will address setting up our parameters.
 
-In this guide, we focus on a ColumnExpectation which can define metric dependencies simply using the metric_dependencies property.
+In this guide, we focus on a `ColumnExpectation` which can define metric dependencies simply using the metric_dependencies property.
 
 Add the following attributes to your Expectation class:
 
-Metric Dependencies - A tuple consisting of the names of all metrics necessary to evaluate the Expectation. Using this shortcut tuple will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
+* Metric Dependencies - A tuple consisting of the names of all metrics necessary to evaluate the Expectation. Using this shortcut tuple will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
 
-Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+* Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
 
-Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
+* Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
 
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric):
 
+````console
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
    metric_dependencies = ("column.aggregate.custom.max",)
@@ -97,12 +101,15 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
        "strict_max": None,
        "mostly": 1
    }
-Validate Configuration
+````
+
+#### 4. Validate Configuration
 
 We have almost reached the end of our journey in implementing an Expectation! Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a validate_configuration method.
 
 In this method, the user provides a configuration and we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
 
+````console
 def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
    """
    Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -148,12 +155,15 @@ def validate_configuration(self, configuration: Optional[ExpectationConfiguratio
      assert max_val is None or isinstance(
          max_val, (float, int)
      ), "Provided max threshold must be a number"
-Validate
+````
+
+#### 5. Validate
 
 In this step, we simply need to validate that the results of our metrics meet our Expectation.
 
 The validate method is implemented as _validate. This method takes a dictionary named Metrics, which contains all metrics requested by your metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
 
+````console
 def _validate(
    self,
    configuration: ExpectationConfiguration,
@@ -190,7 +200,9 @@ def _validate(
    success = above_min and below_max
 
    return {"success": success, "result": {"observed_value": column_max}}
-Test
+````
+
+#### 6. Test
 
 When developing an Expectation, there are several different points at which you should test what you have written:
 
@@ -198,10 +210,11 @@ During development, you should import and run your Expectation, writing addition
 
 It is often helpful to generate examples showing the functionality of your Expectation, which helps verify the Expectation works as intended.
 
-If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the tests/test_definitions/name_of_your_expectation directory.
+If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the `tests/test_definitions/name_of_your_expectation directory`.
 
-Import: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your plugins/ directory will make it available to import, you must still import the Expectation:
+Import: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your plugins/ directory will make it *available* to import, you must still import the Expectation:
 
+````console
 # get a validator
 # Note: attempting to run our expectation now would fail, because even though
 # our Expectation is in our DataContext plugins/ directory it has not been imported.
@@ -210,10 +223,12 @@ from custom_module import ExpectColumnMaxToBeBetweenCustom
 
 # now we can run our expectation
 validator.expect_column_max_to_be_between_custom('col', min_value=0, max_value=5)
-Optional: Implement Custom Data Docs Renderers
+````
+
+#### 8. Optional: Implement [Custom Data Docs Renderers](/docs/guides/expectations/advanced/how-to-create-renderers-for-custom-expectations)
 
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference the core concepts documentation.
 
-Arguments for Custom Expectations currently must be provided as keyword arguments; positional arguments should be avoided.
+1. Arguments for Custom Expectations currently **must be provided as keyword arguments**; positional arguments should be avoided.
 
 

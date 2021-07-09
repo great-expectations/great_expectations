@@ -36,7 +36,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
 
 1. We could also explicitly override our parent methods to modify the behavior of our new Expectation, for example by updating the configuration validation to require the values we set as defaults not be altered.
 
-````console
+````python
 def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
     super().validate_configuration(configuration)
     assert "min_value" not in configuration.kwargs, "min_value cannot be altered"
