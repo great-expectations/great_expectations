@@ -68,6 +68,12 @@ docs_test_matrix = [
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
     # },
     {
+        "name": "getting_started",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
+    },
+    {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
