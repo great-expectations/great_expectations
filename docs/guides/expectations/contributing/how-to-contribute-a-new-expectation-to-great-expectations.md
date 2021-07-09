@@ -40,37 +40,37 @@ Recently we introduced a fast-track release process for community contributed Ex
 
 1. Pick a name for your Expectation
 
-Expectations follow a naming convention.
+	Expectations follow a naming convention.
 
-Names of Expectations are snake_case (e.g., `expect_column_values_to_equal_three`).
+	Names of Expectations are snake_case (e.g., `expect_column_values_to_equal_three`).
 
-Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
+	Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
 
-* `Column map Expectations`: `expect_column_values_...` (e.g., `expect_column_values_to_match_regex`)
-* `Column aggregate Expectations`: `expect_column_...` (e.g., `expect_column_mean_to_be_between`)
-* Column pair map Expectations: `expect_column_pair_values_...` (e.g., `expect_column_pair_values_to_be_in_set`)
-* Table Expectatons: `expect_table_...` (e.g., `expect_table_row_count_to_be_equal`)
+	* `Column map Expectations`: `expect_column_values_...` (e.g., `expect_column_values_to_match_regex`)
+	* `Column aggregate Expectations`: `expect_column_...` (e.g., `expect_column_mean_to_be_between`)
+	* Column pair map Expectations: `expect_column_pair_values_...` (e.g., `expect_column_pair_values_to_be_in_set`)
+	* Table Expectatons: `expect_table_...` (e.g., `expect_table_row_count_to_be_equal`)
 
 2. Name the file
 
 	The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., `expect_column_values_to_equal_three.py`).
 
-For example, if you call your Expectation `expect_column_values_to_equal_three`, the file with its implementation should be: `contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py`
+	For example, if you call your Expectation `expect_column_values_to_equal_three`, the file with its implementation should be: `contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py`
 
 3. Name the class
 
-Within the file, update the name of the class that implements your Expectation. Classes that implement Expectations have CamelCase names (e.g., `ExpectColumnValuesToEqualThree`). The framework will automatically translate this class name into a method with the snake_case name of `expect_column_values_to_equal_three`. You will make this change in two places:
+	Within the file, update the name of the class that implements your Expectation. Classes that implement Expectations have CamelCase names (e.g., `ExpectColumnValuesToEqualThree`). The framework will automatically translate this class name into a method with the snake_case name of `expect_column_values_to_equal_three`. You will make this change in two places:
 
-* Class declaration (search for `class Expect`)
-* A call to `run_diagnostic` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
-
-For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/contributing-style)
+	* Class declaration (search for `class Expect`)
+	* A call to `run_diagnostic` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
+	
+	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/contributing-style)
 
 #### 4. Run diagnostics on your Expectation.
 
 Expectations contain a self diagnostic tool that will help you during development. The simplest way to run it is to execute the file as a standalone script. Note: if you prefer, you can also run it within a notebook or IDE.
 
-````console
+````python
 python expect_column_values_to_equal_three.py
 ````
 
@@ -153,16 +153,15 @@ Each example is a dictionary with two keys:
 * `data`: defines the input data of the example as a table/data frame. In this example the table has one column named “mostly_threes” with 10 rows. If you define multiple columns, make sure that they have the same number of rows. If possible, include test data and tests that includes null values (None in the python test definition).
 
 * `tests`: a list of test cases that use the data defined above as input to validate
-
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
-include_in_gallery: set it to True if you want this test case to be visible in the gallery as an example (true for most test cases).
+	* 'include_in_gallery': set it to True if you want this test case to be visible in the gallery as an example (true for most test cases).
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the result object - only the ones that are important to test.
 
 Uncomment that code snippet and replace with your examples.
 
-Run `run_diagnostic`s again. The newly added examples will appear in the output. They are not executed as tests yet, because most of the code in the Expectation is still commented out.
+Run `run_diagnostics` again. The newly added examples will appear in the output. They are not executed as tests yet, because most of the code in the Expectation is still commented out.
 
 :::note
 
@@ -200,9 +199,8 @@ map_metric = "column_values.equal_three"
 
 The parent class expects the variable map_metric to be set. Change the value of map_metric to something that fits your Metric. Follow these two naming conventions:
 
-	* the name should start with “column_values.”, because it is a “column map” Metric
-	* the second part of the name (after the “.”) should be in snake_case format
-
+* the name should start with “column_values.”, because it is a “column map” Metric
+* the second part of the name (after the “.”) should be in snake_case format
 * While many metrics are already implemented within Great Expectations (e.g., column_values.match_regex, column_values.json_parseable, etc.), column_values.equal_three is not. You will define and implement this new Metric.
 
 The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
@@ -297,8 +295,8 @@ The class implements methods decorated with `@column_function_partial` to comput
 
 Consult the following files for the details of this pattern:
 
-* great_expectations/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py
-* great_expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py
+* [great_expectations/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py)
+* [great_expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py)
 :::
 
 
@@ -307,7 +305,9 @@ Expectations that extend ColumnExpectation class are evaluated for a single colu
 
 Define success_keys of your Expectation
 
+````python
 success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+````
 
 Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](docs/reference/metrics).
 

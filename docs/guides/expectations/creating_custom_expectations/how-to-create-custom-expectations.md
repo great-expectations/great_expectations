@@ -14,7 +14,7 @@ See also this [complete example](https://github.com/superconductive/ge_tutorials
 :::note Prerequisites
 This how-to guide assumes you have already:
 
-[Set up a working deployment of Great Expectations](/docs/tutorials/getting-started/intro)
+* [Set up a working deployment of Great Expectations](/docs/tutorials/getting-started/intro)
 :::
 
 Modular Expectations are new in version 0.13. They utilize a class structure that is significantly easier to build than ever before and are explained below!
@@ -33,7 +33,7 @@ If your metric does not yet exist within the framework, you will need to impleme
 
 Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark dialects. (Other implementations can be found in the dictionary of metrics).
 
-````console
+````python
 from great_expectations.execution_engine import (
    PandasExecutionEngine,
    SparkDFExecutionEngine,
@@ -77,11 +77,11 @@ In this guide, we focus on a `ColumnExpectation` which can define metric depende
 
 Add the following attributes to your Expectation class:
 
-* Metric Dependencies - A tuple consisting of the names of all metrics necessary to evaluate the Expectation. Using this shortcut tuple will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
+* **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation. Using this shortcut tuple will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
 
-* Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+* **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
 
-* Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
+* **Default Kwarg Values** (Optional) - Default values for success keys and the defined domain, among other values.
 
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric):
 
@@ -212,7 +212,7 @@ It is often helpful to generate examples showing the functionality of your Expec
 
 If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the `tests/test_definitions/name_of_your_expectation directory`.
 
-Import: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your plugins/ directory will make it *available* to import, you must still import the Expectation:
+#### 7. Import: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your plugins/ directory will make it *available* to import, you must still import the Expectation:
 
 ````console
 # get a validator
