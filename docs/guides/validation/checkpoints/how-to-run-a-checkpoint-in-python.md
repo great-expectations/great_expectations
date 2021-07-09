@@ -7,7 +7,8 @@ import Prerequisites from '../../../guides/connecting_to_your_data/components/pr
 This guide will help you run a Checkpoint in python.
 This is useful if your pipeline environment or orchestration engine does not have shell access.
 
-:::note Prerequisites: This how-to guide assumes you have already:
+:::note Prerequisites
+  This how-to guide assumes you have already:
 
   - Created at least one [Checkpoint](./how-to-create-a-new-checkpoint).
 

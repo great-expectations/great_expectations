@@ -6,7 +6,8 @@ import Prerequisites from '../../../guides/connecting_to_your_data/components/pr
 
 This guide will help you run a Checkpoint in a terminal.
 
-:::note Prerequisites: This how-to guide assumes you have already:
+:::note Prerequisites
+  This how-to guide assumes you have already:
 
   - Created at least one [Checkpoint](./how-to-create-a-new-checkpoint).
 
@@ -28,10 +29,10 @@ Additional notes
 
 This command will return posix status codes and print messages as follows:
 
-+-------------------------------+-----------------+-----------------------+
-| **Situation**                 | **Return code** | **Message**           |
-+-------------------------------+-----------------+-----------------------+
-| all validations passed        | 0               | Validation succeeded! |
-+-------------------------------+-----------------+-----------------------+
-| one or more validation failed | 1               | Validation failed!    |
-+-------------------------------+-----------------+-----------------------+
+    +-------------------------------+-----------------+-----------------------+
+    | **Situation**                 | **Return code** | **Message**           |
+    +-------------------------------+-----------------+-----------------------+
+    | all validations passed        | 0               | Validation succeeded! |
+    +-------------------------------+-----------------+-----------------------+
+    | one or more validation failed | 1               | Validation failed!    |
+    +-------------------------------+-----------------+-----------------------+
