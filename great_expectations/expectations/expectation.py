@@ -1203,6 +1203,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls):
+        print(f'\n[ALEX_TEST] CLS_MAP_METRIC_IS_NONE: {cls.map_metric is None } ; SUPER_IS_ABSTRACT: {super().is_abstract()}')
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
