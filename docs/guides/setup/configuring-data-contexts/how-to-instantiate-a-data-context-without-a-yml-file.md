@@ -195,7 +195,7 @@ Steps
 
     If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
 
-    - [Deploying Great Expectations with Airflow](../../../guides/w) - **TODO(cdkini): Where do we link this?**
+    - [Deploying Great Expectations with Airflow](../../../../docs/intro.md) - **TODO(cdkini): Where do we link this?**
 
 
 Additional resources
