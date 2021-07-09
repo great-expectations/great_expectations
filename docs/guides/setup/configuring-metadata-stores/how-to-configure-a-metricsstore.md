@@ -2,4 +2,4 @@
 title: How to configure a MetricsStore
 ---
 
-- This article is a stub.
+This article is a stub.
