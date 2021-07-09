@@ -51,4 +51,4 @@ Finally, if you would like to build and view Data Docs in your environment, plea
 Additional notes
 ----------------
 
-If you have successfully deployed Great Expectations in a hosted environment other than the ones listed above, we would love to hear from you. Please comment on the Discuss post below, or reach out to us on `Slack <https://greatexpectations.io/slack>`_.
+If you have successfully deployed Great Expectations in a hosted environment other than the ones listed above, we would love to hear from you. Please comment on the Discuss post below, or reach out to us on [Slack](https://greatexpectations.io/slack).
