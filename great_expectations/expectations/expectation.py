@@ -146,6 +146,8 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     def is_abstract(cls):
+        a = isabstract(cls)
+        print(f'\n[ALEX_TEST] CLS(AT_TOP_EXPECTATION_LEVEL): {str(cls)} ; IS_ABSTRACT: {a}')
         return isabstract(cls)
 
     @classmethod
@@ -1203,7 +1205,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls):
-        print(f'\n[ALEX_TEST] CLS_MAP_METRIC_IS_NONE: {cls.map_metric is None } ; SUPER_IS_ABSTRACT: {super().is_abstract()}')
+        # TODO: <Alex>ALEX</Alex>
+        a = cls.map_metric is None or super().is_abstract()
+        print(f'\n[ALEX_TEST] CLS(AT_COLUMN_MAP_EXPECTATION_LEVEL): {str(cls)} ; CLS_MAP_METRIC_IS_NONE: {cls.map_metric is None} ; SUPER_IS_ABSTRACT: {super().is_abstract()} ; IS_ABSTRACT: {a}')
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
