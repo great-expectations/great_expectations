@@ -7,12 +7,12 @@ Welcome to Great Expectations! This tutorial will help you set up your first loc
 :::warning
 The steps described in this tutorial assume you are installing Great Expectations version 0.13.8 or above.
 
-For a tutorial for older versions of Great Expectations, please see older versions of this documentation.
+For a tutorial for older versions of Great Expectations, please see older versions of this documentation, which can be found [here](https://docs.greatexpectations.io/en/latest/guides/tutorials.html).
 :::
 
 The tutorial will walk you through the following steps:
 
-![minimap](minimap.png)
+![minimap](../../images/minimap.png)
 
 1. First, we will introduce you to the data and help you initialize a **Data Context**.
 1. Then you will learn how to configure a **Datasource** to connect to your data.
