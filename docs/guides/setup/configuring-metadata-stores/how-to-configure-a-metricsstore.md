@@ -66,9 +66,12 @@ validation_operators:
 The `StoreMetricsValidationAction` processes an `ExpectationValidationResult` and stores Metrics to a configured Store.
 Now, when your operator is executed, the requested metrics will be available in your database!
 
+
+<TODO: Replace below with example using v3 API (checkpoints to take place of validation operators).>
 ```python
 context.run_validation_operator('action_list_operator', (batch_kwargs, expectation_suite_name))
 ```
 
-#### Note
+:::note
 To discuss with the Great Expectations community, please visit this topic in our community discussion forum: https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3
+:::
