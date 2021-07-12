@@ -107,7 +107,7 @@ From this point on, we will start filling in the pieces of your Expectation. You
 
 :::note
 * If you prefer to do your development in Jupyter Notebook and copy your Expectation into the file after you are done, you will run run_diagnostics directly in the notebook (instead of executing the file):
-````console
+````python
 # TODO: replace the class name with your Expectation's class name
 diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
 print(json.dumps(diagnostics_report, indent=2))
@@ -125,7 +125,7 @@ These examples serve a dual purpose:
 * provide test cases that the Great Expectations testing framework can execute automatically
 We will explain the structure of these tests using the example provided in one of the templates that implements `expect_column_values_to_equal_three`:
 
-````console
+````python
 examples = [{
     "data": {
         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
@@ -193,7 +193,7 @@ Expectations that extend ColumnMapExpectation class work as follows:
 
 * `ExpectColumnValuesToEqualThree` class that the template implements declares that the metric that maps each row in the column to the answer to its yes/no question is called `column_values.equal_three`:
 
-````console
+````python
 map_metric = "column_values.equal_three"
 ````
 
@@ -209,7 +209,7 @@ Search for `class ColumnValuesEqualThree` and rename it to ColumnValues<CamelCas
 
 The Metric Provider class declares the condition metric that it can compute. “Condition metric” is a metric that answers a yes/no question:
 
-````console
+````python
 condition_metric_name = "column_values.equal_three"
 ````
 
@@ -313,7 +313,7 @@ Expectations rely on Metrics to produce their result. A Metric is any observable
 
 * `ExpectColumnCustomMedianToBeBetween` class that the template implements declares the list of Metrics it needs computes for producing its result:
 
-````console
+````python
 metric_dependencies = ("column.custom.median",)
 ````
 
@@ -330,7 +330,7 @@ Search for `class ColumnCustomMedian` and rename it to Column<CamelCase version 
 
 The Metric Provider class declares the metric that it can compute.
 
-````console
+````python
 metric_name = "column.custom.median"
 ````
 
