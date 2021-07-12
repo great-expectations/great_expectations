@@ -85,7 +85,7 @@ Add the following attributes to your Expectation class:
 
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class and building our Expectation in a separate file from our Metric):
 
-````console
+````python
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
    metric_dependencies = ("column.aggregate.custom.max",)
@@ -230,5 +230,4 @@ validator.expect_column_max_to_be_between_custom('col', min_value=0, max_value=5
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference the core concepts documentation.
 
 1. Arguments for Custom Expectations currently **must be provided as keyword arguments**; positional arguments should be avoided.
-
 
