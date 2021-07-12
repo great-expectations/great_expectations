@@ -109,7 +109,7 @@ We have almost reached the end of our journey in implementing an Expectation! No
 
 In this method, the user provides a configuration and we check that certain conditions are satisfied by the configuration. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
 
-````console
+````python
 def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
    """
    Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
