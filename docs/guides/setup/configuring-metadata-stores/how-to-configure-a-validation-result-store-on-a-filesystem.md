@@ -10,6 +10,7 @@ This guide will explain how to use a Validation Action to update Data Docs sites
 
 <Prerequisites>
 
+- Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md).
  - Configured an [Expectation Suite ](../../../tutorials/getting-started/create-your-first-expectations).
  - Configured a [Checkpoint](../../../guides/validation/checkpoints/how-to-create-a-new-checkpoint).
  - Determined a new storage location where you would like to store Validations. This can either be a local path, or a path to a secure network filesystem.
