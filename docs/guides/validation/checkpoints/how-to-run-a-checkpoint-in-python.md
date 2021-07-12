@@ -1,27 +1,27 @@
 ---
 title: How to run a Checkpoint in python
 ---
+import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
 
-import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
-
-This guide will help you run a Checkpoint in python.
+This guide will help you run a Checkpoint in Python.
 This is useful if your pipeline environment or orchestration engine does not have shell access.
 
-:::note Prerequisites
-  This how-to guide assumes you have already:
+<Prerequisites>
 
-  - Created at least one [Checkpoint](./how-to-create-a-new-checkpoint).
+- Created at least one [Checkpoint](./how-to-create-a-new-checkpoint)
+
+</Prerequisites>
 
 Steps
 -----
 
-1. First, generate the python with the command:
+1. First, generate the Python with the command:
 
 ```bash
 great_expectations --v3-api checkpoint script my_checkpoint
 ```
 
-2. Next, you will see a message about where the python script was created like:
+2. Next, you will see a message about where the Python script was created like:
 
 ```bash
 A python script was created that runs the checkpoint named: `my_checkpoint`
@@ -73,9 +73,9 @@ print("Validation succeeded!")
 sys.exit(0)
 ```
 
-4. This python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
-or the python code can be embedded in your pipeline.
+4. This Python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
+or the Python code can be embedded in your pipeline.
 
-    Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.  The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()` must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently configured Checkpoint with the given `name`.
+  Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.  The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()` must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently configured Checkpoint with the given `name`.
 
 Please see [How to configure a new Checkpoint using test_yaml_config](./how-to-configure-a-new-checkpoint-using-test_yaml_config) for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
