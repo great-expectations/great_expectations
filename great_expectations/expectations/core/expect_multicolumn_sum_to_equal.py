@@ -34,7 +34,10 @@ class ExpectMulticolumnSumToEqual(TableExpectation):
     metric_dependencies = ("multicolumn_sum.equal.condition",)
     # domain_keys = ("column_list",)
     # TODO: <Alex>ALEX</Alex>
-    success_keys = ("column_list", "sum_total",)
+    success_keys = (
+        "column_list",
+        "sum_total",
+    )
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
@@ -78,29 +81,13 @@ class ExpectMulticolumnSumToEqual(TableExpectation):
         # actual_sum_total = metrics.get("multicolumn_sum.equal.condition")
         success = metrics.get("multicolumn_sum.equal.condition")
         # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # table_row_count_self = metrics["table.row_count.self"]
-        # table_row_count_other = metrics["table.row_count.other"]
-        # TODO: <Alex>ALEX</Alex>
-
-        # TODO: <Alex>ALEX</Alex>
-        # return {
-        #     "success": table_row_count_self == table_row_count_other,
-        #     "result": {
-        #         "observed_value": {
-        #             "self": table_row_count_self,
-        #             "other": table_row_count_other,
-        #         }
-        #     },
-        # }
-        # TODO: <Alex>ALEX</Alex>
-        print(f'\n[ALEX_TEST] DESIRED_SUM_TOTAL: {sum_total} ; TYPE: {str(type(sum_total))}')
-        print(f'\n[ALEX_TEST] ACTUAL_SUM_TOTAL: {success} ; TYPE: {str(type(success))}')
         return {
             "success": success,
             "result": {
                 "observed_value": {
+                    # TODO: <Alex>ALEX -- this is FAKE (for testing purposes)</Alex>
                     "something": 13,
+                    # TODO: <Alex>ALEX -- this is FAKE (for testing purposes)</Alex>
                     "someother": 26,
                 }
             },

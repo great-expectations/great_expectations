@@ -412,7 +412,6 @@ Please check your config."""
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            print(f'\n[ALEX_TEST] PANDAS_EXECUTION_ENGINE_MULTICOLUMN--COMPUTE_DOMAIN_KWARGS: {compute_domain_kwargs} ; TYPE: {str(type(compute_domain_kwargs))}')
             if "columns" in compute_domain_kwargs:
                 accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
 

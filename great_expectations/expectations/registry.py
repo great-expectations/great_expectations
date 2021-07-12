@@ -103,7 +103,6 @@ def register_metric(
         Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]
     ] = None,
 ) -> dict:
-    print(f'\n[ALEX_TEST] REGISTERING_METRIC: {metric_name} ; METRIC_PROVIDER: {metric_provider} TYPE: {str(type(metric_provider))}')
     res = dict()
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
@@ -251,7 +250,6 @@ def get_domain_metrics_dict_by_name(
 
 
 def get_expectation_impl(expectation_name):
-    print(f'\n[ALEX_TEST] REGISTERED_EXPECTATIONS:\n{_registered_expectations}')
     return _registered_expectations.get(expectation_name)
 
 

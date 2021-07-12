@@ -6,8 +6,7 @@ from .column_aggregate_metric import (
 from .column_aggregate_metrics import *
 from .column_map_metrics import *
 from .column_pair_map_metrics import *
-# TODO: <Alex>ALEX</Alex>
-from .multicolumn_map_metrics import *
+
 # TODO: <Alex>ALEX</Alex>
 from .map_metric import (
     ColumnMapMetricProvider,
@@ -24,4 +23,7 @@ from .metric_provider import (
     metric_partial,
     metric_value,
 )
+
+# TODO: <Alex>ALEX</Alex>
+from .multicolumn_map_metrics import *
 from .table_metrics import *

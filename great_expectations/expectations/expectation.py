@@ -69,15 +69,10 @@ class MetaExpectation(ABCMeta):
     """
 
     def __new__(cls, clsname, bases, attrs):
-        # print(f'\n[ALEX_TEST] REGISTERING_EXPECTATION: {clsname} ; TYPE: {str(type(clsname))}')
         newclass = super().__new__(cls, clsname, bases, attrs)
         if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
-        # TODO: <Alex>ALEX</Alex>
-        else:
-            print(f'\n[ALEX_TEST] NOT_REGISTERING_ABSTRACT_EXPECTATION: {clsname} ; TYPE: {str(type(clsname))}')
-        # TODO: <Alex>ALEX</Alex>
         newclass._register_renderer_functions()
         default_kwarg_values = dict()
         for base in reversed(bases):
@@ -147,7 +142,6 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     def is_abstract(cls):
         a = isabstract(cls)
-        print(f'\n[ALEX_TEST] CLS(AT_TOP_EXPECTATION_LEVEL): {str(cls)} ; IS_ABSTRACT: {a}')
         return isabstract(cls)
 
     @classmethod
@@ -1064,22 +1058,18 @@ class TableExpectation(Expectation, ABC):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
-        print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] CONFIGURATION: {configuration} ; SUPER_DEPENDENCIES: {dependencies} ; TYPE: {str(type(dependencies))}')
-        print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] METRIC_DEPENDENCIES: {self.metric_dependencies} ; TYPE: {str(type(self.metric_dependencies))}')
         for metric_name in self.metric_dependencies:
             metric_kwargs = get_metric_kwargs(
                 metric_name=metric_name,
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
-            print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] METRIC_NAME: {metric_name} ; METRIC_KWARGS: {metric_kwargs} ; TYPE: {str(type(metric_kwargs))}')
             dependencies["metrics"][metric_name] = MetricConfiguration(
                 metric_name=metric_name,
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
-        print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] RETURNING_UPDATED_DEPENDENCIES: {dependencies} ; TYPE: {str(type(dependencies))}')
         return dependencies
 
     def validate_metric_value_between_configuration(
@@ -1209,9 +1199,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls):
-        # TODO: <Alex>ALEX</Alex>
-        a = cls.map_metric is None or super().is_abstract()
-        print(f'\n[ALEX_TEST] CLS(AT_COLUMN_MAP_EXPECTATION_LEVEL): {str(cls)} ; CLS_MAP_METRIC_IS_NONE: {cls.map_metric is None} ; SUPER_IS_ABSTRACT: {super().is_abstract()} ; IS_ABSTRACT: {a}')
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
