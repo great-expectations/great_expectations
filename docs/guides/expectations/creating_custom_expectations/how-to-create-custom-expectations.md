@@ -214,7 +214,7 @@ If you plan on contributing your Expectation back to the library of main Expecta
 
 #### 7. Import: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your plugins/ directory will make it *available* to import, you must still import the Expectation:
 
-````console
+````python
 # get a validator
 # Note: attempting to run our expectation now would fail, because even though
 # our Expectation is in our DataContext plugins/ directory it has not been imported.
@@ -230,4 +230,3 @@ validator.expect_column_max_to_be_between_custom('col', min_value=0, max_value=5
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference the core concepts documentation.
 
 1. Arguments for Custom Expectations currently **must be provided as keyword arguments**; positional arguments should be avoided.
-
