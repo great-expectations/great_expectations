@@ -349,7 +349,7 @@ If you have never used Python Decorators and don’t know what they are and how 
 
 Find the following code snippet in your Metric Provider class:
 
-````console
+````python
 @column_aggregate_value(engine=PandasExecutionEngine)
 def _pandas(cls, column, **kwargs):
     """Pandas Median Implementation"""
@@ -395,4 +395,3 @@ For more comprehensive documentation consult this [how-to guide](/docs/guides/ex
 #### 9. Submit your contribution
 
 Follow [Contribution Checklist](/docs/contributing/contributing-checklist)  to submit your contribution.
-
