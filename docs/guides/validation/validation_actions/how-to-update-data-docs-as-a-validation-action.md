@@ -28,16 +28,16 @@ Steps
 
   ```yaml
 
-    validation_operators:
-      action_list_operator: # this is a user-selected name
-        class_name: ActionListValidationOperator
-        action_list:
-        - name: store_validation_result # this is a user-selected name
-          action:
-            class_name: StoreValidationResultAction
-        - name: update_data_docs # this is a user-selected name
-          action:
-            class_name: UpdateDataDocsAction
+validation_operators:
+  action_list_operator: # this is a user-selected name
+    class_name: ActionListValidationOperator
+    action_list:
+    - name: store_validation_result # this is a user-selected name
+      action:
+        class_name: StoreValidationResultAction
+    - name: update_data_docs # this is a user-selected name
+      action:
+        class_name: UpdateDataDocsAction
   ```
 
 2. **If you only want to update certain configured Data Docs sites**:
@@ -46,18 +46,18 @@ Steps
 
   ```yaml
 
-    validation_operators:
-      action_list_operator: # this is a user-selected name
-        class_name: ActionListValidationOperator
-        action_list:
-        - name: store_validation_result # this is a user-selected name
-          action:
-            class_name: StoreValidationResultAction
-        - name: update_data_docs # this is a user-selected name
-          action:
-            class_name: UpdateDataDocsAction
-            site_names:
-              - team_site
+validation_operators:
+  action_list_operator: # this is a user-selected name
+    class_name: ActionListValidationOperator
+    action_list:
+    - name: store_validation_result # this is a user-selected name
+      action:
+        class_name: StoreValidationResultAction
+    - name: update_data_docs # this is a user-selected name
+      action:
+        class_name: UpdateDataDocsAction
+        site_names:
+          - team_site
   ```
 
 3. **Test your configuration.**
