@@ -1,22 +1,25 @@
 ---
 title: How to add a Validation Operator
 ---
-
-import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
 
 :::note
 This guide is only relevant if you are using the V2 (Batch Kwargs) API. For the V3 (Batch Request) API, please refer to the Checkpoints (>=0.13.12) tab in the guide on [Checkpoint](./checkpoints/how-to-create-a-new-checkpoint).
+:::
+
+This guide will help you run a Checkpoint in Python.
+This is useful if your pipeline environment or orchestration engine does not have shell access.
+
+<Prerequisites>
+
+- Created at least one Expectation Suite.
+- Created at least one [Checkpoint](./checkpoints/how-to-create-a-new-checkpoint). You will need it in order to test that your new Validation Operator is working.
+
+</Prerequisites>
 
 This guide will help you add a new instance of a [Validation Operator](../../reference/checkpoints-and-actions). Validation Operators give you the ability to encode business logic around validation, such as validating multiple batches of data together, differentiating between warnings and errors, and kicking off actions based on the results of validation.
 
 As a general rule, Validation Operators should be invoked from within [Checkpoints](../../reference/core-concepts#checkpoints). Separating out the configuration for Validation Operators and Checkpoints can help make Operator code reusable.
-
-:::note Prerequisites:
-
-This how-to guide assumes you have already:
-
-  - Created at least one Expectation Suite.
-  - Created at least one [Checkpoint](./checkpoints/how-to-create-a-new-checkpoint). You will need it in order to test that your new Validation Operator is working.
 
 Steps
 -----
