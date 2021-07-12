@@ -265,7 +265,10 @@ class Validator:
                     exception_traceback = traceback.format_exc()
                     exception_message = "{}: {}".format(type(err).__name__, str(err))
 
-                    validation_result = ExpectationValidationResult(success=False)
+                    validation_result = ExpectationValidationResult(
+                        expectation_config=configuration,
+                        success=False,
+                    )
 
                     validation_result.exception_info = {
                         "raised_exception": raised_exception,
