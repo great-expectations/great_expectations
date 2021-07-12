@@ -27,7 +27,6 @@ Steps
     The ``StoreValidationResultAction`` action must appear before this action, since Data Docs are rendered from validation results from the store.
 
   ```yaml
-
 validation_operators:
   action_list_operator: # this is a user-selected name
     class_name: ActionListValidationOperator
@@ -45,7 +44,6 @@ validation_operators:
   - Add a ``site_names`` key to the ``UpdateDataDocsAction`` config.
 
   ```yaml
-
 validation_operators:
   action_list_operator: # this is a user-selected name
     class_name: ActionListValidationOperator
