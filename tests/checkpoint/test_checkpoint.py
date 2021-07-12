@@ -46,11 +46,16 @@ def test_checkpoint_with_config_version_has_action_list(empty_data_context):
     assert obs == [{"foo": "bar"}]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_basic_checkpoint_config_validation(
-    empty_data_context,
+    mock_emit,
+    empty_data_context_stats_enabled,
     caplog,
     capsys,
 ):
+    context: DataContext = empty_data_context_stats_enabled
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
     checkpoint_config: Union[CheckpointConfig, dict]
@@ -66,10 +71,21 @@ def test_basic_checkpoint_config_validation(
         checkpoint_config = CheckpointConfig(**config_erroneous)
     with pytest.raises(KeyError):
         # noinspection PyUnusedLocal
-        checkpoint = empty_data_context.test_yaml_config(
+        checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
         )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -82,17 +98,46 @@ def test_basic_checkpoint_config_validation(
         )
     with pytest.raises(KeyError):
         # noinspection PyUnusedLocal
-        checkpoint = empty_data_context.test_yaml_config(
+        checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
         )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "diagnostic_info": ["__class_name_not_provided__"]
+                    },
+                    "success": False,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
     with pytest.raises(ge_exceptions.InvalidConfigError):
         # noinspection PyUnusedLocal
-        checkpoint = empty_data_context.test_yaml_config(
+        checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
             class_name="Checkpoint",
         )
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {"parent_class": "Checkpoint"},
+                    "success": False,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -100,7 +145,7 @@ def test_basic_checkpoint_config_validation(
     class_name: Checkpoint
     """
     # noinspection PyUnusedLocal
-    checkpoint = empty_data_context.test_yaml_config(
+    checkpoint = context.test_yaml_config(
         yaml_config=yaml_config_erroneous,
         name="my_erroneous_checkpoint",
         class_name="Checkpoint",
@@ -120,10 +165,30 @@ def test_basic_checkpoint_config_validation(
             for message in [caplog.text, captured.out]
         ]
     )
+    assert mock_emit.call_count == 4
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[3][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "anonymized_name": anonymized_name,
+                        "parent_class": "Checkpoint",
+                    },
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
-    assert len(empty_data_context.list_checkpoints()) == 0
-    empty_data_context.add_checkpoint(**yaml.load(yaml_config_erroneous))
-    assert len(empty_data_context.list_checkpoints()) == 1
+    assert len(context.list_checkpoints()) == 0
+    context.add_checkpoint(**yaml.load(yaml_config_erroneous))
+    assert len(context.list_checkpoints()) == 1
 
     yaml_config: str = f"""
     name: my_checkpoint
@@ -166,59 +231,85 @@ def test_basic_checkpoint_config_validation(
     config: CommentedMap = yaml.load(yaml_config)
     checkpoint_config = CheckpointConfig(**config)
     checkpoint_config = checkpoint_config.to_json_dict()
-    checkpoint = Checkpoint(data_context=empty_data_context, **checkpoint_config)
+    checkpoint = Checkpoint(data_context=context, **checkpoint_config)
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.config.to_json_dict(),
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
 
-    checkpoint = empty_data_context.test_yaml_config(
+    checkpoint = context.test_yaml_config(
         yaml_config=yaml_config,
         name="my_checkpoint",
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.config.to_json_dict(),
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
-
-    assert len(empty_data_context.list_checkpoints()) == 1
-    empty_data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(empty_data_context.list_checkpoints()) == 2
-
-    empty_data_context.create_expectation_suite(
-        expectation_suite_name="my_expectation_suite"
+    assert mock_emit.call_count == 5
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[4][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "anonymized_name": anonymized_name,
+                        "parent_class": "Checkpoint",
+                    },
+                    "success": True,
+                }
+            ),
+        ]
     )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    assert len(context.list_checkpoints()) == 1
+    context.add_checkpoint(**yaml.load(yaml_config))
+    assert len(context.list_checkpoints()) == 2
+
+    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
     with pytest.raises(
         ge_exceptions.DataContextError,
         match=r'Checkpoint "my_checkpoint" does not contain any validations.',
     ):
         # noinspection PyUnusedLocal
-        result: CheckpointResult = empty_data_context.run_checkpoint(
+        result: CheckpointResult = context.run_checkpoint(
             checkpoint_name=checkpoint.config.name,
         )
 
-    empty_data_context.delete_checkpoint(name="my_erroneous_checkpoint")
-    empty_data_context.delete_checkpoint(name="my_checkpoint")
-    assert len(empty_data_context.list_checkpoints()) == 0
+    context.delete_checkpoint(name="my_erroneous_checkpoint")
+    context.delete_checkpoint(name="my_checkpoint")
+    assert len(context.list_checkpoints()) == 0
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
+    mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
@@ -317,9 +408,30 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
+
+    # Test usage stats messages
+    assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_checkpoint_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_checkpoint_name,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        )
+    ]
 
     assert len(data_context.list_checkpoints()) == 0
     data_context.add_checkpoint(**yaml.load(yaml_config))
@@ -445,8 +557,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -537,8 +651,10 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -686,8 +802,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -783,8 +901,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -897,8 +1017,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 1

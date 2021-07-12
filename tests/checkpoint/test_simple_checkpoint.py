@@ -427,6 +427,7 @@ def test_simple_checkpoint_persisted_to_store(
         "config_version": 1.0,
         "evaluation_parameters": {},
         "expectation_suite_name": None,
+        "ge_cloud_id": None,
         "module_name": "great_expectations.checkpoint",
         "name": "foo",
         "profilers": [],
@@ -528,8 +529,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
         )
     )
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
@@ -606,8 +607,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
         )
     )
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
@@ -690,8 +691,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
         )
     )
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
@@ -804,8 +805,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     )
     expected_runtime_kwargs.pop("template_name")
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(

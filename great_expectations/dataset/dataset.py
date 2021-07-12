@@ -2575,12 +2575,14 @@ class Dataset(MetaDataset):
             <great_expectations.dataset.dataset.Dataset.expect_column_distinct_values_to_equal_set>`
 
         """
+        observed_value_counts = self.get_column_value_counts(column)
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
+            observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
         else:
             parsed_value_set = value_set
 
-        observed_value_counts = self.get_column_value_counts(column)
         expected_value_set = set(parsed_value_set)
         observed_value_set = set(observed_value_counts.index)
 

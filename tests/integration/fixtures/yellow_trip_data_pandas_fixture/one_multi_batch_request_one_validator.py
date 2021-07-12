@@ -11,7 +11,7 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 context = DataContext()
 suite = context.get_expectation_suite("yellow_trip_data_validations")
 
-# This BatchRequest will retrieve all three batches from 2019 ("01", "02", "03")
+# This BatchRequest will retrieve all twelve batches from 2019
 multi_batch_request = BatchRequest(
     datasource_name="taxi_pandas",
     data_connector_name="monthly",
@@ -24,33 +24,34 @@ validator_multi_batch = context.get_validator(
     batch_request=multi_batch_request, expectation_suite=suite
 )
 
-# The active batch should be March, as this should be the last one loaded. Confirming here.
-assert validator_multi_batch.active_batch_definition.batch_identifiers["month"] == "03"
+# The active batch should be December, as this should be the last one loaded. Confirming here.
+assert validator_multi_batch.active_batch_definition.batch_identifiers["month"] == "12"
 
-# Get the list of all batches contained by the Validator for use in the BatchFileter
+# Get the list of all batches contained by the Validator for use in the BatchFilter
 total_batch_definition_list: list = [
     v.batch_definition for k, v in validator_multi_batch.batches.items()
 ]
 
-# Filter to all batch_definitions prior to March
-jan_feb_batch_filter: BatchFilter = build_batch_filter(
+# Filter to all batch_definitions prior to December
+pre_dec_batch_filter: BatchFilter = build_batch_filter(
     data_connector_query_dict={
         "custom_filter_function": lambda batch_identifiers: int(
             batch_identifiers["month"]
         )
-        < 3
+        < 12
+        and batch_identifiers["year"] == "2019"
     }
 )
-jan_feb_batch_definition_list: list = (
-    jan_feb_batch_filter.select_from_data_connector_query(
+pre_dec_batch_definition_list: list = (
+    pre_dec_batch_filter.select_from_data_connector_query(
         batch_definition_list=total_batch_definition_list
     )
 )
 
-# Get the highest max and lowest min between January and February
+# Get the highest max and lowest min before December
 cumulative_max = 0
 cumulative_min = np.Inf
-for batch_definition in jan_feb_batch_definition_list:
+for batch_definition in pre_dec_batch_definition_list:
     batch_id: str = batch_definition.id
     current_max = validator_multi_batch.get_metric(
         MetricConfiguration(
@@ -68,7 +69,7 @@ for batch_definition in jan_feb_batch_definition_list:
     )
     cumulative_min = current_min if current_min < cumulative_min else cumulative_min
 
-# Use the highest max and lowest min from Jan and Feb to create an expectation which we validate against March
+# Use the highest max and lowest min from before December to create an expectation which we validate against December
 result = validator_multi_batch.expect_column_values_to_be_between(
     "fare_amount", min_value=cumulative_min, max_value=cumulative_max
 )

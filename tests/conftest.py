@@ -41,6 +41,7 @@ from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
+    get_sqlite_connection_url,
 )
 from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
@@ -104,6 +105,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run aws integration tests",
     )
+    parser.addoption(
+        "--docs-tests",
+        action="store_true",
+        help="If set, run integration tests for docs",
+    )
 
 
 def build_test_backends_list(metafunc):
@@ -149,12 +155,18 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--aws-integration"):
         # --aws-integration given in cli: do not skip aws-integration tests
         return
+    if config.getoption("--docs-tests"):
+        # --docs-tests given in cli: do not skip documentation integration tests
+        return
     skip_aws_integration = pytest.mark.skip(
         reason="need --aws-integration option to run"
     )
+    skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
     for item in items:
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
+        if "docs" in item.keywords:
+            item.add_marker(skip_docs_integration)
 
 
 @pytest.fixture(autouse=True)
@@ -2167,7 +2179,9 @@ def postgresql_engine(test_backend):
 
 
 @pytest.fixture(scope="function")
-def empty_data_context(tmp_path) -> DataContext:
+def empty_data_context(
+    tmp_path,
+) -> DataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -2865,7 +2879,9 @@ def empty_context_with_checkpoint_v1_stats_enabled(
 
 
 @pytest.fixture
-def titanic_data_context(tmp_path_factory):
+def titanic_data_context(
+    tmp_path_factory,
+) -> DataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -3225,7 +3241,9 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
 
 
 @pytest.fixture(scope="function")
-def titanic_multibatch_data_context(tmp_path):
+def titanic_multibatch_data_context(
+    tmp_path,
+) -> DataContext:
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
@@ -3734,7 +3752,10 @@ def filesystem_csv_data_context_with_validation_operators(
 
 
 @pytest.fixture()
-def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
+def filesystem_csv_data_context(
+    empty_data_context,
+    filesystem_csv_2,
+) -> DataContext:
     empty_data_context.add_datasource(
         "rad_datasource",
         module_name="great_expectations.datasource",
@@ -4007,7 +4028,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
         os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
-    engine: sa.engine.Engine = sa.create_engine(f"sqlite:////{db_file_path}")
+    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
     conn: sa.engine.Connection = engine.connect()
 
     # Build a SqlAlchemyDataset using that database
@@ -4343,7 +4364,7 @@ def misc_directory(tmp_path):
 def yellow_trip_pandas_data_context(
     tmp_path_factory,
     monkeypatch,
-):
+) -> DataContext:
     """
     Provides a data context with a data_connector for a pandas datasource which can connect to three months of
     yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
@@ -4356,7 +4377,7 @@ def yellow_trip_pandas_data_context(
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "test_data")
+    data_path: str = os.path.join(context_path, "..", "data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(
         file_relative_path(
@@ -4382,7 +4403,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
             )
         ),
     )
@@ -4397,7 +4418,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
             )
         ),
     )
@@ -4412,7 +4433,7 @@ def yellow_trip_pandas_data_context(
         ),
         str(
             os.path.join(
-                context_path, "..", "test_data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
             )
         ),
     )

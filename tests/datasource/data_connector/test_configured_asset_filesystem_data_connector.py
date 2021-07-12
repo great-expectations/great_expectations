@@ -1,11 +1,13 @@
 import json
 import os
 from typing import List
+from unittest import mock
 
 import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -83,8 +85,13 @@ def test_basic_instantiation(tmp_path_factory):
         )
 
 
-def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
-    context = empty_data_context
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_instantiation_from_a_config(
+    mock_emit, empty_data_context_stats_enabled, tmp_path_factory
+):
+    context: DataContext = empty_data_context_stats_enabled
 
     base_directory = str(tmp_path_factory.mktemp("test_instantiation_from_a_config"))
     create_files_in_directory(
@@ -138,12 +145,33 @@ assets:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_instantiation_from_a_config_regex_does_not_match_paths(
-    empty_data_context, tmp_path_factory
+    mock_emit, empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -199,6 +227,23 @@ assets:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
