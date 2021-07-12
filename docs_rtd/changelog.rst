@@ -6,15 +6,31 @@ Changelog
 
 Develop
 -----------------
-* [DOCS] Getting Started with Great Expectations - Updated and is now integration tested
-* [FEATURE] INTRODUCING MAJOR IMPROVEMENTS to the new Rule-Based Profiler architecture and capabilities (Experimental):
-  - Clean separation of concerns between DomainBuilder and ParameterBuilder logic
-  - Support for both single-batch and multi-batch use-cases showcased
-  - Addition of the "bootstrap" mode of parameter estimation (default) to NumericMetricRangeMultiBatchParameterBuilder
-  - Initial documentation
-* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 #2989
-* [BUGFIX] Fix an issue where "compression" was added to reader_options for all files loaded from S3 by PandasExecutionEngine
-* [MAINTENANCE] Instrumented BaseDataContext.test_yaml_config() and updated Anonymizers
+
+0.13.22
+-----------------
+* [FEATURE] Port over guide for Slack notifications for validation actions (#3005)
+* [FEATURE] bootstrap estimator  for NumericMetricRangeMultiBatchParameterBuilder (#3001)
+* [BUGFIX] Update naming of confidence_level in integration test fixture (#3002)
+* [BUGFIX] [batch.py] fix check for null value (#2994) (thanks @Mohamed Abido)
+* [BUGFIX] Fix issue where compression key was added to reader_method for read_parquet (#2506)
+* [BUGFIX] Improve support for dates for expect_column_distinct_values_to_contain_set (#2997) (thanks @xaniasd)
+* [BUGFIX] Fix bug in getting non-existent parameter (#2986)
+* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 (#2989)
+* [DOCS] Getting Started - Clean Up and Integration Tests (#2985)
+* [DOCS] Adding in url links and style (#2999)
+* [DOCS] Adding a missing import to a documentation page (#2983) (thanks @rishabh-bhargava)
+* [DOCS]/GDOC-108/GDOC-143/Add in Contributing fields and updates (#2972)
+* [DOCS] Update rule-based profiler docs (#2987)    
+* [DOCS] add image zoom plugin (#2979)
+* [MAINTENANCE] fix lint issues for docusaurus (#3004)
+* [Maintenance] update header to match GE.io (#2811)
+* [MAINTENANCE] Instrument test_yaml_config() (#2981)
+* [MAINTENANCE] Remove "mostly" from "bobster" test config (#2996)
+* [MAINTENANCE] Update v-0.12 CLI test to reflect Pandas upgrade to version 1.3.0 (#2995)
+* [MAINTENANCE] rephrase expectation suite meta profile comment (#2991)
+* [MAINTENANCE] make citation cleaner in expectation suite (#2990)
+* [MAINTENANCE] Attempt to fix Numpy and Scipy Version Requirements without additional requirements* files (#2982)
 
 0.13.21
 -----------------

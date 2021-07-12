@@ -234,7 +234,8 @@ module.exports = {
                 'guides/validation/validation_actions/how-to-trigger-slack-notifications-as-a-validation-action',
                 'guides/validation/validation_actions/how-to-update-data-docs-as-a-validation-action'
               ]
-            }
+            },
+            'guides/validation/how-to-validate-data-without-a-checkpoint'
           ]
         },
         {
@@ -257,6 +258,7 @@ module.exports = {
       type: 'category',
       label: 'Deployment Patterns',
       items: [
+        'deployment_patterns/how-to-instantiate-a-data-context-hosted-environments',
         'deployment_patterns/how-to-instantiate-a-data-context-on-an-emr-spark-cluster',
         'deployment_patterns/how-to-instantiate-a-data-context-on-databricks-spark-cluster',
         'deployment_patterns/how-to-run-a-checkpoint-in-airflow',
@@ -352,14 +354,14 @@ module.exports = {
       label: 'Contributing',
       collapsed: true,
       items: [
-	      { type: 'doc', id: 'contributing/contributing' },
-	      { type: 'doc', id: 'contributing/contributing-setup' },
-	      { type: 'doc', id: 'contributing/contributing-checklist' },
-	      { type: 'doc', id: 'contributing/contributing-github' },
-	      { type: 'doc', id: 'contributing/contributing-test' },
-	      { type: 'doc', id: 'contributing/contributing-maturity' },
-	      { type: 'doc', id: 'contributing/contributing-style' },
-	      { type: 'doc', id: 'contributing/contributing-misc' }
+        { type: 'doc', id: 'contributing/contributing' },
+        { type: 'doc', id: 'contributing/contributing-setup' },
+        { type: 'doc', id: 'contributing/contributing-checklist' },
+        { type: 'doc', id: 'contributing/contributing-github' },
+        { type: 'doc', id: 'contributing/contributing-test' },
+        { type: 'doc', id: 'contributing/contributing-maturity' },
+        { type: 'doc', id: 'contributing/contributing-style' },
+        { type: 'doc', id: 'contributing/contributing-misc' }
       ]
     },
     {
