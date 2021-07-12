@@ -1064,18 +1064,22 @@ class TableExpectation(Expectation, ABC):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
+        print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] CONFIGURATION: {configuration} ; SUPER_DEPENDENCIES: {dependencies} ; TYPE: {str(type(dependencies))}')
+        print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] METRIC_DEPENDENCIES: {self.metric_dependencies} ; TYPE: {str(type(self.metric_dependencies))}')
         for metric_name in self.metric_dependencies:
             metric_kwargs = get_metric_kwargs(
                 metric_name=metric_name,
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
+            print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] METRIC_NAME: {metric_name} ; METRIC_KWARGS: {metric_kwargs} ; TYPE: {str(type(metric_kwargs))}')
             dependencies["metrics"][metric_name] = MetricConfiguration(
                 metric_name=metric_name,
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
+        print(f'\n[ALEX_TEST] [IN_TABLE_EXPECTATION.GET_VALIDATION_DEPENDENCIES()] RETURNING_UPDATED_DEPENDENCIES: {dependencies} ; TYPE: {str(type(dependencies))}')
         return dependencies
 
     def validate_metric_value_between_configuration(

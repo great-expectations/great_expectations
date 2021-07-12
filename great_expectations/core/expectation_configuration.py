@@ -724,6 +724,15 @@ class ExpectationConfiguration(SerializableDictDot):
                 "catch_exceptions": False,
             },
         },
+        "expect_multicolumn_sum_to_equal": {
+            "domain_kwargs": ["column_list"],
+            "success_kwargs": ["sum_total"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
         "expect_select_column_values_to_be_unique_within_record": {
             "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
             "success_kwargs": ["ignore_row_if"],
