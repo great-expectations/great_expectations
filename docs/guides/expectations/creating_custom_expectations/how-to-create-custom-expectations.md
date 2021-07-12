@@ -163,7 +163,7 @@ In this step, we simply need to validate that the results of our metrics meet ou
 
 The validate method is implemented as _validate. This method takes a dictionary named Metrics, which contains all metrics requested by your metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
 
-````console
+````python
 def _validate(
    self,
    configuration: ExpectationConfiguration,
