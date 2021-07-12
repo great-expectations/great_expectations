@@ -1,5 +1,5 @@
 ---
-title: How to configure an Expectation store in Azure blob storage
+title: How to configure an Expectation store to use Azure blob storage
 ---
 
 This article is a stub.

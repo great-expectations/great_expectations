@@ -1,5 +1,5 @@
 ---
-title: How to configure an Expectation store on a filesystem
+title: How to configure an Expectation store to use a filesystem
 ---
 
 This article is a stub.
