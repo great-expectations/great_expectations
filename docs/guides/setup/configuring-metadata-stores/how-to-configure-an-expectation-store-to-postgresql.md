@@ -1,5 +1,5 @@
 ---
-title: How to configure an Expectation store to PostgreSQL
+title: How to configure an Expectation store to use PostgreSQL
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
