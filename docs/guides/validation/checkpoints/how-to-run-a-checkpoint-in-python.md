@@ -18,62 +18,59 @@ Steps
 1. First, generate the python with the command:
 
 ```bash
-
-    great_expectations --v3-api checkpoint script my_checkpoint
+great_expectations --v3-api checkpoint script my_checkpoint
 ```
 
 2. Next, you will see a message about where the python script was created like:
 
 ```bash
-
-    A python script was created that runs the checkpoint named: `my_checkpoint`
-      - The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`
-      - The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`
+A python script was created that runs the checkpoint named: `my_checkpoint`
+  - The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`
+  - The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`
 ```
 
 3. Next, open the script which should look like this:
 
 ```python
+"""
+This is a basic generated Great Expectations script that runs a Checkpoint.
 
-    """
-    This is a basic generated Great Expectations script that runs a Checkpoint.
+Checkpoints are the primary method for validating batches of data in production and triggering any followup actions.
 
-    Checkpoints are the primary method for validating batches of data in production and triggering any followup actions.
+A Checkpoint facilitates running a validation as well as configurable Actions such as updating Data Docs, sending a
+notification to team members about validation results, or storing a result in a shared cloud storage.
 
-    A Checkpoint facilitates running a validation as well as configurable Actions such as updating Data Docs, sending a
-    notification to team members about validation results, or storing a result in a shared cloud storage.
+See also [How to configure a new Checkpoint using test_yaml_config](./how-to-configure-a-new-checkpoint-using-test_yaml_config) for more information about the Checkpoints and how to configure them in your Great Expectations environment.
 
-    See also [How to configure a new Checkpoint using test_yaml_config](./how-to-configure-a-new-checkpoint-using-test_yaml_config) for more information about the Checkpoints and how to configure them in your Great Expectations environment.
+Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
+is provided for those who wish to run Checkpoints in python.
 
-    Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
-    is provided for those who wish to run Checkpoints in python.
+Usage:
+- Run this file: `python great_expectations/uncommitted/run_chk.py`.
+- This can be run manually or via a scheduler such, as cron.
+- If your pipeline runner supports python snippets, then you can paste this into your pipeline.
+"""
+import sys
 
-    Usage:
-    - Run this file: `python great_expectations/uncommitted/run_chk.py`.
-    - This can be run manually or via a scheduler such, as cron.
-    - If your pipeline runner supports python snippets, then you can paste this into your pipeline.
-    """
-    import sys
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.data_context import DataContext
 
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.data_context import DataContext
+data_context: DataContext = DataContext(
+    context_root_dir="/Users/talgluck/Documents/ge_main/quagga/UAT/DataContexts/cli_testing/ge_suite/v3_many_suites_pandas_filesystem_v3_config/great_expectations"
+)
 
-    data_context: DataContext = DataContext(
-        context_root_dir="/Users/talgluck/Documents/ge_main/quagga/UAT/DataContexts/cli_testing/ge_suite/v3_many_suites_pandas_filesystem_v3_config/great_expectations"
-    )
+result: CheckpointResult = data_context.run_checkpoint(
+    checkpoint_name="chk",
+    batch_request=None,
+    run_name=None,
+)
 
-    result: CheckpointResult = data_context.run_checkpoint(
-        checkpoint_name="chk",
-        batch_request=None,
-        run_name=None,
-    )
+if not result["success"]:
+    print("Validation failed!")
+    sys.exit(1)
 
-    if not result["success"]:
-        print("Validation failed!")
-        sys.exit(1)
-
-    print("Validation succeeded!")
-    sys.exit(0)
+print("Validation succeeded!")
+sys.exit(0)
 ```
 
 4. This python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
