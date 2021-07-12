@@ -214,10 +214,7 @@ module.exports = {
               items: [
                 'guides/validation/checkpoints/how-to-add-validations-data-or-suites-to-a-checkpoint',
                 'guides/validation/checkpoints/how-to-create-a-new-checkpoint',
-                'guides/validation/checkpoints/how-to-configure-a-new-checkpoint-using-test_yaml_config',
-                'guides/validation/checkpoints/how-to-run-a-checkpoint-in-python',
-                'guides/validation/checkpoints/how-to-run-a-checkpoint-in-terminal',
-                'guides/validation/how-to-add-a-validation-operator'
+                'guides/validation/checkpoints/how-to-configure-a-new-checkpoint-using-test_yaml_config'
               ]
             },
             {
