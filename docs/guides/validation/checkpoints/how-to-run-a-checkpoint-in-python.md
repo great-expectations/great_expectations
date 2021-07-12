@@ -1,5 +1,5 @@
 ---
-title: How to run a Checkpoint in python
+title: How to run a Checkpoint in Python
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
 
@@ -15,7 +15,7 @@ This is useful if your pipeline environment or orchestration engine does not hav
 Steps
 -----
 
-1. First, generate the Python with the command:
+1. First, generate the Python script with the command:
 
 ```bash
 great_expectations --v3-api checkpoint script my_checkpoint
@@ -24,7 +24,7 @@ great_expectations --v3-api checkpoint script my_checkpoint
 2. Next, you will see a message about where the Python script was created like:
 
 ```bash
-A python script was created that runs the checkpoint named: `my_checkpoint`
+A Python script was created that runs the checkpoint named: `my_checkpoint`
   - The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`
   - The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`
 ```
@@ -43,12 +43,12 @@ notification to team members about validation results, or storing a result in a 
 See also [How to configure a new Checkpoint using test_yaml_config](./how-to-configure-a-new-checkpoint-using-test_yaml_config) for more information about the Checkpoints and how to configure them in your Great Expectations environment.
 
 Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
-is provided for those who wish to run Checkpoints in python.
+is provided for those who wish to run Checkpoints in Python.
 
 Usage:
 - Run this file: `python great_expectations/uncommitted/run_chk.py`.
 - This can be run manually or via a scheduler such, as cron.
-- If your pipeline runner supports python snippets, then you can paste this into your pipeline.
+- If your pipeline runner supports Python snippets, then you can paste this into your pipeline.
 """
 import sys
 
@@ -73,7 +73,7 @@ print("Validation succeeded!")
 sys.exit(0)
 ```
 
-4. This Python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
+4. This Python script can then be invoked directly using Python `python great_expectations/uncommitted/run_my_checkpoint.py`
 or the Python code can be embedded in your pipeline.
 
   Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.  The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()` must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently configured Checkpoint with the given `name`.
