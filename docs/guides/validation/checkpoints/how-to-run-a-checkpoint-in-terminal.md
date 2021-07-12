@@ -18,8 +18,8 @@ Steps
 1. Checkpoints can be run like applications from the command line by running:
 
 ```bash
-  great_expectations --v3-api checkpoint run my_checkpoint
-  Validation failed!
+great_expectations --v3-api checkpoint run my_checkpoint
+Validation failed!
 ```
 
 2. Next, observe the output which will tell you if all validations passed or failed.
