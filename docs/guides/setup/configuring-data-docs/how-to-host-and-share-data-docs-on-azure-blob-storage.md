@@ -41,23 +41,23 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 3. **Add a new Azure site to the data_docs_sites section of your great_expectations.yml.**
   
     ```yaml
-  data_docs_sites:
-    local_site:
-      class_name: SiteBuilder
-      show_how_to_buttons: true
-      store_backend:
-        class_name: TupleFilesystemStoreBackend
-        base_directory: uncommitted/data_docs/local_site/
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
-    az_site:  # this is a user-selected name - you may select your own
-      class_name: SiteBuilder
-      store_backend:
-         class_name: TupleAzureBlobStoreBackend
-         container: \$web
-         connection_string: ${AZURE_STORAGE_WEB_CONNECTION_STRING}
-      site_index_builder:
-         class_name: DefaultSiteIndexBuilder
+    data_docs_sites:
+      local_site:
+        class_name: SiteBuilder
+        show_how_to_buttons: true
+        store_backend:
+          class_name: TupleFilesystemStoreBackend
+          base_directory: uncommitted/data_docs/local_site/
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
+      az_site:  # this is a user-selected name - you may select your own
+        class_name: SiteBuilder
+        store_backend:
+           class_name: TupleAzureBlobStoreBackend
+           container: \$web
+           connection_string: ${AZURE_STORAGE_WEB_CONNECTION_STRING}
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
     ```
 
   You may also replace the default ``local_site`` if you would only like to maintain a single Azure Data Docs site.
