@@ -1,15 +1,16 @@
 ---
 title: How to run a Checkpoint in terminal
 ---
-
-import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
 
 This guide will help you run a Checkpoint in a terminal.
+This is useful if your pipeline environment or orchestration engine does not have shell access.
 
-:::note Prerequisites
-  This how-to guide assumes you have already:
+<Prerequisites>
 
-  - Created at least one [Checkpoint](./how-to-create-a-new-checkpoint).
+- Created at least one [Checkpoint](./how-to-create-a-new-checkpoint)
+
+</Prerequisites>
 
 Steps
 -----
