@@ -141,7 +141,6 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     def is_abstract(cls):
-        a = isabstract(cls)
         return isabstract(cls)
 
     @classmethod
