@@ -22,7 +22,7 @@ Steps
 
 1. **Configure a new folder on your filesystem where Validation results will be stored.**
 
-    Create a new folder where you would like to store your Validation results, and move your existing Validation results over to the new location. In our case, the name of the Validation result is ``npi_validations`` and the path to our new storage location is ``shared_validations/``.
+Create a new folder where you would like to store your Validation results, and move your existing Validation results over to the new location. In our case, the name of the Validation result is ``npi_validations`` and the path to our new storage location is ``shared_validations/``.
 
 ```bash
 # in the great_expectations/ folder
@@ -32,7 +32,7 @@ mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 
 2. **Identify your Data Context Validations Store**
 
-    In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validations in a store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validations in a store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
 
 ```yaml
   validations_store_name: validations_store
@@ -47,10 +47,9 @@ mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 
 3. **Update your configuration file to include a new store for Validation results on your filesystem**
 
-    In the example below, Validations Store is being set to ``shared_validations_filesystem_store``, but it can be any name you like.  Also, the ``base_directory`` is being set to ``uncommitted/shared_validations/``, but it can be set to any path accessible by Great Expectations.
+In the example below, Validations Store is being set to ``shared_validations_filesystem_store``, but it can be any name you like.  Also, the ``base_directory`` is being set to ``uncommitted/shared_validations/``, but it can be set to any path accessible by Great Expectations.
 
 ```yaml
-
   validations_store_name: shared_validations_filesystem_store
 
   stores:
@@ -63,28 +62,28 @@ mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 
 4. **Confirm that the location has been updated by running** ``great_expectations --v3-api store list``.
 
-    Notice the output contains two Validation stores: the original ``validations_store`` and the ``shared_validations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Validations in the ``uncommitted/shared_validations/`` folder as long as we set the ``validations_store_name`` variable to ``shared_validations_filesystem_store``. The config for ``validations_store`` can be removed if you would like.
+Notice the output contains two Validation stores: the original ``validations_store`` and the ``shared_validations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Validations in the ``uncommitted/shared_validations/`` folder as long as we set the ``validations_store_name`` variable to ``shared_validations_filesystem_store``. The config for ``validations_store`` can be removed if you would like.
 
 ```bash
-  great_expectations --v3-api store list
+great_expectations --v3-api store list
 
-  - name: validations_store
+- name: validations_store
   class_name: ValidationsStore
   store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validations/
+    class_name: TupleFilesystemStoreBackend
+    base_directory: uncommitted/validations/
 
-  - name: shared_validations_filesystem_store
+- name: shared_validations_filesystem_store
   class_name: ValidationsStore
   store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/shared_validations/
+    class_name: TupleFilesystemStoreBackend
+    base_directory: uncommitted/shared_validations/
 ```
 
 
 5. **Confirm that the Validations store has been correctly configured**
 
-Run a [Checkpoint](../../../tutorials/getting-started/validate-your-data.md) to store results in the new Validations store on in your new location then visualize the results by re-building [Data Docs](../../../tutorials/getting-started/check-out-data-docs.md).
+    Run a [Checkpoint](../../../tutorials/getting-started/validate-your-data.md) to store results in the new Validations store on in your new location then visualize the results by re-building [Data Docs](../../../tutorials/getting-started/check-out-data-docs.md).
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.
