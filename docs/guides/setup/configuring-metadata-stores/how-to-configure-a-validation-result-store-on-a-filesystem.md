@@ -35,14 +35,14 @@ mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validations in a store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
 
 ```yaml
-  validations_store_name: validations_store
+validations_store_name: validations_store
 
-  stores:
-      validations_store:
-          class_name: ValidationsStore
-          store_backend:
-              class_name: TupleFilesystemStoreBackend
-              base_directory: uncommitted/validations/
+stores:
+   validations_store:
+       class_name: ValidationsStore
+       store_backend:
+           class_name: TupleFilesystemStoreBackend
+           base_directory: uncommitted/validations/
 ```
 
 3. **Update your configuration file to include a new store for Validation results on your filesystem**
@@ -50,14 +50,14 @@ In your ``great_expectations.yml``, look for the following lines.  The configura
 In the example below, Validations Store is being set to ``shared_validations_filesystem_store``, but it can be any name you like.  Also, the ``base_directory`` is being set to ``uncommitted/shared_validations/``, but it can be set to any path accessible by Great Expectations.
 
 ```yaml
-  validations_store_name: shared_validations_filesystem_store
+validations_store_name: shared_validations_filesystem_store
 
-  stores:
-      shared_validations_filesystem_store:
-          class_name: ValidationsStore
-          store_backend:
-              class_name: TupleFilesystemStoreBackend
-              base_directory: uncommitted/shared_validations/
+stores:
+   shared_validations_filesystem_store:
+       class_name: ValidationsStore
+       store_backend:
+           class_name: TupleFilesystemStoreBackend
+           base_directory: uncommitted/shared_validations/
 ```
 
 4. **Confirm that the location has been updated by running** ``great_expectations --v3-api store list``.
