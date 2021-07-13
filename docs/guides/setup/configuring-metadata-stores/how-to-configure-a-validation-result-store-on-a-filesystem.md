@@ -2,18 +2,18 @@
 title: How to configure a Validation Result store on a filesystem
 ---
 
-By default, Validation results are stored in the ``uncommitted/validations/`` directory.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validations on your filesystem.
-
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+
+By default, Validation results are stored in the ``uncommitted/validations/`` directory.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validations on your filesystem.
 
 This guide will explain how to use a Validation Action to update Data Docs sites with new validation results from Validation Operator runs.
 
 <Prerequisites>
 
 - Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md).
- - Configured an [Expectation Suite ](../../../tutorials/getting-started/create-your-first-expectations).
- - Configured a [Checkpoint](../../../guides/validation/checkpoints/how-to-create-a-new-checkpoint).
- - Determined a new storage location where you would like to store Validations. This can either be a local path, or a path to a secure network filesystem.
+- Configured an [Expectation Suite ](../../../tutorials/getting-started/create-your-first-expectations).
+- Configured a [Checkpoint](../../../guides/validation/checkpoints/how-to-create-a-new-checkpoint).
+- Determined a new storage location where you would like to store Validations. This can either be a local path, or a path to a secure network filesystem.
 
 </Prerequisites>
 
