@@ -21,51 +21,51 @@ Steps
 
 1. **Update the action_list key in your Validation Operator config.**
 
-  Add the ``UpdateDataDocsAction`` action to the ``action_list`` key of the ``ActionListValidationOperator`` or ``WarningAndFailureExpectationSuitesValidationOperator`` config in your ``great_expectations.yml``. This action will update all configured Data Docs sites with the new validation from the Validation Operator run.
+   Add the ``UpdateDataDocsAction`` action to the ``action_list`` key of the ``ActionListValidationOperator`` or ``WarningAndFailureExpectationSuitesValidationOperator`` config in your ``great_expectations.yml``. This action will update all configured Data Docs sites with the new validation from the Validation Operator run.
 
-  :::note Note:
+   :::note Note:
+   The ``StoreValidationResultAction`` action must appear before this action, since Data Docs are rendered from validation results from the store.
+   :::
 
-    The ``StoreValidationResultAction`` action must appear before this action, since Data Docs are rendered from validation results from the store.
-
-  ```yaml
-validation_operators:
-  action_list_operator: # this is a user-selected name
-    class_name: ActionListValidationOperator
-    action_list:
-    - name: store_validation_result # this is a user-selected name
-      action:
-        class_name: StoreValidationResultAction
-    - name: update_data_docs # this is a user-selected name
-      action:
-        class_name: UpdateDataDocsAction
-  ```
+   ```yaml
+   validation_operators:
+     action_list_operator: # this is a user-selected name
+       class_name: ActionListValidationOperator
+       action_list:
+       - name: store_validation_result # this is a user-selected name
+         action:
+           class_name: StoreValidationResultAction
+       - name: update_data_docs # this is a user-selected name
+         action:
+           class_name: UpdateDataDocsAction
+   ```
 
 2. **If you only want to update certain configured Data Docs sites**:
 
-  - Add a ``site_names`` key to the ``UpdateDataDocsAction`` config.
+   - Add a ``site_names`` key to the ``UpdateDataDocsAction`` config.
 
-  ```yaml
-validation_operators:
-  action_list_operator: # this is a user-selected name
-    class_name: ActionListValidationOperator
-    action_list:
-    - name: store_validation_result # this is a user-selected name
-      action:
-        class_name: StoreValidationResultAction
-    - name: update_data_docs # this is a user-selected name
-      action:
-        class_name: UpdateDataDocsAction
-        site_names:
-          - team_site
-  ```
+   ```yaml
+   validation_operators:
+     action_list_operator: # this is a user-selected name
+       class_name: ActionListValidationOperator
+       action_list:
+       - name: store_validation_result # this is a user-selected name
+         action:
+           class_name: StoreValidationResultAction
+       - name: update_data_docs # this is a user-selected name
+         action:
+           class_name: UpdateDataDocsAction
+           site_names:
+             - team_site
+   ```
 
 3. **Test your configuration.**
 
    Test that your new Validation Operator Action is configured correctly:
 
-    1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how-to-add-validations-data-or-suites-to-a-checkpoint).
-    2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../checkpoints/how-to-run-a-checkpoint-in-terminal) or from Python, as explained in [How to run a Checkpoint in python](../checkpoints/how-to-run-a-checkpoint-in-python).
-    3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
+   1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how-to-add-validations-data-or-suites-to-a-checkpoint).
+   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../checkpoints/how-to-run-a-checkpoint-in-terminal) or from Python, as explained in [How to run a Checkpoint in python](../checkpoints/how-to-run-a-checkpoint-in-python).
+   3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
 
 Additional notes
 ----------------
