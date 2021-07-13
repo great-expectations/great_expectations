@@ -2,6 +2,8 @@
 title: How to add validations data or suites to a Checkpoint
 ---
 
+import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+
 This guide will help you add validations, data or suites to an existing Checkpoint.
 This is useful if you want to aggregate individual validations (across suites or datasources) into a single Checkpoint.
 
