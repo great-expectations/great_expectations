@@ -3,7 +3,7 @@ title: How to configure a Validation Result store in Azure blob storage
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-By default, Validations are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system. This guide will help you configure a new storage location for Validations in a Azure Blob Storage.
+By default, Validations are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system. This guide will help you configure a new storage location for Validations in Azure Blob Storage.
 
 <Prerequisites>
 
