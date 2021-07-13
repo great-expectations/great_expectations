@@ -64,7 +64,7 @@ Steps
    Test that your new Validation Operator Action is configured correctly:
 
    1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how-to-add-validations-data-or-suites-to-a-checkpoint).
-   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../checkpoints/how-to-run-a-checkpoint-in-terminal) or from Python, as explained in [How to run a Checkpoint in python](../checkpoints/how-to-run-a-checkpoint-in-python).
+   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../checkpoints/how-to-run-a-checkpoint-in-terminal) or from Python, as explained in [How to run a Checkpoint in Python](../checkpoints/how-to-run-a-checkpoint-in-python).
    3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
 
 Additional notes
