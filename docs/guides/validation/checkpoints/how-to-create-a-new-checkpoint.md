@@ -64,9 +64,9 @@ When executed, test_yaml_config will instantiate the component and run through a
 
 In the case of a Checkpoint, this means
 
-	1. validating the yaml configuration,
-	2. verifying that the Checkpoint class with the given configuration, if valid, can be instantiated, and
-	3. printing warnings in case certain parts of the configuration, while valid, may be incomplete and need to be better specified for a successful Checkpoint operation.
+1. validating the yaml configuration,
+2. verifying that the Checkpoint class with the given configuration, if valid, can be instantiated, and
+3. printing warnings in case certain parts of the configuration, while valid, may be incomplete and need to be better specified for a successful Checkpoint operation.
 
 The output will look something like this:
 
