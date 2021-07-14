@@ -1,5 +1,5 @@
 """
-Usage: `./trace_docs_deps [DOCS_DIR]`
+Usage: `python trace_docs_deps [DOCS_DIR]`
 
 This script is used in our Azure Docs Integration pipeline (azure-pipelines-docs-integration.yml) to determine whether
 a change has been made in the `great_expectations/` directory that change impacts `docs/` and the snippets therein.
