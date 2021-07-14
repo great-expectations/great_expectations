@@ -1,14 +1,12 @@
-#!/usr/bin/env python3
-
 """
 Usage: `./trace_docs_deps [DOCS_DIR]`
 
 This script is used in our Azure Docs Integration pipeline (azure-pipelines-docs-integration.yml) to determine whether
-a change has been made in the `great_expectations/` directory and if that change impacts `docs/` and the tests therein.
+a change has been made in the `great_expectations/` directory that change impacts `docs/` and the snippets therein.
 
 The script takes the following steps:
     1. Parses all markdown files in `docs/`, using regex to find any Docusaurus links (i.e. ```python file=...#L10-20)
-    2. Goes to each linked file and use AST to parse imports used there
+    2. Goes to each linked file and uses AST to parse imports used there
     3. Filters for only relative imports and determines the paths to those files
 
 The resulting output list is all of the dependencies `docs/` has on the primary `great_expectations/` directory.
