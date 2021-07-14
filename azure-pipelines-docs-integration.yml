@@ -42,7 +42,7 @@ stages:
       - job: changes
         steps:
           - task: ChangedFiles@1
-            name: Check docs changes
+            name: CheckDocsChanges
             inputs:
               verbose: true
               rules: |
@@ -67,7 +67,7 @@ stages:
                     break
                 fi
               done
-            name: Check docs dependencies changes
+            name: CheckDocsDependenciesChanges
 
   - stage: docusaurus_tests
     pool:
