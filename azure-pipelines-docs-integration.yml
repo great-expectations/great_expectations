@@ -53,6 +53,7 @@ stages:
                 tests/test_sets/**
 
           - bash: |
+              echo $isMain
               CHANGED_FILES=$(git diff HEAD origin/develop --name-only)
               echo "Changed files:" $CHANGED_FILES
 
