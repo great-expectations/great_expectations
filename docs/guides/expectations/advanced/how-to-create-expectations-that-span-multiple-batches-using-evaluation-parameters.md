@@ -58,32 +58,32 @@ In a notebook,
 
 4. **Define an Expectation using an Evaluation Parameter on the downstream Validator.**
 
-    ```python
-        eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
-        downstream_validator.expect_table_row_count_to_equal(
-            value={
-                '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
-            }
-        )
-    ```
+   ```python
+   eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
+   downstream_validator.expect_table_row_count_to_equal(
+      value={
+         '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
+      }
+   )
+   ```
 
-    The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data-context#evaluation-parameter-stores) or [Metrics Store](../../../reference/metrics) (see also [How to configure a MetricsStore](../../../guides/setup/configuring-metadata-stores/how-to-configure-a-metricsstore)).
+   The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data-context#evaluation-parameter-stores) or [Metrics Store](../../../reference/metrics) (see also [How to configure a MetricsStore](../../../guides/setup/configuring-metadata-stores/how-to-configure-a-metricsstore)).
 
-    This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
+   This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
 
-    When executed in the notebook, this Expectation will generate an [Expectation Validation Result](../../../reference/validation). Most values will be missing, since interactive evaluation was disabled.
+   When executed in the notebook, this Expectation will generate an [Expectation Validation Result](../../../reference/validation). Most values will be missing, since interactive evaluation was disabled.
 
-    ```python
-        {
-          "result": {},
-          "success": null,
-          "meta": {},
-          "exception_info": {
-            "raised_exception": false,
-            "exception_traceback": null,
-            "exception_message": null
-          }
-        }
+   ```python
+   {
+      "result": {},
+      "success": null,
+      "meta": {},
+      "exception_info": {
+         "raised_exception": false,
+         "exception_traceback": null,
+         "exception_message": null
+      }
+   }
     ```
 
    :::warning
@@ -140,7 +140,7 @@ In a notebook,
 
    :::warning
 
-   In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://discuss.great_expectations.io>`_ and `Slack channel <https://great_expectations.io/slack>`_.
+   In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the [Great Expectations discussion forum ](https://discuss.great_expectations.io) and [Slack channel](https://greatexpectations.io/slack).
 
    :::
 
