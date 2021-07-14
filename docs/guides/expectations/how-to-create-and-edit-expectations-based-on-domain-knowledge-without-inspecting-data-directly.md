@@ -101,20 +101,20 @@ Steps
    ```
 
    ```python
-        expectation_configuration = ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
-            kwargs={
-                "column": "user_id",
-                "mostly": 0.75,
-            },
-            meta={
-                "notes": {
-                    "format": "markdown",
-                    "content": "Some clever comment about this expectation. **Markdown** `Supported`"
-                }
-            }
-        )
-        suite.add_expectation(expectation_configuration=expectation_configuration)
+   expectation_configuration = ExpectationConfiguration(
+      expectation_type="expect_column_values_to_not_be_null",
+      kwargs={
+         "column": "user_id",
+         "mostly": 0.75,
+      },
+      meta={
+         "notes": {
+            "format": "markdown",
+            "content": "Some clever comment about this expectation. **Markdown** `Supported`"
+         }
+      }
+   )
+   suite.add_expectation(expectation_configuration=expectation_configuration)
    ```
 
    You can see all the available Expectations in the :ref:`expectation_glossary`.
