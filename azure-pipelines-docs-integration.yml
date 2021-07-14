@@ -55,6 +55,7 @@ stages:
           - bash: |
               CHANGED_FILES=$(git diff HEAD origin/develop --name-only)
               DEPENDENCIES=$(python scripts/trace_docs_deps.py docs)
+              printf '%s\n' "[CHANGED FILES]" "${CHANGED_FILES[@]}" "" "[DEPENDENCIES]" "${DEPENDENCIES[@]}" ""
 
               echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
               for FILE in $DEPENDENCIES; do
