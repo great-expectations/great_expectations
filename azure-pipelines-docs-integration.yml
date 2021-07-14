@@ -42,7 +42,7 @@ stages:
       - job: changes
         steps:
 
-          - bash: trace_docs_deps docs
+          - bash: ./trace_docs_deps docs
             displayName: 'Find local dependencies'
 
           - task: ChangedFiles@1
