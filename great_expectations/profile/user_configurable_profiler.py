@@ -32,6 +32,8 @@ from tqdm.auto import tqdm
 class UserConfigurableProfiler:
 
     """
+    THIS IS JUST A TEST LINE FOR PURPOSES OF EVALUATING OUR AZURE PIPELINE :)
+
     The UserConfigurableProfiler is used to build an expectation suite from a dataset. The expectations built are
     strict - they can be used to determine whether two tables are the same.
 
