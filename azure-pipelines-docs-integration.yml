@@ -41,9 +41,7 @@ stages:
     jobs:
       - job: changes
         steps:
-          - bash: |
-                    VAR=$(trace_docs_deps docs)
-                    echo $VAR
+          - bash: echo $(trace_docs_deps docs)
           - task: ChangedFiles@1
             name: CheckChanges
             inputs:
