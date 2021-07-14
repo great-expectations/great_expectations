@@ -53,7 +53,7 @@ stages:
                 tests/test_sets/**
 
           - bash: |
-              CHANGED_FILES=$(git diff HEAD origin/HEAD --name-only)
+              CHANGED_FILES=$(git diff HEAD origin/develop --name-only)
               echo "Changed files:" $CHANGED_FILES
 
               DEPENDENCIES=$(python scripts/trace_docs_deps.py docs)
