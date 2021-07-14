@@ -87,6 +87,7 @@ class Validator:
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
         self._validator_config = {}
+
         if batches is None:
             batches = tuple()
 
