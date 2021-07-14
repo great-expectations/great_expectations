@@ -53,18 +53,14 @@ stages:
                 tests/test_sets/**
 
           - bash: |
-              echo $isMain
               CHANGED_FILES=$(git diff HEAD origin/develop --name-only)
-              echo "Changed files:" $CHANGED_FILES
-
               DEPENDENCIES=$(python scripts/trace_docs_deps.py docs)
-              echo "Docs dependencies:" $DEPENDENCIES
 
               echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
               for FILE in $DEPENDENCIES; do
                 if [[ ${CHANGED_FILES[@]} =~ $FILE ]]; then
                     echo "Found change in local dependency:" $FILE
-                    echo "##vso[task.setvariable variable=DOCS_DEPENDENCIES_CHANGED;isOutput=true]true"
+                    echo "##vso[task.setvariable variable=DocsDependenciesChanged;isOutput=true]true"
                     break
                 fi
               done
@@ -75,7 +71,7 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: test_docs
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       variables:
         python.version: '3.8'
       services:
