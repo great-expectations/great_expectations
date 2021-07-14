@@ -54,9 +54,10 @@ stages:
 
           - bash: |
               CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
-              echo $CHANGED_FILES
+              echo "Changed files:" $CHANGED_FILES
+
               DEPENDENCIES=$(./trace_docs_deps docs)
-              echo $DEPENDENCIES
+              echo "Docs dependencies:" $DEPENDENCIES
 
               echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
               for FILE in $DEPENDENCIES; do
@@ -66,8 +67,6 @@ stages:
                     break
                 fi
               done
-            displayName: 'Find changes in local dependencies'
-
 
   - stage: docusaurus_tests
     pool:
