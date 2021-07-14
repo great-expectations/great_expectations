@@ -41,10 +41,6 @@ stages:
     jobs:
       - job: changes
         steps:
-
-          - bash: ./trace_docs_deps docs
-            displayName: 'Find local dependencies'
-
           - task: ChangedFiles@1
             name: CheckChanges
             inputs:
@@ -56,13 +52,30 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
+          - bash: |
+              CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
+              echo "CHANGED_FILES:" $CHANGED_FILES
+              DEPENDENCES=$(./trace_docs_deps docs)
+              echo "DEPENDENCES:" $DEPENDENCIES
+
+              echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
+              for FILE in $DEPENDENCES; do
+                  if [[ " ${CHANGED_FILES[@]} " =~ " ${FILE} " ]]; then
+                      echo "Found change in local dependency:" $FILE
+                      echo "##vso[task.setvariable variable=DOCS_DEPENDENCIES_CHANGED;isOutput=true]true"
+                      break
+                  fi
+              done
+            displayName: 'Find changes in local dependencies'
+            name: CheckChanges2
+
 
   - stage: docusaurus_tests
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: test_docs
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges2.DOCS_DEPENDENCIES_CHANGED'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
       variables:
         python.version: '3.8'
       services:

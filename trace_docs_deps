@@ -68,7 +68,8 @@ def get_paths(imports: List[str]) -> List[str]:
         if os.path.isfile(f"{path}.py"):
             paths.append(f"{path}.py")
         elif os.path.isdir(path):
-            paths.append(f"{path}/")
+            for file in glob.glob(f"{path}/**/*.py", recursive=True):
+                paths.append(file)
 
     return paths
 
