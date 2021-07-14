@@ -59,7 +59,7 @@ stages:
               echo "DEPENDENCIES:" $DEPENDENCIES
 
               echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
-              for FILE in $DEPENDENCES; do
+              for FILE in $DEPENDENCIES; do
                   if [[ " ${CHANGED_FILES[@]} " =~ " ${FILE} " ]]; then
                       echo "Found change in local dependency:" $FILE
                       echo "##vso[task.setvariable variable=DOCS_DEPENDENCIES_CHANGED;isOutput=true]true"
