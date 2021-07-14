@@ -54,8 +54,6 @@ from great_expectations.validator.validation_graph import (
     ValidationGraph,
 )
 
-print("THIS IS JUST A TEST")
-
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 

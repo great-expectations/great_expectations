@@ -54,7 +54,9 @@ stages:
 
           - bash: |
               CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
+              echo $CHANGED_FILES
               DEPENDENCIES=$(./trace_docs_deps docs)
+              echo $DEPENDENCIES
 
               echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
               for FILE in $DEPENDENCIES; do

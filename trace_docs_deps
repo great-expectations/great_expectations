@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 
 """
-Usage: `python docs_script.py docs`
+Usage: `./trace_docs_deps [DOCS_DIR]`
 
-1. Parse all markdown files in docs, using regex to find any Docusaurus links (i.e. ```python file=...#L10-20)
-2. Go to each linked file and use AST to parse imports used there
-3. Filter for only relative imports and determine the paths to those files
-4. Aggregate in list and place in Azure
+This script is used in our Azure Docs Integration pipeline (azure-pipelines-docs-integration.yml) to determine whether
+a change has been made in the `great_expectations/` directory and if that change impacts `docs/` and the tests therein.
+
+The script takes the following steps:
+    1. Parses all markdown files in `docs/`, using regex to find any Docusaurus links (i.e. ```python file=...#L10-20)
+    2. Goes to each linked file and use AST to parse imports used there
+    3. Filters for only relative imports and determines the paths to those files
+
+The resulting output list is all of the dependencies `docs/` has on the primary `great_expectations/` directory.
+If a change is identified in any of these files during the pipeline runtime, we know that a docs dependency has possibly
+been impacted and the pipeline should run to ensure adequate test coverage.
 
 """
 
