@@ -54,6 +54,8 @@ from great_expectations.validator.validation_graph import (
     ValidationGraph,
 )
 
+print("THIS IS JUST A TEST")
+
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
@@ -87,7 +89,6 @@ class Validator:
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
         self._validator_config = {}
-
         if batches is None:
             batches = tuple()
 
