@@ -55,8 +55,8 @@ stages:
           - bash: |
               CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
               echo "CHANGED_FILES:" $CHANGED_FILES
-              DEPENDENCIES=$(./trace_docs_deps docs)
-              echo "DEPENDENCES:" $DEPENDENCIES
+              DEPENDENCES=$(./trace_docs_deps docs)
+              echo "DEPENDENCIES:" $DEPENDENCIES
 
               echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
               for FILE in $DEPENDENCES; do
@@ -67,7 +67,6 @@ stages:
                   fi
               done
             displayName: 'Find changes in local dependencies'
-            name: CheckChanges2
 
 
   - stage: docusaurus_tests
@@ -75,7 +74,7 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: test_docs
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges2.DOCS_DEPENDENCIES_CHANGED'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
       variables:
         python.version: '3.8'
       services:
