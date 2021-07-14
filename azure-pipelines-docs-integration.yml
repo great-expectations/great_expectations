@@ -42,7 +42,7 @@ stages:
       - job: changes
         steps:
           - task: ChangedFiles@1
-            name: CheckChanges
+            name: Check docs changes
             inputs:
               verbose: true
               rules: |
@@ -52,7 +52,9 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
-          - bash: |
+          - task: ChangedFiles@2
+            name: Check docs dependencies changes
+            bash: |
               CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
               echo "Changed files:" $CHANGED_FILES
 
