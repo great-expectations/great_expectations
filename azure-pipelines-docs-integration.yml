@@ -43,7 +43,6 @@ stages:
         steps:
           - task: ChangedFiles@1
             name: CheckDocsChanges
-            displayname: Check for changes in docs
             inputs:
               verbose: true
               rules: |
@@ -68,7 +67,6 @@ stages:
                 fi
               done
             name: CheckDocsDependenciesChanges
-            displayname: Check for changes in GE that impact docs
 
   - stage: docusaurus_tests
     pool:
