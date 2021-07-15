@@ -13,7 +13,7 @@ def test_find_docusaurus_refs_parses_correctly(tmpdir_factory):
             "```python file=../../../../../../../../../../../../../../../a/b/c/script1.py#L1\n"
         )
         f.write(
-            "```python file=../../../../../../../../../../../../../../../d/e/f/script2.py#L5-10"
+            "```python file=../../../../../../../../../../../../../../../d/e/f/script2.py#L5-10\n"
         )
         f.write(
             "```yaml file=../../../../../../../../../../../../../../../g/h/i/script3.py#L100-200"
@@ -45,7 +45,8 @@ def test_get_local_imports_parses_correctly(tmpdir_factory):
         )
         f.write("from great_expectations.core.util import nested_update")
 
-    assert sorted(get_local_imports([str(temp_file)])) == [
+    files: List[str] = [str(temp_file)]
+    assert sorted(get_local_imports(files)) == [
         "great_expectations.core.util",
         "great_expectations.rule_based_profiler.profiler",
     ]
@@ -58,7 +59,8 @@ def test_get_local_imports_discards_external_dependencies(tmpdir_factory):
         f.write("from ruamel import YAML\n")
         f.write("import pytest")
 
-    assert len(get_local_imports([str(temp_file)])) == 0
+    files: List[str] = [str(temp_file)]
+    assert len(get_local_imports(files)) == 0
 
 
 def test_get_local_imports_discards_general_ge_imports(tmpdir_factory):
@@ -68,4 +70,24 @@ def test_get_local_imports_discards_general_ge_imports(tmpdir_factory):
         f.write("import great_expectations\n")
         f.write("import great_expectations as ge")
 
-    assert len(get_local_imports([str(temp_file)])) == 0
+    files: List[str] = [str(temp_file)]
+    assert len(get_local_imports(files)) == 0
+
+
+def test_get_import_paths_references_ge_files():
+    imports: List[str] = [
+        "great_expectations.core.batch",
+        "great_expectations.expectations.util",
+    ]
+    assert sorted(get_import_paths(imports)) == [
+        "great_expectations/core/batch.py",
+        "great_expectations/expectations/util.py",
+    ]
+
+
+def test_get_import_paths_references_files_in_ge_directory():
+    imports: List[str] = ["great_expectations.checkpoint.types"]
+    assert sorted(get_import_paths(imports)) == [
+        "great_expectations/checkpoint/types/__init__.py",
+        "great_expectations/checkpoint/types/checkpoint_result.py",
+    ]
