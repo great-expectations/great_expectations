@@ -43,7 +43,7 @@ Steps
     In our case, the name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files will be located.
 
     :::warning
-    If you are also storing [Validations in S3](../configuring-metadata-stores/how-to-configure-a-validation-result-store-in-amazon-s3.md) or [DataDocs in S3](../configuring-data-docs/how-to-host-and-share-data-docs-on-amazon-s3.md),  please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+    If you are also storing [Validations in S3](../configuring_metadata_stores/how-to-configure-a-validation-result-store-in-amazon-s3.md) or [DataDocs in S3](../configuring-data-docs/how-to-host-and-share-data-docs-on-amazon-s3.md),  please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
     :::
 
     ```yaml

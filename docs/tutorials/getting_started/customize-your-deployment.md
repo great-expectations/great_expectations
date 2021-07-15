@@ -39,20 +39,20 @@ Many teams find it convenient to store Expectations in git. Essentially, this ap
 
 Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database.
 
-* [How to configure an Expectation store in Amazon S3](/docs/guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-in-amazon-s3)
-* [How to configure an Expectation store in GCS](/docs/guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-in-gcs)
-* [How to configure an Expectation store in Azure blob storage](/docs/guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-in-azure-blob-storage)
-* [How to configure an Expectation store to PostgreSQL](/docs/guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-to-postgresql)
-* [How to configure an Expectation store on a filesystem](/docs/guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-to-postgresql)
+* [How to configure an Expectation store in Amazon S3](/docs/guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-in-amazon-s3)
+* [How to configure an Expectation store in GCS](/docs/guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-in-gcs)
+* [How to configure an Expectation store in Azure blob storage](/docs/guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-in-azure-blob-storage)
+* [How to configure an Expectation store to PostgreSQL](/docs/guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-to-postgresql)
+* [How to configure an Expectation store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-to-postgresql)
 
 ## Options for storing Validation Results
 By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database.
 
-* [How to configure a Validation Result store on a filesystem](/docs/guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-on-a-filesystem)
-* [How to configure a Validation Result store in Amazon S3](/docs/guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-in-amazon-s3)
-* [How to configure a Validation Result store in GCS](/docs/guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-in-gcs)
-* [How to configure a Validation Result store in Azure blob storage](/docs/guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-in-azure-blob-storage)
-* [How to configure a Validation Result store to PostgreSQL](/docs/guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-to-postgresql)
+* [How to configure a Validation Result store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-on-a-filesystem)
+* [How to configure a Validation Result store in Amazon S3](/docs/guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-amazon-s3)
+* [How to configure a Validation Result store in GCS](/docs/guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-gcs)
+* [How to configure a Validation Result store in Azure blob storage](/docs/guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-azure-blob-storage)
+* [How to configure a Validation Result store to PostgreSQL](/docs/guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-to-postgresql)
 
 ## Options for customizing generated notebooks
 Great Expectations generates and provides notebooks as interactive development environments for expectation suites. You might want to customize parts of the notebooks to add company-specific documentation, or change the code sections to suit your use-cases.
