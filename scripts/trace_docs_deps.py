@@ -45,10 +45,10 @@ def _get_relative_path(line: str, doc: str) -> str:
     path: str = search.group(1)
 
     # Ensure that paths are relative to pwd
-    nesting: int = doc.count("/")
+    depth: int = doc.count("/")
     parts: List[str] = path.split("/")
 
-    return "/".join(part for part in parts[nesting:])
+    return "/".join(part for part in parts[depth:])
 
 
 def get_local_imports(files: List[str]) -> List[str]:
@@ -56,12 +56,12 @@ def get_local_imports(files: List[str]) -> List[str]:
     imports: Set[str] = set()
 
     for file in files:
-        with open(file) as fh:
-            root: ast.Module = ast.parse(fh.read(), file)
+        with open(file) as f:
+            root: ast.Module = ast.parse(f.read(), file)
+
         for node in ast.walk(root):
-            if not isinstance(
-                node, ast.ImportFrom
-            ):  # ast.Import is only used for external deps
+            # ast.Import is only used for external deps
+            if not isinstance(node, ast.ImportFrom):
                 continue
 
             # Only consider imports relevant to GE (note that "import great_expectations as ge" is discarded)
@@ -89,9 +89,7 @@ def get_import_paths(imports: List[str]) -> List[str]:
 def _update_paths(paths: List[str], path: str):
     if os.path.isfile(f"{path}.py"):
         paths.append(f"{path}.py")
-    elif os.path.isdir(
-        path
-    ):  # Extract all files from a directory to simplify checks in Azure
+    elif os.path.isdir(path):
         for file in glob.glob(f"{path}/**/*.py", recursive=True):
             paths.append(file)
 
