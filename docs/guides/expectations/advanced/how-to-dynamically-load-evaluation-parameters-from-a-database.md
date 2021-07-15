@@ -7,7 +7,7 @@ This guide will help you create an Expectation that loads part of its [Expectati
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
   - Obtained credentials for a database to query for dynamic values
   - Identified a SQL query that will return values for your expectation configuration.
 
