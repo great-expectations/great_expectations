@@ -43,6 +43,7 @@ stages:
         steps:
           - task: ChangedFiles@1
             name: CheckDocsChanges
+            displayname: Check for changes in docs
             inputs:
               verbose: true
               rules: |
@@ -54,8 +55,10 @@ stages:
 
           - bash: |
               CHANGED_FILES=$(git diff HEAD origin/develop --name-only)
+              printf '%s\n' "[CHANGED FILES]" "${CHANGED_FILES[@]}" ""
+
               DEPENDENCIES=$(python scripts/trace_docs_deps.py docs)
-              printf '%s\n' "[CHANGED FILES]" "${CHANGED_FILES[@]}" "" "[DEPENDENCIES]" "${DEPENDENCIES[@]}" ""
+              printf '%s\n' "[DEPENDENCIES]" "${DEPENDENCIES[@]}" ""
 
               echo "Checking for file changes from 'great_expectations/' that impact 'docs/'..."
               for FILE in $DEPENDENCIES; do
@@ -66,6 +69,7 @@ stages:
                 fi
               done
             name: CheckDocsDependenciesChanges
+            displayname: Check for changes in GE that impact docs
 
   - stage: docusaurus_tests
     pool:
