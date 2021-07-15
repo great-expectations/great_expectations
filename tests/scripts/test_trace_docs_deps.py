@@ -74,20 +74,20 @@ def test_get_local_imports_discards_general_ge_imports(tmpdir_factory):
     assert len(get_local_imports(files)) == 0
 
 
-def test_get_import_paths_references_ge_files():
-    imports: List[str] = [
-        "great_expectations.core.batch",
-        "great_expectations.expectations.util",
-    ]
-    assert sorted(get_import_paths(imports)) == [
-        "great_expectations/core/batch.py",
-        "great_expectations/expectations/util.py",
-    ]
+# def test_get_import_paths_references_ge_files():
+#     imports: List[str] = [
+#         "great_expectations.core.batch",
+#         "great_expectations.expectations.util",
+#     ]
+#     assert sorted(get_import_paths(imports)) == [
+#         "great_expectations/core/batch.py",
+#         "great_expectations/expectations/util.py",
+#     ]
 
 
-def test_get_import_paths_references_files_in_ge_directory():
-    imports: List[str] = ["great_expectations.checkpoint.types"]
-    assert sorted(get_import_paths(imports)) == [
-        "great_expectations/checkpoint/types/__init__.py",
-        "great_expectations/checkpoint/types/checkpoint_result.py",
-    ]
+# def test_get_import_paths_references_files_in_ge_directory():
+#     imports: List[str] = ["great_expectations.checkpoint.types"]
+#     assert sorted(get_import_paths(imports)) == [
+#         "great_expectations/checkpoint/types/__init__.py",
+#         "great_expectations/checkpoint/types/checkpoint_result.py",
+#     ]
