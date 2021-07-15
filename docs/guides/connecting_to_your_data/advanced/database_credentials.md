@@ -48,7 +48,7 @@ my_postgres_db_yaml_creds:
 
 :::warning
   Add content from Existing Document
-  [Link to Existing Document](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html#how-to-guides-configuring-data-contexts-how-to-use-a-yaml-file-or-environment-variables-to-populate-credentials)
+  [Link to Existing Document](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html#how-to-guides-configuring_data_contexts-how-to-use-a-yaml-file-or-environment-variables-to-populate-credentials)
 :::
 
 

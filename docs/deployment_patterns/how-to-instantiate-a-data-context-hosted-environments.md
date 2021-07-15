@@ -21,7 +21,7 @@ Step 1: Configure your Data Context
 
 The following guide gives an overview of creating an in-code Data Context including defaults to help you more quickly set one up for common configurations:
 
-- [How to instantiate a DataContext without a YML file](../guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file)
+- [How to instantiate a DataContext without a YML file](../guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file)
 
 The following guides will contain examples for each environment we have tested out:
 

@@ -30,9 +30,9 @@ The simplest way to manage your Great Expectations configuration is usually by c
 
 Here’s how to handle each of those cases:
 
-* [How to use a YAML file or environment variables to populate credentials](/docs/guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables)
-* [How to populate credentials from a secrets store](/docs/guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-secrets-store)
-* [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file)
+* [How to use a YAML file or environment variables to populate credentials](/docs/guides/setup/configuring_data_contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables)
+* [How to populate credentials from a secrets store](/docs/guides/setup/configuring_data_contexts/how-to-configure-credentials-using-a-secrets-store)
+* [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file)
 
 ## Options for storing Expectations
 Many teams find it convenient to store Expectations in git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. git acts as a collaboration tool and source of record.
