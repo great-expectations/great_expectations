@@ -14,23 +14,18 @@ from great_expectations.expectations.metrics.util import filter_pair_metric_null
 
 
 class MulticolumnSumEqual(MapMetricProvider):
-    # TODO: <Alex>ALEX</Alex>
     condition_metric_name = "multicolumn_sum.equal"
-    # metric_name = "multicolumn_sum.equal"
-    # TODO: <Alex>ALEX</Alex>
-    condition_value_keys = (
-        # TODO: <Alex>ALEX</Alex>
-        "sum_total",
-        # TODO: <Alex>ALEX</Alex>
-    )
-    # TODO: <Alex>ALEX</Alex>
-    domain_keys = ("batch_id", "table", "column_list")
+    condition_value_keys = ("sum_total",)
+    domain_keys = ("batch_id", "table", "columns")
 
+    # TODO: <Alex>ALEX</Alex>
     @metric_partial(
         engine=PandasExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-        domain_type=MetricDomainTypes.MULTICOLUMN,
+        # domain_type=MetricDomainTypes.MULTICOLUMN,
+        domain_type=MetricDomainTypes.IDENTITY,
     )
+    # TODO: <Alex>ALEX</Alex>
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -41,17 +36,17 @@ class MulticolumnSumEqual(MapMetricProvider):
     ):
 
         sum_total = metric_value_kwargs.get("sum_total")
+        # TODO: <Alex>ALEX</Alex>
         (
             df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.MULTICOLUMN
+            # metric_domain_kwargs, MetricDomainTypes.MULTICOLUMN
+            metric_domain_kwargs,
+            MetricDomainTypes.IDENTITY,
         )
+        # TODO: <Alex>ALEX</Alex>
 
-        # TODO: <Alex>ALEX</Alex>
         row_wise_cond = df.sum(axis=1) == sum_total
-        # TODO: <Alex>ALEX</Alex>
-        # return row_wise_cond.all()
         return row_wise_cond, compute_domain_kwargs, accessor_domain_kwargs
-        # TODO: <Alex>ALEX</Alex>

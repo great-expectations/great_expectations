@@ -21,7 +21,5 @@ from .metric_provider import (
     metric_partial,
     metric_value,
 )
-
-# TODO: <Alex>ALEX</Alex>
 from .multicolumn_map_metrics import *
 from .table_metrics import *

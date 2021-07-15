@@ -1,4 +1,7 @@
-from typing import Dict
+import copy
+from typing import Dict, Optional
+
+import numpy as np
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -10,6 +13,7 @@ from great_expectations.render.types import (
     RenderedTableContent,
 )
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class ExpectMulticolumnSumToEqual(TableExpectation):
@@ -28,16 +32,8 @@ class ExpectMulticolumnSumToEqual(TableExpectation):
         "requirements": [],
     }
 
-    # TODO: <Alex>ALEX</Alex>
-    # metric_dependencies = ("multicolumn_sum_equal",)
-    # TODO: <Alex>ALEX</Alex>
-    metric_dependencies = ("multicolumn_sum.equal.condition",)
-    # domain_keys = ("column_list",)
-    # TODO: <Alex>ALEX</Alex>
-    success_keys = (
-        "column_list",
-        "sum_total",
-    )
+    domain_keys = ("column_list",)
+    success_keys = ("sum_total",)
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
@@ -69,6 +65,42 @@ class ExpectMulticolumnSumToEqual(TableExpectation):
     ):
         pass
 
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        column_list = configuration.kwargs.get("column_list")
+        domain_kwargs = configuration.get_domain_kwargs()
+        metric_domain_kwargs = copy.deepcopy(domain_kwargs)
+        metric_domain_kwargs["columns"] = metric_domain_kwargs.pop("column_list")
+        success_kwargs = configuration.get_success_kwargs()
+        metric_value_kwargs = copy.deepcopy(success_kwargs)
+        for domain_key in domain_kwargs:
+            metric_value_kwargs.pop(domain_key, None)
+        # TODO: <Alex>ALEX</Alex>
+        ks = [
+            "multicolumn_sum.equal.condition",
+            "multicolumn_sum.equal.unexpected_count",
+            # 'multicolumn_sum.equal.unexpected_index_list',
+            # 'multicolumn_sum.equal.unexpected_rows',
+        ]
+        for k in ks:
+            m = MetricConfiguration(
+                metric_name=k,
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=metric_value_kwargs,
+                metric_dependencies=None,
+            )
+            dependencies["metrics"][k] = m
+        # TODO: <Alex>ALEX</Alex>
+
+        return dependencies
+
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -76,18 +108,27 @@ class ExpectMulticolumnSumToEqual(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        # TODO: <Alex>ALEX</Alex>
         sum_total = self.get_success_kwargs(configuration).get("sum_total")
-        # actual_sum_total = metrics.get("multicolumn_sum.equal.condition")
-        success = metrics.get("multicolumn_sum.equal.condition")
+        # TODO: <Alex>ALEX</Alex>
+        ks = [
+            "multicolumn_sum.equal.condition",
+            "multicolumn_sum.equal.unexpected_count",
+            # 'multicolumn_sum.equal.unexpected_index_list',
+            # 'multicolumn_sum.equal.unexpected_rows',
+        ]
+        for k in ks:
+            v = metrics.get(k)
+        # TODO: <Alex>ALEX</Alex>
+        condition = metrics.get("multicolumn_sum.equal.condition")
+        success = (
+            np.count_nonzero([1 if v is False else 0 for v in condition[0].values]) == 0
+        )
         # TODO: <Alex>ALEX</Alex>
         return {
             "success": success,
             "result": {
                 "observed_value": {
-                    # TODO: <Alex>ALEX -- this is FAKE (for testing purposes)</Alex>
                     "something": 13,
-                    # TODO: <Alex>ALEX -- this is FAKE (for testing purposes)</Alex>
                     "someother": 26,
                 }
             },
