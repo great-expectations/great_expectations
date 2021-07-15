@@ -44,7 +44,7 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class ColumnDiscreteEntropy(ColumnMetricProvider):
-    """MetricProvider Class for Aggregate Mean MetricProvider"""
+    """MetricProvider Class for Discrete Entropy MetricProvider"""
 
     metric_name = "column.discrete.entropy"
     value_keys = ("base",)
@@ -70,41 +70,31 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        column_name = accessor_domain_kwargs["column"]
         base = metric_value_kwargs["base"]
-
-        column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
-        dialect = sqlalchemy_engine.dialect
 
         column_value_counts = metrics.get("column.value_counts")
         return scipy.stats.entropy(column_value_counts, base=base)
 
-    #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
+    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    def _spark(
+        cls,
+        execution_engine: "SparkDFExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+        base = metric_value_kwargs["base"]
+
+        column_value_counts = metrics.get("column.value_counts")
+        return scipy.stats.entropy(column_value_counts, base=base)
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -134,7 +124,9 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
             }
         )
 
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(
+            execution_engine, SparkDFExecutionEngine
+        ):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
                 "column_values.nonnull.count", metric.metric_domain_kwargs
             )
