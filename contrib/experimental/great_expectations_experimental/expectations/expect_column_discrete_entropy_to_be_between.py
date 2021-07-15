@@ -47,42 +47,39 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.discrete.entropy"
-    value_keys = ("base", "dropna")
+    value_keys = ("base",)
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, base, dropna, **kwargs):
-        counts = column.value_counts(dropna=dropna)
-        print(counts)
-        print(scipy.stats.entropy(counts, base=base))
-        return scipy.stats.entropy(counts, base=base)
+    def _pandas(cls, column, base, **kwargs):
+        column_value_counts = column.value_counts()
+        return scipy.stats.entropy(column_value_counts, base=base)
 
-    #
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
-    # def _sqlalchemy(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         selectable,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column_name = accessor_domain_kwargs["column"]
-    #     column = sa.column(column_name)
-    #     sqlalchemy_engine = execution_engine.engine
-    #     dialect = sqlalchemy_engine.dialect
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
+    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    def _sqlalchemy(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            selectable,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+        column_name = accessor_domain_kwargs["column"]
+        base = metric_value_kwargs["base"]
+
+        column = sa.column(column_name)
+        sqlalchemy_engine = execution_engine.engine
+        dialect = sqlalchemy_engine.dialect
+
+        column_value_counts = metrics.get("column.value_counts")
+        return scipy.stats.entropy(column_value_counts, base=base)
+
     #
     # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     # def _spark(
@@ -108,47 +105,44 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
     #
     #     return column_median
     #
-    # @classmethod
-    # def _get_evaluation_dependencies(
-    #     cls,
-    #     metric: MetricConfiguration,
-    #     configuration: Optional[ExpectationConfiguration] = None,
-    #     execution_engine: Optional[ExecutionEngine] = None,
-    #     runtime_configuration: Optional[dict] = None,
-    # ):
-    #     """This should return a dictionary:
-    #
-    #     {
-    #       "dependency_name": MetricConfiguration,
-    #       ...
-    #     }
-    #     """
-    #
-    #     dependencies = super()._get_evaluation_dependencies(
-    #         metric=metric,
-    #         configuration=configuration,
-    #         execution_engine=execution_engine,
-    #         runtime_configuration=runtime_configuration,
-    #     )
-    #
-    #     table_domain_kwargs = {
-    #         k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-    #     }
-    #
-    #     dependencies.update(
-    #         {
-    #             "table.row_count": MetricConfiguration(
-    #                 "table.row_count", table_domain_kwargs
-    #             )
-    #         }
-    #     )
-    #
-    #     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-    #         dependencies["column_values.nonnull.count"] = MetricConfiguration(
-    #             "column_values.nonnull.count", metric.metric_domain_kwargs
-    #         )
-    #
-    #     return dependencies
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        table_domain_kwargs = {
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+        }
+
+        dependencies.update(
+            {
+                "table.row_count": MetricConfiguration(
+                    "table.row_count", table_domain_kwargs
+                )
+            }
+        )
+
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            dependencies["column_values.nonnull.count"] = MetricConfiguration(
+                "column_values.nonnull.count", metric.metric_domain_kwargs
+            )
+            dependencies["column.value_counts"] = MetricConfiguration(
+                metric_name="column.value_counts",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+        return dependencies
 
 
 class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
@@ -174,8 +168,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
                     If True, the column standard deviation must be strictly smaller than max_value, default=False
                 base (float):
                     The base of the logarithm, default=2
-                dropna (boolean):
-                    If True , default=True
             Other Parameters:
                 result_format (str or None): \
                     Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
@@ -232,7 +224,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
                         "min_value": 7,
                         "max_value": 7,
                         "base": 3,
-                        "dropna": False,
                         "result_format": "COMPLETE",
                     },
                     "out": {
@@ -285,7 +276,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
         "max_value",
         "strict_max",
         "base",
-        "dropna",
     )
 
     # Default values
@@ -298,7 +288,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "base": 2,
-        "dropna": True,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
