@@ -1,5 +1,16 @@
 ---
 title: How to configure a new Data Context with the CLI
 ---
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-This article is a stub.
+<Prerequisites>
+
+- Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md)
+
+</Prerequisites>
+
+We recommend that you create new Data Contexts by using the a ``greate_expectations init`` command in the directory where you want to deploy Great Expectations.
+
+```bash
+great_expectations init
+```
