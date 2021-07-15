@@ -7,7 +7,7 @@ This guide will explain how to use a YAML file and/or environment variables to p
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 
 </Prerequisites>
 

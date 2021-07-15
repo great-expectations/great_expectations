@@ -2,7 +2,7 @@
 title: Deploying Great Expectations in a hosted environment without file system or CLI
 ---
 
-If you follow the steps of the [Getting Started](../tutorials/getting-started/intro) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
+If you follow the steps of the [Getting Started](../tutorials/getting_started/intro) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
 
 #. The Great Expectations [CLI](../guides/miscellaneous/how-to-use-the-great-expectations-cli) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
 #. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for validation results, etc.
@@ -46,7 +46,7 @@ In order to use an Expectation Suite you've created to validate data, follow thi
 Step 4: Use Data Docs
 ----------------------
 
-Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../tutorials/getting-started/customize-your-deployment#options-for-hosting-data-docs).
+Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../tutorials/getting_started/customize-your-deployment#options-for-hosting-data-docs).
 
 Additional notes
 ----------------

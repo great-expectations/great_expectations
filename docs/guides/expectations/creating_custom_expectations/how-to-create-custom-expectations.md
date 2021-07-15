@@ -14,7 +14,7 @@ See also this [complete example](https://github.com/superconductive/ge_tutorials
 :::note Prerequisites
 This how-to guide assumes you have already:
 
-* [Set up a working deployment of Great Expectations](/docs/tutorials/getting-started/intro)
+* [Set up a working deployment of Great Expectations](/docs/tutorials/getting_started/intro)
 :::
 
 Modular Expectations are new in version 0.13. They utilize a class structure that is significantly easier to build than ever before and are explained below!

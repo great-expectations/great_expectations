@@ -11,7 +11,7 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 
 <Prerequisites>
 
-- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../tutorials/getting-started/intro.md).
+- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../tutorials/getting_started/intro.md).
 
 </Prerequisites>
 

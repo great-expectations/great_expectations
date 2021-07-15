@@ -10,8 +10,8 @@ This guide will explain how to use a Validation Action to update Data Docs sites
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md).
-- Configured an [Expectation Suite ](../../../tutorials/getting-started/create-your-first-expectations).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
+- Configured an [Expectation Suite ](../../../tutorials/getting_started/create-your-first-expectations).
 - Configured a [Checkpoint](../../../guides/validation/checkpoints/how-to-create-a-new-checkpoint).
 - Determined a new storage location where you would like to store Validations. This can either be a local path, or a path to a secure network filesystem.
 
@@ -83,7 +83,7 @@ Steps
 
 5. **Confirm that the Validations store has been correctly configured**
 
-    Run a [Checkpoint](../../../tutorials/getting-started/validate-your-data.md) to store results in the new Validations store on in your new location then visualize the results by re-building [Data Docs](../../../tutorials/getting-started/check-out-data-docs.md).
+    Run a [Checkpoint](../../../tutorials/getting_started/validate-your-data.md) to store results in the new Validations store on in your new location then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check-out-data-docs.md).
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

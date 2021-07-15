@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+declare -a arr=("configuring-data-contexts" "configuring-metadata-stores" "configuring-data-docs" "getting_started")
+
+
+for i in "${arr[@]}"; do
+    files=$(rg -l $i)
+    echo $files
+    for file in $files; do
+        replace=$(echo $i | tr "-" "_")
+        sd $i $replace $file
+    done 
+done
+

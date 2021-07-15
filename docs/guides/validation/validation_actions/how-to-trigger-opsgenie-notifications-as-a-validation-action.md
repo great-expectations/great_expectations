@@ -7,7 +7,7 @@ This guide will help you setup Opsgenie alert notifications when running Great E
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
   - You already have an Opsgenie account
 
 </Prerequisites>

@@ -7,7 +7,7 @@ This guide will explain how to host and share Data Docs on a filesystem.
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations.](../../../tutorials/getting-started/intro.md)
+- [Set up a working deployment of Great Expectations.](../../../tutorials/getting_started/intro.md)
 
 </Prerequisites>
 

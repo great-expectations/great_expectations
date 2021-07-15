@@ -7,7 +7,7 @@ The ``JsonSchemaProfiler`` helps you quickly create [Expectation Suites](../../.
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
   - Have a valid jsonschema file that has top level object of type `object`
 
 </Prerequisites>

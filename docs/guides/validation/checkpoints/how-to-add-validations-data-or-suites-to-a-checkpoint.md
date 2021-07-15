@@ -10,8 +10,8 @@ This is useful if you want to aggregate individual validations (across suites or
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md).
-- Configured an [Expectations Suite](../../../tutorials/getting-started/create-your-first-expectations.md).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
+- Configured an [Expectations Suite](../../../tutorials/getting_started/create-your-first-expectations.md).
 - Configured a [Checkpoint](./how-to-create-a-new-checkpoint)
 
 </Prerequisites>

@@ -8,7 +8,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
 <Prerequisites>
 
-- Configured a [Data Context](../../tutorials/getting-started/initialize-a-data-context.md).
+- Configured a [Data Context](../../tutorials/getting_started/initialize-a-data-context.md).
 
 </Prerequisites>
 

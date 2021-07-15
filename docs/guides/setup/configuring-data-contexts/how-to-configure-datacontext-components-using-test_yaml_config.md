@@ -7,7 +7,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 
 </Prerequisites>
 

@@ -8,9 +8,9 @@ By default, Validation results are stored in JSON format in the ``uncommitted/va
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md).
-- Configured an [Expectations Suite](../../../tutorials/getting-started/create-your-first-expectations.md).
-- Configured a [Checkpoint](../../../tutorials/getting-started/validate-your-data.md).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
+- Configured an [Expectations Suite](../../../tutorials/getting_started/create-your-first-expectations.md).
+- Configured a [Checkpoint](../../../tutorials/getting_started/validate-your-data.md).
 - Installed [boto3](https://github.com/boto/boto3) in your local environment.
 - Identified the S3 bucket and prefix where Validation results will be stored.
 
@@ -94,7 +94,7 @@ Steps
 
 6. **Confirm that the Validations store has been correctly configured.**
 
-   Run a [Checkpoint](../../../tutorials/getting-started/validate-your-data.md) to store results in the new Validations store on S3 then visualize the results by re-building [Data Docs](../../../tutorials/getting-started/check-out-data-docs.md).
+   Run a [Checkpoint](../../../tutorials/getting_started/validate-your-data.md) to store results in the new Validations store on S3 then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check-out-data-docs.md).
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

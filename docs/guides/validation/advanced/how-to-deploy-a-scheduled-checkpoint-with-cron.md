@@ -7,7 +7,7 @@ This guide will help you deploy a scheduled Checkpoint with cron.
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - You have [created a Checkpoint](../../validation/how-to-validate-data-by-running-a-checkpoint.md)
 
 </Prerequisites>

@@ -15,15 +15,15 @@ This last section of this tutorial is designed to present you with clear options
 Here’s an overview of the components of a typical Great Expectations deployment:
 
 * Great Expectations configs and metadata
-  * [Options for storing Great Expectations configuration](/docs/tutorials/getting-started/customize-your-deployment#options-for-storing-great-expectations-configuration)
-  * [Options for storing Expectations](/docs/tutorials/getting-started/customize-your-deployment#options-for-storing-expectations)
-  * [Options for storing Validation Results](/docs/tutorials/getting-started/customize-your-deployment#options-for-storing-validation-results)
-  * [Options for customizing generated notebooks](/docs/tutorials/getting-started/customize-your-deployment#options-for-customizing-generated-notebooks)
+  * [Options for storing Great Expectations configuration](/docs/tutorials/getting_started/customize-your-deployment#options-for-storing-great-expectations-configuration)
+  * [Options for storing Expectations](/docs/tutorials/getting_started/customize-your-deployment#options-for-storing-expectations)
+  * [Options for storing Validation Results](/docs/tutorials/getting_started/customize-your-deployment#options-for-storing-validation-results)
+  * [Options for customizing generated notebooks](/docs/tutorials/getting_started/customize-your-deployment#options-for-customizing-generated-notebooks)
 
 * Integrations to related systems
-  * [Connecting to Data](/docs/tutorials/getting-started/customize-your-deployment#connecting-to-data)
-  * [Options for hosting Data Docs](/docs/tutorials/getting-started/customize-your-deployment#options-for-hosting-data-docs)
-  * [Additional Checkpoints and Actions](/docs/tutorials/getting-started/customize-your-deployment#additional-checkpoints-and-actions)
+  * [Connecting to Data](/docs/tutorials/getting_started/customize-your-deployment#connecting-to-data)
+  * [Options for hosting Data Docs](/docs/tutorials/getting_started/customize-your-deployment#options-for-hosting-data-docs)
+  * [Additional Checkpoints and Actions](/docs/tutorials/getting_started/customize-your-deployment#additional-checkpoints-and-actions)
 
 ## Options for storing Great Expectations configuration
 The simplest way to manage your Great Expectations configuration is usually by committing great_expectations/great_expectations.yml to git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).

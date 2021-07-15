@@ -16,7 +16,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - [Knowledge on how to populate credentials](../configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables.md)
 - Configured a secret store and secrets in the cloud:
     - [AWS](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html)
@@ -102,7 +102,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - [Knowledge on how to populate credentials](../configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables.md)
 - Configured a secret store and secrets in the cloud:
     - [GCP](https://cloud.google.com/secret-manager/docs/quickstart)
@@ -182,7 +182,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - [Knowledge on how to populate credentials](../configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables.md)
 - Configured a secret store and secrets in the cloud:
     - [Azure](https://docs.microsoft.com/azure/key-vault/secrets/quick-create-portal)

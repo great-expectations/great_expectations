@@ -21,7 +21,7 @@ Here are some reasons why you may wish to do this but please contact us if there
 
 <Prerequisites>
 
-- Configured a [Data Context](../../tutorials/getting-started/initialize-a-data-context.md).
+- Configured a [Data Context](../../tutorials/getting_started/initialize-a-data-context.md).
 - Have your Data Context configured to save Expectations to your filesystem (please see [How to configure an Expectation store to use a filesystem](../../guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-on-a-filesystem)) or another Expectation Store if you are in a hosted environment.
 
 </Prerequisites>
