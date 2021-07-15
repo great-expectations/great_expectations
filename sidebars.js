@@ -13,13 +13,13 @@ module.exports = {
       type: 'category',
       label: 'Getting started with Great Expectations',
       items: [
-        'tutorials/getting-started/intro',
-        'tutorials/getting-started/initialize-a-data-context',
-        'tutorials/getting-started/connect-to-data',
-        'tutorials/getting-started/create-your-first-expectations',
-        'tutorials/getting-started/check-out-data-docs',
-        'tutorials/getting-started/validate-your-data',
-        'tutorials/getting-started/customize-your-deployment'
+        'tutorials/getting_started/intro',
+        'tutorials/getting_started/initialize-a-data-context',
+        'tutorials/getting_started/connect-to-data',
+        'tutorials/getting_started/create-your-first-expectations',
+        'tutorials/getting_started/check-out-data-docs',
+        'tutorials/getting_started/validate-your-data',
+        'tutorials/getting_started/customize-your-deployment'
       ]
     },
     {
@@ -45,38 +45,38 @@ module.exports = {
               type: 'category',
               label: 'Configuring Data Contexts',
               items: [
-                'guides/setup/configuring-data-contexts/how-to-create-a-new-data-context-with-the-cli',
-                'guides/setup/configuring-data-contexts/how-to-configure-datacontext-components-using-test_yaml_config',
-                'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables',
-                'guides/setup/configuring-data-contexts/how-to-configure-credentials-using-a-secrets-store',
-                'guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file'
+                'guides/setup/configuring_data_contexts/how-to-create-a-new-data-context-with-the-cli',
+                'guides/setup/configuring_data_contexts/how-to-configure-datacontext-components-using-test_yaml_config',
+                'guides/setup/configuring_data_contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables',
+                'guides/setup/configuring_data_contexts/how-to-configure-credentials-using-a-secrets-store',
+                'guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file'
               ]
             },
             {
               type: 'category',
               label: 'Configuring metadata Stores',
               items: [
-                'guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-in-amazon-s3',
-                'guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-in-azure-blob-storage',
-                'guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-in-gcs',
-                'guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-on-a-filesystem',
-                'guides/setup/configuring-metadata-stores/how-to-configure-an-expectation-store-to-postgresql',
-                'guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-in-amazon-s3',
-                'guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-in-azure-blob-storage',
-                'guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-in-gcs',
-                'guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-on-a-filesystem',
-                'guides/setup/configuring-metadata-stores/how-to-configure-a-validation-result-store-to-postgresql',
-                'guides/setup/configuring-metadata-stores/how-to-configure-a-metricsstore'
+                'guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-in-amazon-s3',
+                'guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-in-azure-blob-storage',
+                'guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-in-gcs',
+                'guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-on-a-filesystem',
+                'guides/setup/configuring_metadata_stores/how-to-configure-an-expectation-store-to-postgresql',
+                'guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-amazon-s3',
+                'guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-azure-blob-storage',
+                'guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-gcs',
+                'guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-on-a-filesystem',
+                'guides/setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-to-postgresql',
+                'guides/setup/configuring_metadata_stores/how-to-configure-a-metricsstore'
               ]
             },
             {
               type: 'category',
               label: 'Configuring Data Docs',
               items: [
-                'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-a-filesystem',
-                'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-azure-blob-storage',
-                'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-gcs',
-                'guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-amazon-s3'
+                'guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-a-filesystem',
+                'guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-azure-blob-storage',
+                'guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-gcs',
+                'guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-amazon-s3'
               ]
             }
           ]
