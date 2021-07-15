@@ -8,5 +8,5 @@ We recommend that you create new Data Contexts by using the a ``greate_expectati
 great_expectations init
 ```
 
-Please see the [Getting Started](../../../tutorials/getting-started/initialize-a-data-context.md) section for a more detailed tutorial on Data Contexts and getting a new project up and running.
+Please see the [Getting Started](../../../tutorials/getting_started/initialize-a-data-context.md) section for a more detailed tutorial on Data Contexts and getting a new project up and running.
 
