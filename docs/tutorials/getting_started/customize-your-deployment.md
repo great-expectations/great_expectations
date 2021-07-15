@@ -83,10 +83,10 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 ## Options for hosting Data Docs
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
 
-* [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-a-filesystem)
-* [How to host and share Data Docs on Azure Blob Storage](/docs/guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-azure-blob-storage)
-* [How to host and share Data Docs on GCS](/docs/guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-gcs)
-* [How to host and share Data Docs on Amazon S3](/docs/guides/setup/configuring-data-docs/how-to-host-and-share-data-docs-on-amazon-s3)
+* [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-a-filesystem)
+* [How to host and share Data Docs on Azure Blob Storage](/docs/guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-azure-blob-storage)
+* [How to host and share Data Docs on GCS](/docs/guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-gcs)
+* [How to host and share Data Docs on Amazon S3](/docs/guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-amazon-s3)
 
 ## Additional Checkpoints and Actions
 Most teams will want to configure various Checkpoints and Validation Actions as part of their deployment. There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.

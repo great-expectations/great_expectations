@@ -10,7 +10,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 - Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create-your-first-expectations.md).
 - Configured an Azure [storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
-- Create the Azure Blob container. If you also wish to [host and share data docs on Azure blob storage](../configuring-data-docs/how-to-host-and-share-data-docs-on-azure-blob-storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
+- Create the Azure Blob container. If you also wish to [host and share data docs on Azure blob storage](../configuring_data_docs/how-to-host-and-share-data-docs-on-azure-blob-storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
 - Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
 </Prerequisites>
@@ -62,7 +62,7 @@ Steps
     ```
 
     :::note
-    If the container is called ``$web`` (for [hosting and sharing data docs on azure blob storage](../configuring-data-docs/how-to-host-and-share-data-docs-on-azure-blob-storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
+    If the container is called ``$web`` (for [hosting and sharing data docs on azure blob storage](../configuring_data_docs/how-to-host-and-share-data-docs-on-azure-blob-storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
     :::
 
 

@@ -61,7 +61,7 @@ Steps
     ```
 
 :::warning
-If you are also storing [Expectations in GCS](../configuring_metadata_stores/how-to-configure-an-expectation-store-in-gcs.md) or [DataDocs in GCS](../configuring-data-docs/how-to-host-and-share-data-docs-on-gcs.md), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Expectations in GCS](../configuring_metadata_stores/how-to-configure-an-expectation-store-in-gcs.md) or [DataDocs in GCS](../configuring_data_docs/how-to-host-and-share-data-docs-on-gcs.md), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 
