@@ -16,7 +16,7 @@ Changelog
 * [DOCS] Port "How to create and edit Expectations with a Profiler" from RTD to Docussaurus. (#3048)
 * [DOCS] Port RTD adding validations data or suites to checkpoint (#3030)
 * [DOCS] Porting "How to create and edit Expectations with instant feedback from a sample Batch of data" from RTD to Docusaurus. (#3046)
-* [DOCS] GDOC-172/Add missing pages (#3007) peter@superconductive.com
+* [DOCS] GDOC-172/Add missing pages (#3007)
 * [DOCS] Port over "How to configure DataContext components using test_yaml_config" from RTD to Docusaurus
 * [DOCS] Port over "How to configure a Validation Result store to Postgres" from RTD to Docusaurus
 * [DOCS] Port over "How to configure an Expectation Store in S3" from RTD to Docusaurus
