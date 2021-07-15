@@ -5,7 +5,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 
 <Prerequisites>
 
-    - Please see the [Getting Started](../../../tutorials/getting-started/initialize-a-data-context.md) section for a more detailed tutorial on Data Contexts and getting a new project up and running.
+- Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md)
 
 </Prerequisites>
 
