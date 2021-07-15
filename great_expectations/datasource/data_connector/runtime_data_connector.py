@@ -211,7 +211,8 @@ class RuntimeDataConnector(DataConnector):
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
-        return {}
+        data_asset_name: str = batch_definition.data_asset_name
+        return {"data_asset_name": data_asset_name}
 
     # This method is currently called called only in tests.
     # noinspection PyMethodOverriding
