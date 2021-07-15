@@ -194,11 +194,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
                 Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
             Notes:
-                These fields in the result object are customized for this expectation:
-                ::
-                    {
-                        "observed_value": (float) The true standard deviation for the column
-                    }
                 * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
                 * If min_value is None, then max_value is treated as an upper bound
                 * If max_value is None, then min_value is treated as a lower bound
