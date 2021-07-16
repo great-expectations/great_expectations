@@ -67,7 +67,7 @@ In a notebook,
    )
    ```
 
-   The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data_context#evaluation_parameter_stores) or [Metrics Store](../../../reference/metrics) (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how-to-configure-a-metricsstore)).
+   The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data_context#evaluation_parameter_stores) or [Metrics Store](../../../reference/metrics) (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)).
 
    This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
 
