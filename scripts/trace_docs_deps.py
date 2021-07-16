@@ -33,22 +33,17 @@ def find_docusaurus_refs(dir: str) -> List[str]:
     for doc in glob.glob(f"{dir}/**/*.md", recursive=True):
         for line in open(doc):
             if re.search(pattern, line):
-                path: str = _get_relative_path(line, doc)
+                file: str = _parse_file_from_docusaurus_link(line)
+                path: str = os.path.join(os.path.dirname(doc), file)
                 linked_files.add(path)
 
     return [file for file in linked_files]
 
 
-def _get_relative_path(line: str, doc: str) -> str:
+def _parse_file_from_docusaurus_link(line: str) -> str:
     pattern: str = "=(.+?)#"  # Parse just the path from the Docusaurus link
     search: re.Match[str] = re.search(pattern, line)
-    path: str = search.group(1)
-
-    # Ensure that paths are relative to pwd
-    depth: int = doc.count("/")
-    parts: List[str] = path.split("/")
-
-    return "/".join(part for part in parts[depth:])
+    return search.group(1)
 
 
 def get_local_imports(files: List[str]) -> List[str]:
