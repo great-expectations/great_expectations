@@ -63,7 +63,7 @@ Or like this:
 **Example:**
 
 ```yaml
-# great-expectations/great_expectations.yml
+# great_expectations/great_expectations.yml
 
 datasources:
   dev_postgres_db:
@@ -143,7 +143,7 @@ Or like this:
 **Example:**
 
 ```yaml
-# great-expectations/great_expectations.yml
+# great_expectations/great_expectations.yml
 
 datasources:
   dev_postgres_db:
@@ -225,7 +225,7 @@ Or like this:
 **Example:**
 
 ```yaml
-# great-expectations/great_expectations.yml
+# great_expectations/great_expectations.yml
 
 datasources:
   dev_postgres_db:
