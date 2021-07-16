@@ -17,7 +17,7 @@ Alternatively, for small changes that don’t need to be tested locally (e.g. do
 
 #### 3. Identify the type of contribution that you want to make
 
-* [Issues in GitHub](https://github.com/great_expectations/great_expectations/issues) are a great place to start. Check out the help wanted and good first issue labels. Comment to let everyone know you’re working on it.
+* [Issues in GitHub](https://github.com/great-expectations/great_expectations/issues) are a great place to start. Check out the help wanted and good first issue labels. Comment to let everyone know you’re working on it.
 
 * If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you’re working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
 
@@ -26,4 +26,4 @@ Alternatively, for small changes that don’t need to be tested locally (e.g. do
 #### 4. Start developing
 * Make sure to reference the [Style Guide](/docs/contributing/contributing_style) and instructions on [Testing](/docs/contributing/contributing_test) when developing your code. When your changes are ready, run through our [Contribution checklist](/docs/contributing/contributing_checklist) for pull requests.
 
-Note that if it’s your first contribution, you will need to sign a there is a standard [Contributor license agreement](https://docs.greatexpectations.io/en/0.13.8/contributing/miscellaneous.html#contributing_cla)  (CLA).
+Note that if it’s your first contribution, you will need to sign a there is a standard [Contributor license agreement](https://docs.greatexpectations.io/en/0.13.8/contributing/miscellaneous.html#contributing-cla)  (CLA).
