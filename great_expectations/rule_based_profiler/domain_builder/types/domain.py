@@ -19,6 +19,7 @@ class SemanticDomainTypes(Enum):
     BINARY = "binary"
     CURRENCY = "currency"
     VALUE_SET = "value_set"
+    IDENTIFIER = "identifier"
     MISCELLANEOUS = "miscellaneous"
     UNKNOWN = "unknown"
 
