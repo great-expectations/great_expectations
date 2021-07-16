@@ -15,7 +15,7 @@ feature is **experimental**. Please expect changes to API as additional backends
 
 For Pandas, the `row_condition` argument should be a boolean expression string, which can be passed
 to `pandas.DataFrame.query()` before Expectation Validation (see
-the [Pandas docs](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html).
+the [Pandas docs](https://pandas.pydata.org/pandas_docs/stable/reference/api/pandas.DataFrame.query.html).
 
 Additionally, the `condition_parser` argument must be provided, which defines the syntax of conditions. Since the
 feature is **experimental** and only available for Pandas this argument must be set to *"pandas"* by default, thus,

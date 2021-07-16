@@ -19,9 +19,9 @@ sc.install_pypi_package("great_expectations")
 ```
 
 ### 2. Configure a Data Context in code
-Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file)
+Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
 
-[Here is Python code](/docs/guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file) that instantiates and configures a Data Context in code for an EMR Spark cluster. Copy this snippet into a cell in your EMR Spark notebook or use the other examples to customize your configuration. Execute the snippet to instantiate a Data Context in memory.
+[Here is Python code](/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file) that instantiates and configures a Data Context in code for an EMR Spark cluster. Copy this snippet into a cell in your EMR Spark notebook or use the other examples to customize your configuration. Execute the snippet to instantiate a Data Context in memory.
 
 Then copy the following code snippet into a cell in your EMR Spark notebook, run it and verify that no error is displayed:
 ```console

@@ -4,7 +4,7 @@ title: Validate your data using a Checkpoint
 
 [Validation](/docs/reference/validation) is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
-In normal usage, the best way to validate data is with a [Checkpoint](/docs/reference/checkpoints-and-actions). Checkpoints bundle [Batches](/docs/reference/datasources#Batches) of data with corresponding [Expectation Suites](/docs/reference/expectations/expectations) for validation.
+In normal usage, the best way to validate data is with a [Checkpoint](/docs/reference/checkpoints_and_actions). Checkpoints bundle [Batches](/docs/reference/datasources#Batches) of data with corresponding [Expectation Suites](/docs/reference/expectations/expectations) for validation.
 
 Let’s set up our first Checkpoint! **Go back to your terminal** and shut down the Jupyter notebook, if you haven’t yet. Then run the following command:
 
@@ -70,4 +70,4 @@ In this tutorial, we have covered the following basic capabilities of Great Expe
 As a final, **optional step**, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, validation results, and Data Docs. And if you want to stop here, feel free to join our [Slack community](https://greatexpectations.io/slack) to say hi to fellow Great Expectations users in the **#beginners** channel!
 
 Also, if you would like to view the full script used in this Tutorial, see it on GitHub:
-  - [getting_started.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/tutorials/getting-started/getting_started.py)
+  - [getting_started.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/tutorials/getting_started/getting_started.py)

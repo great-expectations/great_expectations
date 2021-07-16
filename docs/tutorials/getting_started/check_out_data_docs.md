@@ -2,7 +2,7 @@
 title: How to use Data Docs
 ---
 
-[Data Docs](/docs/reference/data-docs) translate [Expectations](/docs/reference/expectations/expectations), [Validation Results](/docs/reference/validation), and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
+[Data Docs](/docs/reference/data_docs) translate [Expectations](/docs/reference/expectations/expectations), [Validation Results](/docs/reference/validation), and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
 
 In the previous steps, when you executed the last cell in the Jupyter notebook, Great Expectations used the Expectation Suite you generated to validate the January data batch. It then compiled those validation results to HTML, and opened a browser window with a Data Docs validation results page:
 
@@ -40,7 +40,7 @@ This Profiler connected to your data (using the Datasource you configured in the
 
 These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you’re not starting from a blank slate.
 
-Later, you should also take a look at other workflows for Creating Custom Expectations. [Creating Custom Expectations](/docs/guides/expectations/creating_custom_expectations/how-to-create-custom-expectations) is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
+Later, you should also take a look at other workflows for Creating Custom Expectations. [Creating Custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations) is a very active area of work in the Great Expectations community. Stay tuned for improvements over time.
 
 ### Expectations under the hood
 

@@ -4,9 +4,9 @@ title: How to configure credentials using a secrets store
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
 Choose which Secret Manager you are using:
- 1. [AWS Secrets Manager](#1-aws-secrets-manager)
- 2. [GCP Secret Manager](#2-gcp-secret-manager)
- 3. [Azure Key Vault](#3-azure-key-vault)
+ 1. [AWS Secrets Manager](#1_aws_secrets_manager)
+ 2. [GCP Secret Manager](#2_gcp_secret_manager)
+ 3. [Azure Key Vault](#3_azure_key_vault)
 
 ---
 
@@ -105,7 +105,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - [Knowledge on how to populate credentials](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md)
 - Configured a secret store and secrets in the cloud:
-    - [GCP](https://cloud.google.com/secret-manager/docs/quickstart)
+    - [GCP](https://cloud.google.com/secret_manager/docs/quickstart)
 
 </Prerequisites>
 
@@ -185,7 +185,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - [Knowledge on how to populate credentials](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md)
 - Configured a secret store and secrets in the cloud:
-    - [Azure](https://docs.microsoft.com/azure/key-vault/secrets/quick-create-portal)
+    - [Azure](https://docs.microsoft.com/azure/key_vault/secrets/quick_create_portal)
 
 </Prerequisites>
 

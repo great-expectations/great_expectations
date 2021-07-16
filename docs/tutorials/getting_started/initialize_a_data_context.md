@@ -10,7 +10,7 @@ title: Initialize a Data Context
 
 ### About the example data
 
-The [NYC taxi data](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page) we’re going to use in this tutorial is an open data set which is updated every month. Each record in the data corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
+The [NYC taxi data](https://www1.nyc.gov/site/tlc/about/tlc_trip_record_data.page) we’re going to use in this tutorial is an open data set which is updated every month. Each record in the data corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
 
 In this tutorial, we provide two CSV files, each with a 10,000 row sample of the Yellow Taxi Trip Records set:
 
@@ -61,9 +61,9 @@ You should see this:
 ```console
 Using v3 (Batch Request) API
 
-  ___              _     ___                  _        _   _
- / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___
-| (_ | '_/ -_) _` |  _| | _|\ \ / '_ \/ -_) _|  _/ _` |  _| / _ \ ' \(_-<
+  ___ | '_/ __             _ | '_/ __    ___ | '_/ __                 _ | '_/ __       _ | '_/ __  _
+ / __|_ | '_/ ___ | '_/ _____ | '_/ ____ | '_/ ___| |_ | '_/ __ | __|_ | '_/ _____ | '_/ ____ | '_/ __ ___ | '_/ ____| |_ | '_/ ____ | '_/ ___| |_(_)___ | '_/ ___ | '_/ ___ | '_/ __ ___
+| (_ | '_/ __|_ | '_/ __) _` |  _| | _|\ \ / '_ | '_/ __\/ -_) _|  _/ _` |  _| / _ | '_/ __\ ' \(_-<
  \___|_| \___\__,_|\__| |___/_\_\ .__/\___\__|\__\__,_|\__|_\___/_||_/__/
                                 |_|
              ~ Always know what to expect from your data ~

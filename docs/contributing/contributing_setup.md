@@ -5,17 +5,17 @@ title: Setting up your Dev Environment
 ### Prerequisites
 In order to contribute to Great Expectations, you will need the following:
 
-* A GitHub account—this is sufficient if you [only want to contribute to the documentation](/docs/contributing/contributing-github).
+* A GitHub account—this is sufficient if you [only want to contribute to the documentation](/docs/contributing/contributing_github).
 
-* If you want to contribute code, you will also need a working version of Git on your computer. Please refer to the [Git setup instructions](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) for your environment.
+* If you want to contribute code, you will also need a working version of Git on your computer. Please refer to the [Git setup instructions](https://git_scm.com/book/en/v2/Getting_Started_Installing_Git) for your environment.
 
-* We also recommend going through the [SSH key setup process on GitHub](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) for easier authentication.
+* We also recommend going through the [SSH key setup process on GitHub](https://help.github.com/en/github/authenticating_to_github/generating_a_new_ssh_key_and_adding_it_to_the_ssh_agent) for easier authentication.
 
 ### Fork and clone the repository
 
 #### 1. Fork the Great Expectations repo
 
-* Go to the [Great Expectations repo on GitHub](https://github.com/great-expectations/great_expectations).
+* Go to the [Great Expectations repo on GitHub](https://github.com/great_expectations/great_expectations).
 
 * Click the `Fork` button in the top right. This will make a copy of the repo in your own GitHub account.
 
@@ -29,7 +29,7 @@ In order to contribute to Great Expectations, you will need the following:
 
 * This will clone the `develop` branch of the great_expectations repo. Please use `develop` (not `main`!) as the starting point for your work.
 
-* Atlassian has a [nice tutorial for developing on a fork.](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams)
+* Atlassian has a [nice tutorial for developing on a fork.](https://www.atlassian.com/git/tutorials/git_forks_and_upstreams)
 
 #### 3. Add the upstream remote
 
@@ -67,9 +67,9 @@ This is not required, but highly recommended.
 
 	* Note that you can also substitute requirements-dev-test.txt to only install requirements required for testing all backends, and requirements-dev-spark.txt or requirements-dev-sqlalchemy.txt if you would like to add support for spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
 
-	* [Installing Microsoft ODBC driver for MacOS](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos)
+	* [Installing Microsoft ODBC driver for MacOS](https://docs.microsoft.com/en_us/sql/connect/odbc/linux_mac/install_microsoft_odbc_driver_sql_server_macos)
 
-	* [Installing Microsoft ODBC driver for Linux](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server)
+	* [Installing Microsoft ODBC driver for Linux](https://docs.microsoft.com/en_us/sql/connect/odbc/linux_mac/installing_the_microsoft_odbc_driver_for_sql_server)
 
 #### 7. Install great_expectations from your cloned repo
 
@@ -152,7 +152,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 #### Run tests to confirm that everything is working
 
-* You can run all tests by running `pytest` in the great_expectations directory root. Please see [Testing](docs/contributing/contributing-test) for testing options and details.
+* You can run all tests by running `pytest` in the great_expectations directory root. Please see [Testing](docs/contributing/contributing_test) for testing options and details.
 
 #### Start coding!
 At this point, you have everything you need to start coding!

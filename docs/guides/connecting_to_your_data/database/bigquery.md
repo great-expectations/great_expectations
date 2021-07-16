@@ -15,7 +15,7 @@ This will allow you to validate and explore your data.
 <Prerequisites>
 
 - Have access to data in a BigQuery database
-- Followed the [Google Cloud Library guide](https://googleapis.dev/python/google-api-core/latest/auth.html) for authentication
+- Followed the [Google Cloud Library guide](https://googleapis.dev/python/google_api_core/latest/auth.html) for authentication
 
 </Prerequisites>
 
@@ -162,8 +162,8 @@ Currently BigQuery does not allow for the creation of temporary tables as the re
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [bigquery_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py)
-- [bigquery_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py)
+- [bigquery_yaml_example.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py)
+- [bigquery_python_example.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py)
 
 ## Next Steps
 

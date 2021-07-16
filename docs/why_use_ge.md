@@ -13,7 +13,7 @@ Validate data they transform as a step in their data pipeline in order to ensure
 Prevent data quality issues from slipping into data products.
 Streamline knowledge capture from subject-matter experts and make implicit knowledge explicit.
 Develop rich, shared documentation of their data.
-You can read more about how data teams use Great Expectations in our [case studies](https://greatexpectations.io/case-studies/).
+You can read more about how data teams use Great Expectations in our [case studies](https://greatexpectations.io/case_studies/).
 
 ### Key Features
 #### Expectations

@@ -4,7 +4,7 @@ title: Data Discovery
 
 
 Profiling is a way of Rendering Validation Results to produce a summary of observed characteristics. When Validation
-Results are rendered as Profiling data, they create a new section in [Data Docs](/docs/reference/data-docs). By computing the
+Results are rendered as Profiling data, they create a new section in [Data Docs](/docs/reference/data_docs). By computing the
 **observed** properties of data, Profiling helps to understand and reason about the data's **expected** properties.
 
 To produce a useful data overview, Great Expectations uses a [profiler](/docs/reference/profilers) to build a special Expectation

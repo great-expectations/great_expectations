@@ -14,7 +14,7 @@ This how-to guide assumes you have already:
 
 * [Set up a working deployment of Great Expectations](/docs/tutorials/getting_started/intro)
 * [Configured a Datasource using the BatchRequest (v3) API](/docs/tutorials/getting_started/connect-to-data)
-* [Created an Expectation Suite](/docs/tutorials/getting_started/create-your-first-expectations)
+* [Created an Expectation Suite](/docs/tutorials/getting_started/create_your_first_expectations)
 
 :::
 
@@ -52,7 +52,7 @@ expectation_suite_name: my_suite
 """
 ````
 
-This is the minimum required to configure a Checkpoint that will run the Expectation Suite `my_suite` against the data asset `MyDataAsset`. See [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how-to-configure-a-new-checkpoint-using-test_yaml_config) for advanced configuration options.
+This is the minimum required to configure a Checkpoint that will run the Expectation Suite `my_suite` against the data asset `MyDataAsset`. See [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) for advanced configuration options.
 
 ##### 2b. Test your config using `context.test_yaml_config`.
 
@@ -97,8 +97,8 @@ Before running a Checkpoint, make sure that all classes and Expectation Suites r
 
 When `run_checkpoint` returns, the `checkpoint_run_result` can then be checked for the value of the `success` field (all validations passed) and other information associated with running the specified actions.
 
-For more advanced configurations of Checkpoints, please see [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how-to-configure-a-new-checkpoint-using-test_yaml_config).
+For more advanced configurations of Checkpoints, please see [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config).
 
 ### Additional Resources
 
-* [Check out the detailed tutorial on Checkpoints](/docs/guides/validation/checkpoints/how-to-create-a-new-checkpoint)
+* [Check out the detailed tutorial on Checkpoints](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint)

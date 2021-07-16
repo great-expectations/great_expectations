@@ -14,7 +14,7 @@ This guide shows how to create a new how-to guide in Great Expectations. By writ
 
 - If you’re integrating with another system, assume that the user is familiar with that system. ie. If you’re writing the "How to configure a Snowflake Datasource," don’t spend any words explaining Snowflake or any of its core concepts.
 
-- If there are important, non-obvious principles for how Great Expectations relates to other systems, you may include them in the guide. If they are short (1-2 sentences, max), they can go in the Steps section. Otherwise, please put them in Additional Notes.
+- If there are important, non-obvious principles for how Great Expectations relates to other systems, you may include them in the guide. If they are short (1_2 sentences, max), they can go in the Steps section. Otherwise, please put them in Additional Notes.
 
 - Remember, the goal is to help users successfully replicate specific steps as simply as possible. Surprisingly often, it turns out to best to not include explanation at all, since it can distract from the main purpose of the guide. If you feel you must include it, shorter is better.
 
@@ -162,7 +162,7 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 
 Broadly speaking, there are two kinds of How-to Guides: code-heavy and process-heavy. All guides are about following a specific sequence of steps. In code-heavy guides, most or all of the steps are expressed in technical syntax: code snippets, JSON or YAML objects, CLI commands, etc. In process-heavy guides, many of the steps are things that must be done manually.
 
-Most guides are code-heavy. When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication. (This guide happens to be process-heavy, because it’s about writing.)
+Most guides are code-heavy. When writing a guide that could go either way, please prefer code-heavy, since they tend to make for better replication. (This guide happens to be process_heavy, because it’s about writing.)
 
 #### Indentation, bolding, and code blocks For code-heavy guides
 

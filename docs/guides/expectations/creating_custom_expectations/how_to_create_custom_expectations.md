@@ -225,7 +225,7 @@ from custom_module import ExpectColumnMaxToBeBetweenCustom
 validator.expect_column_max_to_be_between_custom('col', min_value=0, max_value=5)
 ````
 
-#### 8. Optional: Implement [Custom Data Docs Renderers](/docs/guides/expectations/advanced/how-to-create-renderers-for-custom-expectations)
+#### 8. Optional: Implement [Custom Data Docs Renderers](/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations)
 
 We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference the core concepts documentation.
 

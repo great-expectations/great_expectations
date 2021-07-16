@@ -6,7 +6,7 @@ title: Validation
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
-We recommend using a [Data Context](/docs/reference/data-context) to manage Expectation Suites and coordinate validation across runs.
+We recommend using a [Data Context](/docs/reference/data_context) to manage Expectation Suites and coordinate validation across runs.
 
 ## Validation Results
 

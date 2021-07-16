@@ -8,8 +8,8 @@ To watch the video complement to this guide that shows an Expectation being impl
 
 :::note Prerequisites:
 This how-to guide assumes you have already:
-* [Set up your dev environment](/docs/contributing/contributing-setup) to contribute
-* [Signed the Contributor License Agreement](/docs/contributing/contributing-checklist) (CLA)
+* [Set up your dev environment](/docs/contributing/contributing_setup) to contribute
+* [Signed the Contributor License Agreement](/docs/contributing/contributing_checklist) (CLA)
 :::
 
 ### Steps
@@ -64,7 +64,7 @@ Recently we introduced a fast-track release process for community contributed Ex
 	* Class declaration (search for `class Expect`)
 	* A call to `run_diagnostic` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
 	
-	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/contributing-style)
+	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/contributing_style)
 
 #### 4. Run diagnostics on your Expectation.
 
@@ -295,8 +295,8 @@ The class implements methods decorated with `@column_function_partial` to comput
 
 Consult the following files for the details of this pattern:
 
-* [great_expectations/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py)
-* [great_expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py)
+* [great_expectations/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py](https://github.com/great_expectations/great_expectations/blob/develop/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py)
+* [great_expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py](https://github.com/great_expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py)
 :::
 
 
@@ -390,8 +390,8 @@ Renderers are methods in the class that implements your Expectation that can dis
 
 The template file that you used to start your development has some renderer implementations commented out. You can use them as a starting point.
 
-For more comprehensive documentation consult this [how-to guide](/docs/guides/expectations/advanced/how-to-create-renderers-for-custom-expectations).
+For more comprehensive documentation consult this [how-to guide](/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations).
 
 #### 9. Submit your contribution
 
-Follow [Contribution Checklist](/docs/contributing/contributing-checklist)  to submit your contribution.
+Follow [Contribution Checklist](/docs/contributing/contributing_checklist)  to submit your contribution.

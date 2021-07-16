@@ -9,7 +9,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- Have permission to create and configured an Azure [storage account](https://docs.microsoft.com/en-us/azure/storage)
+- Have permission to create and configured an Azure [storage account](https://docs.microsoft.com/en_us/azure/storage)
 
 </Prerequisites>
     
@@ -18,8 +18,8 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 
 
 1. **Create an Azure Blob Storage static website.**
-    - Create a [storage account](https://docs.microsoft.com/en-us/azure/storage).
-    - In settings select [Static website](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website-host) to display the configuration page for static websites.
+    - Create a [storage account](https://docs.microsoft.com/en_us/azure/storage).
+    - In settings select [Static website](https://docs.microsoft.com/en_us/azure/storage/blobs/storage-blob-static-website-host) to display the configuration page for static websites.
     - Select **Enabled** to enable static website hosting for the storage account.
     - Write "index.html" in Index document.
   
@@ -29,7 +29,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 
 2. **Configure the** ``config_variables.yml`` **file with your azure storage credentials**
 
-  Get the [Connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal) of the storage account you have just created.
+  Get the [Connection string](https://docs.microsoft.com/en_us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal) of the storage account you have just created.
 
   We recommend that azure storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following lines add azure storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
   
@@ -100,4 +100,4 @@ Data Docs will be served using an Azure Blob Storage static website with restric
     - You can add access to Virtual Network
     - You can add IP ranges to the firewall 
   
-  More details are available [here](https://docs.microsoft.com/en-us/azure/storage/common/storage-network-security?tabs=azure-portal).
+  More details are available [here](https://docs.microsoft.com/en_us/azure/storage/common/storage-network-security?tabs=azure-portal).

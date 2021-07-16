@@ -45,7 +45,7 @@ GE core team members use this checklist to ship releases.
 
 10. Wait for all the builds to complete. The builds should include several test jobs and a deploy job, which handles the actual publishing of code to pypi. You can watch the progress of these builds on Azure.
 
-11. Check [PyPI](https://pypi.org/project/great-expectations/#history) for the new release
+11. Check [PyPI](https://pypi.org/project/great_expectations/#history) for the new release
 
 
 12. Create an annotated git tag:
@@ -58,7 +58,7 @@ GE core team members use this checklist to ship releases.
 
 * On develop, add a new “Develop” section header to changelog.rst, and push the updated file with message “Update changelog for develop”
 
-13. [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
+13. [Create the release on GitHub](https://github.com/great_expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
 
 * The deploy step will automatically create a draft for the release.
 
@@ -68,7 +68,7 @@ GE core team members use this checklist to ship releases.
 
 15. Socialize the release on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
 
-16. Review and merge the automatically-generated PR for [conda-forge/great-expectations-feedstock](https://github.com/conda-forge/great-expectations-feedstock/pulls), updating requirements as necessary and verifying the build status.
+16. Review and merge the automatically-generated PR for [conda-forge/great-expectations-feedstock](https://github.com/conda_forge/great_expectations_feedstock/pulls), updating requirements as necessary and verifying the build status.
 
 * To list requirements changed since a previous version of GE, you can run `git diff <<old_tag_e.g._0.12.6>>..<<new_tag_e.g._0.12.7>> -- requirements.txt`. If there are differences, update the requirements section of `recipe/meta.yaml`. This is an important step as this is not done automatically when the PR is generated.
 
@@ -78,7 +78,7 @@ GE core team members use this checklist to ship releases.
 
 * If you need to re-run a failing build and don’t have appropriate permissions or you don’t have permissions to merge please refer to the Account Permissions Overview on the superconductive internal [wiki[(https://superconductive.atlassian.net/wiki/spaces/SUP/pages) for who to ask. Other conda-forge community partners are extremely responsive and may be able to help resolve issues quickly.
 
-17. Check for open issues in the [GE conda-forge repository](https://github.com/conda-forge/great-expectations-feedstock/issues). If there are open issues that do not have a corresponding issue in the main GE repo, please create an issue in the GE repo with a link to the corresponding conda issue (e.g. issue [#2021](https://github.com/great-expectations/great_expectations/issues/2021) ). This allows us to internally triage and track the issue.
+17. Check for open issues in the [GE conda-forge repository](https://github.com/conda_forge/great_expectations_feedstock/issues). If there are open issues that do not have a corresponding issue in the main GE repo, please create an issue in the GE repo with a link to the corresponding conda issue (e.g. issue [#2021](https://github.com/great-expectations/great_expectations/issues/2021) ). This allows us to internally triage and track the issue.
 
 18 Celebrate! You have successfully released a new version of Great Expectations!!
 

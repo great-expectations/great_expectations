@@ -19,7 +19,7 @@ overall description of a dataset. Expectation Suites should have names correspon
 like “NPI” for National Provider Identifier data or “company.users” for a users table.
 
 The Data Context also provides other services, such as storing and substituting evaluation parameters during validation.
-See [Evaluation Parameter stores](#evaluation-parameter-stores) for more information.
+See [Evaluation Parameter stores](#evaluation_parameter_stores) for more information.
 
 ## Interactively testing configurations
 

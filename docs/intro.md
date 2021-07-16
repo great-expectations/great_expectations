@@ -12,5 +12,5 @@ Software developers have long known that automated testing is essential for mana
 ![overview](../docs/guides/images/ge_overview.png)
 
 :::tip
-[See our GitHub community](https://github.com/great-expectations/great_expectations)
+[See our GitHub community](https://github.com/great_expectations/great_expectations)
 :::

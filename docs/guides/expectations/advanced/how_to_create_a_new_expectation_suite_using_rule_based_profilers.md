@@ -8,7 +8,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 <Prerequisites>
 
 - Have a basic understanding of [Metrics in Great Expectations](https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html)
-- Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys)
+- Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation_concepts_domain_and_success_keys)
 - Have read the sections in Core Concepts on [Profilers](../../../reference/profilers) and [Rule-Based Profilers](../../../reference/profilers#rule-based-profilers)
 
 </Prerequisites>
@@ -21,7 +21,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 - Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations --v3-api init`
 
 ### 2. Download the data
-- Download [this directory](https://github.com/gre`at-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_trip_data_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
+- Download [this directory](https://github.com/gre`at_expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_trip_data_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
 - Move the unzipped directory of `csv` files into the `data` directory that you created in Step 1
 
 ### 3. Setting up your Datasource
@@ -77,7 +77,7 @@ A Rule can have multiple ParameterBuilders if needed, but in our case, we'll onl
 Finally, you would use an ExpectationConfigurationBuilder to actually build your `expect_table_row_count_to_be_between` expectation, where the Domain is the Domain returned by your TableDomainBuilder (your entire table), and the `min_value` and `max_value` are Parameters returned by your NumericMetricRangeMultiBatchParameterBuilder.
 ```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L33-L41
 ```
-You can see here that we use a special `$` syntax to reference `variables` and `parameters` that have been previously defined in our config. You can see a more thorough description of this syntax in the  docstring for [`ParameterContainer` here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/parameter_builder/parameter_container.py).
+You can see here that we use a special `$` syntax to reference `variables` and `parameters` that have been previously defined in our config. You can see a more thorough description of this syntax in the  docstring for [`ParameterContainer` here](https://github.com/great_expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/parameter_builder/parameter_container.py).
 
 - When we put it all together, here is what our config with our single `row_count_rule` looks like:
 ```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L10-L41
@@ -109,7 +109,7 @@ As before, we will first add the name of our rule, and then specify the DomainBu
 ```
 In this case, our DomainBuilder configuration is a bit more complex. First, we are using a SimpleSemanticTypeColumnDomainBuilder. This will take a table, and return a list of all columns that match the `semantic_type` specified - `numeric` in our case.
 
-Then, we need to specify a BatchRequest that returns exactly one Batch of data (this is our `data_connector_query` with `index` equal to `-1`). This tells us which Batch to use to get the columns from which we will select our numeric columns. Though we might hope that all our Batches of data have the same columns, in actuality, there might be differences between the Batches, and so we explicitly specify the Batch we want to use here.
+Then, we need to specify a BatchRequest that returns exactly one Batch of data (this is our `data_connector_query` with `index` equal to `_1`). This tells us which Batch to use to get the columns from which we will select our numeric columns. Though we might hope that all our Batches of data have the same columns, in actuality, there might be differences between the Batches, and so we explicitly specify the Batch we want to use here.
 
 After this, we specify our ParameterBuilders. This is very similar to the specification in our previous rule, except we will be specifying two NumericMetricRangeMultiBatchParameterBuilders to get a probable range for the `min_value` and `max_value` of each of our numeric columns. Thus one ParameterBuilder will take the `column.min` `metric_name`, and the other will take the `column.max` `metric_name`.
 ```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L54-L78
@@ -131,4 +131,4 @@ And if we re-instantiate our `Profiler` with our config which now has two rules,
 
 To view the full script used in this page, see it on GitHub:
 
-- [multi_batch_rule_based_profiler_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py)
+- [multi_batch_rule_based_profiler_example.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py)

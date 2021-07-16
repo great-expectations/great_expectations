@@ -28,7 +28,7 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 * **Experimental classes should log an experimental warning when initialized:** “Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future.”
 
-* **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx-doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
+* **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx_doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
 
 * **Lint your code.** Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. - Linting with `isort` MUST occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. So, **before running ``pre-commit install`` ensure you have activated a virtual environment that has all development requirements installed.**
 
@@ -63,7 +63,7 @@ pyupgrade --py3-plus
 
 #### The CLI
 
-The [CLI](docs/guides/miscellaneous/how-to-use-the-great-expectations-cli) has some conventions of its own.
+The [CLI](docs/guides/miscellaneous/how_to_use_the_great_expectations_cli) has some conventions of its own.
 
 * The CLI never writes to disk without asking first.
 
@@ -109,14 +109,14 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **For sections within “how to”-type guides, titles should be short, imperative sentences**. Avoid extra words. Good: “Configure data documentation”. Nope: “Configuring data documentation”. Avoid: “Configure documentation for your data”
 
-* **Please follow the Sphinx guide for sections to determine which of the many, confusing .rst underlining conventions to use**: [Sphinx guide for sections](http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections)
+* **Please follow the Sphinx guide for sections to determine which of the many, confusing .rst underlining conventions to use**: [Sphinx guide for sections](http://www.sphinx_doc.org/en/master/usage/restructuredtext/basics.html#sections)
 
 #### Core concepts and classes
 
 * **Core concepts are always capitalized, and always are linked on first reference within each page**. Pretend the docs are a fantasy novel, and core concepts are magic.
 
 	* Wrong: “You can create expectation suites as follows…”
-	* Better: “You can create [Expectation Suites](http://localhost:3000/docs/reference/glossary-of-expectations) as follows…”
+	* Better: “You can create [Expectation Suites](http://localhost:3000/docs/reference/glossary_of_expectations) as follows…”
 	* Avoid: “You can create suites of Expectations as follows…”
 
 * **Class names are written in upper camel case, and always linked on first reference.** 

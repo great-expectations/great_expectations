@@ -54,7 +54,7 @@ Steps
     ```
 
     - Set notify_on to one of, "all", "failure", or "success"
-    - Optionally set a priority (from P1 - P5, defaults to P3)
+    - Optionally set a priority (from P1 _ P5, defaults to P3)
     - Set region: eu if you are using the European Opsgenie endpoint
 
 4. That's it. Start running your expectations!

@@ -6,7 +6,7 @@ title: Credential storage and usage options
 
 ### 1. Adding a Connection String
 
-Credentials can be added to a Datasource using a connection string, which is equivalent to the URL that is used by SqlAlchemy to create an [`Engine`](https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls).
+Credentials can be added to a Datasource using a connection string, which is equivalent to the URL that is used by SqlAlchemy to create an [`Engine`](https://docs.sqlalchemy.org/en/14/core/engines.html#database_urls).
 If you are developing interactively in a Notebook, this is the quickest way to get your configuration up and running,
 but you run the risk of exposing your credentials.
 
@@ -48,7 +48,7 @@ my_postgres_db_yaml_creds:
 
 :::warning
   Add content from Existing Document
-  [Link to Existing Document](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html#how-to-guides-configuring-data-contexts-how-to-use-a-yaml-file-or-environment-variables-to-populate-credentials)
+  [Link to Existing Document](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html#how_to_guides_configuring_data_contexts_how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials)
 :::
 
 

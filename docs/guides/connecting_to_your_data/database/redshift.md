@@ -46,7 +46,7 @@ For this guide we will use a `connection_string` like this:
 postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>
 ```   
 
-**Note**: Depending on your Redshift cluster configuration, you may or may not need the `sslmode` parameter. For more details, please refer to Amazon's documentation for [configuring security options on Amazon Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/connecting-ssl-support.html).
+**Note**: Depending on your Redshift cluster configuration, you may or may not need the `sslmode` parameter. For more details, please refer to Amazon's documentation for [configuring security options on Amazon Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/connecting_ssl_support.html).
 
 ### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
 
@@ -157,8 +157,8 @@ Here is an example of loading data by specifying an existing table name.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [redshift_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py)
-- [redshift_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py)
+- [redshift_yaml_example.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py)
+- [redshift_python_example.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py)
 
 ## Next Steps
 
