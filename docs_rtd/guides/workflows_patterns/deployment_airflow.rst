@@ -71,7 +71,7 @@ The ``GreatExpectationsOperator`` supports multiple ways of invoking validation 
 
 By default, a ``GreatExpectationsOperator`` task will run validation and raise an ``AirflowException`` if any of the tests fails. To override this behavior and continue running even if tests fail, set the ``fail_task_on_validation_failure`` flag to ``False``.
 
-For more information about possible parameters and examples, see the `README in the repository <https://github.com/great-expectations/airflow-provider-great-expectations>`_, and the `example DAG in the provider package <https://github.com/great-expectations/airflow-provider-great-expectations/tree/main/great_expectations_provider/examples>`_
+For more information about possible parameters and examples, see the `README in the repository <https://github.com/great-expectations/airflow-provider-great-expectations>`_, and the `example DAG in the provider package <https://github.com/great-expectations/airflow-provider-great-expectations/tree/main/great_expectations_provider/example_dags>`_
 
 
 Running validation using a ``PythonOperator``
