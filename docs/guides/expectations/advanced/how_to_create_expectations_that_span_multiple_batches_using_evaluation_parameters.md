@@ -4,7 +4,7 @@ title: How to create Expectations that span multiple Batches using Evaluation Pa
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
-This guide will help you create [Expectations](../../../reference/expectations/expectations) that span multiple [Batches](../../../reference/dividing-data-assets-into-batches) of data using [Evaluation Parameters](../../../reference/evaluation-parameters) (see also [Evaluation Parameter stores](../../../reference/data_context#evaluation_parameter_stores)). This pattern is useful for things like verifying that row counts between tables stay consistent.
+This guide will help you create [Expectations](../../../reference/expectations/expectations) that span multiple [Batches](../../../reference/dividing_data_assets_into_batches) of data using [Evaluation Parameters](../../../reference/evaluation_parameters) (see also [Evaluation Parameter stores](../../../reference/data_context#evaluation_parameter_stores)). This pattern is useful for things like verifying that row counts between tables stay consistent.
 
 <Prerequisites>
 
