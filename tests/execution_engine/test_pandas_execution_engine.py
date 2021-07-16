@@ -118,23 +118,23 @@ def test_get_compute_domain_with_multicolumn_domain():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="multicolumn"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="multicolumn"
     )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Accessor kwargs have been modified"
 
     # Trying same test with enum form of table domain - should work the same way
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="identity"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="identity"
     )
     assert data.equals(
         expected_identity
     ), "Data does not match after getting compute domain"
     assert compute_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
