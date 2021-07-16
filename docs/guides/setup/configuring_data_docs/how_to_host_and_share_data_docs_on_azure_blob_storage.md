@@ -68,7 +68,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
   :::
   
   You also may configure Great Expectations to store your expectations and validations in this Azure Storage account.
-  You can follow the documentation from the guides for [expectations](../../setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md) and [validations](../../setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-azure-blob-storage.md) but unsure you set ``container: \$web`` inplace of other container name.
+  You can follow the documentation from the guides for [expectations](../../setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md) and [validations](../../setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.md) but unsure you set ``container: \$web`` inplace of other container name.
 
 
 4. **Build the Azure Blob Data Docs site.**

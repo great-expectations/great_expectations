@@ -12,7 +12,7 @@ This guide will help you Install Great Expectations on a Spark EMR cluster.
 
 ### 1. Install Great Expectations
 
-The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the [Great Expectations Command Line Interface (CLI)](/docs/guides/setup/configuring_data_contexts/how-to-create-a-new-data-context-with-the-cli)
+The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the [Great Expectations Command Line Interface (CLI)](/docs/guides/setup/configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli)
 
 ```console
 sc.install_pypi_package("great_expectations")

@@ -12,7 +12,7 @@ This guide will help you create [Expectations](../../../reference/expectations/e
 - Configured a [Datasource](../../../reference/datasources) (or several Datasources) with at least two **Data Assets** and understand the basics of **Batch Requests**.
 - Also created [Expectations Suites](../../../tutorials/getting_started/create_your_first_expectations.md) for those Data Assets.
 - Have a working [Evaluation Parameter store](../../../reference/data_context#evaluation_parameter_stores). (The default in-memory store from ``great_expectations init`` can work for this.)
-- Have a working [Validation Operator](../../../reference/checkpoints_and_actions) (see also [How to add a Validation Operator](../../../guides/validation/how-to-add-a-validation-operator)). (The default Validation Operator from ``great_expectations init`` can work for this.)
+- Have a working [Validation Operator](../../../reference/checkpoints_and_actions) (see also [How to add a Validation Operator](../../../guides/validation/how_to_add_a_validation_operator)). (The default Validation Operator from ``great_expectations init`` can work for this.)
 
 </Prerequisites>
 

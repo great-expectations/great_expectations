@@ -16,7 +16,7 @@ Steps
 1. The ``--interactive`` mode denotes the fact that you are interacting with your data.  In
     other words, you have access to a data source and can specify a Batch of data to be used to create Expectations
     against.  ``--manual`` mode
-    (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how-to-create-and-edit-expectations-based-on-domain-knowledge-without-inspecting-data-directly))
+    (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly))
     still allows you to create expectations (e.g., if you already know enough about your data, such as the various columns
     in a database table), but you will not be able to run validations, until you specify a Batch of data,
     which can be done at a later point; in fact, you can switch back and forth between the interactive and
@@ -48,7 +48,7 @@ Steps
    ```
 
 3. One of the easiest ways to get starting in the interactive mode is to take advantage of the `--profile` flag
-   (please see [How to create and edit Expectations with a Profiler](./how-to-create-and-edit-expectations-with-a-profiler.md)).
+   (please see [How to create and edit Expectations with a Profiler](./how_to_create_and_edit_expectations_with_a_profiler.md)).
 
    :::info
    When in the interactive mode, the initialization cell of your jupyter notebook will contain the ``batch_request``

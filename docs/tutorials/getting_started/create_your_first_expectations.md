@@ -5,7 +5,7 @@ title: Create your first Expectations
 
 [Expectations](/docs/reference/expectations/expectations) are the key concept in Great Expectations.
 
-Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with [dozens of built-in Expectations](/docs/reference/glossary_of_expectations), and it’s possible to [develop your own custom Expectations](/docs/guides/expectations/creating_custom_expectations/how-to-create-custom-expectations), too.
+Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with [dozens of built-in Expectations](/docs/reference/glossary_of_expectations), and it’s possible to [develop your own custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations), too.
 
 :::note Admonition from Mr. Dickens.
   “Take nothing on its looks; take everything on evidence. There’s no better rule.”

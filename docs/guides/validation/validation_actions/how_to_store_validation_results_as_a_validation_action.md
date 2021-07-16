@@ -21,4 +21,4 @@ If it would be useful to you, please comment with a +1 and feel free to add any 
 
 If you want to be a real hero, we'd welcome a pull request.
 
-Please see our [Contributing guide](../../../contributing/contributing) and [How to write a how-to-guide](../../miscellaneous/how-to-write-a-how-to-guide)  to get started.
+Please see our [Contributing guide](../../../contributing/contributing) and [How to write a how-to-guide](../../miscellaneous/how_to_write_a_how_to_guide)  to get started.
