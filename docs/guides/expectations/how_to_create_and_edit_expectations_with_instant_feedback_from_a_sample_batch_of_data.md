@@ -70,7 +70,7 @@ Steps
    great_expectations --v3-api suite new --interactive --batch-request my_saved_batch_request_file.json
    ```
 
-   Unless you specify the name of the Expectation Suite on the command line (using the ``__expectation_suite MY_SUITE`` syntax),
+   Unless you specify the name of the Expectation Suite on the command line (using the ``--expectation_suite MY_SUITE`` syntax),
    the command will ask you to name your new Expectation Suite and offer you a default name for you to simply accept, or provide your own.
 
    You can extend the previous example to specify the name of the Expectation Suite on the command line as follows:

@@ -61,7 +61,7 @@ If your PR contains **only** changes to `contrib` directory (community contribut
 * Please add a bullet point to `docs_rtd/changelog.rst`, in the develop section.
 * Please group in the following order:  [FEATURE], [BUGFIX], [DOCS], [MAINTENANCE]
 
-* You can see the past [Changelog](https://github.com/great_expectations/great-expectations/blob/develop/docs_rtd/changelog.rst) here:
+* You can see the past [Changelog](https://github.com/great-expectations/great_expectations/blob/develop/docs_rtd/changelog.rst) here:
 
 If you’ve checked off all these items, you’re now ready to submit a pull request!
 

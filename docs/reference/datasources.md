@@ -40,7 +40,7 @@ by date or alphabetically.
 The main goal of Data Connectors is to provide useful guarantees about *Batches*, for example ensuring that they cover
 data from non-overlapping date ranges. A **Batch** is a combination of data and metadata.
 
-![Image](https://lucid.app/publicSegments/view/5eddbad8_d189_4f72_9af3_f94155fb5523/image.png)
+![Image](https://lucid.app/publicSegments/view/5eddbad8-d189-4f72-9af3-f94155fb5523/image.png)
 
 The `Datasource` is responsible for orchestrating the building of a Batch, using the following components:
 
@@ -161,7 +161,7 @@ Batch(
 Let's follow the outline in this diagram to follow the journey from `BatchRequest` to `BatchDefinition` to `BatchSpec`
 to `Batch`:
 
-![Image](https://lucid.app/publicSegments/view/429a4083_ad56_477c_907a_671df36e3346/image.png)
+![Image](https://lucid.app/publicSegments/view/429a4083-ad56-477c-907a-671df36e3346/image.png)
 
 1. `BatchRequest`
 
@@ -231,7 +231,7 @@ A Runtime Data Connector is a special kind of Data Connector that supports easy 
 the data is already available as a reference that needs only a lightweight wrapper to track validations. Runtime Data
 Connectors are used alongside a special kind of Batch Request class called a `RuntimeBatchRequest`. Instead of serving
 as a description of what data Great Expectations should fetch, a Runtime Batch Request serves as a wrapper for data that
-is passed in at runtime (as an in_memory dataframe, file/S3 path, or SQL query), with user-provided identifiers for
+is passed in at runtime (as an in-memory dataframe, file/S3 path, or SQL query), with user-provided identifiers for
 uniquely identifying the data.
 
 In a Batch Definition produced by a Runtime Data Connector, the `batch_identifiers` come directly from the Runtime Batch

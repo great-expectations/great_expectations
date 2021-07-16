@@ -127,7 +127,7 @@ index.html file or a custom error file:
 
 - If you wish to host a Data Docs site in a subfolder of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
 
-- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a S3 site with the ``base_public_path`` set to ``www.mydns.com``.  Data Docs will still be written to the configured location on S3 (for example ``https://s3.amazonaws.com/data_docs.my_org/docs/index.html``), but you will be able to access the pages from your DNS (``http://www.mydns.com/index.html`` in our example)
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a S3 site with the ``base_public_path`` set to ``www.mydns.com``.  Data Docs will still be written to the configured location on S3 (for example ``https://s3.amazonaws.com/data-docs.my_org/docs/index.html``), but you will be able to access the pages from your DNS (``http://www.mydns.com/index.html`` in our example)
 
     ```yaml
     data_docs_sites:
