@@ -12,7 +12,7 @@ All Expectations return a JSON-serializable dictionary when evaluated, and share
 * [meta](#meta): Allows user-supplied meta-data to be stored with an Expectation.
 
 ## `result_format`
-See [Result format](./result-format) for more information.
+See [Result format](./result_format) for more information.
 
 ## `include_config`
 

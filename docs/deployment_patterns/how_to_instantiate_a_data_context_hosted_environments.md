@@ -4,11 +4,11 @@ title: Deploying Great Expectations in a hosted environment without file system 
 
 If you follow the steps of the [Getting Started](../tutorials/getting_started/intro) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
 
-#. The Great Expectations [CLI](../guides/miscellaneous/how-to-use-the-great-expectations-cli) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
+#. The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
 #. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for validation results, etc.
 
 
-However, you might not have these components available in hosted environments, such as [Databricks](./how-to-instantiate-a-data-context-on-databricks-spark-cluster), [AWS EMR](./how-to-instantiate-a-data-context-on-an-emr-spark-cluster), Google Cloud Composer, and others. This workflow guide will outline the main steps required to successfully use Great Expectations in a hosted environment.
+However, you might not have these components available in hosted environments, such as [Databricks](./how_to_instantiate_a_data_context_on_databricks_spark_cluster), [AWS EMR](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster), Google Cloud Composer, and others. This workflow guide will outline the main steps required to successfully use Great Expectations in a hosted environment.
 
 
 Step 1: Configure your Data Context
@@ -21,12 +21,12 @@ Step 1: Configure your Data Context
 
 The following guide gives an overview of creating an in-code Data Context including defaults to help you more quickly set one up for common configurations:
 
-- [How to instantiate a DataContext without a YML file](../guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file)
+- [How to instantiate a DataContext without a YML file](../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
 
 The following guides will contain examples for each environment we have tested out:
 
-- [AWS EMR](./how-to-instantiate-a-data-context-on-an-emr-spark-cluster)
-- [Databricks](./how-to-instantiate-a-data-context-on-databricks-spark-cluster)
+- [AWS EMR](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+- [Databricks](./how_to_instantiate_a_data_context_on_databricks_spark_cluster)
 - :ref:`deployment_google_cloud_composer` <TODO: Convert reference to "Google Cloud Composer" to docusaurus format.>
 - :ref:`deployment_astronomer` <TODO: Convert reference to "Astronomer" to docusaurus format.>
 
@@ -41,12 +41,12 @@ In order to store your Expectation Suites so you can load them for validation at
 Step 3: Run validation
 --------------------------------
 
-In order to use an Expectation Suite you've created to validate data, follow this guide: [How to validate data without a Checkpoint](../guides/validation/how-to-validate-data-without-a-checkpoint).
+In order to use an Expectation Suite you've created to validate data, follow this guide: [How to validate data without a Checkpoint](../guides/validation/how_to_validate_data_without_a_checkpoint).
 
 Step 4: Use Data Docs
 ----------------------
 
-Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../tutorials/getting_started/customize-your-deployment#options-for-hosting-data-docs).
+Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../tutorials/getting_started/customize_your_deployment#options_for_hosting_data_docs).
 
 Additional notes
 ----------------

@@ -8,7 +8,7 @@ This is useful if your pipeline environment or orchestration engine does not hav
 
 <Prerequisites>
 
-- Created at least one [Checkpoint](./how-to-create-a-new-checkpoint)
+- Created at least one [Checkpoint](./how_to_create_a_new_checkpoint)
 
 </Prerequisites>
 

@@ -31,7 +31,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 
   Get the [Connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal) of the storage account you have just created.
 
-  We recommend that azure storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following lines add azure storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how-to-configure-credentials-using-a-yaml-file-or-environment-variables.md).
+  We recommend that azure storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following lines add azure storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
   
   ```yaml
  AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
@@ -68,7 +68,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
   :::
   
   You also may configure Great Expectations to store your expectations and validations in this Azure Storage account.
-  You can follow the documentation from the guides for [expectations](../../setup/configuring_metadata_stores/how-to-configure-an-expectation-store-in-azure-blob-storage.md) and [validations](../../setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-azure-blob-storage.md) but unsure you set ``container: \$web`` inplace of other container name.
+  You can follow the documentation from the guides for [expectations](../../setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md) and [validations](../../setup/configuring_metadata_stores/how-to-configure-a-validation-result-store-in-azure-blob-storage.md) but unsure you set ``container: \$web`` inplace of other container name.
 
 
 4. **Build the Azure Blob Data Docs site.**

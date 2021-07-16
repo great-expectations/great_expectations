@@ -8,11 +8,11 @@ This guide will explain how to use a Validation Action to update Data Docs sites
 
 <Prerequisites>
 
- - Learned [How to add a Validation Operator](../how-to-add-a-validation-operator)
+ - Learned [How to add a Validation Operator](../how_to_add_a_validation_operator)
  - Set up a `.py` class: `great_expectations.validation_operators.validation_operators.ActionListValidationOperator` **or**
  - Set up a `.py` class: `great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator`
  - Created at least one Expectation Suite.
- - Created at least one [Checkpoint](../checkpoints/how-to-create-a-new-checkpoint). You will need it in order to test that your new Validation Operator is working.
+ - Created at least one [Checkpoint](../checkpoints/how_to_create_a_new_checkpoint). You will need it in order to test that your new Validation Operator is working.
 
 </Prerequisites>
 
@@ -63,8 +63,8 @@ Steps
 
    Test that your new Validation Operator Action is configured correctly:
 
-   1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how-to-add-validations-data-or-suites-to-a-checkpoint).
-   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../checkpoints/how-to-run-a-checkpoint-in-terminal) or from Python, as explained in [How to run a Checkpoint in Python](../checkpoints/how-to-run-a-checkpoint-in-python).
+   1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint).
+   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../checkpoints/how_to_run_a_checkpoint_in_terminal) or from Python, as explained in [How to run a Checkpoint in Python](../checkpoints/how-to-run-a-checkpoint-in-python).
    3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
 
 Additional notes
@@ -76,5 +76,5 @@ The ``UpdateDataDocsAction`` generates an HTML file for the latest validation re
 Additional resources
 --------------------
 
-- [How to store Validation Results as a Validation Action](./how-to-store-validation-results-as-a-validation-action)
-- [Checkpoints and Actions](../../../reference/checkpoints-and-actions)
+- [How to store Validation Results as a Validation Action](./how_to_store_validation_results_as_a_validation_action)
+- [Checkpoints and Actions](../../../reference/checkpoints_and_actions)

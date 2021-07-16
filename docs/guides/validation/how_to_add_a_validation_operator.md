@@ -4,7 +4,7 @@ title: How to add a Validation Operator
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
 
 :::note
-This guide is only relevant if you are using the V2 (Batch Kwargs) API. For the V3 (Batch Request) API, please refer to the Checkpoints (>=0.13.12) tab in the guide on [Checkpoint](./checkpoints/how-to-create-a-new-checkpoint).
+This guide is only relevant if you are using the V2 (Batch Kwargs) API. For the V3 (Batch Request) API, please refer to the Checkpoints (>=0.13.12) tab in the guide on [Checkpoint](./checkpoints/how_to_create_a_new_checkpoint).
 :::
 
 This guide will help you run a Checkpoint in Python.
@@ -13,13 +13,13 @@ This is useful if your pipeline environment or orchestration engine does not hav
 <Prerequisites>
 
 - Created at least one Expectation Suite.
-- Created at least one [Checkpoint](./checkpoints/how-to-create-a-new-checkpoint). You will need it in order to test that your new Validation Operator is working.
+- Created at least one [Checkpoint](./checkpoints/how_to_create_a_new_checkpoint). You will need it in order to test that your new Validation Operator is working.
 
 </Prerequisites>
 
-This guide will help you add a new instance of a [Validation Operator](../../reference/checkpoints-and-actions). Validation Operators give you the ability to encode business logic around validation, such as validating multiple batches of data together, differentiating between warnings and errors, and kicking off actions based on the results of validation.
+This guide will help you add a new instance of a [Validation Operator](../../reference/checkpoints_and_actions). Validation Operators give you the ability to encode business logic around validation, such as validating multiple batches of data together, differentiating between warnings and errors, and kicking off actions based on the results of validation.
 
-As a general rule, Validation Operators should be invoked from within [Checkpoints](../../reference/core-concepts#checkpoints). Separating out the configuration for Validation Operators and Checkpoints can help make Operator code reusable.
+As a general rule, Validation Operators should be invoked from within [Checkpoints](../../reference/core_concepts#checkpoints). Separating out the configuration for Validation Operators and Checkpoints can help make Operator code reusable.
 
 Steps
 -----
@@ -78,8 +78,8 @@ validation_operators:
 
    Test that your new Validation Operator is configured correctly:
 
-      1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the value from Step 2 above. The details of Checkpoint configuration can be found in [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how-to-add-validations-data-or-suites-to-a-checkpoint).
-      2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../guides/validation/checkpoints/how-to-run-a-checkpoint-in-terminal) or from Python, as explained in [How to run a Checkpoint in python](./checkpoints/how-to-run-a-checkpoint-in-python).
+      1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the value from Step 2 above. The details of Checkpoint configuration can be found in [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint).
+      2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../guides/validation/checkpoints/how_to_run_a_checkpoint_in_terminal) or from Python, as explained in [How to run a Checkpoint in python](./checkpoints/how-to-run-a-checkpoint-in-python).
 
 
 Additional notes

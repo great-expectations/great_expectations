@@ -4,15 +4,15 @@ title: How to create Expectations that span multiple Batches using Evaluation Pa
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
-This guide will help you create [Expectations](../../../reference/expectations/expectations) that span multiple [Batches](../../../reference/dividing-data-assets-into-batches) of data using [Evaluation Parameters](../../../reference/evaluation-parameters) (see also [Evaluation Parameter stores](../../../reference/data-context#evaluation-parameter-stores)). This pattern is useful for things like verifying that row counts between tables stay consistent.
+This guide will help you create [Expectations](../../../reference/expectations/expectations) that span multiple [Batches](../../../reference/dividing-data-assets-into-batches) of data using [Evaluation Parameters](../../../reference/evaluation-parameters) (see also [Evaluation Parameter stores](../../../reference/data_context#evaluation_parameter_stores)). This pattern is useful for things like verifying that row counts between tables stay consistent.
 
 <Prerequisites>
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured a [Datasource](../../../reference/datasources) (or several Datasources) with at least two **Data Assets** and understand the basics of **Batch Requests**.
 - Also created [Expectations Suites](../../../tutorials/getting_started/create_your_first_expectations.md) for those Data Assets.
-- Have a working [Evaluation Parameter store](../../../reference/data-context#evaluation-parameter-stores). (The default in-memory store from ``great_expectations init`` can work for this.)
-- Have a working [Validation Operator](../../../reference/checkpoints-and-actions) (see also [How to add a Validation Operator](../../../guides/validation/how-to-add-a-validation-operator)). (The default Validation Operator from ``great_expectations init`` can work for this.)
+- Have a working [Evaluation Parameter store](../../../reference/data_context#evaluation_parameter_stores). (The default in-memory store from ``great_expectations init`` can work for this.)
+- Have a working [Validation Operator](../../../reference/checkpoints_and_actions) (see also [How to add a Validation Operator](../../../guides/validation/how-to-add-a-validation-operator)). (The default Validation Operator from ``great_expectations init`` can work for this.)
 
 </Prerequisites>
 
@@ -67,7 +67,7 @@ In a notebook,
    )
    ```
 
-   The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data-context#evaluation-parameter-stores) or [Metrics Store](../../../reference/metrics) (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how-to-configure-a-metricsstore)).
+   The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data_context#evaluation_parameter_stores) or [Metrics Store](../../../reference/metrics) (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how-to-configure-a-metricsstore)).
 
    This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
 

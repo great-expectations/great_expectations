@@ -129,7 +129,7 @@ Expectations. When deploying Great Expectations in a real data pipeline, you wil
 
 Checkpoints are mini-applications that can be configured to implement these scenarios.
 
-Read [Checkpoints and Actions](./checkpoints-and-actions) to learn more.
+Read [Checkpoints and Actions](./checkpoints_and_actions) to learn more.
 
 ## Deployment patterns
 
@@ -146,4 +146,4 @@ Useful deployment patterns for validation include:
   problem is resolved. Alternatively, you can implement Expectations that raise warnings without halting the DAG.
 
 For certain deployment patterns, it may be useful to parameterize Expectations, and supply Evaluation Parameters at
-validation time. See [Evaluation Parameters](./evaluation-parameters) for more information.
+validation time. See [Evaluation Parameters](./evaluation_parameters) for more information.

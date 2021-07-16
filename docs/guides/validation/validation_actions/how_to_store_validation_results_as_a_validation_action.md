@@ -8,8 +8,8 @@ This guide is a stub. We all know that it will be useful, but no one has made ti
 
 <Prerequisites>
 
- - Learned [How to add a Validation Operator](../how-to-add-a-validation-operator)
- - Created at least one [Checkpoint](../checkpoints/how-to-create-a-new-checkpoint). You will need it in order to test that your new Validation Operator is working.
+ - Learned [How to add a Validation Operator](../how_to_add_a_validation_operator)
+ - Created at least one [Checkpoint](../checkpoints/how_to_create_a_new_checkpoint). You will need it in order to test that your new Validation Operator is working.
 
 </Prerequisites>
 

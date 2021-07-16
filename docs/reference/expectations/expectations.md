@@ -18,7 +18,7 @@ Great Expectations' built-in library includes more than 50 common Expectations, 
 
 For a full list of available Expectations, please check out the [Expectation Glossary](./). Please note that not all
 Expectations are implemented on all Execution Engines yet. You can see the grid of supported
-Expectations [here](./implemented-expectations). We welcome [contributions](./) to fill in the gaps.
+Expectations [here](./implemented_expectations). We welcome [contributions](./) to fill in the gaps.
 
 You can also extend Great Expectations by [creating your own custom Expectations](./).
 

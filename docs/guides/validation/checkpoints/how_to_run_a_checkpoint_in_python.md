@@ -8,7 +8,7 @@ This is useful if your pipeline environment or orchestration engine does not hav
 
 <Prerequisites>
 
-- Created at least one [Checkpoint](./how-to-create-a-new-checkpoint)
+- Created at least one [Checkpoint](./how_to_create_a_new_checkpoint)
 
 </Prerequisites>
 
@@ -40,7 +40,7 @@ Checkpoints are the primary method for validating batches of data in production 
 A Checkpoint facilitates running a validation as well as configurable Actions such as updating Data Docs, sending a
 notification to team members about validation results, or storing a result in a shared cloud storage.
 
-See also [How to configure a new Checkpoint using test_yaml_config](./how-to-configure-a-new-checkpoint-using-test_yaml_config) for more information about the Checkpoints and how to configure them in your Great Expectations environment.
+See also [How to configure a new Checkpoint using test_yaml_config](./how_to_configure_a_new_checkpoint_using_test_yaml_config) for more information about the Checkpoints and how to configure them in your Great Expectations environment.
 
 Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
 is provided for those who wish to run Checkpoints in Python.
@@ -78,4 +78,4 @@ or the Python code can be embedded in your pipeline.
 
   Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.  The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()` must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently configured Checkpoint with the given `name`.
 
-Please see [How to configure a new Checkpoint using test_yaml_config](./how-to-configure-a-new-checkpoint-using-test_yaml_config) for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
+Please see [How to configure a new Checkpoint using test_yaml_config](./how_to_configure_a_new_checkpoint_using_test_yaml_config) for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
