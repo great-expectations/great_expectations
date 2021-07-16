@@ -35,7 +35,7 @@ We will now explain the supported methods for using Great Expectations within an
 Running validation using the ``GreatExpectationsOperator``
 -----------------------------------------------------------
 
-The ``GreatExpectationsOperator`` in the `Great Expectations Airflow Provider package <https://github.com/great-expectations/airflow-provider-great-expectations>`_ is a convenient way to invoke validation with Great Expectations in an Airflow DAG. See the `example DAG in the examples folder <https://github.com/great-expectations/airflow-provider-great-expectations/blob/main/great_expectations_provider/examples/example_great_expectations_dag.py>`_ for several methods to use the operator.
+The ``GreatExpectationsOperator`` in the `Great Expectations Airflow Provider package <https://github.com/great-expectations/airflow-provider-great-expectations>`_ is a convenient way to invoke validation with Great Expectations in an Airflow DAG. See the `example DAG in the examples folder <https://github.com/great-expectations/airflow-provider-great-expectations/blob/main/great_expectations_provider/example_dags/example_great_expectations_dag.py>`_ for several methods to use the operator.
 
 1. Ensure that the ``great_expectations`` directory that defines your Data Context is accessible by your DAG. Typically, it will be located in the same project as your DAG, but you can point the operator at any location.
 
