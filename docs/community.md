@@ -12,7 +12,7 @@ Join our public slack channel here: [join slack](https://greatexpectations.io/sl
 Slack is good for that, too: [join slack](https://greatexpectations.io/slack).
 
 ### File a bug report or feature request
-If you have bugfix or feature request, please [upvote an existing issue](https://github.com/great_expectations/great_expectations/issues) or [open a new issue](https://github.com/great_expectations/great_expectations/issues/new) on GitHub and we’ll see what we can do.
+If you have bugfix or feature request, please [upvote an existing issue](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new) on GitHub and we’ll see what we can do.
 
 
 ### Contribute code or documentation

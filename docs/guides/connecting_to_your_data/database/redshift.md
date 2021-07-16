@@ -157,8 +157,8 @@ Here is an example of loading data by specifying an existing table name.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [redshift_yaml_example.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py)
-- [redshift_python_example.py](https://github.com/great_expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py)
+- [redshift_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py)
+- [redshift_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py)
 
 ## Next Steps
 

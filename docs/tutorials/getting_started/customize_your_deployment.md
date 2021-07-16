@@ -26,7 +26,7 @@ Here’s an overview of the components of a typical Great Expectations deploymen
   * [Additional Checkpoints and Actions](/docs/tutorials/getting_started/customize_your_deployment#additional-checkpoints-and-actions)
 
 ## Options for storing Great Expectations configuration
-The simplest way to manage your Great Expectations configuration is usually by committing great_expectations/great_expectations.yml to git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
+The simplest way to manage your Great Expectations configuration is usually by committing great-expectations/great_expectations.yml to git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
 
 Here’s how to handle each of those cases:
 

@@ -17,7 +17,7 @@ Alternatively, for small changes that don’t need to be tested locally (e.g. do
 
 #### 3. Identify the type of contribution that you want to make
 
-* [Issues in GitHub](https://github.com/great_expectations/great_expectations/issues) are a great place to start. Check out the help wanted and good first issue labels. Comment to let everyone know you’re working on it.
+* [Issues in GitHub](https://github.com/great-expectations/great_expectations/issues) are a great place to start. Check out the help wanted and good first issue labels. Comment to let everyone know you’re working on it.
 
 * If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you’re working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
 

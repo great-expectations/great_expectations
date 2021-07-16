@@ -28,7 +28,7 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 * **Experimental classes should log an experimental warning when initialized:** “Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future.”
 
-* **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx_doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
+* **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx-doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
 
 * **Lint your code.** Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. - Linting with `isort` MUST occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. So, **before running ``pre-commit install`` ensure you have activated a virtual environment that has all development requirements installed.**
 
@@ -109,7 +109,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **For sections within “how to”-type guides, titles should be short, imperative sentences**. Avoid extra words. Good: “Configure data documentation”. Nope: “Configuring data documentation”. Avoid: “Configure documentation for your data”
 
-* **Please follow the Sphinx guide for sections to determine which of the many, confusing .rst underlining conventions to use**: [Sphinx guide for sections](http://www.sphinx_doc.org/en/master/usage/restructuredtext/basics.html#sections)
+* **Please follow the Sphinx guide for sections to determine which of the many, confusing .rst underlining conventions to use**: [Sphinx guide for sections](http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections)
 
 #### Core concepts and classes
 

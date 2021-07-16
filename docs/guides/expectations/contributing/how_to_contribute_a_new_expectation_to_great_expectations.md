@@ -295,8 +295,8 @@ The class implements methods decorated with `@column_function_partial` to comput
 
 Consult the following files for the details of this pattern:
 
-* [great_expectations/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py](https://github.com/great_expectations/great_expectations/blob/develop/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py)
-* [great_expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py](https://github.com/great_expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py)
+* [great-expectations/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/core/expect_column_value_z_scores_to_be_less_than.py)
+* [great-expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py)
 :::
 
 

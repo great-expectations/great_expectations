@@ -61,7 +61,7 @@ Steps
 2. If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
 
   ```yaml
-  # great_expectations/great_expectations.yml
+  # great-expectations/great_expectations.yml
 
   config_variables_file_path: uncommitted/config_variables.yml
   ```
@@ -69,7 +69,7 @@ Steps
 3. Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
   ```yaml
-  # great_expectations/great_expectations.yml
+  # great-expectations/great_expectations.yml
 
   datasources:
     my_postgres_db:
