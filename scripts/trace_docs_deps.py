@@ -13,6 +13,8 @@ The resulting output list is all of the dependencies `docs/` has on the primary 
 If a change is identified in any of these files during the pipeline runtime, we know that a docs dependency has possibly
 been impacted and the pipeline should run to ensure adequate test coverage.
 
+TODO: ADD WARNING ABOUT BAD PATTERNS
+
 """
 
 import ast
@@ -21,6 +23,8 @@ import os
 import re
 import sys
 from typing import List, Set
+
+from great_expectations.data_context.util import file_relative_path
 
 
 def find_docusaurus_refs(dir: str) -> List[str]:
