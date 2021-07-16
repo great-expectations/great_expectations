@@ -5,7 +5,7 @@ import Prerequisites from '../guides/connecting_to_your_data/components/prerequi
 
 This guide will help you instantiate a Data Context on an Databricks Spark cluster.
 
-The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/setup/configuring_data_contexts/how-to-create-a-new-data-context-with-the-cli.md).
+The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/setup/configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli.md).
 
 <Prerequisites>
 
@@ -29,7 +29,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
 
 2. **Configure a Data Context in code.**
 
-    Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](../guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file.md) using the FilesystemStoreBackendDefaults or configuring stores as in the code block below.
+    Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md) using the FilesystemStoreBackendDefaults or configuring stores as in the code block below.
 
     :::note
        If you are using DBFS for your stores, make sure to set the ``root_directory`` of FilesystemStoreBackendDefaults to ``/dbfs/`` or ``/dbfs/FileStore/`` to make sure you are writing to DBFS and not the Spark driver node filesystem. If you have mounted another file store (e.g. s3 bucket) to use instead of DBFS, you can use that path here instead.

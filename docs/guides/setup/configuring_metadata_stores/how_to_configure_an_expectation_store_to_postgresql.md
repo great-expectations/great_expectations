@@ -7,8 +7,8 @@ By default, newly profiled Expectations are stored in JSON format in the `expect
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
-- Configured an [Expectations Suite](../../../tutorials/getting_started/create-your-first-expectations.md).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
 - Configured a [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 
 </Prerequisites>

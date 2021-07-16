@@ -55,4 +55,4 @@ Additional notes
 Additional resources
 --------------------
 
-- [Core concepts: Data Docs](../../../reference/data-docs.md)
+- [Core concepts: Data Docs](../../../reference/data_docs.md)

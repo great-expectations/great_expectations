@@ -3,7 +3,7 @@ title: How to dynamically load evaluation parameters from a database
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-This guide will help you create an Expectation that loads part of its [Expectation Configuration](../../../reference/core-concepts.md) from a database at runtime. Using a dynamic [Evaluation Parameter](../../../reference/core-concepts.md) makes it possible to maintain part of an Expectation Suite in a shared database.
+This guide will help you create an Expectation that loads part of its [Expectation Configuration](../../../reference/core_concepts.md) from a database at runtime. Using a dynamic [Evaluation Parameter](../../../reference/core_concepts.md) makes it possible to maintain part of an Expectation Suite in a shared database.
 
 <Prerequisites>
 
@@ -78,7 +78,7 @@ Steps
 
 3. **Define an expectation that relies on a dynamic query**
 
-    Great Expectations recognizes several types of [Evaluation Parameters](../../../reference/evaluation-parameters.md) that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
+    Great Expectations recognizes several types of [Evaluation Parameters](../../../reference/evaluation_parameters.md) that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with "urn:great_expectations:stores". The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
 
     ```python
     batch.expect_column_values_to_be_in_set(

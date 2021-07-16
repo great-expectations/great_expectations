@@ -149,5 +149,5 @@ Additional resources
 - [AWS Website Hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html)
 - [AWS Static Site Access Permissions](https://docs.aws.amazon.com/en_pv/AmazonS3/latest/dev/WebsiteAccessPermissionsReqd.html)
 - [AWS Website configuration](https://docs.aws.amazon.com/AmazonS3/latest/dev/HowDoIWebsiteConfiguration.html)
-- [Core concepts: Data Docs](../../../reference/data-docs.md)
+- [Core concepts: Data Docs](../../../reference/data_docs.md)
 

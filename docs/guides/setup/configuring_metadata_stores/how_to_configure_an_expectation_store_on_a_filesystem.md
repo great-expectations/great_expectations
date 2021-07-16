@@ -7,8 +7,8 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
-- Configured an [Expectation Suite](../../../tutorials/getting_started/create-your-first-expectations.md).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- Configured an [Expectation Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
 - Determined a new storage location where you would like to store Expectations. This can either be a local path, or a path to a network filesystem.
     
 </Prerequisites>

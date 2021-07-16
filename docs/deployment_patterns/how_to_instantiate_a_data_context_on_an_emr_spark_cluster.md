@@ -6,7 +6,7 @@ import Prerequisites from '../guides/connecting_to_your_data/components/prerequi
 This guide will help you instantiate a Data Context on an EMR Spark cluster.
 
 
-The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/miscellaneous/how-to-use-the-great-expectations-cli.md).
+The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md).
 
 
 <Prerequisites>
@@ -29,7 +29,7 @@ Steps
 
 2. **Configure a Data Context in code.**
 
-    Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](../guides/setup/configuring_data_contexts/how-to-instantiate-a-data-context-without-a-yml-file.md).
+    Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
 
     The snippet at the end of the guide shows Python code that instantiates and configures a Data Context in code for an EMR Spark cluster. Copy this snippet into a cell in your EMR Spark notebook or use the other examples to customize your configuration.
 

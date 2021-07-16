@@ -7,11 +7,11 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
-- Configured an [Expectations Suite](../../../tutorials/getting_started/create-your-first-expectations.md).
-- Configured a [Checkpoint](../../../tutorials/getting_started/validate-your-data.md).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
+- Configured a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md).
 - Configured an Azure [storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
-- Create the Azure Blob container. If you also wish to [host and share data docs on Azure blob storage](../../../guides/setup/configuring_data_docs/how-to-host-and-share-data-docs-on-azure-blob-storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
+- Create the Azure Blob container. If you also wish to [host and share data docs on Azure blob storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
 - Identify the prefix (folder) where Validations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
 </Prerequisites>
@@ -107,5 +107,5 @@ Steps
 
 6. **Confirm that the Validations store has been correctly configured.**
 
-    Run a [Checkpoint](../../../tutorials/getting_started/validate-your-data.md) to store results in the new Validations store on Azure Blob then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check-out-data-docs.md).
+    Run a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validations store on Azure Blob then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
 

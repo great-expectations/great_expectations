@@ -6,7 +6,7 @@ import Prerequisites from '../../guides/connecting_to_your_data/components/prere
 
 <Prerequisites>
 
-- Configured a [Data Context](../../tutorials/getting_started/initialize-a-data-context.md).
+- Configured a [Data Context](../../tutorials/getting_started/initialize_a_data_context.md).
 
 </Prerequisites>
 

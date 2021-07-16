@@ -7,9 +7,9 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting_started/initialize-a-data-context.md).
-- Configured an [Expectations Suite](../../../tutorials/getting_started/create-your-first-expectations.md).
-- Configured a [Checkpoint](../../../tutorials/getting_started/validate-your-data.md).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
+- Configured a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md).
 - Configured a Google Cloud Platform (GCP) [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that can access the appropriate GCP resources, which include Storage Objects.
 - Identified the GCP project, GCS bucket, and prefix where Validations will be stored.
 
@@ -102,7 +102,7 @@ If you are also storing [Expectations in GCS](../configuring_metadata_stores/how
 
 6. **Confirm that the Validations store has been correctly configured.**
 
-    Run a [Checkpoint](../../../tutorials/getting_started/validate-your-data.md) to store results in the new Validations store on GCS then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/validate-your-data.md).
+    Run a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validations store on GCS then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/validate_your_data.md).
 
 
 If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.
