@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
+CHANGED_FILES=$(git diff HEAD origin/develop --name-only)
 printf '%s\n' "[CHANGED FILES]" "${CHANGED_FILES[@]}" ""
 
 DEPENDENCIES=$(python scripts/trace_docs_deps.py docs)
