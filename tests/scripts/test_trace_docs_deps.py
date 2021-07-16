@@ -9,15 +9,9 @@ def test_find_docusaurus_refs_parses_correctly(tmpdir_factory):
     docs_dir: py.path.local = tmpdir_factory.mktemp("docs")
     temp_file: py.path.local = docs_dir.join("file.md")
     with open(temp_file, "w") as f:
-        f.write(
-            "```python file=../../../../../../../../../../../../../../../a/b/c/script1.py#L1\n"
-        )
-        f.write(
-            "```python file=../../../../../../../../../../../../../../../d/e/f/script2.py#L5-10\n"
-        )
-        f.write(
-            "```yaml file=../../../../../../../../../../../../../../../g/h/i/script3.py#L100-200"
-        )
+        f.write("```python file=../../a/b/c/script1.py#L1\n")
+        f.write("```python file=../../d/e/f/script2.py#L5-10\n")
+        f.write("```yaml file=../../g/h/i/script3.py#L100-200")
 
     assert len(find_docusaurus_refs(str(docs_dir))) == 3
 
@@ -26,12 +20,8 @@ def test_find_docusaurus_refs_does_not_duplicate(tmpdir_factory):
     docs_dir: py.path.local = tmpdir_factory.mktemp("docs")
     temp_file: py.path.local = docs_dir.join("temp_file.md")
     with open(temp_file, "w") as f:
-        f.write(
-            "```python file=../../../../../../../../../../../../../../../a/b/c/script_a.py#L1\n"
-        )
-        f.write(
-            "```python file=../../../../../../../../../../../../../../../a/b/c/script_a.py#L5-10"
-        )
+        f.write("```python file=../../a/b/c/script_a.py#L1\n")
+        f.write("```python file=../../a/b/c/script_a.py#L5-10")
 
     assert len(find_docusaurus_refs(str(docs_dir))) == 1
 
@@ -74,20 +64,20 @@ def test_get_local_imports_discards_general_ge_imports(tmpdir_factory):
     assert len(get_local_imports(files)) == 0
 
 
-# def test_get_import_paths_references_ge_files():
-#     imports: List[str] = [
-#         "great_expectations.core.batch",
-#         "great_expectations.expectations.util",
-#     ]
-#     assert sorted(get_import_paths(imports)) == [
-#         "great_expectations/core/batch.py",
-#         "great_expectations/expectations/util.py",
-#     ]
+def test_get_import_paths_references_ge_files():
+    imports: List[str] = [
+        "great_expectations.core.batch",
+        "great_expectations.expectations.util",
+    ]
+    assert sorted(get_import_paths(imports)) == [
+        "great_expectations/core/batch.py",
+        "great_expectations/expectations/util.py",
+    ]
 
 
-# def test_get_import_paths_references_files_in_ge_directory():
-#     imports: List[str] = ["great_expectations.checkpoint.types"]
-#     assert sorted(get_import_paths(imports)) == [
-#         "great_expectations/checkpoint/types/__init__.py",
-#         "great_expectations/checkpoint/types/checkpoint_result.py",
-#     ]
+def test_get_import_paths_references_files_in_ge_directory():
+    imports: List[str] = ["great_expectations.checkpoint.types"]
+    assert sorted(get_import_paths(imports)) == [
+        "great_expectations/checkpoint/types/__init__.py",
+        "great_expectations/checkpoint/types/checkpoint_result.py",
+    ]
