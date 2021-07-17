@@ -6,14 +6,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-      - run: pip install bandit black codespell flake8 isort mypy pytest pyupgrade safety
-      - run: bandit --recursive --skip B101 . || true  # B101 is assert statements
+      - run: pip install bandit black flake8 isort mypy pytest pyupgrade safety
+      - run: bandit --recursive --skip B101,B102,B105,B106,B107,B110,B303,B311,B320,B403,B404,B410,B602,B603,B604,B607,B608,B701 .
       - run: black --check . || true
-      - run: codespell || true  # --ignore-words-list="" --skip=""
-      - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - run: flake8 . --count --select=E9,F63,F7 --show-source --statistics  # Todo: Add undefined names ,F82
       - run: flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --show-source --statistics
-      - run: isort --check-only --profile black . || true
-      - run: pip install -r requirements.txt || true
+      - run: isort --check-only .
+      - run: pip install -r requirements.txt -r requirements-dev.txt
       - run: mypy --install-types --non-interactive . || true
       - run: pytest . || true
       - run: pytest --doctest-modules . || true
