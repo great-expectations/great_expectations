@@ -147,7 +147,7 @@ class ColumnKurtosis(ColumnMetricProvider):
 
 
 class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
-    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t) """
+    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
