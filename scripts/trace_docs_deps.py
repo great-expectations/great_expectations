@@ -47,7 +47,7 @@ def find_docusaurus_refs(dir: str) -> List[str]:
         for line in open(doc):
             if re.search(pattern, line):
                 file: str = _parse_file_from_docusaurus_link(line)
-                path: str = os.path.join(os.path.dirname(doc), file)
+                path: str = file_relative_path(doc, file)
                 linked_files.add(path)
 
     return [file for file in linked_files]
