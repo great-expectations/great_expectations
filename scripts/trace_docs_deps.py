@@ -13,7 +13,16 @@ The resulting output list is all of the dependencies `docs/` has on the primary 
 If a change is identified in any of these files during the pipeline runtime, we know that a docs dependency has possibly
 been impacted and the pipeline should run to ensure adequate test coverage.
 
-TODO: ADD WARNING ABOUT BAD PATTERNS
+Please note that this solution has some inherit disclaimers one should be familiar with. As there is no actual running
+of source code (but rather parsing of the source file's AST), it is hard to exactly pinpoint the location of a given
+import. Utilizing the `__file__` attr would provide the exact path of an import but without that, we need to assume that
+an ast.Import node corresponds to an accurate path in our codebase (i.e. `great_expectations.core.batch` results in
+great_expectations/core/batch.py).
+
+As long as imports correspond to the relative path of modules, this method will continue to work as intended. Deviations
+here would result in certain imports not being picked up by the script, reducing the accuracy and frequency of the
+Azure Docs Integration pipeline's triggers. As GE has maintained this consistency throughout its development, this
+script and the methods used herein are deemed to be appropriate.
 
 """
 
