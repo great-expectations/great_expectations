@@ -177,7 +177,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
 
 
 def show_available_data_asset_names(context, data_source_name=None):
-    """ List asset names found in the current context. """
+    """List asset names found in the current context."""
     # TODO: Needs tests.
     styles = """
     <style type='text/css'>
