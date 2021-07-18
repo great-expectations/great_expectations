@@ -94,7 +94,7 @@ def get_import_paths(imports: List[str]) -> List[str]:
     return paths
 
 
-def _update_paths(paths: List[str], path: str):
+def _update_paths(paths: List[str], path: str) -> None:
     if os.path.isfile(f"{path}.py"):
         paths.append(f"{path}.py")
     elif os.path.isdir(path):
