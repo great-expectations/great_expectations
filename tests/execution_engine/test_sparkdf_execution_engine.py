@@ -997,7 +997,7 @@ def test_get_compute_domain_with_multicolumn(
     df = engine.dataframe
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="multicolumn"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="multicolumn"
     )
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -1006,13 +1006,13 @@ def test_get_compute_domain_with_multicolumn(
     ), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be empty"
     assert accessor_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Accessor kwargs have been modified"
 
     # Checking for identity
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="identity"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="identity"
     )
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -1020,7 +1020,7 @@ def test_get_compute_domain_with_multicolumn(
         data, df
     ), "Data does not match after getting compute domain"
     assert compute_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Compute domain kwargs should not change for identity domain"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 

@@ -204,7 +204,7 @@ class ProfilerTypeMapping:
         "SMALLMONEY",
         "smallmoney",
     ]
-    IDENTITY_TYPE_NAMES = [
+    IDENTIFIER_TYPE_NAMES = [
         "UNIQUEIDENTIFIER",
         "uniqueidentifier",
     ]
