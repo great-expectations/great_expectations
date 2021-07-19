@@ -4,7 +4,7 @@ title: ✳ How to create and edit Expectations in bulk
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
 
-The `JsonSchemaProfiler` helps you quickly create [Expectation Suites](/docs/reference/expectation-suite-operations) from jsonschema files.
+The `JsonSchemaProfiler` helps you quickly create [Expectation Suites](/docs/reference/expectation_suite_operations) from jsonschema files.
 
 <Prerequisites>
 
