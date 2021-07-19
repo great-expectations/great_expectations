@@ -7,8 +7,8 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting-started/initialize-a-data-context.md).
-- Configured an [Expectations Suite](../../../tutorials/getting-started/create-your-first-expectations.md).
+- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
 - Configured a Google Cloud Platform (GCP) [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that can access the appropriate GCP resources, which include Storage Objects.
 - Identified the GCP project, GCS bucket, and prefix where Expectations will be stored.
 
@@ -49,7 +49,7 @@ Steps
 
     :::warning
 
-    If you are also storing [Validations in GCS](./how-to-configure-a-validation-result-store-in-gcs.md) or [DataDocs in GCS](../configuring-data-docs/how-to-host-and-share-data-docs-on-gcs), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+    If you are also storing [Validations in GCS](./how_to_configure_a_validation_result_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     :::
 
