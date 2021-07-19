@@ -27,7 +27,7 @@ pip install great_expectations
 great_expectations --version
 ```
 
-To configure your Data Context, please look at [How to create a new data context with the cli](../configuring-data-contexts/how-to-create-a-new-data-context-with-the-cli.md)
+To configure your Data Context, please look at [How to create a new data context with the cli](../configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli.md)
 
 <Congratulations />
 
