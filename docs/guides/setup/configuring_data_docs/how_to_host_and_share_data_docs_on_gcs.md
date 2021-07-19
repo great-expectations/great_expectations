@@ -23,7 +23,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
   Make sure you modify the project name, bucket name, and region for your situation.
 
   ```bash
-  > gsutil mb -p my_org_project -l US-EAST1 -b on gs://my_org_data_docs/
+  gsutil mb -p my_org_project -l US-EAST1 -b on gs://my_org_data_docs/
   Creating gs://my_org_data_docs/...
   ```
 
@@ -86,7 +86,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
   ```bash
   # Insert the appropriate project name.
 
-  > gcloud auth login && gcloud config set project <<project_name>>
+  gcloud auth login && gcloud config set project <<project_name>>
   ```
 
 4. **Deploy your Google App Engine app.**
@@ -126,7 +126,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
   Use the following CLI command: ``great_expectations --v3-api docs build --site-name gs_site``. If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
 
   ```bash
-  > great_expectations --v3-api docs build --site-name gs_site
+  great_expectations --v3-api docs build --site-name gs_site
 
   The following Data Docs sites will be built:
 
