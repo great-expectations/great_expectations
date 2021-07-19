@@ -88,7 +88,9 @@ def get_import_paths(imports: List[str]) -> List[str]:
     paths: List[str] = []
 
     for imp in imports:
-        path: str = imp.replace(".", "/")
+        path: str = imp.replace(
+            ".", "/"
+        )  # AST nodes are formatted as great_expectations.module.file
         _update_paths(paths, path)
 
     return paths
