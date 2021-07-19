@@ -64,5 +64,5 @@ Another option is to use the output of the `great_expectations --v3-api checkpoi
 Additional Resources
 --------------------
 
-Please see [How to configure a New Checkpoint using "test_yaml_config"](how_to_guides_how_to_configure_a_new_checkpoint_using_test_yaml_config) for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
+Please see [How to configure a New Checkpoint using "test_yaml_config"](../guides/validation/checkpoints/how-to-configure-a-new-checkpoint-using-test_yaml_config.md) for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
 
