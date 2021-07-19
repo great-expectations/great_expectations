@@ -49,7 +49,7 @@ Steps
 
     :::warning
 
-    If you are also storing [Validations in GCS](./how-to-configure-a-validation-result-store-in-gcs.md) or [DataDocs in GCS](../configuring-data-docs/how-to-host-and-share-docs-on-gcs), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+    If you are also storing [Validations in GCS](./how-to-configure-a-validation-result-store-in-gcs.md) or [DataDocs in GCS](../configuring-data-docs/how-to-host-and-share-data-docs-on-gcs), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     :::
 
