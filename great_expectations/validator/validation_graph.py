@@ -27,7 +27,7 @@ class MetricConfiguration:
         self.metric_dependencies = metric_dependencies
 
     def __repr__(self):
-        return json.dumps(self._to_json_dict(), indent=2)
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
         return self.__repr__()
@@ -60,7 +60,7 @@ class MetricConfiguration:
             self.metric_value_kwargs_id,
         )
 
-    def _to_json_dict(self) -> dict:
+    def to_json_dict(self) -> dict:
         json_dict: dict = {
             "metric_name": self.metric_name,
             "metric_domain_kwargs": self.metric_domain_kwargs,
