@@ -44,16 +44,16 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
 
         if match_on == "any":
             condition = sa.or_(
-                *[
+                *(
                     get_dialect_like_pattern_expression(column, _dialect, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         else:
             condition = sa.and_(
-                *[
+                *(
                     get_dialect_like_pattern_expression(column, _dialect, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         return condition

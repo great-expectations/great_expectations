@@ -22,8 +22,8 @@ def build_docs(
 
     msg: str = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
-        msg += " - <cyan>{}:</cyan> ".format(site_name)
-        msg += "{}\n".format(index_page_locator_info)
+        msg += f" - <cyan>{site_name}:</cyan> "
+        msg += f"{index_page_locator_info}\n"
 
     cli_message(msg)
     if not assume_yes:

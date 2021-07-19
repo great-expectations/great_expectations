@@ -223,7 +223,7 @@ class PandasDatasource(LegacyDatasource):
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
             logger.debug(
-                "Fetching s3 object. Bucket: {} Key: {}".format(url.bucket, url.key)
+                f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}"
             )
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)

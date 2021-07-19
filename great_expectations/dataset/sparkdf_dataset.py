@@ -294,8 +294,8 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{}`".format(eval_col_A))
-            col_B_df = nonnull_df.select("__row", "`B_{}`".format(eval_col_B))
+            col_A_df = nonnull_df.select("__row", f"`A_{eval_col_A}`")
+            col_B_df = nonnull_df.select("__row", f"`B_{eval_col_B}`")
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -312,8 +312,8 @@ class MetaSparkDFDataset(Dataset):
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
                     (
-                        row["A_{}".format(eval_col_A)],
-                        row["B_{}".format(eval_col_B)],
+                        row[f"A_{eval_col_A}"],
+                        row[f"B_{eval_col_B}"],
                     )
                     for row in unexpected_df.collect()
                 ]
@@ -1286,7 +1286,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         if match_on == "any":
             return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
         elif match_on == "all":
-            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            formatted_regex_list = [f"(?={regex})" for regex in regex_list]
             return column.withColumn(
                 "__success", column[0].rlike("".join(formatted_regex_list))
             )
@@ -1356,8 +1356,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             _udf = udf(parse, sparktypes.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
-                "__ts_{}".format(column_A_name),
-                "__ts_{}".format(column_B_name),
+                f"__ts_{column_A_name}",
+                f"__ts_{column_B_name}",
             )
             temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
             temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))
@@ -1639,7 +1639,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                 expected sum of columns
         """
         expression = "+".join(
-            ["COALESCE({}, 0)".format(col) for col in column_list.columns]
+            [f"COALESCE({col}, 0)" for col in column_list.columns]
         )
         column_list = column_list.withColumn("actual_total", expr(expression))
         return column_list.withColumn(

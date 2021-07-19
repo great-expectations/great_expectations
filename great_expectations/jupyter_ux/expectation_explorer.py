@@ -279,7 +279,7 @@ class ExpectationExplorer:
             if kwarg_name in ancillary_kwargs:
                 continue
             elif not hasattr(
-                self, "generate_{kwarg_name}_widget_dict".format(kwarg_name=kwarg_name)
+                self, f"generate_{kwarg_name}_widget_dict"
             ):
                 expectation_kwargs[kwarg_name] = widget_dict.get("ge_kwarg_value")
             else:
@@ -1072,7 +1072,7 @@ class ExpectationExplorer:
         expectation_type = expectation_state["expectation_type"]
         inc_dec = expectation_type.split("_")[-1]
         strictly_widget = self.generate_boolean_checkbox_widget(
-            value=strictly, description="strictly {inc_dec}".format(inc_dec=inc_dec)
+            value=strictly, description=f"strictly {inc_dec}"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)

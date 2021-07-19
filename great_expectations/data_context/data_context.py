@@ -1351,7 +1351,7 @@ class BaseDataContext:
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            logger.info("Setting run_name to: {}".format(run_name))
+            logger.info(f"Setting run_name to: {run_name}")
         if evaluation_parameters is None:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
@@ -2567,7 +2567,7 @@ class BaseDataContext:
 
         if not dry_run:
             logger.info(
-                "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
+                f"Profiling '{datasource_name}' with '{profiler.__name__}'"
             )
 
         profiling_results = {}
@@ -2582,7 +2582,7 @@ class BaseDataContext:
         except KeyError:
             # KeyError will happen if there is not datasource
             raise ge_exceptions.ProfilerError(
-                "No datasource {} found.".format(datasource_name)
+                f"No datasource {datasource_name} found."
             )
 
         if batch_kwargs_generator_name is None:
@@ -2818,7 +2818,7 @@ class BaseDataContext:
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
         logger.info(
-            "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
+            f"Profiling '{datasource_name}' with '{profiler.__name__}'"
         )
 
         if not additional_batch_kwargs:
@@ -3851,7 +3851,7 @@ class DataContext(BaseDataContext):
         if result is None:
             raise ge_exceptions.ConfigNotFoundError()
 
-        logger.debug("Using project config: {}".format(yml_path))
+        logger.debug(f"Using project config: {yml_path}")
         return result
 
     @classmethod

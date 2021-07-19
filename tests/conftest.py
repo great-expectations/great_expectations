@@ -3057,7 +3057,7 @@ def titanic_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        engine = create_engine(f"sqlite:///{titanic_db_path}")
         assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
         return engine
     except ImportError:

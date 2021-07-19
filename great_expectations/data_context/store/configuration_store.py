@@ -127,7 +127,7 @@ class ConfigurationStore(Store):
             print("Checking for existing keys...")
 
         report_object["keys"] = sorted(
-            [key.configuration_key for key in self.list_keys()]
+            key.configuration_key for key in self.list_keys()
         )
 
         report_object["len_keys"] = len(report_object["keys"])

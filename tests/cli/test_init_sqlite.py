@@ -29,7 +29,7 @@ def titanic_sqlite_db_file(sa, tmp_path_factory):
     db_path = os.path.join(temp_dir, "titanic.db")
     shutil.copy(fixture_db_path, db_path)
 
-    engine = sa.create_engine("sqlite:///{}".format(db_path), pool_recycle=3600)
+    engine = sa.create_engine(f"sqlite:///{db_path}", pool_recycle=3600)
     assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
     return db_path
 
@@ -49,7 +49,7 @@ def test_cli_init_on_new_project(
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
+    engine = sa.create_engine(f"sqlite:///{database_path}", pool_recycle=3600)
 
     inspector = sa.inspect(engine)
 
@@ -215,7 +215,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
+    engine = sa.create_engine(f"sqlite:///{database_path}", pool_recycle=3600)
     engine_url_with_added_whitespace = "    " + str(engine.url) + "  "
 
     inspector = sa.inspect(engine)
@@ -429,7 +429,7 @@ def initialized_sqlite_project(
     project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
 
     engine = sa.create_engine(
-        "sqlite:///{}".format(titanic_sqlite_db_file), pool_recycle=3600
+        f"sqlite:///{titanic_sqlite_db_file}", pool_recycle=3600
     )
 
     inspector = sa.inspect(engine)

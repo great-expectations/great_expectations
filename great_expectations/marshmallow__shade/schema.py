@@ -983,7 +983,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
             invalid_fields |= self.exclude - available_field_names
 
         if invalid_fields:
-            message = "Invalid fields for {}: {}.".format(self, invalid_fields)
+            message = f"Invalid fields for {self}: {invalid_fields}."
             raise ValueError(message)
 
         fields_dict = self.dict_class()
@@ -1122,7 +1122,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
                 if field_name in self.declared_fields:
                     continue
                 raise ValueError(
-                    '"{}" field does not exist.'.format(field_name)
+                    f'"{field_name}" field does not exist.'
                 ) from error
 
             data_key = (

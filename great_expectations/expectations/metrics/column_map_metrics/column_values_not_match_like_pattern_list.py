@@ -36,10 +36,10 @@ class ColumnValuesNotMatchLikePatternList(ColumnMapMetricProvider):
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 get_dialect_like_pattern_expression(
                     column, _dialect, like_pattern, positive=False
                 )
                 for like_pattern in like_pattern_list
-            ]
+            )
         )

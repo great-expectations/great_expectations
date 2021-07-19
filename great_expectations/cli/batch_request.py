@@ -134,7 +134,7 @@ def select_data_connector_name(
     )
     choices: str = "\n".join(
         [
-            "    {}. {}".format(i, data_connector_name)
+            f"    {i}. {data_connector_name}"
             for i, data_connector_name in enumerate(data_connector_names, 1)
         ]
     )
@@ -167,13 +167,13 @@ def _get_data_asset_name_from_data_connector(
         key=lambda x: x,
     )
     available_data_asset_names_str: List[str] = [
-        "{}".format(name) for name in available_data_asset_names
+        f"{name}" for name in available_data_asset_names
     ]
 
     data_asset_names_to_display: List[str] = available_data_asset_names_str[:50]
     choices: str = "\n".join(
         [
-            "    {}. {}".format(i, name)
+            f"    {i}. {name}"
             for i, name in enumerate(data_asset_names_to_display, 1)
         ]
     )

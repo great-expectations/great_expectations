@@ -1391,7 +1391,7 @@ class TimeDelta(Field):
 
         if precision not in units:
             msg = 'The precision must be {} or "{}".'.format(
-                ", ".join(['"{}"'.format(each) for each in units[:-1]]), units[-1]
+                ", ".join([f'"{each}"' for each in units[:-1]]), units[-1]
             )
             raise ValueError(msg)
 
@@ -1726,7 +1726,7 @@ class Function(Field):
     def _call_or_raise(self, func, value, attr):
         if len(utils.get_func_args(func)) > 1:
             if self.parent.context is None:
-                msg = "No context available for Function field {!r}".format(attr)
+                msg = f"No context available for Function field {attr!r}"
                 raise ValidationError(msg)
             return func(value, self.parent.context)
         else:
