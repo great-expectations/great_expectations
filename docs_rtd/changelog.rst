@@ -4,8 +4,48 @@
 Changelog
 #########
 
-Develop
+0.13.23
 -----------------
+* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
+* [BUGFIX] fix update data docs as validation action (#3031)
+* [DOCS] Port over "How to configure an Expectation Store in Azure" from RTD to Docusaurus
+* [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus (#3018)
+* [DOCS] Port over "How to instantiate a Data Context w/o YML" from RTD to Docusaurus (#3011)
+* [DOCS] Port "How to configure a Validation Result store on a filesystem" from RTD to Docusaurus (#3025)
+* [DOCS] how to create multibatch expectations using evaluation parameters (#3039)
+* [DOCS] Port "How to create and edit Expectations with a Profiler" from RTD to Docussaurus. (#3048)
+* [DOCS] Port RTD adding validations data or suites to checkpoint (#3030)
+* [DOCS] Porting "How to create and edit Expectations with instant feedback from a sample Batch of data" from RTD to Docusaurus. (#3046)
+* [DOCS] GDOC-172/Add missing pages (#3007)
+* [DOCS] Port over "How to configure DataContext components using test_yaml_config" from RTD to Docusaurus
+* [DOCS] Port over "How to configure a Validation Result store to Postgres" from RTD to Docusaurus
+* [DOCS] Port over "How to configure an Expectation Store in S3" from RTD to Docusaurus
+* [DOCS] Port over "How to configure an Expectation Store on a filesystem" from RTD to Docusaurus
+* [DOCS] Port over "How to configure credentials using YAML or env vars" from RTD to Docusaurus
+* [DOCS] Port over "How to configure credentials using a secrets store" from RTD to Docusaurus
+* [DOCS] Port over "How to configure validation result store in GCS" from RTD to Docusaurus (#3019)
+* [DOCS] Port over "How to connect to an Athena DB" from RTD to Docusaurus
+* [DOCS] Port over "How to create a new ExpectationSuite from jsonschema" from RTD to Docusaurus (#3017)
+* [DOCS] Port over "How to deploy a scheduled checkpoint with cron" from RTD to Docusaurus
+* [DOCS] Port over "How to dynamically load evaluation parameters from DB" from RTD to Docusaurus (#3052)
+* [DOCS] Port over "How to host and share DataDocs on Amazon S3" from RTD to Docusaurus
+* [DOCS] Port over "How to implement custom notifications" from RTD to Docusaurus  (#3050)
+* [DOCS] Port over "How to instantiate a DataContext on Databricks Spark cluster" from RTD to Docusaurus
+* [DOCS] Port over "How to instantiate a DataContext on an EMR Spark Cluster" from RTD to Docusaurus (#3024)
+* [DOCS] Port over "How to trigger Opsgenie notifications as a validation action" from RTD to Docusaurus
+* [DOCS] Update titles of metadata store docs (#3016)
+* [DOCS] Port over "How to configure Expectation store to PostgreSQL" from RTD to Docusaurus (#3010)
+* [DOCS] Port over "How to configure a MetricsStore" from RTD to Docusaurus (#3009)
+* [DOCS] Port over "How to configure validation result store in Azure" from RTD to Docusaurus (#3014)
+* [DOCS] Port over "How to host and share DataDocs on Azure" from RTD to Docusaurus  (#3012)
+* [DOCS]Port "How to create and edit Expectations based on domain knowledge, without inspecting data directly" from RTD to Datasaurus. (#3047)
+* [DOCS] Ported "How to configure a Validation Result store in Amazon S3" from RTD to Docusaurus. (#3026)
+* [DOCS] how to validate without checkpoint (#3013)
+* [DOCS] validation action data docs update (convert from RTD to DocuSaurus) (#3015)
+* [DOCS] port of 'How to store Validation Results as a Validation Action' from RTD into Docusaurus. (#3023)
+* [MAINTENANCE] Cleanup (#3038)
+* [MAINTENANCE] Edits (Formatting) (#3022)
+
 
 0.13.22
 -----------------

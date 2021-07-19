@@ -289,7 +289,7 @@ class Validator:
         return self._execution_engine
 
     def list_available_expectation_types(self):
-        """ Returns a list of all expectations available to the validator"""
+        """Returns a list of all expectations available to the validator"""
         keys = dir(self)
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
