@@ -7,9 +7,9 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../tutorials/getting-started/intro.md)
-- [Created an Expectation Suite](../guides/connecting_to_your_data/how-to-create-a-new-expectation-suite-using-the-cli.md)
-- [Created a checkpoint for that Expectation Suite and a data asset](../guides/validation/checkpoints/how-to-create-a-new-checkpoint.md)
+- [Set up a working deployment of Great Expectations](../tutorials/getting_started/intro.md)
+- [Created an Expectation Suite](../guides/connecting_to_your_data/how_to_create_a_new_expectation_suite_using_the_cli.md)
+- [Created a checkpoint for that Expectation Suite and a data asset](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md)
 - Created an Airflow DAG file
 
 </Prerequisites>
@@ -64,5 +64,5 @@ Another option is to use the output of the `great_expectations --v3-api checkpoi
 Additional Resources
 --------------------
 
-Please see [How to configure a New Checkpoint using "test_yaml_config"](../guides/validation/checkpoints/how-to-configure-a-new-checkpoint-using-test_yaml_config.md) for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
+Please see [How to configure a New Checkpoint using "test_yaml_config"](../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
 
