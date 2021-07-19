@@ -2,15 +2,15 @@
 title: ✳ How to create and edit Expectations in bulk
 ---
 
+import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
+
 The `JsonSchemaProfiler` helps you quickly create [Expectation Suites](/docs/reference/expectation-suite-operations) from jsonschema files.
 
-:::note Prerequisites 
-This how-to guide assumes you have already:
+<Prerequisites>
 
-* Set up a [working deployment of Great Expectations](/docs/tutorials/getting-started/intro)
 * Have a valid jsonschema file that has top level object of type object.
 
-:::
+</Prerequisites>
 
 :::warning
 
@@ -61,14 +61,14 @@ context.save_expectation_suite(suite)
 Data Docs provides a concise and useful way to review the Expectation Suite that has been created.
 
 ````console
-   context.build_data_docs()
+context.build_data_docs()
 
 You can also review and update the Expectations created by the profiler to get to the Expectation Suite you want using ``great_expectations suite edit``.
 ````
 
 ### Additional notes
 
-:::note Important
+:::important
 
 Note that JsonSchemaProfiler generates Expectation Suites using column map expectations, which assumes a tabular data structure, because Great Expectations does not currently support nested data structures.
 :::
