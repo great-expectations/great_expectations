@@ -89,10 +89,8 @@ def test_ConfigOnlyDataContext_v013__initialization(
                 filter(
                     lambda element: element,
                     sorted(
-                        
-                            pattern.match(element) is not None
-                            for element in context.plugins_directory.split("/")[-3:]
-                        
+                        pattern.match(element) is not None
+                        for element in context.plugins_directory.split("/")[-3:]
                     ),
                 )
             )

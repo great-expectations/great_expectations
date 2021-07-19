@@ -90,9 +90,7 @@ def datasource_new(directory):
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
-        cli_message(
-            f"A new datasource '{datasource_name}' was added to your project."
-        )
+        cli_message(f"A new datasource '{datasource_name}' was added to your project.")
         toolkit.send_usage_message(
             data_context=context, event="cli.datasource.new", success=True
         )
@@ -118,9 +116,7 @@ def delete_datasource(directory, datasource):
         context.delete_datasource(datasource)
     except ValueError:
         cli_message(
-            "<red>{}</red>".format(
-                f"Datasource {datasource} could not be found."
-            )
+            "<red>{}</red>".format(f"Datasource {datasource} could not be found.")
         )
         sys.exit(1)
     try:
@@ -1107,8 +1103,7 @@ We could not determine the format of the file. What is it?
                 generator.get_available_data_asset_names()["names"], key=lambda x: x[0]
             )
             available_data_asset_names_str = [
-                f"{name[0]} ({name[1]})"
-                for name in available_data_asset_names
+                f"{name[0]} ({name[1]})" for name in available_data_asset_names
             ]
 
             data_asset_names_to_display = available_data_asset_names_str[:50]
@@ -1294,8 +1289,7 @@ Would you like to continue?"""
                     temp_generator.get_available_data_asset_names()["names"]
                 )
                 available_data_asset_names_str = [
-                    f"{name[0]} ({name[1]})"
-                    for name in available_data_asset_names
+                    f"{name[0]} ({name[1]})" for name in available_data_asset_names
                 ]
 
                 data_asset_names_to_display = available_data_asset_names_str
@@ -1628,9 +1622,7 @@ msg_prompt_choose_database = """
 Which database backend are you using?
 {}
 """.format(
-    "\n".join(
-        [f"    {i}. {db.value}" for i, db in enumerate(SupportedDatabases, 1)]
-    )
+    "\n".join([f"    {i}. {db.value}" for i, db in enumerate(SupportedDatabases, 1)])
 )
 
 msg_prompt_filesys_enter_base_path = """

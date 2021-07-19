@@ -179,7 +179,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -262,7 +262,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         if result.result is None or result.result.get("observed_value") is None:
             return "--"
@@ -305,7 +305,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         table_rows = []

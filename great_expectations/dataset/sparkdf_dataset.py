@@ -1638,9 +1638,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             sum_total (int): \
                 expected sum of columns
         """
-        expression = "+".join(
-            [f"COALESCE({col}, 0)" for col in column_list.columns]
-        )
+        expression = "+".join([f"COALESCE({col}, 0)" for col in column_list.columns])
         column_list = column_list.withColumn("actual_total", expr(expression))
         return column_list.withColumn(
             "__success",

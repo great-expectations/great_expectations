@@ -95,7 +95,7 @@ class URL(Validator):
         relative: bool = False,
         schemes: types.StrSequenceOrSet = None,
         require_tld: bool = True,
-        error: str = None
+        error: str = None,
     ):
         self.relative = relative
         self.error = error or self.default_message  # type: str
@@ -222,7 +222,7 @@ class Range(Validator):
         *,
         min_inclusive: bool = True,
         max_inclusive: bool = True,
-        error: str = None
+        error: str = None,
     ):
         self.min = min
         self.max = max
@@ -376,7 +376,7 @@ class Regexp(Validator):
         regex: typing.Union[str, bytes, typing.Pattern],
         flags=0,
         *,
-        error: str = None
+        error: str = None,
     ):
         self.regex = (
             re.compile(regex, flags) if isinstance(regex, (str, bytes)) else regex
@@ -477,7 +477,7 @@ class OneOf(Validator):
         choices: typing.Iterable,
         labels: typing.Iterable[str] = None,
         *,
-        error: str = None
+        error: str = None,
     ):
         self.choices = choices
         self.choices_text = ", ".join(str(choice) for choice in self.choices)

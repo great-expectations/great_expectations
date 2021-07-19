@@ -278,9 +278,7 @@ class ExpectationExplorer:
                 continue
             if kwarg_name in ancillary_kwargs:
                 continue
-            elif not hasattr(
-                self, f"generate_{kwarg_name}_widget_dict"
-            ):
+            elif not hasattr(self, f"generate_{kwarg_name}_widget_dict"):
                 expectation_kwargs[kwarg_name] = widget_dict.get("ge_kwarg_value")
             else:
                 expectation_kwargs[kwarg_name] = (
@@ -370,7 +368,7 @@ class ExpectationExplorer:
                         ge_kwarg_name
                     ] = self.generate_expectation_kwarg_fallback_widget_dict(
                         expectation_kwarg_name=ge_kwarg_name,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                 else:
                     self.update_kwarg_widget_dict(
@@ -390,12 +388,12 @@ class ExpectationExplorer:
                 widget_dict = (
                     widget_dict_generator(
                         expectation_state=existing_expectation_state,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                     if widget_dict_generator
                     else self.generate_expectation_kwarg_fallback_widget_dict(
                         expectation_kwarg_name=ge_kwarg_name,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                 )
                 current_expectation_kwarg_dict[ge_kwarg_name] = widget_dict
@@ -602,7 +600,7 @@ class ExpectationExplorer:
         expectation_state,
         output_strftime_format="",
         column=None,
-        **expectation_kwargs
+        **expectation_kwargs,
     ):
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
@@ -1021,7 +1019,7 @@ class ExpectationExplorer:
         expectation_state,
         parse_strings_as_datetimes=None,
         column=None,
-        **expectation_kwargs
+        **expectation_kwargs,
     ):
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]

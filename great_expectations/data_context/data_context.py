@@ -2566,9 +2566,7 @@ class BaseDataContext:
         datasource = self.get_datasource(datasource_name)
 
         if not dry_run:
-            logger.info(
-                f"Profiling '{datasource_name}' with '{profiler.__name__}'"
-            )
+            logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
 
         profiling_results = {}
 
@@ -2581,9 +2579,7 @@ class BaseDataContext:
             datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
         except KeyError:
             # KeyError will happen if there is not datasource
-            raise ge_exceptions.ProfilerError(
-                f"No datasource {datasource_name} found."
-            )
+            raise ge_exceptions.ProfilerError(f"No datasource {datasource_name} found.")
 
         if batch_kwargs_generator_name is None:
             # if no generator name is passed as an arg and the datasource has only
@@ -2817,9 +2813,7 @@ class BaseDataContext:
             run_name = run_name or "profiling"
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        logger.info(
-            f"Profiling '{datasource_name}' with '{profiler.__name__}'"
-        )
+        logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
 
         if not additional_batch_kwargs:
             additional_batch_kwargs = {}

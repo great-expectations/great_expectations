@@ -152,10 +152,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             number of data_references known by this DataConnector.
         """
         total_references: int = sum(
-            
-                len(self._data_references_cache[data_asset_name])
-                for data_asset_name in self._data_references_cache
-            
+            len(self._data_references_cache[data_asset_name])
+            for data_asset_name in self._data_references_cache
         )
 
         return total_references

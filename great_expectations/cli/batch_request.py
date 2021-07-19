@@ -172,10 +172,7 @@ def _get_data_asset_name_from_data_connector(
 
     data_asset_names_to_display: List[str] = available_data_asset_names_str[:50]
     choices: str = "\n".join(
-        [
-            f"    {i}. {name}"
-            for i, name in enumerate(data_asset_names_to_display, 1)
-        ]
+        [f"    {i}. {name}" for i, name in enumerate(data_asset_names_to_display, 1)]
     )
     prompt: str = msg_prompt_enter_data_asset_name + choices + "\n"
     data_asset_name_selection: str = click.prompt(prompt, show_default=False)

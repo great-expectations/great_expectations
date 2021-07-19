@@ -142,7 +142,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         notebook_config: Optional[NotebookTemplateConfig],
         default_file_name: str,
-        **default_kwargs
+        **default_kwargs,
     ):
         if notebook_config:
             rendered = self.template_env.get_template(notebook_config.file_name).render(

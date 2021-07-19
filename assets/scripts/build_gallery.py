@@ -127,9 +127,7 @@ def build_gallery(
     logger.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
     installed_packages_names = [i.key for i in installed_packages]
-    installed_packages_txt = sorted(
-        f"{i.key}=={i.version}" for i in installed_packages
-    )
+    installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
     logger.debug(f"Found the following packages: {installed_packages_txt}")
 
     import great_expectations
