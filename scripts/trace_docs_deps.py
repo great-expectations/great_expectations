@@ -33,8 +33,6 @@ import re
 import sys
 from typing import List, Set
 
-from great_expectations.data_context.util import file_relative_path
-
 
 def find_docusaurus_refs(dir: str) -> List[str]:
     """ Finds any Docusaurus links within a target directory (i.e. ```python file=...#L10-20) """
@@ -47,7 +45,7 @@ def find_docusaurus_refs(dir: str) -> List[str]:
         for line in open(doc):
             if re.search(pattern, line):
                 file: str = _parse_file_from_docusaurus_link(line)
-                path: str = file_relative_path(doc, file)
+                path: str = os.path.join(os.path.dirname(doc), file)
                 linked_files.add(path)
 
     return [file for file in linked_files]

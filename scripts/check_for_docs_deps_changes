@@ -3,8 +3,6 @@
 CHANGED_FILES=$(git diff HEAD origin/develop --name-only)
 printf '%s\n' "[CHANGED FILES]" "${CHANGED_FILES[@]}" ""
 
-pip install -e . > /dev/null 2>&1 # Necessary to get GE helper methods working for `trace_docs_deps.py`
-
 DEPENDENCIES=$(python scripts/trace_docs_deps.py docs)
 printf '%s\n' "[DEPENDENCIES]" "${DEPENDENCIES[@]}" ""
 
