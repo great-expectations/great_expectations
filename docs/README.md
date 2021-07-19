@@ -3,8 +3,6 @@ title: Documentation Site
 slug: /readme
 ---
 
-TEST
-
 This documentation site is built using [Docusaurus 2](https://v2.docusaurus.io/), a modern static website generator.
 
 ## System Requirements
