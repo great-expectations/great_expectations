@@ -21,14 +21,14 @@ This implementation does not traverse any levels of nesting.
 
 #### 1.Set a filename and a suite name
 
-````console
+````python
 jsonschema_file = "YOUR_JSON_SCHEMA_FILE.json"
 suite_name = "YOUR_SUITE_NAME"
 ````
 
 #### 2. Load a DataContext
 
-````console
+````python
 context = ge.data_context.DataContext()
 ````
 
