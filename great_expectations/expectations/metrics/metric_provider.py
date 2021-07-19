@@ -28,7 +28,7 @@ def metric_value(
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
     **kwargs
 ):
-    """The metric decorator annotates a method """
+    """The metric decorator annotates a method"""
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
@@ -49,7 +49,7 @@ def metric_partial(
     domain_type: Union[str, MetricDomainTypes],
     **kwargs
 ):
-    """The metric decorator annotates a method """
+    """The metric decorator annotates a method"""
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)

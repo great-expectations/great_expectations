@@ -5,7 +5,10 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
@@ -519,7 +522,7 @@ def test_map_column_value_lengths_between_pd():
 
 
 def test_map_unique_pd_column_exists():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, 4, None]}))
 
     metrics: dict = {}
 
@@ -529,7 +532,7 @@ def test_map_unique_pd_column_exists():
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
+    condition_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
@@ -538,11 +541,27 @@ def test_map_unique_pd_column_exists():
         },
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,),
+        metrics_to_resolve=(condition_metric,),
         metrics=metrics,
     )
+    metrics.update(results)
 
-    assert list(results[desired_metric.id][0]) == [False, False, True, True]
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert list(metrics[condition_metric.id][0]) == [False, False, True, True, False]
+    assert metrics[unexpected_count_metric.id] == 2
 
 
 def test_map_unique_pd_column_does_not_exist():
