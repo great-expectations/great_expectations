@@ -8,7 +8,6 @@ import numpy as np
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
@@ -1481,7 +1480,7 @@ class MapMetricProvider(MetricProvider):
             try:
                 _ = get_metric_provider(metric_name + ".aggregate_fn", execution_engine)
                 has_aggregate_fn = True
-            except MetricProviderError:
+            except ge_exceptions.MetricProviderError:
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
@@ -1525,7 +1524,7 @@ class MapMetricProvider(MetricProvider):
                 metric.metric_domain_kwargs,
                 metric.metric_value_kwargs,
             )
-        except MetricProviderError:
+        except ge_exceptions.MetricProviderError:
             pass
 
         return dependencies

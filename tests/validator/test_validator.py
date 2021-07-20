@@ -22,7 +22,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
@@ -176,10 +175,10 @@ def test_populate_dependencies_with_incorrect_metric_name():
                 configuration,
                 execution_engine=engine,
             )
-        except MetricProviderError as e:
+        except ge_exceptions.MetricProviderError as e:
             graph = e
 
-    assert isinstance(graph, MetricProviderError)
+    assert isinstance(graph, ge_exceptions.MetricProviderError)
 
 
 def test_graph_validate(basic_datasource):
