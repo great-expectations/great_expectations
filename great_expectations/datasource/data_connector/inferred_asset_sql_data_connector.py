@@ -240,20 +240,25 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             # Note Abe 20201112: This logic is currently untested.
             if include_views:
                 # Note: this is not implemented for bigquery
+                try:
+                    view_names = inspector.get_view_names(schema=schema_name)
+                except NotImplementedError:
+                    # Not implemented by Athena dialect
+                    pass
+                else:
+                    for view_name in view_names:
 
-                for view_name in inspector.get_view_names(schema=schema_name):
+                        if (ignore_information_schemas_and_system_tables) and (
+                            table_name in system_tables
+                        ):
+                            continue
 
-                    if (ignore_information_schemas_and_system_tables) and (
-                        table_name in system_tables
-                    ):
-                        continue
-
-                    tables.append(
-                        {
-                            "schema_name": schema_name,
-                            "table_name": view_name,
-                            "type": "view",
-                        }
-                    )
+                        tables.append(
+                            {
+                                "schema_name": schema_name,
+                                "table_name": view_name,
+                                "type": "view",
+                            }
+                        )
 
         return tables
