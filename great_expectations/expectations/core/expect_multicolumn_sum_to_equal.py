@@ -35,6 +35,7 @@ class ExpectMulticolumnSumToEqual(TableExpectation):
         "condition",
         "unexpected_count",
         # WARNING: Commented out suffixes result in unavailable metrics, due to dependency on the "column" domain key.
+        # A plausible work-around: check whether or not the "column" domain key is present in "accessor_domain_kwargs".
         # "unexpected_index_list",
         # "unexpected_rows",
     )
