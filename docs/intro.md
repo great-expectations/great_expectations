@@ -3,7 +3,9 @@ title: Welcome
 slug: /
 ---
 
-Welcome to Great Expectations!
+THIS IS A CHANGE MADE TO TRIGGER THE DOCS INTEGRATION PIPELINE IN ORDER TO TEST SNOWFLAKE
+
+Welcome to Great Expectations! 
 
 Great Expectations is the leading tool for [validating](./reference/core_concepts#expectations), [documenting](./reference/core_concepts#data-docs), and [profiling](./reference/core_concepts#profiling) your data to maintain quality and improve communication between teams. Head over to our [getting started](./tutorials/getting_started/intro) tutorial.
 
