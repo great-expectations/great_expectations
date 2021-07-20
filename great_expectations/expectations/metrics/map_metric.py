@@ -8,7 +8,6 @@ import numpy as np
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
@@ -670,25 +669,27 @@ def _pandas_map_condition_index(
         "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
     )
 
-    column_name = accessor_domain_kwargs["column"]
+    if "column" in accessor_domain_kwargs:
+        column_name = accessor_domain_kwargs["column"]
 
-    if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
-            message=f'Error: The column "{column_name}" in BatchData does not exist.'
-        )
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
 
-    if filter_column_isnull:
-        df = df[df[column_name].notnull()]
+        if filter_column_isnull:
+            df = df[df[column_name].notnull()]
 
     result_format = metric_value_kwargs["result_format"]
+
     if result_format["result_format"] == "COMPLETE":
         return list(df[boolean_mapped_unexpected_values].index)
-    else:
-        return list(
-            df[boolean_mapped_unexpected_values].index[
-                : result_format["partial_unexpected_count"]
-            ]
-        )
+
+    return list(
+        df[boolean_mapped_unexpected_values].index[
+            : result_format["partial_unexpected_count"]
+        ]
+    )
 
 
 def _pandas_column_map_condition_value_counts(
@@ -789,23 +790,25 @@ def _pandas_map_condition_rows(
         "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
     )
 
-    column_name = accessor_domain_kwargs["column"]
+    if "column" in accessor_domain_kwargs:
+        column_name = accessor_domain_kwargs["column"]
 
-    if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
-            message=f'Error: The column "{column_name}" in BatchData does not exist.'
-        )
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
 
-    if filter_column_isnull:
-        df = df[df[column_name].notnull()]
+        if filter_column_isnull:
+            df = df[df[column_name].notnull()]
 
     result_format = metric_value_kwargs["result_format"]
+
     if result_format["result_format"] == "COMPLETE":
         return df[boolean_mapped_unexpected_values]
-    else:
-        return df[boolean_mapped_unexpected_values][
-            result_format["partial_unexpected_count"]
-        ]
+
+    return df[boolean_mapped_unexpected_values][
+        result_format["partial_unexpected_count"]
+    ]
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
@@ -1477,7 +1480,7 @@ class MapMetricProvider(MetricProvider):
             try:
                 _ = get_metric_provider(metric_name + ".aggregate_fn", execution_engine)
                 has_aggregate_fn = True
-            except MetricProviderError:
+            except ge_exceptions.MetricProviderError:
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
@@ -1521,7 +1524,7 @@ class MapMetricProvider(MetricProvider):
                 metric.metric_domain_kwargs,
                 metric.metric_value_kwargs,
             )
-        except MetricProviderError:
+        except ge_exceptions.MetricProviderError:
             pass
 
         return dependencies

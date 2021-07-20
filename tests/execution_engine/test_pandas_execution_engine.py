@@ -10,7 +10,7 @@ import pytest
 from botocore.errorfactory import ClientError
 from moto import mock_s3
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
     PathBatchSpec,
@@ -19,7 +19,6 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
@@ -281,7 +280,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     )
     desired_metrics = (mean, stdev)
 
-    with pytest.raises(MetricProviderError) as e:
+    with pytest.raises(ge_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
