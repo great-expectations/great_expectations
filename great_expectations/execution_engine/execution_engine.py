@@ -50,7 +50,7 @@ class MetricFunctionTypes(Enum):
 
 
 class MetricDomainTypes(Enum):
-    IDENTITY = "identity"
+    IDENTITY = "identity"  # Instructs ExecutionEngine not to split accessor_domain_kwargs out of domain_kwargs; hence, compute_domain_kwargs returned by ExecutionEngine will be domain_kwargs (unaltered).
     COLUMN = "column"
     COLUMN_PAIR = "column_pair"
     MULTICOLUMN = "multicolumn"
