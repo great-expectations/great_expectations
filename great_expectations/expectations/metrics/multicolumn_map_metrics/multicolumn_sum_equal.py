@@ -1,8 +1,5 @@
 from typing import Any, Dict, Tuple
 
-import pandas as pd
-from dateutil.parser import parse
-
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
@@ -10,22 +7,20 @@ from great_expectations.execution_engine.execution_engine import (
 )
 from great_expectations.expectations.metrics.map_metric import MapMetricProvider
 from great_expectations.expectations.metrics.metric_provider import metric_partial
-from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 
 
 class MulticolumnSumEqual(MapMetricProvider):
     condition_metric_name = "multicolumn_sum.equal"
     condition_value_keys = ("sum_total",)
-    domain_keys = ("batch_id", "table", "columns")
+    condition_domain_keys = ("batch_id", "table", "column_list")
 
-    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (for investigation purposes).</Alex>
     @metric_partial(
         engine=PandasExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-        # domain_type=MetricDomainTypes.MULTICOLUMN,
-        domain_type=MetricDomainTypes.IDENTITY,
+        domain_type=MetricDomainTypes.MULTICOLUMN,
+        # domain_type=MetricDomainTypes.IDENTITY,  # In which situations should this "domain_type" be used?
     )
-    # TODO: <Alex>ALEX</Alex>
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
@@ -34,19 +29,23 @@ class MulticolumnSumEqual(MapMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-
         sum_total = metric_value_kwargs.get("sum_total")
-        # TODO: <Alex>ALEX</Alex>
         (
             df,
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
-            # metric_domain_kwargs, MetricDomainTypes.MULTICOLUMN
             metric_domain_kwargs,
-            MetricDomainTypes.IDENTITY,
+            MetricDomainTypes.MULTICOLUMN
+            # MetricDomainTypes.IDENTITY  # In which situations should this "domain_type" be used?
         )
-        # TODO: <Alex>ALEX</Alex>
 
-        row_wise_cond = df.sum(axis=1) == sum_total
+        # Is logic based on specific "accessor_domain_kwargs" keys a proper coding pattern in metric implementations?
+        if "column_list" in accessor_domain_kwargs:
+            df = df[accessor_domain_kwargs["column_list"]]
+
+        # The fact that this condition metric must implement the negative logic in order to obtain the correct result
+        # suggests the need for another condition style metric provider (e.g., "MulticolumnMapMetricProvider").
+        row_wise_cond = ~(df.sum(axis=1) == sum_total)
+
         return row_wise_cond, compute_domain_kwargs, accessor_domain_kwargs
