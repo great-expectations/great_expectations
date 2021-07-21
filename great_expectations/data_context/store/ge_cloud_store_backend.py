@@ -109,7 +109,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        data["data"]["attributes"][post_body_key] = loads(value)
+        data["data"]["attributes"][post_body_key] = value
 
         url = urljoin(
             self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource)}"
