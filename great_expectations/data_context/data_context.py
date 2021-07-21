@@ -3833,25 +3833,32 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
     @classmethod
-    def find_context_root_dir(cls):
+    def find_context_root_dir(cls, ge_cloud_mode=False):
+        if ge_cloud_mode:
+            target_filename = cls.GE_CLOUD_DOTFILE
+        else:
+            target_filename = cls.GE_YML
         result = None
-        yml_path = None
+        target_path = None
         ge_home_environment = os.getenv("GE_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
-                os.path.join(ge_home_environment, "great_expectations.yml")
+                os.path.join(ge_home_environment, target_filename)
             ):
                 result = ge_home_environment
         else:
-            yml_path = cls.find_context_yml_file()
-            if yml_path:
-                result = os.path.dirname(yml_path)
+            target_path = cls.find_context_yml_file()
+            if target_path:
+                result = os.path.dirname(target_path)
 
         if result is None:
             raise ge_exceptions.ConfigNotFoundError()
 
-        logger.debug("Using project config: {}".format(yml_path))
+        if ge_cloud_mode:
+            logger.debug("Context root dir found at: {}".format(result))
+        else:
+            logger.debug("Using project config: {}".format(target_path))
         return result
 
     @classmethod
