@@ -901,11 +901,11 @@ class NotebooksConfigSchema(Schema):
 
 class GeCloudConfig(DictDot):
     def __init__(
-            self,
-            ge_cloud_base_url: str,
-            ge_cloud_account_id: str,
-            ge_cloud_access_token: str,
-            ge_cloud_data_context_id: Optional[str] = None,
+        self,
+        ge_cloud_base_url: str,
+        ge_cloud_account_id: str,
+        ge_cloud_access_token: str,
+        ge_cloud_data_context_id: Optional[str] = None,
     ):
         self.ge_cloud_base_url = ge_cloud_base_url
         self.ge_cloud_data_context_id = ge_cloud_data_context_id

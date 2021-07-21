@@ -57,7 +57,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "expectation_suite": "expectation_suites",
     "expectation_suite_validation_result": "expectation_suite_validation_results",
     "expectation_validation_result": "expectation_validation_results",
-    "data_context_config": "data_context_configs"
+    "data_context_config": "data_context_configs",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT = {
@@ -68,7 +68,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "expectation_suites": "expectation_suite",
     "expectation_suite_validation_results": "expectation_suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
-    "data_context_configs": "data_context_config"
+    "data_context_configs": "data_context_config",
 }
 
 
