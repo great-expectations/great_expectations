@@ -4,7 +4,6 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import numpy as np
-import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -519,7 +518,7 @@ def _pandas_column_map_condition_values(
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     (
-        boolean_map_unexpected_values,
+        boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
@@ -554,15 +553,14 @@ def _pandas_column_map_condition_values(
 
     domain_values = df[column_name]
 
+    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+
     result_format = metric_value_kwargs["result_format"]
+
     if result_format["result_format"] == "COMPLETE":
-        return list(domain_values[boolean_map_unexpected_values == True])
+        return list(domain_values)
     else:
-        return list(
-            domain_values[boolean_map_unexpected_values == True][
-                : result_format["partial_unexpected_count"]
-            ]
-        )
+        return list(domain_values[: result_format["partial_unexpected_count"]])
 
 
 def _pandas_column_map_series_and_domain_values(
@@ -575,7 +573,7 @@ def _pandas_column_map_series_and_domain_values(
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     (
-        boolean_map_unexpected_values,
+        boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
@@ -621,24 +619,20 @@ def _pandas_column_map_series_and_domain_values(
 
     domain_values = df[column_name]
 
+    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    map_series = map_series[boolean_mapped_unexpected_values == True]
+
     result_format = metric_value_kwargs["result_format"]
+
     if result_format["result_format"] == "COMPLETE":
         return (
-            list(domain_values[boolean_map_unexpected_values == True]),
-            list(map_series[boolean_map_unexpected_values == True]),
+            list(domain_values),
+            list(map_series),
         )
     else:
         return (
-            list(
-                domain_values[boolean_map_unexpected_values == True][
-                    : result_format["partial_unexpected_count"]
-                ]
-            ),
-            list(
-                map_series[boolean_map_unexpected_values == True][
-                    : result_format["partial_unexpected_count"]
-                ]
-            ),
+            list(domain_values[: result_format["partial_unexpected_count"]]),
+            list(map_series[: result_format["partial_unexpected_count"]]),
         )
 
 
@@ -683,14 +677,12 @@ def _pandas_map_condition_index(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format["result_format"] == "COMPLETE":
-        return list(df[boolean_mapped_unexpected_values].index)
+    df = df[boolean_mapped_unexpected_values]
 
-    return list(
-        df[boolean_mapped_unexpected_values].index[
-            : result_format["partial_unexpected_count"]
-        ]
-    )
+    if result_format["result_format"] == "COMPLETE":
+        return list(df.index)
+
+    return list(df.index[: result_format["partial_unexpected_count"]])
 
 
 def _pandas_column_map_condition_value_counts(
@@ -804,11 +796,7 @@ def _pandas_map_condition_rows(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if (
-        isinstance(boolean_mapped_unexpected_values, pd.Series)
-        and boolean_mapped_unexpected_values.name
-    ) or isinstance(boolean_mapped_unexpected_values, np.ndarray):
-        df = df[boolean_mapped_unexpected_values]
+    df = df[boolean_mapped_unexpected_values]
 
     if result_format["result_format"] == "COMPLETE":
         return df
