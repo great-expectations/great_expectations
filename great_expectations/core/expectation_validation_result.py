@@ -1,6 +1,8 @@
 import json
 import logging
 from copy import deepcopy
+from typing import Optional
+from uuid import UUID
 
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
@@ -43,6 +45,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result=None,
         meta=None,
         exception_info=None,
+        ge_cloud_id: Optional[UUID] = None,
     ):
         if result and not self.validate_result_dict(result):
             raise InvalidCacheValueError(result)

@@ -92,8 +92,6 @@ class ValidationsStore(Store):
 
     _key_class = ValidationResultIdentifier
 
-
-
     def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
         self._expectationSuiteValidationResultSchema = (
             ExpectationSuiteValidationResultSchema()
@@ -154,13 +152,12 @@ class ValidationsStore(Store):
         deserialization into a GE object
         """
         ge_cloud_suite_validation_result_id = response_json["data"]["id"]
-        suite_validation_result_dict = response_json["data"]["attributes"][
-            "result"
-        ]
-        suite_validation_result_dict["ge_cloud_id"] = ge_cloud_suite_validation_result_id
+        suite_validation_result_dict = response_json["data"]["attributes"]["result"]
+        suite_validation_result_dict[
+            "ge_cloud_id"
+        ] = ge_cloud_suite_validation_result_id
 
-        return checkpoint_config_dict
-
+        return suite_validation_result_dict
 
     def serialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.dumps(value)
@@ -217,7 +214,7 @@ class ValidationsStore(Store):
             key=test_key,
         )
         if pretty_print:
-            print("\tTest value successfully retreived.")
+            print("\tTest value successfully retrieved.")
             print()
 
         return return_obj
