@@ -7,7 +7,7 @@ This guide will help you add an Athena instance (or a database) as a Datasource.
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting-started/intro.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
   - Installed the pyathena package for the Athena sqlalchemy dialect (``pip install "pyathena[SQLAlchemy]"``)
 
 </Prerequisites>
