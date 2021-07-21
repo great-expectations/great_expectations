@@ -3936,6 +3936,34 @@ class DataContext(BaseDataContext):
 
         return yml_path
 
+    # TODO: Unify with find_context_yml_file at next major release
+    @classmethod
+    def find_ge_cloud_dotfile(cls, search_start_dir=None):
+        """Search for the GE Cloud  dotfile starting here and moving upward."""
+        dotfile_path = None
+        if search_start_dir is None:
+            search_start_dir = os.getcwd()
+
+        for i in range(4):
+            logger.debug(
+                "Searching for GE dotfile {} ({} layer deep)".format(
+                    search_start_dir, i
+                )
+            )
+
+            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
+
+            if os.path.isdir(potential_ge_dir):
+                potential_dotfile = os.path.join(potential_ge_dir, cls.GE_CLOUD_DOTFILE)
+                if os.path.isfile(potential_dotfile):
+                    dotfile_path = potential_dotfile
+                    logger.debug("Found dotfile at " + str(dotfile_path))
+                    break
+            # move up one directory
+            search_start_dir = os.path.dirname(search_start_dir)
+
+        return dotfile_path
+
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir):
         """Return True if the great_expectations.yml exists on disk."""
