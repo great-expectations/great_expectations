@@ -3747,7 +3747,53 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None, runtime_environment=None):
+    def _initialize_ge_cloud_config(
+            self,
+            ge_cloud_base_url: Optional[str] = None,
+            ge_cloud_account_id: Optional[str] = None,
+            ge_cloud_access_token: Optional[str] = None,
+            ge_cloud_data_context_id: Optional[str] = None,
+        ):
+        ge_cloud_base_url = ge_cloud_base_url or super()._get_global_config_value(
+            environment_variable="GE_CLOUD_DATA_CONTEXT_ID", conf_file_section="ge_cloud",
+            conf_file_option="data_context_id"
+        ) or "https://app.greatexpectations.io/"
+        ge_cloud_data_context_id = ge_cloud_data_context_id or super()._get_global_config_value(
+            environment_variable="GE_CLOUD_DATA_CONTEXT_ID", conf_file_section="ge_cloud",
+            conf_file_option="data_context_id"
+        )
+        ge_cloud_account_id = ge_cloud_account_id or super()._get_global_config_value(
+            environment_variable="GE_CLOUD_ACCOUNT_ID", conf_file_section="ge_cloud",
+            conf_file_option="account_id"
+        )
+        ge_cloud_access_token = ge_cloud_access_token or super()._get_global_config_value(
+            environment_variable="GE_CLOUD_ACCESS_TOKEN", conf_file_section="ge_cloud",
+            conf_file_option="access_token"
+        )
+        self._ge_cloud_config = GeCloudConfig(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_account_id=ge_cloud_account_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_data_context_id=ge_cloud_data_context_id,
+        )
+
+    def __init__(
+            self,
+            context_root_dir: Optional[str] = None,
+            runtime_environment: Optional[dict] = None,
+            ge_cloud_base_url: Optional[str] = None,
+            ge_cloud_account_id: Optional[str] = None,
+            ge_cloud_access_token: Optional[str] = None,
+            ge_cloud_data_context_id: Optional[str] = None,
+            ge_cloud_mode: bool = False,
+            create_new_if_not_found: bool = False
+    ):
+        if ge_cloud_mode:
+            self._initialize_ge_cloud_config(
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_account_id=ge_cloud_account_id,
+                ge_cloud_access_token=ge_cloud_access_token,
+            )
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
