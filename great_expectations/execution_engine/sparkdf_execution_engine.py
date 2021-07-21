@@ -443,9 +443,11 @@ Please check your config."""
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "columns" in compute_domain_kwargs:
-                # If columns exist
-                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+            if "column_list" in compute_domain_kwargs:
+                # If column_list exists
+                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                    "column_list"
+                )
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
@@ -464,8 +466,8 @@ Please check your config."""
             else:
 
                 # If we would like our data to become a multicolumn
-                if "columns" in compute_domain_kwargs:
-                    data = data.select(compute_domain_kwargs["columns"])
+                if "column_list" in compute_domain_kwargs:
+                    data = data.select(compute_domain_kwargs["column_list"])
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
