@@ -1447,7 +1447,7 @@ def profile_datasource(
     open_docs=False,
     skip_prompt_flag=False,
 ):
-    """"Profile a named datasource using the specified context"""
+    """Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
     # more control over console UI.
     logging.getLogger("great_expectations.profile.basic_dataset_profiler").setLevel(

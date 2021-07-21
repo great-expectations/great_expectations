@@ -173,9 +173,9 @@ information.  Please ensure that the specified column name refers to exactly one
         }:
             semantic_column_type = SemanticDomainTypes.CURRENCY
         elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.IDENTITY_TYPE_NAMES
+            type_name.upper() for type_name in ProfilerTypeMapping.IDENTIFIER_TYPE_NAMES
         }:
-            semantic_column_type = SemanticDomainTypes.IDENTITY
+            semantic_column_type = SemanticDomainTypes.IDENTIFIER
         elif column_type in (
             {
                 type_name.upper()

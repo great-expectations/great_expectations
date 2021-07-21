@@ -369,7 +369,7 @@ class DataConnector:
             )
         )
 
-        if pretty_print and df is not None:
+        if pretty_print and data is not None:
             print(f"\n\t\tShowing 5 rows")
             print(data)
 
