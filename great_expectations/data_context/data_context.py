@@ -73,7 +73,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema,
+    datasourceConfigSchema, GeCloudConfig,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -238,6 +238,7 @@ class BaseDataContext:
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
+    GE_CLOUD_DOTFILE = ".great_expectations_cloud"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
