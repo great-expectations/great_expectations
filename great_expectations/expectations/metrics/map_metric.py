@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import numpy as np
+import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -803,12 +804,16 @@ def _pandas_map_condition_rows(
 
     result_format = metric_value_kwargs["result_format"]
 
-    if result_format["result_format"] == "COMPLETE":
-        return df[boolean_mapped_unexpected_values]
+    if (
+        isinstance(boolean_mapped_unexpected_values, pd.Series)
+        and boolean_mapped_unexpected_values.name
+    ) or isinstance(boolean_mapped_unexpected_values, np.ndarray):
+        df = df[boolean_mapped_unexpected_values]
 
-    return df[boolean_mapped_unexpected_values][
-        result_format["partial_unexpected_count"]
-    ]
+    if result_format["result_format"] == "COMPLETE":
+        return df
+
+    return df.iloc[: result_format["partial_unexpected_count"]]
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
@@ -1298,7 +1303,6 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_pandas_column_map_condition_value_counts,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
-
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
                         metric_name=metric_name + ".condition",
@@ -1437,7 +1441,6 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_spark_column_map_condition_value_counts,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
-
             elif metric_fn_type in [
                 MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_FN,
