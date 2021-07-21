@@ -899,6 +899,20 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class GeCloudConfig(DictDot):
+    def __init__(
+            self,
+            ge_cloud_base_url: str,
+            ge_cloud_account_id: str,
+            ge_cloud_access_token: str,
+            ge_cloud_data_context_id: Optional[str] = None,
+    ):
+        self.ge_cloud_base_url = ge_cloud_base_url
+        self.ge_cloud_data_context_id = ge_cloud_data_context_id
+        self.ge_cloud_account_id = ge_cloud_account_id
+        self.ge_cloud_access_token = ge_cloud_access_token
+
+
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
