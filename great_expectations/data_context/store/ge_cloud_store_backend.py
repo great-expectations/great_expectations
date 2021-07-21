@@ -86,12 +86,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 str(jsonError),
             )
             raise StoreBackendError("Unable to get object in GE Cloud Store Backend.")
-        return jsonResponse
 
     def _move(self):
         pass
 
     def _set(self, key, value, **kwargs):
+        # Each resource type has corresponding attribute key to include in POST body
         post_body_keys = {
             "suite_validation_result": "result",
             "checkpoint": "checkpoint_config",
