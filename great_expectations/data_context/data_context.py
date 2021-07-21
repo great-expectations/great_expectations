@@ -3755,8 +3755,8 @@ class DataContext(BaseDataContext):
             ge_cloud_data_context_id: Optional[str] = None,
         ):
         ge_cloud_base_url = ge_cloud_base_url or super()._get_global_config_value(
-            environment_variable="GE_CLOUD_DATA_CONTEXT_ID", conf_file_section="ge_cloud",
-            conf_file_option="data_context_id"
+            environment_variable="GE_CLOUD_BASE_URL", conf_file_section="ge_cloud",
+            conf_file_option="base_url"
         ) or "https://app.greatexpectations.io/"
         ge_cloud_data_context_id = ge_cloud_data_context_id or super()._get_global_config_value(
             environment_variable="GE_CLOUD_DATA_CONTEXT_ID", conf_file_section="ge_cloud",
