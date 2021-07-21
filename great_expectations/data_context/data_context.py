@@ -3797,10 +3797,14 @@ class DataContext(BaseDataContext):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
-            context_root_dir = self.find_context_root_dir()
-        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
-        self._context_root_directory = context_root_directory
+            try:
+                context_root_dir = self.find_context_root_dir(ge_cloud_mode=ge_cloud_mode)
+                context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
+            except ge_exceptions.ConfigNotFoundError as e:
+                if not create_new_if_not_found:
+                    raise e
 
+        self._context_root_directory = context_root_directory
         project_config = self._load_project_config()
         super().__init__(project_config, context_root_directory, runtime_environment)
 
@@ -3895,7 +3899,10 @@ class DataContext(BaseDataContext):
             ):
                 result = ge_home_environment
         else:
-            target_path = cls.find_context_yml_file()
+            if ge_cloud_mode:
+                target_path = cls.find_ge_cloud_dotfile()
+            else:
+                target_path = cls.find_context_yml_file()
             if target_path:
                 result = os.path.dirname(target_path)
 
