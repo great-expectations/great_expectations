@@ -373,3 +373,11 @@ class SorterError(DataContextError):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+
+class MetricError(GreatExpectationsError):
+    pass
+
+
+class MetricProviderError(MetricError):
+    pass

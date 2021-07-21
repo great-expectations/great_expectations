@@ -4,14 +4,12 @@ import os
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.exceptions.exceptions import InvalidConfigError
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
@@ -102,7 +100,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
 
 
 def test_instantiation_error_states(sa, test_db_connection_string):
-    with pytest.raises(InvalidConfigError):
+    with pytest.raises(ge_exceptions.InvalidConfigError):
         SqlAlchemyExecutionEngine()
 
 
@@ -497,7 +495,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
     )
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(GreatExpectationsError) as e:
+    with pytest.raises(ge_exceptions.GreatExpectationsError) as e:
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
@@ -535,7 +533,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
-    with pytest.raises(MetricProviderError) as e:
+    with pytest.raises(ge_exceptions.MetricProviderError) as e:
         res = engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
