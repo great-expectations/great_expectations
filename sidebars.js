@@ -45,7 +45,7 @@ module.exports = {
               type: 'category',
               label: 'Configuring Data Contexts',
               items: [
-                'guides/setup/configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli',
+                'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
                 'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
                 'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables',
                 'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store',
@@ -88,7 +88,6 @@ module.exports = {
             'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
             'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
             'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-            'guides/connecting_to_your_data/how_to_create_a_new_expectation_suite_using_the_cli',
             'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
             {
               type: 'category',
@@ -234,8 +233,7 @@ module.exports = {
                 'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
               ]
-            },
-            'guides/validation/how_to_validate_data_without_a_checkpoint'
+            }
           ]
         },
         {
