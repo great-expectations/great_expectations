@@ -14,12 +14,16 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 
 </Prerequisites>
 
-Using checkpoints is the most straightforward way to trigger a validation run from within Airflow. The following sections describe two alternative approaches to accomplishing this.
+Using checkpoints is the most straightforward way to trigger a validation run from within Airflow. 
+
+The following sections describe two alternative approaches to accomplishing this:
+ 1. [Running a checkpoint with a BashOperator](#option-1-running-a-checkpoint-with-a-bashoperator)
+ 2. [Running the `checkpoint script` output with a PythonOperator](#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 
 Steps
 -----
 
-### Running a checkpoint with a BashOperator
+### Option 1: Running a checkpoint with a BashOperator
 
 You can use a simple `BashOperator` in Airflow to trigger the checkpoint run. The following snippet shows an Airflow task for an Airflow DAG named `dag` that triggers the run of a checkpoint we named `my_checkpoint`:
 
@@ -31,7 +35,7 @@ validation_task = BashOperator(
 )
 ```
 
-### Running the `checkpoint script` output with a PythonOperator
+### Option 2: Running the `checkpoint script` output with a PythonOperator
 
 Another option is to use the output of the `great_expectations --v3-api checkpoint script` command and paste it into a method that is called from a PythonOperator in the DAG. This gives you more fine-grained control over how to respond to validation results:
 
