@@ -200,7 +200,7 @@ class ValidationsStore(Store):
             key=test_key,
         )
         if pretty_print:
-            print("\tTest value successfully retreived.")
+            print("\tTest value successfully retrieved.")
             print()
 
         return return_obj

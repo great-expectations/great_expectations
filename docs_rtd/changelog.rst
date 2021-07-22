@@ -4,6 +4,10 @@
 Changelog
 #########
 
+develop
+-----------------
+* [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
+
 0.13.23
 -----------------
 * [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
@@ -61,7 +65,7 @@ Changelog
 * [DOCS] Adding in url links and style (#2999)
 * [DOCS] Adding a missing import to a documentation page (#2983) (thanks @rishabh-bhargava)
 * [DOCS]/GDOC-108/GDOC-143/Add in Contributing fields and updates (#2972)
-* [DOCS] Update rule-based profiler docs (#2987)    
+* [DOCS] Update rule-based profiler docs (#2987)
 * [DOCS] add image zoom plugin (#2979)
 * [MAINTENANCE] fix lint issues for docusaurus (#3004)
 * [Maintenance] update header to match GE.io (#2811)
@@ -1177,7 +1181,7 @@ v0.7.11
 * Fix logic for the 'auto' bin selection of `build_continuous_partition_object`
 * Add missing jinja2 dependency
 * Fix an issue with inconsistent availability of strict_min and strict_max options on expect_column_values_to_be_between
-* Fix an issue where expectation suite evaluation_parameters could be overriden by values during validate operation
+* Fix an issue where expectation suite evaluation_parameters could be overridden by values during validate operation
 
 
 v0.7.10
