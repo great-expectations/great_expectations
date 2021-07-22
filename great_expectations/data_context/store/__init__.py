@@ -39,6 +39,6 @@ for module_name, package_name in [
     (".tuple_store_backend", "great_expectations.data_context.store"),
     (".database_store_backend", "great_expectations.data_context.store"),
     (".ge_cloud_store_backend", "great_expectations.data_context.store"),
-    (".data_context_config_store", "great_expectations.data_context.store"),
+    (".data_context_store", "great_expectations.data_context.store"),
 ]:
     verify_dynamic_loading_support(module_name=module_name, package_name=package_name)
