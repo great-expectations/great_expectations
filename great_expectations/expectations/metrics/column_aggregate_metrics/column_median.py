@@ -111,7 +111,7 @@ class ColumnMedian(ColumnMetricProvider):
         # Note that this can be an expensive computation; we are not exposing
         # spark's ability to estimate.
         # We add two to 2 * n_values to maintain a legitimate quantile
-        # in the degnerate case when n_values = 0
+        # in the degenerate case when n_values = 0
 
         """Spark Median Implementation"""
         table_row_count = metrics.get("table.row_count")

@@ -197,7 +197,7 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
 
 - A ``BatchSpec`` is a set of specific instructions for the ``ExecutionEngine`` to fetch specific data; it is the ExecutionEngine-specific version of the BatchDefinition. For example, a ``BatchSpec`` could include the path to files, information about headers, or other configuration required to ensure the data is loaded properly for validation.
 
-4. During initilization of the Batch, ``BatchMarkers``, calculated by the ``ExecutionEngine``, are also added. They are metadata that can be used to calculate performance characteristics, ensure reproducibility of validation results, and provide indicators of the state of the underlying data system.
+4. During initialization of the Batch, ``BatchMarkers``, calculated by the ``ExecutionEngine``, are also added. They are metadata that can be used to calculate performance characteristics, ensure reproducibility of validation results, and provide indicators of the state of the underlying data system.
 
 .. _runtime_data_connector_and_runtime_batch_request:
 ************************************************************

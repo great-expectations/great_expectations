@@ -1080,7 +1080,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         idx = 0
         bins = list(bins)
 
-        # If we have an infinte lower bound, don't express that in sql
+        # If we have an infinite lower bound, don't express that in sql
         if (
             bins[0]
             == get_sql_dialect_floating_point_infinity_value(
