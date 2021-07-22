@@ -3798,6 +3798,10 @@ class DataContext(BaseDataContext):
             ge_cloud_data_context_id=ge_cloud_data_context_id,
         )
 
+    @property
+    def ge_cloud_config(self):
+        return self._ge_cloud_config
+
     def __init__(
         self,
         context_root_dir: Optional[str] = None,
