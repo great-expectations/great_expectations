@@ -91,7 +91,7 @@ class ExpectationValidationResult(SerializableDictDot):
                         )
                     ),
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
-                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
+                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
                     # handled appropriately.
                     (self.result is None and other.result is None)
                     or (all(self.result) == all(other.result)),
