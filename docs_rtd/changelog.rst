@@ -10,6 +10,7 @@ develop
 
 0.13.24
 -----------------
+* [FEATURE] Script to automate proper triggering of Docs Azure pipeline (#3003)
 * [BUGFIX] Fix an undefined name that could lead to a NameError (#3063) (Thanks @cclauss)
 * [BUGFIX] fix incorrect pandas top rows usage (#3091)
 * [BUGFIX] Fix parens in Expectation metric validation method that always returned True assertation (#3086) (Thanks @morland96)
@@ -25,7 +26,6 @@ develop
 * [DOCS] Port over “How to create renderers for custom Expectations” from RTD to Docusaurus
 * [DOCS] Port over “How to run a Checkpoint in Airflow” from RTD to Docusaurus (#3074)
 * [DOCS] Update how-to-create-and-edit-expectations-in-bulk.md (#3073)
-* [FEATURE] Script to automate proper triggering of Docs Azure pipeline (#3003)
 * [MAINTENANCE] Adding a comment explaining the IDENTITY metric domain type. (#3057)
 * [MAINTENANCE] Change domain key value from “column” to “column_list” in ExecutionEngine implementations (#3059)
 * [MAINTENANCE] clean up metric errors (#3085)
