@@ -54,7 +54,7 @@ Steps
         * Column map Expectations: ``expect_column_values_...`` (e.g., ``expect_column_values_to_match_regex``)
         * Column aggregate Expectations: ``expect_column_...`` (e.g., ``expect_column_mean_to_be_between``)
         * Column pair map Expectations: ``expect_column_pair_values_...`` (e.g., ``expect_column_pair_values_to_be_in_set``)
-        * Table Expectatons: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
+        * Table Expectations: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
 
     #. Name the file
 
@@ -314,7 +314,7 @@ Steps
 
                     The Expectation declares  "column_values.z_score.under_threshold" as its ``condition_metric_name`` (the Metric that answers the yes/no question for every row).
 
-                    The ``ColumnValuesZScore`` Metric Provider class that computes this Metric declares an additonal metric:
+                    The ``ColumnValuesZScore`` Metric Provider class that computes this Metric declares an additional metric:
 
                     .. code-block:: python
 
