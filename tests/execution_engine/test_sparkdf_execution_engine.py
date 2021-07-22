@@ -7,14 +7,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.self_check.util import build_spark_engine
@@ -1117,7 +1115,7 @@ def test_get_compute_domain_with_unmeetable_row_condition_alt(
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
     # Ensuring errors for column and column_ pair domains are caught
-    with pytest.raises(GreatExpectationsError):
+    with pytest.raises(ge_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1126,7 +1124,7 @@ def test_get_compute_domain_with_unmeetable_row_condition_alt(
             },
             domain_type="column",
         )
-    with pytest.raises(GreatExpectationsError) as g:
+    with pytest.raises(ge_exceptions.GreatExpectationsError) as g:
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1213,7 +1211,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(GreatExpectationsError):
+    with pytest.raises(ge_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1258,7 +1256,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
-    with pytest.raises(MetricProviderError) as e:
+    with pytest.raises(ge_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         res = engine.resolve_metrics(
             metrics_to_resolve=(

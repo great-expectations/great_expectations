@@ -41,7 +41,7 @@ In order to store your Expectation Suites so you can load them for validation at
 Step 3: Run validation
 --------------------------------
 
-In order to use an Expectation Suite you've created to validate data, follow this guide: [How to validate data without a Checkpoint](../guides/validation/how_to_validate_data_without_a_checkpoint).
+In order to use an Expectation Suite you've created to validate data, follow this guide: [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint).
 
 Step 4: Use Data Docs
 ----------------------
