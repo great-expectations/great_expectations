@@ -33,7 +33,7 @@ Steps
     )
     ```
 
-    Leads to the following representation in the Data Docs (click on the speech bubble to view the comment).
+    Leads to the following representation in the Data Docs (For Expectation Suite pages, click on the speech bubble to view the comment).
 
     ![Expectation with simple comment, no formatting](../../../images/table_level_no_format.png)
 
