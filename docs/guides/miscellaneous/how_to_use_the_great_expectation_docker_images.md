@@ -8,7 +8,9 @@ This guide will help you use the official Great Expectations Docker images.
 This is useful if you wish to have a fully portable Great Expectations runtime that can be used locally or deployed on the cloud.
 
 <Prerequisites>
-  - Installed Docker on your machine
+
+- Installed Docker on your machine
+
 </Prerequisites>
 
 ## Steps
