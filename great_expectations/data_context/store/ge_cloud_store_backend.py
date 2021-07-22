@@ -23,7 +23,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     PAYLOAD_ATTRIBUTES_KEYS = {
         "suite_validation_result": "result",
         "checkpoint": "checkpoint_config",
-        "data_context": "data_context_config"
+        "data_context": "data_context_config",
     }
 
     def __init__(
@@ -107,9 +107,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "data": {
                 "type": resource_type,
                 "id": ge_cloud_id,
-                "attributes": {
-                    attributes_key: value
-                },
+                "attributes": {attributes_key: value},
             }
         }
 
