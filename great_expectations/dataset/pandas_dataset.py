@@ -590,7 +590,7 @@ Notes:
                 for lower, upper in zip(bins[:-1], bins[1:])
             ]
             if any(np.isnan(series)):
-                # Missings get digitized into bin = n_bins+1
+                # Missing get digitized into bin = n_bins+1
                 labels += ["(missing)"]
 
             return pd.Categorical.from_codes(
