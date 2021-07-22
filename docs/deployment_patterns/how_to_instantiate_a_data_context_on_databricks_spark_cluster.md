@@ -5,7 +5,7 @@ import Prerequisites from '../guides/connecting_to_your_data/components/prerequi
 
 This guide will help you instantiate a Data Context on an Databricks Spark cluster.
 
-The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/setup/configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli.md).
+The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md).
 
 <Prerequisites>
 

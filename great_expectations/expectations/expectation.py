@@ -1096,8 +1096,8 @@ class TableExpectation(Expectation, ABC):
                 assert min_val is None or is_parseable_date(
                     min_val
                 ), "Provided min threshold must be a dateutil-parseable date"
-                assert (
-                    max_val is None or is_parseable_date(max_val),
+                assert max_val is None or is_parseable_date(
+                    max_val
                 ), "Provided max threshold must be a dateutil-parseable date"
             else:
                 assert min_val is None or isinstance(
