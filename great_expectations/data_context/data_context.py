@@ -3888,31 +3888,35 @@ class DataContext(BaseDataContext):
 
         :return: the configuration object read from the file
         """
-        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
-        try:
-            with open(path_to_yml) as data:
-                config_commented_map_from_yaml = yaml.load(data)
+        if self.ge_cloud_mode:
+            config_key = ConfigurationIdentifier(configuration_key=self.ge_cloud_config.ge_cloud_data_context_id)
+            return self.ge_cloud_data_context_store.get(key=config_key)
+        else:
+            path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+            try:
+                with open(path_to_yml) as data:
+                    config_commented_map_from_yaml = yaml.load(data)
 
-        except YAMLError as err:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
-                    err
+            except YAMLError as err:
+                raise ge_exceptions.InvalidConfigurationYamlError(
+                    "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
+                        err
+                    )
                 )
-            )
-        except DuplicateKeyError:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
-            )
-        except OSError:
-            raise ge_exceptions.ConfigNotFoundError()
+            except DuplicateKeyError:
+                raise ge_exceptions.InvalidConfigurationYamlError(
+                    "Error: duplicate key found in project YAML file."
+                )
+            except OSError:
+                raise ge_exceptions.ConfigNotFoundError()
 
-        try:
-            return DataContextConfig.from_commented_map(
-                commented_map=config_commented_map_from_yaml
-            )
-        except ge_exceptions.InvalidDataContextConfigError:
-            # Just to be explicit about what we intended to catch
-            raise
+            try:
+                return DataContextConfig.from_commented_map(
+                    commented_map=config_commented_map_from_yaml
+                )
+            except ge_exceptions.InvalidDataContextConfigError:
+                # Just to be explicit about what we intended to catch
+                raise
 
     def _save_project_config(self):
         """Save the current project to disk."""
