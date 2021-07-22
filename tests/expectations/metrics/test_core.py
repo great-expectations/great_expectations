@@ -563,6 +563,25 @@ def test_map_unique_pd_column_exists():
     assert list(metrics[condition_metric.id][0]) == [False, False, True, True, False]
     assert metrics[unexpected_count_metric.id] == 2
 
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id]["a"].index == [2]
+    assert metrics[unexpected_rows_metric.id]["a"].values == [3]
+
 
 def test_map_unique_pd_column_does_not_exist():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
