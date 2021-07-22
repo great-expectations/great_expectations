@@ -75,23 +75,19 @@ Commands:
 
 If you want to enable autocompletion for the Great Expectations CLI, you can execute following commands in your shell (or add them to your .bashrc/.zshrc or ~/.config/fish/completions/):
 
-```bash
+```bash title="bash"
 $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_bash great_expectations)"
 ```
 
-for bash
-
-```zsh
+```zsh title="zsh"
 $ eval "$(_GREAT_EXPECTATIONS_COMPLETE=source_zsh great_expectations)"
 ```
 
-for zsh, and
-
-```fish
+```fish title="fish"
 $ eval (env _GREAT_EXPECTATIONS_COMPLETE=source_fish great_expectations)
 ```
 
-for fish (you'll have to create a ~/.config/fish/completions/great_expectations.fish file).
+(you'll have to create a ~/.config/fish/completions/great_expectations.fish file).
 
 Alternatively, if you don't want the eval command to slow down your shell startup time, you can instead add the commands as a script to your shell profile. For more info, see the official [Click documentation](https://click.palletsprojects.com/en/7.x/bashcomplete/)
 

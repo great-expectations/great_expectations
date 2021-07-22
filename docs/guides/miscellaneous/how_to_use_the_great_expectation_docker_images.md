@@ -2,13 +2,14 @@
 title: How to use the Great Expectations Docker images
 ---
 
+import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+
 This guide will help you use the official Great Expectations Docker images.
 This is useful if you wish to have a fully portable Great Expectations runtime that can be used locally or deployed on the cloud.
 
-:::note This how-to guide assumes you have already:
-  - [Set up a working deployment of Great Expectations](../../tutorials/getting_started/intro.md)
+<Prerequisites>
   - Installed Docker on your machine
-:::
+</Prerequisites>
 
 ## Steps
 
