@@ -42,6 +42,20 @@ class ColumnMostCommonValue(ColumnMetricProvider):
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )
 
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        column_value_counts = metrics.get("column.value_counts")
+        return list(
+            column_value_counts[column_value_counts == column_value_counts.max()].index
+        )
+
     @classmethod
     def _get_evaluation_dependencies(
         cls,
@@ -59,7 +73,9 @@ class ColumnMostCommonValue(ColumnMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if isinstance(execution_engine, SparkDFExecutionEngine):
+        if isinstance(
+            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
             dependencies["column.value_counts"] = MetricConfiguration(
                 metric_name="column.value_counts",
                 metric_domain_kwargs=metric.metric_domain_kwargs,

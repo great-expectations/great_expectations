@@ -6,6 +6,18 @@
       "y" : ["hello", "jello", "mello", "hello", "jello", "mello", "hello", "jello", "mello", "jello"],
       "z" : [1,2,2,3,3,3,4,4,4,4]
     },
+    "schemas": {
+      "sqlite": {
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER"
+      },
+      "postgresql": {
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER"
+      }
+    },
     "tests" : [
       {
         "title": "negative_test_tie_for_most_common_with_missing_values_and_complete_result_format",
