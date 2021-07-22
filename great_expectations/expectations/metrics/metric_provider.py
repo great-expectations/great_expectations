@@ -86,6 +86,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
         Support isinstance and issubclass checks.
     """
 
+    # TODO: <Alex>All logging/warning directives should be placed into a common module to be imported as needed.</Alex>
     warnings.simplefilter("default", category=DeprecationWarning)
 
     # Arguments: True -- suppresses the warnings; False -- outputs the warnings (to stderr).
