@@ -4,6 +4,10 @@
 Changelog
 #########
 
+develop
+-----------------
+* [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
+
 0.13.23
 -----------------
 * [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
@@ -61,7 +65,7 @@ Changelog
 * [DOCS] Adding in url links and style (#2999)
 * [DOCS] Adding a missing import to a documentation page (#2983) (thanks @rishabh-bhargava)
 * [DOCS]/GDOC-108/GDOC-143/Add in Contributing fields and updates (#2972)
-* [DOCS] Update rule-based profiler docs (#2987)    
+* [DOCS] Update rule-based profiler docs (#2987)
 * [DOCS] add image zoom plugin (#2979)
 * [MAINTENANCE] fix lint issues for docusaurus (#3004)
 * [Maintenance] update header to match GE.io (#2811)
