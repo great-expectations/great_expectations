@@ -1,3 +1,7 @@
+from .meta_metric_provider import (  # isort:skip
+    MetaMetricProvider,
+    DeprecatedMetaMetricProvider,
+)
 from .column_aggregate_metric import (
     ColumnMetricProvider,  # This class name is being deprecated (use "ColumnAggregateMetricProvider" going forward).
 )

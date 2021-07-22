@@ -16,8 +16,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
     sa,
 )
+from great_expectations.expectations.metrics import DeprecatedMetaMetricProvider
 from great_expectations.expectations.metrics.metric_provider import (
-    DeprecatedMetaMetricProvider,
     metric_partial,
     metric_value,
 )
