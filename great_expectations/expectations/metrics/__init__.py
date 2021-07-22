@@ -13,7 +13,7 @@ from .column_aggregate_metric import (
 from .column_aggregate_metrics import *
 from .column_map_metrics import *
 from .column_pair_map_metrics import *
-from .map_metric import (
+from .map_metric_provider import (
     ColumnMapMetricProvider,
     MapMetricProvider,
     column_condition_partial,
