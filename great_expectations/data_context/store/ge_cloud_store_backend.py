@@ -95,6 +95,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         post_body_keys = {
             "suite_validation_result": "result",
             "checkpoint": "checkpoint_config",
+            "data_context": "data_context_config"
         }
 
         resource = self.ge_cloud_resource_type
