@@ -493,8 +493,9 @@ class BaseDataContext:
                 )
             )
 
+    @classmethod
     def _get_global_config_value(
-        self, environment_variable=None, conf_file_section=None, conf_file_option=None
+        cls, environment_variable=None, conf_file_section=None, conf_file_option=None
     ):
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
@@ -3021,7 +3022,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             },
         )
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name,
+            configuration_key="" if self.ge_cloud_mode else name,
         )
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
@@ -3034,7 +3035,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
     ) -> Union[Checkpoint, LegacyCheckpoint]:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name or ge_cloud_id,
+            configuration_key=ge_cloud_id or name,
         )
         try:
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
@@ -3592,6 +3593,10 @@ class DataContext(BaseDataContext):
         project_root_dir=None,
         usage_statistics_enabled=True,
         runtime_environment=None,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_mode: bool = False,
     ):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -3614,18 +3619,32 @@ class DataContext(BaseDataContext):
                 "to initialize a new DataContext"
             )
 
+        if ge_cloud_mode:
+            target_filename = cls.GE_CLOUD_DOTFILE
+        else:
+            target_filename = cls.GE_YML
+
+
         ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
-        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
+        if os.path.isfile(os.path.join(ge_dir, target_filename)):
             message = """Warning. An existing `{}` was found here: {}.
     - No action was taken.""".format(
-                cls.GE_YML, ge_dir
+                target_filename, ge_dir
             )
             warnings.warn(message)
         else:
-            cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
+            if ge_cloud_mode:
+                cls.write_project_template_to_ge_cloud(
+                    ge_cloud_base_url=ge_cloud_base_url,
+                    ge_cloud_account_id=ge_cloud_account_id,
+                    ge_cloud_access_token=ge_cloud_access_token,
+                    usage_statistics_enabled=usage_statistics_enabled
+                )
+            else:
+                cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
         if os.path.isfile(os.path.join(ge_dir, "notebooks")):
             message = """Warning. An existing `notebooks` directory was found here: {}.
@@ -3685,6 +3704,44 @@ class DataContext(BaseDataContext):
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
             else:
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
+
+    # TODO: update templates
+    @classmethod
+    def write_project_template_to_ge_cloud(
+            cls,
+            ge_cloud_base_url: Optional[str] = None,
+            ge_cloud_account_id: Optional[str] = None,
+            ge_cloud_access_token: Optional[str] = None,
+            usage_statistics_enabled=True
+    ):
+        ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_account_id=ge_cloud_account_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+        )
+        ge_cloud_config_dict.pop("ge_cloud_data_context_id")
+
+        missing_keys = []
+        for key, val in ge_cloud_config_dict.items():
+            if not val:
+                missing_keys.append(key)
+        if len(missing_keys) > 0:
+            raise DataContextError(
+                f"Arg(s) {missing_keys} required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
+            )
+
+        if usage_statistics_enabled:
+            template = PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED
+        else:
+            template = PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED
+
+        config = json.dumps(yaml.load(template))
+
+        ge_cloud_data_context_store = cls.build_ge_cloud_data_context_store(
+            **ge_cloud_config_dict
+        )
+        ge_cloud_data_context_store._store_backend.set(("",), config)
 
     @classmethod
     def scaffold_directories(cls, base_dir):
@@ -3749,8 +3806,9 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def _initialize_ge_cloud_config(
-        self,
+    @classmethod
+    def _get_ge_cloud_config_dict(
+        cls,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
@@ -3764,19 +3822,13 @@ class DataContext(BaseDataContext):
             conf_file_option="data_context_id",
             )
         )
-        if not ge_cloud_data_context_id:
-            raise DataContextError(
-                f"ge_cloud_data_context_id is required for ge_cloud_mode but was neither provided nor found in "
-                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
-            )
         ge_cloud_base_url = (
             ge_cloud_base_url
             or super()._get_global_config_value(
-                environment_variable="GE_CLOUD_BASE_URL",
-                conf_file_section="ge_cloud",
-                conf_file_option="base_url",
-            )
-            or "https://app.greatexpectations.io/"
+            environment_variable="GE_CLOUD_BASE_URL",
+            conf_file_section="ge_cloud",
+            conf_file_option="base_url",
+            ) or "https://app.greatexpectations.io/"
         )
         ge_cloud_account_id = ge_cloud_account_id or super()._get_global_config_value(
             environment_variable="GE_CLOUD_ACCOUNT_ID",
@@ -3786,17 +3838,43 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token = (
             ge_cloud_access_token
             or super()._get_global_config_value(
-                environment_variable="GE_CLOUD_ACCESS_TOKEN",
-                conf_file_section="ge_cloud",
-                conf_file_option="access_token",
+            environment_variable="GE_CLOUD_ACCESS_TOKEN",
+            conf_file_section="ge_cloud",
+            conf_file_option="access_token",
             )
         )
-        self._ge_cloud_config = GeCloudConfig(
+        return {
+            "ge_cloud_data_context_id": ge_cloud_data_context_id,
+            "ge_cloud_base_url": ge_cloud_base_url,
+            "ge_cloud_account_id": ge_cloud_account_id,
+            "ge_cloud_access_token": ge_cloud_access_token
+        }
+
+    def _initialize_ge_cloud_config(
+        self,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_data_context_id: Optional[str] = None,
+    ):
+        ge_cloud_config_dict = self._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_data_context_id=ge_cloud_data_context_id,
+            ge_cloud_data_context_id=ge_cloud_data_context_id
         )
+
+        missing_keys = []
+        for key, val in ge_cloud_config_dict.items():
+            if not val:
+                missing_keys.append(key)
+        if len(missing_keys) > 0:
+            raise DataContextError(
+                f"Arg(s) {missing_keys} required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
+            )
+
+        self._ge_cloud_config = GeCloudConfig(**ge_cloud_config_dict)
 
     @property
     def ge_cloud_config(self):
@@ -3919,12 +3997,16 @@ class DataContext(BaseDataContext):
                 raise
 
     def _save_project_config(self):
-        """Save the current project to disk."""
+        """Save the current project."""
         logger.debug("Starting DataContext._save_project_config")
 
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self._project_config.to_yaml(outfile)
+        if self.ge_cloud_mode:
+            config_key = ConfigurationIdentifier(configuration_key=self.ge_cloud_config.ge_cloud_data_context_id or "")
+            self.ge_cloud_data_context_store.set(config_key=config_key)
+        else:
+            config_filepath = os.path.join(self.root_directory, self.GE_YML)
+            with open(config_filepath, "w") as outfile:
+                self._project_config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store for store %s" % store_name)
