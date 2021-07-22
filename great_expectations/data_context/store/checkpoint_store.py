@@ -57,7 +57,7 @@ class CheckpointStore(ConfigurationStore):
         # noinspection PyUnusedLocal
         test_value: CheckpointConfig = self.get(key=test_key)
         if pretty_print:
-            print("\tTest value successfully retreived from Checkpoint store.")
+            print("\tTest value successfully retrieved from Checkpoint store.")
             print()
 
         if pretty_print:

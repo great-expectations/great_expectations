@@ -3798,7 +3798,7 @@ class Dataset(MetaDataset):
 
         test_result = stats.chisquare(test_df["count"], test_df["expected"])[1]
 
-        # Normalize the ouputs so they can be used as partitions into other expectations
+        # Normalize the outputs so they can be used as partitions into other expectations
         # GH653
         expected_weights = (test_df["expected"] / test_df["expected"].sum()).tolist()
         observed_weights = (test_df["count"] / test_df["count"].sum()).tolist()
