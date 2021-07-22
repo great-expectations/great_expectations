@@ -213,7 +213,7 @@ values={[
 
   </TabItem>
   <TabItem value="tab1">
-  This configuration specifies four top-level keys (`expectation_suite_name`, `action_list`, `evaluation_parameters`, and `runtime_configuration`) that can serve as defaults for each validation, allowing the keys to be omited from the validation dictionaries. When run, this Checkpoint will perform two validations of two different batches of data, both against the same Expectation Suite ("users.delivery"). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
+  This configuration specifies four top-level keys (`expectation_suite_name`, `action_list`, `evaluation_parameters`, and `runtime_configuration`) that can serve as defaults for each validation, allowing the keys to be omitted from the validation dictionaries. When run, this Checkpoint will perform two validations of two different batches of data, both against the same Expectation Suite ("users.delivery"). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
 
 **yaml**:
 
