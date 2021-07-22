@@ -15,7 +15,7 @@ Steps
 1. Select an Expectation to inherit from
 ########################################
 
-  For the purpose of this excercise, we will implement the new Expectation "expect_column_mean_to_be_positive" - a realistic Expectation of the data that
+  For the purpose of this exercise, we will implement the new Expectation "expect_column_mean_to_be_positive" - a realistic Expectation of the data that
   can easily inherit from ``expect_column_mean_to_be_between``.
 
 2. Select default values for your class

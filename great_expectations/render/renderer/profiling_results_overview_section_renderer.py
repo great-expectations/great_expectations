@@ -21,7 +21,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         content_blocks = []
         # NOTE: I don't love the way this builds content_blocks as a side effect.
         # The top-level API is clean and scannable, but the function internals are counterintutitive and hard to test.
-        # I wonder if we can enable something like jquery chaining for this. Tha would be concise AND testable.
+        # I wonder if we can enable something like jquery chaining for this. That would be concise AND testable.
         # Pressing on for now...
         cls._render_header(evrs, content_blocks)
         cls._render_dataset_info(evrs, content_blocks)

@@ -194,7 +194,7 @@ Additional Notes
 
         Running SQL queries requires either registering temporary views or enabling Spark catalog (like Hive metastore).
 
-        This configuraiton options are enabled using Hive Metastore catalog - an equivalent of `.enableHiveSupport()`.
+        This configuration options are enabled using Hive Metastore catalog - an equivalent of `.enableHiveSupport()`.
 
             .. code-block:: bash
 

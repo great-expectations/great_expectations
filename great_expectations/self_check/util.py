@@ -1904,10 +1904,10 @@ def check_json_test_result(test, result, data_asset=None):
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
                 if (isinstance(value, list)) & (len(value) >= 1):
                     if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = value.sort()
-                        result["result"]["unexpected_list"] = result["result"][
-                            "unexpected_list"
-                        ].sort()
+                        value = sorted(value, key=lambda x: str(x))
+                        result["result"]["unexpected_list"] = sorted(
+                            result["result"]["unexpected_list"], key=lambda x: str(x)
+                        )
 
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "

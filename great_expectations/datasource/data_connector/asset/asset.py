@@ -28,7 +28,7 @@ class Asset:
         self._glob_directive = glob_directive
         self._pattern = pattern
 
-        # Note: this may need to become a nested object to accomodate sorters
+        # Note: this may need to become a nested object to accommodate sorters
         self._group_names = group_names
 
         self._bucket = bucket
