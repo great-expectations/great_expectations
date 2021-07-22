@@ -12,7 +12,8 @@ Each noun command and each verb sub-command has a description, and should help y
 
 Please note that the V3 (Batch Request) API can be accessed by adding the `--v3-api` flag after `great_expectations`. Please see our how-to guides and use the `--help` flag for more complete descriptions of the new functionality.
 
-:::note All Great Expectations commands have help text which you can access by adding `--help` to the end of a command. For example, by running `great_expectations --v3-api suite new --help` you'll see help output for that specific command.
+:::info [OPTIONAL_TEXT_HERE]
+All Great Expectations commands have help text which you can access by adding `--help` to the end of a command. For example, by running `great_expectations --v3-api suite new --help` you'll see help output for that specific command.
 :::
 
 By running `great_expectations --v3-api --help`, you will see all top-level commands that are available in the CLI:
@@ -93,5 +94,4 @@ $ eval (env _GREAT_EXPECTATIONS_COMPLETE=source_fish great_expectations)
 for fish (you'll have to create a ~/.config/fish/completions/great_expectations.fish file).
 
 Alternatively, if you don't want the eval command to slow down your shell startup time, you can instead add the commands as a script to your shell profile. For more info, see the official [Click documentation](https://click.palletsprojects.com/en/7.x/bashcomplete/)
-
 
