@@ -102,8 +102,9 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
 
                 if alias is not None:
                     warnings.warn(
-                        f"{cls.__name__} has been renamed to {alias.__name__} -- the alias {cls.__name} will be "
-                        "removed in the future.",
+                        f"""{cls.__name__} has been renamed to {alias.__name__} -- the alias {cls.__name} will be \
+deprecated in the future.
+""",
                         DeprecationWarning,
                         stacklevel=2,
                     )
@@ -120,8 +121,9 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
 
             if alias is not None:
                 warnings.warn(
-                    f"{b.__name__} has been renamed to {alias.__name__} -- the alias {b.__name__} will be "
-                    "removed in the future.",
+                    f"""{b.__name__} has been renamed to {alias.__name__} -- the alias {b.__name__} will be deprecated \
+in the future.
+""",
                     DeprecationWarning,
                     stacklevel=2,
                 )
