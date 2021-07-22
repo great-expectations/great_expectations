@@ -15,7 +15,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
@@ -55,7 +55,7 @@ except ImportError:
         Row = None
 
 
-class ColumnQuantileValues(ColumnMetricProvider):
+class ColumnQuantileValues(ColumnAggregateMetricProvider):
     metric_name = "column.quantile_values"
     value_keys = ("quantiles", "allow_relative_error")
 

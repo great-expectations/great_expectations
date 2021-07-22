@@ -13,7 +13,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnMedian(ColumnMetricProvider):
+class ColumnMedian(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.median"
