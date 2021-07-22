@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
+    PAYLOAD_ATTRIBUTES_KEYS = {
+        "suite_validation_result": "result",
+        "checkpoint": "checkpoint_config",
+        "data_context": "data_context_config"
+    }
+
     def __init__(
         self,
         ge_cloud_credentials: Dict,
@@ -90,18 +96,55 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self):
         pass
 
+    def _update(self, ge_cloud_id, value, **kwargs):
+        ge_cloud_id = key[0]
+        resource_type = self.ge_cloud_resource_type
+        account_id = self.ge_cloud_credentials["account_id"]
+
+        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+
+        data = {
+            "data": {
+                "type": resource_type,
+                "id": ge_cloud_id,
+                "attributes": {
+                    attributes_key: value
+                },
+            }
+        }
+
+        url = urljoin(
+            self.ge_cloud_base_url,
+            f"accounts/"
+            f"{account_id}/"
+            f"{self.ge_cloud_resource_name}/"
+            f"{ge_cloud_id}",
+        )
+        try:
+            response = requests.patch(url, json=data, headers=self.auth_headers)
+            response_status_code = response.status_code
+
+            if response_status_code < 300:
+                return True
+            return False
+        except Exception as e:
+            logger.debug(str(e))
+            raise StoreBackendError(
+                "Unable to update object in GE Cloud Store Backend."
+            )
+
     def _set(self, key, value, **kwargs):
         # Each resource type has corresponding attribute key to include in POST body
-        post_body_keys = {
-            "suite_validation_result": "result",
-            "checkpoint": "checkpoint_config",
-            "data_context": "data_context_config"
-        }
+        ge_cloud_id = key[0]
+
+        # if key has ge_cloud_id, perform _update instead
+        if ge_cloud_id:
+            return self._update(ge_cloud_id=ge_cloud_id, value=value, **kwargs)
 
         resource = self.ge_cloud_resource_type
         account_id = self.ge_cloud_credentials["account_id"]
 
-        post_body_key = post_body_keys[resource]
+        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource]
 
         data = {
             "data": {
@@ -110,7 +153,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        data["data"]["attributes"][post_body_key] = value
+        data["data"]["attributes"][attributes_key] = value
 
         url = urljoin(
             self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource)}"
