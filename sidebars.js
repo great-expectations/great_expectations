@@ -244,7 +244,6 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_add_comments_to_a_page_on_docs.greatexpectations.io' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_template' }

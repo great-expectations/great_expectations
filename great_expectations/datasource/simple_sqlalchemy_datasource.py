@@ -45,7 +45,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         self._datasource_config = {}
 
     # noinspection PyMethodOverriding
-    # Note: This method is meant to overwrite Datasource._init_data_connectors (dispite signature mismatch).
+    # Note: This method is meant to overwrite Datasource._init_data_connectors (despite signature mismatch).
     def _init_data_connectors(
         self,
         introspection_configs: dict,
