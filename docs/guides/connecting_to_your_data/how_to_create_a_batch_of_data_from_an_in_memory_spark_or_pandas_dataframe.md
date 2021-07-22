@@ -8,17 +8,23 @@ This guide will help you load the following as Batches for use in creating Expec
   2. [Spark DataFrames](#how-to-create-a-batch-from-a-pandas-dataframe)
 
 
-What used to be called a “Batch” in the old API was replaced with [Validator](reference__core_concepts__validation). A Validator knows how to validate a particular Batch of data on a particular [Execution Engine](reference__core_concepts) against a particular [Expectation Suite](reference__core_concepts__expectations__expectation_suites). In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
+What used to be called a “Batch” in the old API was replaced with [Validator](../../reference/validation.md). A Validator knows how to validate a particular Batch of data on a particular [Execution Engine](../../reference/execution_engine.md) against a particular [Expectation Suite](../../reference/expectations/expectations.md). In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
-You can read more about the core classes that make Great Expectations run in our [Core Concepts reference guide](reference__core_concepts).
+You can read more about the core classes that make Great Expectations run in our [Core Concepts reference guide](../../reference/core_concepts.md).
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](tutorials__getting_started)
-- [Configured and loaded a Data Context](how_to_guides__configuring_data_contexts)
-- Configured a [Spark Datasource](how_to_guides__configuring_datasources__how_to_configure_a_spark_filesystem_datasource)
-- Identified an in-memory Spark DataFrame that you would like to use as the data to validate **OR**
-- Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
+- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/intro.md)
+- [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
+- *Spark*
+    - Configured a [Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
+    - Identified an in-memory Spark DataFrame that you would like to use as the data to validate **OR**
+    - Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
+- *Pandas*
+    - TODO
+    - TODO
+    - TODO
+
     
 </Prerequisites>
 
