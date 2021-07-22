@@ -2,34 +2,37 @@
 title: ✳ How to create a Batch of data from an in-memory Spark or Pandas dataframe
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
 
 This guide will help you load the following as Batches for use in creating Expectations:
-  1. [Pandas DataFrames](#how-to-create-a-batch-from-a-spark-dataframe)
-  2. [Spark DataFrames](#how-to-create-a-batch-from-a-pandas-dataframe)
+  1. **Pandas DataFrames**
+  2. **Spark DataFrames**
 
 
 What used to be called a “Batch” in the old API was replaced with [Validator](../../reference/validation.md). A Validator knows how to validate a particular Batch of data on a particular [Execution Engine](../../reference/execution_engine.md) against a particular [Expectation Suite](../../reference/expectations/expectations.md). In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
 You can read more about the core classes that make Great Expectations run in our [Core Concepts reference guide](../../reference/core_concepts.md).
 
+
+<Tabs
+  groupId='spark-or-pandas'
+  defaultValue='spark'
+  values={[
+  {label: 'Spark DataFrame', value:'spark'},
+  {label: 'Pandas DataFrame', value:'pandas'},
+  ]}>
+  <TabItem value='spark'>
+
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](../../tutorials/getting_started/intro.md)
 - [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
-- *Spark*
-    - Configured a [Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
-    - Identified an in-memory Spark DataFrame that you would like to use as the data to validate **OR**
-    - Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
-- *Pandas*
-    - TODO
-    - TODO
-    - TODO
-
-    
+- Configured a [Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
+- Identified an in-memory Spark DataFrame that you would like to use as the data to validate **OR**
+- Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
+  
 </Prerequisites>
-
-
-## How to create a Batch from a Spark DataFrame
 
   1. **Load or create a Data Context**
 
@@ -188,7 +191,18 @@ You can read more about the core classes that make Great Expectations run in our
     Now that you have a Validator, you can use it to create Expectations or validate the data.
 
 
-## How to create a Batch from a Pandas DataFrame
+  </TabItem>
+
+  <TabItem value='pandas'>
+
+<Prerequisites>
+
+- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/intro.md)
+- [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
+- Configured a [Pandas/filesystem Datasource](../../guides/connecting_to_your_data/filesystem/pandas.md)
+- Identified a Pandas DataFrame that you would like to use as the data to validate.
+  
+</Prerequisites>
 
   1. **Load or create a Data Context**
 
@@ -344,4 +358,8 @@ You can read more about the core classes that make Great Expectations run in our
       ```
 
     Now that you have a Validator, you can use it to create Expectations or validate the data.
+
+
+  </TabItem>
+</Tabs>
 
