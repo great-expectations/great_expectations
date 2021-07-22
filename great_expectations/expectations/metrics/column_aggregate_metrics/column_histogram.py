@@ -15,7 +15,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 logger = logging.getLogger(__name__)
 
 
-class ColumnHistogram(ColumnMetricProvider):
+class ColumnHistogram(ColumnAggregateMetricProvider):
     metric_name = "column.histogram"
     value_keys = ("bins",)
 

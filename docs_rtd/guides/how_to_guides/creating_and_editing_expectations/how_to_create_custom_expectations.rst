@@ -472,12 +472,12 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                SqlAlchemyExecutionEngine,
             )
             from great_expectations.expectations.metrics import (
-               ColumnMetricProvider,
+               ColumnAggregateMetricProvider,
                column_aggregate_value, column_aggregate_partial,
             )
             from great_expectations.expectations.metrics.import_manager import F, sa
 
-            class ColumnCustomMax(ColumnMetricProvider):
+            class ColumnCustomMax(ColumnAggregateMetricProvider):
                 """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
                 metric_name = "column.aggregate.custom.max"

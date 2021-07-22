@@ -40,12 +40,12 @@ from great_expectations.execution_engine import (
    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics import (
-   ColumnMetricProvider,
+   ColumnAggregateMetricProvider,
    column_aggregate_value, column_aggregate_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
-class ColumnCustomMax(ColumnMetricProvider):
+class ColumnCustomMax(ColumnAggregateMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
     metric_name = "column.aggregate.custom.max"

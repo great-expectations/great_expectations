@@ -1,5 +1,8 @@
 from .column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnMetricProvider,  # This class name is being deprecated (use "ColumnAggregateMetricProvider" going forward).
+)
+from .column_aggregate_metric import (
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
