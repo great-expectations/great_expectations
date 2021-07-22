@@ -98,9 +98,3 @@ Steps
 
 
 4. **Review your comments in the Expectation Suite overview of your Data Docs.**
-
-:::info API Note
-The “bubble” icons with the notes are displayed only on the Expectation Suite pages, but not on the Validation Results ones.
-
-This came up in questions from several users. The plan is to support this feature on all pages, but we don’t have a timeline yet.
-:::
