@@ -1721,7 +1721,7 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
 
     A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
     If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
-    want to be dependant on all the "stale" datasources working too.
+    want to be dependent on all the "stale" datasources working too.
 
     data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
     (with "fake_port" and "fake_host")

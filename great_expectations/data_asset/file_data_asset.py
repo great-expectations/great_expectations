@@ -523,7 +523,7 @@ class FileDataAsset(MetaFileDataAsset):
 
         Args:
             filepath (str or None): \
-                The filepath to evalutate. If none, will check the currently-configured path object
+                The filepath to evaluate. If none, will check the currently-configured path object
                 of this FileDataAsset.
 
         Keyword Args:
