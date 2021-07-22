@@ -55,9 +55,9 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "data_asset": "data_assets",
     "expectation": "expectations",
     "expectation_suite": "expectation_suites",
-    "expectation_suite_validation_result": "expectation_suite_validation_results",
+    "suite_validation_result": "suite_validation_results",
     "expectation_validation_result": "expectation_validation_results",
-    "data_context_config": "data_context_configs",
+    "data_context": "data_contexts",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT = {
@@ -66,9 +66,9 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "data_assets": "data_asset",
     "expectations": "expectation",
     "expectation_suites": "expectation_suite",
-    "expectation_suite_validation_results": "expectation_suite_validation_result",
+    "suite_validation_results": "suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
-    "data_context_configs": "data_context_config",
+    "data_contexts": "data_context",
 }
 
 
@@ -119,6 +119,10 @@ def underscore(word: str) -> str:
     word = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", word)
     word = word.replace("-", "_")
     return word.lower()
+
+
+def hyphen(input: str):
+    return input.replace("_", "-")
 
 
 def profile(func: Callable = None) -> Callable:
