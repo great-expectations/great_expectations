@@ -53,7 +53,7 @@ You can read more about the core classes that make Great Expectations run in our
       context = ge.get_context()
       ```
 
-      Create an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file)
+      Create an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
   2. **Obtain an Expectation Suite**
 
