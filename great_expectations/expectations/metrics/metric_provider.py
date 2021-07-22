@@ -21,9 +21,6 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
-logging.captureWarnings(False)
-warnings.filterwarnings("default", category=DeprecationWarning)
-
 logger = logging.getLogger(__name__)
 
 
@@ -88,6 +85,11 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
         Subclassing of a deprecated class should raise a warning;
         Support isinstance and issubclass checks.
     """
+
+    warnings.simplefilter("default", category=DeprecationWarning)
+
+    # Arguments: True -- suppresses the warnings; False -- outputs the warnings (to stderr).
+    logging.captureWarnings(False)
 
     def __new__(cls, name, bases, classdict, *args, **kwargs):
         alias = classdict.get("_DeprecatedMetaMetricProvider__alias")
