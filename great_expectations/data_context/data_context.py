@@ -3827,6 +3827,18 @@ class DataContext(BaseDataContext):
             store_config=store_config,
         )
 
+    @property
+    def ge_cloud_data_context_store(self):
+        if not self._ge_cloud_data_context_store:
+            data_context_store = self.build_ge_cloud_data_context_store(
+                ge_cloud_base_url=self.ge_cloud_config.ge_cloud_base_url,
+                ge_cloud_account_id=self.ge_cloud_config.ge_cloud_account_id,
+                ge_cloud_access_token=self.ge_cloud_config.ge_cloud_access_token
+            )
+            self._ge_cloud_data_context_store = data_context_store
+            return data_context_store
+        return self._ge_cloud_data_context_store
+
     def __init__(
         self,
         context_root_dir: Optional[str] = None,
