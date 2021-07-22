@@ -96,6 +96,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -3755,6 +3756,19 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_data_context_id: Optional[str] = None,
     ):
+        ge_cloud_data_context_id = (
+            ge_cloud_data_context_id
+            or super()._get_global_config_value(
+            environment_variable="GE_CLOUD_DATA_CONTEXT_ID",
+            conf_file_section="ge_cloud",
+            conf_file_option="data_context_id",
+            )
+        )
+        if not ge_cloud_data_context_id:
+            raise DataContextError(
+                f"ge_cloud_data_context_id is required for ge_cloud_mode but was neither provided nor found in "
+                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
+            )
         ge_cloud_base_url = (
             ge_cloud_base_url
             or super()._get_global_config_value(
@@ -3763,14 +3777,6 @@ class DataContext(BaseDataContext):
                 conf_file_option="base_url",
             )
             or "https://app.greatexpectations.io/"
-        )
-        ge_cloud_data_context_id = (
-            ge_cloud_data_context_id
-            or super()._get_global_config_value(
-                environment_variable="GE_CLOUD_DATA_CONTEXT_ID",
-                conf_file_section="ge_cloud",
-                conf_file_option="data_context_id",
-            )
         )
         ge_cloud_account_id = ge_cloud_account_id or super()._get_global_config_value(
             environment_variable="GE_CLOUD_ACCOUNT_ID",
