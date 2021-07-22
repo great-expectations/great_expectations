@@ -3848,29 +3848,27 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_data_context_id: Optional[str] = None,
         ge_cloud_mode: bool = False,
-        create_new_if_not_found: bool = False,
     ):
+        self.ge_cloud_mode = ge_cloud_mode
+        self._ge_cloud_data_context_store = None
         if ge_cloud_mode:
             self._initialize_ge_cloud_config(
                 ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_data_context_id=ge_cloud_data_context_id,
                 ge_cloud_account_id=ge_cloud_account_id,
                 ge_cloud_access_token=ge_cloud_access_token,
             )
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
-            try:
-                context_root_dir = self.find_context_root_dir(
-                    ge_cloud_mode=ge_cloud_mode
-                )
-                context_root_directory = os.path.abspath(
-                    os.path.expanduser(context_root_dir)
-                )
-            except ge_exceptions.ConfigNotFoundError as e:
-                if not create_new_if_not_found:
-                    raise e
-
+            context_root_dir = self.find_context_root_dir(
+                ge_cloud_mode=ge_cloud_mode
+            )
+        context_root_directory = os.path.abspath(
+            os.path.expanduser(context_root_dir)
+        )
         self._context_root_directory = context_root_directory
+
         project_config = self._load_project_config()
         super().__init__(project_config, context_root_directory, runtime_environment)
 
