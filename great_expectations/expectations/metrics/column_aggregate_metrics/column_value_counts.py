@@ -9,13 +9,13 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
-class ColumnValueCounts(ColumnMetricProvider):
+class ColumnValueCounts(ColumnAggregateMetricProvider):
     metric_name = "column.value_counts"
     value_keys = ("sort", "collate")
 

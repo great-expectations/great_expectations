@@ -10,14 +10,14 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnDistinctValues(ColumnMetricProvider):
+class ColumnDistinctValues(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
@@ -80,7 +80,7 @@ class ColumnDistinctValues(ColumnMetricProvider):
         return dependencies
 
 
-class ColumnDistinctValuesCount(ColumnMetricProvider):
+class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
