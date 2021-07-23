@@ -7,8 +7,9 @@ Changelog
 
 develop
 -----------------
-* [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
 * [FEATURE] Add sqlalchemy engine support for `column.most_common_value` metric
+* [BUGFIX] Snowflake connections are closed correctly by DOCS tests (#3104)
+* [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
 
 
 0.13.24
