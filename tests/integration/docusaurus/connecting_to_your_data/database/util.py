@@ -1,9 +1,10 @@
 def load_data_into_database(
     table_name: str, csv_path: str, connection_string: str
 ) -> None:
+    import logging
+
     import pandas as pd
     import sqlalchemy as sa
-    import logging
 
     logger = logging.getLogger(__name__)
     logging.captureWarnings(True)
