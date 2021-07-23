@@ -12,6 +12,7 @@ from great_expectations.execution_engine.execution_engine import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.registry import (
     get_metric_function_type,
     get_metric_provider,
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
-    **kwargs
+    **kwargs,
 ):
     """The metric decorator annotates a method"""
 
@@ -47,7 +48,7 @@ def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: Union[str, MetricPartialFunctionTypes],
     domain_type: Union[str, MetricDomainTypes],
-    **kwargs
+    **kwargs,
 ):
     """The metric decorator annotates a method"""
 
@@ -65,15 +66,6 @@ def metric_partial(
         return inner_func
 
     return wrapper
-
-
-class MetaMetricProvider(type):
-    """MetaMetricProvider registers metrics as they are defined."""
-
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super().__new__(cls, clsname, bases, attrs)
-        newclass._register_metric_functions()
-        return newclass
 
 
 class MetricProvider(metaclass=MetaMetricProvider):
