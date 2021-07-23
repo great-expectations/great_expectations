@@ -253,5 +253,10 @@ class SqlAlchemyBatchData(BatchData):
                 self._engine.execute(stmt_1)
             except DatabaseError:
                 self._engine.execute(stmt_2)
+            except Exception as e:
+                logger.debug("Unexpected error creating temp_table in execution_engine.sqlalchemy_batch_data: " + str(e))
         else:
-            self._engine.execute(stmt)
+            try:
+                self._engine.execute(stmt)
+            except Exception as e:
+                logger.debug("Unexpected error creating temp_table in execution_engine.sqlalchemy_batch_data: " + str(e))
