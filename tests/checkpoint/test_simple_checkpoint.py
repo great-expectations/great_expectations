@@ -209,7 +209,7 @@ def test_simple_checkpoint_raises_error_on_missing_slack_webhook_when_notify_on_
 def test_simple_checkpoint_raises_error_on_missing_slack_webhook_when_notify_on_is_not_default(
     empty_data_context, slack_notification_action, webhook
 ):
-    for condition in ["faliure", "success"]:
+    for condition in ["failure", "success"]:
         with pytest.raises(ValueError):
             SimpleCheckpointConfigurator(
                 "foo", empty_data_context, notify_on=condition

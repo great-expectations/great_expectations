@@ -47,7 +47,7 @@ def send_opsgenie_alert(query, suite_name, settings):
     if settings["region"] != None:
         url = "https://api.{region}.opsgenie.com/v2/alerts".format(
             region=settings["region"]
-        )  # accomodate for Europeans
+        )  # accommodate for Europeans
     else:
         url = "https://api.opsgenie.com/v2/alerts"
 

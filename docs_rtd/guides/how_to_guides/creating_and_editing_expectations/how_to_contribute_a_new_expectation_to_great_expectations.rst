@@ -54,7 +54,7 @@ Steps
         * Column map Expectations: ``expect_column_values_...`` (e.g., ``expect_column_values_to_match_regex``)
         * Column aggregate Expectations: ``expect_column_...`` (e.g., ``expect_column_mean_to_be_between``)
         * Column pair map Expectations: ``expect_column_pair_values_...`` (e.g., ``expect_column_pair_values_to_be_in_set``)
-        * Table Expectatons: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
+        * Table Expectations: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
 
     #. Name the file
 
@@ -314,7 +314,7 @@ Steps
 
                     The Expectation declares  "column_values.z_score.under_threshold" as its ``condition_metric_name`` (the Metric that answers the yes/no question for every row).
 
-                    The ``ColumnValuesZScore`` Metric Provider class that computes this Metric declares an additonal metric:
+                    The ``ColumnValuesZScore`` Metric Provider class that computes this Metric declares an additional metric:
 
                     .. code-block:: python
 
@@ -373,7 +373,7 @@ Steps
 
             * Implement the computation of the Metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: pandas, sqlalchemy, spark. Most contributors find starting with Pandas is the easiest and fastest way to build.
 
-                The parent class of your Metric Provider class is ``ColumnMetricProvider``. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
+                The parent class of your Metric Provider class is ``ColumnAggregateMetricProvider``. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
 
                 .. admonition:: Note:
 
