@@ -583,7 +583,7 @@ def test__build_batch_spec(basic_datasource):
         },
     )
     assert type(batch_spec) == RuntimeDataBatchSpec
-    assert set(batch_spec.keys()) == {"batch_data"}
+    assert set(batch_spec.keys()) == {"batch_data", "data_asset_name"}
     assert batch_spec["batch_data"].shape == (10, 1)
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
