@@ -1001,7 +1001,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             ).get_container_client(self.container)
         else:
             raise StoreBackendError(
-                "Unable to initialze ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+                "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
             )
 
     def _get(self, key):
