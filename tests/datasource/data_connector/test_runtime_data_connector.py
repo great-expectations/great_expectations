@@ -544,7 +544,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    expected_batch_spec_parameters: dict = {}
+    expected_batch_spec_parameters: dict = {"data_asset_name": "my_data_asset"}
 
     # noinspection PyProtectedMember
     batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(

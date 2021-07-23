@@ -207,7 +207,6 @@ class RuntimeDataConnector(DataConnector):
     ):
         return {}
 
-    # This method is currently called called only in tests.
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
@@ -280,7 +279,7 @@ class RuntimeDataConnector(DataConnector):
             or (runtime_parameters and batch_identifiers)
         ):
             raise ge_exceptions.DataConnectorError(
-                f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both 
+                f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both
                 present and non-empty or
                 both absent in the batch_request parameter.
                 """
