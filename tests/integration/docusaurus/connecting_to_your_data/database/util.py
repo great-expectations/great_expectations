@@ -22,7 +22,10 @@ def load_data_into_database(
         df.to_sql(name=table_name, con=engine, index=False)
         logger.debug(f"tests.integration.docusaurus data loaded into database")
     except Exception as e:
-        logger.debug("Unexpected error in tests.integration.docusaurus load_data_into_database: " + str(e))
+        logger.debug(
+            "Unexpected error in tests.integration.docusaurus load_data_into_database: "
+            + str(e)
+        )
     finally:
         connection.close()
         engine.dispose()

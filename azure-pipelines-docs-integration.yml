@@ -85,7 +85,8 @@ stages:
             pip install pytest pytest-azurepipelines
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
-            pytest -v --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
+            # default logger output level is WARNING, but can be overridden either in this yml file or on Azure itself
+            pytest -v --capture=no --log-cli-level=$(LOG_LEVEL) --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
