@@ -60,7 +60,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # the column we will be performing the expectation on, and the query is performed against it.
-        dialect = None
+        dialect = kwargs.get("_dialect", None)
         sql_engine = kwargs.get("_sqlalchemy_engine", None)
         if sql_engine and dialect and dialect.dialect.name == "mysql":
             temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
