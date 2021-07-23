@@ -3,15 +3,16 @@ import logging
 from functools import wraps
 from typing import Callable, Optional, Type, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import nested_update
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.registry import (
     get_metric_function_type,
     get_metric_provider,
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
-    **kwargs
+    **kwargs,
 ):
     """The metric decorator annotates a method"""
 
@@ -47,7 +48,7 @@ def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: Union[str, MetricPartialFunctionTypes],
     domain_type: Union[str, MetricDomainTypes],
-    **kwargs
+    **kwargs,
 ):
     """The metric decorator annotates a method"""
 
@@ -65,15 +66,6 @@ def metric_partial(
         return inner_func
 
     return wrapper
-
-
-class MetaMetricProvider(type):
-    """MetaMetricProvider registers metrics as they are defined."""
-
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super().__new__(cls, clsname, bases, attrs)
-        newclass._register_metric_functions()
-        return newclass
 
 
 class MetricProvider(metaclass=MetaMetricProvider):
@@ -217,7 +209,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
             try:
                 _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
                 has_aggregate_fn = True
-            except MetricProviderError:
+            except ge_exceptions.MetricProviderError:
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
