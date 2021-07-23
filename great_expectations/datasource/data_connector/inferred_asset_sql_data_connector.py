@@ -248,8 +248,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 else:
                     for view_name in view_names:
 
-                        if (ignore_information_schemas_and_system_tables) and (
-                            table_name in system_tables
+                        if ignore_information_schemas_and_system_tables and (
+                            view_name in system_tables
                         ):
                             continue
 

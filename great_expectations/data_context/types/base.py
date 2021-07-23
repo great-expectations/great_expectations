@@ -1464,7 +1464,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         # Initialize base defaults
         super().__init__()
 
-        # Use default credentials if seprate credentials not supplied for expectations_store and validations_store
+        # Use default credentials if separate credentials not supplied for expectations_store and validations_store
         if expectations_store_credentials is None:
             expectations_store_credentials = default_credentials
         if validations_store_credentials is None:

@@ -832,7 +832,7 @@ This script can be run by invoking it with:
 .. code-block:: bash
 
     $ python great_expectations/uncommitted/run_cost_model_protection.py
-    Validation Suceeded!
+    Validation Succeeded!
 
 Just like the built in command ``great_expectations checkpoint run``, this posix-compatible script exits with a status of ``0`` if validation is successful and a status of ``1`` if validation failed.
 
