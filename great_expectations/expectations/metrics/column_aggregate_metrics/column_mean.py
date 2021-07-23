@@ -6,14 +6,14 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
 
-class ColumnMean(ColumnMetricProvider):
+class ColumnMean(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.mean"
