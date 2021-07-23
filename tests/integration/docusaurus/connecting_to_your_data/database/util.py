@@ -22,4 +22,3 @@ def load_data_into_database(
     finally:
         connection.close()
         engine.dispose()
-
