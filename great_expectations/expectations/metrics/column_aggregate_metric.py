@@ -16,6 +16,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
     sa,
 )
+from great_expectations.expectations.metrics import DeprecatedMetaMetricProvider
 from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
@@ -228,7 +229,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_partial")
 
 
-class ColumnMetricProvider(TableMetricProvider):
+class ColumnAggregateMetricProvider(TableMetricProvider):
     domain_keys = (
         "batch_id",
         "table",
@@ -264,3 +265,9 @@ class ColumnMetricProvider(TableMetricProvider):
             metric_dependencies=None,
         )
         return dependencies
+
+
+class ColumnMetricProvider(
+    ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider
+):
+    _DeprecatedMetaMetricProvider__alias = ColumnAggregateMetricProvider
