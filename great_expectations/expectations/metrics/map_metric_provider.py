@@ -37,9 +37,11 @@ logger = logging.getLogger(__name__)
 
 
 def column_function_partial(
-    engine: Type[ExecutionEngine], partial_fn_type: str = None, **kwargs
+    engine: Type[ExecutionEngine],
+    partial_fn_type: str = None,
+    **kwargs,
 ):
-    """Provides engine-specific support for authing a metric_fn with a simplified signature.
+    """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
     A metric function that is decorated as a column_function_partial will be called with the engine-specific column type
     and any value_kwargs associated with the Metric for which the provider function is being declared.
@@ -255,12 +257,13 @@ def column_condition_partial(
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
 ):
-    """Provides engine-specific support for authing a metric_fn with a simplified signature. A column_condition_partial
-    must provide a map function that evalues to a boolean value; it will be used to provide supplemental metrics, such
-    as the unexpected_value count, unexpected_values, and unexpected_rows.
+    """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
-    A metric function that is decorated as a column_condition_partial will be called with the engine-specific column type
-    and any value_kwargs associated with the Metric for which the provider function is being declared.
+    A column_condition_partial must provide a map function that evalues to a boolean value; it will be used to provide
+    supplemental metrics, such as the unexpected_value count, unexpected_values, and unexpected_rows.
+
+    A metric function that is decorated as a column_condition_partial will be called with the engine-specific column
+    type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
 
 
