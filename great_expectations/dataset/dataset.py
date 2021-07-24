@@ -4760,7 +4760,20 @@ class Dataset(MetaDataset):
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
+
+        For example (with column_list=["B", "C"] and sum_total=5)::
+
+            A B C
+            1 3 2
+            1 5 0
+            1 1 4
+            2 4 1
+            3 2 3
+            2 0 5
+
+            Pass
 
         Args:
             column_list (List[str]): \
