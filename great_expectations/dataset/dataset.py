@@ -4768,12 +4768,16 @@ class Dataset(MetaDataset):
             A B C
             1 3 2
             1 5 0
-            1 1 4
-            2 4 1
-            3 2 3
-            2 0 5
-
+            1 1 4        
+            
             Pass
+            
+            A B C
+            1 3 2
+            1 5 1
+            1 1 4        
+            
+            Fail on row 2     
 
         Args:
             column_list (List[str]): \
