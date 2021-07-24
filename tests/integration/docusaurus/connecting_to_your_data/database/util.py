@@ -13,7 +13,7 @@ def load_data_into_database(
     connection = engine.connect()
     try:
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        logger.debug(f"Dropping table {table_name}")
+        logger.debug(f"Dropping table {table_name} from database")
         df = pd.read_csv(csv_path)
         df = df.head(
             10
