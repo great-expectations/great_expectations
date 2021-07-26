@@ -50,7 +50,7 @@ batches:
 # Description:
 #A Checkpoint can apply one or more Validators to data accessible by GreatExpectations.
 #
-#A Validator specifies the BatchDefinition attributes (which provide directives for, among other purposes, efficiently accessing the particular data of insterest) as well as the ExpecationSuites against which this data is to be validated.  (The ValidationOperator is assumed to be the "action_list_operator", which, due to its generality, fulfills the needs of a broad list of data validation scenarios.  This standard choice can be overrridden, if desired, by setting "validation_operator_name" to a value other than "action_list_operator".)
+#A Validator specifies the BatchDefinition attributes (which provide directives for, among other purposes, efficiently accessing the particular data of insterest) as well as the ExpecationSuites against which this data is to be validated.  (The ValidationOperator is assumed to be the "action_list_operator", which, due to its generality, fulfills the needs of a broad list of data validation scenarios.  This standard choice can be overridden, if desired, by setting "validation_operator_name" to a value other than "action_list_operator".)
 #
 #One or more ExpectationSuites can be used for data validation in a Validator (as captured within the "expectation_suite_names" section).
 #
@@ -61,7 +61,7 @@ batches:
 #
 #
 #Example:
-#A Validator, configured in CheckPoint "titanic_checkpoint_1.yml", is asking the ExecutionEngine "PandasExecutionEngine" to use the DataConnector "subdir_reader_on_filesystem_data_connector_alex_0" (both defined in ExecutionEnvironment "Titanic_Env_0") to fetch the latest partion of the DataAsset "Titanic_CSV_File_Whose_Contents_Are_Updated_Hourly" and validate it against the expectations suite "Titanic.warning".
+#A Validator, configured in CheckPoint "titanic_checkpoint_1.yml", is asking the ExecutionEngine "PandasExecutionEngine" to use the DataConnector "subdir_reader_on_filesystem_data_connector_alex_0" (both defined in ExecutionEnvironment "Titanic_Env_0") to fetch the latest partition of the DataAsset "Titanic_CSV_File_Whose_Contents_Are_Updated_Hourly" and validate it against the expectations suite "Titanic.warning".
 #
 #
 #

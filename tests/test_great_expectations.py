@@ -772,7 +772,7 @@ def test_validate():
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
-
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
     assert results.to_json_dict() == expected_results.to_json_dict()
 
     # Now, change the results and ensure they are no longer equal
@@ -783,13 +783,14 @@ def test_validate():
     # and does not affect the "statistics" field.
     validation_results = my_df.validate(only_return_failures=True)
     del validation_results.meta["great_expectations_version"]
-
+    del validation_results.meta["expectation_suite_meta"]["great_expectations_version"]
     expected_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "titanic",
             "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
             "validation_time": "19551105T000000.000000Z",
             "batch_kwargs": {"ge_batch_id": "1234"},
+            "expectation_suite_meta": {},
             "batch_markers": {},
             "batch_parameters": {},
         },
@@ -880,6 +881,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
 
     for result in results.results:
         result.exception_info.pop("exception_traceback")

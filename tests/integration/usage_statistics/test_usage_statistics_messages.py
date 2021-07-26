@@ -22,7 +22,7 @@ def generate_messages_with_defaults(
         message_stubs: Unique parts of message
 
     Returns:
-        List of messsages same len(message_stubs) combining defaults overridden by message stubs
+        List of messages same len(message_stubs) combining defaults overridden by message stubs
     """
     output_list = []
     for message_stub in message_stubs:

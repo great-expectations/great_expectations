@@ -559,7 +559,7 @@ def get_dataset(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -609,7 +609,7 @@ def get_dataset(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
@@ -727,7 +727,7 @@ def get_test_validator_with_data(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -777,7 +777,7 @@ def get_test_validator_with_data(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
@@ -1234,7 +1234,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_most_common_value_to_be_in_set",
+            # "expect_column_most_common_value_to_be_in_set",
             # "expect_column_max_to_be_between",
             # "expect_column_min_to_be_between",
             # "expect_column_sum_to_be_between",
@@ -1904,10 +1904,10 @@ def check_json_test_result(test, result, data_asset=None):
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
                 if (isinstance(value, list)) & (len(value) >= 1):
                     if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = value.sort()
-                        result["result"]["unexpected_list"] = result["result"][
-                            "unexpected_list"
-                        ].sort()
+                        value = sorted(value, key=lambda x: str(x))
+                        result["result"]["unexpected_list"] = sorted(
+                            result["result"]["unexpected_list"], key=lambda x: str(x)
+                        )
 
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "

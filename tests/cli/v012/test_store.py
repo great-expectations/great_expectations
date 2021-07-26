@@ -16,7 +16,7 @@ def test_store_list_with_zero_stores(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "store list -d {}".format(project_dir),
+        f"store list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -57,7 +57,7 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "store list -d {}".format(project_dir),
+        f"store list -d {project_dir}",
         catch_exceptions=False,
     )
 
@@ -98,7 +98,7 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "store list -d {}".format(project_dir),
+        f"store list -d {project_dir}",
         catch_exceptions=False,
     )
     print(result.output)

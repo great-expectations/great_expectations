@@ -179,7 +179,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -223,7 +223,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
 
         for quantile, value_range in zip(quantiles, value_ranges):
-            quantile_string = quantile_strings.get(quantile, "{:3.2f}".format(quantile))
+            quantile_string = quantile_strings.get(quantile, f"{quantile:3.2f}")
             table_rows.append(
                 [
                     quantile_string,
@@ -262,7 +262,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         if result.result is None or result.result.get("observed_value") is None:
             return "--"
@@ -279,7 +279,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append(
                 [
-                    quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                    quantile_string if quantile_string else f"{quantile:3.2f}",
                     str(value_ranges[idx]),
                 ]
             )
@@ -305,7 +305,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         table_rows = []
@@ -323,7 +323,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         "string_template": {
                             "template": quantile_string
                             if quantile_string
-                            else "{:3.2f}".format(quantile),
+                            else f"{quantile:3.2f}",
                             "tooltip": {
                                 "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
                                 if quantile == 0.50
