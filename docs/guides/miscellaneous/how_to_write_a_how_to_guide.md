@@ -128,14 +128,6 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 
 ## Steps
 
-
-:::warning
-  Links are broken. Fix the following
-  - [Setting up your dev environment](./how_to_template)
-  - [Style guide](./how_to_template)
-  - [Testing](./how_to_template)
-:::
-
 1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](../../contributing/contributing_setup)
 
 2. Copy the How-to guide template file to the appropriate subdirectory of `docs/guides/`, and rename it.
