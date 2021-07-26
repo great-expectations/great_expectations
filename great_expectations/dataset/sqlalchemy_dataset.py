@@ -673,7 +673,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 head_sql_str += "`" + self._table.name + "`"
             else:
                 head_sql_str += self._table.name
-            head_sql_str += " limit {:d}".format(n)
+            head_sql_str += f" limit {n:d}"
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
@@ -1492,9 +1492,9 @@ WHERE
         )
 
         if ignore_row_if == "all_values_are_missing":
-            query = query.where(sa.and_(*[col != None for col in columns]))
+            query = query.where(sa.and_(*(col != None for col in columns)))
         elif ignore_row_if == "any_value_is_missing":
-            query = query.where(sa.or_(*[col != None for col in columns]))
+            query = query.where(sa.or_(*(col != None for col in columns)))
         elif ignore_row_if == "never":
             pass
         else:
@@ -2044,17 +2044,17 @@ WHERE
 
         if match_on == "any":
             condition = sa.or_(
-                *[
+                *(
                     self._get_dialect_regex_expression(column, regex)
                     for regex in regex_list
-                ]
+                )
             )
         else:
             condition = sa.and_(
-                *[
+                *(
                     self._get_dialect_regex_expression(column, regex)
                     for regex in regex_list
-                ]
+                )
             )
         return condition
 
@@ -2082,10 +2082,10 @@ WHERE
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 self._get_dialect_regex_expression(column, regex, positive=False)
                 for regex in regex_list
-            ]
+            )
         )
 
     def _get_dialect_like_pattern_expression(self, column, like_pattern, positive=True):
@@ -2212,17 +2212,17 @@ WHERE
 
         if match_on == "any":
             condition = sa.or_(
-                *[
+                *(
                     self._get_dialect_like_pattern_expression(column, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         else:
             condition = sa.and_(
-                *[
+                *(
                     self._get_dialect_like_pattern_expression(column, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         return condition
 
@@ -2253,10 +2253,10 @@ WHERE
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 self._get_dialect_like_pattern_expression(
                     column, like_pattern, positive=False
                 )
                 for like_pattern in like_pattern_list
-            ]
+            )
         )

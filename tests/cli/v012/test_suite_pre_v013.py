@@ -710,7 +710,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit not_a_real_suite -d {}".format(project_dir),
+        f"suite edit not_a_real_suite -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1219,7 +1219,7 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1239,7 +1239,7 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1262,7 +1262,7 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     output = result.output
@@ -1374,7 +1374,7 @@ def test_suite_delete_with_one_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite delete a.warning -d {}".format(project_dir),
+        f"suite delete a.warning -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

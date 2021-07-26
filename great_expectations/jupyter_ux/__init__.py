@@ -215,7 +215,7 @@ def show_available_data_asset_names(context, data_source_name=None):
             # TODO hacks to deal w/ inconsistent return types. Remove urgently
             mystery_object = generator.get_available_data_asset_names()
             if isinstance(mystery_object, dict) and "names" in mystery_object.keys():
-                data_asset_names = sorted([name[0] for name in mystery_object["names"]])
+                data_asset_names = sorted(name[0] for name in mystery_object["names"])
             elif isinstance(mystery_object, list):
                 data_asset_names = sorted(mystery_object)
             else:
@@ -226,7 +226,7 @@ def show_available_data_asset_names(context, data_source_name=None):
                 html += styles
                 html += "<ul class='data-assets'>"
                 for data_asset_name in data_asset_names:
-                    html += "<li>{:s}</li>".format(data_asset_name)
+                    html += f"<li>{data_asset_name:s}</li>"
                     data_asset_expectation_suite_keys = [
                         es_key
                         for es_key in expectation_suite_keys

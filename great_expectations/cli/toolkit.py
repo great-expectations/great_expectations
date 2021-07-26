@@ -386,7 +386,7 @@ def select_datasource(
         else:
             choices: str = "\n".join(
                 [
-                    "    {}. {}".format(i, data_source.name)
+                    f"    {i}. {data_source.name}"
                     for i, data_source in enumerate(data_sources, 1)
                 ]
             )
@@ -462,13 +462,13 @@ def load_data_context_with_error_handling(
                 from_cli_upgrade_command=from_cli_upgrade_command,
             )
         else:
-            cli_message(string="<red>{}</red>".format(err.message))
+            cli_message(string=f"<red>{err.message}</red>")
             sys.exit(1)
     except (
         ge_exceptions.ConfigNotFoundError,
         ge_exceptions.InvalidConfigError,
     ) as err:
-        cli_message(string="<red>{}</red>".format(err.message))
+        cli_message(string=f"<red>{err.message}</red>")
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:
         cli_message(string=err.cli_colored_message)
@@ -885,7 +885,7 @@ def get_batch_request_from_json_file(
         cli_message(
             string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
         )
-        cli_message(string="<red>{}</red>".format(e))
+        cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             send_usage_message(
                 data_context=data_context, event=usage_event, success=False

@@ -196,7 +196,7 @@ def _invert_regex_to_data_reference_template(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-    """Create a string template based on a regex and corresponding list of group names.
+    r"""Create a string template based on a regex and corresponding list of group names.
 
     For example:
 
