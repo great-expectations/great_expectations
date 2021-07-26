@@ -706,10 +706,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
-            *[
+            *(
                 sa.column(column_name) == column_value
                 for column_name, column_value in batch_identifiers.items()
-            ]
+            )
         )
 
     def _split_on_hashed_column(
