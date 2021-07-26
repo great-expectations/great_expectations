@@ -559,7 +559,7 @@ def get_dataset(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -609,7 +609,7 @@ def get_dataset(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
@@ -727,7 +727,7 @@ def get_test_validator_with_data(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -777,7 +777,7 @@ def get_test_validator_with_data(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:

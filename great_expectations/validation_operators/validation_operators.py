@@ -643,7 +643,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         status_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Status*: {}".format(status_text)},
+            "text": {"type": "mrkdwn", "text": f"*Status*: {status_text}"},
         }
         query["blocks"].append(status_element)
 
@@ -651,7 +651,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*Batch Id List:* {}".format(batch_identifiers),
+                "text": f"*Batch Id List:* {batch_identifiers}",
             },
         }
         query["blocks"].append(batch_identifiers_element)
@@ -670,13 +670,13 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         run_name_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Run Name:* {}".format(run_name)},
+            "text": {"type": "mrkdwn", "text": f"*Run Name:* {run_name}"},
         }
         query["blocks"].append(run_name_element)
 
         run_time_element = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": "*Run Time:* {}".format(run_time)},
+            "text": {"type": "mrkdwn", "text": f"*Run Time:* {run_time}"},
         }
         query["blocks"].append(run_time_element)
 
