@@ -514,7 +514,7 @@ class LegacyCheckpoint(Checkpoint):
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            logger.info("Setting run_name to: {}".format(run_name))
+            logger.info(f"Setting run_name to: {run_name}")
 
         default_validation_operator = ActionListValidationOperator(
             data_context=self.data_context,
