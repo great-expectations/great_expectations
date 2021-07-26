@@ -9,6 +9,13 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 
+# proposing that we are doing this:
+import logging
+logger = logging.getLogger(__name__)
+
+
+
+
 
 class BackendDependencies(enum.Enum):
     BIGQUERY = "BIGQUERY"
@@ -67,29 +74,29 @@ docs_test_matrix = [
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
     # },
-    {
-        "name": "getting_started",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
-    },
+    # {
+    #     "name": "getting_started",
+    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "user_flow_script": "tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    # },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -111,68 +118,68 @@ docs_test_matrix = [
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     # },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
-        "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
-        "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/template/script_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.MYSQL,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.MYSQL,
-    },
-    {
-        "name": "rule_base_profiler_multi_batch_example",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
+    #     "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
+    #     "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/template/script_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.MYSQL,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    #     "extra_backend_dependencies": BackendDependencies.MYSQL,
+    # },
+    # {
+    #     "name": "rule_base_profiler_multi_batch_example",
+    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    # },
 ]
 """
 TODO(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
@@ -187,26 +194,26 @@ integration_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
     },
-    {
-        "name": "pandas_two_batch_requests_two_validators",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
-        "expected_stderrs": "",
-        "expected_stdouts": "",
-    },
-    {
-        "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
-    },
-    {
-        "name": "pandas_multiple_batch_requests_one_validator_one_step",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
-    },
+    # {
+    #     "name": "pandas_two_batch_requests_two_validators",
+    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+    #     "expected_stderrs": "",
+    #     "expected_stdouts": "",
+    # },
+    # {
+    #     "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
+    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
+    # },
+    # {
+    #     "name": "pandas_multiple_batch_requests_one_validator_one_step",
+    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
+    # },
 ]
 
 
@@ -224,6 +231,14 @@ def pytest_parsed_arguments(request):
 @pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
+    print("~~~~~~~~~~~~~")
+    print("~~~~~~~~~~~~~")
+    print("~~~~~~~~~~~~~")
+    print(__name__)
+    print("~~~~~~~~~~~~~")
+    print("~~~~~~~~~~~~~")
+    print("~~~~~~~~~~~~~")
+
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
     _execute_integration_test(test_configuration, tmp_path)
 
@@ -253,6 +268,7 @@ def _execute_integration_test(test_configuration, tmp_path):
         )
         os.chdir(tmp_path)
         # Ensure GE is installed in our environment
+        logger.debug("Docusaurus test is installing GE")
         ge_requirement = test_configuration.get("ge_requirement", "great_expectations")
         execute_shell_command(f"pip install {ge_requirement}")
 
@@ -261,6 +277,7 @@ def _execute_integration_test(test_configuration, tmp_path):
         #
 
         # DataContext
+        logger.debug("Docusaurus test is copying DataContext folder")
         if test_configuration.get("data_context_dir"):
             context_source_dir = os.path.join(
                 base_dir, test_configuration.get("data_context_dir")
@@ -271,7 +288,9 @@ def _execute_integration_test(test_configuration, tmp_path):
                 test_context_dir,
             )
 
+
         # Test Data
+        logger.debug("Docusaurus test is copying test data folder")
         if test_configuration.get("data_dir") is not None:
             source_data_dir = os.path.join(base_dir, test_configuration.get("data_dir"))
             test_data_dir = os.path.join(tmp_path, "data")
@@ -289,6 +308,8 @@ def _execute_integration_test(test_configuration, tmp_path):
         shutil.copyfile(script_source, script_path)
 
         # Util Script
+        logger.debug("Docusaurus test is copying util_script.py for database tests")
+
         if test_configuration.get("util_script") is not None:
             script_source = os.path.join(
                 base_dir,
@@ -300,13 +321,20 @@ def _execute_integration_test(test_configuration, tmp_path):
         # Check initial state
 
         # Execute test
+
+        # this is what is preventing a lot of this from happening??
+        # how do you have the configure the logging.
         res = subprocess.run(["python", script_path], capture_output=True)
+        #res = subprocess.call(["python", script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
         # Check final state
         expected_stderrs = test_configuration.get("expected_stderrs")
         expected_stdouts = test_configuration.get("expected_stdouts")
         expected_failure = test_configuration.get("expected_failure")
         outs = res.stdout.decode("utf-8")
         errs = res.stderr.decode("utf-8")
+        #res.stderr.close()
+        #res.stdout.close()
         print(outs)
         print(errs)
 
