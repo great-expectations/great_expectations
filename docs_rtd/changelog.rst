@@ -9,6 +9,7 @@ develop
 -----------------
 * [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
 * [FEATURE] Add sqlalchemy engine support for `column.most_common_value` metric
+* [DOCS] Add "Select data_connector" to "Create your first Expectations" tutorial
 
 
 0.13.24
