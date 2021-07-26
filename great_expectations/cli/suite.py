@@ -332,7 +332,7 @@ def _suite_new_workflow(
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message(string="<red>{}</red>".format(e))
+        cli_message(string=f"<red>{e}</red>")
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
         )
@@ -619,7 +619,7 @@ def _suite_edit_workflow(
                     batch_request=batch_request,
                 )
 
-        notebook_name: str = "edit_{}.ipynb".format(expectation_suite_name)
+        notebook_name: str = f"edit_{expectation_suite_name}.ipynb"
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
         if profile:
@@ -675,7 +675,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message(string="<red>{}</red>".format(e))
+        cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             toolkit.send_usage_message(
                 data_context=context, event=usage_event, success=False

@@ -45,10 +45,10 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 get_dialect_regex_expression(column, regex, _dialect, positive=False)
                 for regex in regex_list
-            ]
+            )
         )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)

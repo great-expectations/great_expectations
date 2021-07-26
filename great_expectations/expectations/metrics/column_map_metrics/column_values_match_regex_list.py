@@ -58,17 +58,17 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
 
         if match_on == "any":
             condition = sa.or_(
-                *[
+                *(
                     get_dialect_regex_expression(column, regex, _dialect)
                     for regex in regex_list
-                ]
+                )
             )
         else:
             condition = sa.and_(
-                *[
+                *(
                     get_dialect_regex_expression(column, regex, _dialect)
                     for regex in regex_list
-                ]
+                )
             )
         return condition
 
@@ -77,7 +77,7 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
         if match_on == "any":
             return column.rlike("|".join(regex_list))
         elif match_on == "all":
-            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            formatted_regex_list = [f"(?={regex})" for regex in regex_list]
             return column.rlike("".join(formatted_regex_list))
         else:
             raise ValueError("match_on must be either 'any' or 'all'")
