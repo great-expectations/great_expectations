@@ -33,6 +33,11 @@ Select data_connector
     2. default_runtime_data_connector_name
 : 1
 
+Select data_connector
+    1. default_inferred_data_connector_name
+    2. default_runtime_data_connector_name
+: 1
+
 Which data asset (accessible by data connector "taxi_data_example_data_connector") would you like to use?
     1. yellow_tripdata_sample_2019-01.csv
     2. yellow_tripdata_sample_2019-02.csv
