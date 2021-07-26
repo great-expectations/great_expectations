@@ -41,7 +41,7 @@ def test_cli_init_on_new_project(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -284,7 +284,7 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     _ = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
     assert mock_webbrowser.call_count == 1
@@ -445,7 +445,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="\n2\n{}\nsink_me\n\n\n".format(data_path),
+            input=f"\n2\n{data_path}\nsink_me\n\n\n",
             catch_exceptions=False,
         )
     stdout = result.stdout
@@ -479,7 +479,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\nn\n".format(data_folder_path, data_path),
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -577,7 +577,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         in stdout
     )
     assert "Try again? [Y/n]:" in stdout
-    assert "[{}]:".format(data_path) in stdout
+    assert f"[{data_path}]:" in stdout
 
     assert "Name the new Expectation Suite [Titanic.warning]" in stdout
     assert (

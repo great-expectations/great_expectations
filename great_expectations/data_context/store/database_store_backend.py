@@ -242,10 +242,10 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
-                    *[
+                    *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns, key)
-                    ]
+                    )
                 )
             )
         )
@@ -308,10 +308,10 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
-                    *[
+                    *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns, key)
-                    ]
+                    )
                 )
             )
         )
@@ -327,10 +327,10 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
-                    *[
+                    *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns[: len(prefix)], prefix)
-                    ]
+                    )
                 )
             )
         )
@@ -339,10 +339,10 @@ class DatabaseStoreBackend(StoreBackend):
     def remove_key(self, key):
         delete_statement = self._table.delete().where(
             and_(
-                *[
+                *(
                     getattr(self._table.columns, key_col) == val
                     for key_col, val in zip(self.key_columns, key)
-                ]
+                )
             )
         )
         try:
