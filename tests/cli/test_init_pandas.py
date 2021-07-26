@@ -612,7 +612,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         in stdout
     )
     assert "Try again? [Y/n]:" in stdout
-    assert "[{}]:".format(data_path) in stdout
+    assert f"[{data_path}]:" in stdout
 
     assert "Name the new Expectation Suite [Titanic.warning]" in stdout
     assert (
