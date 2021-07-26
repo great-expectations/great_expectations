@@ -136,8 +136,7 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
   - [Testing](./how_to_template)
 :::
 
-
-1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](#TODO)
+1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](../../contributing/contributing_setup)
 
 2. Copy the How-to guide template file to the appropriate subdirectory of `docs/guides/`, and rename it.
 
@@ -152,9 +151,9 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 
 7. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 
-8. Scan your article to make sure it follows the [Style guide](#TODO). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+8. Scan your article to make sure it follows the [Style guide](../../contributing/contributing_style.md). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 
-9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](#TODO)
+9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](../../contributing/contributing_test.md)
 
 10. Submit your PR! If there are any additional integrations that need to be run, then please add this to your PR message.
 
