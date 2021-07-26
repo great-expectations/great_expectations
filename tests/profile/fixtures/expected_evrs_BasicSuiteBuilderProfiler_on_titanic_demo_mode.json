@@ -6,6 +6,7 @@
     "batch_kwargs": {
       "ge_batch_id": "29669d54-7b8f-11ea-9d75-acde48001122"
     },
+    "expectation_suite_meta": {},
     "batch_markers": {},
     "batch_parameters": {}
   },
