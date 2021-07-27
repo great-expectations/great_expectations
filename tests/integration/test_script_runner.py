@@ -8,13 +8,9 @@ import pytest
 
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
+from tests.integration.util import get_logger_from_config_file
 
-# proposing that we are doing this:
-import logging
-logger = logging.getLogger(__name__)
-
-
-
+logger = get_logger_from_config_file()
 
 
 class BackendDependencies(enum.Enum):
@@ -231,14 +227,6 @@ def pytest_parsed_arguments(request):
 @pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
-    print("~~~~~~~~~~~~~")
-    print("~~~~~~~~~~~~~")
-    print("~~~~~~~~~~~~~")
-    print(__name__)
-    print("~~~~~~~~~~~~~")
-    print("~~~~~~~~~~~~~")
-    print("~~~~~~~~~~~~~")
-
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
     _execute_integration_test(test_configuration, tmp_path)
 
@@ -288,7 +276,6 @@ def _execute_integration_test(test_configuration, tmp_path):
                 test_context_dir,
             )
 
-
         # Test Data
         logger.debug("Docusaurus test is copying test data folder")
         if test_configuration.get("data_dir") is not None:
@@ -325,7 +312,7 @@ def _execute_integration_test(test_configuration, tmp_path):
         # this is what is preventing a lot of this from happening??
         # how do you have the configure the logging.
         res = subprocess.run(["python", script_path], capture_output=True)
-        #res = subprocess.call(["python", script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # res = subprocess.call(["python", script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         # Check final state
         expected_stderrs = test_configuration.get("expected_stderrs")
@@ -333,8 +320,8 @@ def _execute_integration_test(test_configuration, tmp_path):
         expected_failure = test_configuration.get("expected_failure")
         outs = res.stdout.decode("utf-8")
         errs = res.stderr.decode("utf-8")
-        #res.stderr.close()
-        #res.stdout.close()
+        # res.stderr.close()
+        # res.stdout.close()
         print(outs)
         print(errs)
 
