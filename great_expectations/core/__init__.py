@@ -39,7 +39,6 @@ __all__ = [
     ge_urn,
 ]
 
-
 logger = logging.getLogger(__name__)
 
 RESULT_FORMATS = ["BOOLEAN_ONLY", "BASIC", "COMPLETE", "SUMMARY"]

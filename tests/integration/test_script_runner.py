@@ -190,26 +190,26 @@ integration_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
     },
-    # {
-    #     "name": "pandas_two_batch_requests_two_validators",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
-    #     "expected_stderrs": "",
-    #     "expected_stdouts": "",
-    # },
-    # {
-    #     "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
-    # },
-    # {
-    #     "name": "pandas_multiple_batch_requests_one_validator_one_step",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    #     "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
-    # },
+    {
+        "name": "pandas_two_batch_requests_two_validators",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+        "expected_stderrs": "",
+        "expected_stdouts": "",
+    },
+    {
+        "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
+    },
+    {
+        "name": "pandas_multiple_batch_requests_one_validator_one_step",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
+    },
 ]
 
 
@@ -308,11 +308,7 @@ def _execute_integration_test(test_configuration, tmp_path):
         # Check initial state
 
         # Execute test
-
-        # this is what is preventing a lot of this from happening??
-        # how do you have the configure the logging.
         res = subprocess.run(["python", script_path], capture_output=True)
-        # res = subprocess.call(["python", script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         # Check final state
         expected_stderrs = test_configuration.get("expected_stderrs")
@@ -320,8 +316,6 @@ def _execute_integration_test(test_configuration, tmp_path):
         expected_failure = test_configuration.get("expected_failure")
         outs = res.stdout.decode("utf-8")
         errs = res.stderr.decode("utf-8")
-        # res.stderr.close()
-        # res.stdout.close()
         print(outs)
         print(errs)
 
