@@ -16,7 +16,7 @@ pyodbc>=4.0.30  # sqlalchemy_tests
 # END NOTE
 # NOTE - 20210727
 # Still pinned per previous note, however now upgraded from 2.3.8
-snowflake-connector-python==2.5.0
+snowflake-connector-python==2.5.0  # sqlalchemy_tests
 # END NOTE
 snowflake-sqlalchemy>=1.2.3  # sqlalchemy_tests
 # NOTE - 20210421 sqlalchemy pinned temporarily due to 1.4.10 breaking mssql tests
