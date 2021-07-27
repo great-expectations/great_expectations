@@ -73,7 +73,7 @@ When you’re done with your work…
 
 * Push to the remote fork of your repo.
 
-* Follow these [instructions to create a PR](https://github.com/great-expectations/great_expectations/blob/develop/docs_rtd/changelog.rst) from your commit.
+* Follow these [instructions to create a PR](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) from your commit.
 
 * Provide background for reviewers so they can understand and approve your PR more quickly:
 
