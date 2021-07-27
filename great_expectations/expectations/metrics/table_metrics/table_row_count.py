@@ -16,7 +16,9 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
 )
-from great_expectations.expectations.metrics.table_metric import TableMetricProvider
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
 
 
 class TableRowCount(TableMetricProvider):
