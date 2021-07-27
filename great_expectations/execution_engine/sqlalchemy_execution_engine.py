@@ -450,7 +450,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table'"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         if domain_type == MetricDomainTypes.TABLE:
