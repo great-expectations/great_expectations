@@ -12,7 +12,9 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.expectations.metrics.import_manager import sparktypes
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.table_metric import TableMetricProvider
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
 from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
 
 
