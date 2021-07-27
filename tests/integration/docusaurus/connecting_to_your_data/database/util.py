@@ -1,3 +1,5 @@
+from sqlalchemy.exc import SQLAlchemyError
+
 def load_data_into_database(
     table_name: str, csv_path: str, connection_string: str
 ) -> None:
@@ -5,14 +7,18 @@ def load_data_into_database(
     import sqlalchemy as sa
 
     engine = sa.create_engine(connection_string)
-    connection = engine.connect()
     try:
+        connection = engine.connect()
+        print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
         df = pd.read_csv(csv_path)
-        df = df.head(
-            10
-        )  # <WILL> This line is here to address performance issues we have been running into with cloud resources (ie redshift). Can be taken out
+        # helping performance
+        df = df.head(10)
+        print(f"Creating table {table_name} from {csv_path}")
         df.to_sql(name=table_name, con=engine, index=False)
+    except SQLAlchemyError as e:
+        # TODO Add logging messages here
+        raise
     finally:
         connection.close()
         engine.dispose()

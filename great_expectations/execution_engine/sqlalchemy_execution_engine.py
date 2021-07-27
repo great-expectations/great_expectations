@@ -239,10 +239,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "snowflake",
             "mysql",
         ]:
-            # engine_backup is used by the snowflake connector, which requires connection and engine to be closed
-            # and disposed separately. Currently self.engine can refer to either a Connection or Engine, depending on
-            # the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and Connection
-            # can be handled separately.
+            # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
+            # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
+            # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
+            # Connection can be handled separately.
             self.engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()

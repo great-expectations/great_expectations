@@ -95,9 +95,10 @@ assert "taxi_data" in set(
     ]
 )
 
-# NOTE: snowflake connector requires connection and engine to be closed and disposed separately.
+# NOTE: The following code is only for testing and can be ignored by users.
+# <WILL> 20210726 - snowflake connector requires connection and engine to be closed and disposed separately.
 # However, SqlAlchemyExecutionEngine will override the engine with a connection for certain backends
 # (including snowflake), so the `engine` below is actually a connection and the `engine_backup` is the engine.
-# This will be cleaned up in an upcoming refactor.
+# This will be cleaned up in an upcoming refactor
 validator.execution_engine.engine.close()  # this closes the connection
 validator.execution_engine.engine_backup.dispose()  # this disposes the engine
