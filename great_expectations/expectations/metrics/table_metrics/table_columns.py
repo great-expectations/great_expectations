@@ -11,7 +11,9 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.table_metric import TableMetricProvider
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 try:
