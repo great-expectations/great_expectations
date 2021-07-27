@@ -544,7 +544,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    expected_batch_spec_parameters: dict = {}
+    expected_batch_spec_parameters: dict = {"data_asset_name": "my_data_asset"}
 
     # noinspection PyProtectedMember
     batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(
@@ -583,7 +583,7 @@ def test__build_batch_spec(basic_datasource):
         },
     )
     assert type(batch_spec) == RuntimeDataBatchSpec
-    assert set(batch_spec.keys()) == {"batch_data"}
+    assert set(batch_spec.keys()) == {"batch_data", "data_asset_name"}
     assert batch_spec["batch_data"].shape == (10, 1)
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
