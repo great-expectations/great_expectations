@@ -200,7 +200,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 [random.choice(list("ABCDEF0123456789")) for _ in range(size)]
             )
 
-        key = tuple([get_random_hex() for _ in range(self.key_length)])
+        key = tuple(get_random_hex() for _ in range(self.key_length))
         filepath = self._convert_key_to_filepath(key)
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:

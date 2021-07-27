@@ -871,12 +871,12 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += "{}{}/\n".format(indent, os.path.basename(root))
+        output_str += f"{indent}{os.path.basename(root)}/\n"
         subindent = " " * 4 * (level + 1)
 
         files.sort()
         for f in files:
-            output_str += "{}{}\n".format(subindent, f)
+            output_str += f"{subindent}{f}\n"
 
     return output_str
 
