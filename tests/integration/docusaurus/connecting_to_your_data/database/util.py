@@ -1,5 +1,6 @@
 from sqlalchemy.exc import SQLAlchemyError
 
+
 def load_data_into_database(
     table_name: str, csv_path: str, connection_string: str
 ) -> None:
