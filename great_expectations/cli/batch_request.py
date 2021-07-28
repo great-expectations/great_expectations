@@ -28,6 +28,7 @@ except ImportError:
     sqlalchemy = None
     Inspector = None
 
+DEFAULT_DATA_CONNECTOR_NAMES = ["default_runtime_data_connector_name", "default_inferred_data_connector_name"]
 
 def get_batch_request(
     datasource: BaseDatasource,
@@ -112,7 +113,7 @@ def get_batch_request(
 
     return batch_request
 
-
+# <WILL> this is what is eventually called, but we dont
 def select_data_connector_name(
     available_data_asset_names_by_data_connector_dict: Optional[
         Dict[str, List[str]]
@@ -128,6 +129,12 @@ def select_data_connector_name(
 
     if len(available_data_asset_names_by_data_connector_dict) == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
+
+    elif len(available_data_asset_names_by_data_connector_dict) == 2:
+        # check if we are only using the defaults:
+        default_data_connector = _check_default_data_connectors(available_data_asset_names_by_data_connector_dict)
+        if default_data_connector:
+            return default_data_connector
 
     data_connector_names: List[str] = list(
         available_data_asset_names_by_data_connector_dict.keys()
@@ -247,6 +254,11 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     )
     inspector: Inspector = Inspector.from_engine(execution_engine.engine)
     return inspector.default_schema_name
+
+def _check_default_data_connectors(available_data_asset_names_by_data_connector_dict):
+    if all(data_connector_name in available_data_asset_names_by_data_connector_dict for data_connector_name in DEFAULT_DATA_CONNECTOR_NAMES):
+        # return the default_inferred_asset_data_connector
+        return DEFAULT_DATA_CONNECTOR_NAMES[1]
 
 
 def _get_batch_spec_passthrough(
