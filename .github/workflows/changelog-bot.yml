@@ -17,7 +17,7 @@ jobs:
 
 
             Please don't forget to add a clear and succinct description of your change
-            under the **Develop** header in `docs/changelog.rst`, if applicable. This will
+            under the **Develop** header in `docs_rtd/changelog.rst`, if applicable. This will
             help us with the release process. See the [Contribution checklist](https://docs.greatexpectations.io/en/latest/contributing/contribution_checklist.html#how-to-submit-a-pull-request)
             in the Great Expectations documentation for the type of labels to use!
 

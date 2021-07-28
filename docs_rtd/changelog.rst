@@ -8,9 +8,11 @@ Changelog
 develop
 -----------------
 * [FEATURE] Add sqlalchemy engine support for `column.most_common_value` metric
+* [BUGFIX] Fix pip install snowflake build error with Python 3.9 (#3119)
 * [BUGFIX] Populate (data) asset name in data docs for RuntimeDataConnector (#3105)
 * [BUGFIX] Snowflake connections are closed correctly by DOCS tests (#3104)
 * [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
+* [DOCS] Correct path to docs_rtd/changelog.rst (#3120)
 
 0.13.24
 -----------------
