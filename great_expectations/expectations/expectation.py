@@ -1373,6 +1373,154 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
 
 
+class MulticolumnMapExpectation(TableExpectation, ABC):
+    map_metric = None
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column_list",
+        "row_condition",
+        "condition_parser",
+    )
+    success_keys = tuple()
+    default_kwarg_values = {
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": True,
+    }
+
+    @classmethod
+    def is_abstract(cls):
+        return cls.map_metric is None or super().is_abstract()
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        if not super().validate_configuration(configuration):
+            return False
+        try:
+            assert (
+                "column_list" in configuration.kwargs
+            ), "'column_list' parameter is required for multicolumn map expectations"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        return True
+
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        assert isinstance(
+            self.map_metric, str
+        ), "MulticolumnMapExpectation must override get_validation_dependencies or declare exactly one map_metric"
+        assert (
+            self.metric_dependencies == tuple()
+        ), "MulticolumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
+        # convenient name for updates
+        metric_dependencies = dependencies["metrics"]
+        metric_kwargs = get_metric_kwargs(
+            metric_name=self.map_metric + ".unexpected_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".unexpected_count"
+        ] = MetricConfiguration(
+            self.map_metric + ".unexpected_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        result_format_str = dependencies["result_format"].get("result_format")
+        metric_kwargs = get_metric_kwargs(
+            metric_name="table.row_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        if result_format_str in ["BOOLEAN_ONLY", "BASIC", "SUMMARY"]:
+            return dependencies
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_rows",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_rows",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        if isinstance(execution_engine, PandasExecutionEngine):
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_index_list",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_index_list"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_index_list",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
+
+        return dependencies
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration.kwargs.get(
+                    "result_format", self.default_kwarg_values.get("result_format")
+                ),
+            )
+        else:
+            result_format = configuration.kwargs.get(
+                "result_format", self.default_kwarg_values.get("result_format")
+            )
+        total_count = metrics.get("table.row_count")
+        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+
+        success = None
+        if total_count is None:
+            # Vacuously true
+            success = True
+        elif total_count != 0:
+            success_ratio = float(total_count - unexpected_count) / total_count
+            success = success_ratio > 0.0
+        elif total_count == 0:
+            success = True
+
+        return _format_map_output(
+            result_format=parse_result_format(result_format),
+            success=success,
+            element_count=metrics.get("table.row_count"),
+            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
+            unexpected_rows=metrics.get(self.map_metric + ".unexpected_rows"),
+            unexpected_index_list=metrics.get(
+                self.map_metric + ".unexpected_index_list"
+            ),
+        )
+
+
 class ColumnPairMapExpectation(TableExpectation, ABC):
     map_metric = None
     domain_keys = (
@@ -1578,10 +1726,11 @@ def _format_map_output(
     result_format,
     success,
     element_count,
-    nonnull_count,
-    unexpected_count,
-    unexpected_list,
-    unexpected_index_list,
+    nonnull_count=None,
+    unexpected_count=None,
+    unexpected_rows=None,
+    unexpected_list=None,
+    unexpected_index_list=None,
 ):
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
@@ -1628,10 +1777,16 @@ def _format_map_output(
         "element_count": element_count,
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent_nonmissing,
-        "partial_unexpected_list": unexpected_list[
-            : result_format["partial_unexpected_count"]
-        ],
     }
+
+    if unexpected_list is not None:
+        return_obj["result"].update(
+            {
+                "partial_unexpected_list": unexpected_list[
+                    : result_format["partial_unexpected_count"]
+                ],
+            }
+        )
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
@@ -1677,10 +1832,21 @@ def _format_map_output(
 
     return_obj["result"].update(
         {
-            "unexpected_list": unexpected_list,
             "unexpected_index_list": unexpected_index_list,
         }
     )
+    if unexpected_rows is not None:
+        return_obj["result"].update(
+            {
+                "unexpected_rows": unexpected_rows,
+            }
+        )
+    if unexpected_list is not None:
+        return_obj["result"].update(
+            {
+                "unexpected_list": unexpected_list,
+            }
+        )
 
     if result_format["result_format"] == "COMPLETE":
         return return_obj
