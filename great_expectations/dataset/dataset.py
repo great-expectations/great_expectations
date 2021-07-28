@@ -3798,7 +3798,7 @@ class Dataset(MetaDataset):
 
         test_result = stats.chisquare(test_df["count"], test_df["expected"])[1]
 
-        # Normalize the ouputs so they can be used as partitions into other expectations
+        # Normalize the outputs so they can be used as partitions into other expectations
         # GH653
         expected_weights = (test_df["expected"] / test_df["expected"].sum()).tolist()
         observed_weights = (test_df["count"] / test_df["count"].sum()).tolist()
@@ -4760,7 +4760,24 @@ class Dataset(MetaDataset):
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
+
+        For example (with column_list=["B", "C"] and sum_total=5)::
+
+            A B C
+            1 3 2
+            1 5 0
+            1 1 4        
+            
+            Pass
+            
+            A B C
+            1 3 2
+            1 5 1
+            1 1 4        
+            
+            Fail on row 2     
 
         Args:
             column_list (List[str]): \

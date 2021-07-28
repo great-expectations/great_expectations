@@ -450,7 +450,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table'"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         if domain_type == MetricDomainTypes.TABLE:
@@ -706,10 +706,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
-            *[
+            *(
                 sa.column(column_name) == column_value
                 for column_name, column_value in batch_identifiers.items()
-            ]
+            )
         )
 
     def _split_on_hashed_column(

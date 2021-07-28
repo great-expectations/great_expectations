@@ -59,7 +59,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         exc.__dict__.setdefault("traces", []).append(trace)
         if is_root:
             trace = " -> ".join(reversed(exc.traces))
-            exc = AssertionError("{}\nTRACE: {}".format(str(exc), trace))
+            exc = AssertionError(f"{str(exc)}\nTRACE: {trace}")
         raise exc
 
 

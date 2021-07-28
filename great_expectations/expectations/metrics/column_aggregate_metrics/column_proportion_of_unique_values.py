@@ -10,12 +10,14 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    sa as sa,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -33,7 +35,7 @@ def unique_proportion(_metrics):
         return 0
 
 
-class ColumnUniqueProportion(ColumnMetricProvider):
+class ColumnUniqueProportion(ColumnAggregateMetricProvider):
     metric_name = "column.unique_proportion"
 
     @metric_value(engine=PandasExecutionEngine)

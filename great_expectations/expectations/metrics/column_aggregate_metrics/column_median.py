@@ -12,8 +12,8 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnMedian(ColumnMetricProvider):
+class ColumnMedian(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.median"
@@ -111,7 +111,7 @@ class ColumnMedian(ColumnMetricProvider):
         # Note that this can be an expensive computation; we are not exposing
         # spark's ability to estimate.
         # We add two to 2 * n_values to maintain a legitimate quantile
-        # in the degnerate case when n_values = 0
+        # in the degenerate case when n_values = 0
 
         """Spark Median Implementation"""
         table_row_count = metrics.get("table.row_count")

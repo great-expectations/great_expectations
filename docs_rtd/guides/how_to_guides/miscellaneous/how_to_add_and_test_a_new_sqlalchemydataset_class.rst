@@ -62,7 +62,7 @@ The core team will not be able to merge your contribution until they're able to 
 
     * **Review SqlAlchemyDataset methods starting with _get_dialect_**
 
-        Methods like ``_get_dialect_type_module`` and ``_get_dialect_regex_expression`` allow you to customize their behavior to accommodate the idiosyncracies of specific databases. In some cases, the methods specify defaults that will work for most SQL engines. In other cases, you'll need to implement custom logic. In either case, you need to verify that they behave properly for your dialect.
+        Methods like ``_get_dialect_type_module`` and ``_get_dialect_regex_expression`` allow you to customize their behavior to accommodate the idiosyncrasies of specific databases. In some cases, the methods specify defaults that will work for most SQL engines. In other cases, you'll need to implement custom logic. In either case, you need to verify that they behave properly for your dialect.
 
 
 3. Make changes to conftest.py

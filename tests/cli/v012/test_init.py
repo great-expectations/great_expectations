@@ -42,7 +42,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     result = runner.invoke(
         cli,
         ["init", "-d", root_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output

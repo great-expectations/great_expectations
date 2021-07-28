@@ -73,7 +73,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
         column_length = column.size
 
-        # choose the operator to use for comparion of consecutive items
+        # choose the operator to use for comparison of consecutive items
         # could be easily adapted for other comparisons, perhaps of custom objects
         if reverse:
             compare_function = operator.ge

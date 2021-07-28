@@ -184,7 +184,7 @@ class MicrosoftTeamsRenderer(Renderer):
     def _render_validation_result_element(key, value, validation_result=None):
         validation_result_element = {
             "type": "TextBlock",
-            "text": "**{key}:** {value}".format(key=key, value=value),
+            "text": f"**{key}:** {value}",
             "horizontalAlignment": "left",
         }
         if validation_result and validation_result.success:
