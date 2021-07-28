@@ -58,14 +58,14 @@ class TableHead(TableMetricProvider):
                     df = pd.read_sql_table(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
-                        con=execution_engine.engine,
+                        con=execution_engine.connection,
                     )
                 else:
                     df = next(
                         pd.read_sql_table(
                             table_name=getattr(selectable, "name", None),
                             schema=getattr(selectable, "schema", None),
-                            con=execution_engine.engine,
+                            con=execution_engine.connection,
                             chunksize=metric_value_kwargs["n_rows"],
                         )
                     )
@@ -91,7 +91,7 @@ class TableHead(TableMetricProvider):
                 dialect=execution_engine.engine.dialect,
                 compile_kwargs={"literal_binds": True},
             )
-            df = pd.read_sql(sql, con=execution_engine.engine)
+            df = pd.read_sql(sql, con=execution_engine.connection)
 
         return df
 

@@ -245,7 +245,7 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = cast(
         SqlAlchemyExecutionEngine, datasource.execution_engine
     )
-    inspector: Inspector = Inspector.from_engine(execution_engine.engine)
+    inspector: Inspector = Inspector.from_engine(execution_engine.connection)
     return inspector.default_schema_name
 
 

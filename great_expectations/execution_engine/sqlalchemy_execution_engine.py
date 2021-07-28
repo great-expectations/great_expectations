@@ -245,7 +245,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Connection can be handled separately.
             self.engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
-            self.engine = self.engine.connect()
+        self.connection = self.engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -633,7 +633,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             assert len(query["select"]) == len(query["ids"])
             try:
-                res = self.engine.execute(
+                res = self.connection.execute(
                     sa.select(query["select"]).select_from(selectable)
                 ).fetchall()
                 logger.debug(
@@ -810,7 +810,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                     query = str(
                         raw_query.compile(
-                            self.engine, compile_kwargs={"literal_binds": True}
+                            self.connection, compile_kwargs={"literal_binds": True}
                         )
                     )
                     query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]

@@ -94,7 +94,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
+        sqlalchemy_engine = execution_engine.connection
         dialect = sqlalchemy_engine.dialect
         quantiles = metric_value_kwargs["quantiles"]
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)

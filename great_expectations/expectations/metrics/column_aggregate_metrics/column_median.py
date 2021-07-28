@@ -52,7 +52,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
+        sqlalchemy_engine = execution_engine.connection
         dialect = sqlalchemy_engine.dialect
         """SqlAlchemy Median Implementation"""
         if dialect.name.lower() == "awsathena":
