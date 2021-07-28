@@ -154,7 +154,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             )
         return rendered
 
-    def add_header(self, suite_name: str, batch_kwargs) -> None:
+    def add_header(
+        self, suite_name: str, batch_kwargs, suite_notes: Optional[dict]
+    ) -> None:
         markdown = self.render_with_overwrite(
             self.header_markdown, "HEADER.md", suite_name=suite_name
         )
@@ -166,6 +168,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         code = self.render_with_overwrite(
             self.header_code,
             "header.py.j2",
+            suite_notes=suite_notes,
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
             env=os.environ,
@@ -282,7 +285,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         suite_name = suite.expectation_suite_name
 
         batch_kwargs = self.get_batch_kwargs(suite, batch_kwargs)
-        self.add_header(suite_name, batch_kwargs)
+        self.add_header(
+            suite_name, batch_kwargs, suite_notes=suite.meta.get("notes", None)
+        )
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()
