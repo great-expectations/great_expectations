@@ -526,7 +526,7 @@ class EmailAction(ValidationAction):
             # implement a custom one
             module_name: great_expectations.render.renderer.email_renderer
             class_name: EmailRenderer
-          # put the actual following informations in the uncommitted/config_variables.yml file
+          # put the actual following information in the uncommitted/config_variables.yml file
           # or pass in as environment variable
           smtp_address: ${smtp_address}
           smtp_port: ${smtp_port}
@@ -561,14 +561,14 @@ class EmailAction(ValidationAction):
                    "module_name": "great_expectations.render.renderer.email_renderer",
                    "class_name": "EmailRenderer",
                }
-            smtp_address: adress of the SMTP server used to send the email
+            smtp_address: address of the SMTP server used to send the email
             smtp_address: port of the SMTP server used to send the email
             sender_login: login used send the email
             sender_password: password used to send the email
             sender_alias: optional alias used to send the email (default = sender_login)
             receiver_emails: email addresses that will be receive the email (separated by commas)
-            use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommanded)
-            use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommanded)
+            use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommended)
+            use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommended)
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
             notify_with: optional list of DataDocs site names to display in the email message
         """

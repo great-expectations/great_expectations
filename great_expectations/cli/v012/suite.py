@@ -158,7 +158,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     context, datasource_name=datasource
                 )
             except ValueError as ve:
-                cli_message("<red>{}</red>".format(ve))
+                cli_message(f"<red>{ve}</red>")
                 toolkit.send_usage_message(
                     data_context=context, event=usage_event, success=False
                 )
@@ -186,7 +186,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     additional_batch_kwargs=additional_batch_kwargs,
                 )
 
-        notebook_name = "edit_{}.ipynb".format(suite.expectation_suite_name)
+        notebook_name = f"edit_{suite.expectation_suite_name}.ipynb"
         notebook_path = _get_notebook_path(context, notebook_name)
         SuiteEditNotebookRenderer.from_data_context(context).render_to_disk(
             suite, notebook_path, batch_kwargs
@@ -350,7 +350,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message("<red>{}</red>".format(e))
+        cli_message(f"<red>{e}</red>")
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
         )
@@ -468,7 +468,7 @@ def suite_list(directory):
 
     try:
         suite_names = [
-            " - <cyan>{}</cyan>".format(suite_name)
+            f" - <cyan>{suite_name}</cyan>"
             for suite_name in context.list_expectation_suite_names()
         ]
         if len(suite_names) == 0:
@@ -480,7 +480,7 @@ def suite_list(directory):
         elif len(suite_names) == 1:
             list_intro_string = "1 Expectation Suite found:"
         else:
-            list_intro_string = "{} Expectation Suites found:".format(len(suite_names))
+            list_intro_string = f"{len(suite_names)} Expectation Suites found:"
 
         cli_message_list(suite_names, list_intro_string)
         toolkit.send_usage_message(

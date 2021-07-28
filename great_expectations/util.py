@@ -493,7 +493,13 @@ def read_excel(
     """
     import pandas as pd
 
-    df = pd.read_excel(filename, *args, **kwargs)
+    try:
+        df = pd.read_excel(filename, *args, **kwargs)
+    except ImportError:
+        raise ImportError(
+            "Pandas now requires 'openpyxl' as an optional-dependency to read Excel files. Please use pip or conda to install openpyxl and try again"
+        )
+
     if dataset_class is None:
         verify_dynamic_loading_support(module_name=module_name)
         dataset_class = load_class(class_name=class_name, module_name=module_name)
@@ -865,12 +871,12 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += "{}{}/\n".format(indent, os.path.basename(root))
+        output_str += f"{indent}{os.path.basename(root)}/\n"
         subindent = " " * 4 * (level + 1)
 
         files.sort()
         for f in files:
-            output_str += "{}{}\n".format(subindent, f)
+            output_str += f"{subindent}{f}\n"
 
     return output_str
 

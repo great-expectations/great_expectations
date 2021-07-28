@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -25,12 +25,80 @@ class Profiler:
     """
     Profiler object serves to profile, or automatically evaluate a set of rules, upon a given
     batch / multiple batches of data.
+
+    --ge-feature-maturity-info--
+
+        id: rule_based_profiler_overall
+        title: Rule-Based Profiler
+        icon:
+        short_description: Configuration Driven Profiler
+        description: Use YAML to configure a flexible Profiler engine, which will then generate an ExpectationSuite for a data set
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Low (instantiation of Profiler and the signature of the profile() method will change)
+            implementation_completeness: Moderate (some augmentation and/or growth in capabilities is to be expected)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: domain_builders
+        title: Domain Builders
+        icon:
+        short_description: Configurable Domain builders for generating lists of ExpectationConfiguration objects
+        description: Use YAML to build domains for ExpectationConfiguration generator (table, column, semantic types, etc.)
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional DomainBuilder classes will be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: parameter_builders
+        title: Parameter Builders
+        icon:
+        short_description: Configurable Parameter builders for generating parameters to be used by ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class
+        description: Use YAML to configure single and multi batch based parameter computation modules for the use by ExpectationConfigurationBuilder classes
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional ParameterBuilder classes will be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: expectation_configuration_builders
+        title: ExpectationConfiguration Builders
+        icon:
+        short_description: Configurable ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class and using parameters, computed by ParameterBuilder classes
+        description: Use YAML to configure ExpectationConfigurationBuilder classes, which emit lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments)
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional ExpectationConfigurationBuilder classes might be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+    --ge-feature-maturity-info--
     """
 
     def __init__(
         self,
         *,
-        profiler_config: Optional[Dict[str, Dict[str, Dict]]] = None,
+        profiler_config: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -43,12 +111,15 @@ class Profiler:
             profiler_config: Variables and Rules configuration as a dictionary
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
+        self._profiler_config = profiler_config
         self._data_context = data_context
         self._rules = []
 
-        rules_configs: Dict[str, Dict] = profiler_config.get("rules", {})
+        rules_configs: Dict[str, Dict[str, Any]] = self._profiler_config.get(
+            "rules", {}
+        )
         rule_name: str
-        rule_config: dict
+        rule_config: Dict[str, Any]
 
         for rule_name, rule_config in rules_configs.items():
             domain_builder_config: dict = rule_config.get("domain_builder")
@@ -107,7 +178,9 @@ class Profiler:
                         )
                     )
 
-            variables_configs: Dict[str, Dict] = profiler_config.get("variables", {})
+            variables_configs: Dict[str, Dict] = self._profiler_config.get(
+                "variables", {}
+            )
             variables: Optional[ParameterContainer] = None
 
             if variables_configs:
@@ -129,10 +202,12 @@ class Profiler:
         self,
         *,
         expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
     ) -> ExpectationSuite:
         """
         Args:
             :param expectation_suite_name: A name for returned Expectation suite.
+            :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
         if expectation_suite_name is None:
@@ -143,6 +218,12 @@ class Profiler:
         expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name
         )
+
+        if include_citation:
+            expectation_suite.add_citation(
+                comment="Suite created by Rule-Based Profiler with the configuration included.",
+                profiler_config=self._profiler_config,
+            )
 
         rule: Rule
         for rule in self._rules:

@@ -12,25 +12,6 @@ anonymized_string_schema = {
     "maxLength": 32,
 }
 
-anonymized_datasource_schema = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "anonymized-datasource",
-    "definitions": {"anonymized_string": anonymized_string_schema},
-    "oneOf": [
-        {
-            "type": "object",
-            "properties": {
-                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
-                "parent_class": {"type": "string", "maxLength": 256},
-                "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
-                "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
-            },
-            "additionalProperties": False,
-            "required": ["parent_class", "anonymized_name"],
-        }
-    ],
-}
-
 anonymized_class_info_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-class-info",
@@ -48,6 +29,49 @@ anonymized_class_info_schema = {
             # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
             "required": ["parent_class"],
         }
+    ],
+}
+
+anonymized_datasource_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-datasource",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_class_info": anonymized_class_info_schema,
+    },
+    "anyOf": [
+        # v2 (Batch Kwargs) API:
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "parent_class": {"type": "string", "maxLength": 256},
+                "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+                "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+            },
+            "additionalProperties": False,
+            "required": ["parent_class", "anonymized_name"],
+        },
+        # v3 (Batch Request) API:
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "parent_class": {"type": "string", "maxLength": 256},
+                "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+                "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+                "anonymized_execution_engine": {
+                    "$ref": "#/definitions/anonymized_class_info"
+                },
+                "anonymized_data_connectors": {
+                    "type": "array",
+                    "maxItems": 1000,
+                    "items": {"$ref": "#/definitions/anonymized_class_info"},
+                },
+            },
+            "additionalProperties": False,
+            "required": ["parent_class", "anonymized_name"],
+        },
     ],
 }
 
@@ -365,6 +389,45 @@ datasource_sqlalchemy_connect_payload = {
     "additionalProperties": False,
 }
 
+test_yaml_config_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "test-yaml-config",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_class_info": anonymized_class_info_schema,
+    },
+    "type": "object",
+    "properties": {
+        "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+        "diagnostic_info": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+                "enum": [
+                    "__substitution_error__",
+                    "__yaml_parse_error__",
+                    "__custom_subclass_not_core_ge__",
+                    "__class_name_not_provided__",
+                ],
+            },
+        },
+        # Store
+        "anonymized_store_backend": {"$ref": "#/definitions/anonymized_class_info"},
+        # Datasource v2 (Batch Kwargs) API & v3 (Batch Request) API:
+        "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+        # Datasource v3 (Batch Request) API only:
+        "anonymized_execution_engine": {"$ref": "#/definitions/anonymized_class_info"},
+        "anonymized_data_connectors": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {"$ref": "#/definitions/anonymized_class_info"},
+        },
+    },
+    "additionalProperties": False,
+}
+
 usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "definitions": {
@@ -385,6 +448,7 @@ usage_statistics_record_schema = {
         "cli_payload": cli_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
+        "test_yaml_config_payload": test_yaml_config_payload_schema,
     },
     "type": "object",
     "properties": {
@@ -462,6 +526,15 @@ usage_statistics_record_schema = {
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["data_context.test_yaml_config"],
+                },
+                "event_payload": {"$ref": "#/definitions/test_yaml_config_payload"},
             },
         },
         {

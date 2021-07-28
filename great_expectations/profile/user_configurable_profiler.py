@@ -557,7 +557,7 @@ class UserConfigurableProfiler:
             column_name: The name of the column
 
         Returns:
-            A list of semantic_types for a given colum
+            A list of semantic_types for a given column
         """
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:

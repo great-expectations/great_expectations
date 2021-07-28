@@ -1,5 +1,6 @@
 import json
 from typing import List
+from unittest import mock
 
 import boto3
 import pandas as pd
@@ -8,6 +9,7 @@ from moto import mock_s3
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -92,9 +94,12 @@ def test_basic_instantiation():
         )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock_s3
-def test_instantiation_from_a_config(empty_data_context):
-    context = empty_data_context
+def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -152,11 +157,33 @@ def test_instantiation_from_a_config(empty_data_context):
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetS3DataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock_s3
-def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context):
-    context = empty_data_context
+def test_instantiation_from_a_config_regex_does_not_match_paths(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -216,6 +243,23 @@ assets:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetS3DataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @mock_s3

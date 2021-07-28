@@ -4,8 +4,134 @@
 Changelog
 #########
 
-Develop
+
+develop
 -----------------
+* [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
+* [FEATURE] Add sqlalchemy engine support for `column.most_common_value` metric
+* [BUGFIX] Populate (data) asset name in data docs for RuntimeDataConnector (#3105)
+
+0.13.24
+-----------------
+* [FEATURE] Script to automate proper triggering of Docs Azure pipeline (#3003)
+* [BUGFIX] Fix an undefined name that could lead to a NameError (#3063) (Thanks @cclauss)
+* [BUGFIX] fix incorrect pandas top rows usage (#3091)
+* [BUGFIX] Fix parens in Expectation metric validation method that always returned True assertation (#3086) (Thanks @morland96)
+* [BUGFIX] Fix run_diagnostics for contrib expectations (#3096)
+* [BUGFIX] Fix typos discovered by codespell (#3064) (Thanks cclauss)
+* [BUGFIX] Wrap get_view_names in try clause for passing the NotImplemented error (#2976) (Thanks @kj-9)
+* [DOCS] Ensuring consistent style of directories, files, and related references in docs (#3053)
+* [DOCS] Fix broken link to example DAG (#3061) (Thanks fritz-astronomer)
+* [DOCS] GDOC-198 cleanup TOC (#3088)
+* [DOCS] Migrating pages under guides/miscellaneous (#3094) (Thanks @spbail)
+* [DOCS] Port over “How to configure a new Checkpoint using test_yaml_config” from RTD to Docusaurus
+* [DOCS] Port over “How to configure an Expectation store in GCS” from RTD to Docusaurus (#3071)
+* [DOCS] Port over “How to create renderers for custom Expectations” from RTD to Docusaurus
+* [DOCS] Port over “How to run a Checkpoint in Airflow” from RTD to Docusaurus (#3074)
+* [DOCS] Update how-to-create-and-edit-expectations-in-bulk.md (#3073)
+* [MAINTENANCE] Adding a comment explaining the IDENTITY metric domain type. (#3057)
+* [MAINTENANCE] Change domain key value from “column” to “column_list” in ExecutionEngine implementations (#3059)
+* [MAINTENANCE] clean up metric errors (#3085)
+* [MAINTENANCE] Correct the typo in the naming of the IDENTIFICATION semantic domain type name. (#3058)
+* [MAINTENANCE] disable snowflake tests temporarily (#3093)
+* [MAINTENANCE] [DOCS] Port over “How to host and share Data Docs on GCS” from RTD to Docusaurus (#3070)
+* [MAINTENANCE] Enable repr for MetricConfiguration to assist with troubleshooting. (#3075)
+* [MAINTENANCE] Expand test of a column map metric to underscore functionality. (#3072)
+* [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
+* [MAINTENANCE] Fix -- check for column key existence in accessor_domain_kwargsn for condition map partials. (#3082)
+* [MAINTENANCE] Missing import of SparkDFExecutionEngine was added. (#3062)
+
+0.13.23
+-----------------
+* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
+* [BUGFIX] fix update data docs as validation action (#3031)
+* [DOCS] Port over "How to configure an Expectation Store in Azure" from RTD to Docusaurus
+* [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus (#3018)
+* [DOCS] Port over "How to instantiate a Data Context w/o YML" from RTD to Docusaurus (#3011)
+* [DOCS] Port "How to configure a Validation Result store on a filesystem" from RTD to Docusaurus (#3025)
+* [DOCS] how to create multibatch expectations using evaluation parameters (#3039)
+* [DOCS] Port "How to create and edit Expectations with a Profiler" from RTD to Docussaurus. (#3048)
+* [DOCS] Port RTD adding validations data or suites to checkpoint (#3030)
+* [DOCS] Porting "How to create and edit Expectations with instant feedback from a sample Batch of data" from RTD to Docusaurus. (#3046)
+* [DOCS] GDOC-172/Add missing pages (#3007)
+* [DOCS] Port over "How to configure DataContext components using test_yaml_config" from RTD to Docusaurus
+* [DOCS] Port over "How to configure a Validation Result store to Postgres" from RTD to Docusaurus
+* [DOCS] Port over "How to configure an Expectation Store in S3" from RTD to Docusaurus
+* [DOCS] Port over "How to configure an Expectation Store on a filesystem" from RTD to Docusaurus
+* [DOCS] Port over "How to configure credentials using YAML or env vars" from RTD to Docusaurus
+* [DOCS] Port over "How to configure credentials using a secrets store" from RTD to Docusaurus
+* [DOCS] Port over "How to configure validation result store in GCS" from RTD to Docusaurus (#3019)
+* [DOCS] Port over "How to connect to an Athena DB" from RTD to Docusaurus
+* [DOCS] Port over "How to create a new ExpectationSuite from jsonschema" from RTD to Docusaurus (#3017)
+* [DOCS] Port over "How to deploy a scheduled checkpoint with cron" from RTD to Docusaurus
+* [DOCS] Port over "How to dynamically load evaluation parameters from DB" from RTD to Docusaurus (#3052)
+* [DOCS] Port over "How to host and share DataDocs on Amazon S3" from RTD to Docusaurus
+* [DOCS] Port over "How to implement custom notifications" from RTD to Docusaurus  (#3050)
+* [DOCS] Port over "How to instantiate a DataContext on Databricks Spark cluster" from RTD to Docusaurus
+* [DOCS] Port over "How to instantiate a DataContext on an EMR Spark Cluster" from RTD to Docusaurus (#3024)
+* [DOCS] Port over "How to trigger Opsgenie notifications as a validation action" from RTD to Docusaurus
+* [DOCS] Update titles of metadata store docs (#3016)
+* [DOCS] Port over "How to configure Expectation store to PostgreSQL" from RTD to Docusaurus (#3010)
+* [DOCS] Port over "How to configure a MetricsStore" from RTD to Docusaurus (#3009)
+* [DOCS] Port over "How to configure validation result store in Azure" from RTD to Docusaurus (#3014)
+* [DOCS] Port over "How to host and share DataDocs on Azure" from RTD to Docusaurus  (#3012)
+* [DOCS]Port "How to create and edit Expectations based on domain knowledge, without inspecting data directly" from RTD to Datasaurus. (#3047)
+* [DOCS] Ported "How to configure a Validation Result store in Amazon S3" from RTD to Docusaurus. (#3026)
+* [DOCS] how to validate without checkpoint (#3013)
+* [DOCS] validation action data docs update (convert from RTD to DocuSaurus) (#3015)
+* [DOCS] port of 'How to store Validation Results as a Validation Action' from RTD into Docusaurus. (#3023)
+* [MAINTENANCE] Cleanup (#3038)
+* [MAINTENANCE] Edits (Formatting) (#3022)
+
+
+0.13.22
+-----------------
+* [FEATURE] Port over guide for Slack notifications for validation actions (#3005)
+* [FEATURE] bootstrap estimator  for NumericMetricRangeMultiBatchParameterBuilder (#3001)
+* [BUGFIX] Update naming of confidence_level in integration test fixture (#3002)
+* [BUGFIX] [batch.py] fix check for null value (#2994) (thanks @Mohamed Abido)
+* [BUGFIX] Fix issue where compression key was added to reader_method for read_parquet (#2506)
+* [BUGFIX] Improve support for dates for expect_column_distinct_values_to_contain_set (#2997) (thanks @xaniasd)
+* [BUGFIX] Fix bug in getting non-existent parameter (#2986)
+* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 (#2989)
+* [DOCS] Getting Started - Clean Up and Integration Tests (#2985)
+* [DOCS] Adding in url links and style (#2999)
+* [DOCS] Adding a missing import to a documentation page (#2983) (thanks @rishabh-bhargava)
+* [DOCS]/GDOC-108/GDOC-143/Add in Contributing fields and updates (#2972)
+* [DOCS] Update rule-based profiler docs (#2987)
+* [DOCS] add image zoom plugin (#2979)
+* [MAINTENANCE] fix lint issues for docusaurus (#3004)
+* [Maintenance] update header to match GE.io (#2811)
+* [MAINTENANCE] Instrument test_yaml_config() (#2981)
+* [MAINTENANCE] Remove "mostly" from "bobster" test config (#2996)
+* [MAINTENANCE] Update v-0.12 CLI test to reflect Pandas upgrade to version 1.3.0 (#2995)
+* [MAINTENANCE] rephrase expectation suite meta profile comment (#2991)
+* [MAINTENANCE] make citation cleaner in expectation suite (#2990)
+* [MAINTENANCE] Attempt to fix Numpy and Scipy Version Requirements without additional requirements* files (#2982)
+
+0.13.21
+-----------------
+* [DOCS] correct errors and reference complete example for custom expectations (thanks @jdimatteo)
+* [DOCS] How to connect to : in-memory Pandas Dataframe
+* [DOCS] How to connect to in memory dataframe with spark
+* [DOCS] How to connect to : S3 data using Pandas
+* [DOCS] How to connect to : Sqlite database
+* [DOCS] no longer show util import to users
+* [DOCS] How to connect to data on a filesystem using Spark guide
+* [DOCS] GDOC-102/GDOC-127 Port in References and Tutorials
+* [DOCS] How to connect to a MySQL database
+* [DOCS] improved clarity in how to write guide templates and docs
+* [DOCS] Add documentation for Rule Based Profilers
+* [BUGFIX] Update mssql image version for Azure
+* [MAINTENANCE] Update test-sqlalchemy-latest.yml
+* [MAINTENANCE] Clean Up Design for Configuration and Flow of Rules, Domain Builders, and Parameter Builders
+* [MAINTENANCE] Update Profiler docstring args
+* [MAINTENANCE] Remove date format parameter builder
+* [MAINTENANCE] Move metrics computations to top-level ParameterBuilder
+* [MAINTENANCE] use tmp dot UUID for discardable expectation suite name
+* [MAINTENANCE] Refactor ExpectationSuite to include profiler_config in citations
+* [FEATURE] Add citations to Profiler.profile()
+* [FEATURE] Bootstrapped Range Parameter Builder
 
 0.13.20
 -----------------
@@ -23,7 +149,7 @@ Develop
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
 * [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
-* [ENHANCEMENT] Experimental WIP Rule Based Profiler for single batch workflows (#2788)
+* [ENHANCEMENT] Experimental WIP Rule-Based Profiler for single batch workflows (#2788)
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [MAINTENANCE] Improve robustness of integration test_runner
@@ -1088,7 +1214,7 @@ v0.7.11
 * Fix logic for the 'auto' bin selection of `build_continuous_partition_object`
 * Add missing jinja2 dependency
 * Fix an issue with inconsistent availability of strict_min and strict_max options on expect_column_values_to_be_between
-* Fix an issue where expectation suite evaluation_parameters could be overriden by values during validate operation
+* Fix an issue where expectation suite evaluation_parameters could be overridden by values during validate operation
 
 
 v0.7.10

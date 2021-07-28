@@ -1,5 +1,4 @@
 import copy
-import uuid
 from abc import ABC, abstractmethod
 from numbers import Number
 from typing import Any, Dict, List, Optional, Union
@@ -7,16 +6,18 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context import DataContext
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
-    ParameterContainer,
+from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
+from great_expectations.rule_based_profiler.util import (
+    get_batch_ids as get_batch_ids_from_batch_request,
 )
 from great_expectations.rule_based_profiler.util import (
-    build_batch_request,
-    build_metric_domain_kwargs,
     get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_validator as get_validator_from_batch_request,
 )
 from great_expectations.util import is_numeric
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -94,22 +95,13 @@ class ParameterBuilder(ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Optional[Validator]:
-        if self._batch_request is None:
-            return None
-
-        batch_request: Optional[BatchRequest] = build_batch_request(
-            domain=domain,
+        return get_validator_from_batch_request(
+            purpose="parameter_builder",
+            data_context=self.data_context,
             batch_request=self._batch_request,
+            domain=domain,
             variables=variables,
             parameters=parameters,
-        )
-
-        expectation_suite_name: str = (
-            f"tmp.parameter_builder_domain_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
-        )
-        return self.data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
         )
 
     def get_batch_ids(
@@ -118,24 +110,13 @@ class ParameterBuilder(ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Optional[List[str]]:
-        if self._batch_request is None:
-            return None
-
-        batch_request: Optional[BatchRequest] = build_batch_request(
-            domain=domain,
+        return get_batch_ids_from_batch_request(
+            data_context=self.data_context,
             batch_request=self._batch_request,
+            domain=domain,
             variables=variables,
             parameters=parameters,
         )
-
-        batch_list: List[Batch] = self.data_context.get_batch_list(
-            batch_request=batch_request
-        )
-
-        batch: Batch
-        batch_ids: List[str] = [batch.id for batch in batch_list]
-
-        return batch_ids
 
     def get_batch_id(
         self,
@@ -319,7 +300,7 @@ class ParameterBuilder(ABC):
             metric_values.append(metric_value)
 
         return {
-            "value": metric_values,
+            "metric_values": metric_values,
             "details": {
                 "metric_configuration": {
                     "metric_name": metric_name,
@@ -327,7 +308,7 @@ class ParameterBuilder(ABC):
                     "metric_value_kwargs": metric_value_kwargs,
                     "metric_dependencies": None,
                 },
-                "num_batches": len(batch_ids),
+                "num_batches": len(metric_values),
             },
         }
 

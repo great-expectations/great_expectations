@@ -487,7 +487,7 @@ def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         md_str
-        == """
+        == r"""
    # Validation Results
 ## Overview
 ### Info

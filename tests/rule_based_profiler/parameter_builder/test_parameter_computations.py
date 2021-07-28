@@ -1,28 +1,55 @@
+from typing import Dict, Optional, Union
+
 import numpy as np
-from scipy import special
+import pandas as pd
+import scipy.stats as stats
 
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
-    NP_SQRT_2,
+    DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
+from great_expectations.rule_based_profiler.util import compute_bootstrap_quantiles
 
 
-# Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.
-def test_standard_deviation_band_around_mean_rule():
-    false_positive_rate: float
-    true_negative_rate: float
-    stds_multiplier: float
+def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
+    data: Dict[str, np.ndarray] = {
+        "normal": np.around(stats.norm.rvs(5000, 1000, size=size)),
+        "uniform": np.around(stats.uniform.rvs(4000, 6000, size=size)),
+        "bimodal": np.around(
+            np.concatenate(
+                [
+                    stats.norm.rvs(4000, 500, size=size // 2),
+                    stats.norm.rvs(6000, 500, size=size // 2),
+                ]
+            )
+        ),
+        "exponential": np.around(
+            stats.gamma.rvs(a=1.5, loc=5000, scale=1000, size=size)
+        ),
+    }
+    return pd.DataFrame(data)
 
-    false_positive_rate = 1.0
-    true_negative_rate = 1.0 - false_positive_rate
-    stds_multiplier = NP_SQRT_2 * special.erfinv(true_negative_rate)
-    assert np.isclose(stds_multiplier, 0.0)
 
-    false_positive_rate = 4.5500263896358e-2
-    true_negative_rate = 1.0 - false_positive_rate
-    stds_multiplier = NP_SQRT_2 * special.erfinv(true_negative_rate)
-    assert np.isclose(stds_multiplier, 2.0)
-
-    false_positive_rate = 2.699796063260e-3
-    true_negative_rate = 1.0 - false_positive_rate
-    stds_multiplier = NP_SQRT_2 * special.erfinv(true_negative_rate)
-    assert np.isclose(stds_multiplier, 3.0)
+def test_custom_bootstrap_efficacy():
+    df: pd.DataFrame = _generate_distribution_samples(size=1000)
+    false_positive_rate: np.float64 = np.float64(0.01)
+    columns: pd.Index = df.columns
+    column: str
+    lower_quantile: np.float64
+    upper_quantile: np.float64
+    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
+    for column in columns:
+        (lower_quantile, upper_quantile,) = compute_bootstrap_quantiles(
+            metric_values=df[column],
+            false_positive_rate=false_positive_rate,
+            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+        )
+        actual_false_positive_rates[column] = (
+            1.0
+            - np.sum(df[column].between(lower_quantile, upper_quantile)) / df.shape[0]
+        )
+        # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
+        assert (
+            false_positive_rate - 0.01
+            <= actual_false_positive_rates[column]
+            <= false_positive_rate + 0.01
+        )

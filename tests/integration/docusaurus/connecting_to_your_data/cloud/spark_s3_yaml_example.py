@@ -18,7 +18,7 @@ data_context_config = DataContextConfig(
 )
 context = BaseDataContext(project_config=data_context_config)
 
-datasource_yaml = f"""
+datasource_yaml = fr"""
 name: my_s3_datasource
 class_name: Datasource
 execution_engine:
@@ -109,26 +109,4 @@ assert set(
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01",
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-02",
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
-}
-
-
-x = {
-    "name": "my_s3_datasource",
-    "class_name": "Datasource",
-    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-    "data_connectors": {
-        "default_runtime_data_connector_name": {
-            "class_name": "RuntimeDataConnector",
-            "batch_identifiers": ["default_identifier_name"],
-        },
-        "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetS3DataConnector",
-            "bucket": "<YOUR_S3_BUCKET_HERE>",
-            "prefix": "<BUCKET_PATH_TO_DATA>",
-            "default_regex": {
-                "group_names": ["data_asset_name"],
-                "pattern": "(.*)\\.csv",
-            },
-        },
-    },
 }

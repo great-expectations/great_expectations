@@ -450,7 +450,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table'"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         if domain_type == MetricDomainTypes.TABLE:
@@ -523,9 +523,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "columns" in compute_domain_kwargs:
-                # If columns exist
-                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+            if "column_list" in compute_domain_kwargs:
+                # If column_list exists
+                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                    "column_list"
+                )
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
@@ -560,17 +562,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     ).select_from(selectable)
             else:
                 # If we would like our data to become a multicolumn
-                if "columns" in compute_domain_kwargs:
+                if "column_list" in compute_domain_kwargs:
                     if self.active_batch_data.use_quoted_name:
                         # Building a list of column objects used for sql alchemy selection
                         to_select = [
                             sa.column(quoted_name(col))
-                            for col in compute_domain_kwargs["columns"]
+                            for col in compute_domain_kwargs["column_list"]
                         ]
                         selectable = sa.select(to_select).select_from(selectable)
                     else:
                         to_select = [
-                            sa.column(col) for col in compute_domain_kwargs["columns"]
+                            sa.column(col)
+                            for col in compute_domain_kwargs["column_list"]
                         ]
                         selectable = sa.select(to_select).select_from(selectable)
 
@@ -703,10 +706,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
-            *[
+            *(
                 sa.column(column_name) == column_value
                 for column_name, column_value in batch_identifiers.items()
-            ]
+            )
         )
 
     def _split_on_hashed_column(

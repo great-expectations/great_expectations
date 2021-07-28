@@ -5,15 +5,13 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
+from great_expectations.rule_based_profiler.domain_builder import (
+    Domain,
+    DomainBuilder,
     InferredSemanticDomainType,
     SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
-    ParameterContainer,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.validator.validator import MetricConfiguration
 
 
@@ -175,9 +173,9 @@ information.  Please ensure that the specified column name refers to exactly one
         }:
             semantic_column_type = SemanticDomainTypes.CURRENCY
         elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.IDENTITY_TYPE_NAMES
+            type_name.upper() for type_name in ProfilerTypeMapping.IDENTIFIER_TYPE_NAMES
         }:
-            semantic_column_type = SemanticDomainTypes.IDENTITY
+            semantic_column_type = SemanticDomainTypes.IDENTIFIER
         elif column_type in (
             {
                 type_name.upper()
