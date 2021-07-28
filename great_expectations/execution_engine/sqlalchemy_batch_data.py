@@ -88,7 +88,10 @@ class SqlAlchemyBatchData(BatchData):
         """
         super().__init__(execution_engine)
         engine = execution_engine.engine
-        connection = execution_engine.connection
+        if hasattr(execution_engine, "connection"):
+            connection = execution_engine.connection
+        else:
+            connection = engine.connect()
         self._engine = engine
         self._connection = connection
         self._record_set_name = record_set_name or "great_expectations_sub_selection"
@@ -115,7 +118,7 @@ class SqlAlchemyBatchData(BatchData):
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
                 table_name = quoted_name(table_name, quote=True)
-            if connection.dialect.name.lower() == "bigquery":
+            if engine.dialect.name.lower() == "bigquery":
                 if schema_name is not None:
                     logger.warning(
                         "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
@@ -140,10 +143,10 @@ class SqlAlchemyBatchData(BatchData):
                 # Suggestion: Pull this into a separate "_generate_temporary_table_name" method
                 generated_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
                 # mssql expects all temporary table names to have a prefix '#'
-                if connection.dialect.name.lower() == "mssql":
+                if engine.dialect.name.lower() == "mssql":
                     generated_table_name = f"#{generated_table_name}"
             if selectable is not None:
-                if connection.dialect.name.lower() == "oracle":
+                if engine.dialect.name.lower() == "oracle":
                     # oracle query was already passed as a string
                     query = selectable
                 else:
