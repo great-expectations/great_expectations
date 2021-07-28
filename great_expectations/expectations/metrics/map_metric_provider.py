@@ -48,6 +48,7 @@ def column_function_partial(
 
     Args:
         engine:
+        partial_fn_type:
         **kwargs:
 
     Returns:
@@ -259,7 +260,7 @@ def column_condition_partial(
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
-    A column_condition_partial must provide a map function that evalues to a boolean value; it will be used to provide
+    A column_condition_partial must provide a map function that evaluates to a boolean value; it will be used to provide
     supplemental metrics, such as the unexpected_value count, unexpected_values, and unexpected_rows.
 
     A metric function that is decorated as a column_condition_partial will be called with the engine-specific column
@@ -269,6 +270,7 @@ def column_condition_partial(
 
     Args:
         engine:
+        partial_fn_type:
         **kwargs:
 
     Returns:
@@ -495,6 +497,166 @@ def column_condition_partial(
             return inner_func
 
         return wrapper
+    else:
+        raise ValueError("Unsupported engine for column_condition_partial")
+
+
+def multicolumn_function_partial(
+    engine: Type[ExecutionEngine], partial_fn_type: str = None, **kwargs
+):
+    """Provides engine-specific support for authoring a metric_fn with a simplified signature.
+
+    A metric function that is decorated as a multicolumn_function_partial will be called with the engine-specific
+    column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
+
+    Args:
+        engine:
+        partial_fn_type:
+        **kwargs:
+
+    Returns:
+        An annotated metric_function which will be called with a simplified signature.
+
+    """
+    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    domain_type = MetricDomainTypes.MULTICOLUMN
+    if issubclass(engine, PandasExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
+            raise ValueError(
+                "PandasExecutionEngine only supports map_series for multicolumn_function_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PandasExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                values = metric_fn(
+                    cls,
+                    df[column_list],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return values, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
+    else:
+        raise ValueError("Unsupported engine for column_function_partial")
+
+
+def multicolumn_condition_partial(
+    engine: Type[ExecutionEngine],
+    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    **kwargs,
+):
+    """Provides engine-specific support for authoring a metric_fn with a simplified signature. A
+    multicolumn_condition_partial must provide a map function that evaluates to a boolean value; it will be used to
+    provide supplemental metrics, such as the unexpected_value count and unexpected_rows.
+
+    A metric function that is decorated as a multicolumn_condition_partial will be called with the engine-specific
+    column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
+
+    Args:
+        engine:
+        partial_fn_type:
+        **kwargs:
+
+    Returns:
+        An annotated metric_function which will be called with a simplified signature.
+
+    """
+    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    domain_type = MetricDomainTypes.MULTICOLUMN
+    if issubclass(engine, PandasExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+            raise ValueError(
+                "PandasExecutionEngine only supports map_condition_series for multicolumn_condition_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PandasExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                meets_expectation_series = metric_fn(
+                    cls,
+                    df[column_list],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~meets_expectation_series,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
     else:
         raise ValueError("Unsupported engine for column_condition_partial")
 
@@ -1560,6 +1722,50 @@ class ColumnMapMetricProvider(MapMetricProvider):
             k: v
             for k, v in metric.metric_domain_kwargs.items()
             if k != MetricDomainTypes.COLUMN.value
+        }
+        dependencies["table.columns"] = MetricConfiguration(
+            metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        return dependencies
+
+
+class MulticolumnMapMetricProvider(MapMetricProvider):
+    condition_domain_keys = (
+        "batch_id",
+        "table",
+        "column_list",
+        "row_condition",
+        "condition_parser",
+    )
+    function_domain_keys = (
+        "batch_id",
+        "table",
+        "column_list",
+        "row_condition",
+        "condition_parser",
+    )
+    condition_value_keys = tuple()
+    function_value_keys = tuple()
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+        table_domain_kwargs: dict = {
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column_list"
         }
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
