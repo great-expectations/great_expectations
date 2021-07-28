@@ -38,7 +38,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
 
                 if alias is not None:
                     warnings.warn(
-                        f"""{cls.__name__} has been renamed to {alias.__name__} -- the alias {cls.__name} will be \
+                        f"""{cls.__name__} has been renamed to {alias} -- the alias {cls.__name__} will be \
 deprecated in the future.
 """,
                         DeprecationWarning,

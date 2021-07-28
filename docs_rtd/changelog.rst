@@ -9,7 +9,7 @@ develop
 -----------------
 * [MAINTENANCE] Expectation anonymizer supports v3 expectation registry (#3092)
 * [FEATURE] Add sqlalchemy engine support for `column.most_common_value` metric
-
+* [BUGFIX] Populate (data) asset name in data docs for RuntimeDataConnector (#3105)
 
 0.13.24
 -----------------
