@@ -14,11 +14,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    sa as sa,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
