@@ -905,7 +905,7 @@ def get_batch_request_using_datasource_name(
     ] = None,
 ) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
     cli_message(
-        string="A batch of data is required to edit the suite - let's help you to specify it."
+        string="\nA batch of data is required to edit the suite - let's help you to specify it."
     )
 
     datasource: BaseDatasource = select_datasource(
