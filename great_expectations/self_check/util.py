@@ -1377,26 +1377,14 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         # disabled test below, please include a link to a github issue tracking
         # fixing this so it is tested with BigQuery.
         return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
+            "expect_select_column_values_to_be_unique_within_record",  # todo(jdimatteo): AttributeError: 'Validator'  object has no attribute 'expect_select_column_values_t
             "expect_table_columns_to_match_set",  # todo(jdimatteo), e.g. AssertionError
-            "expect_table_column_count_to_be_between",
-            "expect_table_column_count_to_equal",
-            "expect_column_to_exist",
-            "expect_table_columns_to_match_ordered_list",
-            "expect_table_row_count_to_be_between",
-            "expect_table_row_count_to_equal",
-            "expect_table_row_count_to_equal_other_table",
-            "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_null",
+            "expect_column_values_to_be_unique",  # TODO(https://github.com/great-expectations/great_expectations/issues/3131)
             "expect_column_values_to_be_of_type",  # todo(jdimatteo), e.g. AssertionError
-            "expect_column_values_to_be_in_type_list",
             "expect_column_values_to_be_in_set",  # todo(jdimatteo) No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01']
-            "expect_column_values_to_not_be_in_set",
             "expect_column_values_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator >=
-            "expect_column_values_to_be_increasing",
-            "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
+            "expect_column_values_to_be_increasing",  # todo(jdimatteo) KeyError: 'unexpected_list'
+            "expect_column_values_to_be_decreasing",  # todo(jdimatteo) KeyError: 'unexpected_list'
             "expect_column_value_lengths_to_equal",
             "expect_column_values_to_match_regex",  # todo(jdimatteo): "column_name with space"
             "expect_column_values_to_not_match_regex",  # todo(jdimatteo): "column_name with space"
