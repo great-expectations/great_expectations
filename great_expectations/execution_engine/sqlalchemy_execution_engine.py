@@ -678,7 +678,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self._engine_backup:
             self.engine.close()
             self._engine_backup.dispose()
-        if self.engine:
+        else:
             self.engine.dispose()
 
     ### Splitter methods for partitioning tables ###
