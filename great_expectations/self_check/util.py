@@ -2026,7 +2026,5 @@ def generate_test_table_name(
 
 # todo(jdimatteo): type hint
 def _create_bigquery_engine():
-    # todo(jdimatteo): how to make this configurable?
-    #  maybe use env variables like something like GE_TEST_LOCAL_DB_HOSTNAME?
-    #  maybe raise exception if env variable not specified
-    return create_engine("bigquery://jdimatteo-v/test_ci")
+    project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "great-expectations-bigquery-ci")
+    return create_engine(f"bigquery://{project}/test_ci")

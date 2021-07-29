@@ -101,6 +101,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against mssql",
     )
     parser.addoption(
+        "--bigquery",
+        action="store_true",
+        help="If set, execute tests against bigquery",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests",
@@ -132,7 +137,7 @@ def build_test_backends_list_cfe(metafunc):
     include_postgresql = not metafunc.config.getoption("--no-postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
-    include_bigquery: bool = False  # todo(jdimatteo) add config
+    include_bigquery: bool = metafunc.config.getoption("--bigquery")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
