@@ -91,7 +91,7 @@ class SqlAlchemyBatchData(BatchData):
         if hasattr(execution_engine, "connection"):
             connection = execution_engine.connection
         else:
-            connection = None
+            connection = engine.connect()
         self._engine = engine
         self._connection = connection
         self._record_set_name = record_set_name or "great_expectations_sub_selection"
@@ -253,19 +253,10 @@ class SqlAlchemyBatchData(BatchData):
             stmt = 'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'.format(
                 temp_table_name=temp_table_name, query=query
             )
-        # <WILL> is there a better way than this?
-        if self._connection:
-            if self.sql_engine_dialect.name.lower() == "oracle":
-                try:
-                    self._connection.execute(stmt_1)
-                except DatabaseError:
-                    self._connection.execute(stmt_2)
-            else:
-                self._connection.execute(stmt)
+        if self.sql_engine_dialect.name.lower() == "oracle":
+            try:
+                self._connection.execute(stmt_1)
+            except DatabaseError:
+                self._connection.execute(stmt_2)
         else:
-            if self.sql_engine_dialect.name.lower() == "oracle":
-                try:
-                    self._engine.execute(stmt_1)
-                except DatabaseError:
-                    self._engine.execute(stmt_2)
-            self._engine.execute(stmt)
+            self._connection.execute(stmt)

@@ -233,18 +233,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect_module = None
 
-        # if self.engine and self.engine.dialect.name.lower() in [
-        #     "sqlite",
-        #     "mssql",
-        #     "snowflake",
-        #     "mysql",
-        # ]:
-        #     # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
-        #     # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
-        #     # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
-        #     # Connection can be handled separately.
-        #     self.engine_backup = self.engine
-        #     # sqlite/mssql temp tables only persist within a connection so override the engine
+        if self.engine and self.engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+            "mysql",
+        ]:
+            # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
+            # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
+            # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
+            # Connection can be handled separately.
+            self.engine_backup = self.engine
+            # sqlite/mssql temp tables only persist within a connection so override the engine
         self.connection = self.engine.connect()
 
         # Send a connect event to provide dialect type
@@ -290,13 +290,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     @property
     def url(self):
         return self._url
-
-    def close_connection(self):
-        # more checks here please
-        if self.connection:
-            self.connection.close()
-        if self.engine:
-            self.engine.dispose()
 
     def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
         """
