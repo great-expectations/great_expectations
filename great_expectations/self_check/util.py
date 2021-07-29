@@ -326,7 +326,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
-            table_name = generate_test_table_name(dataset_type)
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -389,7 +389,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
-            table_name = generate_test_table_name(dataset_type)
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -448,7 +448,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
-            table_name = generate_test_table_name(dataset_type)
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -520,7 +520,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
-            table_name = generate_test_table_name(dataset_type)
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -685,7 +685,7 @@ def get_test_validator_with_data(
 
         if table_name is None:
             # noinspection PyUnusedLocal
-            table_name = generate_test_table_name(execution_engine)
+            table_name = generate_test_table_name()
 
         return build_pandas_validator_with_data(df=df)
 
@@ -809,7 +809,7 @@ def get_test_validator_with_data(
 
         if table_name is None:
             # noinspection PyUnusedLocal
-            table_name = generate_test_table_name(execution_engine)
+            table_name = generate_test_table_name()
 
         return build_spark_validator_with_data(df=spark_df, spark=spark)
 
@@ -911,7 +911,7 @@ def build_sa_validator_with_data(
                 df[col] = pd.to_datetime(df[col])
 
     if table_name is None:
-        table_name = generate_test_table_name(sa_engine_name)
+        table_name = generate_test_table_name()
 
     df.to_sql(
         name=table_name,
@@ -2067,14 +2067,10 @@ def check_json_test_result(test, result, data_asset=None):
                 )
 
 
-def generate_test_table_name(backend: str) -> str:
-    if False and backend == "bigquery":
-        # For BigQuery, use the same table name to re-use it for all tests to
-        # prevent accumulation of random tables in persistent BigQuery datasets.
-        return "test_data"
-    # todo(jdimatteo): why doesn't re-using always work, e.g. why does postgres fail?
-    # todo(jdimatteo): revert this method change
-    table_name: str = "test_data_" + "".join(
+def generate_test_table_name(
+    default_table_name_prefix: Optional[str] = "test_data_",
+) -> str:
+    table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
     return table_name
