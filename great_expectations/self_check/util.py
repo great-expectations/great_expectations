@@ -1373,9 +1373,17 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_compound_columns_to_be_unique",
         ]
     if context == "bigquery":
-        # Below are temporarily not being tested with BigQuery. For each
-        # disabled test below, please include a link to a github issue tracking
-        # fixing this so it is tested with BigQuery.
+        ###
+        # NOTE: 20210729 - jdimatteo: It is relatively slow to create tables for
+        # all these tests in BigQuery, and if you want to run a single test then
+        # you can uncomment and modify the below line (which results in only the
+        # tests for "expect_column_values_to_not_be_null" being run):
+        # return expectation_type != "expect_column_values_to_not_be_null"
+        ###
+        # NOTE: 20210729 - jdimatteo: Below are temporarily not being tested
+        # with BigQuery. For each disabled test below, please include a link to
+        # a github issue tracking adding the test with BigQuery.
+        ###
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",  # todo(jdimatteo): AttributeError: 'Validator'  object has no attribute 'expect_select_column_values_t
             "expect_table_columns_to_match_set",  # todo(jdimatteo), e.g. AssertionError
