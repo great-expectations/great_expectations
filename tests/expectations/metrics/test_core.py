@@ -1646,9 +1646,7 @@ def test_map_multicolumn_sum_equal():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id].empty
-    assert (
-        len(metrics[unexpected_rows_metric.id].columns) == 3
-    )  # Important: unexpected rows contain all columns.
+    assert len(metrics[unexpected_rows_metric.id].columns) == 2
 
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
@@ -1707,7 +1705,5 @@ def test_map_multicolumn_sum_equal():
     assert metrics[unexpected_rows_metric.id].equals(
         pd.DataFrame(data={"a": [2], "b": [3], "c": [1]}, index=[2])
     )
-    assert (
-        len(metrics[unexpected_rows_metric.id].columns) == 3
-    )  # Important: unexpected rows contain all columns.
+    assert len(metrics[unexpected_rows_metric.id].columns) == 3
     assert metrics[unexpected_rows_metric.id].index == [2]
