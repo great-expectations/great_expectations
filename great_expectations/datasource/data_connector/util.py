@@ -297,8 +297,8 @@ def list_azure_keys(
        delimiter: str = "/",
        **kwargs: Optional[Any]
     """
-    client: ContainerClient = azure.get_container_client(container)
-    blobs: ItemPaged[BlobProperties] = client.walk_blobs(**query_options)
+    container_client: ContainerClient = azure.get_container_client(container)
+    blobs: ItemPaged[BlobProperties] = container_client.walk_blobs(**query_options)
     yield from blobs
 
 

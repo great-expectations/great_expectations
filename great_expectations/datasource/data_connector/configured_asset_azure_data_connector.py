@@ -73,33 +73,27 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
     # Let's identify what actually goes in query_options
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
-            # "Bucket": self._container,
-            # "Prefix": self._prefix,
-            # "Delimiter": self._delimiter,
-            # "MaxKeys": self._max_keys,
-            "name_starts_with": None,
-            "include": None,
+            "container": self._container,
+            "name_starts_with": self._prefix,
             "delimiter": self._delimiter,
         }
         if asset is not None:
             if asset.bucket:
-                query_options["Bucket"] = asset.bucket
+                query_options["container"] = asset.bucket
             if asset.prefix:
-                query_options["Prefix"] = asset.prefix
+                query_options["name_starts_with"] = asset.prefix
             if asset.delimiter:
-                query_options["Delimiter"] = asset.delimiter
-            if asset.max_keys:
-                query_options["MaxKeys"] = asset.max_keys
+                query_options["delimiter"] = asset.delimiter
+            # if asset.max_keys:
+            #    query_options["MaxKeys"] = asset.max_keys
 
-        path_list: List[
-            str
-        ] = [  # TODO(cdkini): What exactly do these paths look like within the S3 implementation?
+        path_list: List[str] = [
             key
             for key in list_azure_keys(
                 azure=self._azure,
                 container=self._container,
                 query_options=query_options,
-                # iterator_dict={},
+                # iterator_dict={}, # TODO(cdkini): I don't think we need this? Open to check.
                 # recursive=False,
             )
         ]
