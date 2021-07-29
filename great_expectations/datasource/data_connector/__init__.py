@@ -1,4 +1,3 @@
-from .configured_asset_azure_data_connector import ConfiguredAssetAzureDataConnector
 from .configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
