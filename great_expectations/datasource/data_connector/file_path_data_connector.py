@@ -1,5 +1,5 @@
 import logging
-from typing import Iterator, List, Optional, cast
+from typing import Any, Dict, Iterator, List, Optional, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -42,7 +42,7 @@ class FilePathDataConnector(DataConnector):
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
-        sorters: Optional[list] = None,
+        sorters: Optional[List[Dict[str, Any]]] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         """
@@ -95,7 +95,7 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if len(self.sorters) > 0:
+        if self.sorters is not None and len(self.sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
@@ -165,7 +165,7 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if len(self.sorters) > 0:
+        if self.sorters is not None and len(self.sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
@@ -193,6 +193,12 @@ class FilePathDataConnector(DataConnector):
             sorted list of batch_definitions
 
         """
+
+        if not isinstance(self.sorters, dict):
+            raise TypeError(
+                "FilePathDataConnector must have valid Sorters to run this method"
+            )
+
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(
@@ -261,6 +267,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return {"path": path}
 
     def _validate_batch_request(self, batch_request: BatchRequestBase):
+        assert isinstance(batch_request, BatchRequest)
         super()._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration(
             data_asset_name=batch_request.data_asset_name

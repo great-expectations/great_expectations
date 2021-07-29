@@ -7,7 +7,7 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -259,8 +259,10 @@ def _invert_regex_to_data_reference_template(
             )
 
     # Collapse adjacent wildcards into a single wildcard
-    data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
-    return data_reference_template
+    collapsed_data_reference_template: str = re.sub(
+        "\\*+", "*", data_reference_template
+    )
+    return collapsed_data_reference_template
 
 
 def normalize_directory_path(
@@ -292,7 +294,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 def list_s3_keys(
     s3, query_options: dict, iterator_dict: dict, recursive: bool = False
-) -> str:
+) -> Generator:
     """
     For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
     specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
@@ -355,7 +357,9 @@ def list_s3_keys(
 # As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
 # called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
 # method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
-def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
+def build_sorters_from_config(
+    config_list: Optional[List[Dict[str, Any]]]
+) -> Optional[dict]:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
         for sorter_config in config_list:

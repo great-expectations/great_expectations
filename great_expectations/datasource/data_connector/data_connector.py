@@ -54,13 +54,13 @@ class DataConnector:
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache = {}
+        self._data_references_cache: dict = {}
 
-        self._data_context_root_directory = None
+        self._data_context_root_directory: Optional[str] = None
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
-    def batch_spec_passthrough(self) -> dict:
+    def batch_spec_passthrough(self) -> Optional[dict]:
         return self._batch_spec_passthrough
 
     @property
@@ -72,7 +72,7 @@ class DataConnector:
         return self._datasource_name
 
     @property
-    def data_context_root_directory(self) -> str:
+    def data_context_root_directory(self) -> Optional[str]:
         return self._data_context_root_directory
 
     @data_context_root_directory.setter
@@ -92,10 +92,17 @@ class DataConnector:
 
         """
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
+
+        if not isinstance(self._execution_engine, ExecutionEngine):
+            raise TypeError(
+                "DataConnector must have an active ExecutionEngine to run this method"
+            )
+
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
         self._execution_engine.load_batch_data(batch_definition.id, batch_data)
+
         return (
             batch_data,
             batch_spec,
@@ -118,13 +125,15 @@ class DataConnector:
             )
         )
         # batch_spec_passthrough via Data Connector config
-        batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
+        batch_spec_passthrough: Optional[dict] = deepcopy(self.batch_spec_passthrough)
 
         # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config
-        if isinstance(batch_definition.batch_spec_passthrough, dict):
-            batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
+        if isinstance(batch_spec_passthrough, dict):
+            if isinstance(batch_definition.batch_spec_passthrough, dict):
+                batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
+            if isinstance(batch_spec_params, dict):
+                batch_spec_params.update(batch_spec_passthrough)
 
-        batch_spec_params.update(batch_spec_passthrough)
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
@@ -326,13 +335,15 @@ class DataConnector:
         if pretty_print:
             print(f"\n\t\tFetching batch data...")
 
-        batch_definition_list: List[
-            BatchDefinition
+        batch_definition_list: Optional[
+            List[BatchDefinition]
         ] = self._map_data_reference_to_batch_definition_list(
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
-        assert len(batch_definition_list) == 1
+        assert (
+            isinstance(batch_definition_list, list) and len(batch_definition_list) == 1
+        )
         batch_definition: BatchDefinition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests
