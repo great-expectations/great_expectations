@@ -8,14 +8,16 @@ from great_expectations.datasource.data_connector import (
 )
 from great_expectations.datasource.data_connector.util import list_azure_keys
 
-ACCOUNT_URL = os.environ["ACCOUNT_URL"]
-CREDENTIALS = os.environ["CREDENTIALS"]
-CONTAINER_NAME = os.environ["CONTAINER_NAME"]
+try:
+    ACCOUNT_URL = os.environ["ACCOUNT_URL"]
+    CONTAINER_NAME = os.environ["CONTAINER_NAME"]
+except:
+    print("Please set environment variables before running tests")
 
 
 @pytest.fixture
 def blob_service_client() -> BlobServiceClient:
-    azure = BlobServiceClient(ACCOUNT_URL, CREDENTIALS)
+    azure = BlobServiceClient(ACCOUNT_URL)
     return azure
 
 
@@ -25,8 +27,8 @@ def container_client(blob_service_client: BlobServiceClient) -> ContainerClient:
     return container
 
 
-def test_container_connects(container: ContainerClient):
-    blobs = [blob for blob in container.list_blobs()]
+def test_container_connects(container_client: ContainerClient):
+    blobs = [blob for blob in container_client.list_blobs()]
     assert len(blobs) == 6
 
 
