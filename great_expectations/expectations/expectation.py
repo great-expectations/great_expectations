@@ -7,6 +7,7 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 from great_expectations import __version__ as ge_version
@@ -1422,7 +1423,11 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             self.metric_dependencies == tuple()
         ), "MulticolumnMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
+
+        result_format_str = dependencies["result_format"].get("result_format")
+
         metric_dependencies = dependencies["metrics"]
+
         metric_kwargs = get_metric_kwargs(
             metric_name=self.map_metric + ".unexpected_count",
             configuration=configuration,
@@ -1435,8 +1440,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
-        result_format_str = dependencies["result_format"].get("result_format")
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
             configuration=configuration,
@@ -1458,6 +1461,18 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
         metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
             metric_name=self.map_metric + ".unexpected_rows",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_values",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".unexpected_values"
+        ] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_values",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -1496,16 +1511,18 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
+
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+        nonnull_count = total_count - unexpected_count
 
         success = None
         if total_count is None:
             # Vacuously true
             success = True
         elif total_count != 0:
-            success_ratio = float(total_count - unexpected_count) / total_count
-            success = success_ratio > 0.0
+            success_ratio = float(nonnull_count) / total_count
+            success = np.isclose(success_ratio, 1.0)
         elif total_count == 0:
             success = True
 
@@ -1513,8 +1530,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             result_format=parse_result_format(result_format),
             success=success,
             element_count=metrics.get("table.row_count"),
+            nonnull_count=nonnull_count,
             unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
-            unexpected_rows=metrics.get(self.map_metric + ".unexpected_rows"),
+            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
             unexpected_index_list=metrics.get(
                 self.map_metric + ".unexpected_index_list"
             ),
@@ -1726,11 +1744,10 @@ def _format_map_output(
     result_format,
     success,
     element_count,
-    nonnull_count=None,
-    unexpected_count=None,
-    unexpected_rows=None,
-    unexpected_list=None,
-    unexpected_index_list=None,
+    nonnull_count,
+    unexpected_count,
+    unexpected_list,
+    unexpected_index_list,
 ):
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
@@ -1777,16 +1794,10 @@ def _format_map_output(
         "element_count": element_count,
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent_nonmissing,
+        "partial_unexpected_list": unexpected_list[
+            : result_format["partial_unexpected_count"]
+        ],
     }
-
-    if unexpected_list is not None:
-        return_obj["result"].update(
-            {
-                "partial_unexpected_list": unexpected_list[
-                    : result_format["partial_unexpected_count"]
-                ],
-            }
-        )
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
@@ -1832,21 +1843,10 @@ def _format_map_output(
 
     return_obj["result"].update(
         {
+            "unexpected_list": unexpected_list,
             "unexpected_index_list": unexpected_index_list,
         }
     )
-    if unexpected_rows is not None:
-        return_obj["result"].update(
-            {
-                "unexpected_rows": unexpected_rows,
-            }
-        )
-    if unexpected_list is not None:
-        return_obj["result"].update(
-            {
-                "unexpected_list": unexpected_list,
-            }
-        )
 
     if result_format["result_format"] == "COMPLETE":
         return return_obj
