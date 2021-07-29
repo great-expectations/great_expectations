@@ -129,6 +129,7 @@ def _parse_index(
 The type given is "{str(type(index))}", which is illegal.
             """
         )
+    return None
 
 
 class BatchFilter:
@@ -141,10 +142,10 @@ class BatchFilter:
 
     def __init__(
         self,
-        custom_filter_function: Callable = None,
+        custom_filter_function: Optional[Callable] = None,
         batch_filter_parameters: Optional[IDDict] = None,
         index: Optional[Union[int, slice]] = None,
-        limit: int = None,
+        limit: Optional[int] = None,
     ):
         self._custom_filter_function = custom_filter_function
         self._batch_filter_parameters = batch_filter_parameters
@@ -152,7 +153,7 @@ class BatchFilter:
         self._limit = limit
 
     @property
-    def custom_filter_function(self) -> Callable:
+    def custom_filter_function(self) -> Optional[Callable]:
         return self._custom_filter_function
 
     @property
@@ -164,7 +165,7 @@ class BatchFilter:
         return self._index
 
     @property
-    def limit(self) -> int:
+    def limit(self) -> Optional[int]:
         return self._limit
 
     def __repr__(self) -> str:

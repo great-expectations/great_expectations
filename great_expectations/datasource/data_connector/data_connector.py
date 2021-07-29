@@ -4,6 +4,7 @@ from typing import Any, List, Optional, Tuple
 
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.exceptions import GreatExpectationsTypeError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -94,8 +95,8 @@ class DataConnector:
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
 
         if not isinstance(self._execution_engine, ExecutionEngine):
-            raise TypeError(
-                "DataConnector must have an active ExecutionEngine to run this method"
+            raise GreatExpectationsTypeError(
+                f"The type of self._execution_engine must be Execution Engine for this method. The type given is {str(type(self._execution_engine))}, which is illegal."
             )
 
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(

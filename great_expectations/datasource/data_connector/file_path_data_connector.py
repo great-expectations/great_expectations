@@ -21,6 +21,7 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
+from great_expectations.exceptions import GreatExpectationsTypeError
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -195,8 +196,8 @@ class FilePathDataConnector(DataConnector):
         """
 
         if not isinstance(self.sorters, dict):
-            raise TypeError(
-                "FilePathDataConnector must have valid Sorters to run this method"
+            raise GreatExpectationsTypeError(
+                f"The type of self.sorters must be Dict for this method. The type given is {str(type(self._sorters))}, which is illegal."
             )
 
         sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
