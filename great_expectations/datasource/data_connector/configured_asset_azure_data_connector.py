@@ -3,7 +3,7 @@ import os
 from typing import List, Optional
 
 try:
-    import azure.storage.blob
+    import azure.storage.blob as azure
 except ImportError:
     azure.storage.blob = None
 
@@ -29,9 +29,9 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: Optional[str] = "",
-        delimiter: Optional[str] = "/",
-        max_keys: Optional[int] = 1000,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -56,11 +56,10 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
         try:
             # TODO(cdkini): Implement various methods of instantiation and authentication
-            # self._azure = boto3.client("s3", **azure_options)
-            self._azure = None
+            self._azure = azure.ContainerClient(**azure_options)
         except (TypeError, AttributeError):
             raise ImportError(
-                "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
+                "Unable to load Azure ContainerClient (it is required for ConfiguredAssetAzureDataConnector)."
             )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
