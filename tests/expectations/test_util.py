@@ -347,7 +347,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     table_name: str
     for backend_name in test_backend_names:
         if backend_name in ["sqlite", "postgresql", "mysql", "mssql"]:
-            table_name = generate_test_table_name()
+            table_name = generate_test_table_name(backend_name)
             validator = build_sa_validator_with_data(
                 df=df,
                 sa_engine_name=backend_name,
