@@ -1373,6 +1373,9 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_compound_columns_to_be_unique",
         ]
     if context == "bigquery":
+        # Below are temporarily not being tested with BigQuery. For each
+        # disabled test below, please include a link to a github issue tracking
+        # fixing this so it is tested with BigQuery.
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
             "expect_table_columns_to_match_set",  # todo(jdimatteo), e.g. AssertionError
@@ -1384,7 +1387,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
             "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null", # todo(jdimatteo), e.g. The column "no_null" in BatchData does not exist.
+            # "expect_column_values_to_not_be_null",
             "expect_column_values_to_be_null",
             "expect_column_values_to_be_of_type",  # todo(jdimatteo), e.g. AssertionError
             "expect_column_values_to_be_in_type_list",
@@ -1393,7 +1396,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator >=
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between", # todo(jdimatteo), e.g. The column "s1" in BatchData does not exist
+            # "expect_column_value_lengths_to_be_between",
             "expect_column_value_lengths_to_equal",
             "expect_column_values_to_match_regex",  # todo(jdimatteo): "column_name with space"
             "expect_column_values_to_not_match_regex",  # todo(jdimatteo): "column_name with space"
@@ -1410,7 +1413,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_distinct_values_to_be_in_set",
             "expect_column_distinct_values_to_contain_set",
             "expect_column_distinct_values_to_equal_set",
-            "expect_column_mean_to_be_between",  # todo(jdimatteo) e.g. The column "x" in BatchData does not exist.
+            "expect_column_mean_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator *
             "expect_column_median_to_be_between",
             "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
