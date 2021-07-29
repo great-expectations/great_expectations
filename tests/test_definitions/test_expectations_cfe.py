@@ -41,12 +41,30 @@ def pytest_generate_tests(metafunc):
     backends = build_test_backends_list_cfe(metafunc)
 
     for expectation_category in expectation_dirs:
+        # TODO: <Alex>ALEX</Alex>
+        if expectation_category.find("multicolumn_map_expectations") != (-1):
+            print(f"\n[ALEX_TEST] EXPECTATION_CATEGORY: {expectation_category} ; TYPE: {str(type(expectation_category))}")
+        else:
+            continue
+        # TODO: <Alex>ALEX</Alex>
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
         for c in backends:
+            # TODO: <Alex>ALEX</Alex>
+            if c == "pandas":
+                print(f"\n[ALEX_TEST] BACKEND: {c} ; TYPE: {str(type(c))}")
+            else:
+                continue
+            # TODO: <Alex>ALEX</Alex>
             for filename in test_configuration_files:
+                # TODO: <Alex>ALEX</Alex>
+                if filename.find("expect_multicolumn_sum_to_equal") != (-1):
+                    print(f"\n[ALEX_TEST] FILENAME: {filename} ; TYPE: {str(type(filename))}")
+                else:
+                    continue
+                # TODO: <Alex>ALEX</Alex>
                 file = open(filename)
                 test_configuration = json.load(file)
 
