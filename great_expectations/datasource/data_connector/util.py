@@ -10,7 +10,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from azure.core.paging import ItemPaged
-from azure.storage.blob import BlobProperties, BlobServiceClient, ContainerClient
+from azure.storage.blob import (
+    BlobPrefix,
+    BlobProperties,
+    BlobServiceClient,
+    ContainerClient,
+)
 
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
@@ -289,17 +294,30 @@ def list_azure_keys(
     container: str,
     iterator_dict: dict,
     recursive: bool = False,
-) -> str:
-    """
-    query_options: Dict[str, Any] ?
-       name_starts_with: Optional[str] = None,
-       include: Optional[Any] = None,
-       delimiter: str = "/",
-       **kwargs: Optional[Any]
-    """
+) -> List[str]:
+
     container_client: ContainerClient = azure.get_container_client(container)
     blobs: ItemPaged[BlobProperties] = container_client.walk_blobs(**query_options)
-    yield from blobs
+
+    # Everything below this comes from the official Azure docs ________________________________________________________
+    depth = 1
+    separator = "   "
+
+    def _walk_blob_hierarchy(prefix=""):
+        nonlocal depth
+        for item in blobs:
+            short_name = item.name[len(prefix) :]
+            if isinstance(item, BlobPrefix):
+                print("Folder: " + separator * depth + short_name)
+                depth += 1
+                _walk_blob_hierarchy(prefix=item.name)
+                depth -= 1
+            else:
+                message = "Blob: " + separator * depth + short_name
+                print(message)
+
+    _walk_blob_hierarchy()
+    # __________________________________________________________________________________________________________________
 
 
 def list_s3_keys(
