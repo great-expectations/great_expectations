@@ -728,6 +728,52 @@ def _pandas_column_map_condition_values(
         return list(domain_values[: result_format["partial_unexpected_count"]])
 
 
+def _pandas_multicolumn_map_condition_values(
+    cls,
+    execution_engine: PandasExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    df, _, _ = execution_engine.get_compute_domain(
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            "_pandas_multicolumn_map_condition_values requires column_list in accessor_domain_kwargs"
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    domain_values = df[column_list]
+
+    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+
+    result_format = metric_value_kwargs["result_format"]
+
+    if result_format["result_format"] == "COMPLETE":
+        return domain_values.to_dict("records")
+    else:
+        return domain_values[: result_format["partial_unexpected_count"]].to_dict(
+            "records"
+        )
+
+
 def _pandas_column_map_series_and_domain_values(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -839,6 +885,17 @@ def _pandas_map_condition_index(
 
         if filter_column_isnull:
             df = df[df[column_name].notnull()]
+
+    elif "column_list" in accessor_domain_kwargs:
+        column_list = accessor_domain_kwargs["column_list"]
+
+        for column_name in column_list:
+            if column_name not in metrics["table.columns"]:
+                raise ge_exceptions.ExecutionEngineError(
+                    message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                )
+
+        df = df[column_list]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -958,6 +1015,17 @@ def _pandas_map_condition_rows(
 
         if filter_column_isnull:
             df = df[df[column_name].notnull()]
+
+    elif "column_list" in accessor_domain_kwargs:
+        column_list = accessor_domain_kwargs["column_list"]
+
+        for column_name in column_list:
+            if column_name not in metrics["table.columns"]:
+                raise ge_exceptions.ExecutionEngineError(
+                    message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                )
+
+        df = df[column_list]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1454,6 +1522,16 @@ class MapMetricProvider(MetricProvider):
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_pandas_column_map_condition_value_counts,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_pandas_multicolumn_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
