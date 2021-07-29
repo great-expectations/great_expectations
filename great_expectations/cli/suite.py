@@ -213,7 +213,7 @@ def _process_suite_new_flags_and_prompt(
             interactive = True
     else:
         suite_create_method: str = click.prompt(
-            """
+            """\
 How would you like to create your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data
@@ -521,7 +521,7 @@ options can be used.
             interactive = True
     else:
         suite_edit_method: str = click.prompt(
-            """
+            """\
 How would you like to edit your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data
