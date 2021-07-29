@@ -9,7 +9,9 @@ import sre_parse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import azure.storage.blob
 import pandas as pd
+from azure.storage.blob import ContainerClient
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -288,6 +290,25 @@ def get_filesystem_one_level_directory_glob_path_list(
         for posix_path in globbed_paths
     ]
     return path_list
+
+
+def list_azure_keys(
+    azure: ContainerClient,
+    query_options: dict,
+    iterator_dict: dict,
+    recursive: bool = False,
+) -> str:
+    """
+    query_options: Dict[str, Any] ?
+       name_starts_with: Optional[str] = None,
+       include: Optional[Any] = None,
+       delimiter: str = "/",
+       **kwargs: Optional[Any]
+    """
+
+    # blobs = azure.walk_blobs(name_starts_with=query_options.get('prefix'), delimiter="/")
+    blobs = azure.walk_blobs(**query_options)
+    yield from blobs
 
 
 def list_s3_keys(
