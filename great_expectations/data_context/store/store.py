@@ -117,6 +117,8 @@ class Store:
     def tuple_to_key(self, tuple_):
         if tuple_ == StoreBackend.STORE_BACKEND_ID_KEY:
             return StoreBackend.STORE_BACKEND_ID_KEY[0]
+        if isinstance(self._store_backend, GeCloudStoreBackend):
+            return self._key_class.from_ge_tuple(tuple_)
         if self._use_fixed_length_key:
             return self._key_class.from_fixed_length_tuple(tuple_)
         return self._key_class.from_tuple(tuple_)
@@ -131,6 +133,7 @@ class Store:
         elif isinstance(self.store_backend, GeCloudStoreBackend):
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
+            # TODO MER-285: Handle non-200 http errors
             if value:
                 value = self.ge_cloud_response_json_to_object_dict(response_json=value)
         else:

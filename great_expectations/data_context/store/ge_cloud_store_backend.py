@@ -97,14 +97,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "checkpoint": "checkpoint_config",
         }
 
-        resource = self.ge_cloud_resource_type
+        resource_key = self.ge_cloud_resource_name
+        resource_type = self.ge_cloud_resource_type
         account_id = self.ge_cloud_credentials["account_id"]
 
-        post_body_key = post_body_keys[resource]
+        post_body_key = post_body_keys[resource_type]
 
         data = {
             "data": {
-                "type": resource,
+                "type": resource_type,
                 "attributes": {"account_id": account_id},
             }
         }
@@ -112,7 +113,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data["data"]["attributes"][post_body_key] = value
 
         url = urljoin(
-            self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource)}"
+            self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource_key)}"
         )
         try:
             response = requests.post(url, json=data, headers=self.auth_headers)
