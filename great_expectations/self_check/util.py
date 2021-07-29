@@ -2014,6 +2014,10 @@ def check_json_test_result(test, result, data_asset=None):
 def generate_test_table_name(
     default_table_name_prefix: Optional[str] = "test_data_",
 ) -> str:
+    # todo(jdimatteo) why not just re-use table name? we are replacing tables
+    #  if they already exist, and this will ensure that we don't end up with
+    #  tons of uncleaned up tables in bigquery
+    return "test_data"
     table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
