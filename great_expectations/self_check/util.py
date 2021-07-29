@@ -920,9 +920,11 @@ def build_sa_validator_with_data(
     )
     # <WILL> it always comes down to this section of hte code. Is there something that should be done here
     # CAN THIS ORDER BE CHANGED?
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data, batch_definition=batch_definition)
+
+    # engine is actually an sa engine, not an ExecutionEngine object.
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+    batch_data = SqlAlchemyBatchData(execution_engine=execution_engine, table_name=table_name)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
