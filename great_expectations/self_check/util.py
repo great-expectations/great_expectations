@@ -1373,11 +1373,9 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_compound_columns_to_be_unique",
         ]
     if context == "bigquery":
-        # todo(jdimatteo): for now, anything other than this one test is on the
-        #  "not implemented" list
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
-            "expect_table_columns_to_match_set",
+            "expect_table_columns_to_match_set",  # todo(jdimatteo), e.g. AssertionError
             "expect_table_column_count_to_be_between",
             "expect_table_column_count_to_equal",
             "expect_column_to_exist",
@@ -1386,21 +1384,21 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
             "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
+            # "expect_column_values_to_not_be_null", # todo(jdimatteo), e.g. The column "no_null" in BatchData does not exist.
             "expect_column_values_to_be_null",
-            "expect_column_values_to_be_of_type",
+            "expect_column_values_to_be_of_type",  # todo(jdimatteo), e.g. AssertionError
             "expect_column_values_to_be_in_type_list",
-            "expect_column_values_to_be_in_set",
+            "expect_column_values_to_be_in_set",  # todo(jdimatteo) No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01']
             "expect_column_values_to_not_be_in_set",
-            "expect_column_values_to_be_between",
+            "expect_column_values_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator >=
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            "expect_column_value_lengths_to_be_between",
+            # "expect_column_value_lengths_to_be_between", # todo(jdimatteo), e.g. The column "s1" in BatchData does not exist
             "expect_column_value_lengths_to_equal",
-            "expect_column_values_to_match_regex",
-            "expect_column_values_to_not_match_regex",
-            "expect_column_values_to_match_regex_list",
-            "expect_column_values_to_not_match_regex_list",
+            "expect_column_values_to_match_regex",  # todo(jdimatteo): "column_name with space"
+            "expect_column_values_to_not_match_regex",  # todo(jdimatteo): "column_name with space"
+            "expect_column_values_to_match_regex_list",  # todo(jdimatteo): "column_name with space"
+            "expect_column_values_to_not_match_regex_list",  # todo(jdimatteo): "column_name with space"
             "expect_column_values_to_match_like_pattern",
             "expect_column_values_to_not_match_like_pattern",
             "expect_column_values_to_match_like_pattern_list",
@@ -1412,7 +1410,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_distinct_values_to_be_in_set",
             "expect_column_distinct_values_to_contain_set",
             "expect_column_distinct_values_to_equal_set",
-            "expect_column_mean_to_be_between",
+            "expect_column_mean_to_be_between",  # todo(jdimatteo) e.g. The column "x" in BatchData does not exist.
             "expect_column_median_to_be_between",
             "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
@@ -1432,7 +1430,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
+            "expect_compound_columns_to_be_unique",  # TODO(https://github.com/great-expectations/great_expectations/issues/3095)
         ]
     return False
 
@@ -2070,11 +2068,12 @@ def check_json_test_result(test, result, data_asset=None):
 
 
 def generate_test_table_name(backend: str) -> str:
-    if backend == "bigquery":
+    if False and backend == "bigquery":
         # For BigQuery, use the same table name to re-use it for all tests to
         # prevent accumulation of random tables in persistent BigQuery datasets.
         return "test_data"
     # todo(jdimatteo): why doesn't re-using always work, e.g. why does postgres fail?
+    # todo(jdimatteo): revert this method change
     table_name: str = "test_data_" + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
