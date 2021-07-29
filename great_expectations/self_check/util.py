@@ -1188,10 +1188,6 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
         return expectation_type in [
             "expect_table_row_count_to_equal_other_table",
         ]
-    if context == "bigquery":
-        # todo(jdimatteo): for now, anything other than this one test is on the
-        #  "not implemented" list
-        return expectation_type != "expect_column_values_to_not_be_null"
     return False
 
 
@@ -1376,6 +1372,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_compound_columns_to_be_unique",
         ]
+    if context == "bigquery":
+        # todo(jdimatteo): for now, anything other than this one test is on the
+        #  "not implemented" list
+        return expectation_type != "expect_column_values_to_not_be_null"
     return False
 
 
