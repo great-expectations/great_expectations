@@ -137,7 +137,7 @@ def select_data_connector_name(
             f"    {i}. {data_connector_name}"
             for i, data_connector_name in enumerate(data_connector_names, 1)
         ]
-    )
+    ) + "/n"
     option_selection: str = click.prompt(
         msg_prompt_select_data_connector_name + "\n" + choices,
         type=click.Choice(
