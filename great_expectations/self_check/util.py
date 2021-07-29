@@ -1381,26 +1381,20 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_table_columns_to_match_set",  # todo(jdimatteo), e.g. AssertionError
             "expect_column_values_to_be_unique",  # TODO(https://github.com/great-expectations/great_expectations/issues/3131)
             "expect_column_values_to_be_of_type",  # todo(jdimatteo), e.g. AssertionError
+            "expect_column_values_to_be_in_type_list",  # todo(jdimatteo) AssertionError
             "expect_column_values_to_be_in_set",  # todo(jdimatteo) No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01']
             "expect_column_values_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator >=
             "expect_column_values_to_be_increasing",  # todo(jdimatteo) KeyError: 'unexpected_list'
             "expect_column_values_to_be_decreasing",  # todo(jdimatteo) KeyError: 'unexpected_list'
-            "expect_column_value_lengths_to_equal",
             "expect_column_values_to_match_regex",  # todo(jdimatteo): "column_name with space"
             "expect_column_values_to_not_match_regex",  # todo(jdimatteo): "column_name with space"
             "expect_column_values_to_match_regex_list",  # todo(jdimatteo): "column_name with space"
             "expect_column_values_to_not_match_regex_list",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_match_like_pattern",
-            "expect_column_values_to_not_match_like_pattern",
-            "expect_column_values_to_match_like_pattern_list",
-            "expect_column_values_to_not_match_like_pattern_list",
-            "expect_column_values_to_match_strftime_format",
-            "expect_column_values_to_be_dateutil_parseable",
-            "expect_column_values_to_be_json_parseable",
-            "expect_column_values_to_match_json_schema",
-            "expect_column_distinct_values_to_be_in_set",
-            "expect_column_distinct_values_to_contain_set",
-            "expect_column_distinct_values_to_equal_set",
+            "expect_column_values_to_match_like_pattern",  # todo(jdimatteo): "column_name with space"
+            "expect_column_values_to_match_like_pattern_list",  # todo(jdimatteo): "column_name with space"
+            "expect_column_values_to_not_match_like_pattern_list",  # todo(jdimatteo): "column_name with space"
+            "expect_column_values_to_match_strftime_format",  # todo(jdimatteo): AssertionError and KeyError: 'unexpected_list'
+            "expect_column_values_to_match_json_schema",  # todo(jdimatteo): KeyError: 'unexpected_list'
             "expect_column_mean_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator *
             "expect_column_median_to_be_between",
             "expect_column_quantile_values_to_be_between",
