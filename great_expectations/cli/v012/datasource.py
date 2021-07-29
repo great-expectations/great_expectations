@@ -1238,7 +1238,7 @@ We have saved your setup progress. When you are ready, run great_expectations in
 
 
 def _get_default_schema(datasource):
-    inspector = sqlalchemy.inspect(datasource.connection)
+    inspector = sqlalchemy.inspect(datasource.engine)
     return inspector.default_schema_name
 
 

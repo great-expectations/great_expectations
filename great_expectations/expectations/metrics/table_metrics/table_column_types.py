@@ -63,7 +63,7 @@ class ColumnTypes(TableMetricProvider):
             raise GreatExpectationsError(
                 "the requested batch is not available; please load the batch into the execution engine."
             )
-        return _get_sqlalchemy_column_metadata(execution_engine.connection, batch_data)
+        return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
