@@ -1451,19 +1451,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
 
-        if result_format_str in ["BOOLEAN_ONLY", "BASIC", "SUMMARY"]:
+        if result_format_str == "BOOLEAN_ONLY":
             return dependencies
 
-        metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-        )
         metric_kwargs = get_metric_kwargs(
             self.map_metric + ".unexpected_values",
             configuration=configuration,
@@ -1473,6 +1463,20 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             self.map_metric + ".unexpected_values"
         ] = MetricConfiguration(
             metric_name=self.map_metric + ".unexpected_values",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        if result_format_str in ["BASIC", "SUMMARY"]:
+            return dependencies
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_rows",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_rows",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
