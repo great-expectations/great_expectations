@@ -1,4 +1,8 @@
+import logging
+
 from sqlalchemy.exc import SQLAlchemyError
+
+logger = logging.getLogger(__name__)
 
 
 def load_data_into_database(
@@ -18,7 +22,9 @@ def load_data_into_database(
         print(f"Creating table {table_name} from {csv_path}")
         df.to_sql(name=table_name, con=engine, index=False)
     except SQLAlchemyError as e:
-        # TODO Add logging messages here
+        logger.error(
+            f"""Docs integration tests encountered an error while loading test-data into test-database. Error: {str(e)}"""
+        )
         raise
     finally:
         connection.close()
