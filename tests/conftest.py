@@ -132,6 +132,7 @@ def build_test_backends_list_cfe(metafunc):
     include_postgresql = not metafunc.config.getoption("--no-postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
+    include_bigquery: bool = True  # todo(jdimatteo) add config
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -139,6 +140,7 @@ def build_test_backends_list_cfe(metafunc):
         include_postgresql=include_postgresql,
         include_mysql=include_mysql,
         include_mssql=include_mssql,
+        include_bigquery=include_bigquery,
     )
     return test_backend_names
 

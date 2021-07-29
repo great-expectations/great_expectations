@@ -689,7 +689,7 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
+    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
         if not create_engine:
             return None
         return build_sa_validator_with_data(
@@ -861,6 +861,8 @@ def build_sa_validator_with_data(
             "for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
+    elif sa_engine_name == "bigquery":
+        engine = _create_bigquery_engine()
     else:
         engine = None
 
@@ -1186,6 +1188,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
         return expectation_type in [
             "expect_table_row_count_to_equal_other_table",
         ]
+    if context == "bigquery":
+        # todo(jdimatteo): for now, anything other than this one test is on the
+        #  "not implemented" list
+        return expectation_type != "expect_column_values_to_not_be_null"
     return False
 
 
@@ -1380,6 +1386,7 @@ def build_test_backends_list(
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
+    include_bigquery=False,
 ):
     test_backends = []
 
@@ -1452,6 +1459,13 @@ def build_test_backends_list(
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
+
+        if include_bigquery:
+            # todo(jdimatteo): wrap in try / catch etc. like above
+            engine = _create_bigquery_engine()
+            conn = engine.connect()
+            conn.close()
+            test_backends += ["bigquery"]
 
     return test_backends
 
@@ -2004,3 +2018,11 @@ def generate_test_table_name(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
     return table_name
+
+
+# todo(jdimatteo): type hint
+def _create_bigquery_engine():
+    # todo(jdimatteo): how to make this configurable?
+    #  maybe use env variables like something like GE_TEST_LOCAL_DB_HOSTNAME?
+    #  maybe raise exception if env variable not specified
+    return create_engine("bigquery://jdimatteo-v/test_ci")
