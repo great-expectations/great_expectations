@@ -9,22 +9,13 @@ import sre_parse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import azure.storage.blob
-import pandas as pd
-from azure.storage.blob import ContainerClient
+from azure.core.paging import ItemPaged
+from azure.storage.blob import BlobProperties, BlobServiceClient, ContainerClient
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
-    SqlAlchemyBatchData,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -293,8 +284,9 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_azure_keys(
-    azure: ContainerClient,
+    azure: BlobServiceClient,
     query_options: dict,
+    container: str,
     iterator_dict: dict,
     recursive: bool = False,
 ) -> str:
@@ -305,9 +297,8 @@ def list_azure_keys(
        delimiter: str = "/",
        **kwargs: Optional[Any]
     """
-
-    # blobs = azure.walk_blobs(name_starts_with=query_options.get('prefix'), delimiter="/")
-    blobs = azure.walk_blobs(**query_options)
+    client: ContainerClient = azure.get_container_client(container)
+    blobs: ItemPaged[BlobProperties] = client.walk_blobs(**query_options)
     yield from blobs
 
 

@@ -3,7 +3,7 @@ import os
 from typing import List, Optional
 
 try:
-    import azure.storage.blob as azure
+    from azure.storage.blob import BlobServiceClient
 except ImportError:
     azure.storage.blob = None
 
@@ -56,10 +56,11 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
         try:
             # TODO(cdkini): Implement various methods of instantiation and authentication
-            self._azure = azure.ContainerClient(**azure_options)
+            self._azure = BlobServiceClient(**azure_options)
+            # self._azure = BlobServiceClient.from_connection_string()
         except (TypeError, AttributeError):
             raise ImportError(
-                "Unable to load Azure ContainerClient (it is required for ConfiguredAssetAzureDataConnector)."
+                "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector)."
             )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
@@ -68,12 +69,17 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return AzureBatchSpec(batch_spec)
 
+    # FIXME(cdkini): Currently breaks DataConnect.self_check()
+    # Let's identify what actually goes in query_options
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
-            "Bucket": self._bucket,
-            "Prefix": self._prefix,
-            "Delimiter": self._delimiter,
-            "MaxKeys": self._max_keys,
+            # "Bucket": self._container,
+            # "Prefix": self._prefix,
+            # "Delimiter": self._delimiter,
+            # "MaxKeys": self._max_keys,
+            "name_starts_with": None,
+            "include": None,
+            "delimiter": self._delimiter,
         }
         if asset is not None:
             if asset.bucket:
@@ -91,9 +97,10 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             key
             for key in list_azure_keys(
                 azure=self._azure,
+                container=self._container,
                 query_options=query_options,
-                iterator_dict={},
-                recursive=False,
+                # iterator_dict={},
+                # recursive=False,
             )
         ]
         return path_list
