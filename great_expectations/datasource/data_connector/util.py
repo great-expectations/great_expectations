@@ -226,7 +226,7 @@ def _invert_regex_to_data_reference_template(
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)
-    for token, value in parsed_sre:
+    for token, value in parsed_sre:  # type: ignore [attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
