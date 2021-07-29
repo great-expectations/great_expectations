@@ -3098,7 +3098,7 @@ def suite_new_messages():
         "warning_profile": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag",
         "happy_path_batch_request": "Entering interactive mode since you passed the --batch-request flag",
         "warning_batch_request": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag",
-        "happy_path_prompt_call": """\
+        "happy_path_prompt_call": """
 How would you like to create your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data
@@ -3468,7 +3468,7 @@ def suite_edit_messages():
         "warning_datasource_name": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --datasource-name flag",
         "happy_path_batch_request": "Entering interactive mode since you passed the --batch-request flag",
         "warning_batch_request": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag",
-        "happy_path_prompt_call": """\
+        "happy_path_prompt_call": """
 How would you like to edit your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data

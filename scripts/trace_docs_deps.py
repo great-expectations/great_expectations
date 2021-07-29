@@ -35,7 +35,7 @@ from typing import List, Set
 
 
 def find_docusaurus_refs(dir: str) -> List[str]:
-    """ Finds any Docusaurus links within a target directory (i.e. ```python file=...#L10-20) """
+    """Finds any Docusaurus links within a target directory (i.e. ```python file=...#L10-20)"""
     linked_files: Set[str] = set()
     pattern: str = (
         r"\`\`\`[a-zA-Z]+ file"  # Format of internal links used by Docusaurus
@@ -58,7 +58,7 @@ def _parse_file_from_docusaurus_link(line: str) -> str:
 
 
 def get_local_imports(files: List[str]) -> List[str]:
-    """ Parses a list of files to determine local imports; external dependencies are discarded """
+    """Parses a list of files to determine local imports; external dependencies are discarded"""
     imports: Set[str] = set()
 
     for file in files:
@@ -82,7 +82,7 @@ def get_local_imports(files: List[str]) -> List[str]:
 
 
 def get_import_paths(imports: List[str]) -> List[str]:
-    """ Takes a list of imports and determines the relative path to each source file or module """
+    """Takes a list of imports and determines the relative path to each source file or module"""
     paths: List[str] = []
 
     for imp in imports:
