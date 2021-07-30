@@ -83,7 +83,13 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
-            echo $(GCP_CREDENTIALS) > /tmp/gcp_credentials.json
+            echo "$(GCP_CREDENTIALS)" > /tmp/gcp_credentials.json
+            echo todo(jdimatteo) begin debug
+            ls -lh /tmp/gcp_credentials.json
+            # note GOOGLE_APPLICATION_CREDENTIALS is just a path so should be safe to echo here for debugging purposes
+            echo $GOOGLE_APPLICATION_CREDENTIALS
+            echo todo(jdimatteo) end debug
+            exit 42
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
             pytest -v --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
@@ -112,4 +118,3 @@ stages:
             GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp_credentials.json
             GCP_PROJECT: $(GCP_PROJECT)
             GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
-
