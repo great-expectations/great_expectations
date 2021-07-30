@@ -23,7 +23,7 @@ def load_data_into_database(
         df.to_sql(name=table_name, con=engine, index=False)
     except SQLAlchemyError as e:
         logger.error(
-            f"""Docs integration tests encountered an error while loading test-data into test-database. Error: {str(e)}"""
+            f"""Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
     finally:
