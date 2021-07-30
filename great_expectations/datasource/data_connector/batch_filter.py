@@ -42,14 +42,18 @@ def build_batch_filter(
 "{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
-    custom_filter_function = data_connector_query_dict.get("custom_filter_function")
+    custom_filter_function: Optional[
+        Union[int, list, tuple, slice, str, dict, IDDict, Callable]
+    ] = data_connector_query_dict.get("custom_filter_function")
     if custom_filter_function and not callable(custom_filter_function):
         raise ge_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    batch_filter_parameters = data_connector_query_dict.get("batch_filter_parameters")
+    batch_filter_parameters: Optional[
+        Union[int, list, tuple, slice, str, dict, IDDict, Callable]
+    ] = data_connector_query_dict.get("batch_filter_parameters")
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
             raise ge_exceptions.BatchFilterError(
@@ -63,11 +67,11 @@ def build_batch_filter(
             )
         batch_filter_parameters = IDDict(batch_filter_parameters)
     index: Optional[
-        Union[int, list, tuple, slice, str]
-    ] = data_connector_query_dict.get(  # type: ignore [assignment]
-        "index"
-    )
-    limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore [assignment]
+        Union[int, list, tuple, slice, str, dict, IDDict, Callable]
+    ] = data_connector_query_dict.get("index")
+    limit: Optional[
+        Union[int, list, tuple, slice, str, dict, IDDict, Callable]
+    ] = data_connector_query_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
@@ -78,7 +82,12 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
         raise ge_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
+
+    assert isinstance(limit, int) or limit is None
+    assert isinstance(index, (int, slice)) or index is None
+
     index = _parse_index(index=index)
+
     return BatchFilter(
         custom_filter_function=custom_filter_function,  # type: ignore [arg-type]
         batch_filter_parameters=batch_filter_parameters,  # type: ignore [arg-type]
