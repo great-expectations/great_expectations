@@ -584,7 +584,7 @@ def multicolumn_condition_partial(
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature. A
     multicolumn_condition_partial must provide a map function that evaluates to a boolean value; it will be used to
-    provide supplemental metrics, such as the unexpected_value count and unexpected_rows.
+    provide supplemental metrics, such as the unexpected_value count, unexpected_values, and unexpected_rows.
 
     A metric function that is decorated as a multicolumn_condition_partial will be called with the engine-specific
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
