@@ -1,6 +1,6 @@
 import logging
 from abc import ABCMeta
-from json import JSONDecodeError, loads
+from json import JSONDecodeError
 from typing import Dict, Optional
 from urllib.parse import urljoin
 
