@@ -110,3 +110,6 @@ stages:
             # todo: add credentials for cloud resources here
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp_credentials.json
+            GCP_PROJECT: $(GCP_PROJECT)
+            GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
+
