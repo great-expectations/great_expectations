@@ -176,6 +176,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ) -> Optional[List[BatchDefinition]]:
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
         # allowing us to invoke `IDDict(data_reference)`
+        if data_asset_name is None:
+            data_asset_name = ""
         return [
             BatchDefinition(
                 datasource_name=self.datasource_name,
