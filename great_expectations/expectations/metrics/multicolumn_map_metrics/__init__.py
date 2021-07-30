@@ -1,1 +1,0 @@
-from .multicolumn_sum_equal import MulticolumnSumEqual

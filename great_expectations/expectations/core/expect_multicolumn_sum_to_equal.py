@@ -1,4 +1,4 @@
-from great_expectations.expectations.expectation import MulticolumnMapExpectation
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -8,7 +8,9 @@ from great_expectations.render.types import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
-class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
+class ExpectMulticolumnSumToEqual(TableExpectation):
+    # This expectation is a stub - it needs migration to the modular expectation API
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -22,8 +24,9 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         "requirements": [],
     }
 
-    map_metric = "multicolumn_sum.equal"
-    success_keys = ("sum_total",)
+    metric_dependencies = tuple()
+    success_keys = ()
+    default_kwarg_values = {}
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
