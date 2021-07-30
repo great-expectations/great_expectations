@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Union
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
-from ..metrics import ColumnValuesZScore
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):

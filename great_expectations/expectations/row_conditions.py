@@ -8,7 +8,6 @@ from pyparsing import (
     Word,
     alphanums,
     alphas,
-    oneOf,
 )
 
 from great_expectations.exceptions import GreatExpectationsError

@@ -14,7 +14,6 @@ from great_expectations.execution_engine.execution_engine import (
 )
 from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.registry import (
-    get_metric_function_type,
     get_metric_provider,
     register_metric,
     register_renderer,

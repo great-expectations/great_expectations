@@ -36,9 +36,6 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
 )
-from great_expectations.expectations.metrics.table_metrics.table_column_types import (
-    ColumnTypes,
-)
 from great_expectations.expectations.registry import (
     _registered_expectations,
     _registered_metrics,
