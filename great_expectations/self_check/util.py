@@ -1385,35 +1385,35 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         # a github issue tracking adding the test with BigQuery.
         ###
         return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",  # todo(jdimatteo): AttributeError: 'Validator'  object has no attribute 'expect_select_column_values_t
-            "expect_table_columns_to_match_set",  # todo(jdimatteo), e.g. AssertionError
-            "expect_column_values_to_be_unique",  # TODO(https://github.com/great-expectations/great_expectations/issues/3131)
-            "expect_column_values_to_be_of_type",  # todo(jdimatteo), e.g. AssertionError
-            "expect_column_values_to_be_in_type_list",  # todo(jdimatteo) AssertionError
-            "expect_column_values_to_be_in_set",  # todo(jdimatteo) No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01']
-            "expect_column_values_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator >=
-            "expect_column_values_to_be_increasing",  # todo(jdimatteo) KeyError: 'unexpected_list'
-            "expect_column_values_to_be_decreasing",  # todo(jdimatteo) KeyError: 'unexpected_list'
-            "expect_column_values_to_match_regex",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_not_match_regex",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_match_regex_list",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_not_match_regex_list",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_match_like_pattern",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_match_like_pattern_list",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_not_match_like_pattern_list",  # todo(jdimatteo): "column_name with space"
-            "expect_column_values_to_match_strftime_format",  # todo(jdimatteo): AssertionError and KeyError: 'unexpected_list'
-            "expect_column_values_to_match_json_schema",  # todo(jdimatteo): KeyError: 'unexpected_list'
-            "expect_column_mean_to_be_between",  # todo(jdimatteo) 400 No matching signature for operator *
-            "expect_column_quantile_values_to_be_between",  # todo(jdimatteo): takes over 15 minutes to "collect" (haven't actually seen it complete yet)
-            "expect_column_pair_values_A_to_be_greater_than_B",  # todo(jdimatteo): AttributeError: 'Validator'  object has no attribute 'expect_column_pair_values_A_to_be_greater_than_B'
-            "expect_column_pair_values_to_be_equal",  # todo(jdimatteo): AttributeError: 'Validator'  object has no attribute 'expect_column_pair_values_to_be_equal'
-            "expect_column_pair_values_to_be_in_set",  # todo(jdimatteo): ColumnPairMapExpectation must override get_validation_dependencies or declare exactly one map_metric
-            "expect_multicolumn_sum_to_equal",  # todo(jdimatteo): AttributeError: 'Validator'  object has no attribute 'expect_multicolumn_sum_to_equal'
-            "expect_column_kl_divergence_to_be_less_than",  # todo(jdimatteo): takes over 64 minutes to "collect" (haven't actually seen it complete yet)
-            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",  # todo(jdimatte): took 43 minutes, AttributeError: 'Validator'  object has no attribute 'expect_column_bootstrapped_ks...
-            "expect_column_chisquare_test_p_value_to_be_greater_than",  # todo(jdimatteo): takes over 27 minutes to "collect" (haven't actually seen it complete yet)
-            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",  # todo(jdimatteo): after 22 minutes, 'Validator'  object has no attribute 'expect_column_parameteriz...
-            "expect_compound_columns_to_be_unique",  # TODO(https://github.com/great-expectations/great_expectations/issues/3095)
+            "expect_select_column_values_to_be_unique_within_record",  # TODO: Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_table_columns_to_match_set",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_unique",  # TODO: 'pybigquery.sqlalchemy_bigquery' has no attribute 'dialect' -- tracked with https://github.com/great-expectations/great_expectations/issues/3131.
+            "expect_column_values_to_be_of_type",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_in_type_list",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_in_set",  # TODO: No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01'] -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_increasing",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_decreasing",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_regex",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_not_match_regex",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_regex_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_not_match_regex_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_like_pattern",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_like_pattern_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_not_match_like_pattern_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_strftime_format",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_json_schema",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_mean_to_be_between",  # TODO: "400 No matching signature for operator *" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_quantile_values_to_be_between",  # TODO: takes over 15 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_pair_values_A_to_be_greater_than_B",  # TODO: Not yet implemented with v3 API. Tracked with https://github.com/great-expectations/great_expectations/issues/2828.
+            "expect_column_pair_values_to_be_equal",  # TODO: Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_pair_values_to_be_in_set",  # TODO: ColumnPairMapExpectation must override get_validation_dependencies or declare exactly one map_metric -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_multicolumn_sum_to_equal",  # TODO: Not yet implemented with v3 API. Tracked with https://github.com/great-expectations/great_expectations/issues/2828.
+            "expect_column_kl_divergence_to_be_less_than",  # TODO: Takes over 64 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",  # TODO: Took 43 minutes, and Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_chisquare_test_p_value_to_be_greater_than",  # TODO: Takes over 27 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",  # TODO: Took 22 minutes, and Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_compound_columns_to_be_unique",  # TODO: Not yet implemented with v3 API. Tracked with https://github.com/great-expectations/great_expectations/issues/3095.
         ]
     return False
 
