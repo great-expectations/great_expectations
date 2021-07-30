@@ -41,9 +41,12 @@ In order to run BigQuery tests, you first need to go through the following steps
 
 1. `Select or create a Cloud Platform project.`_
 2. `Setup Authentication.`_
+3. `In your project, create a bigquery dataset named "test_ci"`_ and `set the dataset default table expiration to .1 days`_
 
 .. _Select or create a Cloud Platform project.: https://console.cloud.google.com/project
 .. _Setup Authentication.: https://googleapis.dev/python/google-api-core/latest/auth.html
+.. _`In your project, create a bigquery dataset named "test_ci"`: https://cloud.google.com/bigquery/docs/datasets
+.. _`set the dataset default table expiration to .1 days`: https://cloud.google.com/bigquery/docs/updating-datasets#table-expiration
 
 After setting up authentication, you can run with your project using the environment variable `GE_TEST_BIGQUERY_PROJECT`, e.g.
 
