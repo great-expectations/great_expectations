@@ -1,4 +1,4 @@
 # Redirect from what the browser serves
 /v2 https://docs.greatexpectations.io/en/latest/
 /goog https://www.google.com
-/en/* https://docs.greatexpectations.io/en/latest/*
+/en/latest/  https://docs.greatexpectations.io/en/latest/
