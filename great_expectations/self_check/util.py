@@ -896,12 +896,7 @@ def build_sa_validator_with_data(
             # echo=True,
         )
     elif sa_engine_name == "bigquery":
-        gcp_project = "superconductive-internal"
-        bigquery_dataset = "demo"
-        table = "taxi_data"  # not used in this context
-        # how do you get rid of credentials_path
-        engine = create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}", credentials_path='/Users/work/Development/creds/superconductive-internal-ba8ee4857de2.json')
-
+        engine = _create_bigquery_engine()
     else:
         engine = None
 
@@ -1234,7 +1229,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 
 
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
             # "expect_table_columns_to_match_set",
@@ -1414,6 +1409,48 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_compound_columns_to_be_unique",
         ]
+    if context == "bigquery":
+        ###
+        # NOTE: 20210729 - jdimatteo: It is relatively slow to create tables for
+        # all these tests in BigQuery, and if you want to run a single test then
+        # you can uncomment and modify the below line (which results in only the
+        # tests for "expect_column_values_to_not_be_null" being run):
+        # return expectation_type != "expect_column_values_to_not_be_null"
+        ###
+        # NOTE: 20210729 - jdimatteo: Below are temporarily not being tested
+        # with BigQuery. For each disabled test below, please include a link to
+        # a github issue tracking adding the test with BigQuery.
+        ###
+        return expectation_type in [
+            "expect_select_column_values_to_be_unique_within_record",  # TODO: Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_table_columns_to_match_set",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_of_type",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_in_type_list",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_in_set",  # TODO: No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01'] -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_increasing",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_be_decreasing",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_regex",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_not_match_regex",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_regex_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_not_match_regex_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_like_pattern",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_like_pattern_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_not_match_like_pattern_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_strftime_format",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_values_to_match_json_schema",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_mean_to_be_between",  # TODO: "400 No matching signature for operator *" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_quantile_values_to_be_between",  # TODO: takes over 15 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_pair_values_A_to_be_greater_than_B",  # TODO: Not yet implemented with v3 API. Tracked with https://github.com/great-expectations/great_expectations/issues/2828.
+            "expect_column_pair_values_to_be_equal",  # TODO: Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_pair_values_to_be_in_set",  # TODO: ColumnPairMapExpectation must override get_validation_dependencies or declare exactly one map_metric -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_multicolumn_sum_to_equal",  # TODO: Not yet implemented with v3 API. Tracked with https://github.com/great-expectations/great_expectations/issues/2828.
+            "expect_column_kl_divergence_to_be_less_than",  # TODO: Takes over 64 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",  # TODO: Took 43 minutes, and Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_chisquare_test_p_value_to_be_greater_than",  # TODO: Takes over 27 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",  # TODO: Took 22 minutes, and Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
+            "expect_compound_columns_to_be_unique",  # TODO: Not yet implemented with v3 API. Tracked with https://github.com/great-expectations/great_expectations/issues/3095.
+        ]
     return False
 
 
@@ -1499,20 +1536,14 @@ def build_test_backends_list(
             test_backends += ["mssql"]
 
         if include_bigquery:
-            gcp_project = "superconductive-internal"
-            bigquery_dataset = "demo"
-            table = "taxi_data" # not used in this context
-            # how do you get rid of credentials_path
             try:
-                engine = create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}", credentials_path='/Users/work/Development/creds/superconductive-internal-ba8ee4857de2.json'
-
-                )
+                engine = _create_bigquery_engine()
                 conn = engine.connect()
                 conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
+            except (ImportError, sa.exc.SQLAlchemyError) as e:
                 raise ImportError(
-                    "bigquery tests are requested, but unable to connect "
-                )
+                    "bigquery tests are requested, but unable to connect"
+                ) from e
             test_backends += ["bigquery"]
 
     return test_backends
@@ -2066,3 +2097,9 @@ def generate_test_table_name(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
     return table_name
+
+
+def _create_bigquery_engine() -> Engine:
+    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "superconductive-internal")
+    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
+    return create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}")

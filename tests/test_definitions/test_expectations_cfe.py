@@ -36,17 +36,16 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-    expectation_dirs = ["bigquery_test"]
+
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
-    backends = ["bigquery"]
+
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
@@ -93,6 +92,7 @@ def pytest_generate_tests(metafunc):
                             validator_with_data = get_test_validator_with_data(
                                 c, d["data"], schemas=schemas
                             )
+
                     for test in d["tests"]:
                         generate_test = True
                         skip_test = False
