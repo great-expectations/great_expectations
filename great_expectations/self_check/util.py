@@ -1500,10 +1500,14 @@ def build_test_backends_list(
             test_backends += ["mssql"]
 
         if include_bigquery:
-            # todo(jdimatteo): wrap in try / catch etc. like above
-            engine = _create_bigquery_engine()
-            conn = engine.connect()
-            conn.close()
+            try:
+                engine = _create_bigquery_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError) as e:
+                raise ImportError(
+                    "bigquery tests are requested, but unable to connect to the bigquery database"
+                ) from e
             test_backends += ["bigquery"]
 
     return test_backends
@@ -2059,7 +2063,6 @@ def generate_test_table_name(
     return table_name
 
 
-# todo(jdimatteo): type hint
-def _create_bigquery_engine():
+def _create_bigquery_engine() -> Engine:
     project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "great-expectations-bigquery-ci")
     return create_engine(f"bigquery://{project}/test_ci")
