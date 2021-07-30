@@ -7,7 +7,6 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
-import numpy as np
 import pandas as pd
 
 from great_expectations import __version__ as ge_version
@@ -1440,6 +1439,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
+
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
             configuration=configuration,
@@ -1451,19 +1451,22 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
 
-        if result_format_str in ["BOOLEAN_ONLY", "BASIC", "SUMMARY"]:
-            return dependencies
-
         metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
+            self.map_metric + ".filtered_row_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
+        metric_dependencies[
+            self.map_metric + ".filtered_row_count"
+        ] = MetricConfiguration(
+            metric_name=self.map_metric + ".filtered_row_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
+
+        if result_format_str == "BOOLEAN_ONLY":
+            return dependencies
+
         metric_kwargs = get_metric_kwargs(
             self.map_metric + ".unexpected_values",
             configuration=configuration,
@@ -1473,6 +1476,20 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             self.map_metric + ".unexpected_values"
         ] = MetricConfiguration(
             metric_name=self.map_metric + ".unexpected_values",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        if result_format_str in ["BASIC", "SUMMARY"]:
+            return dependencies
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_rows",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_rows",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -1514,23 +1531,22 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
-        nonnull_count = total_count - unexpected_count
+        filtered_row_count = metrics.get(self.map_metric + ".filtered_row_count")
 
         success = None
         if total_count is None:
             # Vacuously true
             success = True
         elif total_count != 0:
-            success_ratio = float(nonnull_count) / total_count
-            success = np.isclose(success_ratio, 1.0)
+            success = unexpected_count == 0
         elif total_count == 0:
             success = True
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
-            element_count=metrics.get("table.row_count"),
-            nonnull_count=nonnull_count,
+            element_count=filtered_row_count,
+            nonnull_count=filtered_row_count,
             unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
             unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
             unexpected_index_list=metrics.get(
