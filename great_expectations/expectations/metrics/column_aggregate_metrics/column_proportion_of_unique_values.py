@@ -76,9 +76,7 @@ class ColumnUniqueProportion(ColumnAggregateMetricProvider):
         )
 
         table_domain_kwargs: dict = {
-            k: v
-            for k, v in metric.metric_domain_kwargs.items()
-            if k != MetricDomainTypes.COLUMN.value
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
