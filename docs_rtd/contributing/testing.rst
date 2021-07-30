@@ -34,6 +34,23 @@ Note: as of early 2020, the tests generate many warnings. Most of these are gene
 
 .. _contributing_testing__writing_unit_tests:
 
+Running BigQuery tests
+----------------------
+
+In order to run BigQuery tests, you first need to go through the following steps:
+
+1. `Select or create a Cloud Platform project.`_
+2. `Setup Authentication.`_
+
+.. _Select or create a Cloud Platform project.: https://console.cloud.google.com/project
+.. _Setup Authentication.: https://googleapis.dev/python/google-api-core/latest/auth.html
+
+After setting up authentication, you can run with your project using the environment variable `GE_TEST_BIGQUERY_PROJECT`, e.g.
+
+.. code-block::
+
+    GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT> pytest tests/test_definitions/test_expectations_cfe.py --bigquery --no-spark --no-postgresql -k bigquery
+
 Writing unit and integration tests
 ----------------------------------
 
@@ -43,7 +60,7 @@ Experimental code in Great Expectations need only be tested lightly. We are movi
 
 Most of Great Expectations' integration testing is in the CLI, which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should *not* include new integration tests, unless they change the CLI itself.
 
-Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to postgresql and sqlite. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
+Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to postgresql, sqlite, mssql, and bigquery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
 
 
 Unit tests for Expectations
