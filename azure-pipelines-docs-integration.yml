@@ -86,7 +86,7 @@ stages:
             echo "$(GCP_CREDENTIALS)" > /tmp/gcp_credentials.json
             echo todo(jdimatteo) begin debug
             echo todo(jdimatteo) ls -lh and wc /tmp/gcp_credentials.json
-            ls -lh /tmp/gcp_credentials.json
+            ls -lh /tmp/gcp_credentials.json | echo no file there
             wc -l /tmp/gcp_credentials.json
             # note GOOGLE_APPLICATION_CREDENTIALS is just a path so should be safe to echo here for debugging purposes
             echo todo(jdimatteo) GOOGLE_APPLICATION_CREDENTIALS
