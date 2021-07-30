@@ -1343,20 +1343,18 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
         unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
 
-        if total_count is None:
-            nonnull_count = None
+        if total_count is None or null_count is None:
+            total_count = nonnull_count = 0
         else:
             nonnull_count = total_count - null_count
 
         success = None
-        if total_count is None or null_count is None:
+        if total_count == 0 or nonnull_count == 0:
             # Vacuously true
             success = True
         elif nonnull_count > 0:
             success_ratio = float(nonnull_count - unexpected_count) / nonnull_count
             success = success_ratio >= mostly
-        elif total_count == 0 or nonnull_count == 0:
-            success = True
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -1538,20 +1536,18 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         null_count = metrics.get("column_values.nonnull.unexpected_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
 
-        if total_count is None:
-            nonnull_count = None
+        if total_count is None or null_count is None:
+            total_count = nonnull_count = 0
         else:
             nonnull_count = total_count - null_count
 
         success = None
-        if total_count is None or null_count is None:
+        if total_count == 0 or nonnull_count == 0:
             # Vacuously true
             success = True
         elif nonnull_count > 0:
             success_ratio = float(nonnull_count - unexpected_count) / nonnull_count
             success = success_ratio >= mostly
-        elif total_count == 0 or nonnull_count == 0:
-            success = True
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
