@@ -1,16 +1,16 @@
 import logging
-from typing import Any, List, Optional, Tuple, Union, cast
+from typing import Any, List, Optional, Tuple, Union, cast, no_type_check
 from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
+    BatchMarkers,
     BatchRequest,
     BatchRequestBase,
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import (
-    BatchMarkers,
     BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
@@ -65,7 +65,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
-    ) -> List[str]:
+    ) -> Union[list]:
         """
         List objects in the cache to create a list of data_references. If data_asset_name is passed in, method will
         return all data_references for the named data_asset. If no data_asset_name is passed in, will return a list of
@@ -115,25 +115,31 @@ class RuntimeDataConnector(DataConnector):
         return list(self._data_references_cache.keys())
 
     # noinspection PyMethodOverriding
-    def get_batch_data_and_metadata(
+    def get_batch_data_and_metadata(  # type: ignore [override]
         self,
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
-        batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
+        batch_spec: BatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
         )
+
+        if not isinstance(self._execution_engine, ExecutionEngine):
+            raise ge_exceptions.GreatExpectationsTypeError()
+
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
+        # assert isinstance(batch_spec, BatchSpec)
+        # assert isinstance(batch_markers, BatchMarkers)
         return (
             batch_data,
             batch_spec,
             batch_markers,
         )
 
-    def get_batch_definition_list_from_batch_request(
+    def get_batch_definition_list_from_batch_request(  # type: ignore [override]
         self,
         batch_request: RuntimeBatchRequest,
     ) -> List[BatchDefinition]:
@@ -213,8 +219,8 @@ class RuntimeDataConnector(DataConnector):
         data_asset_name: str = batch_definition.data_asset_name
         return {"data_asset_name": data_asset_name}
 
-    # This method is currently called called only in tests.
     # noinspection PyMethodOverriding
+    @no_type_check  # This method is currently called called only in tests.
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition,
@@ -251,7 +257,7 @@ class RuntimeDataConnector(DataConnector):
         return data_reference_name
 
     @staticmethod
-    def _validate_runtime_parameters(runtime_parameters: Union[dict, type(None)]):
+    def _validate_runtime_parameters(runtime_parameters: Optional[dict]) -> None:
         if not isinstance(runtime_parameters, dict):
             raise TypeError(
                 f"""The type of runtime_parameters must be a dict object. The type given is
