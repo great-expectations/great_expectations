@@ -84,18 +84,18 @@ stages:
         - script: |
             pip install pytest pytest-azurepipelines
             echo "$(GCP_CREDENTIALS)" > /tmp/gcp_credentials.json
-            echo todo(jdimatteo) begin debug
-            echo todo(jdimatteo) ls -lh and wc /tmp/gcp_credentials.json
+            echo "todo(jdimatteo) begin debug"
+            echo "todo(jdimatteo) ls -lh and wc /tmp/gcp_credentials.json"
             ls -lh /tmp/gcp_credentials.json | echo no file there
             wc -l /tmp/gcp_credentials.json
             # note GOOGLE_APPLICATION_CREDENTIALS is just a path so should be safe to echo here for debugging purposes
-            echo todo(jdimatteo) GOOGLE_APPLICATION_CREDENTIALS
-            echo $GOOGLE_APPLICATION_CREDENTIALS
-            echo todo(jdimatteo) any reference to gcp.json in env?
+            echo "todo(jdimatteo) GOOGLE_APPLICATION_CREDENTIALS"
+            echo $(GOOGLE_APPLICATION_CREDENTIALS)
+            echo "todo(jdimatteo) any reference to gcp.json in env?"
             env | grep gcp.json | wc -l
-            echo todo(jdimatteo) any reference to gcp.json in credentials?
+            echo "todo(jdimatteo) any reference to gcp.json in credentials?"
             grep gcp.json /tmp/gcp_credentials.json | wc -l
-            echo todo(jdimatteo) end debug
+            echo "todo(jdimatteo) end debug"
             exit 42
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
