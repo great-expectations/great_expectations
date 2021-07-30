@@ -5,6 +5,7 @@ import random
 import string
 
 import pandas as pd
+import pybigquery
 import pytest
 
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
@@ -35,16 +36,17 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-
+    expectation_dirs = ["bigquery_test"]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
-
+    backends = ["bigquery"]
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
+
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
@@ -91,7 +93,6 @@ def pytest_generate_tests(metafunc):
                             validator_with_data = get_test_validator_with_data(
                                 c, d["data"], schemas=schemas
                             )
-
                     for test in d["tests"]:
                         generate_test = True
                         skip_test = False
@@ -105,6 +106,7 @@ def pytest_generate_tests(metafunc):
                                 validator_with_data.execution_engine.active_batch_data,
                                 SqlAlchemyBatchData,
                             ):
+                                print("HELLO THIS WORKS")
                                 # Call out supported dialects
                                 if "sqlalchemy" in test["only_for"]:
                                     generate_test = True
@@ -144,6 +146,14 @@ def pytest_generate_tests(metafunc):
                                     )
                                 ):
                                     generate_test = True
+                                elif (
+                                        "bigquery" in test["only_for"]
+                                      and isinstance(
+                                          validator_with_data.execution_engine.active_batch_data.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect)
+                                ):
+                                    print("GENERATE TEST FOR BIG QUERY")
+                                    generate_test = True
+
                             elif validator_with_data and isinstance(
                                 validator_with_data.execution_engine.active_batch_data,
                                 PandasBatchData,

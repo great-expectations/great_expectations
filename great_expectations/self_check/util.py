@@ -100,6 +100,38 @@ except (ImportError, KeyError):
     SQLITE_TYPES = {}
 
 try:
+    import pybigquery.sqlalchemy_bigquery
+    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
+    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+    sqlalchemy.dialects.registry.register(
+        "bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect"
+    )
+    try:
+        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
+        bigquery_types_tuple = {}
+        # Just some basic types that are used in tests
+        BIGQUERY_TYPES = {
+            "INTEGER": pybigquery.sqlalchemy_bigquery.INTEGER,
+            "NUMERIC": pybigquery.sqlalchemy_bigquery.NUMERIC,
+            "STRING": pybigquery.sqlalchemy_bigquery.STRING,
+        }
+    except AttributeError:
+        # In older versions of the pybigquery driver, types were not exported, so we use a hack
+        logger.warning(
+            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+        )
+        from collections import namedtuple
+
+        BigQueryTypes = namedtuple(
+            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
+        )
+        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
+except (ImportError, AttributeError):
+    bigquery_types_tuple = None
+    pybigquery = None
+
+
+try:
     import sqlalchemy.dialects.postgresql as postgresqltypes
     from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 
@@ -689,7 +721,7 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
+    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
         if not create_engine:
             return None
         return build_sa_validator_with_data(
@@ -839,12 +871,14 @@ def build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
+        "bigquery": pybigquery.sqlalchemy_bigquery.BigQueryDialect
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
         "postgresql": POSTGRESQL_TYPES,
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
+        "bigquery": BIGQUERY_TYPES,
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -861,6 +895,13 @@ def build_sa_validator_with_data(
             "for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
+    elif sa_engine_name == "bigquery":
+        gcp_project = "superconductive-internal"
+        bigquery_dataset = "demo"
+        table = "taxi_data"  # not used in this context
+        # how do you get rid of credentials_path
+        engine = create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}", credentials_path='/Users/work/Development/creds/superconductive-internal-ba8ee4857de2.json')
+
     else:
         engine = None
 
@@ -876,6 +917,7 @@ def build_sa_validator_with_data(
         and sa_engine_name in schemas
         and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
     ):
+        # currently engine.dialect is : BigQueryDialect
         schema = schemas[sa_engine_name]
         sql_dtypes = {
             col: dialect_types.get(sa_engine_name)[dtype]
@@ -923,6 +965,8 @@ def build_sa_validator_with_data(
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
+    print("ENGINE WAS SUCCESSFUL")
+    print(execution_engine)
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
@@ -1190,7 +1234,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 
 
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
             # "expect_table_columns_to_match_set",
@@ -1380,6 +1424,7 @@ def build_test_backends_list(
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
+    include_bigquery=False,
 ):
     test_backends = []
 
@@ -1452,6 +1497,23 @@ def build_test_backends_list(
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
+
+        if include_bigquery:
+            gcp_project = "superconductive-internal"
+            bigquery_dataset = "demo"
+            table = "taxi_data" # not used in this context
+            # how do you get rid of credentials_path
+            try:
+                engine = create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}", credentials_path='/Users/work/Development/creds/superconductive-internal-ba8ee4857de2.json'
+
+                )
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "bigquery tests are requested, but unable to connect "
+                )
+            test_backends += ["bigquery"]
 
     return test_backends
 
