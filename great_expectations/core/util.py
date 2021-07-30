@@ -71,23 +71,22 @@ def nested_update(
     d: Union[Iterable, dict], u: Union[Iterable, dict], dedup: bool = False
 ):
     """update d with items from u, recursively and joining elements"""
-    if isinstance(u, dict):
-        for k, v in u.items():
-            if isinstance(v, Mapping):
-                d[k] = nested_update(d.get(k, {}), v, dedup=dedup)
-            elif isinstance(v, set) or (k in d and isinstance(d[k], set)):
-                s1 = d.get(k, set())
-                s2 = v or set()
-                d[k] = s1 | s2
-            elif isinstance(v, list) or (k in d and isinstance(d[k], list)):
-                l1 = d.get(k, [])
-                l2 = v or []
-                if dedup:
-                    d[k] = list(set(l1 + l2))
-                else:
-                    d[k] = l1 + l2
+    for k, v in u.items():
+        if isinstance(v, Mapping):
+            d[k] = nested_update(d.get(k, {}), v, dedup=dedup)
+        elif isinstance(v, set) or (k in d and isinstance(d[k], set)):
+            s1 = d.get(k, set())
+            s2 = v or set()
+            d[k] = s1 | s2
+        elif isinstance(v, list) or (k in d and isinstance(d[k], list)):
+            l1 = d.get(k, [])
+            l2 = v or []
+            if dedup:
+                d[k] = list(set(l1 + l2))
             else:
-                d[k] = v
+                d[k] = l1 + l2
+        else:
+            d[k] = v
     return d
 
 
