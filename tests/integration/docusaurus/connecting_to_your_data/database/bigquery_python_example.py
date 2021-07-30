@@ -11,6 +11,7 @@ gcp_project = os.environ.get("GCP_PROJECT")
 bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
 
 # comment to get the tests working
+# one more comment
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 # This utility is not for general use. It is only to support testing.
