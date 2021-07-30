@@ -83,6 +83,7 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
+            echo $(GCP_CREDENTIALS) > /tmp/gcp_credentials.json
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
             pytest -v --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
@@ -107,3 +108,5 @@ stages:
             # AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
             # AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
             # todo: add credentials for cloud resources here
+            # GCP credentials
+            GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp_credentials.json
