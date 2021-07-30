@@ -94,7 +94,7 @@ stages:
             gcloud --quiet components update
             displayName: 'install gcloud SDK'
 
-        - script:
+        - script: |
             gcloud auth activate-service-account --key-file $(gcp_authkey.secureFilePath)
             displayName: 'activate google service account'
 
