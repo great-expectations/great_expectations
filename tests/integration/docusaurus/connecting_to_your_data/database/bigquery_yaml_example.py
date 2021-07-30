@@ -7,6 +7,7 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 # Google BigQuery config
 # TODO : configure additional environment variables for Azure pipeline to perform full integration tests on bigquery data.
+# trigger for running the script
 gcp_project = os.environ.get("GCP_PROJECT")
 bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
 
