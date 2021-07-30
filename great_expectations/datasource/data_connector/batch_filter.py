@@ -1,6 +1,6 @@
 import itertools
 import logging
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
@@ -112,7 +112,7 @@ def _parse_index(
     elif isinstance(index, str):
         if is_int(value=index):
             return _parse_index(index=int(index))
-        index_as_list: List[Optional[str, int]]
+        index_as_list: List[Any]
         if index:
             index_as_list = index.split(":")
             if len(index_as_list) == 1:

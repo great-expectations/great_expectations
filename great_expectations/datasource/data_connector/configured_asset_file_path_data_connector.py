@@ -235,18 +235,23 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         """
 
         data_asset_name: str = batch_definition.data_asset_name
-        if (
-            data_asset_name in self.assets
-            and self.assets[data_asset_name].batch_spec_passthrough
-            and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)
-        ):
-            # batch_spec_passthrough from data_asset
-            batch_spec_passthrough = deepcopy(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
-            )
+
+        if data_asset_name in self.assets:
+            asset: Union[dict, Asset] = self.assets[data_asset_name]
+
+            batch_spec_passthrough = {}
+            if (
+                isinstance(asset, dict)
+                and asset.get("batch_spec_passthrough") is not None
+            ):
+                batch_spec_passthrough = deepcopy(asset["batch_spec_passthrough"])
+            elif isinstance(asset, Asset) and asset.batch_spec_passthrough is not None:
+                batch_spec_passthrough = deepcopy(asset.batch_spec_passthrough)
+
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
+
             # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
