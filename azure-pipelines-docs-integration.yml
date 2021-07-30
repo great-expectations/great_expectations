@@ -84,7 +84,7 @@ stages:
         - script: |
             pip install pytest pytest-azurepipelines
             mkdir -p DO_NOT_COMMIT
-            echo "$(GCP_CREDENTIALS)" > DO_NOT_COMMIT/gcp_credentials.json
+            echo "${GCP_CREDENTIALS}" > DO_NOT_COMMIT/gcp_credentials.json
             export GOOGLE_APPLICATION_CREDENTIALS=$PWD/DO_NOT_COMMIT/gcp_credentials.json
             echo "todo(jdimatteo) begin debug"
             echo "todo(jdimatteo) ls -lh and wc DO_NOT_COMMIT/gcp_credentials.json"
@@ -92,15 +92,15 @@ stages:
             wc -l DO_NOT_COMMIT/gcp_credentials.json
             # note GOOGLE_APPLICATION_CREDENTIALS is just a path so should be safe to echo here for debugging purposes
             echo "todo(jdimatteo) GOOGLE_APPLICATION_CREDENTIALS"
-            echo "$(GOOGLE_APPLICATION_CREDENTIALS)"
+            echo "${GOOGLE_APPLICATION_CREDENTIALS}"
             echo "todo(jdimatteo) ls -lh with GOOGLE_APPLICATION_CREDENTIALS"
-            ls -lh $(GOOGLE_APPLICATION_CREDENTIALS) | echo "no file there"
+            ls -lh ${GOOGLE_APPLICATION_CREDENTIALS} | echo "no file there"
             echo "todo(jdimatteo) end debug"
             exit 42
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
             pytest -v --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
-            rm -rf $(GOOGLE_APPLICATION_CREDENTIALS)
+            rm -rf ${GOOGLE_APPLICATION_CREDENTIALS}
           displayName: 'pytest'
           env:
             # snowflake credentials
