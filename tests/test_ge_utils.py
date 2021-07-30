@@ -9,8 +9,8 @@ from great_expectations.dataset.util import check_sql_engine_dialect
 from great_expectations.util import (
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
+    hyphen,
     lint_code,
-    hyphen
 )
 
 
@@ -360,6 +360,7 @@ def test_filter_properties_dict():
     d7_end_expected = {"string": "xyz_0", "integer_one": 1}
     assert d7_end == d7_end_expected
 
+
 def test_hyphen():
-    input = 'suite_validation_result'
-    assert hyphen(input) == 'suite-validation-result'
+    input = "suite_validation_result"
+    assert hyphen(input) == "suite-validation-result"
