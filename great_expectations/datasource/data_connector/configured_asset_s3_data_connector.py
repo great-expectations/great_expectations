@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List, Optional
+from typing import List, Optional, Union
 
 try:
     import boto3
@@ -44,9 +44,9 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: Optional[str] = "",
-        delimiter: Optional[str] = "/",
-        max_keys: Optional[int] = 1000,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -108,14 +108,16 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return S3BatchSpec(batch_spec)
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(
+        self, asset: Optional[Union[dict, Asset]]
+    ) -> List[str]:
         query_options: dict = {
             "Bucket": self._bucket,
             "Prefix": self._prefix,
             "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
-        if asset is not None:
+        if isinstance(asset, Asset):
             if asset.bucket:
                 query_options["Bucket"] = asset.bucket
             if asset.prefix:

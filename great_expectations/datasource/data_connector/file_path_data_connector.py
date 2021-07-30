@@ -42,7 +42,7 @@ class FilePathDataConnector(DataConnector):
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
-        sorters: Optional[list] = None,
+        sorters: Optional[List[dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         """
@@ -70,7 +70,11 @@ class FilePathDataConnector(DataConnector):
             default_regex = {}
         self._default_regex = default_regex
 
-        self._sorters = build_sorters_from_config(config_list=sorters)
+        if sorters is not None:
+            self._sorters = build_sorters_from_config(config_list=sorters)
+        else:
+            self._sorters = None
+
         self._validate_sorters_configuration()
 
     @property
@@ -95,7 +99,7 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if len(self.sorters) > 0:
+        if self.sorters is not None and len(self.sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
@@ -165,7 +169,7 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if len(self.sorters) > 0:
+        if self.sorters is not None and len(self.sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
@@ -193,11 +197,12 @@ class FilePathDataConnector(DataConnector):
             sorted list of batch_definitions
 
         """
-        sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
-        for sorter in sorters:
-            batch_definition_list = sorter.get_sorted_batch_definitions(
-                batch_definitions=batch_definition_list
-            )
+        if isinstance(self.sorters, dict):
+            sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
+            for sorter in sorters:
+                batch_definition_list = sorter.get_sorted_batch_definitions(
+                    batch_definitions=batch_definition_list
+                )
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
@@ -261,6 +266,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return {"path": path}
 
     def _validate_batch_request(self, batch_request: BatchRequestBase):
+        batch_request = cast(BatchRequest, batch_request)
         super()._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration(
             data_asset_name=batch_request.data_asset_name

@@ -10,10 +10,11 @@ logger = logging.getLogger(__name__)
 class Sorter:
     def __init__(self, name: str, orderby: str = "asc"):
         self._name = name
+        reverse: bool
         if orderby is None or orderby == "asc":
-            reverse: bool = False
+            reverse = False
         elif orderby == "desc":
-            reverse: bool = True
+            reverse = True
         else:
             raise ge_exceptions.SorterError(
                 f'Illegal sort order "{orderby}" for attribute "{name}".'

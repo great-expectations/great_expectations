@@ -54,9 +54,9 @@ class DataConnector:
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache = {}
+        self._data_references_cache: dict = {}
 
-        self._data_context_root_directory = None
+        self._data_context_root_directory: Optional[str] = None
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
@@ -72,7 +72,7 @@ class DataConnector:
         return self._datasource_name
 
     @property
-    def data_context_root_directory(self) -> str:
+    def data_context_root_directory(self) -> Optional[str]:
         return self._data_context_root_directory
 
     @data_context_root_directory.setter
@@ -92,6 +92,7 @@ class DataConnector:
 
         """
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
+        assert isinstance(self._execution_engine, ExecutionEngine)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
@@ -326,13 +327,13 @@ class DataConnector:
         if pretty_print:
             print(f"\n\t\tFetching batch data...")
 
-        batch_definition_list: List[
-            BatchDefinition
+        batch_definition_list: Optional[
+            List[BatchDefinition]
         ] = self._map_data_reference_to_batch_definition_list(
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
-        assert len(batch_definition_list) == 1
+        assert batch_definition_list is not None and len(batch_definition_list) == 1
         batch_definition: BatchDefinition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests

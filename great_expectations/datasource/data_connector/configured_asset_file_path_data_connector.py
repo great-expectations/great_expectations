@@ -139,7 +139,11 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
         """
-        asset: Optional[Asset] = self._get_asset(data_asset_name=data_asset_name)
+        if data_asset_name is None:
+            data_asset_name = ""
+        asset: Optional[Union[dict, Asset]] = self._get_asset(
+            data_asset_name=data_asset_name
+        )
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
@@ -189,17 +193,17 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
-        asset: Optional[Asset] = None
+        asset: Optional[Union[dict, Asset]] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
         return self._get_full_file_path_for_asset(path=path, asset=asset)
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         regex_config: dict = deepcopy(self._default_regex)
-        asset: Optional[Asset] = None
+        asset: Optional[Union[dict, Asset]] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
-        if asset is not None:
+        if isinstance(asset, Asset) and asset is not None:
             # Override the defaults
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
@@ -207,8 +211,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                 regex_config["group_names"] = asset.group_names
         return regex_config
 
-    def _get_asset(self, data_asset_name: str) -> Asset:
-        asset: Optional[Asset] = None
+    def _get_asset(self, data_asset_name: str) -> Optional[Union[dict, Asset]]:
+        asset: Optional[Union[dict, Asset]] = None
         if (
             data_asset_name is not None
             and self.assets
@@ -217,10 +221,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             asset = self.assets[data_asset_name]
         return asset
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(
+        self, asset: Optional[Union[dict, Asset]]
+    ) -> List[str]:
         raise NotImplementedError
 
-    def _get_full_file_path_for_asset(self, path: str, asset: Optional[Asset]) -> str:
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Union[dict, Asset]]
+    ) -> str:
         raise NotImplementedError
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
@@ -235,15 +243,20 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         """
 
         data_asset_name: str = batch_definition.data_asset_name
-        if (
-            data_asset_name in self.assets
-            and self.assets[data_asset_name].batch_spec_passthrough
-            and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)
-        ):
+
+        if data_asset_name in self.assets:
+            asset: Union[dict, Asset] = self.assets[data_asset_name]
+
             # batch_spec_passthrough from data_asset
-            batch_spec_passthrough = deepcopy(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
-            )
+            batch_spec_passthrough: dict = {}
+            if (
+                isinstance(asset, dict)
+                and asset.get("batch_spec_passthrough") is not None
+            ):
+                batch_spec_passthrough = deepcopy(asset["batch_spec_passthrough"])
+            if isinstance(asset, Asset) and asset.batch_spec_passthrough is not None:
+                batch_spec_passthrough = deepcopy(asset.batch_spec_passthrough)
+
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )

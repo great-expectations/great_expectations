@@ -43,9 +43,9 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: Optional[str] = "",
-        delimiter: Optional[str] = "/",
-        max_keys: Optional[int] = 1000,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):

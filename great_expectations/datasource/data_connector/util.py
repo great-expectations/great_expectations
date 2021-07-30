@@ -7,7 +7,7 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple
 
 import pandas as pd
 
@@ -226,7 +226,7 @@ def _invert_regex_to_data_reference_template(
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)
-    for token, value in parsed_sre:
+    for token, value in parsed_sre:  # type: ignore [attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
@@ -259,7 +259,7 @@ def _invert_regex_to_data_reference_template(
             )
 
     # Collapse adjacent wildcards into a single wildcard
-    data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
+    data_reference_template = re.sub("\\*+", "*", data_reference_template)
     return data_reference_template
 
 
@@ -292,7 +292,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 def list_s3_keys(
     s3, query_options: dict, iterator_dict: dict, recursive: bool = False
-) -> str:
+) -> Generator:
     """
     For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
     specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
