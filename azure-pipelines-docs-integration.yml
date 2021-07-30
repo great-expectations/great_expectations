@@ -83,23 +83,24 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
-            echo "$(GCP_CREDENTIALS)" > /tmp/gcp_credentials.json
+            mkdir -p DO_NOT_COMMIT
+            echo "$(GCP_CREDENTIALS)" > DO_NOT_COMMIT/gcp_credentials.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/DO_NOT_COMMIT/gcp_credentials.json
             echo "todo(jdimatteo) begin debug"
-            echo "todo(jdimatteo) ls -lh and wc /tmp/gcp_credentials.json"
-            ls -lh /tmp/gcp_credentials.json | echo no file there
-            wc -l /tmp/gcp_credentials.json
+            echo "todo(jdimatteo) ls -lh and wc DO_NOT_COMMIT/gcp_credentials.json"
+            ls -lh DO_NOT_COMMIT/gcp_credentials.json | echo "no file there"
+            wc -l DO_NOT_COMMIT/gcp_credentials.json
             # note GOOGLE_APPLICATION_CREDENTIALS is just a path so should be safe to echo here for debugging purposes
             echo "todo(jdimatteo) GOOGLE_APPLICATION_CREDENTIALS"
-            echo $(GOOGLE_APPLICATION_CREDENTIALS)
-            echo "todo(jdimatteo) any reference to gcp.json in env?"
-            env | grep gcp.json | wc -l
-            echo "todo(jdimatteo) any reference to gcp.json in credentials?"
-            grep gcp.json /tmp/gcp_credentials.json | wc -l
+            echo "$(GOOGLE_APPLICATION_CREDENTIALS)"
+            echo "todo(jdimatteo) ls -lh with GOOGLE_APPLICATION_CREDENTIALS"
+            ls -lh $(GOOGLE_APPLICATION_CREDENTIALS) | echo "no file there"
             echo "todo(jdimatteo) end debug"
             exit 42
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
             pytest -v --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
+            rm -rf $(GOOGLE_APPLICATION_CREDENTIALS)
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -122,6 +123,5 @@ stages:
             # AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
             # todo: add credentials for cloud resources here
             # GCP credentials
-            GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp_credentials.json
             GCP_PROJECT: $(GCP_PROJECT)
             GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
