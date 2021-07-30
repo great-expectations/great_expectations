@@ -1,12 +1,8 @@
-from typing import Optional, Union
-
-import pandas as pd
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -14,7 +10,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, Expectation, _format_map_output
+from ..expectation import ColumnMapExpectation
 
 
 class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):

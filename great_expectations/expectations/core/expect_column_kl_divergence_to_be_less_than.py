@@ -8,8 +8,6 @@ from scipy import stats as stats
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
-    build_categorical_partition_object,
-    build_continuous_partition_object,
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )

@@ -7,7 +7,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.expectations.registry import (
     _registered_renderers,
-    get_expectation_impl,
     get_renderer_impl,
 )
 from great_expectations.render.types import (

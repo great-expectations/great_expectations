@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.util import render_evaluation_parameter_string

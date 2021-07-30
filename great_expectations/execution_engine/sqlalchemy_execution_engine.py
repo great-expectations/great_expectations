@@ -6,8 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
-from packaging.version import parse as parse_version
-
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
@@ -17,7 +15,6 @@ del get_versions  # isort:skip
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
-    RuntimeDataBatchSpec,
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )

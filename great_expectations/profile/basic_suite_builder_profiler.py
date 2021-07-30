@@ -1,5 +1,4 @@
 import datetime
-from typing import Iterable
 
 import numpy as np
 from dateutil.parser import parse

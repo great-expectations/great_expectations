@@ -3,9 +3,6 @@ import logging
 import re
 import traceback
 
-import altair as alt
-import pandas as pd
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -19,13 +16,11 @@ from great_expectations.render.renderer.content_block import (
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     RenderedBulletListContent,
-    RenderedGraphContent,
     RenderedHeaderContent,
     RenderedSectionContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     TextContent,
-    ValueListContent,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
