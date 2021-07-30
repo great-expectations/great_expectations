@@ -1468,12 +1468,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             return dependencies
 
         metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
+            self.map_metric + ".unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
+        metric_dependencies[
+            self.map_metric + ".unexpected_values"
+        ] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_values",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
