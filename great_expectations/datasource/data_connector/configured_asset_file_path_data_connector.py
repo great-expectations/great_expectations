@@ -139,6 +139,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache.
         """
+        if data_asset_name is None:
+            data_asset_name = ""
         asset: Optional[Asset] = self._get_asset(data_asset_name=data_asset_name)
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
@@ -207,14 +209,11 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                 regex_config["group_names"] = asset.group_names
         return regex_config
 
-    def _get_asset(self, data_asset_name: str) -> Asset:
+    def _get_asset(self, data_asset_name: str) -> Optional[Asset]:
         asset: Optional[Asset] = None
-        if (
-            data_asset_name is not None
-            and self.assets
-            and data_asset_name in self.assets
-        ):
-            asset = self.assets[data_asset_name]
+        retrieved_asset: Optional[Union[dict, Asset]] = self.assets.get(data_asset_name)
+        if isinstance(retrieved_asset, Asset):
+            asset = retrieved_asset
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
@@ -239,7 +238,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         if data_asset_name in self.assets:
             asset: Union[dict, Asset] = self.assets[data_asset_name]
 
-            batch_spec_passthrough = {}
+            # batch_spec_passthrough from data_asset
+            batch_spec_passthrough: dict = {}
             if (
                 isinstance(asset, dict)
                 and asset.get("batch_spec_passthrough") is not None

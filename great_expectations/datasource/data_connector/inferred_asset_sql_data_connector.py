@@ -2,6 +2,7 @@ from typing import Dict, List, Optional
 
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.exceptions import GreatExpectationsTypeError
 from great_expectations.execution_engine import ExecutionEngine
 
 try:
@@ -21,16 +22,16 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_asset_name_prefix: Optional[str] = "",
-        data_asset_name_suffix: Optional[str] = "",
-        include_schema_name: Optional[bool] = False,
+        data_asset_name_prefix: str = "",
+        data_asset_name_suffix: str = "",
+        include_schema_name: bool = False,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         excluded_tables: Optional[list] = None,
         included_tables: Optional[list] = None,
-        skip_inapplicable_tables: Optional[bool] = True,
+        skip_inapplicable_tables: bool = True,
         introspection_directives: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -80,7 +81,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # This cache will contain a "config" for each data_asset discovered via introspection.
         # This approach ensures that ConfiguredAssetSqlDataConnector._assets and _introspected_assets_cache store objects of the same "type"
         # Note: We should probably turn them into AssetConfig objects
-        self._introspected_assets_cache = {}
+        self._introspected_assets_cache: Dict[str, Asset] = {}
         self._refresh_introspected_assets_cache(
             self._data_asset_name_prefix,
             self._data_asset_name_suffix,
@@ -95,7 +96,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         )
 
     @property
-    def assets(self) -> Dict[str, Asset]:
+    def assets(self) -> Dict[str, Asset]:  # type: ignore [override]
         return self._introspected_assets_cache
 
     def _refresh_data_references_cache(self):
@@ -190,7 +191,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     ) from e
 
             # Store an asset config for each introspected data asset.
-            self._introspected_assets_cache[data_asset_name] = data_asset_config
+            self._introspected_assets_cache[data_asset_name] = data_asset_config  # type: ignore [assignment]
 
     def _introspect_db(
         self,
@@ -206,7 +207,10 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         system_tables: List[str] = ["sqlite_master"],  # sqlite
         include_views=True,
     ):
-        engine = self._execution_engine.engine
+        if self._execution_engine is None:
+            raise GreatExpectationsTypeError()
+
+        engine = self._execution_engine.engine  # type: ignore [union-attr,attr-defined]
         inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
