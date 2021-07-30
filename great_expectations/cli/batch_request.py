@@ -59,6 +59,11 @@ def get_batch_request(
     available_data_asset_names_by_data_connector_dict: Dict[
         str, List[str]
     ] = datasource.get_available_data_asset_names()
+
+    print("hello will this is where we need to get the test")
+    print(available_data_asset_names_by_data_connector_dict)
+    print("~~~~~~~~~~~~")
+
     data_connector_name: Optional[str] = select_data_connector_name(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
@@ -118,7 +123,6 @@ def get_batch_request(
     return batch_request
 
 
-# <WILL> this is what is eventually called, but we dont
 def select_data_connector_name(
     available_data_asset_names_by_data_connector_dict: Optional[
         Dict[str, List[str]]
@@ -135,13 +139,13 @@ def select_data_connector_name(
     if len(available_data_asset_names_by_data_connector_dict) == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
 
-    elif len(available_data_asset_names_by_data_connector_dict) == 2:
-        # check if we are only using the defaults:
-        default_data_connector = _check_default_data_connectors(
-            available_data_asset_names_by_data_connector_dict
-        )
-        if default_data_connector:
-            return default_data_connector
+    # elif len(available_data_asset_names_by_data_connector_dict) == 2:
+    #     # check if we are only using the defaults
+    #     default_data_connector = _check_default_data_connectors(
+    #         available_data_asset_names_by_data_connector_dict
+    #     )
+    #     if default_data_connector:
+    #         return default_data_connector
 
     data_connector_names: List[str] = list(
         available_data_asset_names_by_data_connector_dict.keys()

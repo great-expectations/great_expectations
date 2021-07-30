@@ -2377,10 +2377,18 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
         )
 
         datasource_config: str = f"""
-        class_name: SimpleSqlalchemyDatasource
-        connection_string: sqlite:///{db_file_path}
-        introspection:
-          whole_table: {{}}
+        class_name: Datasource
+        execution_engine:
+          class_name: SqlAlchemyExecutionEngine
+          connection_string: sqlite:///{db_file_path}
+        data_connectors:
+          default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+              - default_identifier_name
+          default_inferred_data_connector_name:
+            class_name: InferredAssetSqlDataConnector
+            name: whole_table
         """
 
         # noinspection PyUnusedLocal

@@ -1492,7 +1492,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
 
     batch_request: dict = {
         "datasource_name": "my_sqlite_db_datasource",
-        "data_connector_name": "whole_table",
+        "data_connector_name": "default_inferred_data_connector_name",
         "data_asset_name": "titanic",
         "limit": 1000,
     }
@@ -1717,7 +1717,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
 
     batch_request: dict = {
         "datasource_name": "my_sqlite_db_datasource",
-        "data_connector_name": "whole_table",
+        "data_connector_name": "default_inferred_data_connector_name",
         "data_asset_name": "titanic",
         "limit": 1000,
     }
