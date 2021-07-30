@@ -1424,7 +1424,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",  # TODO: Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_table_columns_to_match_set",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
-            "expect_column_values_to_be_unique",  # TODO: 'pybigquery.sqlalchemy_bigquery' has no attribute 'dialect' -- tracked with https://github.com/great-expectations/great_expectations/issues/3131.
             "expect_column_values_to_be_of_type",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_values_to_be_in_type_list",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_values_to_be_in_set",  # TODO: No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01'] -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
