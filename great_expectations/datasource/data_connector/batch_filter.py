@@ -42,10 +42,10 @@ def build_batch_filter(
 "{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
-    custom_filter_function: Callable = data_connector_query_dict.get(
+    custom_filter_function: Callable = data_connector_query_dict.get(  # type: ignore [assignment]
         "custom_filter_function"
     )
-    if custom_filter_function and not isinstance(custom_filter_function, Callable):
+    if custom_filter_function and not isinstance(custom_filter_function, Callable):  # type: ignore [arg-type]
         raise ge_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
@@ -53,7 +53,9 @@ def build_batch_filter(
         )
     batch_filter_parameters: Optional[
         Union[dict, IDDict]
-    ] = data_connector_query_dict.get("batch_filter_parameters")
+    ] = data_connector_query_dict.get(
+        "batch_filter_parameters"
+    )  # type: ignore [assignment]
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
             raise ge_exceptions.BatchFilterError(
@@ -68,8 +70,10 @@ def build_batch_filter(
         batch_filter_parameters = IDDict(batch_filter_parameters)
     index: Optional[
         Union[int, list, tuple, slice, str]
-    ] = data_connector_query_dict.get("index")
-    limit: Optional[int] = data_connector_query_dict.get("limit")
+    ] = data_connector_query_dict.get(
+        "index"
+    )  # type: ignore [assignment]
+    limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore [assignment]
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
@@ -83,7 +87,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
     index = _parse_index(index=index)
     return BatchFilter(
         custom_filter_function=custom_filter_function,
-        batch_filter_parameters=batch_filter_parameters,
+        batch_filter_parameters=batch_filter_parameters,  # type: ignore [arg-type]
         index=index,
         limit=limit,
     )

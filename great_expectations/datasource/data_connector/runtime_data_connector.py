@@ -181,6 +181,8 @@ class RuntimeDataConnector(DataConnector):
             batch_spec_passthrough=batch_request.batch_spec_passthrough,
         )
         batch_definition_list = [batch_definition]
+
+        assert isinstance(batch_identifiers, IDDict)
         self._update_data_references_cache(
             batch_request.data_asset_name, batch_definition_list, batch_identifiers
         )
@@ -275,7 +277,7 @@ class RuntimeDataConnector(DataConnector):
                 "'query', 'path'."
             )
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
+    def _validate_batch_request(self, batch_request: BatchRequest):
         super()._validate_batch_request(batch_request=batch_request)
 
         runtime_parameters = batch_request.runtime_parameters
