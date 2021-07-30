@@ -624,7 +624,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY.value
+                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY
             )
             assert len(query["select"]) == len(query["ids"])
             try:
