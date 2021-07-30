@@ -69,7 +69,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         self._base_directory = base_directory
         self._glob_directive = glob_directive
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:  # type: ignore [override]
         base_directory: str = self.base_directory
         glob_directive: str = self._glob_directive
 
@@ -87,7 +87,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
         return sorted(path_list)
 
-    def _get_full_file_path_for_asset(
+    def _get_full_file_path_for_asset(  # type: ignore [override]
         self, path: str, asset: Optional[Asset] = None
     ) -> str:
         base_directory: str = self.base_directory

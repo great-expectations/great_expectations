@@ -84,15 +84,16 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
         )
 
     assert isinstance(limit, int) or limit is None
-
     if isinstance(index, (int, list, tuple, slice, str)) or index is None:
         index = _parse_index(index=index)
-
     assert isinstance(index, (int, slice)) or index is None
+    assert (
+        isinstance(batch_filter_parameters, IDDict) or batch_filter_parameters is None
+    )
 
     return BatchFilter(
         custom_filter_function=custom_filter_function,  # type: ignore [arg-type]
-        batch_filter_parameters=batch_filter_parameters,  # type: ignore [arg-type]
+        batch_filter_parameters=batch_filter_parameters,
         index=index,
         limit=limit,
     )
