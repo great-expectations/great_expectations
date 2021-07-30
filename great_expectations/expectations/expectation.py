@@ -7,7 +7,6 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
-import numpy as np
 import pandas as pd
 
 from great_expectations import __version__ as ge_version
@@ -1382,11 +1381,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "column_list",
         "row_condition",
         "condition_parser",
+        "ignore_row_if",
     )
     success_keys = tuple()
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "ignore_row_if": "any_value_is_missing",
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
@@ -1440,6 +1441,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
+
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
             configuration=configuration,
@@ -1447,6 +1449,19 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
         metric_dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".filtered_row_count",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[
+            self.map_metric + ".filtered_row_count"
+        ] = MetricConfiguration(
+            metric_name=self.map_metric + ".filtered_row_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -1515,26 +1530,24 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             result_format = configuration.kwargs.get(
                 "result_format", self.default_kwarg_values.get("result_format")
             )
-
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
-        nonnull_count = total_count - unexpected_count
+        filtered_row_count = metrics.get(self.map_metric + ".filtered_row_count")
 
         success = None
         if total_count is None:
             # Vacuously true
             success = True
         elif total_count != 0:
-            success_ratio = float(nonnull_count) / total_count
-            success = np.isclose(success_ratio, 1.0)
+            success = unexpected_count == 0
         elif total_count == 0:
             success = True
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
-            element_count=metrics.get("table.row_count"),
-            nonnull_count=nonnull_count,
+            element_count=filtered_row_count,
+            nonnull_count=filtered_row_count,
             unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
             unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
             unexpected_index_list=metrics.get(
