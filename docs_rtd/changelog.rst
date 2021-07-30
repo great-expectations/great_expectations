@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Snowflake connections are closed correctly by DOCS tests (#3104)
 
 0.13.25
 -----------------
