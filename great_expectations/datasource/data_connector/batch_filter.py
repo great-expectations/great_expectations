@@ -88,7 +88,8 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
         index = _parse_index(index=index)
     assert isinstance(index, (int, slice)) or index is None
     assert (
-        isinstance(batch_filter_parameters, IDDict) or batch_filter_parameters is None
+        isinstance(batch_filter_parameters, (dict, IDDict))
+        or batch_filter_parameters is None
     )
 
     return BatchFilter(
@@ -153,7 +154,7 @@ class BatchFilter:
     def __init__(
         self,
         custom_filter_function: Optional[Callable] = None,
-        batch_filter_parameters: Optional[IDDict] = None,
+        batch_filter_parameters: Optional[Union[dict, IDDict]] = None,
         index: Optional[Union[int, slice]] = None,
         limit: Optional[int] = None,
     ):
@@ -167,7 +168,7 @@ class BatchFilter:
         return self._custom_filter_function
 
     @property
-    def batch_filter_parameters(self) -> Optional[IDDict]:
+    def batch_filter_parameters(self) -> Optional[Union[dict, IDDict]]:
         return self._batch_filter_parameters
 
     @property
