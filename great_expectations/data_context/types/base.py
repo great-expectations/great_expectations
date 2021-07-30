@@ -1791,11 +1791,11 @@ class CheckpointConfig(BaseYamlConfig):
 
                 other_batch_request = other_config.batch_request
 
-                updated_batch_request = nested_update(
-                    batch_request,
-                    other_batch_request,
-                )
-                self._batch_request = updated_batch_request
+                # updated_batch_request = nested_update(
+                #     batch_request,
+                #     other_batch_request,
+                # )
+                # self._batch_request = updated_batch_request
             if other_config.action_list is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,

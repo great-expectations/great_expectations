@@ -124,7 +124,6 @@ class RuntimeDataConnector(DataConnector):
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
         )
-        assert isinstance(batch_spec, RuntimeDataBatchSpec)
         assert isinstance(self._execution_engine, ExecutionEngine)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
