@@ -15,10 +15,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.metric_provider import (
-    metric_partial,
-    metric_value,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

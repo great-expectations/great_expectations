@@ -3,7 +3,6 @@ from typing import Any, Dict, Tuple
 
 import numpy as np
 import pandas as pd
-from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Optional, Tuple, Union, cast
+from typing import Any, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions

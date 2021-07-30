@@ -1,9 +1,6 @@
 import uuid
-from typing import Any, Dict, Optional, Tuple
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
@@ -17,11 +14,8 @@ from great_expectations.expectations.metrics.import_manager import F, Window
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
-    column_function_partial,
 )
 from great_expectations.expectations.metrics.map_metric_provider import sa as sa
-from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class ColumnValuesUnique(ColumnMapMetricProvider):

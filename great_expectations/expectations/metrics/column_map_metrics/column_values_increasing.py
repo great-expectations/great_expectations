@@ -1,7 +1,5 @@
 from typing import Any, Dict, Optional, Tuple
 
-import pandas as pd
-
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -12,18 +10,12 @@ from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.metric_provider import (
-    metric_partial,
-    metric_value,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

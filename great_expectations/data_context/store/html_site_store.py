@@ -1,4 +1,3 @@
-import inspect
 import logging
 import os
 from mimetypes import guess_type
