@@ -11,6 +11,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -1715,7 +1716,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
+        batch_request: Optional[Union[dict, BatchRequest]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1789,7 +1790,10 @@ class CheckpointConfig(BaseYamlConfig):
                 else:
                     batch_request = self.batch_request
 
+                # TODO(cdkini): Add test using RuntimeDataConnector and SimpleCheckpoint
                 other_batch_request = other_config.batch_request
+                if isinstance(other_batch_request, BatchRequest):
+                    other_batch_request = other_batch_request.get_json_dict()
 
                 updated_batch_request = nested_update(
                     batch_request,
