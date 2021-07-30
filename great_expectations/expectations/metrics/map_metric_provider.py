@@ -584,7 +584,7 @@ def multicolumn_condition_partial(
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature. A
     multicolumn_condition_partial must provide a map function that evaluates to a boolean value; it will be used to
-    provide supplemental metrics, such as the unexpected_value count and unexpected_rows.
+    provide supplemental metrics, such as the unexpected_value count, unexpected_values, and unexpected_rows.
 
     A metric function that is decorated as a multicolumn_condition_partial will be called with the engine-specific
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
@@ -772,6 +772,37 @@ def _pandas_multicolumn_map_condition_values(
         return domain_values[: result_format["partial_unexpected_count"]].to_dict(
             "records"
         )
+
+
+def _pandas_multicolumn_map_condition_filtered_row_count(
+    cls,
+    execution_engine: PandasExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    df, _, _ = execution_engine.get_compute_domain(
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY.value,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            "_pandas_multicolumn_map_condition_filtered_row_count requires column_list in accessor_domain_kwargs"
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    return df.shape[0]
 
 
 def _pandas_column_map_series_and_domain_values(
@@ -1534,6 +1565,15 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_pandas_multicolumn_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
+                        register_metric(
+                            metric_name=metric_name + ".filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_pandas_multicolumn_map_condition_filtered_row_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
                         metric_name=metric_name + ".condition",
@@ -1743,6 +1783,7 @@ class MapMetricProvider(MetricProvider):
             ".unexpected_value_counts",
             ".unexpected_index_list",
             ".unexpected_rows",
+            ".filtered_row_count",
         ]:
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
@@ -1817,6 +1858,7 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
         "column_list",
         "row_condition",
         "condition_parser",
+        "ignore_row_if",
     )
     function_domain_keys = (
         "batch_id",
@@ -1824,6 +1866,7 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
         "column_list",
         "row_condition",
         "condition_parser",
+        "ignore_row_if",
     )
     condition_value_keys = tuple()
     function_value_keys = tuple()
