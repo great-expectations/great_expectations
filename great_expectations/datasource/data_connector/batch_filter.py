@@ -53,9 +53,9 @@ def build_batch_filter(
         )
     batch_filter_parameters: Optional[
         Union[dict, IDDict]
-    ] = data_connector_query_dict.get(
+    ] = data_connector_query_dict.get(  # type: ignore [assignment]
         "batch_filter_parameters"
-    )  # type: ignore [assignment]
+    )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
             raise ge_exceptions.BatchFilterError(
@@ -70,9 +70,9 @@ def build_batch_filter(
         batch_filter_parameters = IDDict(batch_filter_parameters)
     index: Optional[
         Union[int, list, tuple, slice, str]
-    ] = data_connector_query_dict.get(
+    ] = data_connector_query_dict.get(  # type: ignore [assignment]
         "index"
-    )  # type: ignore [assignment]
+    )
     limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore [assignment]
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.BatchFilterError(
