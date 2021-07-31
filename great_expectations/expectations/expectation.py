@@ -1525,6 +1525,8 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+        unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
+        unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
         filtered_row_count = metrics.get(self.map_metric + ".filtered_row_count")
 
         success = None
@@ -1541,11 +1543,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             success=success,
             element_count=filtered_row_count,
             nonnull_count=filtered_row_count,
-            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
-            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
-            unexpected_index_list=metrics.get(
-                self.map_metric + ".unexpected_index_list"
-            ),
+            unexpected_count=unexpected_count,
+            unexpected_list=unexpected_values,
+            unexpected_index_list=unexpected_index_list,
         )
 
 
