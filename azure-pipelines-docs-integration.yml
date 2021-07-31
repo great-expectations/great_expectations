@@ -87,16 +87,6 @@ stages:
           inputs:
               secureFile: 'superconductive-service-acct.json'
               retryCount: '2'
-        # - script: |
-        #     wget https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz
-        #     tar zxvf google-cloud-sdk.tar.gz && ./google-cloud-sdk/install.sh --quiet --usage-reporting=false --path-update=true
-        #     PATH="google-cloud-sdk/bin:${PATH}"
-        #     gcloud --quiet components update
-        #   displayName: 'install gcloud SDK'
-        #
-        # - script: |
-        #     gcloud auth activate-service-account --key-file $(gcp_authkey.secureFilePath)
-        #   displayName: 'activate google service account'
 
         - script: |
             pip install pytest pytest-azurepipelines
