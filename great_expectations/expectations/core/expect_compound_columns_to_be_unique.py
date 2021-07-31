@@ -1,7 +1,10 @@
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.types import (
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -9,7 +12,8 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectCompoundColumnsToBeUnique(TableExpectation):
+class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
+    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",
@@ -24,14 +28,14 @@ class ExpectCompoundColumnsToBeUnique(TableExpectation):
         "requirements": [],
     }
 
-    metric_dependencies = tuple()
-    domain_keys = ("column_list",)
-    success_keys = ("ignore_row_if",)
+    map_metric = "compound_columns.unique"
     default_kwarg_values = {
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": False,
+        "catch_exceptions": True,
     }
 
     @classmethod
@@ -46,10 +50,6 @@ class ExpectCompoundColumnsToBeUnique(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
@@ -109,3 +109,15 @@ class ExpectCompoundColumnsToBeUnique(TableExpectation):
                 }
             )
         ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        pass
