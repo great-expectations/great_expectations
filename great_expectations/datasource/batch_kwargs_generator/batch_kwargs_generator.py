@@ -162,7 +162,7 @@ class BatchKwargsGenerator:
     """
 
     _batch_kwargs_type = BatchKwargs
-    recognized_batch_parameters = set()
+    recognized_batch_parameters: set = set()
 
     def __init__(self, name, datasource):
         self._name = name
