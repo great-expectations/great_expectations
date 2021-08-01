@@ -917,24 +917,20 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
 
 @pytest.fixture
 def runtime_batch_request():
-    df = pd.DataFrame({"col1": ["a", "a", "b", "c"], "col2": [1, 2, 3, 4]})
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_runtime_data_connector",
         data_asset_name="my_data_asset",
-        runtime_parameters={"batch_data": df},
-        batch_identifiers={
-            "some_batch_identifier_so_this_can_work": "blah",
-        },
+        batch_identifiers={"my_batch_identifier": "foo"},
     )
     return runtime_batch_request
 
 
-def test_simple_checkpoint_with_runtime_batch_request_builds_proper_config(
+def test_simple_checkpoint_with_runtime_batch_request_builds_valid_config(
     context_with_data_source_and_empty_suite,
     runtime_batch_request,
-    store_eval_parameter_action,
     store_validation_result_action,
+    store_eval_parameter_action,
     update_data_docs_action,
 ):
     context: DataContext = context_with_data_source_and_empty_suite
@@ -955,22 +951,3 @@ def test_simple_checkpoint_with_runtime_batch_request_builds_proper_config(
     assert checkpoint_config.evaluation_parameters == {}
     assert checkpoint_config.runtime_configuration == {}
     assert checkpoint_config.validations == []
-
-
-def test_simple_checkpoint_with_runtime_batch_request_successfully_runs(
-    context_with_data_source_and_empty_suite, runtime_batch_request, one_validation
-):
-    context: DataContext = context_with_data_source_and_empty_suite
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
-    )
-    result = checkpoint.run(
-        run_name="bar",
-        validations=[one_validation],
-    )
-
-    assert isinstance(result, CheckpointResult)
-    assert result.run_id.run_name == "bar"
-    assert result.list_expectation_suite_names() == ["one"]
-    assert len(result.list_validation_results()) == 1
-    assert result.success
