@@ -919,9 +919,9 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
 def runtime_batch_request():
     df = pd.DataFrame({"col1": ["a", "a", "b", "c"], "col2": [1, 2, 3, 4]})
     runtime_batch_request = RuntimeBatchRequest(
-        datasource_name="my_pandas_datasource",
+        datasource_name="my_datasource",
         data_connector_name="my_runtime_data_connector",
-        data_asset_name="insert_your_data_asset_name_here",
+        data_asset_name="my_data_asset",
         runtime_parameters={"batch_data": df},
         batch_identifiers={
             "some_batch_identifier_so_this_can_work": "blah",
@@ -930,21 +930,47 @@ def runtime_batch_request():
     return runtime_batch_request
 
 
-def test_simple_checkpoint_with_runtime_batch_request(
-    context_with_data_source_and_empty_suite, runtime_batch_request
+def test_simple_checkpoint_with_runtime_batch_request_builds_proper_config(
+    context_with_data_source_and_empty_suite,
+    runtime_batch_request,
+    store_eval_parameter_action,
+    store_validation_result_action,
+    update_data_docs_action,
 ):
     context: DataContext = context_with_data_source_and_empty_suite
     checkpoint = SimpleCheckpoint(
         name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
     )
+    checkpoint_config = checkpoint.config
 
-    assert checkpoint
+    assert isinstance(checkpoint_config, CheckpointConfig)
+    assert checkpoint_config.name == "my_checkpoint"
+    assert checkpoint_config.action_list == [
+        store_validation_result_action,
+        store_eval_parameter_action,
+        update_data_docs_action,
+    ]
+    assert checkpoint_config.config_version == 1.0
+    assert checkpoint_config.class_name == "Checkpoint"
+    assert checkpoint_config.evaluation_parameters == {}
+    assert checkpoint_config.runtime_configuration == {}
+    assert checkpoint_config.validations == []
 
-    # context.create_expectation_suite("two")
-    # assert len(context.list_expectation_suites()) == 2
 
-    # assert isinstance(result, CheckpointResult)
-    # assert result.run_id.run_name == "bar"
-    # assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
-    # assert len(result.list_validation_results()) == 2
-    # assert result.success
+def test_simple_checkpoint_with_runtime_batch_request_successfully_runs(
+    context_with_data_source_and_empty_suite, runtime_batch_request, one_validation
+):
+    context: DataContext = context_with_data_source_and_empty_suite
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
+    )
+    result = checkpoint.run(
+        run_name="bar",
+        validations=[one_validation],
+    )
+
+    assert isinstance(result, CheckpointResult)
+    assert result.run_id.run_name == "bar"
+    assert result.list_expectation_suite_names() == ["one"]
+    assert len(result.list_validation_results()) == 1
+    assert result.success
