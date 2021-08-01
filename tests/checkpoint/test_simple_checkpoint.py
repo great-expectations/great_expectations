@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
@@ -10,6 +11,7 @@ from great_expectations.checkpoint.checkpoint import (
     CheckpointResult,
     SimpleCheckpoint,
 )
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import filter_properties_dict
 
@@ -911,3 +913,38 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
     assert len(result.list_validation_results()) == 2
     assert result.success
+
+
+@pytest.fixture
+def runtime_batch_request():
+    df = pd.DataFrame({"col1": ["a", "a", "b", "c"], "col2": [1, 2, 3, 4]})
+    runtime_batch_request = RuntimeBatchRequest(
+        datasource_name="my_pandas_datasource",
+        data_connector_name="my_runtime_data_connector",
+        data_asset_name="insert_your_data_asset_name_here",
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "some_batch_identifier_so_this_can_work": "blah",
+        },
+    )
+    return runtime_batch_request
+
+
+def test_simple_checkpoint_with_runtime_batch_request(
+    context_with_data_source_and_empty_suite, runtime_batch_request
+):
+    context: DataContext = context_with_data_source_and_empty_suite
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
+    )
+
+    assert checkpoint
+
+    # context.create_expectation_suite("two")
+    # assert len(context.list_expectation_suites()) == 2
+
+    # assert isinstance(result, CheckpointResult)
+    # assert result.run_id.run_name == "bar"
+    # assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
+    # assert len(result.list_validation_results()) == 2
+    # assert result.success
