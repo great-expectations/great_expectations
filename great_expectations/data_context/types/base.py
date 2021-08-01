@@ -1790,11 +1790,14 @@ class CheckpointConfig(BaseYamlConfig):
                 else:
                     batch_request = self.batch_request
 
-                # TODO(cdkini): Add test using RuntimeDataConnector and SimpleCheckpoint
                 other_batch_request = other_config.batch_request
+
+                # Manual casting to prevent type mismatch in nested_update()
+                # Necessary when using RuntimeDataConnector with SimpleCheckpoint
                 if isinstance(other_batch_request, BatchRequest):
                     other_batch_request = other_batch_request.get_json_dict()
 
+                assert type(batch_request) == type(other_batch_request)
                 updated_batch_request = nested_update(
                     batch_request,
                     other_batch_request,
