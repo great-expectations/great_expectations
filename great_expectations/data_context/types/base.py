@@ -1797,7 +1797,9 @@ class CheckpointConfig(BaseYamlConfig):
                 if isinstance(other_batch_request, BatchRequest):
                     other_batch_request = other_batch_request.get_json_dict()
 
-                assert type(batch_request) == type(other_batch_request)
+                assert type(batch_request) == type(
+                    other_batch_request
+                ), "batch_request and other_batch_request must both be dictionaries to work with nested_update()"
                 updated_batch_request = nested_update(
                     batch_request,
                     other_batch_request,
