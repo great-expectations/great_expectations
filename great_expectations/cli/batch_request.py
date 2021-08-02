@@ -60,10 +60,6 @@ def get_batch_request(
         str, List[str]
     ] = datasource.get_available_data_asset_names()
 
-    print("hello will this is where we need to get the test")
-    print(available_data_asset_names_by_data_connector_dict)
-    print("~~~~~~~~~~~~")
-
     data_connector_name: Optional[str] = select_data_connector_name(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
