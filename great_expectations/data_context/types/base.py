@@ -1797,10 +1797,7 @@ class CheckpointConfig(BaseYamlConfig):
                     # Conversion to prevent type mismatch in nested_update()
                     other_batch_request = other_batch_request.get_json_dict()
 
-                assert isinstance(batch_request, dict) and isinstance(
-                    other_batch_request, dict
-                ), "batch_request and other_batch_request must both be of type Dict to work with nested_update()"
-
+                assert all(isinstance(req, dict) for req in (batch_request, other_batch_request)), "batch_request and other_batch_request must both be of type Dict to work with nested_update()"
                 updated_batch_request = nested_update(
                     batch_request,
                     other_batch_request,
@@ -1849,7 +1846,6 @@ class CheckpointConfig(BaseYamlConfig):
                     runtime_batch_request = runtime_batch_request.get_json_dict()
                 
                 assert all(isinstance(req, dict) for req in (batch_request, runtime_batch_request)), "batch_request and runtime_batch_request must both be of type Dict to work with nested_update()"
-
                 batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
