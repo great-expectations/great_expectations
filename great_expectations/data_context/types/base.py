@@ -11,7 +11,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -1833,14 +1832,6 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request = self.batch_request
                 batch_request = batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
-
-                # Necessary when using RuntimeDataConnector with SimpleCheckpoint
-                if isinstance(runtime_batch_request, BatchRequest):
-                    runtime_batch_request = runtime_batch_request.get_json_dict()
-                assert isinstance(batch_request, dict) and isinstance(
-                    runtime_batch_request, dict
-                ), "batch_request and runtime_batch_request must both be of type Dict to work with nested_update()"
-
                 batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
