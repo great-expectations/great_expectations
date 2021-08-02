@@ -132,8 +132,6 @@ def test_instantiation_from_a_config(
         return_mode="report_object",
     )
 
-    print(report_object)
-
     assert report_object == {
         "class_name": "ConfiguredAssetAzureDataConnector",
         "data_asset_count": 1,
