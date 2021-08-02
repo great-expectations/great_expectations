@@ -292,32 +292,23 @@ def list_azure_keys(
     azure: BlobServiceClient,
     query_options: dict,
     container: str,
-    iterator_dict: dict,
     recursive: bool = False,
 ) -> List[str]:
 
     container_client: ContainerClient = azure.get_container_client(container)
     blobs: ItemPaged[BlobProperties] = container_client.walk_blobs(**query_options)
-
-    # Everything below this comes from the official Azure docs ________________________________________________________
-    depth = 1
-    separator = "   "
+    paths: List[str] = []
 
     def _walk_blob_hierarchy(prefix=""):
-        nonlocal depth
         for item in blobs:
-            short_name = item.name[len(prefix) :]
             if isinstance(item, BlobPrefix):
-                print("Folder: " + separator * depth + short_name)
-                depth += 1
-                _walk_blob_hierarchy(prefix=item.name)
-                depth -= 1
+                if recursive:
+                    _walk_blob_hierarchy(prefix=item.name)
             else:
-                message = "Blob: " + separator * depth + short_name
-                print(message)
+                paths.append(item.name)
 
     _walk_blob_hierarchy()
-    # __________________________________________________________________________________________________________________
+    return paths
 
 
 def list_s3_keys(

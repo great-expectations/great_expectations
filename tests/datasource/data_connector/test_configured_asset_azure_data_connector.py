@@ -33,11 +33,10 @@ def test_container_connects(container_client: ContainerClient) -> None:
 
 
 def test_list_azure_keys(blob_service_client: BlobServiceClient) -> None:
-    a = list_azure_keys(
+    keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={},
+        query_options={"name_starts_with": ""},
         container=CONTAINER_NAME,
-        iterator_dict={},
-        recursive=False,
+        recursive=True,
     )
-    assert False
+    assert keys == 1

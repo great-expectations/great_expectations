@@ -84,19 +84,13 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 query_options["name_starts_with"] = asset.prefix
             if asset.delimiter:
                 query_options["delimiter"] = asset.delimiter
-            # if asset.max_keys:
-            #    query_options["MaxKeys"] = asset.max_keys
 
-        path_list: List[str] = [
-            key
-            for key in list_azure_keys(
-                azure=self._azure,
-                container=self._container,
-                query_options=query_options,
-                # iterator_dict={}, # TODO(cdkini): I don't think we need this? Open to check.
-                # recursive=False,
-            )
-        ]
+        path_list: List[str] = list_azure_keys(
+            azure=self._azure,
+            container=self._container,
+            query_options=query_options,
+            recursive=False,
+        )
         return path_list
 
     def _get_full_file_path(
