@@ -139,13 +139,13 @@ def select_data_connector_name(
     if len(available_data_asset_names_by_data_connector_dict) == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
 
-    # elif len(available_data_asset_names_by_data_connector_dict) == 2:
-    #     # check if we are only using the defaults
-    #     default_data_connector = _check_default_data_connectors(
-    #         available_data_asset_names_by_data_connector_dict
-    #     )
-    #     if default_data_connector:
-    #         return default_data_connector
+    elif len(available_data_asset_names_by_data_connector_dict) == 2:
+        # if only default data_connectors are configured, select default_inferred_asset_data_connector
+        default_data_connector = _check_default_data_connectors(
+            available_data_asset_names_by_data_connector_dict
+        )
+        if default_data_connector:
+            return default_data_connector
 
     data_connector_names: List[str] = list(
         available_data_asset_names_by_data_connector_dict.keys()
