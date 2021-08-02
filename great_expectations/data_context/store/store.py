@@ -133,7 +133,7 @@ class Store:
         elif isinstance(self.store_backend, GeCloudStoreBackend):
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
-            # TODO MER-285: Handle non-200 http errors
+            # TODO [Robby] MER-285: Handle non-200 http errors
             if value:
                 value = self.ge_cloud_response_json_to_object_dict(response_json=value)
         else:
