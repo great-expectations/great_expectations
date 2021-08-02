@@ -55,10 +55,10 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             azure_options = {}
 
         try:
-            # TODO(cdkini): Implement various methods of instantiation and authentication
-            ACCOUNT_URL = os.environ["ACCOUNT_URL"]
-            self._azure = BlobServiceClient(account_url=ACCOUNT_URL, **azure_options)
-            # self._azure = BlobServiceClient.from_connection_string()
+            if "conn_str" in azure_options:
+                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+            else:
+                self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector)."
