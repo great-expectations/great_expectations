@@ -121,7 +121,7 @@ def test_instantiation_from_a_config(
         datasource_name: FAKE_DATASOURCE
         name: TEST_DATA_CONNECTOR
         default_regex:
-            "pattern": yellow_trip_data_sample_(.*)\\.csv
+            pattern: yellow_trip_data_sample_(.*)\\.csv
             group_names:
                 - timestamp
         container: {CONTAINER_NAME}
@@ -153,8 +153,29 @@ def test_instantiation_from_a_config(
     }
 
 
-# def test_instantiation_from_a_config_regex_does_not_match_paths():
-#     raise NotImplementedError()
+# def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context_stats_enabled):
+#     context: DataContext = empty_data_context_stats_enabled
+
+#     report_object = context.test_yaml_config(
+#         f"""
+#         module_name: great_expectations.datasource.data_connector
+#         class_name: ConfiguredAssetAzureDataConnector
+#         datasource_name: FAKE_DATASOURCE
+#         name: TEST_DATA_CONNECTOR
+
+#         container: {CONTAINER_NAME}
+#         prefix: ""
+
+#         default_regex:
+#             pattern: yellow_trip_data_sample_(.*)\\.csv
+#             group_names:
+#                 - timestamp
+
+#         assets:
+#             alpha:
+#     """,
+#         return_mode="report_object",
+#     )
 
 # def test_return_all_batch_definitions_unsorted():
 #     raise NotImplementedError()
