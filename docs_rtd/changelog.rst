@@ -209,6 +209,11 @@ develop
 * [ENHANCEMENT] Athena expect column quantile values to be between #2544 (Thanks @RicardoPedrotti!)
 * [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors #2665
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
+* [BUGFIX] Handle limit for oracle with rownum #2691 (Thanks @NathanFarmer!)
+* [BUGFIX] add create table logic for athena #2668 (Thanks @kj-9!)
+* [BUGFIX] Add note for user-submitted Expectation that is not compatible with SqlAlchemy 1.4 (uszipcode) #2677
+* [BUGFIX] Usage stats cli payload schema #2680
+* [BUGFIX] Rename assets in SqlDataConnectors #2665
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
 * [DOCS] Update Configuring Data Docs documentation for V3 API CLI
