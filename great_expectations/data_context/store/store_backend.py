@@ -98,7 +98,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
 
-    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going thorugh initialization order in DataContext
+    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going through initialization order in DataContext
     @property
     def store_backend_id(self):
         return self._construct_store_backend_id(suppress_warning=False)

@@ -411,12 +411,6 @@ class Expectation(metaclass=MetaExpectation):
             # "sampled" unexpected values
             total_count = 0
             for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
-                if not isinstance(unexpected_count_dict, dict):
-                    # handles case: "partial_exception_counts requires a hashable type"
-                    # this case is also now deprecated (because the error is moved to an errors key
-                    # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
-                    # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
-                    continue
                 value = unexpected_count_dict.get("value")
                 count = unexpected_count_dict.get("count")
                 total_count += count
@@ -475,7 +469,7 @@ class Expectation(metaclass=MetaExpectation):
         if result_dict is None:
             return "--"
 
-        if result_dict.get("observed_value"):
+        if result_dict.get("observed_value") is not None:
             observed_value = result_dict.get("observed_value")
             if isinstance(observed_value, (int, float)) and not isinstance(
                 observed_value, bool
@@ -1102,8 +1096,8 @@ class TableExpectation(Expectation, ABC):
                 assert min_val is None or is_parseable_date(
                     min_val
                 ), "Provided min threshold must be a dateutil-parseable date"
-                assert (
-                    max_val is None or is_parseable_date(max_val),
+                assert max_val is None or is_parseable_date(
+                    max_val
                 ), "Provided max threshold must be a dateutil-parseable date"
             else:
                 assert min_val is None or isinstance(
@@ -1346,36 +1340,30 @@ class ColumnMapExpectation(TableExpectation, ABC):
         total_count = metrics.get("table.row_count")
         null_count = metrics.get("column_values.nonnull.unexpected_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+        unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
+        unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
+
+        if total_count is None or null_count is None:
+            total_count = nonnull_count = 0
+        else:
+            nonnull_count = total_count - null_count
 
         success = None
-        if total_count is None or null_count is None:
+        if total_count == 0 or nonnull_count == 0:
             # Vacuously true
             success = True
-        elif (total_count - null_count) != 0:
-            success_ratio = (total_count - unexpected_count - null_count) / (
-                total_count - null_count
-            )
+        elif nonnull_count > 0:
+            success_ratio = float(nonnull_count - unexpected_count) / nonnull_count
             success = success_ratio >= mostly
-        elif total_count == 0 or (total_count - null_count) == 0:
-            success = True
-
-        try:
-            nonnull_count = metrics.get("table.row_count") - metrics.get(
-                "column_values.nonnull.unexpected_count"
-            )
-        except TypeError:
-            nonnull_count = None
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
-            element_count=metrics.get("table.row_count"),
+            element_count=total_count,
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
-            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
-            unexpected_index_list=metrics.get(
-                self.map_metric + ".unexpected_index_list"
-            ),
+            unexpected_count=unexpected_count,
+            unexpected_list=unexpected_values,
+            unexpected_index_list=unexpected_index_list,
         )
 
 
@@ -1548,24 +1536,18 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         null_count = metrics.get("column_values.nonnull.unexpected_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
 
-        success = None
         if total_count is None or null_count is None:
+            total_count = nonnull_count = 0
+        else:
+            nonnull_count = total_count - null_count
+
+        success = None
+        if total_count == 0 or nonnull_count == 0:
             # Vacuously true
             success = True
-        elif (total_count - null_count) != 0:
-            success_ratio = (total_count - unexpected_count - null_count) / (
-                total_count - null_count
-            )
+        elif nonnull_count > 0:
+            success_ratio = float(nonnull_count - unexpected_count) / nonnull_count
             success = success_ratio >= mostly
-        elif total_count == 0 or (total_count - null_count) == 0:
-            success = True
-
-        try:
-            nonnull_count = metrics.get("table.row_count") - metrics.get(
-                "column_values.nonnull.unexpected_count"
-            )
-        except TypeError:
-            nonnull_count = None
 
         return _format_map_output(
             result_format=parse_result_format(result_format),

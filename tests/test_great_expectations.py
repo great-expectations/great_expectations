@@ -25,6 +25,7 @@ from great_expectations.data_asset.data_asset import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
 from great_expectations.exceptions import InvalidCacheValueError
+from great_expectations.util import is_library_loadable
 
 try:
     from unittest import mock
@@ -771,7 +772,7 @@ def test_validate():
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
-
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
     assert results.to_json_dict() == expected_results.to_json_dict()
 
     # Now, change the results and ensure they are no longer equal
@@ -782,13 +783,14 @@ def test_validate():
     # and does not affect the "statistics" field.
     validation_results = my_df.validate(only_return_failures=True)
     del validation_results.meta["great_expectations_version"]
-
+    del validation_results.meta["expectation_suite_meta"]["great_expectations_version"]
     expected_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "titanic",
             "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
             "validation_time": "19551105T000000.000000Z",
             "batch_kwargs": {"ge_batch_id": "1234"},
+            "expectation_suite_meta": {},
             "batch_markers": {},
             "batch_parameters": {},
         },
@@ -879,6 +881,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
 
     for result in results.results:
         result.exception_info.pop("exception_traceback")
@@ -1014,6 +1017,10 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="openpyxl"),
+        reason="GE uses pandas to read excel files, which requires openpyxl",
+    )
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_excel(

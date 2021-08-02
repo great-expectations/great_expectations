@@ -80,7 +80,7 @@ def init(ctx, usage_stats):
                         exit(0)
 
         except (DataContextError, DatasourceInitializationError) as e:
-            cli_message("<red>{}</red>".format(e.message))
+            cli_message(f"<red>{e.message}</red>")
             sys.exit(1)
 
         try:
@@ -88,7 +88,7 @@ def init(ctx, usage_stats):
             cli_message(ONBOARDING_COMPLETE)
 
         except DataContextError as e:
-            cli_message("<red>{}</red>".format(e.message))
+            cli_message(f"<red>{e.message}</red>")
             # TODO ensure this is covered by a test
             exit(5)
     else:
@@ -106,7 +106,7 @@ def init(ctx, usage_stats):
             )
         except DataContextError as e:
             # TODO ensure this is covered by a test
-            cli_message("<red>{}</red>".format(e))
+            cli_message(f"<red>{e}</red>")
 
     cli_message(SECTION_SEPARATOR)
     cli_message(READY_FOR_CUSTOMIZATION)

@@ -13,6 +13,9 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
+  plugins: [
+    'plugin-image-zoom'
+  ],
   themeConfig: {
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')
@@ -20,6 +23,7 @@ module.exports = {
     colorMode: {
       disableSwitch: true
     },
+    zoomSelector: '.markdown :not(em) > img',
     // announcementBar: {
     //   id: 'RTD_docs', // Link to RTD Docs
     //   content:
@@ -143,7 +147,7 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport],
           editUrl:
-            'https://github.com/great-expectations/great_expectations/tree/develop/docs/'
+            'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css')

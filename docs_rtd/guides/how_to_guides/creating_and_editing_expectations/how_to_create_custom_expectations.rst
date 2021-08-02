@@ -435,6 +435,8 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
         This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps!
 
+        See also this `complete example <https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
+
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
           - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
@@ -470,12 +472,12 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                SqlAlchemyExecutionEngine,
             )
             from great_expectations.expectations.metrics import (
-               ColumnMetricProvider,
+               ColumnAggregateMetricProvider,
                column_aggregate_value, column_aggregate_partial,
             )
             from great_expectations.expectations.metrics.import_manager import F, sa
 
-            class ColumnCustomMax(ColumnMetricProvider):
+            class ColumnCustomMax(ColumnAggregateMetricProvider):
                 """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
                 metric_name = "column.aggregate.custom.max"
@@ -494,7 +496,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
                 def _spark(cls, column, _table, _column_name, **kwargs):
                     """Spark Max Implementation"""
                     types = dict(_table.dtypes)
-                    return F.maxcolumn)
+                    return F.maxcolumn()
 
 
 
@@ -606,7 +608,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
               execution_engine: ExecutionEngine = None,
            ):
               """Validates the given data against the set minimum and maximum value thresholds for the column max"""
-              column_max = metrics.get("column.aggregate.max")
+              column_max = metrics["column.aggregate.custom.max"]
 
               # Obtaining components needed for validation
               min_value = self.get_success_kwargs(configuration).get("min_value")
@@ -646,16 +648,17 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
         7. **Import**: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your `plugins/` directory will make it *available* to import, you must still import the Expectation:
         
         .. code-block:: python
-            # get a validator 
-            # Note: attempting to run our expectation now would fail, because even though 
-            # our Expectation is in our DataContext plugins/ directory it has not been imported.
-            
-            from custom_module import ExpectColumnMaxToBeBetweenCustom
-            
-            # now we can run our expectation
-            validator.expect_column_max_to_be_between_custom('col', min_value=0, max_value=5)
 
-        7. **Optional:** Implement :ref:`Custom Data Docs Renderers <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`
+           # get a validator
+           # Note: attempting to run our expectation now would fail, because even though
+           # our Expectation is in our DataContext plugins/ directory it has not been imported.
+
+           from custom_module import ExpectColumnMaxToBeBetweenCustom
+
+           # now we can run our expectation
+           validator.expect_column_max_to_be_between_custom('col', min_value=0, max_value=5)
+
+        8. **Optional:** Implement :ref:`Custom Data Docs Renderers <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`
 
         We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference the core concepts documentation.
         

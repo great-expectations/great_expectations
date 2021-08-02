@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Optional
 from uuid import UUID
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
@@ -12,7 +13,6 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     in_jupyter_notebook,
 )
-from great_expectations.exceptions import InvalidCacheValueError, UnavailableMetricError
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
 from great_expectations.types import SerializableDictDot
 
@@ -47,7 +47,7 @@ class ExpectationValidationResult(SerializableDictDot):
         exception_info=None,
     ):
         if result and not self.validate_result_dict(result):
-            raise InvalidCacheValueError(result)
+            raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
@@ -93,7 +93,7 @@ class ExpectationValidationResult(SerializableDictDot):
                         )
                     ),
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
-                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparision is
+                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
                     # handled appropriately.
                     (self.result is None and other.result is None)
                     or (all(self.result) == all(other.result)),
@@ -182,7 +182,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):
         if not self.expectation_config:
-            raise UnavailableMetricError(
+            raise ge_exceptions.UnavailableMetricError(
                 "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
                 "return a metric."
             )
@@ -195,20 +195,20 @@ class ExpectationValidationResult(SerializableDictDot):
                 metric_name, self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
-                raise UnavailableMetricError(
+                raise ge_exceptions.UnavailableMetricError(
                     "Requested metric_kwargs_id (%s) does not match the configuration of this "
                     "ExpectationValidationResult (%s)."
                     % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
                 )
             if len(metric_name_parts) < 2:
-                raise UnavailableMetricError(
+                raise ge_exceptions.UnavailableMetricError(
                     "Expectation-defined metrics must include a requested metric."
                 )
             elif len(metric_name_parts) == 2:
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
-                    raise UnavailableMetricError(
+                    raise ge_exceptions.UnavailableMetricError(
                         "Metric name must have more than two parts for keys other than "
                         "success."
                     )
@@ -219,11 +219,13 @@ class ExpectationValidationResult(SerializableDictDot):
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
-                    raise UnavailableMetricError(
+                    raise ge_exceptions.UnavailableMetricError(
                         "Unable to get metric {} -- KeyError in "
                         "ExpectationValidationResult.".format(metric_name)
                     )
-        raise UnavailableMetricError("Unrecognized metric name {}".format(metric_name))
+        raise ge_exceptions.UnavailableMetricError(
+            "Unrecognized metric name {}".format(metric_name)
+        )
 
 
 class ExpectationValidationResultSchema(Schema):
@@ -327,7 +329,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             if len(metric_name_parts) == 2:
                 return self.statistics.get(metric_name_parts[1])
             else:
-                raise UnavailableMetricError(
+                raise ge_exceptions.UnavailableMetricError(
                     "Unrecognized metric {}".format(metric_name)
                 )
 
@@ -345,13 +347,13 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                         ):
                             metric_value = result.get_metric(metric_name, **kwargs)
                             break
-                    except UnavailableMetricError:
+                    except ge_exceptions.UnavailableMetricError:
                         pass
                 if metric_value is not None:
                     self._metrics[(metric_name, metric_kwargs_id)] = metric_value
                     return metric_value
 
-        raise UnavailableMetricError(
+        raise ge_exceptions.UnavailableMetricError(
             "Metric {} with metric_kwargs_id {} is not available.".format(
                 metric_name, metric_kwargs_id
             )

@@ -233,12 +233,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect_module = None
 
+        # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
+        # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
+        # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
+        # Connection can be handled separately.
+        self._engine_backup = None
         if self.engine and self.engine.dialect.name.lower() in [
             "sqlite",
             "mssql",
             "snowflake",
             "mysql",
         ]:
+            self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
 
@@ -450,7 +456,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table'"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         if domain_type == MetricDomainTypes.TABLE:
@@ -523,9 +529,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "columns" in compute_domain_kwargs:
-                # If columns exist
-                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+            if "column_list" in compute_domain_kwargs:
+                # If column_list exists
+                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                    "column_list"
+                )
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
@@ -560,17 +568,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     ).select_from(selectable)
             else:
                 # If we would like our data to become a multicolumn
-                if "columns" in compute_domain_kwargs:
+                if "column_list" in compute_domain_kwargs:
                     if self.active_batch_data.use_quoted_name:
                         # Building a list of column objects used for sql alchemy selection
                         to_select = [
                             sa.column(quoted_name(col))
-                            for col in compute_domain_kwargs["columns"]
+                            for col in compute_domain_kwargs["column_list"]
                         ]
                         selectable = sa.select(to_select).select_from(selectable)
                     else:
                         to_select = [
-                            sa.column(col) for col in compute_domain_kwargs["columns"]
+                            sa.column(col)
+                            for col in compute_domain_kwargs["column_list"]
                         ]
                         selectable = sa.select(to_select).select_from(selectable)
 
@@ -621,7 +630,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY.value
+                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY
             )
             assert len(query["select"]) == len(query["ids"])
             try:
@@ -647,6 +656,30 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
 
         return resolved_metrics
+
+    def close(self):
+        """
+        Note: Will 20210729
+
+        This is a helper function that will close and dispose Sqlalchemy objects that are used to connect to a database.
+        Databases like Snowflake require the connection and engine to be instantiated and closed separately, and not
+        doing so has caused problems with hanging connections.
+
+        Currently the ExecutionEngine does not support handling connections and engine separately, and will actually
+        override the engine with a connection in some cases, obfuscating what object is used to actually used by the
+        ExecutionEngine to connect to the external database. This will be handled in an upcoming refactor, which will
+        allow this function to eventually become:
+
+        self.connection.close()
+        self.engine.dispose()
+
+        More background can be found here: https://github.com/great-expectations/great_expectations/pull/3104/
+        """
+        if self._engine_backup:
+            self.engine.close()
+            self._engine_backup.dispose()
+        else:
+            self.engine.dispose()
 
     ### Splitter methods for partitioning tables ###
 
@@ -703,10 +736,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
-            *[
+            *(
                 sa.column(column_name) == column_value
                 for column_name, column_value in batch_identifiers.items()
-            ]
+            )
         )
 
     def _split_on_hashed_column(

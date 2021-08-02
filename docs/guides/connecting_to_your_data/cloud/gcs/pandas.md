@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data on a gcs using pandas
+title: How to connect to data on GCS using Pandas
 ---
 
 **TODO** This is a stub

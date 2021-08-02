@@ -113,7 +113,7 @@ def suite_new(
     no_jupyter,
 ):
     """
-    Create a new empty Expectation Suite.
+    Create a new Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
     """
     context: DataContext = ctx.obj.data_context
@@ -213,7 +213,7 @@ def _process_suite_new_flags_and_prompt(
             interactive = True
     else:
         suite_create_method: str = click.prompt(
-            """\
+            """
 How would you like to create your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data
@@ -332,7 +332,7 @@ def _suite_new_workflow(
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message(string="<red>{}</red>".format(e))
+        cli_message(string=f"<red>{e}</red>")
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
         )
@@ -399,7 +399,7 @@ def suite_edit(
     no_jupyter,
 ):
     """
-    Generate a Jupyter notebook for editing an existing Expectation Suite.
+    Edit an existing Expectation Suite.
 
     The SUITE argument is required. This is the name you gave to the suite
     when you created it.
@@ -521,7 +521,7 @@ options can be used.
             interactive = True
     else:
         suite_edit_method: str = click.prompt(
-            """\
+            """
 How would you like to edit your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data
@@ -619,7 +619,7 @@ def _suite_edit_workflow(
                     batch_request=batch_request,
                 )
 
-        notebook_name: str = "edit_{}.ipynb".format(expectation_suite_name)
+        notebook_name: str = f"edit_{expectation_suite_name}.ipynb"
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
         if profile:
@@ -675,7 +675,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message(string="<red>{}</red>".format(e))
+        cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             toolkit.send_usage_message(
                 data_context=context, event=usage_event, success=False
@@ -710,7 +710,7 @@ def suite_demo(ctx):
 @click.pass_context
 def suite_delete(ctx, suite):
     """
-    Delete an expectation suite from the expectation store.
+    Delete an Expectation Suite from the Expectation Store.
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -756,7 +756,7 @@ def suite_delete(ctx, suite):
 @suite.command(name="list")
 @click.pass_context
 def suite_list(ctx):
-    """Lists available Expectation Suites."""
+    """List existing Expectation Suites."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:

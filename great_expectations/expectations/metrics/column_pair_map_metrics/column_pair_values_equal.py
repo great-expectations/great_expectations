@@ -10,7 +10,9 @@ from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F
-from great_expectations.expectations.metrics.map_metric import MapMetricProvider
+from great_expectations.expectations.metrics.map_metric_provider import (
+    MapMetricProvider,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
 

@@ -1,50 +1,40 @@
-from typing import List
+from typing import List, Optional
 
-from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchDefinition
+from ruamel.yaml import YAML
+
+from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import (
-    ActiveBatchTableDomainBuilder,
     ColumnDomainBuilder,
+    Domain,
     DomainBuilder,
     SimpleSemanticTypeColumnDomainBuilder,
+    TableDomainBuilder,
 )
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.domain_builder.inferred_semantic_domain_type import (
-    SemanticDomainTypes,
+from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterContainer,
+    build_parameter_container_for_variables,
 )
-from great_expectations.self_check.util import build_pandas_validator_with_data
-from great_expectations.validator.validator import Validator
+
+yaml = YAML()
 
 
 # noinspection PyPep8Naming
-def test_active_batch_table_domain_builder(
-    pandas_test_df,
+def test_table_domain_builder(
+    alice_columnar_table_single_batch_context,
     table_Users_domain,
 ):
-    batch_definition: BatchDefinition = BatchDefinition(
-        datasource_name="my_datasource",
-        data_connector_name="my_data_connector",
-        data_asset_name="my_data_asset",
-        batch_identifiers=IDDict({}),
-    )
+    data_context: DataContext = alice_columnar_table_single_batch_context
 
-    validator: Validator = build_pandas_validator_with_data(
-        df=pandas_test_df,
-        batch_definition=batch_definition,
+    domain_builder: DomainBuilder = TableDomainBuilder(
+        data_context=data_context,
+        batch_request=None,
     )
-
-    domain_builder: DomainBuilder = ActiveBatchTableDomainBuilder()
-    domains: List[Domain] = domain_builder.get_domains(
-        validator=validator,
-    )
+    domains: List[Domain] = domain_builder.get_domains()
 
     assert len(domains) == 1
     assert domains == [
         {
             "domain_type": "table",
-            "domain_kwargs": {
-                "batch_id": "f576df3a81c34925978336d530453bc4",
-            },
         }
     ]
 
@@ -52,133 +42,142 @@ def test_active_batch_table_domain_builder(
     # Assert Domain object equivalence.
     assert domain == table_Users_domain
     # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
-    assert domain.domain_kwargs.batch_id == "f576df3a81c34925978336d530453bc4"
+    assert domain.domain_kwargs.batch_id is None
 
 
 # noinspection PyPep8Naming
 def test_column_domain_builder(
-    pandas_test_df,
+    alice_columnar_table_single_batch_context,
+    alice_columnar_table_single_batch,
     column_Age_domain,
     column_Date_domain,
     column_Description_domain,
 ):
-    batch_definition: BatchDefinition = BatchDefinition(
-        datasource_name="my_datasource",
-        data_connector_name="my_data_connector",
-        data_asset_name="my_data_asset",
-        batch_identifiers=IDDict({}),
-    )
+    data_context: DataContext = alice_columnar_table_single_batch_context
 
-    validator: Validator = build_pandas_validator_with_data(
-        df=pandas_test_df,
-        batch_definition=batch_definition,
-    )
+    profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
-    domain_builder: DomainBuilder = ColumnDomainBuilder()
-    domains: List[Domain] = domain_builder.get_domains(
-        validator=validator,
-    )
+    full_profiler_config_dict: dict = yaml.load(profiler_config)
+    variables_configs: dict = full_profiler_config_dict.get("variables")
+    variables: Optional[ParameterContainer] = None
+    if variables_configs:
+        variables = build_parameter_container_for_variables(
+            variables_configs=variables_configs
+        )
 
-    assert len(domains) == 3
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    domain_builder: DomainBuilder = ColumnDomainBuilder(
+        data_context=data_context,
+        batch_request=batch_request,
+    )
+    domains: List[Domain] = domain_builder.get_domains(variables=variables)
+
+    assert len(domains) == 7
     assert domains == [
         {
             "domain_type": "column",
             "domain_kwargs": {
-                "column": "Age",
-                "batch_id": "f576df3a81c34925978336d530453bc4",
+                "column": "id",
             },
+            "details": {},
         },
         {
             "domain_type": "column",
             "domain_kwargs": {
-                "column": "Date",
-                "batch_id": "f576df3a81c34925978336d530453bc4",
+                "column": "event_type",
             },
+            "details": {},
         },
         {
             "domain_type": "column",
             "domain_kwargs": {
-                "column": "Description",
-                "batch_id": "f576df3a81c34925978336d530453bc4",
+                "column": "user_id",
             },
+            "details": {},
+        },
+        {
+            "domain_type": "column",
+            "domain_kwargs": {
+                "column": "event_ts",
+            },
+            "details": {},
+        },
+        {
+            "domain_type": "column",
+            "domain_kwargs": {
+                "column": "server_ts",
+            },
+            "details": {},
+        },
+        {
+            "domain_type": "column",
+            "domain_kwargs": {
+                "column": "device_ts",
+            },
+            "details": {},
+        },
+        {
+            "domain_type": "column",
+            "domain_kwargs": {
+                "column": "user_agent",
+            },
+            "details": {},
         },
     ]
-    # Assert Domain object equivalence.
-    domain: Domain
-    domain = domains[0]
-    assert domain == column_Age_domain
-    domain = domains[1]
-    assert domain == column_Date_domain
-    domain = domains[2]
-    assert domain == column_Description_domain
 
 
 # noinspection PyPep8Naming
 def test_simple_semantic_type_column_domain_builder(
-    pandas_test_df,
+    alice_columnar_table_single_batch_context,
+    alice_columnar_table_single_batch,
     column_Age_domain,
     column_Description_domain,
 ):
-    batch_definition: BatchDefinition = BatchDefinition(
-        datasource_name="my_datasource",
-        data_connector_name="my_data_connector",
-        data_asset_name="my_data_asset",
-        batch_identifiers=IDDict({}),
-    )
+    data_context: DataContext = alice_columnar_table_single_batch_context
 
-    validator: Validator = build_pandas_validator_with_data(
-        df=pandas_test_df,
-        batch_definition=batch_definition,
-    )
+    profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
+    full_profiler_config_dict: dict = yaml.load(profiler_config)
+    variables_configs: dict = full_profiler_config_dict.get("variables")
+    variables: Optional[ParameterContainer] = None
+    if variables_configs:
+        variables = build_parameter_container_for_variables(
+            variables_configs=variables_configs
+        )
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
     domain_builder: DomainBuilder = SimpleSemanticTypeColumnDomainBuilder(
+        data_context=data_context,
+        batch_request=batch_request,
         semantic_types=[
             "numeric",
-            "text",
-        ]
+        ],
     )
-    domains: List[Domain] = domain_builder.get_domains(
-        validator=validator,
-    )
+    domains: List[Domain] = domain_builder.get_domains(variables=variables)
 
     assert len(domains) == 2
     assert domains == [
         {
             "domain_type": "column",
             "domain_kwargs": {
-                "column": "Age",
-                "batch_id": "f576df3a81c34925978336d530453bc4",
+                "column": "event_type",
             },
-            "details": {
-                "inferred_semantic_domain_type": "numeric",
-            },
+            "details": {"inferred_semantic_domain_type": "numeric"},
         },
         {
             "domain_type": "column",
             "domain_kwargs": {
-                "column": "Description",
-                "batch_id": "f576df3a81c34925978336d530453bc4",
+                "column": "user_id",
             },
-            "details": {
-                "inferred_semantic_domain_type": "text",
-            },
+            "details": {"inferred_semantic_domain_type": "numeric"},
         },
     ]
-    # Assert Domain object equivalence.
-    domain: Domain
-    domain = domains[0]
-    assert domain == Domain(
-        domain_type=column_Age_domain.domain_type,
-        domain_kwargs=column_Age_domain.domain_kwargs,
-        details={
-            "inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC,
-        },
-    )
-    domain = domains[1]
-    assert domain == Domain(
-        domain_type=column_Description_domain.domain_type,
-        domain_kwargs=column_Description_domain.domain_kwargs,
-        details={
-            "inferred_semantic_domain_type": SemanticDomainTypes.TEXT,
-        },
-    )

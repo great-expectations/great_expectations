@@ -1,7 +1,6 @@
 import os
 
 from ruamel import yaml
-from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -14,6 +13,9 @@ sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
 sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+
+# This utility is not for general use. It is only to support testing.
+from util import load_data_into_database
 
 load_data_into_database(
     table_name="taxi_data",
@@ -92,4 +94,4 @@ assert "taxi_data" in set(
         "default_inferred_data_connector_name"
     ]
 )
-validator.execution_engine.engine.close()
+validator.execution_engine.close()

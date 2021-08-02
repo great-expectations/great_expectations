@@ -74,10 +74,10 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        self.discard_subset_failing_expectations = kwargs.get(
+        self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.get("boto3_options", {})
+        boto3_options: dict = kwargs.pop("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
@@ -150,7 +150,9 @@ Please check your config."""
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             if "compression" not in reader_options.keys():
-                reader_options["compression"] = sniff_s3_compression(s3_url)
+                inferred_compression_param = sniff_s3_compression(s3_url)
+                if inferred_compression_param is not None:
+                    reader_options["compression"] = inferred_compression_param
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
@@ -352,7 +354,7 @@ Please check your config."""
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
@@ -410,8 +412,11 @@ Please check your config."""
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "columns" in compute_domain_kwargs:
-                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+            if "column_list" in compute_domain_kwargs:
+                # If column_list exists
+                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                    "column_list"
+                )
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
@@ -436,8 +441,8 @@ Please check your config."""
 
             else:
                 # If we would like our data to become a multicolumn
-                if "columns" in compute_domain_kwargs:
-                    data = data[compute_domain_kwargs["columns"]]
+                if "column_list" in compute_domain_kwargs:
+                    data = data[compute_domain_kwargs["column_list"]]
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 

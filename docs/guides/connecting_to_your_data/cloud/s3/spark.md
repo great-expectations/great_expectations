@@ -1,11 +1,13 @@
 ---
-title: How to connect to your data on a S3 using spark
+title: How to connect to data on S3 using Spark
 ---
 
 import NextSteps from '../../components/next_steps.md'
 import Congratulations from '../../components/congratulations.md'
 import Prerequisites from '../../components/prerequisites.jsx'
 import WhereToRunCode from '../../components/where_to_run_code.md'
+import SparkDataContextNote from '../../components/spark_data_context_note.md'
+import SparkAdditionalNotes from '../../components/spark_additional_notes.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -32,13 +34,7 @@ Import these necessary packages and modules.
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L1-L4
 ```
 
-:::note Load your DataContext into memory
-Use one of the guides below based on your deployment:
-
-- [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-without-a-yml-file)
-- [How to instantiate a Data Context on an EMR Spark cluster](/docs/guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-on-an-emr-spark-cluster)
-- [How to instantiate a Data Context on Databricks Spark cluster](/docs/guides/setup/configuring-data-contexts/how-to-instantiate-a-data-context-on-databricks-spark-cluster)
-:::
+<SparkDataContextNote />
 
 Please proceed only after you have instantiated your `DataContext`.
 
@@ -145,16 +141,12 @@ Then load data into the `Validator`.
 
 ## Additional Notes
 
-If you are working with nonstandard CSVs, read one of these guides:
-
-- [How to work with headerless CSVs in spark](#TODO)
-- [How to work with custom delimited CSVs in spark](#TODO)
-- [How to work with parquet files in spark](#TODO)
+<SparkAdditionalNotes />
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [spark_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/integration/code/connecting_to_your_data/cloud/spark_s3_yaml_example.py)
-- [spark_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/integration/code/connecting_to_your_data/cloud/spark_s3_python_example.py)
+- [spark_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py)
+- [spark_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py)
 
 ## Next Steps
 
