@@ -29,9 +29,9 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: str = "",
+        name_starts_with: str = "",
         delimiter: str = "/",
-        max_keys: int = 1000,
+        max_keys: int = 1000,  # TODO(cdkini): Do we need to address this in Azure?
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -47,7 +47,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._container = container
-        self._prefix = os.path.join(prefix, "")
+        self._name_starts_with = os.path.join(name_starts_with, "")
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -72,8 +72,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
-            "name_starts_with": self._prefix,
-            "include": None,
+            "name_starts_with": self._name_starts_with,
             "delimiter": self._delimiter,
         }
         if asset is not None:
@@ -95,6 +94,8 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         path: str,
         data_asset_name: Optional[str] = None,
     ) -> str:
-        # data_assert_name isn't used in this method.
+        # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
+        # http://<storage_account_name>.blob.core.windows.net/<container_name>/<blob_name>
+        # return f"http://{storage_account_name}.blob.core.windows.net/{self._container}/{path}"
         return f"s3a://{os.path.join(self._azure, path)}"  # TODO(cdkini): Replace with Azure-specific URL
