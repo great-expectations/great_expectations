@@ -924,7 +924,7 @@ def runtime_batch_request():
     return runtime_batch_request
 
 
-def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector(
+def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector_creates_config(
     context_with_data_source_and_empty_suite,
     runtime_batch_request,
     store_validation_result_action,
@@ -944,31 +944,13 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
         store_eval_parameter_action,
         update_data_docs_action,
     ]
+    assert checkpoint_config.batch_request == {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_runtime_data_connector",
+        "data_asset_name": "users",
+    }
     assert checkpoint_config.config_version == 1.0
     assert checkpoint_config.class_name == "Checkpoint"
     assert checkpoint_config.evaluation_parameters == {}
     assert checkpoint_config.runtime_configuration == {}
     assert checkpoint_config.validations == []
-
-
-# def test_abc(
-#     context_with_data_source_and_empty_suite,
-#     runtime_batch_request,
-#     one_validation,
-# ):
-#     context: DataContext = context_with_data_source_and_empty_suite
-#     checkpoint = SimpleCheckpoint(
-#         name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
-#     )
-
-#     assert context.list_checkpoints() == []
-#     result = checkpoint.run(
-#         run_name="bar",
-#         validations=[one_validation],
-#         batch_request=runtime_batch_request,
-#     )
-#     assert isinstance(result, CheckpointResult)
-#     assert result.run_id.run_name == "bar"
-#     assert result.list_expectation_suite_names() == ["one"]
-#     assert len(result.list_validation_results()) == 1
-#     assert result.success
