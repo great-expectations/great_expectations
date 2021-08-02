@@ -27,16 +27,46 @@ def container_client(blob_service_client: BlobServiceClient) -> ContainerClient:
     return container
 
 
-def test_container_connects(container_client: ContainerClient) -> None:
-    blobs = [blob for blob in container_client.list_blobs()]
-    assert len(blobs) == 6
-
-
 def test_list_azure_keys(blob_service_client: BlobServiceClient) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={"name_starts_with": ""},
+        query_options={"name_starts_with": "2018"},
         container=CONTAINER_NAME,
         recursive=True,
     )
-    assert keys == 1
+
+    assert len(keys) == 3
+
+
+def test_self_check():
+    my_data_connector = ConfiguredAssetAzureDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "yellow_trip_data_sample_(.*)\\.csv",
+            "group_names": ["timestamp"],
+        },
+        container=CONTAINER_NAME,
+        prefix="",
+        assets={"alpha": {}},
+    )
+
+    assert my_data_connector.self_check() == {
+        "class_name": "ConfiguredAssetAzureDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "yellow_trip_data_sample_2018-01.csv",
+                    "yellow_trip_data_sample_2018-02.csv",
+                    "yellow_trip_data_sample_2018-03.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+    }

@@ -297,6 +297,7 @@ def list_azure_keys(
 
     container_client: ContainerClient = azure.get_container_client(container)
     blobs: ItemPaged[BlobProperties] = container_client.walk_blobs(**query_options)
+
     paths: List[str] = []
 
     def _walk_blob_hierarchy(prefix=""):

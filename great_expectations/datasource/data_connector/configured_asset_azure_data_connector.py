@@ -56,7 +56,8 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
         try:
             # TODO(cdkini): Implement various methods of instantiation and authentication
-            self._azure = BlobServiceClient(**azure_options)
+            ACCOUNT_URL = os.environ["ACCOUNT_URL"]
+            self._azure = BlobServiceClient(account_url=ACCOUNT_URL, **azure_options)
             # self._azure = BlobServiceClient.from_connection_string()
         except (TypeError, AttributeError):
             raise ImportError(
@@ -69,17 +70,13 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return AzureBatchSpec(batch_spec)
 
-    # FIXME(cdkini): Currently breaks DataConnect.self_check()
-    # Let's identify what actually goes in query_options
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
-            "container": self._container,
             "name_starts_with": self._prefix,
+            "include": None,
             "delimiter": self._delimiter,
         }
         if asset is not None:
-            if asset.bucket:
-                query_options["container"] = asset.bucket
             if asset.prefix:
                 query_options["name_starts_with"] = asset.prefix
             if asset.delimiter:
