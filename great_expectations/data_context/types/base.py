@@ -1847,10 +1847,8 @@ class CheckpointConfig(BaseYamlConfig):
                 if isinstance(runtime_batch_request, BatchRequest):
                     # Manual casting to prevent type mismatch in nested_update()
                     runtime_batch_request = runtime_batch_request.get_json_dict()
-
-                assert isinstance(batch_request, dict) and isinstance(
-                    runtime_batch_request, dict
-                ), "batch_request and runtime_batch_request must both be of type Dict to work with nested_update()"
+                
+                assert all(isinstance(req, dict) for req in (batch_request, runtime_batch_request)), "batch_request and runtime_batch_request must both be of type Dict to work with nested_update()"
 
                 batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request
