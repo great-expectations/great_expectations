@@ -1789,7 +1789,9 @@ class CheckpointConfig(BaseYamlConfig):
                     batch_request = {}
                 else:
                     batch_request = self.batch_request
+
                 other_batch_request = other_config.batch_request
+
                 updated_batch_request = nested_update(
                     batch_request,
                     other_batch_request,
