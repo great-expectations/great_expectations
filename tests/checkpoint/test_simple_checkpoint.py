@@ -919,8 +919,7 @@ def runtime_batch_request():
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_runtime_data_connector",
-        data_asset_name="my_data_asset",
-        batch_identifiers={"my_batch_identifier": "foo"},
+        data_asset_name="users",
     )
     return runtime_batch_request
 

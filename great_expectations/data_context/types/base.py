@@ -1792,14 +1792,15 @@ class CheckpointConfig(BaseYamlConfig):
 
                 other_batch_request = other_config.batch_request
 
-                # Manual casting to prevent type mismatch in nested_update()
                 # Necessary when using RuntimeDataConnector with SimpleCheckpoint
                 if isinstance(other_batch_request, BatchRequest):
+                    # Manual casting to prevent type mismatch in nested_update()
                     other_batch_request = other_batch_request.get_json_dict()
 
-                assert type(batch_request) == type(
-                    other_batch_request
-                ), "batch_request and other_batch_request must both be dictionaries to work with nested_update()"
+                assert isinstance(batch_request, dict) and isinstance(
+                    other_batch_request, dict
+                ), "batch_request and other_batch_request must both be of type Dict to work with nested_update()"
+
                 updated_batch_request = nested_update(
                     batch_request,
                     other_batch_request,
