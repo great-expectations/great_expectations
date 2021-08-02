@@ -84,8 +84,9 @@ def test_basic_instantiation() -> None:
             "group_names": ["timestamp"],
         },
         container=CONTAINER_NAME,
-        prefix="",
+        name_starts_with="",
         assets={"alpha": {}},
+        azure_options={"account_url": ACCOUNT_URL},
     )
 
     assert my_data_connector.self_check() == {
@@ -128,6 +129,8 @@ def test_instantiation_from_a_config(
         name_starts_with: ""
         assets:
             alpha:
+        azure_options:
+            account_url: {ACCOUNT_URL}
     """,
         return_mode="report_object",
     )
