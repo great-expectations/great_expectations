@@ -296,18 +296,19 @@ def list_azure_keys(
 ) -> List[str]:
 
     container_client: ContainerClient = azure.get_container_client(container)
-    blobs: ItemPaged[BlobProperties] = container_client.walk_blobs(**query_options)
     path_list: List[str] = []
 
-    def _walk_blob_hierarchy(prefix=""):
-        for item in blobs:
+    def _walk_blob_hierarchy(prefix: str) -> None:
+        for item in container_client.walk_blobs(name_starts_with=prefix):
             if isinstance(item, BlobPrefix):
                 if recursive:
                     _walk_blob_hierarchy(prefix=item.name)
             else:
                 path_list.append(item.name)
 
-    _walk_blob_hierarchy()
+    prefix: str = query_options.get("name_starts_with", "")
+    _walk_blob_hierarchy(prefix)
+
     return path_list
 
 
