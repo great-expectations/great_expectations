@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Enable BigQuery tests for Azure CI/CD #3155
 * [BUGFIX] Snowflake connections are closed correctly by DOCS tests (#3104)
 
 0.13.25
