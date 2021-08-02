@@ -125,7 +125,7 @@ def test_instantiation_from_a_config(
             group_names:
                 - timestamp
         container: {CONTAINER_NAME}
-        prefix: ""
+        name_starts_with: ""
         assets:
             alpha:
     """,
