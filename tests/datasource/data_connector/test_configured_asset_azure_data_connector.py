@@ -1,8 +1,9 @@
 import os
 
 import pytest
-from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
+from azure.storage.blob import BlobServiceClient, ContainerClient
 
+from great_expectations import DataContext
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetAzureDataConnector,
 )
@@ -41,7 +42,7 @@ def test_list_azure_keys_basic(blob_service_client: BlobServiceClient) -> None:
     ]
 
 
-def test_list_azure_keys_with_prefixx(blob_service_client: BlobServiceClient) -> None:
+def test_list_azure_keys_with_prefix(blob_service_client: BlobServiceClient) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
         query_options={"name_starts_with": "2018/"},
@@ -74,7 +75,7 @@ def test_list_azure_keys_with_prefix_and_recursive(
     ]
 
 
-def test_self_check():
+def test_basic_instantiation() -> None:
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -106,3 +107,68 @@ def test_self_check():
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
     }
+
+
+def test_instantiation_from_a_config(
+    empty_data_context_stats_enabled, blob_service_client: BlobServiceClient
+):
+    context: DataContext = empty_data_context_stats_enabled
+
+    report_object = context.test_yaml_config(
+        f"""
+        module_name: great_expectations.datasource.data_connector
+        class_name: ConfiguredAssetAzureDataConnector
+        datasource_name: FAKE_DATASOURCE
+        name: TEST_DATA_CONNECTOR
+        default_regex:
+            "pattern": yellow_trip_data_sample_(.*)\\.csv
+            group_names:
+                - timestamp
+        container: {CONTAINER_NAME}
+        prefix: ""
+        assets:
+            alpha:
+    """,
+        return_mode="report_object",
+    )
+
+    print(report_object)
+
+    assert report_object == {
+        "class_name": "ConfiguredAssetAzureDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "yellow_trip_data_sample_2018-01.csv",
+                    "yellow_trip_data_sample_2018-02.csv",
+                    "yellow_trip_data_sample_2018-03.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+    }
+
+
+# def test_instantiation_from_a_config_regex_does_not_match_paths():
+#     raise NotImplementedError()
+
+# def test_return_all_batch_definitions_unsorted():
+#     raise NotImplementedError()
+
+# def test_return_all_batch_definitions_sorted():
+#     raise NotImplementedError()
+
+# def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group():
+#     raise NotImplementedError()
+
+# def test_return_all_batch_definitions_too_many_sorters():
+#     raise NotImplementedError()
+
+# def test_example_with_explicit_data_asset_names():
+#     raise NotImplementedError()
