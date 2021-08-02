@@ -38,8 +38,8 @@ def execute_shell_command(command: str) -> int:
             args=["bash", "-c", command],
             stdin=None,
             input=None,
-            stdout=None,
-            stderr=None,
+            # stdout=None, # commenting out to prevent issues with `subprocess.run` in python <3.7.4
+            # stderr=None, # commenting out to prevent issues with `subprocess.run` in python <3.7.4
             capture_output=True,
             shell=False,
             cwd=cwd,
@@ -127,9 +127,7 @@ def build_gallery(
     logger.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
     installed_packages_names = [i.key for i in installed_packages]
-    installed_packages_txt = sorted(
-        [f"{i.key}=={i.version}" for i in installed_packages]
-    )
+    installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
     logger.debug(f"Found the following packages: {installed_packages_txt}")
 
     import great_expectations
@@ -200,9 +198,11 @@ def build_gallery(
                 impl = great_expectations.expectations.registry.get_expectation_impl(
                     expectation
                 )
+
                 diagnostics = impl().run_diagnostics()
                 gallery_info[expectation] = diagnostics
                 built_expectations.add(expectation)
+
             logger.info(f"Unloading just-installed for module {expectation_module}")
             for req in just_installed:
                 logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")

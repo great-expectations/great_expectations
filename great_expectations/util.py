@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import pstats
+import re
 import time
 from collections import OrderedDict
 from datetime import datetime
@@ -31,6 +32,7 @@ from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
 from great_expectations.exceptions import (
+    GreatExpectationsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -45,6 +47,76 @@ except ModuleNotFoundError:
 
 
 logger = logging.getLogger(__name__)
+
+
+SINGULAR_TO_PLURAL_LOOKUP_DICT = {
+    "batch": "batches",
+    "checkpoint": "checkpoints",
+    "data_asset": "data_assets",
+    "expectation": "expectations",
+    "expectation_suite": "expectation_suites",
+    "expectation_suite_validation_result": "expectation_suite_validation_results",
+    "expectation_validation_result": "expectation_validation_results",
+}
+
+PLURAL_TO_SINGULAR_LOOKUP_DICT = {
+    "batches": "batch",
+    "checkpoints": "checkpoint",
+    "data_assets": "data_asset",
+    "expectations": "expectation",
+    "expectation_suites": "expectation_suite",
+    "expectation_suite_validation_results": "expectation_suite_validation_result",
+    "expectation_validation_results": "expectation_validation_result",
+}
+
+
+def pluralize(singular_ge_noun):
+    """
+    Pluralizes a Great Expectations singular noun
+    """
+    try:
+        return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
+    except KeyError:
+        raise GreatExpectationsError(
+            f"Unable to pluralize '{singular_ge_noun}'. Please update "
+            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
+        )
+
+
+def singularize(plural_ge_noun):
+    """
+    Singularizes a Great Expectations plural noun
+    """
+    try:
+        return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
+    except KeyError:
+        raise GreatExpectationsError(
+            f"Unable to singularize '{plural_ge_noun}'. Please update "
+            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
+        )
+
+
+def underscore(word: str) -> str:
+    """
+    **Borrowed from inflection.underscore**
+    Make an underscored, lowercase form from the expression in the string.
+
+    Example::
+
+        >>> underscore("DeviceType")
+        'device_type'
+
+    As a rule of thumb you can think of :func:`underscore` as the inverse of
+    :func:`camelize`, though there are cases where that does not hold::
+
+        >>> camelize(underscore("IOError"))
+        'IoError'
+
+    """
+    word = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", word)
+    word = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", word)
+    word = word.replace("-", "_")
+    return word.lower()
 
 
 def profile(func: Callable = None) -> Callable:
@@ -130,7 +202,7 @@ def get_currently_executing_function_call_arguments(
             "class_name": self.__class__.__name__,
         },
     )
-    filter_properties_dict(properties=self._config, inplace=True)
+    filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
     """
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
@@ -186,6 +258,7 @@ def verify_dynamic_loading_support(module_name: str, package_name: str = None) -
     :param package_name: the name of a package, to which the given module belongs
     """
     try:
+        # noinspection PyUnresolvedReferences
         module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
             module_name, package=package_name
         )
@@ -420,7 +493,13 @@ def read_excel(
     """
     import pandas as pd
 
-    df = pd.read_excel(filename, *args, **kwargs)
+    try:
+        df = pd.read_excel(filename, *args, **kwargs)
+    except ImportError:
+        raise ImportError(
+            "Pandas now requires 'openpyxl' as an optional-dependency to read Excel files. Please use pip or conda to install openpyxl and try again"
+        )
+
     if dataset_class is None:
         verify_dynamic_loading_support(module_name=module_name)
         dataset_class = load_class(class_name=class_name, module_name=module_name)
@@ -792,12 +871,12 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += "{}{}/\n".format(indent, os.path.basename(root))
+        output_str += f"{indent}{os.path.basename(root)}/\n"
         subindent = " " * 4 * (level + 1)
 
         files.sort()
         for f in files:
-            output_str += "{}{}\n".format(subindent, f)
+            output_str += f"{subindent}{f}\n"
 
     return output_str
 
@@ -828,7 +907,9 @@ def filter_properties_dict(
     properties: dict,
     keep_fields: Optional[list] = None,
     delete_fields: Optional[list] = None,
-    clean_empty: Optional[bool] = True,
+    clean_nulls: Optional[bool] = True,
+    clean_falsy: Optional[bool] = False,
+    keep_falsy_numerics: Optional[bool] = True,
     inplace: Optional[bool] = False,
 ) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
@@ -837,8 +918,11 @@ def filter_properties_dict(
         properties: source dictionary to be filtered according to the supplied filtering directives
         keep_fields: list of keys that must be retained, with the understanding that all other entries will be deleted
         delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained
-        clean_empty: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
+        clean_nulls: If True, then in addition to other filtering directives, delete entries, whose values are None
+        clean_falsy: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
+        (If the "clean_falsy" argument is specified at "True", then "clean_nulls" is assumed to be "True" as well.)
         inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes
+        keep_falsy_numerics: If True, then in addition to other filtering directives, do not delete zero-valued numerics
 
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
@@ -847,6 +931,9 @@ def filter_properties_dict(
         raise ValueError(
             "Only one of keep_fields and delete_fields filtering directives can be specified."
         )
+
+    if clean_falsy:
+        clean_nulls = True
 
     if not inplace:
         properties = copy.deepcopy(properties)
@@ -863,7 +950,7 @@ def filter_properties_dict(
             [key for key, value in properties.items() if key in delete_fields]
         )
 
-    if clean_empty:
+    if clean_nulls:
         keys_for_deletion.extend(
             [
                 key
@@ -871,11 +958,37 @@ def filter_properties_dict(
                 if not (
                     (keep_fields and key in keep_fields)
                     or (delete_fields and key in delete_fields)
-                    or is_numeric(value=value)
-                    or value
+                    or value is not None
                 )
             ]
         )
+
+    if clean_falsy:
+        if keep_falsy_numerics:
+            keys_for_deletion.extend(
+                [
+                    key
+                    for key, value in properties.items()
+                    if not (
+                        (keep_fields and key in keep_fields)
+                        or (delete_fields and key in delete_fields)
+                        or is_numeric(value=value)
+                        or value
+                    )
+                ]
+            )
+        else:
+            keys_for_deletion.extend(
+                [
+                    key
+                    for key, value in properties.items()
+                    if not (
+                        (keep_fields and key in keep_fields)
+                        or (delete_fields and key in delete_fields)
+                        or value
+                    )
+                ]
+            )
 
     keys_for_deletion = list(set(keys_for_deletion))
 
@@ -889,7 +1002,7 @@ def filter_properties_dict(
 
 
 def is_numeric(value: Any) -> bool:
-    return value is not None and (is_int(value) or is_float(value))
+    return value is not None and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
@@ -944,3 +1057,7 @@ def generate_library_json_from_registered_expectations():
         library_json[expectation_name] = report_object
 
     return library_json
+
+
+def delete_blank_lines(text: str) -> str:
+    return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)

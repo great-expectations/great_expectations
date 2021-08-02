@@ -33,7 +33,7 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.exc import DatabaseError, ProgrammingError
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
     from sqlalchemy.sql.operators import custom_op
@@ -271,17 +271,37 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results["null_count"] = int(count_results["null_count"])
             count_results["unexpected_count"] = int(count_results["unexpected_count"])
 
-            # Retrieve unexpected values
-            unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)])
-                .select_from(self._table)
-                .where(
-                    sa.and_(
-                        sa.not_(expected_condition), sa.not_(ignore_values_condition)
+            # limit doesn't compile properly for oracle so we will append rownum to query string later
+            if self.engine.dialect.name.lower() == "oracle":
+                raw_query = (
+                    sa.select([sa.column(column)])
+                    .select_from(self._table)
+                    .where(
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        )
                     )
                 )
-                .limit(unexpected_count_limit)
-            )
+                query = str(
+                    raw_query.compile(
+                        self.engine, compile_kwargs={"literal_binds": True}
+                    )
+                )
+                query += "\nAND ROWNUM <= %d" % unexpected_count_limit
+            else:
+                query = (
+                    sa.select([sa.column(column)])
+                    .select_from(self._table)
+                    .where(
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        )
+                    )
+                    .limit(unexpected_count_limit)
+                )
+            unexpected_query_results = self.engine.execute(query)
 
             nonnull_count: int = (
                 count_results["element_count"] - count_results["null_count"]
@@ -653,7 +673,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 head_sql_str += "`" + self._table.name + "`"
             else:
                 head_sql_str += self._table.name
-            head_sql_str += " limit {:d}".format(n)
+            head_sql_str += f" limit {n:d}"
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
@@ -1060,7 +1080,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         idx = 0
         bins = list(bins)
 
-        # If we have an infinte lower bound, don't express that in sql
+        # If we have an infinite lower bound, don't express that in sql
         if (
             bins[0]
             == get_sql_dialect_floating_point_infinity_value(
@@ -1317,7 +1337,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         elif engine_dialect == "oracle":
-            stmt = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
+            # oracle 18c introduced PRIVATE temp tables which are transient objects
+            stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {table_name} ON COMMIT PRESERVE DEFINITION AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+            # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
+            # this means an empty table will persist after the db session
+            stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         else:
@@ -1325,7 +1351,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
 
-        self.engine.execute(stmt)
+        if engine_dialect == "oracle":
+            try:
+                self.engine.execute(stmt_1)
+            except DatabaseError:
+                self.engine.execute(stmt_2)
+        else:
+            self.engine.execute(stmt)
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
@@ -1460,9 +1492,9 @@ WHERE
         )
 
         if ignore_row_if == "all_values_are_missing":
-            query = query.where(sa.and_(*[col != None for col in columns]))
+            query = query.where(sa.and_(*(col != None for col in columns)))
         elif ignore_row_if == "any_value_is_missing":
-            query = query.where(sa.or_(*[col != None for col in columns]))
+            query = query.where(sa.or_(*(col != None for col in columns)))
         elif ignore_row_if == "never":
             pass
         else:
@@ -2012,17 +2044,17 @@ WHERE
 
         if match_on == "any":
             condition = sa.or_(
-                *[
+                *(
                     self._get_dialect_regex_expression(column, regex)
                     for regex in regex_list
-                ]
+                )
             )
         else:
             condition = sa.and_(
-                *[
+                *(
                     self._get_dialect_regex_expression(column, regex)
                     for regex in regex_list
-                ]
+                )
             )
         return condition
 
@@ -2050,10 +2082,10 @@ WHERE
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 self._get_dialect_regex_expression(column, regex, positive=False)
                 for regex in regex_list
-            ]
+            )
         )
 
     def _get_dialect_like_pattern_expression(self, column, like_pattern, positive=True):
@@ -2180,17 +2212,17 @@ WHERE
 
         if match_on == "any":
             condition = sa.or_(
-                *[
+                *(
                     self._get_dialect_like_pattern_expression(column, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         else:
             condition = sa.and_(
-                *[
+                *(
                     self._get_dialect_like_pattern_expression(column, like_pattern)
                     for like_pattern in like_pattern_list
-                ]
+                )
             )
         return condition
 
@@ -2221,10 +2253,10 @@ WHERE
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 self._get_dialect_like_pattern_expression(
                     column, like_pattern, positive=False
                 )
                 for like_pattern in like_pattern_list
-            ]
+            )
         )

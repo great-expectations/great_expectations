@@ -108,7 +108,7 @@ def get_batch_request(
     batch_spec_passthrough.update(_get_batch_spec_passthrough(datasource=datasource))
     batch_request["batch_spec_passthrough"] = batch_spec_passthrough
 
-    filter_properties_dict(properties=batch_request, inplace=True)
+    filter_properties_dict(properties=batch_request, clean_falsy=True, inplace=True)
 
     return batch_request
 
@@ -134,10 +134,11 @@ def select_data_connector_name(
     )
     choices: str = "\n".join(
         [
-            "    {}. {}".format(i, data_connector_name)
+            f"    {i}. {data_connector_name}"
             for i, data_connector_name in enumerate(data_connector_names, 1)
         ]
     )
+    choices += "\n"  # Necessary for consistent spacing between prompts
     option_selection: str = click.prompt(
         msg_prompt_select_data_connector_name + "\n" + choices,
         type=click.Choice(
@@ -167,15 +168,12 @@ def _get_data_asset_name_from_data_connector(
         key=lambda x: x,
     )
     available_data_asset_names_str: List[str] = [
-        "{}".format(name) for name in available_data_asset_names
+        f"{name}" for name in available_data_asset_names
     ]
 
     data_asset_names_to_display: List[str] = available_data_asset_names_str[:50]
     choices: str = "\n".join(
-        [
-            "    {}. {}".format(i, name)
-            for i, name in enumerate(data_asset_names_to_display, 1)
-        ]
+        [f"    {i}. {name}" for i, name in enumerate(data_asset_names_to_display, 1)]
     )
     prompt: str = msg_prompt_enter_data_asset_name + choices + "\n"
     data_asset_name_selection: str = click.prompt(prompt, show_default=False)

@@ -90,9 +90,7 @@ def datasource_new(directory):
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
-        cli_message(
-            "A new datasource '{}' was added to your project.".format(datasource_name)
-        )
+        cli_message(f"A new datasource '{datasource_name}' was added to your project.")
         toolkit.send_usage_message(
             data_context=context, event="cli.datasource.new", success=True
         )
@@ -118,9 +116,7 @@ def delete_datasource(directory, datasource):
         context.delete_datasource(datasource)
     except ValueError:
         cli_message(
-            "<red>{}</red>".format(
-                "Datasource {} could not be found.".format(datasource)
-            )
+            "<red>{}</red>".format(f"Datasource {datasource} could not be found.")
         )
         sys.exit(1)
     try:
@@ -404,7 +400,7 @@ def _add_pandas_datasource(
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
-                "Invalid Datasource configuration: {:s}".format(errors)
+                f"Invalid Datasource configuration: {errors:s}"
             )
 
     cli_message(
@@ -457,7 +453,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
         success=True,
     )
 
-    datasource_name = "my_{}_db".format(selected_database.value.lower())
+    datasource_name = f"my_{selected_database.value.lower()}_db"
     if selected_database == SupportedDatabases.OTHER:
         datasource_name = "my_database"
     if prompt_for_datasource_name:
@@ -533,7 +529,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             errors = DatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
                 raise ge_exceptions.GreatExpectationsError(
-                    "Invalid Datasource configuration: {:s}".format(errors)
+                    f"Invalid Datasource configuration: {errors:s}"
                 )
 
             cli_message(
@@ -898,7 +894,7 @@ def _add_spark_datasource(
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
-                "Invalid Datasource configuration: {:s}".format(errors)
+                f"Invalid Datasource configuration: {errors:s}"
             )
 
     cli_message(
@@ -941,7 +937,7 @@ def select_batch_kwargs_generator(
         generator_names = list(available_data_asset_names_by_generator.keys())
         choices = "\n".join(
             [
-                "    {}. {}".format(i, generator_name)
+                f"    {i}. {generator_name}"
                 for i, generator_name in enumerate(generator_names, 1)
             ]
         )
@@ -970,7 +966,7 @@ def get_batch_kwargs(
     This method manages the interaction with user necessary to obtain batch_kwargs for a batch of a data asset.
 
     In order to get batch_kwargs this method needs datasource_name, batch_kwargs_generator_name and data_asset_name
-    to combine them into a fully qualified data asset identifier(datasource_name/batch_kwargs_generator_name/data_asset_name).
+    to combine them into a fully-qualified data asset identifier(datasource_name/batch_kwargs_generator_name/data_asset_name).
     All three arguments are optional. If they are present, the method uses their values. Otherwise, the method
     prompts user to enter them interactively. Since it is possible for any of these three components to be
     passed to this method as empty values and to get their values after interacting with user, this method
@@ -980,7 +976,7 @@ def get_batch_kwargs(
     from that list (note: if there are multiple batch_kwargs_generators, user has to choose one first). If a name known to
     the chosen batch_kwargs_generator is selected, the batch_kwargs_generators will be able to yield batch_kwargs. The method also gives user
     an alternative to selecting the data asset name from the batch_kwargs_generators's list - user can type in a name for their
-    data asset. In this case a passthrough batch kwargs batch_kwargs_generators will be used to construct a fully qualified data asset
+    data asset. In this case a passthrough batch kwargs batch_kwargs_generators will be used to construct a fully-qualified data asset
     identifier (note: if the datasource has no passthrough batch_kwargs_generators configured, the method will exist with a failure).
     Since no batch_kwargs_generators can yield batch_kwargs for this data asset name, the method prompts user to specify batch_kwargs
     by choosing a file (if the datasource is pandas or spark) or by writing a SQL query (if the datasource points
@@ -1107,14 +1103,13 @@ We could not determine the format of the file. What is it?
                 generator.get_available_data_asset_names()["names"], key=lambda x: x[0]
             )
             available_data_asset_names_str = [
-                "{} ({})".format(name[0], name[1])
-                for name in available_data_asset_names
+                f"{name[0]} ({name[1]})" for name in available_data_asset_names
             ]
 
             data_asset_names_to_display = available_data_asset_names_str[:50]
             choices = "\n".join(
                 [
-                    "    {}. {}".format(i, name)
+                    f"    {i}. {name}"
                     for i, name in enumerate(data_asset_names_to_display, 1)
                 ]
             )
@@ -1300,14 +1295,13 @@ Would you like to continue?"""
                     temp_generator.get_available_data_asset_names()["names"]
                 )
                 available_data_asset_names_str = [
-                    "{} ({})".format(name[0], name[1])
-                    for name in available_data_asset_names
+                    f"{name[0]} ({name[1]})" for name in available_data_asset_names
                 ]
 
                 data_asset_names_to_display = available_data_asset_names_str
                 choices = "\n".join(
                     [
-                        "    {}. {}".format(i, name)
+                        f"    {i}. {name}"
                         for i, name in enumerate(data_asset_names_to_display, 1)
                     ]
                 )
@@ -1453,7 +1447,7 @@ def profile_datasource(
     open_docs=False,
     skip_prompt_flag=False,
 ):
-    """"Profile a named datasource using the specified context"""
+    """Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
     # more control over console UI.
     logging.getLogger("great_expectations.profile.basic_dataset_profiler").setLevel(
@@ -1634,9 +1628,7 @@ msg_prompt_choose_database = """
 Which database backend are you using?
 {}
 """.format(
-    "\n".join(
-        ["    {}. {}".format(i, db.value) for i, db in enumerate(SupportedDatabases, 1)]
-    )
+    "\n".join([f"    {i}. {db.value}" for i, db in enumerate(SupportedDatabases, 1)])
 )
 
 msg_prompt_filesys_enter_base_path = """

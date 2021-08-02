@@ -260,7 +260,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         expectation: ExpectationConfiguration
         for expectation in expectations_by_column["table_expectations"]:
-            filter_properties_dict(properties=expectation["kwargs"], inplace=True)
+            filter_properties_dict(
+                properties=expectation["kwargs"], clean_falsy=True, inplace=True
+            )
             code: str = self.render_with_overwrite(
                 notebook_config=self.table_expectation_code,
                 default_file_name="table_expectation.py.j2",
@@ -301,7 +303,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
             expectation: ExpectationConfiguration
             for expectation in expectations:
-                filter_properties_dict(properties=expectation["kwargs"], inplace=True)
+                filter_properties_dict(
+                    properties=expectation["kwargs"], clean_falsy=True, inplace=True
+                )
                 code: str = self.render_with_overwrite(
                     notebook_config=self.column_expectation_code,
                     default_file_name="column_expectation.py.j2",
@@ -317,18 +321,18 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def _build_kwargs_string(cls, expectation: ExpectationConfiguration) -> str:
         kwargs: List[str] = []
         expectation_kwargs: dict = filter_properties_dict(
-            properties=expectation["kwargs"]
+            properties=expectation["kwargs"], clean_falsy=True
         )
         for k, v in expectation_kwargs.items():
             if k == "column":
                 # make the column a positional argument
-                kwargs.insert(0, "{}='{}'".format(k, v))
+                kwargs.insert(0, f"{k}='{v}'")
             elif isinstance(v, str):
                 # Put strings in quotes
-                kwargs.append("{}='{}'".format(k, v))
+                kwargs.append(f"{k}='{v}'")
             else:
                 # Pass other types as is
-                kwargs.append("{}={}".format(k, v))
+                kwargs.append(f"{k}={v}")
 
         return ", ".join(kwargs)
 
@@ -342,7 +346,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             meta.pop(profiler)
 
         if meta.keys():
-            return ", meta={}".format(meta)
+            return f", meta={meta}"
 
         return ""
 

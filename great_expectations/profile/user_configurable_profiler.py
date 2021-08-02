@@ -68,9 +68,10 @@ class UserConfigurableProfiler:
         value_set_threshold: str = "MANY",
     ):
         """
-                The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
-                instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
-                instantiated, if config items change, a new profiler will be needed.
+        The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
+        instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
+        instantiated, if config items change, a new profiler will be needed.
+
         Write an entry on how to use the profiler for the GE docs site
                 Args:
                     profile_dataset: A Great Expectations Dataset or Validator object
@@ -556,7 +557,7 @@ class UserConfigurableProfiler:
             column_name: The name of the column
 
         Returns:
-            A list of semantic_types for a given colum
+            A list of semantic_types for a given column
         """
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
@@ -846,22 +847,21 @@ class UserConfigurableProfiler:
                         profile_dataset.execution_engine.engine.dialect
                     )
 
-            quantile_result = (
-                profile_dataset.expect_column_quantile_values_to_be_between(
-                    column,
-                    quantile_ranges={
-                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                        "value_ranges": [
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                        ],
-                    },
-                    allow_relative_error=allow_relative_error,
-                    result_format="SUMMARY",
-                )
+            quantile_result = profile_dataset.expect_column_quantile_values_to_be_between(
+                column,
+                quantile_ranges={
+                    "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                    "value_ranges": [
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                    ],
+                },
+                # TODO: <Alex>ALEX -- Tal, could you please fix the issue in the next line?</Alex>
+                allow_relative_error=allow_relative_error,
+                result_format="SUMMARY",
             )
             if quantile_result.exception_info and (
                 quantile_result.exception_info["exception_traceback"]

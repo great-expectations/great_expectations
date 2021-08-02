@@ -3,10 +3,17 @@ import os
 from typing import Dict, List
 from unittest import mock
 
+import click
+import pytest
+from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.cli.suite import (
+    _process_suite_edit_flags_and_prompt,
+    _process_suite_new_flags_and_prompt,
+)
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -34,11 +41,11 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  delete  Delete an expectation suite from the expectation store.
+  delete  Delete an Expectation Suite from the Expectation Store.
   demo    This command is not supported in the v3 (Batch Request) API.
-  edit    Generate a Jupyter notebook for editing an existing Expectation...
-  list    Lists available Expectation Suites.
-  new     Create a new empty Expectation Suite.
+  edit    Edit an existing Expectation Suite.
+  list    List existing Expectation Suites.
+  new     Create a new Expectation Suite.
 """
         in stdout
     )
@@ -222,7 +229,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite new",
-        input=f"{expectation_suite_name}\n",
+        input=f"1\n{expectation_suite_name}\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3081,3 +3088,723 @@ suite = profiler.build_suite()"""
         my_caplog=caplog,
         click_result=result,
     )
+
+
+@pytest.fixture
+def suite_new_messages():
+    return {
+        "no_msg": "",
+        "happy_path_profile": "Entering interactive mode since you passed the --profile flag",
+        "warning_profile": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag",
+        "happy_path_batch_request": "Entering interactive mode since you passed the --batch-request flag",
+        "warning_batch_request": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag",
+        "happy_path_prompt_call": """
+How would you like to create your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+    3. Automatically, using a profiler
+""",
+        "error_both_interactive_flags": "Please choose either --interactive or --manual, you may not choose both.",
+    }
+
+
+@pytest.mark.parametrize(
+    "interactive_flag,manual_flag,profile_flag,batch_request_flag,error_expected,prompt_input,return_interactive,return_profile,stdout_fixture,stderr_fixture",
+    [
+        # No error expected
+        # return_interactive = True, return_profile = False
+        pytest.param(
+            True,
+            False,
+            False,
+            None,
+            False,
+            None,
+            True,
+            False,
+            "no_msg",
+            "no_msg",
+            id="--interactive",
+        ),
+        # return_interactive = False, return_profile = False
+        pytest.param(
+            False,
+            True,
+            False,
+            None,
+            False,
+            None,
+            False,
+            False,
+            "no_msg",
+            "no_msg",
+            id="--manual",
+        ),
+        # return_interactive = True, return_profile = True
+        pytest.param(
+            False,
+            False,
+            True,
+            None,
+            False,
+            None,
+            True,
+            True,
+            "no_msg",
+            "no_msg",
+            id="--profile",
+        ),
+        pytest.param(
+            True,
+            False,
+            True,
+            None,
+            False,
+            None,
+            True,
+            True,
+            "no_msg",
+            "no_msg",
+            id="--interactive --profile",
+        ),
+        # batch_request not empty
+        pytest.param(
+            True,
+            False,
+            False,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            False,
+            "no_msg",
+            "no_msg",
+            id="--interactive --batch-request",
+        ),
+        pytest.param(
+            False,
+            False,
+            True,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            True,
+            "happy_path_profile",
+            "no_msg",
+            id="--profile --batch-request",
+        ),
+        pytest.param(
+            True,
+            False,
+            True,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            True,
+            "no_msg",
+            "no_msg",
+            id="--interactive --profile --batch-request",
+        ),
+        # Prompts
+        # Just hit enter (default choice)
+        pytest.param(
+            False,
+            False,
+            False,
+            None,
+            False,
+            "",
+            False,
+            False,
+            "no_msg",
+            "no_msg",
+            id="prompt: Default Choice 1 - Manual suite creation (default)",
+        ),
+        # Choice 1 - Manual suite creation (default)
+        pytest.param(
+            False,
+            False,
+            False,
+            None,
+            False,
+            "1",
+            False,
+            False,
+            "no_msg",
+            "no_msg",
+            id="prompt: Choice 1 - Manual suite creation (default)",
+        ),
+        # Choice 2 - Interactive suite creation
+        pytest.param(
+            False,
+            False,
+            False,
+            None,
+            False,
+            "2",
+            True,
+            False,
+            "no_msg",
+            "no_msg",
+            id="prompt: Choice 2 - Interactive suite creation",
+        ),
+        # Choice 3 - Automatic suite creation (profiler)
+        pytest.param(
+            False,
+            False,
+            False,
+            None,
+            False,
+            "3",
+            True,
+            True,
+            "no_msg",
+            "no_msg",
+            id="prompt: Choice 3 - Automatic suite creation (profiler)",
+        ),
+        # No error but warning expected
+        # no-interactive flag with batch_request, with/without profile flag
+        pytest.param(
+            False,
+            True,
+            False,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            False,
+            "warning_batch_request",
+            "no_msg",
+            id="warning: --manual --batch-request",
+        ),
+        pytest.param(
+            False,
+            True,
+            True,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            True,
+            "warning_profile",
+            "no_msg",
+            id="warning: --manual --profile --batch-request",
+        ),
+        # no-interactive flag with profile and without batch request flag
+        pytest.param(
+            False,
+            True,
+            True,
+            None,
+            False,
+            None,
+            True,
+            True,
+            "warning_profile",
+            "no_msg",
+            id="warning: --manual --profile",
+        ),
+        # Yes error expected
+        # both interactive flags, profile=False, with/without batch_request
+        pytest.param(
+            True,
+            True,
+            False,
+            None,
+            True,
+            None,
+            None,
+            None,
+            "error_both_interactive_flags",
+            "no_msg",
+            id="error: --interactive --manual",
+        ),
+        pytest.param(
+            True,
+            True,
+            False,
+            "batch_request.json",
+            True,
+            None,
+            None,
+            None,
+            "error_both_interactive_flags",
+            "no_msg",
+            id="error: --interactive --manual --batch-request",
+        ),
+        # both interactive flags, profile=True, with/without batch_request
+        pytest.param(
+            True,
+            True,
+            True,
+            None,
+            True,
+            None,
+            None,
+            None,
+            "error_both_interactive_flags",
+            "no_msg",
+            id="error: --interactive --manual --profile",
+        ),
+        pytest.param(
+            True,
+            True,
+            True,
+            "batch_request.json",
+            True,
+            None,
+            None,
+            None,
+            "error_both_interactive_flags",
+            "no_msg",
+            id="error: --interactive --manual --profile --batch-request",
+        ),
+    ],
+)
+@mock.patch("click.prompt")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test__process_suite_new_flags_and_prompt(
+    mock_emit,
+    mock_prompt,
+    interactive_flag,
+    manual_flag,
+    profile_flag,
+    batch_request_flag,
+    error_expected,
+    prompt_input,
+    return_interactive,
+    return_profile,
+    stdout_fixture,
+    stderr_fixture,
+    empty_data_context_stats_enabled,
+    capsys,
+    suite_new_messages,
+):
+    """
+    What does this test and why?
+    _process_suite_new_flags_and_prompt should return the correct configuration or error based on input flags.
+    """
+
+    usage_event_end: str = "cli.suite.new.end"
+    context: DataContext = empty_data_context_stats_enabled
+
+    # test happy paths
+    if not error_expected:
+        if prompt_input is not None:
+            mock_prompt.side_effect = [prompt_input]
+        processed_flags = _process_suite_new_flags_and_prompt(
+            context=context,
+            usage_event_end=usage_event_end,
+            interactive_flag=interactive_flag,
+            manual_flag=manual_flag,
+            profile=profile_flag,
+            batch_request=batch_request_flag,
+        )
+        assert processed_flags == {
+            "interactive": return_interactive,
+            "profile": return_profile,
+        }
+        # Note - in this method on happy path no usage stats message is sent. Other messages are sent during the full
+        #  CLI suite new flow of creating a notebook etc.
+        assert mock_emit.call_count == 0
+        assert mock_emit.call_args_list == []
+
+        # Check output
+        captured: CaptureResult = capsys.readouterr()
+        assert suite_new_messages[stdout_fixture] in captured.out
+        assert suite_new_messages[stderr_fixture] in captured.err
+
+        # Check prompt text and called only when appropriate
+        if prompt_input is not None:
+            assert mock_prompt.call_count == 1
+            assert (
+                mock_prompt.call_args_list[0][0][0]
+                == suite_new_messages["happy_path_prompt_call"]
+            )
+        else:
+            assert mock_prompt.call_count == 0
+
+    # test error cases
+    elif error_expected:
+        with pytest.raises(SystemExit):
+            _ = _process_suite_new_flags_and_prompt(
+                context=context,
+                usage_event_end=usage_event_end,
+                interactive_flag=interactive_flag,
+                manual_flag=manual_flag,
+                profile=profile_flag,
+                batch_request=batch_request_flag,
+            )
+
+        # Check output
+        captured: CaptureResult = capsys.readouterr()
+        assert suite_new_messages[stdout_fixture] in captured.out
+        assert suite_new_messages[stderr_fixture] in captured.err
+        assert mock_prompt.call_count == 0
+
+        # Note - in this method only a single usage stats message is sent. Other messages are sent during the full
+        #  CLI suite new flow of creating a notebook etc.
+        assert mock_emit.call_count == 1
+        assert mock_emit.call_args_list == [
+            mock.call(
+                {
+                    "event": usage_event_end,
+                    "event_payload": {"api_version": "v3"},
+                    "success": False,
+                }
+            ),
+        ]
+
+
+@pytest.fixture
+def suite_edit_messages():
+    return {
+        "no_msg": "",
+        "happy_path_datasource_name": "Entering interactive mode since you passed the --datasource-name flag",
+        "warning_datasource_name": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --datasource-name flag",
+        "happy_path_batch_request": "Entering interactive mode since you passed the --batch-request flag",
+        "warning_batch_request": "Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag",
+        "happy_path_prompt_call": """
+How would you like to edit your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+""",
+        "error_both_interactive_flags": "Please choose either --interactive or --manual, you may not choose both.",
+        "error_both_datasource_name_and_batch_request_flags": """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
+options can be used.
+""",
+    }
+
+
+@pytest.mark.parametrize(
+    "interactive_flag,manual_flag,datasource_name_flag,batch_request_flag,error_expected,prompt_input,return_interactive,stdout_fixture,stderr_fixture",
+    [
+        # No error expected
+        # return_interactive = True
+        pytest.param(
+            True,
+            False,
+            None,
+            None,
+            False,
+            None,
+            True,
+            "no_msg",
+            "no_msg",
+            id="--interactive",
+        ),
+        # return_interactive = False
+        pytest.param(
+            False,
+            True,
+            None,
+            None,
+            False,
+            None,
+            False,
+            "no_msg",
+            "no_msg",
+            id="--manual",
+        ),
+        # return_interactive = True, --datasource-name
+        pytest.param(
+            False,
+            False,
+            "some_datasource_name",
+            None,
+            False,
+            None,
+            True,
+            "happy_path_datasource_name",
+            "no_msg",
+            id="--datasource-name",
+        ),
+        pytest.param(
+            True,
+            False,
+            "some_datasource_name",
+            None,
+            False,
+            None,
+            True,
+            "no_msg",
+            "no_msg",
+            id="--interactive --datasource-name",
+        ),
+        # batch_request not empty
+        pytest.param(
+            True,
+            False,
+            None,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            "no_msg",
+            "no_msg",
+            id="--interactive --batch-request",
+        ),
+        pytest.param(
+            False,
+            False,
+            None,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            "happy_path_batch_request",
+            "no_msg",
+            id="--batch-request",
+        ),
+        # Prompts
+        # Just hit enter (default choice)
+        pytest.param(
+            False,
+            False,
+            None,
+            None,
+            False,
+            "",
+            False,
+            "no_msg",
+            "no_msg",
+            id="prompt: Default Choice 1 - Manual suite edit (default)",
+        ),
+        # # Choice 1 - Manual suite edit (default)
+        pytest.param(
+            False,
+            False,
+            None,
+            None,
+            False,
+            "1",
+            False,
+            "no_msg",
+            "no_msg",
+            id="prompt: Choice 1 - Manual suite edit (default)",
+        ),
+        # Choice 2 - Interactive suite edit
+        pytest.param(
+            False,
+            False,
+            None,
+            None,
+            False,
+            "2",
+            True,
+            "no_msg",
+            "no_msg",
+            id="prompt: Choice 2 - Interactive suite edit",
+        ),
+        # No error but warning expected
+        # no-interactive flag with batch_request
+        pytest.param(
+            False,
+            True,
+            None,
+            "batch_request.json",
+            False,
+            None,
+            True,
+            "warning_batch_request",
+            "no_msg",
+            id="warning: --manual --batch-request",
+        ),
+        # no-interactive flag with datasource_name
+        pytest.param(
+            False,
+            True,
+            "some_datasource_name",
+            None,
+            False,
+            None,
+            True,
+            "warning_datasource_name",
+            "no_msg",
+            id="warning: --manual --datasource-name",
+        ),
+        # Yes error expected
+        # both interactive flags, datasource_name=None, with/without batch_request
+        pytest.param(
+            True,
+            True,
+            None,
+            None,
+            True,
+            None,
+            None,
+            "error_both_interactive_flags",
+            "no_msg",
+            id="error: --interactive --manual",
+        ),
+        pytest.param(
+            True,
+            True,
+            None,
+            "batch_request.json",
+            True,
+            None,
+            None,
+            "error_both_interactive_flags",
+            "no_msg",
+            id="error: --interactive --manual --batch-request",
+        ),
+        # both interactive flags, datasource_name=something, with/without batch_request
+        pytest.param(
+            True,
+            True,
+            "some_datasource_name",
+            None,
+            True,
+            None,
+            None,
+            "error_both_interactive_flags",
+            "no_msg",
+            id="error: --interactive --manual --datasource-name",
+        ),
+        pytest.param(
+            True,
+            True,
+            "some_datasource_name",
+            "batch_request.json",
+            True,
+            None,
+            None,
+            "error_both_datasource_name_and_batch_request_flags",
+            "no_msg",
+            id="error: --interactive --manual --datasource-name --batch-request",
+        ),
+        # both --datasource-name and --batch-request
+        pytest.param(
+            False,
+            False,
+            "some_datasource_name",
+            "batch_request.json",
+            True,
+            None,
+            True,
+            "error_both_datasource_name_and_batch_request_flags",
+            "no_msg",
+            id="error: --datasource-name --batch-request",
+        ),
+        pytest.param(
+            True,
+            False,
+            "some_datasource_name",
+            "batch_request.json",
+            True,
+            None,
+            True,
+            "error_both_datasource_name_and_batch_request_flags",
+            "no_msg",
+            id="--interactive --datasource-name --batch-request",
+        ),
+        pytest.param(
+            False,
+            True,
+            "some_datasource_name",
+            "batch_request.json",
+            True,
+            None,
+            True,
+            "error_both_datasource_name_and_batch_request_flags",
+            "no_msg",
+            id="--manual --datasource-name --batch-request",
+        ),
+    ],
+)
+@mock.patch("click.prompt")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test__process_suite_edit_flags_and_prompt(
+    mock_emit,
+    mock_prompt,
+    interactive_flag,
+    manual_flag,
+    datasource_name_flag,
+    batch_request_flag,
+    error_expected,
+    prompt_input,
+    return_interactive,
+    stdout_fixture,
+    stderr_fixture,
+    empty_data_context_stats_enabled,
+    capsys,
+    suite_edit_messages,
+):
+    """
+    What does this test and why?
+    _process_suite_edit_flags_and_prompt should return the correct configuration or error based on input flags.
+    """
+
+    usage_event_end: str = "cli.suite.edit.end"
+    context: DataContext = empty_data_context_stats_enabled
+
+    # test happy paths
+    if not error_expected:
+        if prompt_input is not None:
+            mock_prompt.side_effect = [prompt_input]
+        interactive: bool = _process_suite_edit_flags_and_prompt(
+            context=context,
+            usage_event_end=usage_event_end,
+            interactive_flag=interactive_flag,
+            manual_flag=manual_flag,
+            datasource_name=datasource_name_flag,
+            batch_request=batch_request_flag,
+        )
+        assert interactive == return_interactive
+        # Note - in this method on happy path no usage stats message is sent. Other messages are sent during the full
+        #  CLI suite new flow of creating a notebook etc.
+        assert mock_emit.call_count == 0
+        assert mock_emit.call_args_list == []
+
+        # Check output
+        captured: CaptureResult = capsys.readouterr()
+        assert suite_edit_messages[stdout_fixture] in captured.out
+        assert suite_edit_messages[stderr_fixture] in captured.err
+
+        # Check prompt text and called only when appropriate
+        if prompt_input is not None:
+            assert mock_prompt.call_count == 1
+            assert (
+                mock_prompt.call_args_list[0][0][0]
+                == suite_edit_messages["happy_path_prompt_call"]
+            )
+        else:
+            assert mock_prompt.call_count == 0
+
+    # test error cases
+    elif error_expected:
+        with pytest.raises(SystemExit):
+            _ = _process_suite_edit_flags_and_prompt(
+                context=context,
+                usage_event_end=usage_event_end,
+                interactive_flag=interactive_flag,
+                manual_flag=manual_flag,
+                datasource_name=datasource_name_flag,
+                batch_request=batch_request_flag,
+            )
+
+        # Check output
+        captured: CaptureResult = capsys.readouterr()
+        assert suite_edit_messages[stdout_fixture] in captured.out
+        assert suite_edit_messages[stderr_fixture] in captured.err
+        assert mock_prompt.call_count == 0
+
+        # Note - in this method only a single usage stats message is sent. Other messages are sent during the full
+        #  CLI suite new flow of creating a notebook etc.
+        assert mock_emit.call_count == 1
+        assert mock_emit.call_args_list == [
+            mock.call(
+                {
+                    "event": usage_event_end,
+                    "event_payload": {"api_version": "v3"},
+                    "success": False,
+                }
+            ),
+        ]

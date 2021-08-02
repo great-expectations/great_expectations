@@ -2,6 +2,7 @@ import copy
 import locale
 import logging
 import os
+import platform
 import random
 import string
 import tempfile
@@ -22,7 +23,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
 )
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
@@ -229,6 +230,16 @@ class LockingConnectionCheck:
             return self._is_valid
 
 
+def get_sqlite_connection_url(sqlite_db_path):
+    url = "sqlite://"
+    if sqlite_db_path is not None:
+        extra_slash = ""
+        if platform.system() != "Windows":
+            extra_slash = "/"
+        url = f"{url}/{extra_slash}{sqlite_db_path}"
+    return url
+
+
 def get_dataset(
     dataset_type,
     data,
@@ -256,6 +267,9 @@ def get_dataset(
                 elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
                     df[key] = pd.to_datetime(df[key])
                     continue
+                elif value.lower() in ["date"]:
+                    df[key] = pd.to_datetime(df[key]).dt.date
+                    value = "object"
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
@@ -270,11 +284,8 @@ def get_dataset(
         if not create_engine:
             return None
 
-        if sqlite_db_path is not None:
-            # Create a new database
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
+
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -311,6 +322,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -372,6 +385,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -429,6 +444,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -499,6 +516,8 @@ def get_dataset(
                         )
                 elif type_ in ["DATETIME", "TIMESTAMP"]:
                     df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
 
         if table_name is None:
             table_name = generate_test_table_name()
@@ -540,7 +559,7 @@ def get_dataset(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -590,7 +609,7 @@ def get_dataset(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
@@ -652,6 +671,9 @@ def get_test_validator_with_data(
                 elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
                     df[key] = pd.to_datetime(df[key])
                     continue
+                elif value.lower() in ["date"]:
+                    df[key] = pd.to_datetime(df[key]).dt.date
+                    value = "object"
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
@@ -705,7 +727,7 @@ def get_test_validator_with_data(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -755,7 +777,7 @@ def get_test_validator_with_data(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
@@ -795,13 +817,22 @@ def get_test_validator_with_data(
         raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
-def build_pandas_validator_with_data(df: pd.DataFrame) -> Validator:
-    batch: Batch = Batch(data=df)
+def build_pandas_validator_with_data(
+    df: pd.DataFrame,
+    batch_definition: Optional[BatchDefinition] = None,
+) -> Validator:
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
 
 
 def build_sa_validator_with_data(
-    df, sa_engine_name, schemas=None, caching=True, table_name=None, sqlite_db_path=None
+    df,
+    sa_engine_name,
+    schemas=None,
+    caching=True,
+    table_name=None,
+    sqlite_db_path=None,
+    batch_definition: Optional[BatchDefinition] = None,
 ):
     dialect_classes = {
         "sqlite": sqlitetypes.dialect,
@@ -817,10 +848,7 @@ def build_sa_validator_with_data(
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
-        if sqlite_db_path is not None:
-            engine = create_engine(f"sqlite:////{sqlite_db_path}")
-        else:
-            engine = create_engine("sqlite://")
+        engine = create_engine(get_sqlite_connection_url(sqlite_db_path))
     elif sa_engine_name == "postgresql":
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
@@ -877,7 +905,7 @@ def build_sa_validator_with_data(
                         value=[min_value_dbms, max_value_dbms],
                         inplace=True,
                     )
-            elif type_ in ["DATETIME", "TIMESTAMP"]:
+            elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
                 df[col] = pd.to_datetime(df[col])
 
     if table_name is None:
@@ -892,7 +920,7 @@ def build_sa_validator_with_data(
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
@@ -917,7 +945,9 @@ def modify_locale(func):
 
 
 def build_spark_validator_with_data(
-    df: Union[pd.DataFrame, SparkDataFrame], spark: SparkSession
+    df: Union[pd.DataFrame, SparkDataFrame],
+    spark: SparkSession,
+    batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -930,15 +960,20 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
-    batch: Batch = Batch(data=df)
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark, df=df, batch_id=batch.id
+        spark=spark,
+        df=df,
+        batch_id=batch.id,
     )
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
-def build_pandas_engine(df: pd.DataFrame) -> PandasExecutionEngine:
+def build_pandas_engine(
+    df: pd.DataFrame,
+) -> PandasExecutionEngine:
     batch: Batch = Batch(data=df)
+
     execution_engine: PandasExecutionEngine = PandasExecutionEngine(
         batch_data_dict={batch.id: batch.data}
     )
@@ -983,8 +1018,28 @@ def build_sa_engine(
 
 # Builds a Spark Execution Engine
 def build_spark_engine(
-    spark: SparkSession, df: Union[pd.DataFrame, SparkDataFrame], batch_id: str
+    spark: SparkSession,
+    df: Union[pd.DataFrame, SparkDataFrame],
+    batch_id: Optional[str] = None,
+    batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
+    if (
+        sum(
+            bool(x)
+            for x in [
+                batch_id is not None,
+                batch_definition is not None,
+            ]
+        )
+        != 1
+    ):
+        raise ValueError(
+            "Exactly one of batch_id or batch_definition must be specified."
+        )
+
+    if batch_id is None:
+        batch_id = batch_definition.id
+
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
             [
@@ -1179,7 +1234,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_most_common_value_to_be_in_set",
+            # "expect_column_most_common_value_to_be_in_set",
             # "expect_column_max_to_be_between",
             # "expect_column_min_to_be_between",
             # "expect_column_sum_to_be_between",
@@ -1849,10 +1904,10 @@ def check_json_test_result(test, result, data_asset=None):
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
                 if (isinstance(value, list)) & (len(value) >= 1):
                     if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = value.sort()
-                        result["result"]["unexpected_list"] = result["result"][
-                            "unexpected_list"
-                        ].sort()
+                        value = sorted(value, key=lambda x: str(x))
+                        result["result"]["unexpected_list"] = sorted(
+                            result["result"]["unexpected_list"], key=lambda x: str(x)
+                        )
 
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "

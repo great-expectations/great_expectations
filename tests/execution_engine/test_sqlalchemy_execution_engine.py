@@ -4,14 +4,12 @@ import os
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.exceptions.exceptions import InvalidConfigError
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
@@ -21,7 +19,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-from tests.test_utils import get_sqlite_temp_table_names
+from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -102,7 +100,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
 
 
 def test_instantiation_error_states(sa, test_db_connection_string):
-    with pytest.raises(InvalidConfigError):
+    with pytest.raises(ge_exceptions.InvalidConfigError):
         SqlAlchemyExecutionEngine()
 
 
@@ -317,7 +315,7 @@ def test_get_compute_domain_with_multicolumn(sa):
 
     # Obtaining compute domain
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="multicolumn"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="multicolumn"
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
@@ -330,12 +328,12 @@ def test_get_compute_domain_with_multicolumn(sa):
     assert raw_data == domain_data, "Data does not match after getting compute domain"
     assert compute_kwargs is not None, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Accessor kwargs have been modified"
 
     # Checking for identity
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="identity"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="identity"
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
@@ -349,7 +347,7 @@ def test_get_compute_domain_with_multicolumn(sa):
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
     assert compute_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
@@ -497,7 +495,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
     )
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(GreatExpectationsError) as e:
+    with pytest.raises(ge_exceptions.GreatExpectationsError) as e:
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
@@ -535,7 +533,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
-    with pytest.raises(MetricProviderError) as e:
+    with pytest.raises(ge_exceptions.MetricProviderError) as e:
         res = engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
@@ -562,3 +560,62 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
 
     assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
     assert batch_markers.get("ge_load_time") is not None
+
+
+def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
+    def validate_tmp_tables():
+        temp_tables = [
+            name
+            for name in get_sqlite_temp_table_names(engine.engine)
+            if name.startswith("ge_tmp_")
+        ]
+        tables = [
+            name
+            for name in get_sqlite_table_names(engine.engine)
+            if name.startswith("ge_tmp_")
+        ]
+        assert len(temp_tables) == 0
+        assert len(tables) == 0
+
+    engine = build_sa_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    validate_tmp_tables()
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    validate_tmp_tables()
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+
+    validate_tmp_tables()

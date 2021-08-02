@@ -94,7 +94,7 @@ class EvaluationParameterParser:
             #                    Optional(e + Word("+-"+nums, nums)))
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
-            fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
+            fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
             ge_urn = Combine(
                 Literal("urn:great_expectations:")
                 + Word(alphas, alphanums + "_$:?=%.&")
@@ -155,7 +155,7 @@ class EvaluationParameterParser:
             # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
             # fails, but I decided against it to instead require that the *entire* expression evaluates
             # numerically UNLESS there is *exactly one* expression to substitute (see cases where len(L) == 1 in the
-            # parse_evaluation_parameter method
+            # parse_evaluation_parameter method.
             try:
                 return int(op)
             except ValueError:
