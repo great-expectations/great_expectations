@@ -127,7 +127,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_id=object_id,
                 url=object_url,
             )
-        # TODO Show more detailed error messages
+        # TODO: [Robby] Show more detailed error messages
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in GE Cloud Store Backend.")
