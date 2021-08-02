@@ -27,10 +27,10 @@ def container_client(blob_service_client: BlobServiceClient) -> ContainerClient:
     return container
 
 
-def test_list_azure_keys_not_recursive(blob_service_client: BlobServiceClient) -> None:
+def test_list_azure_keys_basic(blob_service_client: BlobServiceClient) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={"name_starts_with": ""},
+        query_options={},
         container=CONTAINER_NAME,
         recursive=False,
     )
@@ -41,20 +41,36 @@ def test_list_azure_keys_not_recursive(blob_service_client: BlobServiceClient) -
     ]
 
 
-def test_list_azure_keys_recursive(blob_service_client: BlobServiceClient) -> None:
+def test_list_azure_keys_with_prefixx(blob_service_client: BlobServiceClient) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={"name_starts_with": ""},
+        query_options={"name_starts_with": "2018/"},
         container=CONTAINER_NAME,
-        recursive=True,
+        recursive=False,
     )
     assert keys == [
         "2018/yellow_trip_data_sample_2018-01.csv",
         "2018/yellow_trip_data_sample_2018-02.csv",
         "2018/yellow_trip_data_sample_2018-03.csv",
-        "yellow_trip_data_sample_2018-01.csv",
-        "yellow_trip_data_sample_2018-02.csv",
-        "yellow_trip_data_sample_2018-03.csv",
+    ]
+
+
+def test_list_azure_keys_with_prefix_and_recursive(
+    blob_service_client: BlobServiceClient,
+) -> None:
+    keys = list_azure_keys(
+        azure=blob_service_client,
+        query_options={"name_starts_with": "2018/"},
+        container=CONTAINER_NAME,
+        recursive=True,
+    )
+    assert keys == [
+        "2018/2018-04/yellow_trip_data_sample_2018-04.csv",
+        "2018/2018-05/yellow_trip_data_sample_2018-05.csv",
+        "2018/2018-06/yellow_trip_data_sample_2018-06.csv",
+        "2018/yellow_trip_data_sample_2018-01.csv",
+        "2018/yellow_trip_data_sample_2018-02.csv",
+        "2018/yellow_trip_data_sample_2018-03.csv",
     ]
 
 
