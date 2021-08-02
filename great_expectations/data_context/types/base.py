@@ -1789,16 +1789,7 @@ class CheckpointConfig(BaseYamlConfig):
                     batch_request = {}
                 else:
                     batch_request = self.batch_request
-
                 other_batch_request = other_config.batch_request
-
-                # Necessary when using RuntimeDataConnector with SimpleCheckpoint
-                if isinstance(other_batch_request, BatchRequest):
-                    other_batch_request = other_batch_request.get_json_dict()
-                assert isinstance(batch_request, dict) and isinstance(
-                    other_batch_request, dict
-                ), "batch_request and other_batch_request must both be of type Dict to work with nested_update()"
-
                 updated_batch_request = nested_update(
                     batch_request,
                     other_batch_request,
