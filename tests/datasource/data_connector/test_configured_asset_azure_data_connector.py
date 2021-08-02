@@ -30,7 +30,7 @@ def container_client(blob_service_client: BlobServiceClient) -> ContainerClient:
 def test_list_azure_keys(blob_service_client: BlobServiceClient) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={"name_starts_with": "2018"},
+        query_options={"name_starts_with": "2018/"},
         container=CONTAINER_NAME,
         recursive=True,
     )

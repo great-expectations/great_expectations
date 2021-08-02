@@ -297,8 +297,7 @@ def list_azure_keys(
 
     container_client: ContainerClient = azure.get_container_client(container)
     blobs: ItemPaged[BlobProperties] = container_client.walk_blobs(**query_options)
-
-    paths: List[str] = []
+    path_list: List[str] = []
 
     def _walk_blob_hierarchy(prefix=""):
         for item in blobs:
@@ -306,10 +305,10 @@ def list_azure_keys(
                 if recursive:
                     _walk_blob_hierarchy(prefix=item.name)
             else:
-                paths.append(item.name)
+                path_list.append(item.name)
 
     _walk_blob_hierarchy()
-    return paths
+    return path_list
 
 
 def list_s3_keys(
