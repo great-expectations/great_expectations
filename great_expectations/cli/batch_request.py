@@ -28,7 +28,7 @@ except ImportError:
     sqlalchemy = None
     Inspector = None
 
-DEFAULT_DATA_CONNECTOR_NAMES = [
+DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
     "default_runtime_data_connector_name",
     "default_inferred_data_connector_name",
 ]
