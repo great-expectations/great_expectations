@@ -263,6 +263,8 @@ class BaseDataContext:
         "ConfiguredAssetFilesystemDataConnector",
         "InferredAssetS3DataConnector",
         "ConfiguredAssetS3DataConnector",
+        "InferredAssetAzureDataConnector",
+        "ConfiguredAssetAzureDataConnector",
         "InferredAssetSqlDataConnector",
         "ConfiguredAssetSqlDataConnector",
     ]
