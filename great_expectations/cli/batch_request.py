@@ -263,7 +263,7 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     return inspector.default_schema_name
 
 
-def _check_default_data_connectors(available_data_asset_names_by_data_connector_dict):
+def _check_default_data_connectors(available_data_asset_names_by_data_connector_dict: Dict[str, List[str]]) -> Optional[str]:
     if all(
         data_connector_name in available_data_asset_names_by_data_connector_dict
         for data_connector_name in DEFAULT_DATA_CONNECTOR_NAMES
