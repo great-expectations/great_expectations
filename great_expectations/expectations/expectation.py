@@ -1381,7 +1381,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "ignore_row_if": "any_value_is_missing",
+        "ignore_row_if": "all_value_are_missing",
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
