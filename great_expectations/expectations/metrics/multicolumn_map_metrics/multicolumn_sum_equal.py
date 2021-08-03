@@ -14,5 +14,5 @@ class MulticolumnSumEqual(MulticolumnMapMetricProvider):
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
         sum_total = kwargs.get("sum_total")
-        row_wise_cond = column_list.sum(axis=1) == sum_total
+        row_wise_cond = column_list.sum(axis=1, skipna=False) == sum_total
         return row_wise_cond

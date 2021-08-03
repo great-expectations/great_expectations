@@ -24,6 +24,14 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
     map_metric = "multicolumn_sum.equal"
     success_keys = ("sum_total",)
+    default_kwarg_values = {
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "ignore_row_if": "all_values_are_missing",
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": True,
+    }
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

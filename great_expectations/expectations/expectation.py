@@ -1374,7 +1374,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "table",
         "column_list",
         "row_condition",
-        "condition_parser",
+        "condition_parser"
         "ignore_row_if",
     )
     success_keys = tuple()
