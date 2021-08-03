@@ -1,10 +1,12 @@
 import datetime
+import gzip
 import json
 import locale
 import logging
 import os
 import random
 import shutil
+from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
@@ -3810,6 +3812,20 @@ def filesystem_csv_2(tmp_path):
     assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
     return base_dir
+
+
+@pytest.fixture
+def filesystem_csv_2_gz(filesystem_csv_2):
+    _compress_csv_in_dir(filesystem_csv_2)
+    return filesystem_csv_2
+
+
+def _compress_csv_in_dir(dir: os.PathLike):
+    dir = Path(dir)
+    for file in dir.glob("*.csv"):
+        file_gz = file.with_name(file.name + ".gz")
+        file_gz.write_bytes(gzip.compress(file.read_bytes(), compresslevel=1))
+        file.unlink()
 
 
 @pytest.fixture(scope="function")
