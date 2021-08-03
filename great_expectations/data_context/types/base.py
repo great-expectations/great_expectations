@@ -414,11 +414,8 @@ filesystem type of the data connector (your data conntector is "{data['class_nam
 configuration to continue.
                 """
             )
-        if (
-            "bucket" in data
-            or "prefix" in data
-            or "delimiter" in data
-            or "max_keys" in data
+        if any(
+            key in data for key in ("bucket", "prefix", "delimiter", "max_keys")
         ) and not (
             data["class_name"]
             in [
@@ -432,17 +429,20 @@ S3 type of the data connector (your data conntector is "{data['class_name']}"). 
 continue.
                 """
             )
-        if (
-            "data_asset_name_prefix" in data
-            or "data_asset_name_suffix" in data
-            or "include_schema_name" in data
-            or "splitter_method" in data
-            or "splitter_kwargs" in data
-            or "sampling_method" in data
-            or "sampling_kwargs" in data
-            or "excluded_tables" in data
-            or "included_tables" in data
-            or "skip_inapplicable_tables" in data
+        if any(
+            key in data
+            for key in (
+                "data_asset_name_prefix",
+                "data_asset_name_suffix",
+                "include_schema_name",
+                "splitter_method",
+                "splitter_kwargs",
+                "sampling_method",
+                "sampling_kwargs",
+                "excluded_tables",
+                "included_tables",
+                "skip_inapplicable_tables",
+            )
         ) and not (
             data["class_name"]
             in [
