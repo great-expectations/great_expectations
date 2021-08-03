@@ -923,8 +923,6 @@ def _pandas_map_condition_index(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
-        df = df[column_list]
-
     result_format = metric_value_kwargs["result_format"]
 
     df = df[boolean_mapped_unexpected_values]
@@ -1050,8 +1048,6 @@ def _pandas_map_condition_rows(
                 raise ge_exceptions.ExecutionEngineError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
-
-        df = df[column_list]
 
     result_format = metric_value_kwargs["result_format"]
 
