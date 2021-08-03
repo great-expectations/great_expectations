@@ -1,7 +1,12 @@
 import logging
 import os
 import uuid
-from typing import Any, Dict, Final, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
+
+try:
+    from typing import Final
+except ImportError:
+    pass
 
 import click
 
