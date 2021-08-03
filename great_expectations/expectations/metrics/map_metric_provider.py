@@ -702,7 +702,9 @@ def _pandas_column_map_condition_values(
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
-            "_pandas_column_map_condition_values requires a column in accessor_domain_kwargs"
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_pandas_column_map_condition_values).
+"""
         )
 
     column_name = accessor_domain_kwargs["column"]
@@ -748,7 +750,9 @@ def _pandas_multicolumn_map_condition_values(
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
-            "_pandas_multicolumn_map_condition_values requires column_list in accessor_domain_kwargs"
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_pandas_multicolumn_map_condition_values).
+"""
         )
 
     column_list = accessor_domain_kwargs["column_list"]
@@ -790,7 +794,9 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
-            "_pandas_multicolumn_map_condition_filtered_row_count requires column_list in accessor_domain_kwargs"
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_pandas_multicolumn_map_condition_filtered_row_count).
+"""
         )
 
     column_list = accessor_domain_kwargs["column_list"]
@@ -844,7 +850,9 @@ def _pandas_column_map_series_and_domain_values(
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
-            "_pandas_column_map_series_and_domain_values requires a column in accessor_domain_kwargs"
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_pandas_column_map_series_and_domain_values).
+"""
         )
 
     column_name = accessor_domain_kwargs["column"]
@@ -965,7 +973,9 @@ def _pandas_column_map_condition_value_counts(
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
-            "_pandas_column_map_condition_value_counts requires a column in accessor_domain_kwargs"
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_pandas_column_map_condition_value_counts).
+"""
         )
 
     if column_name not in metrics["table.columns"]:
@@ -1185,7 +1195,9 @@ def _sqlalchemy_column_map_condition_values(
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
-            "_sqlalchemy_column_map_condition_values requires a column in accessor_domain_kwargs"
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_sqlalchemy_column_map_condition_values).
+"""
         )
 
     column_name = accessor_domain_kwargs["column"]
@@ -1232,7 +1244,9 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
-            "_sqlalchemy_column_map_condition_value_counts requires a column in accessor_domain_kwargs"
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_sqlalchemy_column_map_condition_value_counts).
+"""
         )
 
     column_name = accessor_domain_kwargs["column"]
@@ -1340,7 +1354,9 @@ def spark_column_map_condition_values(
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
-            "spark_column_map_condition_values requires a column in accessor_domain_kwargs"
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(spark_column_map_condition_values).
+"""
         )
 
     column_name = accessor_domain_kwargs["column"]
@@ -1381,7 +1397,9 @@ def _spark_column_map_condition_value_counts(
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
-            "spark_column_map_condition_values requires a column in accessor_domain_kwargs"
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_spark_column_map_condition_value_counts).
+"""
         )
 
     column_name = accessor_domain_kwargs["column"]
