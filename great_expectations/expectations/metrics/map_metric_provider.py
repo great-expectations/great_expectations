@@ -743,7 +743,7 @@ def _pandas_multicolumn_map_condition_values(
     ) = metrics["unexpected_condition"]
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=MetricDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY,
     )
 
     if "column_list" not in accessor_domain_kwargs:
@@ -785,7 +785,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=MetricDomainTypes.IDENTITY.value,
+        domain_type=MetricDomainTypes.IDENTITY,
     )
 
     if "column_list" not in accessor_domain_kwargs:
@@ -923,8 +923,6 @@ def _pandas_map_condition_index(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
-        df = df[column_list]
-
     result_format = metric_value_kwargs["result_format"]
 
     df = df[boolean_mapped_unexpected_values]
@@ -1050,8 +1048,6 @@ def _pandas_map_condition_rows(
                 raise ge_exceptions.ExecutionEngineError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
-
-        df = df[column_list]
 
     result_format = metric_value_kwargs["result_format"]
 
