@@ -450,7 +450,12 @@ S3 type of the data connector (your data connector is "{data['class_name']}").  
 continue.
                 """
             )
-        if ("container" in data or "name_starts_with" in data) and not (
+        if (
+            "container" in data
+            or "account_url" in data
+            or "conn_str" in data
+            or "name_starts_with" in data
+        ) and not (
             data["class_name"]
             in [
                 "InferredAssetAzureDataConnector",

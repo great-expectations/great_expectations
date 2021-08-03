@@ -72,7 +72,7 @@ def test_list_azure_keys_with_prefix_and_recursive(
     ]
 
 
-def test_basic_instantiation() -> None:
+def test_instantiation_with_account_url() -> None:
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -107,9 +107,11 @@ def test_basic_instantiation() -> None:
     }
 
 
-def test_instantiation_from_a_config(
-    empty_data_context_stats_enabled, blob_service_client: BlobServiceClient
-):
+# def test_instantiation_with_conn_str() -> None:
+#     raise NotImplementedError()
+
+
+def test_instantiation_from_a_config(empty_data_context_stats_enabled):
     context: DataContext = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
