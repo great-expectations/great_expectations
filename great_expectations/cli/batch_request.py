@@ -7,7 +7,7 @@ try:
     from typing import Final
 except ImportError:
     # Fallback for python < 3.8
-    from typing-extensions import Final
+    from typing_extensions import Final
 
 import click
 
