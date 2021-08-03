@@ -422,12 +422,22 @@ filesystem type of the data connector (your data conntector is "{data['class_nam
 configuration to continue.
                 """
             )
-        if (
-            "bucket" in data
-            or "prefix" in data
-            or "delimiter" in data
-            or "max_keys" in data
-        ) and not (
+        if ("delimiter" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if ("bucket" in data or "prefix" in data or "max_keys" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
@@ -440,11 +450,11 @@ S3 type of the data connector (your data connector is "{data['class_name']}").  
 continue.
                 """
             )
-        if () and not (  # TODO(cdkini): Add Azure-specific config options here!
+        if ("container" in data or "name_starts_with" in data) and not (
             data["class_name"]
             in [
-                "InferredAssetS3DataConnector",
-                "ConfiguredAssetS3DataConnector",
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
