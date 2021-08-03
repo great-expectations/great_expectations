@@ -1,7 +1,7 @@
 import logging
 import os
 import uuid
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, Final, List, Optional, Tuple, Union, cast
 
 import click
 
@@ -125,16 +125,20 @@ def select_data_connector_name(
 ) -> Optional[str]:
     msg_prompt_select_data_connector_name = "Select data_connector"
 
+    num_available_data_asset_names_by_data_connector = len(
+        available_data_asset_names_by_data_connector_dict
+    )
+
     if (
         available_data_asset_names_by_data_connector_dict is None
-        or len(available_data_asset_names_by_data_connector_dict) == 0
+        or num_available_data_asset_names_by_data_connector == 0
     ):
         return None
 
-    if len(available_data_asset_names_by_data_connector_dict) == 1:
+    if num_available_data_asset_names_by_data_connector == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
 
-    elif len(available_data_asset_names_by_data_connector_dict) == 2:
+    elif num_available_data_asset_names_by_data_connector == 2:
         # if only default data_connectors are configured, select default_inferred_asset_data_connector
         default_data_connector = _check_default_data_connectors(
             available_data_asset_names_by_data_connector_dict
@@ -263,7 +267,9 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     return inspector.default_schema_name
 
 
-def _check_default_data_connectors(available_data_asset_names_by_data_connector_dict: Dict[str, List[str]]) -> Optional[str]:
+def _check_default_data_connectors(
+    available_data_asset_names_by_data_connector_dict: Dict[str, List[str]]
+) -> Optional[str]:
     if all(
         data_connector_name in available_data_asset_names_by_data_connector_dict
         for data_connector_name in DEFAULT_DATA_CONNECTOR_NAMES
