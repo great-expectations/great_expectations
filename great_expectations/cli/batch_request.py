@@ -6,7 +6,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 try:
     from typing import Final
 except ImportError:
-    pass
+    # Fallback for python < 3.8
+    from typing-extensions import Final
 
 import click
 
