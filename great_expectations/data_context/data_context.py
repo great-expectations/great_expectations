@@ -1317,6 +1317,10 @@ class BaseDataContext:
         Run a validation operator to validate data assets and to perform the business logic around
         validation that the operator implements.
 
+        Note: This method will be deprecated along with the rest of the V2 (Batch Kwargs) API and "run_checkpoint"
+        should be used instead. This method currently only works with the V2 (Batch Kwargs) API and doesn't work with
+        the V3 (Batch Request) API.
+
         Args:
             validation_operator_name: name of the operator, as appears in the context's config file
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
