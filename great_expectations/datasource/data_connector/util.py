@@ -291,10 +291,9 @@ def get_filesystem_one_level_directory_glob_path_list(
 def list_azure_keys(
     azure: BlobServiceClient,
     query_options: dict,
-    container: str,
     recursive: bool = False,
 ) -> List[str]:
-
+    container = query_options.get("container", "")
     container_client: ContainerClient = azure.get_container_client(container)
     path_list: List[str] = []
 

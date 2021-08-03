@@ -72,10 +72,13 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
+            "container": self._container,
             "name_starts_with": self._name_starts_with,
             "delimiter": self._delimiter,
         }
         if asset is not None:
+            if asset.bucket:
+                query_options["container"] = asset.bucket
             if asset.prefix:
                 query_options["name_starts_with"] = asset.prefix
             if asset.delimiter:
@@ -83,7 +86,6 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
         path_list: List[str] = list_azure_keys(
             azure=self._azure,
-            container=self._container,
             query_options=query_options,
             recursive=False,
         )

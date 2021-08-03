@@ -31,8 +31,7 @@ def container_client(blob_service_client: BlobServiceClient) -> ContainerClient:
 def test_list_azure_keys_basic(blob_service_client: BlobServiceClient) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={},
-        container=CONTAINER_NAME,
+        query_options={"container": CONTAINER_NAME},
         recursive=False,
     )
     assert keys == [
@@ -45,8 +44,7 @@ def test_list_azure_keys_basic(blob_service_client: BlobServiceClient) -> None:
 def test_list_azure_keys_with_prefix(blob_service_client: BlobServiceClient) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={"name_starts_with": "2018/"},
-        container=CONTAINER_NAME,
+        query_options={"name_starts_with": "2018/", "container": CONTAINER_NAME},
         recursive=False,
     )
     assert keys == [
@@ -61,8 +59,7 @@ def test_list_azure_keys_with_prefix_and_recursive(
 ) -> None:
     keys = list_azure_keys(
         azure=blob_service_client,
-        query_options={"name_starts_with": "2018/"},
-        container=CONTAINER_NAME,
+        query_options={"name_starts_with": "2018/", "container": CONTAINER_NAME},
         recursive=True,
     )
     assert keys == [
