@@ -9,6 +9,7 @@ develop
 -----------------
 * [FEATURE] Enable BigQuery tests for Azure CI/CD #3155
 * [BUGFIX] Snowflake connections are closed correctly by DOCS tests (#3104)
+* [BUGFIX] Restore support for V2 API style custom expectation rendering (#3179)
 * [BUGFIX] V2 API CLI now allows files to be read that require extra `reader_options` passed.  For instance `.csv.gz` files from S3. (#2695)
 
 0.13.25
