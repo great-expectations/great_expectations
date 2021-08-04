@@ -286,6 +286,7 @@ class DataConnectorConfig(DictDot):
         glob_directive=None,
         default_regex=None,
         batch_identifiers=None,
+        credentials=None,
         bucket=None,
         prefix=None,
         delimiter=None,
@@ -307,6 +308,8 @@ class DataConnectorConfig(DictDot):
             self.default_regex = default_regex
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
+        if credentials is not None:
+            self.credentials = credentials
         if bucket is not None:
             self.bucket = bucket
         if prefix is not None:
@@ -355,6 +358,7 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
     default_regex = fields.Dict(required=False, allow_none=True)
+    credentials = fields.Raw(required=False, allow_none=True)
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
@@ -397,7 +401,7 @@ class DataConnectorConfigSchema(Schema):
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-subclass of the FilePathDataConnector class (your data conntector is "{data['class_name']}").  Please update your
+subclass of the FilePathDataConnector class (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )
@@ -410,7 +414,7 @@ configuration to continue.
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-filesystem type of the data connector (your data conntector is "{data['class_name']}").  Please update your
+filesystem type of the data connector (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )

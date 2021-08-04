@@ -40,6 +40,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         name: str,
         datasource_name: str,
         bucket: str,
+        credentials: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
@@ -83,8 +84,12 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
         if boto3_options is None:
             boto3_options = {}
+        if credentials is None:
+            credentials = {}
 
         try:
+            # boto3_options takes priority over credentials in the case of duplicate keys
+            boto3_options = {**credentials, **boto3_options}
             self._s3 = boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
