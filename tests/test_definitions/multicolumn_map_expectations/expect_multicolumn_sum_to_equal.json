@@ -12,7 +12,7 @@
     "tests" : [{
       "title": "basic_positive_test",
       "exact_match_out" : false,
-      "suppress_test_for": ["pandas"],
+      "suppress_test_for": ["pandas", "sqlalchemy", "spark"],
       "in": {
         "column_list": ["w", "x"],
         "ignore_row_if": "never",
@@ -26,7 +26,7 @@
     },{
       "title": "basic_positive_test_more_than_2_columns",
       "exact_match_out" : false,
-      "suppress_test_for": ["pandas"],
+      "suppress_test_for": ["pandas", "sqlalchemy", "spark"],
       "in": {
         "column_list": ["z", "a", "b"],
         "sum_total": 3
@@ -42,7 +42,8 @@
       "exact_match_out" : true,
       "in": {
         "column_list": ["w", "y"],
-        "row_condition": "x<0.8 & y<0.8",
+        "sum_total": 1,
+        "row_condition": "w!=0.56 & w<0.8 & x<0.8 & y<0.8",
         "condition_parser": "pandas",
         "ignore_row_if": "any_value_is_missing",
         "result_format": "COMPLETE"
@@ -50,7 +51,7 @@
       "out": {
         "success": true,
         "result": {
-          "element_count": 3,
+          "element_count": 7,
           "missing_count": 0,
           "missing_percent": 0.0,
           "unexpected_count": 0
@@ -59,7 +60,7 @@
     },{
       "title": "basic_negative_test",
       "exact_match_out" : false,
-      "suppress_test_for": ["pandas"],
+      "suppress_test_for": ["pandas", "sqlalchemy", "spark"],
       "in": {
         "column_list": ["w", "y"],
         "ignore_row_if": "any_value_is_missing",
@@ -73,7 +74,7 @@
     },{
       "title": "negative_test_different_value",
       "exact_match_out" : false,
-      "suppress_test_for": ["pandas"],
+      "suppress_test_for": ["pandas", "sqlalchemy", "spark"],
       "in": {
         "column_list": ["w", "x"],
         "ignore_row_if": "any_value_is_missing",

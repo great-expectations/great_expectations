@@ -57,8 +57,8 @@ def pytest_generate_tests(metafunc):
             for filename in test_configuration_files:
                 # TODO: <Alex>ALEX</Alex>
                 if not (
-                    # filename.find("expect_multicolumn_sum_to_equal") != (-1)  # or
-                    filename.find("expect_compound_columns_to_be_unique") != (-1)
+                    filename.find("expect_multicolumn_sum_to_equal") != (-1)  # or
+                    # filename.find("expect_compound_columns_to_be_unique") != (-1)
                 ):
                     continue
                 # TODO: <Alex>ALEX</Alex>

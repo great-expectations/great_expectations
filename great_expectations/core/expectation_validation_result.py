@@ -1,6 +1,8 @@
 import json
 import logging
 from copy import deepcopy
+from typing import Optional
+from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import (
@@ -46,6 +48,7 @@ class ExpectationValidationResult(SerializableDictDot):
     ):
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
+        print(f'\n[ALEX_TEST] [ExpectationValidationResult] EXCEPTION_DID_NOT_OCCUR_IN_CONSTRUCTOR!!! SUCCESS: {success}')
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
@@ -53,6 +56,7 @@ class ExpectationValidationResult(SerializableDictDot):
         if result is None:
             result = {}
         self.result = result
+        print(f'\n[ALEX_TEST] [ExpectationValidationResult] RESULT_IN_CONSTRUCTOR: {self.result}')
         if meta is None:
             meta = {}
         # We require meta information to be serializable, but do not convert until necessary
@@ -77,6 +81,40 @@ class ExpectationValidationResult(SerializableDictDot):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         try:
+            print(f'\n[ALEX_TEST] IN__EQ__: ACTUAL_SELF.RESULT:\n{self.result} ; TYPE: {str(type(self.result))}')
+            print(f'\n[ALEX_TEST] IN__EQ__: OTHER.RESULT:\n{other.result} ; TYPE: {str(type(other.result))}')
+            print(f'\n[ALEX_TEST] IN__EQ__: SELF.EXPECTATION_CONFIG:\n{self.expectation_config} ; TYPE: {str(type(self.expectation_config))}')
+            print(f'\n[ALEX_TEST] IN__EQ__: OTHER.EXPECTATION_CONFIG:\n{other.expectation_config} ; TYPE: {str(type(other.expectation_config))}')
+            e = self.expectation_config.isEquivalentTo(other.expectation_config)
+            r = all(self.result) == all(other.result)
+            print(f'\n[ALEX_TEST] IN__EQ__: RESULTS_ARE_SAME: {r}')
+            better_same_results = all(
+                [other.result[k] == self.result[k] for k in other.result.keys()]
+            )
+            print(f'\n[ALEX_TEST] IN__EQ__: BETTER_RESULTS_ARE_SAME: {better_same_results}')
+            everything = all(
+                (
+                    self.success == other.success,
+                    (
+                            self.expectation_config is None
+                            and other.expectation_config is None
+                    )
+                    or (
+                            self.expectation_config is not None
+                            and self.expectation_config.isEquivalentTo(
+                        other.expectation_config
+                    )
+                    ),
+                    # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
+                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
+                    # handled appropriately.
+                    (self.result is None and other.result is None)
+                    or (all(self.result) == all(other.result)),
+                    self.meta == other.meta,
+                    self.exception_info == other.exception_info,
+                )
+            )
+            print(f'\n[ALEX_TEST] IN__EQ__: EVERYTHING_TRUE: {everything}')
             return all(
                 (
                     self.success == other.success,
@@ -110,6 +148,8 @@ class ExpectationValidationResult(SerializableDictDot):
             # Delegate comparison to the other instance's __ne__.
             return NotImplemented
         try:
+            print(f'\n[ALEX_TEST] IN__NEQ__: ACTUAL_SELF.RESULT:\n{self.result} ; TYPE: {str(type(self.result))}')
+            print(f'\n[ALEX_TEST] IN__NEQ__: OTHER.RESULT:\n{other.result} ; TYPE: {str(type(other.result))}')
             return any(
                 (
                     self.success != other.success,
@@ -264,6 +304,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         evaluation_parameters=None,
         statistics=None,
         meta=None,
+        ge_cloud_id: Optional[UUID] = None,
     ):
         self.success = success
         if results is None:
@@ -363,6 +404,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     evaluation_parameters = fields.Dict()
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump
