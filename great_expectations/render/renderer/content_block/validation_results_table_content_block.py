@@ -1,7 +1,9 @@
 import logging
 import traceback
+import warnings
 from copy import deepcopy
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
     ExpectColumnKlDivergenceToBeLessThan,
 )
@@ -59,6 +61,43 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             content_block.styling = styling
 
     @classmethod
+    def _get_legacy_v2_api_style_expectation_string_fn(cls, expectation_type):
+        legacy_expectation_string_fn = getattr(cls, expectation_type, None)
+        if legacy_expectation_string_fn is None:
+            return None
+        warnings.warn(
+            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
+            DeprecationWarning,
+        )
+        # _legacy_v2_mode = True # todo(jdmatteo)
+
+        def expectation_string_fn_with_legacy_translation(
+            configuration: ExpectationConfiguration, runtime_configuration: dict
+        ):
+            return legacy_expectation_string_fn(
+                expectation=configuration,
+                styling=runtime_configuration.get("styling", None),
+                include_column_name=runtime_configuration.get(
+                    "include_column_name", True
+                ),
+            )
+
+        return expectation_string_fn_with_legacy_translation
+
+    @staticmethod
+    def _get_legacy_observed_value(expectation_string_fn, result):
+        if (
+            expectation_string_fn.__name__
+            != "expectation_string_fn_with_legacy_translation"
+        ):
+            return None
+        warnings.warn(
+            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
+            DeprecationWarning,
+        )
+        return result["result"].get("observed_value")
+
+    @classmethod
     def _get_content_block_fn(cls, expectation_type):
         expectation_string_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type="renderer.prescriptive"
@@ -66,6 +105,10 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         expectation_string_fn = (
             expectation_string_fn[1] if expectation_string_fn else None
         )
+        if expectation_string_fn is None:
+            expectation_string_fn = cls._get_legacy_v2_api_style_expectation_string_fn(
+                expectation_type
+            )
         if expectation_string_fn is None:
             expectation_string_fn = getattr(cls, "_missing_content_block_fn")
 
@@ -147,7 +190,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 observed_value = [
                     observed_value_renderer[1](result=result)
                     if observed_value_renderer
-                    else "--"
+                    else (
+                        cls._get_legacy_observed_value(expectation_string_fn, result)
+                        or "--"
+                    )
                 ]
             except Exception as e:
                 exception_traceback = traceback.format_exc()
