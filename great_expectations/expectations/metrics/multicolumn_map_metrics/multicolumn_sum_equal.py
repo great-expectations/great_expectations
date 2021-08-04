@@ -7,8 +7,15 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 class MulticolumnSumEqual(MulticolumnMapMetricProvider):
     condition_metric_name = "multicolumn_sum.equal"
+    condition_domain_keys = (
+        "batch_id",
+        "table",
+        "column_list",
+        "row_condition",
+        "condition_parser",
+        "ignore_row_if",
+    )
     condition_value_keys = ("sum_total",)
-    condition_domain_keys = ("batch_id", "table", "column_list")
 
     # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
     @multicolumn_condition_partial(engine=PandasExecutionEngine)

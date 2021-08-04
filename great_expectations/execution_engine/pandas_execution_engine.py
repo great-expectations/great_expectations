@@ -323,9 +323,12 @@ Please check your config."""
                 )
 
         # Filtering by row condition
+        print(f'\n[ALEX_TEST] DOMAIN_KWARGS: {domain_kwargs} ; TYPE: {str(type(domain_kwargs))}')
         row_condition = domain_kwargs.get("row_condition", None)
         if row_condition:
             condition_parser = domain_kwargs.get("condition_parser", None)
+            print(f'\n[ALEX_TEST] ROW_CONDITION: {row_condition} ; TYPE: {str(type(row_condition))}')
+            print(f'\n[ALEX_TEST] CONDITION_PARSER: {condition_parser} ; TYPE: {str(type(condition_parser))}')
 
             # Ensuring proper condition parser has been provided
             if condition_parser not in ["python", "pandas"]:

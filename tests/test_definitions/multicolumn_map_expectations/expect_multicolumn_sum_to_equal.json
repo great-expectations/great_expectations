@@ -12,6 +12,7 @@
     "tests" : [{
       "title": "basic_positive_test",
       "exact_match_out" : false,
+      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["w", "x"],
         "ignore_row_if": "never",
@@ -25,6 +26,7 @@
     },{
       "title": "basic_positive_test_more_than_2_columns",
       "exact_match_out" : false,
+      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["z", "a", "b"],
         "sum_total": 3
@@ -46,13 +48,18 @@
         "result_format": "COMPLETE"
       },
       "out": {
-        "unexpected_list": [],
-        "unexpected_index_list": [],
-        "success": true
+        "success": true,
+        "result": {
+          "element_count": 3,
+          "missing_count": 0,
+          "missing_percent": 0.0,
+          "unexpected_count": 0
+        }
       }
     },{
       "title": "basic_negative_test",
       "exact_match_out" : false,
+      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["w", "y"],
         "ignore_row_if": "any_value_is_missing",
@@ -66,6 +73,7 @@
     },{
       "title": "negative_test_different_value",
       "exact_match_out" : false,
+      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["w", "x"],
         "ignore_row_if": "any_value_is_missing",
