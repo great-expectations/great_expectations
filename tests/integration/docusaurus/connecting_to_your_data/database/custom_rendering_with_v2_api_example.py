@@ -1,8 +1,6 @@
 """
 This tests custom expectation rendering with the V2 API as described at
 https://docs.greatexpectations.io/en/latest/reference/spare_parts/data_docs_reference.html#customizing-data-docs.
-
-TOOD(jdimatteo): run this test as part of Azure pipeline.
 """
 import os
 import shutil
