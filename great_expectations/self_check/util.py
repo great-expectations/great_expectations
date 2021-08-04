@@ -928,8 +928,17 @@ def build_sa_validator_with_data(
         # https://stackoverflow.com/questions/4406501/change-the-name-of-a-key-in-dictionary
         # https://www.codegrepper.com/code-examples/python/replace+space+with+underscore+in+column+names+pandas
         if sa_engine_name == "bigquery":
+            print("this is working?")
+            print("schema before")
+            print("df before")
             schema = {k.replace(" ", "_"): v for k, v in schema.items()}
             df.columns = df.columns.str.replace(" ", "_")
+
+            print("schema after")
+            print("df after")
+            print(schema)
+            print(df.columns)
+            print("~~~~~~~~~~~~~~~~")
 
         sql_dtypes = {
             col: dialect_types.get(sa_engine_name)[dtype]
