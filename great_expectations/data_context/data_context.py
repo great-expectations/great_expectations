@@ -2898,7 +2898,7 @@ class BaseDataContext:
         )
         profiling_results["results"].append((expectation_suite, validation_results))
 
-        self.validations_store.set(
+        validation_ref = self.validations_store.set(
             key=ValidationResultIdentifier(
                 expectation_suite_identifier=ExpectationSuiteIdentifier(
                     expectation_suite_name=expectation_suite_name
@@ -2908,6 +2908,10 @@ class BaseDataContext:
             ),
             value=validation_results,
         )
+
+        if isinstance(validation_ref, GeCloudIdAwareRef):
+            ge_cloud_id = validation_ref.ge_cloud_id
+            validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
         if isinstance(batch, Dataset):
             # For datasets, we can produce some more detailed statistics
