@@ -180,6 +180,94 @@ def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock_s3
+def test_instantiation_from_a_config_with_credentials(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
+    report_object = context.test_yaml_config(
+        f"""
+        module_name: great_expectations.datasource.data_connector
+        class_name: ConfiguredAssetS3DataConnector
+        datasource_name: FAKE_DATASOURCE
+        name: TEST_DATA_CONNECTOR
+        credentials:
+            aws_access_key_id: FAKE_ACCESS_KEY
+            aws_secret_access_key: FAKE_SECRET_KEY
+            aws_session_token: FAKE_SESSION_TOKEN
+        default_regex:
+            pattern: alpha-(.*)\\.csv
+            group_names:
+                - index
+        bucket: {bucket}
+        prefix: ""
+        assets:
+            alpha:
+    """,
+        return_mode="report_object",
+    )
+
+    assert report_object == {
+        "class_name": "ConfiguredAssetS3DataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "alpha-1.csv",
+                    "alpha-2.csv",
+                    "alpha-3.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
+    }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetS3DataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock_s3
 def test_instantiation_from_a_config_regex_does_not_match_paths(
     mock_emit, empty_data_context_stats_enabled
 ):
