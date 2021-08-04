@@ -1529,14 +1529,16 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
         filtered_row_count = metrics.get(self.map_metric + ".filtered_row_count")
 
-        success = None
-        if total_count is None:
+        if (
+            total_count is None
+            or filtered_row_count is None
+            or total_count == 0
+            or filtered_row_count == 0
+        ):
             # Vacuously true
             success = True
-        elif total_count != 0:
+        else:
             success = unexpected_count == 0
-        elif total_count == 0:
-            success = True
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
