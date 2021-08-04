@@ -114,6 +114,15 @@ try:
             "INTEGER": pybigquery.sqlalchemy_bigquery.INTEGER,
             "NUMERIC": pybigquery.sqlalchemy_bigquery.NUMERIC,
             "STRING": pybigquery.sqlalchemy_bigquery.STRING,
+            "BIGNUMERIC": pybigquery.sqlalchemy_bigquery.BIGNUMERIC,
+            "BYTES": pybigquery.sqlalchemy_bigquery.BYTES,
+            "BOOL": pybigquery.sqlalchemy_bigquery.BOOL,
+            "BOOLEAN": pybigquery.sqlalchemy_bigquery.BOOLEAN,
+            "TIMESTAMP": pybigquery.sqlalchemy_bigquery.TIMESTAMP,
+            "TIME": pybigquery.sqlalchemy_bigquery.TIME,
+            "FLOAT": pybigquery.sqlalchemy_bigquery.FLOAT,
+            "DATE": pybigquery.sqlalchemy_bigquery.DATE,
+            "DATETIME": pybigquery.sqlalchemy_bigquery.DATETIME,
         }
     except AttributeError:
         # In older versions of the pybigquery driver, types were not exported, so we use a hack
@@ -1423,9 +1432,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         ###
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",  # TODO: Not yet implemented with v3 API -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
-            "expect_table_columns_to_match_set",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
-            "expect_column_values_to_be_of_type",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
-            "expect_column_values_to_be_in_type_list",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_values_to_be_in_set",  # TODO: No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01'] -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_values_to_be_increasing",  # TODO: KeyError: 'unexpected_list' -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
@@ -2101,5 +2107,5 @@ def generate_test_table_name(
 
 def _create_bigquery_engine() -> Engine:
     gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "superconductive-internal")
-    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
+    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "demo")
     return create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}")
