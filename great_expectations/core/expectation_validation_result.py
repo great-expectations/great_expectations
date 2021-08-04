@@ -96,7 +96,14 @@ class ExpectationValidationResult(SerializableDictDot):
                     # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
                     # handled appropriately.
                     (self.result is None and other.result is None)
-                    or (all(self.result) == all(other.result)),
+                    or all(
+                        [
+                            self.result[k] == other.result[k]
+                            for k in set(self.result.keys()).intersection(
+                                other.result.keys()
+                            )
+                        ]
+                    ),
                     self.meta == other.meta,
                     self.exception_info == other.exception_info,
                 )

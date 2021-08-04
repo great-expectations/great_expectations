@@ -193,7 +193,7 @@
           "observed_value": ["c1", "c2", "c3"],
           "details": {
             "mismatched": {
-              "missing": ["c1", "c2", "c3"]
+              "unexpected": ["c1", "c2", "c3"]
             }
           }
         }
