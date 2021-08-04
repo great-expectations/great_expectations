@@ -540,7 +540,6 @@ class ExecutionEngineConfig(DictDot):
         credentials=None,
         spark_config=None,
         boto3_options=None,
-        azure_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -557,8 +556,6 @@ class ExecutionEngineConfig(DictDot):
             self.spark_config = spark_config
         if boto3_options is not None:
             self.boto3_options = boto3_options
-        if azure_options is not None:
-            self.azure_options = azure_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -586,14 +583,7 @@ class ExecutionEngineConfigSchema(Schema):
     spark_config = fields.Raw(required=False, allow_none=True)
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
-
-    # S3
     boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-
-    # Azure
-    azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
 
@@ -641,7 +631,6 @@ class DatasourceConfig(DictDot):
         introspection=None,
         tables=None,
         boto3_options=None,
-        azure_options=None,
         reader_method=None,
         reader_options=None,
         limit=None,
@@ -686,8 +675,6 @@ class DatasourceConfig(DictDot):
             self.tables = tables
         if boto3_options is not None:
             self.boto3_options = boto3_options
-        if azure_options is not None:
-            self.azure_options = azure_options
         if reader_method is not None:
             self.reader_method = reader_method
         if reader_options is not None:
@@ -735,9 +722,6 @@ class DatasourceConfigSchema(Schema):
     introspection = fields.Dict(required=False, allow_none=True)
     tables = fields.Dict(required=False, allow_none=True)
     boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     reader_method = fields.String(required=False, allow_none=True)
