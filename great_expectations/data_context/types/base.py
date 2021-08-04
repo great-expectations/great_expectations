@@ -581,11 +581,11 @@ class ExecutionEngineConfigSchema(Schema):
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
-    caching = fields.Boolean(required=False, allow_none=True)
-    batch_spec_defaults = fields.Dict(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    caching = fields.Boolean(required=False, allow_none=True)
+    batch_spec_defaults = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
