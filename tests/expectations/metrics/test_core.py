@@ -1570,7 +1570,9 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 
 def test_map_multicolumn_sum_equal():
     engine = build_pandas_engine(
-        pd.DataFrame(data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1]})
+        pd.DataFrame(
+            data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
+        )
     )
 
     metrics: dict = {}
@@ -1646,7 +1648,7 @@ def test_map_multicolumn_sum_equal():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id].empty
-    assert len(metrics[unexpected_rows_metric.id].columns) == 2
+    assert len(metrics[unexpected_rows_metric.id].columns) == 4
 
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
@@ -1703,9 +1705,9 @@ def test_map_multicolumn_sum_equal():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id].equals(
-        pd.DataFrame(data={"a": [2], "b": [3], "c": [1]}, index=[2])
+        pd.DataFrame(data={"a": [2], "b": [3], "c": [1], "d": [9]}, index=[2])
     )
-    assert len(metrics[unexpected_rows_metric.id].columns) == 3
+    assert len(metrics[unexpected_rows_metric.id].columns) == 4
     pd.testing.assert_index_equal(
         metrics[unexpected_rows_metric.id].index, pd.Index([2])
     )
@@ -1789,7 +1791,7 @@ def test_map_compound_columns_unique():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id].empty
-    assert len(metrics[unexpected_rows_metric.id].columns) == 2
+    assert len(metrics[unexpected_rows_metric.id].columns) == 3
 
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
@@ -1846,9 +1848,9 @@ def test_map_compound_columns_unique():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id].equals(
-        pd.DataFrame(data={"a": [1, 1], "c": [2, 2]}, index=[1, 2])
+        pd.DataFrame(data={"a": [1, 1], "b": [2, 3], "c": [2, 2]}, index=[1, 2])
     )
-    assert len(metrics[unexpected_rows_metric.id].columns) == 2
+    assert len(metrics[unexpected_rows_metric.id].columns) == 3
     pd.testing.assert_index_equal(
         metrics[unexpected_rows_metric.id].index, pd.Index([1, 2])
     )
