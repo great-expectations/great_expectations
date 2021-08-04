@@ -1932,6 +1932,10 @@ class CheckpointConfig(BaseYamlConfig):
     def batch_request(self):
         return self._batch_request
 
+    @batch_request.setter
+    def batch_request(self, value: dict):
+        self._batch_request = value
+
     @property
     def expectation_suite_name(self):
         return self._expectation_suite_name
