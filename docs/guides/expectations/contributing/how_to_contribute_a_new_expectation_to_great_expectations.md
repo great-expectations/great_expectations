@@ -154,7 +154,7 @@ The value of `examples` is a list of examples.
 
 Each example is a dictionary with two keys:
 
-* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named “mostly_threes” with 10 rows. If you define multiple columns, make sure that they have the same number of rows. If possible, include test data and tests that includes null values (None in the python test definition).
+* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named “mostly_threes” with 10 rows. If you define multiple columns, make sure that they have the same number of rows. If possible, include test data and tests that includes null values (None in the Python test definition).
 
 * `tests`: a list of test cases that use the data defined above as input to validate
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
