@@ -290,10 +290,14 @@ class DataConnectorConfig(DictDot):
         prefix=None,
         delimiter=None,
         max_keys=None,
-        boto3_options=None,
-        azure_options=None,
         sorters=None,
         batch_spec_passthrough=None,
+        # S3 connection obj args
+        boto3_options=None,
+        # Azure connection obj args
+        account_url=None,
+        conn_str=None,
+        credential=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -316,14 +320,23 @@ class DataConnectorConfig(DictDot):
             self.delimiter = delimiter
         if max_keys is not None:
             self.max_keys = max_keys
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
-        if azure_options is not None:
-            self.azure_options = azure_options
         if sorters is not None:
             self.sorters = sorters
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
+
+        # S3
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
+
+        # Azure
+        if account_url is not None:
+            self.account_url = account_url
+        if conn_str is not None:
+            self.conn_str = conn_str
+        if credential is not None:
+            self.credential = credential
+
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -366,9 +379,6 @@ class DataConnectorConfigSchema(Schema):
     delimiter = fields.String(required=False, allow_none=True)
     max_keys = fields.Integer(required=False, allow_none=True)
     boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
@@ -554,14 +564,19 @@ class ExecutionEngineConfigSchema(Schema):
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
+    caching = fields.Boolean(required=False, allow_none=True)
+    batch_spec_defaults = fields.Dict(required=False, allow_none=True)
+
+    # S3
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+
+    # Azure
+
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
-    caching = fields.Boolean(required=False, allow_none=True)
-    batch_spec_defaults = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
