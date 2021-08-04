@@ -419,8 +419,7 @@ configuration to continue.
                 """
             )
         if (
-            "credentials" in data
-            or "bucket" in data
+            "bucket" in data
             or "prefix" in data
             or "delimiter" in data
             or "max_keys" in data
