@@ -193,6 +193,11 @@ class ValidationResultIdentifier(DataContextKey):
             batch_identifier=batch_identifier,
         )
 
+    # TODO: [Rob] nix method after GeCloudIdentifier is implemented
+    @classmethod
+    def from_ge_tuple(cls, tuple_):
+        return tuple_[0]
+
 
 class ValidationResultIdentifierSchema(Schema):
     expectation_suite_identifier = fields.Nested(
