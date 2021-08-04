@@ -22,7 +22,7 @@ great_expectations --v3-api datasource new
 </TabItem>
 <TabItem value="yaml">
 
-If you use Great Expectations in an environment that has filesystem access, and prefer not to use the CLI, run the code in this guide in a notebook or other python script.
+If you use Great Expectations in an environment that has filesystem access, and prefer not to use the CLI, run the code in this guide in a notebook or other Python script.
 
 See [🍏 CORE SKILL ICON How to instantiate a Data Context](#) for details.
 
