@@ -681,7 +681,8 @@ def get_dataset(
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
-
+    elif dataset_type == "bigquery":
+        pass
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
