@@ -286,18 +286,20 @@ class DataConnectorConfig(DictDot):
         glob_directive=None,
         default_regex=None,
         batch_identifiers=None,
-        bucket=None,
-        prefix=None,
-        delimiter=None,
-        max_keys=None,
         sorters=None,
         batch_spec_passthrough=None,
         # S3 connection obj args
         boto3_options=None,
+        bucket=None,
+        prefix=None,
+        max_keys=None,
         # Azure connection obj args
+        container=None,
         account_url=None,
         conn_str=None,
         credential=None,
+        name_starts_with=None,
+        delimiter=None,  # Shared between S3 and Azure
         **kwargs,
     ):
         self._class_name = class_name
@@ -312,14 +314,6 @@ class DataConnectorConfig(DictDot):
             self.default_regex = default_regex
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
-        if bucket is not None:
-            self.bucket = bucket
-        if prefix is not None:
-            self.prefix = prefix
-        if delimiter is not None:
-            self.delimiter = delimiter
-        if max_keys is not None:
-            self.max_keys = max_keys
         if sorters is not None:
             self.sorters = sorters
         if batch_spec_passthrough is not None:
@@ -328,14 +322,28 @@ class DataConnectorConfig(DictDot):
         # S3
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if bucket is not None:
+            self.bucket = bucket
+        if prefix is not None:
+            self.prefix = prefix
+        if max_keys is not None:
+            self.max_keys = max_keys
 
         # Azure
+        if container is not None:
+            self.container = container
         if account_url is not None:
             self.account_url = account_url
         if conn_str is not None:
             self.conn_str = conn_str
         if credential is not None:
             self.credential = credential
+        if name_starts_with is not None:
+            self.name_starts_with = name_starts_with
+
+        # Both S3 and Azure
+        if delimiter is not None:
+            self.delimiter = delimiter
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -374,13 +382,25 @@ class DataConnectorConfigSchema(Schema):
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
-    bucket = fields.String(required=False, allow_none=True)
-    prefix = fields.String(required=False, allow_none=True)
-    delimiter = fields.String(required=False, allow_none=True)
-    max_keys = fields.Integer(required=False, allow_none=True)
+
+    # S3
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
+
+    # Azure
+    container = fields.String(required=False, allow_none=True)
+    account_url = fields.String(required=False, allow_none=True)
+    conn_str = fields.String(required=False, allow_none=True)
+    credential = fields.String(required=False, allow_none=True)
+    name_starts_with = fields.String(required=False, allow_none=True)
+
+    # Both S3 and Azure
+    delimiter = fields.String(required=False, allow_none=True)
+
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
@@ -573,7 +593,6 @@ class ExecutionEngineConfigSchema(Schema):
     )
 
     # Azure
-
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
