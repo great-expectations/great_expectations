@@ -10,6 +10,7 @@ from great_expectations.checkpoint.checkpoint import (
     CheckpointResult,
     SimpleCheckpoint,
 )
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import filter_properties_dict
 
@@ -911,3 +912,45 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
     assert len(result.list_validation_results()) == 2
     assert result.success
+
+
+@pytest.fixture
+def runtime_batch_request():
+    runtime_batch_request = RuntimeBatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_runtime_data_connector",
+        data_asset_name="users",
+    )
+    return runtime_batch_request
+
+
+def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector_creates_config(
+    context_with_data_source_and_empty_suite,
+    runtime_batch_request,
+    store_validation_result_action,
+    store_eval_parameter_action,
+    update_data_docs_action,
+):
+    context: DataContext = context_with_data_source_and_empty_suite
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
+    )
+    checkpoint_config = checkpoint.config
+
+    assert isinstance(checkpoint_config, CheckpointConfig)
+    assert checkpoint_config.name == "my_checkpoint"
+    assert checkpoint_config.action_list == [
+        store_validation_result_action,
+        store_eval_parameter_action,
+        update_data_docs_action,
+    ]
+    assert checkpoint_config.batch_request == {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_runtime_data_connector",
+        "data_asset_name": "users",
+    }
+    assert checkpoint_config.config_version == 1.0
+    assert checkpoint_config.class_name == "Checkpoint"
+    assert checkpoint_config.evaluation_parameters == {}
+    assert checkpoint_config.runtime_configuration == {}
+    assert checkpoint_config.validations == []
