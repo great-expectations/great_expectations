@@ -69,7 +69,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
             DeprecationWarning,
         )
-        # _legacy_v2_mode = True # todo(jdmatteo)
 
         def expectation_string_fn_with_legacy_translation(
             configuration: ExpectationConfiguration, runtime_configuration: dict
@@ -85,7 +84,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         return expectation_string_fn_with_legacy_translation
 
     @staticmethod
-    def _get_legacy_observed_value(expectation_string_fn, result):
+    def _get_legacy_v2_api_observed_value(expectation_string_fn, result):
         if (
             expectation_string_fn.__name__
             != "expectation_string_fn_with_legacy_translation"
@@ -191,7 +190,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     observed_value_renderer[1](result=result)
                     if observed_value_renderer
                     else (
-                        cls._get_legacy_observed_value(expectation_string_fn, result)
+                        cls._get_legacy_v2_api_observed_value(
+                            expectation_string_fn, result
+                        )
                         or "--"
                     )
                 ]
