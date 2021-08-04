@@ -101,6 +101,7 @@ except (ImportError, KeyError):
 
 try:
     import pybigquery.sqlalchemy_bigquery
+
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     sqlalchemy.dialects.registry.register(
@@ -880,7 +881,7 @@ def build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
-        "bigquery": pybigquery.sqlalchemy_bigquery.BigQueryDialect
+        "bigquery": pybigquery.sqlalchemy_bigquery.BigQueryDialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,

@@ -146,10 +146,9 @@ def pytest_generate_tests(metafunc):
                                     )
                                 ):
                                     generate_test = True
-                                elif (
-                                        "bigquery" in test["only_for"]
-                                      and isinstance(
-                                          validator_with_data.execution_engine.active_batch_data.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect)
+                                elif "bigquery" in test["only_for"] and isinstance(
+                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
                                 ):
                                     print("GENERATE TEST FOR BIG QUERY")
                                     generate_test = True
