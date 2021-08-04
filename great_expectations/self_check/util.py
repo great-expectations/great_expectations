@@ -922,8 +922,15 @@ def build_sa_validator_with_data(
         and sa_engine_name in schemas
         and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
     ):
-        # currently engine.dialect is : BigQueryDialect
         schema = schemas[sa_engine_name]
+
+        # handle bigquery limit
+        # https://stackoverflow.com/questions/4406501/change-the-name-of-a-key-in-dictionary
+        # https://www.codegrepper.com/code-examples/python/replace+space+with+underscore+in+column+names+pandas
+        if sa_engine_name == "bigquery":
+            schema = {k.replace(' ', '_'): v for k, v in schema.items()}
+            df.columns = df.columns.str.replace(' ', '_')
+
         sql_dtypes = {
             col: dialect_types.get(sa_engine_name)[dtype]
             for (col, dtype) in schema.items()
@@ -955,6 +962,7 @@ def build_sa_validator_with_data(
             elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
                 df[col] = pd.to_datetime(df[col])
 
+
     if table_name is None:
         table_name = generate_test_table_name()
 
@@ -970,8 +978,6 @@ def build_sa_validator_with_data(
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    print("ENGINE WAS SUCCESSFUL")
-    print(execution_engine)
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 

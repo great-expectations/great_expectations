@@ -106,7 +106,6 @@ def pytest_generate_tests(metafunc):
                                 validator_with_data.execution_engine.active_batch_data,
                                 SqlAlchemyBatchData,
                             ):
-                                print("HELLO THIS WORKS")
                                 # Call out supported dialects
                                 if "sqlalchemy" in test["only_for"]:
                                     generate_test = True
