@@ -1,6 +1,8 @@
 import json
 import logging
 from copy import deepcopy
+from typing import Optional
+from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import (
@@ -264,6 +266,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         evaluation_parameters=None,
         statistics=None,
         meta=None,
+        ge_cloud_id: Optional[UUID] = None,
     ):
         self.success = success
         if results is None:
@@ -363,6 +366,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     evaluation_parameters = fields.Dict()
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump
