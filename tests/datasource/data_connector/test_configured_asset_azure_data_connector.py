@@ -14,6 +14,11 @@ try:
     CONTAINER_NAME = os.environ["CONTAINER_NAME"]
 except:
     print("Please set environment variables before running tests")
+from ruamel.yaml import YAML
+
+from great_expectations.data_context.util import instantiate_class_from_config
+
+yaml = YAML()
 
 
 @pytest.fixture
@@ -155,6 +160,42 @@ def test_instantiation_from_a_config(empty_data_context_stats_enabled):
     }
 
 
+def test_abc():
+    my_data_connector_yaml = yaml.load(
+        f"""
+            class_name: ConfiguredAssetAzureDataConnector
+            datasource_name: test_environment
+            execution_engine:
+                class_name: PandasExecutionEngine
+            container: {CONTAINER_NAME}
+            name_starts_with: ""
+            assets:
+                TestFiles:
+            default_regex:
+                pattern: (.+)_(.+)_(.+)\\.csv
+                group_names:
+                    - name
+                    - timestamp
+                    - price
+            azure_options:
+                account_url: {ACCOUNT_URL}
+        """
+    )
+
+    my_data_connector: ConfiguredAssetAzureDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_azure_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
+    )
+
+
 # def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context_stats_enabled):
 #     context: DataContext = empty_data_context_stats_enabled
 
@@ -164,20 +205,35 @@ def test_instantiation_from_a_config(empty_data_context_stats_enabled):
 #         class_name: ConfiguredAssetAzureDataConnector
 #         datasource_name: FAKE_DATASOURCE
 #         name: TEST_DATA_CONNECTOR
-
 #         container: {CONTAINER_NAME}
-#         prefix: ""
-
+#         name_starts_with: ""
 #         default_regex:
 #             pattern: yellow_trip_data_sample_(.*)\\.csv
 #             group_names:
 #                 - timestamp
-
 #         assets:
 #             alpha:
+#         azure_options:
+#             account_url: {ACCOUNT_URL}
 #     """,
 #         return_mode="report_object",
 #     )
+#     assert report_object == {
+#         "class_name": "ConfiguredAssetAzureDataConnector",
+#         "data_asset_count": 1,
+#         "example_data_asset_names": [
+#             "alpha",
+#         ],
+#         "data_assets": {
+#             "alpha": {"example_data_references": [
+#                 "yellow_trip_data_sample_2018-01.csv",
+#                 "yellow_trip_data_sample_2018-02.csv",
+#                 "yellow_trip_data_sample_2018-03.csv",
+#             ], "batch_definition_count": 3},
+#         },
+#         "example_unmatched_data_references": [],
+#         "unmatched_data_reference_count": 0,
+#     }
 
 # def test_return_all_batch_definitions_unsorted():
 #     raise NotImplementedError()
