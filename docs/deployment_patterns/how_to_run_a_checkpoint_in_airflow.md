@@ -46,7 +46,7 @@ Another option is to use the output of the `great_expectations --v3-api checkpoi
 
     ...
 
-    A python script was created that runs the checkpoint named: `my_checkpoint`
+    A Python script was created that runs the checkpoint named: `my_checkpoint`
     - The script is located in `great_expectations/uncommitted/my_checkpoint.py`
     - The script can be run with `python great_expectations/uncommitted/my_checkpoint.py`
     ```
