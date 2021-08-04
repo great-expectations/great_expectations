@@ -1,16 +1,20 @@
 ---
 title: How to contribute a new Expectation to Great Expectations
 ---
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
 
 This guide will help you add a new Expectation to Great Expectations’ shared library. Your Expectation will be featured in the Expectations Gallery, along with many others developed by data practitioners from around the world as part of this collaborative community effort.
 
 To watch the video complement to this guide that shows an Expectation being implemented in real time, click here.
 
-:::note Prerequisites:
-This how-to guide assumes you have already:
-* [Set up your dev environment](/docs/contributing/contributing_setup) to contribute
-* [Signed the Contributor License Agreement](/docs/contributing/contributing_checklist) (CLA)
-:::
+<Prerequisites>
+
+  * [Set up your dev environment](/docs/contributing/contributing_setup) to contribute
+  * [Signed the Contributor License Agreement](/docs/contributing/contributing_checklist) (CLA)
+
+</Prerequisites>
 
 ### Steps
 
@@ -182,7 +186,17 @@ When you define data in your examples, we will mostly guess the type of the colu
 
 The details of this step differ based on the type of Expectations you are implementing. 
 
-##### ColumnMapExpectation
+<Tabs
+  groupId="expectation-type"
+  defaultValue='columnmap'
+  values={[
+  {label: 'ColumnMapExpectation', value:'columnmap'},
+  {label: 'ColumnExpectation', value:'column'},
+  {label: 'ColumnPairMapExpectation', value:'columnpairmap'},
+  {label: 'TableExpectation', value:'table'},
+  ]}>
+
+<TabItem value="columnmap">
 
 Expectations that extend ColumnMapExpectation class work as follows:
 
@@ -299,8 +313,9 @@ Consult the following files for the details of this pattern:
 * [great-expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py)
 :::
 
+</TabItem>
+<TabItem value="column">
 
-##### ColumnExpectation
 Expectations that extend ColumnExpectation class are evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
 
 Define success_keys of your Expectation
@@ -360,12 +375,20 @@ This means that the method `_pandas` is a metric function that is decorated as a
 
 Implement this method to compute your Metric.
 
+</TabItem>
+<TabItem value="columnpairmap">
 
-##### ColumnPairMapExpectation
-Under Construction
+:::caution Under Construction
+:::
 
-##### TableExpectation
-Under Construction
+</TabItem>
+<TabItem value="table">
+
+:::caution Under Construction
+:::
+
+</TabItem>
+</Tabs>
 
 #### 7. Fill in the `library_metadata` dictionary.
 
