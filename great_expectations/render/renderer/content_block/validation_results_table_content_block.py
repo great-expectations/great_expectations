@@ -61,42 +61,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             content_block.styling = styling
 
     @classmethod
-    def _get_legacy_v2_api_style_expectation_string_fn(cls, expectation_type):
-        legacy_expectation_string_fn = getattr(cls, expectation_type, None)
-        if legacy_expectation_string_fn is None:
-            return None
-        warnings.warn(
-            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
-            DeprecationWarning,
-        )
-
-        def expectation_string_fn_with_legacy_translation(
-            configuration: ExpectationConfiguration, runtime_configuration: dict
-        ):
-            return legacy_expectation_string_fn(
-                expectation=configuration,
-                styling=runtime_configuration.get("styling", None),
-                include_column_name=runtime_configuration.get(
-                    "include_column_name", True
-                ),
-            )
-
-        return expectation_string_fn_with_legacy_translation
-
-    @staticmethod
-    def _get_legacy_v2_api_observed_value(expectation_string_fn, result):
-        if (
-            expectation_string_fn.__name__
-            != "expectation_string_fn_with_legacy_translation"
-        ):
-            return None
-        warnings.warn(
-            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
-            DeprecationWarning,
-        )
-        return result["result"].get("observed_value")
-
-    @classmethod
     def _get_content_block_fn(cls, expectation_type):
         expectation_string_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type="renderer.prescriptive"
@@ -215,3 +179,48 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 return [status_cell + expectation_string_cell + observed_value]
 
         return row_generator_fn
+
+    @classmethod
+    def _get_legacy_v2_api_style_expectation_string_fn(cls, expectation_type):
+        legacy_expectation_string_fn = getattr(cls, expectation_type, None)
+        if legacy_expectation_string_fn is None:
+            # With the V2 API, expectation rendering was implemented by defining a method with the same name as the expectation.
+            # If no legacy rendering is present, return None.
+            return None
+
+        warnings.warn(
+            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
+            DeprecationWarning,
+        )
+
+        def expectation_string_fn_with_legacy_translation(
+            configuration: ExpectationConfiguration, runtime_configuration: dict
+        ):
+            # With the V2 API, the epectation string function had a different signature; below translates from the new signature to the legacy signature.
+            return legacy_expectation_string_fn(
+                expectation=configuration,
+                styling=runtime_configuration.get("styling", None),
+                include_column_name=runtime_configuration.get(
+                    "include_column_name", True
+                ),
+            )
+
+        return expectation_string_fn_with_legacy_translation
+
+    @staticmethod
+    def _get_legacy_v2_api_observed_value(expectation_string_fn, result):
+        if (
+            expectation_string_fn.__name__
+            != "expectation_string_fn_with_legacy_translation"
+        ):
+            # If legacy V2 API style rendering is used, "expectation_string_fn" will be the method defined in the above "_get_legacy_v2_api_style_expectation_string_fn".
+            # If this isn't the case, return None, so we don't do any legacy logic.
+            return None
+
+        warnings.warn(
+            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
+            DeprecationWarning,
+        )
+
+        # With V2 API style rendering, the result had an "observed_value" entry that could be rendered.
+        return result["result"].get("observed_value")
