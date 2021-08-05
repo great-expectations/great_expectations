@@ -2,6 +2,8 @@ import logging
 import os
 from typing import List, Optional
 
+import great_expectations.exceptions as ge_exceptions
+
 try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
@@ -54,6 +56,11 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
         try:
             if "conn_str" in azure_options:
+                if "account_url" in azure_options:
+                    raise ge_exceptions.DataConnectorError(
+                        f"""ConfiguredAssetAzureDataConnector "{self.name}" requires one of `conn_str` or `account_url` to be present in `azure_options` (but not both).
+                    """
+                    )
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
             else:
                 self._azure = BlobServiceClient(**azure_options)
