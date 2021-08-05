@@ -30,9 +30,16 @@ helps reduce trips to domain experts and avoids leaving insights about data on t
 Expectation Concepts: Domain and Success Keys
 **********************************************
 
-A **domain** makes it possible to address a specific set of data, such as a *table*, *query result*, *column* in a table or dataframe, or even a metric computed on a previous batch of data.
+A **domain** for an Expectation or Metric is all of the data that the Expectation or Metric evaluates. In Great Expectations, Expectation Configurations and Metric Configurations include ``domain_kwargs``, which are sets of key-value pairs, to define the data to which they should be applied.
 
-- A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectatation; for example, many Expectations apply to data in a single ``column``, but others apply to data from multiple columns or to properties that do not apply to a column at all.
+- **Domain keys** are the keys in a set of ``domain_kwargs``. Different domains may use different domain keys, such as ``batch_id`` to specify data from a particular batch, ``table`` to define data from a specific table, ``column`` to define data from a particular column, or ``row_condition`` to filter data meeting a specified condition.
+
+- In most Expectation Configurations, the ``batch_id`` and/or ``table`` is omitted, in which case the domain is evaluated *relative to the currently active batch*. For example, most Column Map Expectations use a single domain key, ``column`` to describe the domain to which they apply.
+
+
+** ADVANCED NOTE: SAFELY IGNORE THIS UNLESS YOU ARE EXTENDING GREAT EXPECTATIONS **
+
+When Great Expectations computes Metrics, it will attempt to bundle compute requests for efficiency. To do that, Execution Engines provide a ``get_compute_domain`` method which returns a tuple containing three elements. The first is an Engine-specific pointer to the data object that should be used to compute the Metric (e.g. a DataFrame for pandas/Spark Execution Engine or SQLAlchemy ``Selectable``). The second and third items are ``compute_domain_kwargs`` and ``accessor_domain_kwargs`` respectively, which are built by splitting the original ``domain_kwargs`` into two parts based on whether the ``domain_key`` has already been processed or still needs to be applied to the Engine-specific data object.
 
 An Expectation also defines **success keys** that determine the values of its metrics and when the Expectation will succeed.
 
