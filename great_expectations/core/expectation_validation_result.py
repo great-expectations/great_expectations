@@ -80,7 +80,7 @@ class ExpectationValidationResult(SerializableDictDot):
             return NotImplemented
         try:
             if self.result and other.result:
-                common_keys = set(self.result.keys()).intersection(other.result.keys())
+                common_keys = set(self.result.keys()) & other.result.keys()
                 result_dict = self.to_json_dict()["result"]
                 other_result_dict = other.to_json_dict()["result"]
                 contents_equal = all(
@@ -88,6 +88,7 @@ class ExpectationValidationResult(SerializableDictDot):
                 )
             else:
                 contents_equal = False
+
             return all(
                 (
                     self.success == other.success,
@@ -104,7 +105,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
                     # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
                     # handled appropriately.
-                    (self.result is None and other.result is None) or contents_equal,
+                    not (self.result or other.result) or contents_equal,
                     self.meta == other.meta,
                     self.exception_info == other.exception_info,
                 )
