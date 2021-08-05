@@ -286,20 +286,14 @@ class DataConnectorConfig(DictDot):
         glob_directive=None,
         default_regex=None,
         batch_identifiers=None,
-        sorters=None,
-        batch_spec_passthrough=None,
-        # S3 connection obj args
-        boto3_options=None,
         bucket=None,
         prefix=None,
+        delimiter=None,
         max_keys=None,
-        # Azure connection obj args
-        container=None,
-        account_url=None,
-        conn_str=None,
-        credential=None,
-        name_starts_with=None,
-        delimiter=None,  # Shared between S3 and Azure
+        boto3_options=None,
+        azure_options=None,
+        sorters=None,
+        batch_spec_passthrough=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -314,37 +308,22 @@ class DataConnectorConfig(DictDot):
             self.default_regex = default_regex
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
-        if sorters is not None:
-            self.sorters = sorters
-        if batch_spec_passthrough is not None:
-            self.batch_spec_passthrough = batch_spec_passthrough
-
-        # S3
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
         if bucket is not None:
             self.bucket = bucket
         if prefix is not None:
             self.prefix = prefix
-        if max_keys is not None:
-            self.max_keys = max_keys
-
-        # Azure
-        if container is not None:
-            self.container = container
-        if account_url is not None:
-            self.account_url = account_url
-        if conn_str is not None:
-            self.conn_str = conn_str
-        if credential is not None:
-            self.credential = credential
-        if name_starts_with is not None:
-            self.name_starts_with = name_starts_with
-
-        # Both S3 and Azure
         if delimiter is not None:
             self.delimiter = delimiter
-
+        if max_keys is not None:
+            self.max_keys = max_keys
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if sorters is not None:
+            self.sorters = sorters
+        if batch_spec_passthrough is not None:
+            self.batch_spec_passthrough = batch_spec_passthrough
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -382,25 +361,16 @@ class DataConnectorConfigSchema(Schema):
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
-
-    # S3
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    delimiter = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
-    bucket = fields.String(required=False, allow_none=True)
-    prefix = fields.String(required=False, allow_none=True)
-    max_keys = fields.Integer(required=False, allow_none=True)
-
-    # Azure
-    container = fields.String(required=False, allow_none=True)
-    account_url = fields.String(required=False, allow_none=True)
-    conn_str = fields.String(required=False, allow_none=True)
-    credential = fields.String(required=False, allow_none=True)
-    name_starts_with = fields.String(required=False, allow_none=True)
-
-    # Both S3 and Azure
-    delimiter = fields.String(required=False, allow_none=True)
-
+    azure_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
@@ -480,7 +450,12 @@ S3 type of the data connector (your data connector is "{data['class_name']}").  
 continue.
                 """
             )
-        if ("container" in data or "name_starts_with" in data) and not (
+        if (
+            "container" in data
+            or "account_url" in data
+            or "conn_str" in data
+            or "name_starts_with" in data
+        ) and not (
             data["class_name"]
             in [
                 "InferredAssetAzureDataConnector",
@@ -535,6 +510,7 @@ class ExecutionEngineConfig(DictDot):
         credentials=None,
         spark_config=None,
         boto3_options=None,
+        azure_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -551,6 +527,8 @@ class ExecutionEngineConfig(DictDot):
             self.spark_config = spark_config
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -577,6 +555,9 @@ class ExecutionEngineConfigSchema(Schema):
     credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     caching = fields.Boolean(required=False, allow_none=True)
@@ -626,6 +607,7 @@ class DatasourceConfig(DictDot):
         introspection=None,
         tables=None,
         boto3_options=None,
+        azure_options=None,
         reader_method=None,
         reader_options=None,
         limit=None,
@@ -670,6 +652,8 @@ class DatasourceConfig(DictDot):
             self.tables = tables
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
         if reader_method is not None:
             self.reader_method = reader_method
         if reader_options is not None:
@@ -717,6 +701,9 @@ class DatasourceConfigSchema(Schema):
     introspection = fields.Dict(required=False, allow_none=True)
     tables = fields.Dict(required=False, allow_none=True)
     boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     reader_method = fields.String(required=False, allow_none=True)
