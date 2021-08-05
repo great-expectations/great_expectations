@@ -920,7 +920,7 @@ def build_sa_validator_with_data(
     # NOTE BECAUSE OC THIS OTHER THIGN?
     if sa_engine_name == "bigquery":
         schema = None
-        if sa_engine_name in schemas:
+        if schemas and sa_engine_name in schemas:
             schema = schemas[sa_engine_name]
 
         print("this is working?")
