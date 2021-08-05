@@ -133,7 +133,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 Here is an example of loading data by specifying a SQL query.
 
 :::note
-Currently BigQuery does not allow for the creation of temporary tables as the result of a query.  As a workaround, Great Expectations allows for a named permanent table to be used as a "temporary" table, with the name passed in as a `batch_spec_passthrough` parameter. In the following example we are using a table named `ge_temp`.
+Currently BigQuery does not allow for the creation of temporary tables as the result of a query.  As a workaround, Great Expectations allows you to pass in a string to use as a table name. It will then use this string to create a named permanent table as a "temporary" table, with the name passed in as a `batch_spec_passthrough` parameter. The table will be created in the location specified in the `connection_string` of your `execution_engine`. In the following example we are using a table named `ge_temp`.
 :::
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L54-L71
