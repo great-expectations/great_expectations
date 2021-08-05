@@ -488,6 +488,15 @@ Azure type of the data connector (your data connector is "{data['class_name']}")
 continue.
                     """
             )
+        if ("conn_str" in data and "account_url" in data) and data["class_name"] in [
+            "InferredAssetAzureDataConnector",
+            "ConfiguredAssetAzureDataConnector",
+        ]:
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses both the `conn_str` and `account_url` keys for the Azure type of data connector but you may only use one method of authentication.
+                Please update your configuration to continue.
+                    """
+            )
         if (
             "data_asset_name_prefix" in data
             or "data_asset_name_suffix" in data
