@@ -917,6 +917,28 @@ def build_sa_validator_with_data(
 
     # Add the data to the database as a new table
 
+
+    # NOTE BECAUSE OC THIS OTHER THIGN?
+    if sa_engine_name == "bigquery":
+        schema = schemas[sa_engine_name]
+        print("this is working?")
+        print("schema before")
+        print("df before")
+        schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+        df.columns = df.columns.str.replace(" ", "_")
+
+        print("schema after")
+        print("df after")
+        print(schema)
+        print(df.columns)
+        print("~~~~~~~~~~~~~~~~")
+
+        ### AND THIS CHECKD
+        print(engine.dialect)
+        print(dialect_classes.get(sa_engine_name))
+        print("~~~~~~~~~~~~~~~~")
+
+    # IS THIS AFFECTED BY
     sql_dtypes = {}
     if (
         schemas
@@ -928,18 +950,6 @@ def build_sa_validator_with_data(
         # handle bigquery limit
         # https://stackoverflow.com/questions/4406501/change-the-name-of-a-key-in-dictionary
         # https://www.codegrepper.com/code-examples/python/replace+space+with+underscore+in+column+names+pandas
-        if sa_engine_name == "bigquery":
-            print("this is working?")
-            print("schema before")
-            print("df before")
-            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
-            df.columns = df.columns.str.replace(" ", "_")
-
-            print("schema after")
-            print("df after")
-            print(schema)
-            print(df.columns)
-            print("~~~~~~~~~~~~~~~~")
 
         sql_dtypes = {
             col: dialect_types.get(sa_engine_name)[dtype]
