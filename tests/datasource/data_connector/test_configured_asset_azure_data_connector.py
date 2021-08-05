@@ -1,23 +1,13 @@
-import os
 from unittest import mock
 
 import pytest
-from azure.storage.blob import BlobServiceClient, ContainerClient
+from ruamel.yaml import YAML
 
 from great_expectations import DataContext
+from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetAzureDataConnector,
 )
-from great_expectations.datasource.data_connector.util import list_azure_keys
-
-try:
-    ACCOUNT_URL = os.environ["ACCOUNT_URL"]
-    CONTAINER_NAME = os.environ["CONTAINER_NAME"]
-except:
-    print("Please set environment variables before running tests")
-from ruamel.yaml import YAML
-
-from great_expectations.data_context.util import instantiate_class_from_config
 
 yaml = YAML()
 
@@ -115,6 +105,10 @@ def test_instantiation_with_account_url(mock_service_client, mock_list_keys):
         "unmatched_data_reference_count": 0,
     }
 
+    my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_unmatched_data_references() == []
+
 
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
@@ -159,8 +153,50 @@ def test_instantiation_with_conn_str(mock_service_client, mock_list_keys):
         "unmatched_data_reference_count": 0,
     }
 
+    my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_unmatched_data_references() == []
 
-def test_instantiation_from_a_config(empty_data_context_stats_enabled):
+
+def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env_name_raises_error():
+    my_data_connector = ConfiguredAssetAzureDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        container="my_container",
+        name_starts_with="",
+        assets={"alpha": {}},
+        azure_options={"account_url": "my_account_url"},
+    )
+
+    with pytest.raises(ValueError):
+        print(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                BatchRequest(
+                    datasource_name="something",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="something",
+                )
+            )
+        )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_instantiation_from_a_config(
+    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
     context: DataContext = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
@@ -170,15 +206,16 @@ def test_instantiation_from_a_config(empty_data_context_stats_enabled):
         datasource_name: FAKE_DATASOURCE
         name: TEST_DATA_CONNECTOR
         default_regex:
-            pattern: yellow_trip_data_sample_(.*)\\.csv
+            pattern: alpha-(.*)\\.csv
             group_names:
-                - timestamp
-        container: {CONTAINER_NAME}
+                - index
+        azure_options:
+            account_url: my_account_url
+            credential: my_credential
+        container: my_container
         name_starts_with: ""
         assets:
             alpha:
-        azure_options:
-            account_url: {ACCOUNT_URL}
     """,
         return_mode="report_object",
     )
@@ -192,9 +229,9 @@ def test_instantiation_from_a_config(empty_data_context_stats_enabled):
         "data_assets": {
             "alpha": {
                 "example_data_references": [
-                    "yellow_trip_data_sample_2018-01.csv",
-                    "yellow_trip_data_sample_2018-02.csv",
-                    "yellow_trip_data_sample_2018-03.csv",
+                    "alpha-1.csv",
+                    "alpha-2.csv",
+                    "alpha-3.csv",
                 ],
                 "batch_definition_count": 3,
             },
@@ -202,160 +239,25 @@ def test_instantiation_from_a_config(empty_data_context_stats_enabled):
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
     }
+    assert mock_emit.call_count == 1
 
-
-# @mock_s3
-# def test_basic_instantiation():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
-
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "alpha-1.csv",
-#        "alpha-2.csv",
-#        "alpha-3.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-
-#    my_data_connector = ConfiguredAssetS3DataConnector(
-#        name="my_data_connector",
-#        datasource_name="FAKE_DATASOURCE_NAME",
-#        default_regex={
-#            "pattern": "alpha-(.*)\\.csv",
-#            "group_names": ["index"],
-#        },
-#        bucket=bucket,
-#        prefix="",
-#        assets={"alpha": {}},
-#    )
-
-#    assert my_data_connector.self_check() == {
-#        "class_name": "ConfiguredAssetS3DataConnector",
-#        "data_asset_count": 1,
-#        "example_data_asset_names": [
-#            "alpha",
-#        ],
-#        "data_assets": {
-#            "alpha": {
-#                "example_data_references": [
-#                    "alpha-1.csv",
-#                    "alpha-2.csv",
-#                    "alpha-3.csv",
-#                ],
-#                "batch_definition_count": 3,
-#            },
-#        },
-#        "example_unmatched_data_references": [],
-#        "unmatched_data_reference_count": 0,
-#        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-#        # "example_data_reference": {},
-#    }
-
-#    # noinspection PyProtectedMember
-#    my_data_connector._refresh_data_references_cache()
-#    assert my_data_connector.get_data_reference_list_count() == 3
-#    assert my_data_connector.get_unmatched_data_references() == []
-
-#    # Illegal execution environment name
-#    with pytest.raises(ValueError):
-#        print(
-#            my_data_connector.get_batch_definition_list_from_batch_request(
-#                BatchRequest(
-#                    datasource_name="something",
-#                    data_connector_name="my_data_connector",
-#                    data_asset_name="something",
-#                )
-#            )
-#        )
-
-
-# @mock.patch(
-#    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-# )
-# @mock_s3
-# def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled):
-#    context: DataContext = empty_data_context_stats_enabled
-
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
-
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "alpha-1.csv",
-#        "alpha-2.csv",
-#        "alpha-3.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-#    report_object = context.test_yaml_config(
-#        f"""
-#        module_name: great_expectations.datasource.data_connector
-#        class_name: ConfiguredAssetS3DataConnector
-#        datasource_name: FAKE_DATASOURCE
-#        name: TEST_DATA_CONNECTOR
-#        default_regex:
-#            pattern: alpha-(.*)\\.csv
-#            group_names:
-#                - index
-#        bucket: {bucket}
-#        prefix: ""
-#        assets:
-#            alpha:
-#    """,
-#        return_mode="report_object",
-#    )
-
-#    assert report_object == {
-#        "class_name": "ConfiguredAssetS3DataConnector",
-#        "data_asset_count": 1,
-#        "example_data_asset_names": [
-#            "alpha",
-#        ],
-#        "data_assets": {
-#            "alpha": {
-#                "example_data_references": [
-#                    "alpha-1.csv",
-#                    "alpha-2.csv",
-#                    "alpha-3.csv",
-#                ],
-#                "batch_definition_count": 3,
-#            },
-#        },
-#        "example_unmatched_data_references": [],
-#        "unmatched_data_reference_count": 0,
-#        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-#        # "example_data_reference": {},
-#    }
-#    assert mock_emit.call_count == 1
-#    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-#        "anonymized_name"
-#    ]
-#    expected_call_args_list = [
-#        mock.call(
-#            {
-#                "event": "data_context.test_yaml_config",
-#                "event_payload": {
-#                    "anonymized_name": anonymized_name,
-#                    "parent_class": "ConfiguredAssetS3DataConnector",
-#                },
-#                "success": True,
-#            }
-#        ),
-#    ]
-#    assert mock_emit.call_args_list == expected_call_args_list
+    # FIXME(cdkini): Currently broken due to indexing errors?
+    # anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+    #     "anonymized_name"
+    # ]
+    # expected_call_args_list = [
+    #     mock.call(
+    #         {
+    #             "event": "data_context.test_yaml_config",
+    #             "event_payload": {
+    #                 "anonymized_name": anonymized_name,
+    #                 "parent_class": "ConfiguredAssetAzureDataConnector",
+    #             },
+    #             "success": True,
+    #         }
+    #     ),
+    # ]
+    # assert mock_emit.call_args_list == expected_call_args_list
 
 
 # @mock.patch(
