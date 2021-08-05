@@ -2,10 +2,10 @@ from .meta_metric_provider import (  # isort:skip
     MetaMetricProvider,
     DeprecatedMetaMetricProvider,
 )
-from .column_aggregate_metric import (
+from .column_aggregate_metric_provider import (
     ColumnMetricProvider,  # This class name is being deprecated (use "ColumnAggregateMetricProvider" going forward).
 )
-from .column_aggregate_metric import (
+from .column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
@@ -28,4 +28,5 @@ from .metric_provider import (
     metric_partial,
     metric_value,
 )
+from .multicolumn_map_metrics import *
 from .table_metrics import *

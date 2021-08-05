@@ -387,7 +387,7 @@ Please check your config."""
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         if domain_type == MetricDomainTypes.TABLE:
@@ -547,7 +547,7 @@ Please check your config."""
         for aggregate in aggregates.values():
             compute_domain_kwargs = aggregate["domain_kwargs"]
             df, _, _ = self.get_compute_domain(
-                compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY.value
+                compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
             )
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []

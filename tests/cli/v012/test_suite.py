@@ -379,6 +379,41 @@ def test_suite_new_empty_with_no_jupyter(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_empty_with_csv_gz(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2_gz,
+):
+    os.mkdir(
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory, "uncommitted"
+        )
+    )
+    root_dir = data_context_parameterized_expectation_suite.root_directory
+    runner = CliRunner(mix_stderr=False)
+    csv = os.path.join(filesystem_csv_2_gz, "f1.csv.gz")
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "foo"],
+        input=f"{csv}\n",
+        catch_exceptions=False,
+    )
+    print(result.stdout)
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Cannot load file" not in stdout
+    context = DataContext(root_dir)
+    suite = context.get_expectation_suite("foo")
+    citations = suite.get_citations()
+    assert citations[0]["batch_kwargs"]["reader_method"] == "read_csv"
+    assert citations[0]["batch_kwargs"]["reader_options"] == {"compression": "gzip"}
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_one_datasource_without_generator_without_suite_name_argument(
     mock_webbrowser, mock_subprocess, caplog, empty_data_context, filesystem_csv_2
 ):

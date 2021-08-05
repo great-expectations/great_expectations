@@ -233,12 +233,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect_module = None
 
+        # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
+        # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
+        # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
+        # Connection can be handled separately.
+        self._engine_backup = None
         if self.engine and self.engine.dialect.name.lower() in [
             "sqlite",
             "mssql",
             "snowflake",
             "mysql",
         ]:
+            self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
 
@@ -450,7 +456,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table'"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         if domain_type == MetricDomainTypes.TABLE:
@@ -624,7 +630,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY.value
+                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY
             )
             assert len(query["select"]) == len(query["ids"])
             try:
@@ -650,6 +656,30 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
 
         return resolved_metrics
+
+    def close(self):
+        """
+        Note: Will 20210729
+
+        This is a helper function that will close and dispose Sqlalchemy objects that are used to connect to a database.
+        Databases like Snowflake require the connection and engine to be instantiated and closed separately, and not
+        doing so has caused problems with hanging connections.
+
+        Currently the ExecutionEngine does not support handling connections and engine separately, and will actually
+        override the engine with a connection in some cases, obfuscating what object is used to actually used by the
+        ExecutionEngine to connect to the external database. This will be handled in an upcoming refactor, which will
+        allow this function to eventually become:
+
+        self.connection.close()
+        self.engine.dispose()
+
+        More background can be found here: https://github.com/great-expectations/great_expectations/pull/3104/
+        """
+        if self._engine_backup:
+            self.engine.close()
+            self._engine_backup.dispose()
+        else:
+            self.engine.dispose()
 
     ### Splitter methods for partitioning tables ###
 

@@ -322,14 +322,6 @@ Please check your config."""
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
-        table = domain_kwargs.get("table", None)
-        if table:
-            raise ValueError(
-                "PandasExecutionEngine does not currently support multiple named tables."
-            )
-
         # Filtering by row condition
         row_condition = domain_kwargs.get("row_condition", None)
         if row_condition:
@@ -347,6 +339,14 @@ Please check your config."""
                     drop=True
                 )
 
+        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs = dict()
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "PandasExecutionEngine does not currently support multiple named tables."
+            )
+
         # Warning user if accessor keys are in any domain that is not of type table, will be ignored
         if (
             domain_type != MetricDomainTypes.TABLE
@@ -354,7 +354,7 @@ Please check your config."""
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
@@ -410,8 +410,41 @@ Please check your config."""
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
 
+            if "ignore_row_if" in compute_domain_kwargs:
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                ignore_row_if = compute_domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "both_values_are_missing":
+                    data = data.dropna(
+                        axis=0, how="all", subset=[column_A_name, column_B_name]
+                    )
+                elif ignore_row_if == "either_value_is_missing":
+                    data = data.dropna(
+                        axis=0, how="any", subset=[column_A_name, column_B_name]
+                    )
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
+
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            if "ignore_row_if" in compute_domain_kwargs:
+                ignore_row_if = compute_domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "all_values_are_missing":
+                    data = data.dropna(how="all")
+                elif ignore_row_if == "any_value_is_missing":
+                    data = data.dropna(how="any")
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
+
             if "column_list" in compute_domain_kwargs:
                 # If column_list exists
                 accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
@@ -420,6 +453,17 @@ Please check your config."""
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
+            if "ignore_row_if" in compute_domain_kwargs:
+                ignore_row_if = compute_domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "all_values_are_missing":
+                    data = data.dropna(how="all")
+                elif ignore_row_if == "any_value_is_missing":
+                    data = data.dropna(how="any")
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
 
             # If we would like our data to become a single column
             if "column" in compute_domain_kwargs:
