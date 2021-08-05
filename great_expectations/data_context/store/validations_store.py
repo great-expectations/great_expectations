@@ -1,4 +1,5 @@
 import random
+from typing import Dict
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -144,6 +145,19 @@ class ValidationsStore(Store):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
+
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        ge_cloud_suite_validation_result_id = response_json["data"]["id"]
+        suite_validation_result_dict = response_json["data"]["attributes"]["result"]
+        suite_validation_result_dict[
+            "ge_cloud_id"
+        ] = ge_cloud_suite_validation_result_id
+
+        return suite_validation_result_dict
 
     def serialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.dumps(value)

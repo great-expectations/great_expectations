@@ -110,7 +110,7 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 ```
 
 :::warning
-Make sure that you lint your script before you finalize the line numbers in your Markdown file. This will prevent unintended line changes and save you pain when the linter changes your python file without you realizing it.
+Make sure that you lint your script before you finalize the line numbers in your Markdown file. This will prevent unintended line changes and save you pain when the linter changes your Python file without you realizing it.
 
 :::
 - Most steps will also require user input, such as a connection string that needs to be replaced, or a step that allows for testing (such as running `test_yaml_config()`).

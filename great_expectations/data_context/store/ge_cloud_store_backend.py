@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta
+from json import JSONDecodeError
 from typing import Dict, Optional
 from urllib.parse import urljoin
 
@@ -8,7 +9,12 @@ import requests
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.exceptions import StoreBackendError
-from great_expectations.util import filter_properties_dict, pluralize, singularize
+from great_expectations.util import (
+    filter_properties_dict,
+    hyphen,
+    pluralize,
+    singularize,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -70,28 +76,45 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _get(self, key):
         ge_cloud_url = self.get_url_for_key(key=key)
-        response = requests.get(ge_cloud_url, headers=self.auth_headers)
-        return response.json()
+        try:
+            response = requests.get(ge_cloud_url, headers=self.auth_headers)
+            return response.json()
+        except JSONDecodeError as jsonError:
+            logger.debug(
+                "Failed to parse GE Cloud Response into JSON",
+                str(response.text),
+                str(jsonError),
+            )
+            raise StoreBackendError("Unable to get object in GE Cloud Store Backend.")
 
     def _move(self):
         pass
 
     def _set(self, key, value, **kwargs):
+        # Each resource type has corresponding attribute key to include in POST body
+        post_body_keys = {
+            "suite_validation_result": "result",
+            "checkpoint": "checkpoint_config",
+        }
+
+        resource_key = self.ge_cloud_resource_name
+        resource_type = self.ge_cloud_resource_type
+        account_id = self.ge_cloud_credentials["account_id"]
+
+        post_body_key = post_body_keys[resource_type]
+
         data = {
             "data": {
-                "type": self.ge_cloud_resource_type,
-                "attributes": {
-                    "account_id": self.ge_cloud_credentials["account_id"],
-                    "checkpoint_config": value,
-                },
+                "type": resource_type,
+                "attributes": {"account_id": account_id},
             }
         }
 
+        data["data"]["attributes"][post_body_key] = value
+
         url = urljoin(
             self.ge_cloud_base_url,
-            f"accounts/"
-            f"{self.ge_cloud_credentials['account_id']}/"
-            f"{self.ge_cloud_resource_name}",
+            f"accounts/" f"{account_id}/" f"{hyphen(resource_key)}",
         )
         try:
             response = requests.post(url, json=data, headers=self.auth_headers)
@@ -104,6 +127,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_id=object_id,
                 url=object_url,
             )
+        # TODO: [Robby] Show more detailed error messages
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in GE Cloud Store Backend.")
@@ -129,7 +153,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.ge_cloud_base_url,
             f"accounts/"
             f"{self.ge_cloud_credentials['account_id']}/"
-            f"{self.ge_cloud_resource_name}",
+            f"{hyphen(self.ge_cloud_resource_name)}",
         )
         try:
             response = requests.get(url, headers=self.auth_headers)

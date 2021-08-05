@@ -3,6 +3,12 @@ import os
 import uuid
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+try:
+    from typing import Final
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Final
+
 import click
 
 from great_expectations import DataContext
@@ -27,6 +33,11 @@ except ImportError:
     )
     sqlalchemy = None
     Inspector = None
+
+DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
+    "default_runtime_data_connector_name",
+    "default_inferred_data_connector_name",
+]
 
 
 def get_batch_request(
@@ -120,14 +131,26 @@ def select_data_connector_name(
 ) -> Optional[str]:
     msg_prompt_select_data_connector_name = "Select data_connector"
 
+    num_available_data_asset_names_by_data_connector = len(
+        available_data_asset_names_by_data_connector_dict
+    )
+
     if (
         available_data_asset_names_by_data_connector_dict is None
-        or len(available_data_asset_names_by_data_connector_dict) == 0
+        or num_available_data_asset_names_by_data_connector == 0
     ):
         return None
 
-    if len(available_data_asset_names_by_data_connector_dict) == 1:
+    if num_available_data_asset_names_by_data_connector == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
+
+    elif num_available_data_asset_names_by_data_connector == 2:
+        # if only default data_connectors are configured, select default_inferred_asset_data_connector
+        default_data_connector = _check_default_data_connectors(
+            available_data_asset_names_by_data_connector_dict
+        )
+        if default_data_connector:
+            return default_data_connector
 
     data_connector_names: List[str] = list(
         available_data_asset_names_by_data_connector_dict.keys()
@@ -138,6 +161,7 @@ def select_data_connector_name(
             for i, data_connector_name in enumerate(data_connector_names, 1)
         ]
     )
+    choices += "\n"  # Necessary for consistent spacing between prompts
     option_selection: str = click.prompt(
         msg_prompt_select_data_connector_name + "\n" + choices,
         type=click.Choice(
@@ -247,6 +271,17 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     )
     inspector: Inspector = Inspector.from_engine(execution_engine.engine)
     return inspector.default_schema_name
+
+
+def _check_default_data_connectors(
+    available_data_asset_names_by_data_connector_dict: Dict[str, List[str]]
+) -> Optional[str]:
+    if all(
+        data_connector_name in available_data_asset_names_by_data_connector_dict
+        for data_connector_name in DEFAULT_DATA_CONNECTOR_NAMES
+    ):
+        # return the default_inferred_asset_data_connector
+        return DEFAULT_DATA_CONNECTOR_NAMES[1]
 
 
 def _get_batch_spec_passthrough(
