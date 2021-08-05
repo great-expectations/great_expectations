@@ -19,9 +19,9 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-
-from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 try:
     import boto3
@@ -74,10 +74,10 @@ Notes:
     }
 
     def __init__(self, *args, **kwargs):
-        self.discard_subset_failing_expectations = kwargs.get(
+        self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.get("boto3_options", {})
+        boto3_options: dict = kwargs.pop("boto3_options", {})
 
         # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
@@ -150,7 +150,9 @@ Please check your config."""
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             if "compression" not in reader_options.keys():
-                reader_options["compression"] = sniff_s3_compression(s3_url)
+                inferred_compression_param = sniff_s3_compression(s3_url)
+                if inferred_compression_param is not None:
+                    reader_options["compression"] = inferred_compression_param
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
@@ -277,7 +279,7 @@ Please check your config."""
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
@@ -286,12 +288,12 @@ Please check your config."""
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
-            MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
-             the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -320,14 +322,6 @@ Please check your config."""
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
-        table = domain_kwargs.get("table", None)
-        if table:
-            raise ValueError(
-                "PandasExecutionEngine does not currently support multiple named tables."
-            )
-
         # Filtering by row condition
         row_condition = domain_kwargs.get("row_condition", None)
         if row_condition:
@@ -345,6 +339,14 @@ Please check your config."""
                     drop=True
                 )
 
+        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs = dict()
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "PandasExecutionEngine does not currently support multiple named tables."
+            )
+
         # Warning user if accessor keys are in any domain that is not of type table, will be ignored
         if (
             domain_type != MetricDomainTypes.TABLE
@@ -352,7 +354,7 @@ Please check your config."""
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
@@ -408,13 +410,60 @@ Please check your config."""
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
 
+            if "ignore_row_if" in compute_domain_kwargs:
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                ignore_row_if = compute_domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "both_values_are_missing":
+                    data = data.dropna(
+                        axis=0, how="all", subset=[column_A_name, column_B_name]
+                    )
+                elif ignore_row_if == "either_value_is_missing":
+                    data = data.dropna(
+                        axis=0, how="any", subset=[column_A_name, column_B_name]
+                    )
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
+
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "columns" in compute_domain_kwargs:
-                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+            if "ignore_row_if" in compute_domain_kwargs:
+                ignore_row_if = compute_domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "all_values_are_missing":
+                    data = data.dropna(how="all")
+                elif ignore_row_if == "any_value_is_missing":
+                    data = data.dropna(how="any")
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
+
+            if "column_list" in compute_domain_kwargs:
+                # If column_list exists
+                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                    "column_list"
+                )
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
+            if "ignore_row_if" in compute_domain_kwargs:
+                ignore_row_if = compute_domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "all_values_are_missing":
+                    data = data.dropna(how="all")
+                elif ignore_row_if == "any_value_is_missing":
+                    data = data.dropna(how="any")
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
 
             # If we would like our data to become a single column
             if "column" in compute_domain_kwargs:
@@ -436,8 +485,8 @@ Please check your config."""
 
             else:
                 # If we would like our data to become a multicolumn
-                if "columns" in compute_domain_kwargs:
-                    data = data[compute_domain_kwargs["columns"]]
+                if "column_list" in compute_domain_kwargs:
+                    data = data[compute_domain_kwargs["column_list"]]
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 

@@ -1,13 +1,12 @@
 import logging
-import random
 from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.validator import validator
 from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +120,7 @@ class DataConnector:
         # batch_spec_passthrough via Data Connector config
         batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
 
-        # batch_spec_passthrough from batch_definition supercedes batch_spec_passthrough from Data Connector config
+        # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config
         if isinstance(batch_definition.batch_spec_passthrough, dict):
             batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
 
@@ -370,7 +369,7 @@ class DataConnector:
             )
         )
 
-        if pretty_print and df is not None:
+        if pretty_print and data is not None:
             print(f"\n\t\tShowing 5 rows")
             print(data)
 

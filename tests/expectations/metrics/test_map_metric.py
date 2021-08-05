@@ -3,7 +3,9 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics import ColumnMax, ColumnValuesNonNull
-from great_expectations.expectations.metrics.map_metric import ColumnMapMetricProvider
+from great_expectations.expectations.metrics.map_metric_provider import (
+    ColumnMapMetricProvider,
+)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

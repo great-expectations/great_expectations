@@ -273,7 +273,7 @@ def test_suite_new_creates_empty_suite(
     citations = suite.get_citations()
     citations[0].pop("citation_date", None)
     citations[0].pop("interactive", None)
-    assert filter_properties_dict(properties=citations[0]) == {
+    assert filter_properties_dict(properties=citations[0], clean_falsy=True) == {
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
@@ -357,7 +357,7 @@ def test_suite_new_empty_with_no_jupyter(
     citations = suite.get_citations()
     citations[0].pop("citation_date", None)
     citations[0].pop("interactive", None)
-    assert filter_properties_dict(properties=citations[0]) == {
+    assert filter_properties_dict(properties=citations[0], clean_falsy=True) == {
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
@@ -375,6 +375,41 @@ def test_suite_new_empty_with_no_jupyter(
         click_result=result,
         allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_empty_with_csv_gz(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2_gz,
+):
+    os.mkdir(
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory, "uncommitted"
+        )
+    )
+    root_dir = data_context_parameterized_expectation_suite.root_directory
+    runner = CliRunner(mix_stderr=False)
+    csv = os.path.join(filesystem_csv_2_gz, "f1.csv.gz")
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "foo"],
+        input=f"{csv}\n",
+        catch_exceptions=False,
+    )
+    print(result.stdout)
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Cannot load file" not in stdout
+    context = DataContext(root_dir)
+    suite = context.get_expectation_suite("foo")
+    citations = suite.get_citations()
+    assert citations[0]["batch_kwargs"]["reader_method"] == "read_csv"
+    assert citations[0]["batch_kwargs"]["reader_options"] == {"compression": "gzip"}
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -716,7 +751,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit not_a_real_suite -d {}".format(project_dir),
+        f"suite edit not_a_real_suite -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1234,7 +1269,7 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1254,7 +1289,7 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1277,7 +1312,7 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     output = result.output
@@ -1389,7 +1424,7 @@ def test_suite_delete_with_one_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite delete a.warning -d {}".format(project_dir),
+        f"suite delete a.warning -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

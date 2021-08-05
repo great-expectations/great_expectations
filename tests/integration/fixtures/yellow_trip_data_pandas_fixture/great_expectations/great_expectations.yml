@@ -17,7 +17,7 @@ datasources:
   taxi_pandas:
     data_connectors:
       monthly:
-        base_directory: ../test_data/
+        base_directory: ../data/
         glob_directive: '*.csv'
         class_name: ConfiguredAssetFilesystemDataConnector
         assets:

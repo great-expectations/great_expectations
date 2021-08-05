@@ -122,6 +122,18 @@ class ProfilerError(GreatExpectationsError):
     pass
 
 
+class ProfilerConfigurationError(ProfilerError):
+    """A configuration error for a profiler."""
+
+    pass
+
+
+class ProfilerExecutionError(ProfilerError):
+    """A runtime error for a profiler."""
+
+    pass
+
+
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message
@@ -361,3 +373,11 @@ class SorterError(DataContextError):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+
+class MetricError(GreatExpectationsError):
+    pass
+
+
+class MetricProviderError(MetricError):
+    pass

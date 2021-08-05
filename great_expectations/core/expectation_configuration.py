@@ -724,6 +724,15 @@ class ExpectationConfiguration(SerializableDictDot):
                 "catch_exceptions": False,
             },
         },
+        "expect_multicolumn_sum_to_equal": {
+            "domain_kwargs": ["column_list"],
+            "success_kwargs": ["sum_total"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
         "_expect_column_values_to_be_of_type__aggregate": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["type_", "mostly"],
@@ -1156,11 +1165,15 @@ class ExpectationConfiguration(SerializableDictDot):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
+        this_kwargs: dict = convert_to_json_serializable(self.kwargs)
+        other_kwargs: dict = convert_to_json_serializable(other.kwargs)
+        this_meta: dict = convert_to_json_serializable(self.meta)
+        other_meta: dict = convert_to_json_serializable(other.meta)
         return all(
             (
                 self.expectation_type == other.expectation_type,
-                self.kwargs == other.kwargs,
-                self.meta == other.meta,
+                this_kwargs == other_kwargs,
+                this_meta == other_meta,
             )
         )
 

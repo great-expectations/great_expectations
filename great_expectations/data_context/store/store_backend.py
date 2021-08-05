@@ -98,7 +98,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
 
-    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going thorugh initialization order in DataContext
+    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going through initialization order in DataContext
     @property
     def store_backend_id(self):
         return self._construct_store_backend_id(suppress_warning=False)
@@ -230,7 +230,7 @@ class InMemoryStoreBackend(StoreBackend):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def _get(self, key):
         try:

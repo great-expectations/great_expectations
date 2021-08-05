@@ -14,6 +14,8 @@ from great_expectations.core.batch_spec import (
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 
 from ..exceptions import (
     BatchKwargsError,
@@ -24,7 +26,6 @@ from ..exceptions import (
 )
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
-from .execution_engine import ExecutionEngine, MetricDomainTypes
 from .sparkdf_batch_data import SparkDFBatchData
 
 logger = logging.getLogger(__name__)
@@ -317,7 +318,7 @@ Please check your config."""
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
@@ -326,12 +327,12 @@ Please check your config."""
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
-            MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
-            the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -386,7 +387,7 @@ Please check your config."""
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
         if domain_type == MetricDomainTypes.TABLE:
@@ -442,9 +443,11 @@ Please check your config."""
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "columns" in compute_domain_kwargs:
-                # If columns exist
-                accessor_domain_kwargs["columns"] = compute_domain_kwargs.pop("columns")
+            if "column_list" in compute_domain_kwargs:
+                # If column_list exists
+                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                    "column_list"
+                )
 
         # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
@@ -463,8 +466,8 @@ Please check your config."""
             else:
 
                 # If we would like our data to become a multicolumn
-                if "columns" in compute_domain_kwargs:
-                    data = data.select(compute_domain_kwargs["columns"])
+                if "column_list" in compute_domain_kwargs:
+                    data = data.select(compute_domain_kwargs["column_list"])
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
@@ -544,7 +547,7 @@ Please check your config."""
         for aggregate in aggregates.values():
             compute_domain_kwargs = aggregate["domain_kwargs"]
             df, _, _ = self.get_compute_domain(
-                compute_domain_kwargs, domain_type="identity"
+                compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
             )
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []

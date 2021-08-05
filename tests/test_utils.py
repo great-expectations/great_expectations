@@ -59,7 +59,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         exc.__dict__.setdefault("traces", []).append(trace)
         if is_root:
             trace = " -> ".join(reversed(exc.traces))
-            exc = AssertionError("{}\nTRACE: {}".format(str(exc), trace))
+            exc = AssertionError(f"{str(exc)}\nTRACE: {trace}")
         raise exc
 
 
@@ -172,6 +172,19 @@ SELECT
     name
 FROM
     sqlite_temp_master
+"""
+    )
+    rows = result.fetchall()
+    return {row[0] for row in rows}
+
+
+def get_sqlite_table_names(engine):
+    result = engine.execute(
+        """
+SELECT
+    name
+FROM
+    sqlite_master
 """
     )
     rows = result.fetchall()
