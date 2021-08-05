@@ -919,10 +919,17 @@ def build_sa_validator_with_data(
 
     # NOTE BECAUSE OC THIS OTHER THIGN?
     if sa_engine_name == "bigquery":
-        schema = schemas[sa_engine_name]
+        schema = None
+        if sa_engine_name in schemas:
+            schema = schemas[sa_engine_name]
+
         print("this is working?")
         print("schema before")
         print("df before")
+
+        print(schema)
+        print(df.columns)
+
         schema = {k.replace(" ", "_"): v for k, v in schema.items()}
         df.columns = df.columns.str.replace(" ", "_")
 
