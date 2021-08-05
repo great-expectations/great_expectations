@@ -929,8 +929,8 @@ def build_sa_validator_with_data(
 
         print(schema)
         print(df.columns)
-
-        schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+        if schema:
+            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
         df.columns = df.columns.str.replace(" ", "_")
 
         print("schema after")
