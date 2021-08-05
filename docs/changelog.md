@@ -3,9 +3,26 @@ title: Changelog
 ---
 
 ### Develop
-* [FEATURE] Enable BigQuery tests for Azure CI/CD #3155
-* [BUGFIX] Snowflake connections are closed correctly by DOCS tests (#3104)
 
+
+### 0.13.26
+* [FEATURE] Enable BigQuery tests for Azure CI/CD (#3155)
+* [FEATURE] Implement MulticolumnMapExpectation class (#3134)
+* [FEATURE] Implement the MulticolumnSumEqual Metric for PandasExecutionEngine (#3130)
+* [FEATURE] Support row_condition and ignore_row_if Directives Combined for PandasExecutionEngine (#3150)
+* [FEATURE] Update ExpectMulticolumnSumToEqual for V3 API (#3136)
+* [FEATURE] add python3.9 to python versions (#3143) (Thanks @dswalter)
+* [FEATURE]/MER-16/MER-75/ADD_ROUTE_FOR_VALIDATION_RESULT (#3090) (Thanks @rreinoldsc)
+* [BUGFIX] Enable `--v3-api suite edit` to proceed without selecting DataConnectors (#3165)
+* [BUGFIX] Fix error when `RuntimeBatchRequest` is passed to `SimpleCheckpoint` with `RuntimeDataConnector` (#3152)
+* [BUGFIX] allow reader_options in the CLI so can read `.csv.gz` files (#2695) (Thanks @luke321321)
+* [DOCS] Apply Docusaurus tabs to relevant pages in new docs
+* [DOCS] Capitalize python to Python in docs (#3176)
+* [DOCS] Improve Core Concepts - Expectation Concepts (#2831)
+* [MAINTENANCE] Error messages must be friendly. (#3171)
+* [MAINTENANCE] Implement the "compound_columns_unique" metric for PandasExecutionEngine (with a unit test). (#3159)
+* [MAINTENANCE] Improve Coding Practices in "great_expectations/expectations/expectation.py" (#3151)
+* [MAINTENANCE] Update test_script_runner.py (#3177)
 
 ### 0.13.25
 * [FEATURE] Pass on meta-data from expectation json to validation result json (#2881) (Thanks @sushrut9898)
