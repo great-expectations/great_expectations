@@ -281,6 +281,7 @@ class DataConnectorConfig(DictDot):
         self,
         class_name,
         module_name=None,
+        credentials=None,
         assets=None,
         base_directory=None,
         glob_directive=None,
@@ -303,6 +304,8 @@ class DataConnectorConfig(DictDot):
     ):
         self._class_name = class_name
         self._module_name = module_name
+        if credentials is not None:
+            self.credentials = credentials
         if assets is not None:
             self.assets = assets
         if base_directory is not None:
@@ -374,6 +377,7 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
     default_regex = fields.Dict(required=False, allow_none=True)
+    credentials = fields.Raw(required=False, allow_none=True)
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
@@ -430,7 +434,7 @@ class DataConnectorConfigSchema(Schema):
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-subclass of the FilePathDataConnector class (your data conntector is "{data['class_name']}").  Please update your
+subclass of the FilePathDataConnector class (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )
@@ -443,7 +447,7 @@ configuration to continue.
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-filesystem type of the data connector (your data conntector is "{data['class_name']}").  Please update your
+filesystem type of the data connector (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )
@@ -517,7 +521,7 @@ continue.
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
-SQL type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )
