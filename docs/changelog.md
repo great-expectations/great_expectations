@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) #3182
 
 
 ### 0.13.26
