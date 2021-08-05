@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -13,15 +13,19 @@ class Asset:
     def __init__(
         self,
         name: str,
-        base_directory: str = None,
-        glob_directive: str = None,
-        pattern: str = None,
+        base_directory: Optional[str] = None,
+        glob_directive: Optional[str] = None,
+        pattern: Optional[str] = None,
         group_names: List[str] = None,
-        bucket: str = None,
-        prefix: str = None,
-        delimiter: str = None,
+        # S3
+        bucket: Optional[str] = None,
+        prefix: Optional[str] = None,
         max_keys: int = None,
-        batch_spec_passthrough: dict = None,
+        # Azure
+        container: Optional[str] = None,
+        name_starts_with: Optional[str] = None,
+        delimiter: Optional[str] = None,  # Both S3/Azure
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         self._name = name
         self._base_directory = base_directory
@@ -31,10 +35,18 @@ class Asset:
         # Note: this may need to become a nested object to accommodate sorters
         self._group_names = group_names
 
+        # S3
         self._bucket = bucket
         self._prefix = prefix
-        self._delimiter = delimiter
         self._max_keys = max_keys
+
+        # Azure
+        self._container = container
+        self._name_starts_with = name_starts_with
+
+        # Both S3/Azure
+        self._delimiter = delimiter
+
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
@@ -42,37 +54,45 @@ class Asset:
         return self._name
 
     @property
-    def base_directory(self) -> str:
+    def base_directory(self) -> Optional[str]:
         return self._base_directory
 
     @property
-    def glob_directive(self) -> str:
+    def glob_directive(self) -> Optional[str]:
         return self._glob_directive
 
     @property
-    def pattern(self) -> str:
+    def pattern(self) -> Optional[str]:
         return self._pattern
 
     @property
-    def group_names(self) -> List[str]:
+    def group_names(self) -> Optional[List[str]]:
         return self._group_names
 
     @property
-    def bucket(self) -> str:
+    def bucket(self) -> Optional[str]:
         return self._bucket
 
     @property
-    def prefix(self) -> str:
+    def prefix(self) -> Optional[str]:
         return self._prefix
 
     @property
-    def delimiter(self) -> str:
+    def delimiter(self) -> Optional[str]:
         return self._delimiter
 
     @property
-    def max_keys(self) -> int:
+    def max_keys(self) -> Optional[int]:
         return self._max_keys
 
     @property
-    def batch_spec_passthrough(self) -> dict:
+    def container(self) -> Optional[str]:
+        return self._container
+
+    @property
+    def name_starts_with(self) -> Optional[str]:
+        return self._name_starts_with
+
+    @property
+    def batch_spec_passthrough(self) -> Optional[dict]:
         return self._batch_spec_passthrough

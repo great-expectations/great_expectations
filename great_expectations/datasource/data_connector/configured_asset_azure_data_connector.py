@@ -31,7 +31,6 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         sorters: Optional[list] = None,
         name_starts_with: str = "",
         delimiter: str = "/",
-        max_keys: int = 1000,  # TODO(cdkini): Do we need to address this in Azure?
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -49,7 +48,6 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         self._container = container
         self._name_starts_with = os.path.join(name_starts_with, "")
         self._delimiter = delimiter
-        self._max_keys = max_keys
 
         if azure_options is None:
             azure_options = {}
@@ -77,10 +75,10 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             "delimiter": self._delimiter,
         }
         if asset is not None:
-            if asset.bucket:
-                query_options["container"] = asset.bucket
-            if asset.prefix:
-                query_options["name_starts_with"] = asset.prefix
+            if asset.container:
+                query_options["container"] = asset.container
+            if asset.name_starts_with:
+                query_options["name_starts_with"] = asset.name_starts_with
             if asset.delimiter:
                 query_options["delimiter"] = asset.delimiter
 
