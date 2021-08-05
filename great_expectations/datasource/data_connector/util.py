@@ -293,7 +293,7 @@ def list_azure_keys(
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
-    container = query_options.get("container", "")
+    container: str = query_options["container"]
     container_client: ContainerClient = azure.get_container_client(container)
     path_list: List[str] = []
 
@@ -305,7 +305,7 @@ def list_azure_keys(
             else:
                 path_list.append(item.name)
 
-    prefix: str = query_options.get("name_starts_with", "")
+    prefix: str = query_options["name_starts_with"]
     _walk_blob_hierarchy(prefix)
 
     return path_list
