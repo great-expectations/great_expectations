@@ -428,11 +428,11 @@ class BaseDataContext:
                 self._cached_datasources[datasource_name] = self.get_datasource(
                     datasource_name=datasource_name
                 )
-            except ge_exceptions.DatasourceInitializationError:
+            except ge_exceptions.DatasourceInitializationError as err:
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
-                pass
+                raise ge_exceptions.DatasourceInitializationError from err
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
