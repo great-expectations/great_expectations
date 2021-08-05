@@ -4,7 +4,13 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core import IDDict
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequest,
+    BatchRequestBase,
+)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetAzureDataConnector,
 )
@@ -128,7 +134,7 @@ def test_instantiation_with_conn_str(mock_service_client, mock_list_keys):
         container="my_container",
         name_starts_with="",
         assets={"alpha": {}},
-        azure_options={
+        azure_options={  # Representative of format noted in official docs
             "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key"
         },
     )
@@ -185,14 +191,14 @@ def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_from_a_config(
     mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -209,9 +215,6 @@ def test_instantiation_from_a_config(
             pattern: alpha-(.*)\\.csv
             group_names:
                 - index
-        azure_options:
-            account_url: my_account_url
-            credential: my_credential
         container: my_container
         name_starts_with: ""
         assets:
@@ -242,283 +245,273 @@ def test_instantiation_from_a_config(
     assert mock_emit.call_count == 1
 
     # FIXME(cdkini): Currently broken due to indexing errors?
-    # anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-    #     "anonymized_name"
-    # ]
-    # expected_call_args_list = [
-    #     mock.call(
-    #         {
-    #             "event": "data_context.test_yaml_config",
-    #             "event_payload": {
-    #                 "anonymized_name": anonymized_name,
-    #                 "parent_class": "ConfiguredAssetAzureDataConnector",
-    #             },
-    #             "success": True,
-    #         }
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetAzureDataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_from_a_config_regex_does_not_match_paths(
+    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
+    report_object = context.test_yaml_config(
+        f"""
+        module_name: great_expectations.datasource.data_connector
+        class_name: ConfiguredAssetAzureDataConnector
+        datasource_name: FAKE_DATASOURCE
+        name: TEST_DATA_CONNECTOR
+        default_regex:
+            pattern: beta-(.*)\\.csv
+            group_names:
+                - index
+        azure_options:
+            account_url: my_account_url
+            credential: my_credential
+        container: my_container
+        name_starts_with: ""
+        assets:
+            alpha:
+    """,
+        return_mode="report_object",
+    )
+
+    assert report_object == {
+        "class_name": "ConfiguredAssetAzureDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {"example_data_references": [], "batch_definition_count": 0},
+        },
+        "example_unmatched_data_references": [
+            "alpha-1.csv",
+            "alpha-2.csv",
+            "alpha-3.csv",
+        ],
+        "unmatched_data_reference_count": 3,
+    }
+    assert mock_emit.call_count == 1
+
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetAzureDataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=[
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_return_all_batch_definitions_unsorted(
+    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+
+    my_data_connector_yaml = yaml.load(
+        f"""
+           class_name: ConfiguredAssetAzureDataConnector
+           datasource_name: test_environment
+           #execution_engine:
+           #    class_name: PandasExecutionEngine
+           container: my_container
+           name_starts_with: ""
+           assets:
+               TestFiles:
+           default_regex:
+               pattern: (.+)_(.+)_(.+)\\.csv
+               group_names:
+                   - name
+                   - timestamp
+                   - price
+       """,
+    )
+
+    my_data_connector: ConfiguredAssetAzureDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_azure_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
+    )
+
+    with pytest.raises(TypeError):
+        my_data_connector.get_batch_definition_list_from_batch_request()
+
+    # with unnamed data_asset_name
+    with pytest.raises(TypeError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_azure_data_connector",
+                data_asset_name=None,
+            )
+        )
+
+    # FIXME(cdkini): Ordering is all wrong :(
+    # # with unnamed data_asset_name
+    # unsorted_batch_definition_list = (
+    #     my_data_connector._get_batch_definition_list_from_batch_request(
+    #         BatchRequestBase(
+    #             datasource_name="test_environment",
+    #             data_connector_name="general_azure_data_connector",
+    #             data_asset_name=None,
+    #         )
+    #     )
+    # )
+    # expected = [
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "abe", "timestamp": "20200809", "price": "1040"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "alex", "timestamp": "20200809", "price": "1000"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "alex", "timestamp": "20200819", "price": "1300"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "james", "timestamp": "20200713", "price": "1567"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "james", "timestamp": "20200810", "price": "1003"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "james", "timestamp": "20200811", "price": "1009"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "will", "timestamp": "20200809", "price": "1002"}
+    #         ),
+    #     ),
+    #     BatchDefinition(
+    #         datasource_name="test_environment",
+    #         data_connector_name="general_azure_data_connector",
+    #         data_asset_name="TestFiles",
+    #         batch_identifiers=IDDict(
+    #             {"name": "will", "timestamp": "20200810", "price": "1001"}
+    #         ),
     #     ),
     # ]
-    # assert mock_emit.call_args_list == expected_call_args_list
 
+    # assert expected == unsorted_batch_definition_list
 
-# @mock.patch(
-#    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-# )
-# @mock_s3
-# def test_instantiation_from_a_config_regex_does_not_match_paths(
-#    mock_emit, empty_data_context_stats_enabled
-# ):
-#    context: DataContext = empty_data_context_stats_enabled
-
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
-
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "alpha-1.csv",
-#        "alpha-2.csv",
-#        "alpha-3.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-
-#    report_object = context.test_yaml_config(
-#        f"""
-# module_name: great_expectations.datasource.data_connector
-# class_name: ConfiguredAssetS3DataConnector
-# datasource_name: FAKE_DATASOURCE
-# name: TEST_DATA_CONNECTOR
-
-# bucket: {bucket}
-# prefix: ""
-
-# default_regex:
-#    pattern: beta-(.*)\\.csv
-#    group_names:
-#        - index
-
-# assets:
-#    alpha:
-
-#    """,
-#        return_mode="report_object",
-#    )
-
-#    assert report_object == {
-#        "class_name": "ConfiguredAssetS3DataConnector",
-#        "data_asset_count": 1,
-#        "example_data_asset_names": [
-#            "alpha",
-#        ],
-#        "data_assets": {
-#            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-#        },
-#        "example_unmatched_data_references": [
-#            "alpha-1.csv",
-#            "alpha-2.csv",
-#            "alpha-3.csv",
-#        ],
-#        "unmatched_data_reference_count": 3,
-#        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-#        # "example_data_reference": {},
-#    }
-#    assert mock_emit.call_count == 1
-#    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-#        "anonymized_name"
-#    ]
-#    expected_call_args_list = [
-#        mock.call(
-#            {
-#                "event": "data_context.test_yaml_config",
-#                "event_payload": {
-#                    "anonymized_name": anonymized_name,
-#                    "parent_class": "ConfiguredAssetS3DataConnector",
-#                },
-#                "success": True,
-#            }
-#        ),
-#    ]
-#    assert mock_emit.call_args_list == expected_call_args_list
-
-
-# @mock_s3
-# def test_return_all_batch_definitions_unsorted():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
-
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "alex_20200809_1000.csv",
-#        "eugene_20200809_1500.csv",
-#        "james_20200811_1009.csv",
-#        "abe_20200809_1040.csv",
-#        "will_20200809_1002.csv",
-#        "james_20200713_1567.csv",
-#        "eugene_20201129_1900.csv",
-#        "will_20200810_1001.csv",
-#        "james_20200810_1003.csv",
-#        "alex_20200819_1300.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-
-#    my_data_connector_yaml = yaml.load(
-#        f"""
-#            class_name: ConfiguredAssetS3DataConnector
-#            datasource_name: test_environment
-#            #execution_engine:
-#            #    class_name: PandasExecutionEngine
-#            bucket: {bucket}
-#            prefix: ""
-#            assets:
-#                TestFiles:
-#            default_regex:
-#                pattern: (.+)_(.+)_(.+)\\.csv
-#                group_names:
-#                    - name
-#                    - timestamp
-#                    - price
-#        """,
-#    )
-
-#    my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-#        config=my_data_connector_yaml,
-#        runtime_environment={
-#            "name": "general_s3_data_connector",
-#            "datasource_name": "test_environment",
-#        },
-#        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-#    )
-
-#    with pytest.raises(TypeError):
-#        my_data_connector.get_batch_definition_list_from_batch_request()
-
-#    # with unnamed data_asset_name
-#    with pytest.raises(TypeError):
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            BatchRequest(
-#                datasource_name="test_environment",
-#                data_connector_name="general_s3_data_connector",
-#                data_asset_name=None,
-#            )
-#        )
-
-#    # with unnamed data_asset_name
-#    unsorted_batch_definition_list = (
-#        my_data_connector._get_batch_definition_list_from_batch_request(
-#            BatchRequestBase(
-#                datasource_name="test_environment",
-#                data_connector_name="general_s3_data_connector",
-#                data_asset_name=None,
-#            )
-#        )
-#    )
-#    expected = [
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "james", "timestamp": "20200713", "price": "1567"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "james", "timestamp": "20200810", "price": "1003"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "james", "timestamp": "20200811", "price": "1009"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "will", "timestamp": "20200809", "price": "1002"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "will", "timestamp": "20200810", "price": "1001"}
-#            ),
-#        ),
-#    ]
-#    assert expected == unsorted_batch_definition_list
-
-#    # with named data_asset_name
-#    unsorted_batch_definition_list = (
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            BatchRequest(
-#                datasource_name="test_environment",
-#                data_connector_name="general_s3_data_connector",
-#                data_asset_name="TestFiles",
-#            )
-#        )
-#    )
-#    assert expected == unsorted_batch_definition_list
+    # # with named data_asset_name
+    # unsorted_batch_definition_list = (
+    #     my_data_connector.get_batch_definition_list_from_batch_request(
+    #         BatchRequest(
+    #             datasource_name="test_environment",
+    #             data_connector_name="general_azure_data_connector",
+    #             data_asset_name="TestFiles",
+    #         )
+    #     )
+    # )
+    # assert expected == unsorted_batch_definition_list
 
 
 # @mock_s3
@@ -931,8 +924,6 @@ def test_instantiation_from_a_config(
 #        },
 #        "unmatched_data_reference_count": 0,
 #        "example_unmatched_data_references": [],
-#        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-#        # "example_data_reference": {},
 #    }
 #    my_batch_definition_list: List[BatchDefinition]
 #    my_batch_definition: BatchDefinition
