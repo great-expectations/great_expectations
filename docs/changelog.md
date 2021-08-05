@@ -11,7 +11,7 @@ title: Changelog
 * [FEATURE] Pass on meta-data from expectation json to validation result json (#2881) (Thanks @sushrut9898)
 * [FEATURE] Add sqlalchemy engine support for `column.most_common_value` metric (#3020) (Thanks @shpolina)
 * [BUGFIX] Added newline to CLI message for consistent formatting (#3127) (Thanks @ismaildawoodjee)
-* [BUGFIX] fix pip install snowflake build error with python 3.9 (#3119) (Thanks @jdimatteo)
+* [BUGFIX] fix pip install snowflake build error with Python 3.9 (#3119) (Thanks @jdimatteo)
 * [BUGFIX] Populate (data) asset name in data docs for RuntimeDataConnector (#3105) (Thanks @ceshine)
 * [DOCS] Correct path to docs_rtd/changelog.rst (#3120) (Thanks @jdimatteo)
 * [DOCS] Fix broken links in "How to write a 'How to Guide'" (#3112)
