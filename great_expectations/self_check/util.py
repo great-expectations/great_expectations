@@ -917,7 +917,6 @@ def build_sa_validator_with_data(
 
     # Add the data to the database as a new table
 
-
     # NOTE BECAUSE OC THIS OTHER THIGN?
     if sa_engine_name == "bigquery":
         schema = schemas[sa_engine_name]
