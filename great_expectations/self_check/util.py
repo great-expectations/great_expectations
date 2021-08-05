@@ -1150,7 +1150,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
         return expectation_type in [
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",
@@ -1450,7 +1450,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_compound_columns_to_be_unique",
         ]
-    if context == "bigquery":
+    if context == "notbigquery":
         ###
         # NOTE: 20210729 - jdimatteo: It is relatively slow to create tables for
         # all these tests in BigQuery, and if you want to run a single test then
