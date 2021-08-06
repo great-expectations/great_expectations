@@ -4,6 +4,7 @@ title: Changelog
 
 ### Develop
 * [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) #3182
+* [BUGFIX] Fix an error in how ExpectationValidationResults (EVR)s were compared. The bug could cause some EVRs toappear identical even when some result properties differed; the issue primarily affected a small number of internal tests, since EVR comparison is not used as part of the data validation flow. #3178
 
 
 ### 0.13.26
