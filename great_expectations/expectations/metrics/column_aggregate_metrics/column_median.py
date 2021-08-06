@@ -12,7 +12,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
@@ -148,9 +148,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             )
 
         table_domain_kwargs: dict = {
-            k: v
-            for k, v in metric.metric_domain_kwargs.items()
-            if k != MetricDomainTypes.COLUMN.value
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",

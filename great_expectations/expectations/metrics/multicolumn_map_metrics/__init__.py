@@ -1,0 +1,2 @@
+from .compound_columns_unique import CompoundColumnsUnique
+from .multicolumn_sum_equal import MulticolumnSumEqual

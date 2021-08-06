@@ -14,15 +14,6 @@ sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 
-# This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
-
-load_data_into_database(
-    table_name="taxi_data",
-    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
-    connection_string=CONNECTION_STRING,
-)
-
 context = ge.get_context()
 
 datasource_config = {
@@ -94,4 +85,4 @@ assert "taxi_data" in set(
         "default_inferred_data_connector_name"
     ]
 )
-validator.execution_engine.engine.close()
+validator.execution_engine.close()

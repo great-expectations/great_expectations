@@ -81,6 +81,13 @@ stages:
             pip install .
           displayName: 'Install dependencies'
 
+        - task: DownloadSecureFile@1
+          name: gcp_authkey
+          displayName: 'Download Google Service Account'
+          inputs:
+              secureFile: 'superconductive-service-acct.json'
+              retryCount: '2'
+
         - script: |
             pip install pytest pytest-azurepipelines
             # TODO enable spark tests
@@ -107,3 +114,7 @@ stages:
             # AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
             # AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
             # todo: add credentials for cloud resources here
+            # GCP credentials
+            GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+            GCP_PROJECT: $(GCP_PROJECT)
+            GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)

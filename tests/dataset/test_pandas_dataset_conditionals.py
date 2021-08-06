@@ -57,7 +57,7 @@ def test_expectation_decorator_summary_mode():
                     {"value": 7.0, "count": 2},
                     {"value": 6.0, "count": 1},
                 ],
-                "unexpected_percent": 30.0,
+                "unexpected_percent": 37.5,
                 "unexpected_percent_nonmissing": 37.5,
                 "partial_unexpected_list": [6.0, 7.0, 7.0],
                 "partial_unexpected_index_list": [5, 6, 7],
@@ -132,10 +132,10 @@ def test_positional_arguments():
         {
             "success": True,
             "result": {
-                "observed_value": 5,
+                "observed_value": 5.0,
                 "element_count": 5,
-                "missing_count": 0,
-                "missing_percent": 0.0,
+                "missing_count": None,
+                "missing_percent": None,
             },
         }
     )
@@ -247,10 +247,10 @@ def test_result_format_argument_in_decorators():
         {
             "success": True,
             "result": {
-                "observed_value": 5,
+                "observed_value": 5.0,
                 "element_count": 5,
-                "missing_count": 0,
-                "missing_percent": 0.0,
+                "missing_count": None,
+                "missing_percent": None,
             },
         }
     )
@@ -278,8 +278,8 @@ def test_result_format_argument_in_decorators():
                 "missing_count": 0,
                 "missing_percent": 0.0,
                 "partial_unexpected_counts": [
-                    {"count": 1, "value": 8},
                     {"count": 1, "value": 10},
+                    {"count": 1, "value": 8},
                 ],
                 "partial_unexpected_index_list": [3, 4],
                 "partial_unexpected_list": [8, 10],
