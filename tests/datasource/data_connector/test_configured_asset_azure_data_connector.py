@@ -21,6 +21,7 @@ yaml = YAML()
 
 @pytest.fixture
 def expected_config_dict():
+    """Used to validate `self_check()` and `test_yaml_config()` outputs."""
     config = {
         "class_name": "ConfiguredAssetAzureDataConnector",
         "data_asset_count": 1,
@@ -309,19 +310,7 @@ def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
@@ -348,6 +337,21 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
        """,
     )
 
+    mock_list_keys.return_value = (
+        [
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ],
+    )
+
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -369,19 +373,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
@@ -406,6 +398,21 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
                    - timestamp
                    - price
        """,
+    )
+
+    mock_list_keys.return_value = (
+        [
+            "alex_20200809_1000.csv",
+            "eugene_20200809_1500.csv",
+            "james_20200811_1009.csv",
+            "abe_20200809_1040.csv",
+            "will_20200809_1002.csv",
+            "james_20200713_1567.csv",
+            "eugene_20201129_1900.csv",
+            "will_20200810_1001.csv",
+            "james_20200810_1003.csv",
+            "alex_20200819_1300.csv",
+        ],
     )
 
     my_data_connector: ConfiguredAssetAzureDataConnector = (
@@ -433,6 +440,10 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
 
 @pytest.fixture
 def expected_batch_definitions_unsorted():
+    """
+    Used to validate `get_batch_definition_list_from_batch_request()` outputs.
+    Input and output should maintain the same order (henced "unsorted")
+    """
     expected = [
         BatchDefinition(
             datasource_name="test_environment",
@@ -522,19 +533,7 @@ def expected_batch_definitions_unsorted():
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
@@ -564,6 +563,19 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
                    - price
        """,
     )
+
+    mock_list_keys.return_value = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
 
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
@@ -601,19 +613,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
@@ -643,6 +643,19 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
                    - price
        """,
     )
+
+    mock_list_keys.return_value = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
 
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
@@ -678,6 +691,11 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
 
 @pytest.fixture
 def expected_batch_definitions_sorted():
+    """
+    Used to validate `get_batch_definition_list_from_batch_request()` outputs.
+    Input should be sorted based on some criteria, resulting in some change
+    between input and output.
+    """
     expected = [
         BatchDefinition(
             datasource_name="test_environment",
@@ -767,19 +785,7 @@ def expected_batch_definitions_sorted():
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
@@ -821,6 +827,19 @@ def test_return_all_batch_definitions_basic_sorted(
      """,
     )
 
+    mock_list_keys.return_value = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
+
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -857,19 +876,7 @@ def test_return_all_batch_definitions_basic_sorted(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
@@ -906,6 +913,19 @@ def test_return_all_batch_definitions_returns_specified_partition(
              name: price
      """,
     )
+
+    mock_list_keys.return_value = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
 
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
@@ -969,19 +989,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -1023,6 +1031,19 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
      """,
     )
 
+    mock_list_keys.return_value = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
+
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -1059,19 +1080,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -1110,6 +1119,20 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
              name: for_me_Me_Me
    """,
     )
+
+    mock_list_keys.return_value = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
+
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -1127,19 +1150,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -1175,6 +1186,20 @@ def test_return_all_batch_definitions_too_many_sorters(
 
    """,
     )
+
+    mock_list_keys.return_value = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
+
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -1193,20 +1218,6 @@ def test_return_all_batch_definitions_too_many_sorters(
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-        "my_base_directory/beta_here/beta-202001.txt",
-        "my_base_directory/beta_here/beta-202002.txt",
-        "my_base_directory/beta_here/beta-202003.txt",
-        "my_base_directory/beta_here/beta-202004.txt",
-        "my_base_directory/gamma-202001.csv",
-        "my_base_directory/gamma-202002.csv",
-        "my_base_directory/gamma-202003.csv",
-        "my_base_directory/gamma-202004.csv",
-        "my_base_directory/gamma-202005.csv",
-    ],
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -1237,6 +1248,22 @@ assets:
 
    """
     config = yaml.load(yaml_string)
+
+    mock_list_keys.return_value = [  # Initial return value during instantiation
+        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+        "my_base_directory/beta_here/beta-202001.txt",
+        "my_base_directory/beta_here/beta-202002.txt",
+        "my_base_directory/beta_here/beta-202003.txt",
+        "my_base_directory/beta_here/beta-202004.txt",
+        "my_base_directory/gamma-202001.csv",
+        "my_base_directory/gamma-202002.csv",
+        "my_base_directory/gamma-202003.csv",
+        "my_base_directory/gamma-202004.csv",
+        "my_base_directory/gamma-202005.csv",
+    ]
+
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
             config,
