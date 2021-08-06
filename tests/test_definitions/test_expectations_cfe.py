@@ -13,6 +13,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.self_check.util import (
+    BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_cfe,
     evaluate_json_test_cfe,
     get_test_validator_with_data,
@@ -20,10 +21,7 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     postgresqlDialect,
     sqliteDialect,
-    BigQueryDialect,
 )
-
-
 from tests.conftest import build_test_backends_list_cfe
 from tests.test_definitions.test_expectations import tmp_dir
 

@@ -12,6 +12,7 @@ import pytest
 
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.self_check.util import (
+    BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list,
     evaluate_json_test,
     get_dataset,
@@ -19,7 +20,6 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     postgresqlDialect,
     sqliteDialect,
-    BigQueryDialect,
 )
 
 from ..conftest import build_test_backends_list
