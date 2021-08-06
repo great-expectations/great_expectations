@@ -102,6 +102,7 @@ except (ImportError, KeyError):
 try:
     import pybigquery.sqlalchemy_bigquery
     import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     sqlalchemy.dialects.registry.register(
@@ -432,7 +433,6 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
-
 
         df.to_sql(
             name=table_name,

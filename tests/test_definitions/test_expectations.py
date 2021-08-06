@@ -207,7 +207,9 @@ def pytest_generate_tests(metafunc):
                                 "bigquery" in test["suppress_test_for"]
                                 and BigQueryDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(data_asset.engine.dialect, BigQueryDialect)
+                                and isinstance(
+                                    data_asset.engine.dialect, BigQueryDialect
+                                )
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
