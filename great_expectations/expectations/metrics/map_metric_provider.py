@@ -1384,7 +1384,9 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
-        unexpected_values = unexpected_values[: result_format["partial_unexpected_count"]]
+        unexpected_values = unexpected_values[
+            : result_format["partial_unexpected_count"]
+        ]
 
     return [dict(r) for r in unexpected_values]
 
