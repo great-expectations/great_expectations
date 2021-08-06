@@ -45,7 +45,7 @@ def pytest_generate_tests(metafunc):
             dir_path + "/" + expectation_category + "/*.json"
         )
         backends = build_test_backends_list(metafunc)
-        #backends.remove("bigquery")
+        # backends.remove("bigquery")
 
         for c in backends:
             for filename in test_configuration_files:

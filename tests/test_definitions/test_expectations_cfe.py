@@ -34,11 +34,11 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-    expectation_dirs = ["known_not_to_work_with_cfe"]
+    # expectation_dirs = ["known_not_to_work_with_cfe"]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
-    backends = ["bigquery"]
+    # backends = ["bigquery"]
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
