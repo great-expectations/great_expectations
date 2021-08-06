@@ -48,7 +48,6 @@ class ExpectationValidationResult(SerializableDictDot):
     ):
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
-        print(f'\n[ALEX_TEST] [ExpectationValidationResult] EXCEPTION_DID_NOT_OCCUR_IN_CONSTRUCTOR!!! SUCCESS: {success}')
         self.success = success
         self.expectation_config = expectation_config
         # TODO: re-add
@@ -56,7 +55,6 @@ class ExpectationValidationResult(SerializableDictDot):
         if result is None:
             result = {}
         self.result = result
-        print(f'\n[ALEX_TEST] [ExpectationValidationResult] RESULT_IN_CONSTRUCTOR: {self.result}')
         if meta is None:
             meta = {}
         # We require meta information to be serializable, but do not convert until necessary
@@ -81,40 +79,16 @@ class ExpectationValidationResult(SerializableDictDot):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         try:
-            print(f'\n[ALEX_TEST] IN__EQ__: ACTUAL_SELF.RESULT:\n{self.result} ; TYPE: {str(type(self.result))}')
-            print(f'\n[ALEX_TEST] IN__EQ__: OTHER.RESULT:\n{other.result} ; TYPE: {str(type(other.result))}')
-            print(f'\n[ALEX_TEST] IN__EQ__: SELF.EXPECTATION_CONFIG:\n{self.expectation_config} ; TYPE: {str(type(self.expectation_config))}')
-            print(f'\n[ALEX_TEST] IN__EQ__: OTHER.EXPECTATION_CONFIG:\n{other.expectation_config} ; TYPE: {str(type(other.expectation_config))}')
-            e = self.expectation_config.isEquivalentTo(other.expectation_config)
-            r = all(self.result) == all(other.result)
-            print(f'\n[ALEX_TEST] IN__EQ__: RESULTS_ARE_SAME: {r}')
-            better_same_results = all(
-                [other.result[k] == self.result[k] for k in other.result.keys()]
-            )
-            print(f'\n[ALEX_TEST] IN__EQ__: BETTER_RESULTS_ARE_SAME: {better_same_results}')
-            everything = all(
-                (
-                    self.success == other.success,
-                    (
-                            self.expectation_config is None
-                            and other.expectation_config is None
-                    )
-                    or (
-                            self.expectation_config is not None
-                            and self.expectation_config.isEquivalentTo(
-                        other.expectation_config
-                    )
-                    ),
-                    # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
-                    # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
-                    # handled appropriately.
-                    (self.result is None and other.result is None)
-                    or (all(self.result) == all(other.result)),
-                    self.meta == other.meta,
-                    self.exception_info == other.exception_info,
+            if self.result and other.result:
+                common_keys = set(self.result.keys()) & other.result.keys()
+                result_dict = self.to_json_dict()["result"]
+                other_result_dict = other.to_json_dict()["result"]
+                contents_equal = all(
+                    [result_dict[k] == other_result_dict[k] for k in common_keys]
                 )
-            )
-            print(f'\n[ALEX_TEST] IN__EQ__: EVERYTHING_TRUE: {everything}')
+            else:
+                contents_equal = False
+
             return all(
                 (
                     self.success == other.success,
@@ -131,8 +105,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
                     # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
                     # handled appropriately.
-                    (self.result is None and other.result is None)
-                    or (all(self.result) == all(other.result)),
+                    not (self.result or other.result) or contents_equal,
                     self.meta == other.meta,
                     self.exception_info == other.exception_info,
                 )
@@ -148,8 +121,6 @@ class ExpectationValidationResult(SerializableDictDot):
             # Delegate comparison to the other instance's __ne__.
             return NotImplemented
         try:
-            print(f'\n[ALEX_TEST] IN__NEQ__: ACTUAL_SELF.RESULT:\n{self.result} ; TYPE: {str(type(self.result))}')
-            print(f'\n[ALEX_TEST] IN__NEQ__: OTHER.RESULT:\n{other.result} ; TYPE: {str(type(other.result))}')
             return any(
                 (
                     self.success != other.success,

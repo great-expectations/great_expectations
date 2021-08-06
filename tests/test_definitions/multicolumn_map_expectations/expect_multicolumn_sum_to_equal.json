@@ -51,7 +51,7 @@
       "out": {
         "success": true,
         "result": {
-          "element_count": 7,
+          "element_count": 5,
           "missing_count": 0,
           "missing_percent": 0.0,
           "unexpected_count": 0
