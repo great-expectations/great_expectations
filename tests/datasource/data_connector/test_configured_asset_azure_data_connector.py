@@ -1250,6 +1250,8 @@ assets:
             runtime_environment={"name": "my_data_connector"},
         )
     )
+
+    # FIXME(cdkini): Add iterable side_effect (https://stackoverflow.com/questions/24897145/python-mock-multiple-return-values)
     my_data_connector._refresh_data_references_cache()
 
     # FIXME(cdkini): Currently fails because `mock_list_keys` returns the same result each time
