@@ -1181,6 +1181,18 @@ def _pandas_map_condition_rows(
     return df.iloc[: result_format["partial_unexpected_count"]]
 
 
+def _sqlalchemy_map_condition_unexpected_count(
+    cls,
+    execution_engine: SqlAlchemyExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Returns unexpected count for MapExpectations"""
+    return np.count_nonzero(metrics["unexpected_condition"][0])
+
+
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -1333,6 +1345,83 @@ def _sqlalchemy_column_map_condition_values(
         val.unexpected_values
         for val in execution_engine.engine.execute(query).fetchall()
     ]
+
+
+def _sqlalchemy_multicolumn_map_condition_values(
+    cls,
+    execution_engine: SqlAlchemyExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+
+    selectable, _, _ = execution_engine.get_compute_domain(
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_sqlalchemy_multicolumn_map_condition_values).
+"""
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    result_format = metric_value_kwargs["result_format"]
+    if result_format["result_format"] != "COMPLETE":
+        unexpected_values = unexpected_values[: result_format["partial_unexpected_count"]]
+
+    return [dict(r) for r in unexpected_values]
+
+
+def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
+    cls,
+    execution_engine: SqlAlchemyExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return value counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    selectable, _, _ = execution_engine.get_compute_domain(
+        domain_kwargs=compute_domain_kwargs,
+        domain_type=MetricDomainTypes.IDENTITY,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_sqlalchemy_multicolumn_map_condition_filtered_row_count).
+"""
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    return execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(selectable)
+    ).one()[0]
 
 
 def _sqlalchemy_column_map_condition_value_counts(
