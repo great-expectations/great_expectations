@@ -165,7 +165,6 @@
             }
           ],
           "partial_unexpected_index_list": [0,1,2,3,4,5,6,7,8],
-          "partial_unexpected_counts": [],
           "details": {
             "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
           },
