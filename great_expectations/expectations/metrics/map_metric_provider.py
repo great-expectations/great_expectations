@@ -1701,6 +1701,15 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
                     )
+                    register_metric(
+                        metric_name=metric_name + ".unexpected_count",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=metric_value_keys,
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_sqlalchemy_map_condition_unexpected_count,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
                         register_metric(
                             metric_name=metric_name + ".unexpected_count.aggregate_fn",
@@ -1758,6 +1767,25 @@ class MapMetricProvider(MetricProvider):
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_sqlalchemy_column_map_condition_value_counts,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_multicolumn_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_multicolumn_map_condition_filtered_row_count,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                 elif issubclass(engine, SparkDFExecutionEngine):
