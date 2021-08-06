@@ -196,7 +196,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         def expectation_string_fn_with_legacy_translation(
             configuration: ExpectationConfiguration, runtime_configuration: dict
         ):
-            # With the V2 API, the epectation string function had a different signature; below translates from the new signature to the legacy signature.
+            # With the V2 API, the expectation string function had a different signature; the below translates from the new signature to the legacy signature.
             return legacy_expectation_string_fn(
                 expectation=configuration,
                 styling=runtime_configuration.get("styling", None),
