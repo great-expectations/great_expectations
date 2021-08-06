@@ -651,7 +651,7 @@ def multicolumn_condition_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (others to follow).</Alex>
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -705,6 +705,65 @@ def multicolumn_condition_partial(
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, SqlAlchemyExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+            raise ValueError(
+                "SqlAlchemyExecutionEngine only supports map_condition_series for multicolumn_condition_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SqlAlchemyExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    selectable,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                column_clause = [sa.column(cl) for cl in column_list]
+                dialect = execution_engine.dialect_module
+                column_function = metric_fn(
+                    cls,
+                    column_clause,
+                    **metric_value_kwargs,
+                    _dialect=dialect,
+                    _table=selectable,
+                    _sqlalchemy_engine=sqlalchemy_engine,
+                    _metrics=metrics,
+                )
+                return column_function, compute_domain_kwargs, accessor_domain_kwargs
 
             return inner_func
 
