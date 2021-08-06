@@ -26,8 +26,8 @@ class MulticolumnSumEqual(MulticolumnMapMetricProvider):
         sum_total = kwargs.get("sum_total")
         engine = kwargs.get("_sqlalchemy_engine")
         table = kwargs.get("_table")
-        stmt = sa.select(column_clause).select_from(table)
+        query = sa.select(column_clause).select_from(table)
         with engine.connect() as connection:
-            result = connection.execute(stmt)
+            result = connection.execute(query).fetchall()
         row_wise_cond = [sum(row) == sum_total for row in result]
-        return row_wise_cond
+        return [result[i] for i in range(len(result)) if row_wise_cond[i]]
