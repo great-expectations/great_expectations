@@ -19,30 +19,9 @@ from great_expectations.datasource.data_connector import (
 yaml = YAML()
 
 
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
-)
-def test_instantiation_with_account_url_and_credential(
-    mock_service_client, mock_list_keys
-):
-    my_data_connector = ConfiguredAssetAzureDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-        container="my_container",
-        name_starts_with="",
-        assets={"alpha": {}},
-        azure_options={"account_url": "my_account_url", "credential": "my_credential"},
-    )
-
-    assert my_data_connector.self_check() == {
+@pytest.fixture
+def expected_config_dict_alpha():
+    config = {
         "class_name": "ConfiguredAssetAzureDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
@@ -61,6 +40,33 @@ def test_instantiation_with_account_url_and_credential(
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
     }
+    return config
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_account_url_and_credential(
+    mock_service_client, mock_list_keys, expected_config_dict_alpha
+):
+    my_data_connector = ConfiguredAssetAzureDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        container="my_container",
+        name_starts_with="",
+        assets={"alpha": {}},
+        azure_options={"account_url": "my_account_url", "credential": "my_credential"},
+    )
+
+    assert my_data_connector.self_check() == expected_config_dict_alpha
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 3
@@ -75,7 +81,7 @@ def test_instantiation_with_account_url_and_credential(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_conn_str_and_credential(
-    mock_service_client, mock_list_keys
+    mock_service_client, mock_list_keys, expected_config_dict_alpha
 ):
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
@@ -92,25 +98,7 @@ def test_instantiation_with_conn_str_and_credential(
         },
     )
 
-    assert my_data_connector.self_check() == {
-        "class_name": "ConfiguredAssetAzureDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    assert my_data_connector.self_check() == expected_config_dict_alpha
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 3
@@ -128,7 +116,11 @@ def test_instantiation_with_conn_str_and_credential(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_service_client,
+    mock_list_keys,
+    mock_emit,
+    empty_data_context_stats_enabled,
+    expected_config_dict_alpha,
 ):
     context: DataContext = empty_data_context_stats_enabled
 
@@ -150,25 +142,7 @@ def test_instantiation_with_test_yaml_config(
         return_mode="report_object",
     )
 
-    assert report_object == {
-        "class_name": "ConfiguredAssetAzureDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {
-                "example_data_references": [
-                    "alpha-1.csv",
-                    "alpha-2.csv",
-                    "alpha-3.csv",
-                ],
-                "batch_definition_count": 3,
-            },
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    assert report_object == expected_config_dict_alpha
 
 
 @mock.patch(
@@ -459,81 +433,8 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         )
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=[
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
-)
-def test_return_all_batch_definitions_unsorted(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
-):
-
-    my_data_connector_yaml = yaml.load(
-        f"""
-           class_name: ConfiguredAssetAzureDataConnector
-           datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
-           container: my_container
-           name_starts_with: ""
-           assets:
-               TestFiles:
-           default_regex:
-               pattern: (.+)_(.+)_(.+)\\.csv
-               group_names:
-                   - name
-                   - timestamp
-                   - price
-       """,
-    )
-
-    my_data_connector: ConfiguredAssetAzureDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_azure_data_connector",
-                "datasource_name": "test_environment",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
-    )
-
-    # with unnamed data_asset_name
-    unsorted_batch_definition_list = (
-        my_data_connector._get_batch_definition_list_from_batch_request(
-            BatchRequestBase(
-                datasource_name="test_environment",
-                data_connector_name="general_azure_data_connector",
-                data_asset_name=None,
-            )
-        )
-    )
-
-    # NOTE(cdkini): In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
-    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
-    #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
-    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
-    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
-
+@pytest.fixture
+def expected_batch_definitions_unsorted():
     expected = [
         BatchDefinition(
             datasource_name="test_environment",
@@ -616,16 +517,157 @@ def test_return_all_batch_definitions_unsorted(
             ),
         ),
     ]
+    return expected
 
-    for i in range(len(expected)):
-        print(
-            expected[i].batch_identifiers["name"],
-            unsorted_batch_definition_list[i].batch_identifiers["name"],
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=[
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
+    mock_service_client,
+    mock_list_keys,
+    mock_emit,
+    empty_data_context_stats_enabled,
+    expected_batch_definitions_unsorted,
+):
+
+    my_data_connector_yaml = yaml.load(
+        f"""
+           class_name: ConfiguredAssetAzureDataConnector
+           datasource_name: test_environment
+           execution_engine:
+               class_name: PandasExecutionEngine
+           container: my_container
+           name_starts_with: ""
+           assets:
+               TestFiles:
+           default_regex:
+               pattern: (.+)_(.+)_(.+)\\.csv
+               group_names:
+                   - name
+                   - timestamp
+                   - price
+       """,
+    )
+
+    my_data_connector: ConfiguredAssetAzureDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_azure_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
         )
+    )
 
-    assert expected == unsorted_batch_definition_list
+    # NOTE(cdkini): In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
+    #
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
+    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
-    # with named data_asset_name
+    unsorted_batch_definition_list = (
+        my_data_connector._get_batch_definition_list_from_batch_request(
+            BatchRequestBase(
+                datasource_name="test_environment",
+                data_connector_name="general_azure_data_connector",
+                data_asset_name=None,
+            )
+        )
+    )
+    assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=[
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
+    mock_service_client,
+    mock_list_keys,
+    mock_emit,
+    empty_data_context_stats_enabled,
+    expected_batch_definitions_unsorted,
+):
+
+    my_data_connector_yaml = yaml.load(
+        f"""
+           class_name: ConfiguredAssetAzureDataConnector
+           datasource_name: test_environment
+           execution_engine:
+               class_name: PandasExecutionEngine
+           container: my_container
+           name_starts_with: ""
+           assets:
+               TestFiles:
+           default_regex:
+               pattern: (.+)_(.+)_(.+)\\.csv
+               group_names:
+                   - name
+                   - timestamp
+                   - price
+       """,
+    )
+
+    my_data_connector: ConfiguredAssetAzureDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_azure_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
+    )
+
+    # NOTE(cdkini): In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
+    #
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
+    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+
     unsorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -635,7 +677,7 @@ def test_return_all_batch_definitions_unsorted(
             )
         )
     )
-    assert expected == unsorted_batch_definition_list
+    assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
 @mock.patch(
