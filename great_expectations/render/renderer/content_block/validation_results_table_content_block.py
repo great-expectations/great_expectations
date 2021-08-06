@@ -196,6 +196,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
         def expectation_string_fn_with_legacy_translation(
             configuration: ExpectationConfiguration, runtime_configuration: dict
         ):
+            if runtime_configuration is None:
+                runtime_configuration = {}
+
             # With the V2 API, the expectation string function had a different signature; the below translates from the new signature to the legacy signature.
             return legacy_expectation_string_fn(
                 expectation=configuration,
