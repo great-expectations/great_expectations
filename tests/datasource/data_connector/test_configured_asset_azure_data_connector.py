@@ -1,3 +1,4 @@
+from typing import List
 from unittest import mock
 
 import pytest
@@ -529,8 +530,8 @@ def test_return_all_batch_definitions_unsorted(
         f"""
            class_name: ConfiguredAssetAzureDataConnector
            datasource_name: test_environment
-           #execution_engine:
-           #    class_name: PandasExecutionEngine
+           execution_engine:
+               class_name: PandasExecutionEngine
            container: my_container
            name_starts_with: ""
            assets:
@@ -567,29 +568,21 @@ def test_return_all_batch_definitions_unsorted(
             )
         )
     )
+
+    # NOTE(cdkini): In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
+    #
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
+    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
+    # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
+
     expected = [
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
         BatchDefinition(
@@ -605,31 +598,15 @@ def test_return_all_batch_definitions_unsorted(
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
         BatchDefinition(
@@ -645,7 +622,39 @@ def test_return_all_batch_definitions_unsorted(
             data_connector_name="general_azure_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
     ]
@@ -656,446 +665,246 @@ def test_return_all_batch_definitions_unsorted(
             unsorted_batch_definition_list[i].batch_identifiers["name"],
         )
 
-    # assert expected == unsorted_batch_definition_list
+    assert expected == unsorted_batch_definition_list
 
-    # # with named data_asset_name
-    # unsorted_batch_definition_list = (
-    #     my_data_connector.get_batch_definition_list_from_batch_request(
-    #         BatchRequest(
-    #             datasource_name="test_environment",
-    #             data_connector_name="general_azure_data_connector",
-    #             data_asset_name="TestFiles",
-    #         )
-    #     )
-    # )
-    # assert expected == unsorted_batch_definition_list
-
-
-# @mock_s3
-# def test_return_all_batch_definitions_sorted():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
-
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "alex_20200809_1000.csv",
-#        "eugene_20200809_1500.csv",
-#        "james_20200811_1009.csv",
-#        "abe_20200809_1040.csv",
-#        "will_20200809_1002.csv",
-#        "james_20200713_1567.csv",
-#        "eugene_20201129_1900.csv",
-#        "will_20200810_1001.csv",
-#        "james_20200810_1003.csv",
-#        "alex_20200819_1300.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-
-#    my_data_connector_yaml = yaml.load(
-#        f"""
-#        class_name: ConfiguredAssetS3DataConnector
-#        datasource_name: test_environment
-#        #execution_engine:
-#        #    class_name: PandasExecutionEngine
-#        bucket: {bucket}
-#        prefix: ""
-#        assets:
-#            TestFiles:
-#        default_regex:
-#            pattern: (.+)_(.+)_(.+)\\.csv
-#            group_names:
-#                - name
-#                - timestamp
-#                - price
-#        sorters:
-#            - orderby: asc
-#              class_name: LexicographicSorter
-#              name: name
-#            - datetime_format: "%Y%m%d"
-#              orderby: desc
-#              class_name: DateTimeSorter
-#              name: timestamp
-#            - orderby: desc
-#              class_name: NumericSorter
-#              name: price
-
-#    """,
-#    )
-
-#    my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-#        config=my_data_connector_yaml,
-#        runtime_environment={
-#            "name": "general_s3_data_connector",
-#            "datasource_name": "test_environment",
-#        },
-#        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-#    )
-
-#    self_check_report = my_data_connector.self_check()
-
-#    assert self_check_report["class_name"] == "ConfiguredAssetS3DataConnector"
-#    assert self_check_report["data_asset_count"] == 1
-#    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
-#    assert self_check_report["unmatched_data_reference_count"] == 0
-
-#    sorted_batch_definition_list = (
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            BatchRequest(
-#                datasource_name="test_environment",
-#                data_connector_name="general_s3_data_connector",
-#                data_asset_name="TestFiles",
-#            )
-#        )
-#    )
-
-#    expected = [
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "james", "timestamp": "20200811", "price": "1009"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "james", "timestamp": "20200810", "price": "1003"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "james", "timestamp": "20200713", "price": "1567"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "will", "timestamp": "20200810", "price": "1001"}
-#            ),
-#        ),
-#        BatchDefinition(
-#            datasource_name="test_environment",
-#            data_connector_name="general_s3_data_connector",
-#            data_asset_name="TestFiles",
-#            batch_identifiers=IDDict(
-#                {"name": "will", "timestamp": "20200809", "price": "1002"}
-#            ),
-#        ),
-#    ]
-
-#    # TEST 1: Sorting works
-#    assert expected == sorted_batch_definition_list
-
-#    my_batch_request: BatchRequest = BatchRequest(
-#        datasource_name="test_environment",
-#        data_connector_name="general_s3_data_connector",
-#        data_asset_name="TestFiles",
-#        data_connector_query=IDDict(
-#            **{
-#                "batch_filter_parameters": {
-#                    "name": "james",
-#                    "timestamp": "20200713",
-#                    "price": "1567",
-#                }
-#            }
-#        ),
-#    )
-
-#    my_batch_definition_list: List[BatchDefinition]
-#    my_batch_definition: BatchDefinition
-
-#    # TEST 2: Should only return the specified partition
-#    my_batch_definition_list = (
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            batch_request=my_batch_request
-#        )
-#    )
-
-#    assert len(my_batch_definition_list) == 1
-#    my_batch_definition = my_batch_definition_list[0]
-#    expected_batch_definition: BatchDefinition = BatchDefinition(
-#        datasource_name="test_environment",
-#        data_connector_name="general_s3_data_connector",
-#        data_asset_name="TestFiles",
-#        batch_identifiers=IDDict(
-#            **{
-#                "name": "james",
-#                "timestamp": "20200713",
-#                "price": "1567",
-#            }
-#        ),
-#    )
-#    assert my_batch_definition == expected_batch_definition
-
-#    # TEST 3: Without data_connector_query, should return all 10
-#    my_batch_request: BatchRequest = BatchRequest(
-#        datasource_name="test_environment",
-#        data_connector_name="general_s3_data_connector",
-#        data_asset_name="TestFiles",
-#        data_connector_query=None,
-#    )
-#    # should return 10
-#    my_batch_definition_list = (
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            batch_request=my_batch_request
-#        )
-#    )
-#    assert len(my_batch_definition_list) == 10
+    # with named data_asset_name
+    unsorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_azure_data_connector",
+                data_asset_name="TestFiles",
+            )
+        )
+    )
+    assert expected == unsorted_batch_definition_list
 
 
-# @mock_s3
-# def test_alpha():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=[
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_return_all_batch_definitions_sorted(
+    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    my_data_connector_yaml = yaml.load(
+        f"""
+       class_name: ConfiguredAssetAzureDataConnector
+       datasource_name: test_environment
+       #execution_engine:
+       #    class_name: PandasExecutionEngine
+       container: my_container
+       name_starts_with: ""
+       assets:
+           TestFiles:
+       default_regex:
+           pattern: (.+)_(.+)_(.+)\\.csv
+           group_names:
+               - name
+               - timestamp
+               - price
+       sorters:
+           - orderby: asc
+             class_name: LexicographicSorter
+             name: name
+           - datetime_format: "%Y%m%d"
+             orderby: desc
+             class_name: DateTimeSorter
+             name: timestamp
+           - orderby: desc
+             class_name: NumericSorter
+             name: price
+     """,
+    )
 
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    my_data_connector: ConfiguredAssetAzureDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_azure_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
+    )
 
-#    keys: List[str] = [
-#        "test_dir_alpha/A.csv",
-#        "test_dir_alpha/B.csv",
-#        "test_dir_alpha/C.csv",
-#        "test_dir_alpha/D.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
+    self_check_report = my_data_connector.self_check()
 
-#    my_data_connector_yaml = yaml.load(
-#        f"""
-#                module_name: great_expectations.datasource.data_connector
-#                class_name: ConfiguredAssetS3DataConnector
-#                bucket: {bucket}
-#                prefix: test_dir_alpha
-#                assets:
-#                  A:
-#                default_regex:
-#                    pattern: .*(.+)\\.csv
-#                    group_names:
-#                    - part_1
-#            """,
-#    )
+    assert self_check_report["class_name"] == "ConfiguredAssetAzureDataConnector"
+    assert self_check_report["data_asset_count"] == 1
+    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
+    assert self_check_report["unmatched_data_reference_count"] == 0
 
-#    my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-#        config=my_data_connector_yaml,
-#        runtime_environment={
-#            "name": "general_s3_data_connector",
-#            "datasource_name": "BASE",
-#        },
-#        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-#    )
-#    self_check_report = my_data_connector.self_check()
-#    print(json.dumps(self_check_report, indent=2))
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_azure_data_connector",
+                data_asset_name="TestFiles",
+            )
+        )
+    )
 
-#    assert self_check_report["class_name"] == "ConfiguredAssetS3DataConnector"
-#    assert self_check_report["data_asset_count"] == 1
-#    assert set(list(self_check_report["data_assets"].keys())) == {"A"}
-#    assert self_check_report["unmatched_data_reference_count"] == 0
+    expected = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "will", "timestamp": "20200810", "price": "1001"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
+        ),
+    ]
 
-#    my_batch_definition_list: List[BatchDefinition]
-#    my_batch_definition: BatchDefinition
+    # TEST 1: Sorting works
+    assert expected == sorted_batch_definition_list
 
-#    # Try to fetch a batch from a nonexistent asset
-#    my_batch_request: BatchRequest = BatchRequest(
-#        datasource_name="BASE",
-#        data_connector_name="general_s3_data_connector",
-#        data_asset_name="B",
-#        data_connector_query=None,
-#    )
+    my_batch_request: BatchRequest = BatchRequest(
+        datasource_name="test_environment",
+        data_connector_name="general_azure_data_connector",
+        data_asset_name="TestFiles",
+        data_connector_query=IDDict(
+            **{
+                "batch_filter_parameters": {
+                    "name": "james",
+                    "timestamp": "20200713",
+                    "price": "1567",
+                }
+            }
+        ),
+    )
 
-#    my_batch_definition_list = (
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            batch_request=my_batch_request
-#        )
-#    )
-#    assert len(my_batch_definition_list) == 0
+    my_batch_definition_list: List[BatchDefinition]
+    my_batch_definition: BatchDefinition
 
-#    my_batch_request: BatchRequest = BatchRequest(
-#        datasource_name="BASE",
-#        data_connector_name="general_s3_data_connector",
-#        data_asset_name="A",
-#        data_connector_query=IDDict(**{"batch_filter_parameters": {"part_1": "B"}}),
-#    )
-#    my_batch_definition_list = (
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            batch_request=my_batch_request
-#        )
-#    )
-#    assert len(my_batch_definition_list) == 1
+    # TEST 2: Should only return the specified partition
+    my_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=my_batch_request
+        )
+    )
 
+    assert len(my_batch_definition_list) == 1
+    my_batch_definition = my_batch_definition_list[0]
+    expected_batch_definition: BatchDefinition = BatchDefinition(
+        datasource_name="test_environment",
+        data_connector_name="general_azure_data_connector",
+        data_asset_name="TestFiles",
+        batch_identifiers=IDDict(
+            **{
+                "name": "james",
+                "timestamp": "20200713",
+                "price": "1567",
+            }
+        ),
+    )
+    assert my_batch_definition == expected_batch_definition
 
-# @mock_s3
-# def test_foxtrot():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
-
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "test_dir_foxtrot/A/A-1.csv",
-#        "test_dir_foxtrot/A/A-2.csv",
-#        "test_dir_foxtrot/A/A-3.csv",
-#        "test_dir_foxtrot/B/B-1.txt",
-#        "test_dir_foxtrot/B/B-2.txt",
-#        "test_dir_foxtrot/B/B-3.txt",
-#        "test_dir_foxtrot/C/C-2017.csv",
-#        "test_dir_foxtrot/C/C-2018.csv",
-#        "test_dir_foxtrot/C/C-2019.csv",
-#        "test_dir_foxtrot/D/D-aaa.csv",
-#        "test_dir_foxtrot/D/D-bbb.csv",
-#        "test_dir_foxtrot/D/D-ccc.csv",
-#        "test_dir_foxtrot/D/D-ddd.csv",
-#        "test_dir_foxtrot/D/D-eee.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-
-#    my_data_connector_yaml = yaml.load(
-#        f"""
-#            module_name: great_expectations.datasource.data_connector
-#            class_name: ConfiguredAssetS3DataConnector
-#            bucket: {bucket}
-#            prefix: test_dir_foxtrot
-#            assets:
-#              A:
-#                prefix: test_dir_foxtrot/A/
-#              B:
-#                prefix: test_dir_foxtrot/B/
-#                pattern: (.+)-(.+)\\.txt
-#                group_names:
-#                - part_1
-#                - part_2
-#              C:
-#                prefix: test_dir_foxtrot/C/
-#              D:
-#                prefix: test_dir_foxtrot/D/
-#            default_regex:
-#                pattern: (.+)-(.+)\\.csv
-#                group_names:
-#                - part_1
-#                - part_2
-#        """,
-#    )
-
-#    my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-#        config=my_data_connector_yaml,
-#        runtime_environment={
-#            "name": "general_s3_data_connector",
-#            "datasource_name": "BASE",
-#        },
-#        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-#    )
-#    self_check_report = my_data_connector.self_check()
-#    assert self_check_report == {
-#        "class_name": "ConfiguredAssetS3DataConnector",
-#        "data_asset_count": 4,
-#        "example_data_asset_names": ["A", "B", "C"],
-#        "data_assets": {
-#            "A": {
-#                "batch_definition_count": 3,
-#                "example_data_references": [
-#                    "test_dir_foxtrot/A/A-1.csv",
-#                    "test_dir_foxtrot/A/A-2.csv",
-#                    "test_dir_foxtrot/A/A-3.csv",
-#                ],
-#            },
-#            "B": {
-#                "batch_definition_count": 3,
-#                "example_data_references": [
-#                    "test_dir_foxtrot/B/B-1.txt",
-#                    "test_dir_foxtrot/B/B-2.txt",
-#                    "test_dir_foxtrot/B/B-3.txt",
-#                ],
-#            },
-#            "C": {
-#                "batch_definition_count": 3,
-#                "example_data_references": [
-#                    "test_dir_foxtrot/C/C-2017.csv",
-#                    "test_dir_foxtrot/C/C-2018.csv",
-#                    "test_dir_foxtrot/C/C-2019.csv",
-#                ],
-#            },
-#        },
-#        "unmatched_data_reference_count": 0,
-#        "example_unmatched_data_references": [],
-#    }
-#    my_batch_definition_list: List[BatchDefinition]
-#    my_batch_definition: BatchDefinition
-#    my_batch_request = BatchRequest(
-#        datasource_name="BASE",
-#        data_connector_name="general_s3_data_connector",
-#        data_asset_name="A",
-#        data_connector_query=None,
-#    )
-#    my_batch_definition_list = (
-#        my_data_connector.get_batch_definition_list_from_batch_request(
-#            batch_request=my_batch_request
-#        )
-#    )
-#    assert len(my_batch_definition_list) == 3
+    # TEST 3: Without data_connector_query, should return all 10
+    my_batch_request: BatchRequest = BatchRequest(
+        datasource_name="test_environment",
+        data_connector_name="general_azure_data_connector",
+        data_asset_name="TestFiles",
+        data_connector_query=None,
+    )
+    # should return 10
+    my_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=my_batch_request
+        )
+    )
+    assert len(my_batch_definition_list) == 10
 
 
 # @mock_s3
