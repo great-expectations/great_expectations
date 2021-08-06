@@ -40,7 +40,7 @@ config = {
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
-    "name": "great_expectations",
+    "name": "dl-great-expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
     "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
