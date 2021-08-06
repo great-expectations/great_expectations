@@ -124,12 +124,6 @@ docs_test_matrix = [
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/custom_expectation_rendering_v2_api.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
-        "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
-    },
-    {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
