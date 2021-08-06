@@ -8,6 +8,7 @@ Changelog
 develop
 -----------------
 * [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) #3182
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema
 
 0.13.26
 -----------------
