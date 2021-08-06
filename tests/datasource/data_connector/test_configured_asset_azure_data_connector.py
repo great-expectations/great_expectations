@@ -329,7 +329,6 @@ def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-
     my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetAzureDataConnector
@@ -390,7 +389,6 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
     mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-
     my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetAzureDataConnector
@@ -548,7 +546,6 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     empty_data_context_stats_enabled,
     expected_batch_definitions_unsorted,
 ):
-
     my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetAzureDataConnector
@@ -581,7 +578,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         )
     )
 
-    # NOTE(cdkini): In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
     # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
     #
     # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
@@ -628,7 +625,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     empty_data_context_stats_enabled,
     expected_batch_definitions_unsorted,
 ):
-
     my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetAzureDataConnector
@@ -661,7 +657,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         )
     )
 
-    # NOTE(cdkini): In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
     # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
     #
     # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
