@@ -20,7 +20,7 @@ yaml = YAML()
 
 
 @pytest.fixture
-def expected_config_dict_alpha():
+def expected_config_dict():
     config = {
         "class_name": "ConfiguredAssetAzureDataConnector",
         "data_asset_count": 1,
@@ -51,7 +51,7 @@ def expected_config_dict_alpha():
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_account_url_and_credential(
-    mock_service_client, mock_list_keys, expected_config_dict_alpha
+    mock_service_client, mock_list_keys, expected_config_dict
 ):
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
@@ -66,7 +66,7 @@ def test_instantiation_with_account_url_and_credential(
         azure_options={"account_url": "my_account_url", "credential": "my_credential"},
     )
 
-    assert my_data_connector.self_check() == expected_config_dict_alpha
+    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 3
@@ -81,7 +81,7 @@ def test_instantiation_with_account_url_and_credential(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_conn_str_and_credential(
-    mock_service_client, mock_list_keys, expected_config_dict_alpha
+    mock_service_client, mock_list_keys, expected_config_dict
 ):
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
@@ -98,7 +98,7 @@ def test_instantiation_with_conn_str_and_credential(
         },
     )
 
-    assert my_data_connector.self_check() == expected_config_dict_alpha
+    assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 3
@@ -120,7 +120,7 @@ def test_instantiation_with_test_yaml_config(
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
-    expected_config_dict_alpha,
+    expected_config_dict,
 ):
     context: DataContext = empty_data_context_stats_enabled
 
@@ -142,7 +142,7 @@ def test_instantiation_with_test_yaml_config(
         return_mode="report_object",
     )
 
-    assert report_object == expected_config_dict_alpha
+    assert report_object == expected_config_dict
 
 
 @mock.patch(
