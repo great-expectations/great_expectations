@@ -70,7 +70,7 @@ stages:
     dependsOn: [scope_check, lint]
 
     jobs:
-      - job: bigquery
+      - job: bigquery_expectations_cfe
         timeoutInMinutes: 0 # Maximize the time that this can run
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
 
@@ -100,7 +100,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics tests/test_definitions/test_expectations_cfe.py
 
             displayName: 'pytest'
             env:
