@@ -71,6 +71,7 @@ stages:
 
     jobs:
       - job: bigquery
+        timeoutInMinutes: 0 # Maximize the time that this can run
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
 
         variables:
