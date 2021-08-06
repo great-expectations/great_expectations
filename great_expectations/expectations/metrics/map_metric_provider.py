@@ -744,6 +744,10 @@ def _pandas_multicolumn_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    """
     domain_args = copy.deepcopy(compute_domain_kwargs)
     domain_args.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
@@ -790,6 +794,10 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    """
     domain_args = copy.deepcopy(compute_domain_kwargs)
     domain_args.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
@@ -902,6 +910,10 @@ def _pandas_map_condition_index(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    """
     domain_args = copy.deepcopy(compute_domain_kwargs)
     domain_args.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
@@ -962,7 +974,6 @@ def _pandas_column_map_condition_value_counts(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
-
     df, _, _ = execution_engine.get_compute_domain(
         domain_kwargs=compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
     )
@@ -1032,6 +1043,10 @@ def _pandas_map_condition_rows(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    """
     domain_args = copy.deepcopy(compute_domain_kwargs)
     domain_args.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
