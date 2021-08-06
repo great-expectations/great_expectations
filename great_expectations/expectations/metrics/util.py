@@ -123,7 +123,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Bigquery
-        if issubclass(dialect.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "BigQueryDialect"):
             if positive:
                 return sa.func.REGEXP_CONTAINS(column, literal(regex))
             else:

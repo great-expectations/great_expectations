@@ -34,11 +34,11 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-
+    expectation_dirs = ["known_not_to_work_with_cfe"]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
-
+    backends = ["bigquery"]
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
@@ -146,12 +146,12 @@ def pytest_generate_tests(metafunc):
                                 elif (
                                     "bigquery" in test["only_for"]
                                     and BigQueryDialect is not None
-                                    and isinstance(
-                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                        BigQueryDialect,
-                                    )
+                                    and hasattr(
+                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect, "name")
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name == "bigquery"
                                 ):
                                     print("GENERATE TEST FOR BIG QUERY")
+                                    print("this isn't going to work either")
                                     generate_test = True
 
                             elif validator_with_data and isinstance(
@@ -239,6 +239,17 @@ def pytest_generate_tests(metafunc):
                                     validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
                                     mssqlDialect,
                                 )
+                            )
+                            or (
+                                "bigquery" in test["suppress_test_for"]
+                                and BigQueryDialect is not None
+                                and validator_with_data
+                                and isinstance(
+                                    validator_with_data.execution_engine.active_batch_data,
+                                    SqlAlchemyBatchData,
+                                )
+                                and hasattr(validator_with_data.execution_engine.active_batch_data.sql_engine_dialect, "name")
+                                and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name == "bigquery"
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
