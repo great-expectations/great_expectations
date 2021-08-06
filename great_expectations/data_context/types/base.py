@@ -492,7 +492,9 @@ Azure type of the data connector (your data connector is "{data['class_name']}")
 continue.
                     """
             )
-        if not ("conn_str" in data ^ "account_url" in data) and data["class_name"] in [
+        if not (("conn_str" in data) ^ ("account_url" in data)) and data[
+            "class_name"
+        ] in [
             "InferredAssetAzureDataConnector",
             "ConfiguredAssetAzureDataConnector",
         ]:
