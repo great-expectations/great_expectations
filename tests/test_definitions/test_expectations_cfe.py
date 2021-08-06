@@ -147,8 +147,11 @@ def pytest_generate_tests(metafunc):
                                     "bigquery" in test["only_for"]
                                     and BigQueryDialect is not None
                                     and hasattr(
-                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect, "name")
-                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name == "bigquery"
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
                                 ):
                                     print("GENERATE TEST FOR BIG QUERY")
                                     print("this isn't going to work either")
@@ -248,8 +251,12 @@ def pytest_generate_tests(metafunc):
                                     validator_with_data.execution_engine.active_batch_data,
                                     SqlAlchemyBatchData,
                                 )
-                                and hasattr(validator_with_data.execution_engine.active_batch_data.sql_engine_dialect, "name")
-                                and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name == "bigquery"
+                                and hasattr(
+                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                    "name",
+                                )
+                                and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                == "bigquery"
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
