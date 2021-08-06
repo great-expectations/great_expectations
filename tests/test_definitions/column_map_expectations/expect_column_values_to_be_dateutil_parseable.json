@@ -3,8 +3,8 @@
     "datasets" : [{
       "data" : {
         "a": ["2019-04-01", "2019-04-02", "2019-04-03", "2019-04-13"],
-        "b": ["01/01/2010", "01/01/2011", "01/01/2012", null],
-        "c": ["cat", "dog", "horse", "goat"],
+        "b": ["01/01/2010", "01/01/2011", "01/01/2012", "abc"],
+        "c": ["cat", "dog", "horse",  "01/01/2011"],
         "d": [1, 2, 3, 4]
       },
       "tests": [{
@@ -22,7 +22,8 @@
         "title": "positive_test_with_nulls",
         "exact_match_out" : false,
         "in":{
-          "column": "b"
+          "column": "b",
+          "mostly": 0.75
         },
         "out":{
           "success": true
@@ -32,7 +33,8 @@
         "title": "negative_test",
         "exact_match_out" : false,
         "in":{
-          "column": "c"
+          "column": "c",
+          "mostly": 0.75
         },
         "out":{
           "success": false
