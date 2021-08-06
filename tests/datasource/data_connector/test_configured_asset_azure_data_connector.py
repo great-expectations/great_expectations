@@ -52,7 +52,7 @@ def expected_config_dict():
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_account_url_and_credential(
-    mock_service_client, mock_list_keys, expected_config_dict
+    mock_azure_conn, mock_list_keys, expected_config_dict
 ):
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
@@ -82,7 +82,7 @@ def test_instantiation_with_account_url_and_credential(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_conn_str_and_credential(
-    mock_service_client, mock_list_keys, expected_config_dict
+    mock_azure_conn, mock_list_keys, expected_config_dict
 ):
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
@@ -117,7 +117,7 @@ def test_instantiation_with_conn_str_and_credential(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config(
-    mock_service_client,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -157,7 +157,7 @@ def test_instantiation_with_test_yaml_config(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
 
@@ -209,7 +209,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_from_a_config_regex_does_not_match_paths(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
 
@@ -281,7 +281,7 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env_name_raises_error(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector = ConfiguredAssetAzureDataConnector(
         name="my_data_connector",
@@ -316,7 +316,7 @@ def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
@@ -379,7 +379,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
@@ -539,7 +539,7 @@ def expected_batch_definitions_unsorted():
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
-    mock_service_client,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -619,7 +619,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
-    mock_service_client,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -791,7 +791,7 @@ def expected_batch_definitions_sorted():
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_basic_sorted(
-    mock_service_client,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -882,7 +882,7 @@ def test_return_all_batch_definitions_basic_sorted(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_returns_specified_partition(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
@@ -995,7 +995,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_return_all_batch_definitions_sorted_without_data_connector_query(
-    mock_service_client,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -1086,7 +1086,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
@@ -1156,7 +1156,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_return_all_batch_definitions_too_many_sorters(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
@@ -1223,7 +1223,7 @@ def test_return_all_batch_definitions_too_many_sorters(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_example_with_explicit_data_asset_names(
-    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     yaml_string = f"""
 class_name: ConfiguredAssetAzureDataConnector
@@ -1280,6 +1280,7 @@ assets:
     # this method (once per asset), we define our expected behavior below.
     #
     # Source: https://stackoverflow.com/questions/24897145/python-mock-multiple-return-values
+
     mock_list_keys.side_effect = [
         [  # Asset alpha
             "my_base_directory/alpha/files/go/here/alpha-202001.csv",
