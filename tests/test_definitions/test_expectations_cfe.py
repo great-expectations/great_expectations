@@ -5,7 +5,6 @@ import random
 import string
 
 import pandas as pd
-import pybigquery
 import pytest
 
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
@@ -17,14 +16,15 @@ from great_expectations.self_check.util import (
     candidate_test_is_on_temporary_notimplemented_list_cfe,
     evaluate_json_test_cfe,
     get_test_validator_with_data,
+    mssqlDialect,
+    mysqlDialect,
+    postgresqlDialect,
+    sqliteDialect,
+    BigQueryDialect,
 )
+
+
 from tests.conftest import build_test_backends_list_cfe
-from tests.test_definitions.test_expectations import mssqlDialect as mssqlDialect
-from tests.test_definitions.test_expectations import mysqlDialect as mysqlDialect
-from tests.test_definitions.test_expectations import (
-    postgresqlDialect as postgresqlDialect,
-)
-from tests.test_definitions.test_expectations import sqliteDialect as sqliteDialect
 from tests.test_definitions.test_expectations import tmp_dir
 
 
@@ -145,9 +145,13 @@ def pytest_generate_tests(metafunc):
                                     )
                                 ):
                                     generate_test = True
-                                elif "bigquery" in test["only_for"] and isinstance(
-                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                    pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                                elif (
+                                    "bigquery" in test["only_for"]
+                                    and BigQueryDialect is not None
+                                    and isinstance(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        BigQueryDialect,
+                                    )
                                 ):
                                     print("GENERATE TEST FOR BIG QUERY")
                                     generate_test = True

@@ -101,7 +101,7 @@ except (ImportError, KeyError):
 
 try:
     import pybigquery.sqlalchemy_bigquery
-
+    import pybigquery.sqlalchemy_bigquery as BigQueryDialect
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     sqlalchemy.dialects.registry.register(
@@ -110,7 +110,6 @@ try:
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
         bigquery_types_tuple = {}
-        # Just some basic types that are used in tests
         BIGQUERY_TYPES = {
             "INTEGER": pybigquery.sqlalchemy_bigquery.INTEGER,
             "NUMERIC": pybigquery.sqlalchemy_bigquery.NUMERIC,
@@ -138,6 +137,7 @@ try:
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
 except (ImportError, AttributeError):
     bigquery_types_tuple = None
+    BigQueryDialect = None
     pybigquery = None
 
 
@@ -432,6 +432,8 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
+
+
         df.to_sql(
             name=table_name,
             con=engine,
@@ -505,6 +507,40 @@ def get_dataset(
         # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
         # rather than referring the table by name.
         custom_sql = "SELECT * FROM " + table_name
+        return SqlAlchemyDataset(
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
+        )
+    elif dataset_type == "bigquery":
+        if not create_engine:
+            return None
+        #### we have to add some sort of machinery for this:
+        engine = _create_bigquery_engine()
+        ## this is where we have to do the renaming
+        schema = None
+        if schemas and dataset_type in schemas:
+            schema = schemas[dataset_type]
+
+        if schema:
+            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+        df.columns = df.columns.str.replace(" ", "_")
+
+        if table_name is None:
+            table_name = generate_test_table_name()
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            if_exists="replace",
+        )
+
+        # Will - 20210126
+        # For mysql we want our tests to know when a temp_table is referred to more than once in the
+        # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+        # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
+        # rather than referring the table by name.
+        bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
+
+        custom_sql = "SELECT * FROM " + bigquery_dataset + "." + table_name
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
@@ -681,8 +717,6 @@ def get_dataset(
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
-    elif dataset_type == "bigquery":
-        pass
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -2148,5 +2182,5 @@ def generate_test_table_name(
 
 def _create_bigquery_engine() -> Engine:
     gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "superconductive-internal")
-    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "demo")
+    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
     return create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}")

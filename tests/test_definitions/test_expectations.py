@@ -19,6 +19,7 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     postgresqlDialect,
     sqliteDialect,
+    BigQueryDialect,
 )
 
 from ..conftest import build_test_backends_list
@@ -38,13 +39,13 @@ def pytest_generate_tests(metafunc):
 
     parametrized_tests = []
     ids = []
-
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
         backends = build_test_backends_list(metafunc)
+        backends = ["bigquery"]
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
@@ -77,6 +78,14 @@ def pytest_generate_tests(metafunc):
                                 )
                             )
                             for dataset in d["data"]:
+                                temp = get_dataset(
+                                    c,
+                                    dataset["data"],
+                                    dataset.get("schemas"),
+                                    table_name=dataset.get("dataset_name"),
+                                    sqlite_db_path=sqlite_db_path,
+                                )
+
                                 datasets.append(
                                     get_dataset(
                                         c,
@@ -136,6 +145,14 @@ def pytest_generate_tests(metafunc):
                                     )
                                 ):
                                     generate_test = True
+                                elif (
+                                    "bigquery" in test["only_for"]
+                                    and BigQueryDialect is not None
+                                    and isinstance(
+                                        data_asset.engine.dialect, BigQueryDialect
+                                    )
+                                ):
+                                    generate_test = True
                             elif isinstance(data_asset, PandasDataset):
                                 if "pandas" in test["only_for"]:
                                     generate_test = True
@@ -185,6 +202,12 @@ def pytest_generate_tests(metafunc):
                                 and mssqlDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(data_asset.engine.dialect, mssqlDialect)
+                            )
+                            or (
+                                "bigquery" in test["suppress_test_for"]
+                                and BigQueryDialect is not None
+                                and isinstance(data_asset, SqlAlchemyDataset)
+                                and isinstance(data_asset.engine.dialect, BigQueryDialect)
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]

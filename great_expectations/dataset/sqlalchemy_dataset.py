@@ -548,6 +548,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
+            "bigquery"
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
@@ -570,6 +571,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.engine.dialect.name.lower() == "awsathena":
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
+            )
+        elif self.engine.dialect.name.lower() == "bigquery":
+            self.dialect = import_library_module(
+                module_name="pybigquery.sqlalchemy_bigquery"
             )
         else:
             self.dialect = None
