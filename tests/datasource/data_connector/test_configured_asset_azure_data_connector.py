@@ -1,4 +1,3 @@
-from typing import List
 from unittest import mock
 
 import pytest
@@ -1359,103 +1358,103 @@ def test_return_all_batch_definitions_too_many_sorters(
         )
 
 
-# @mock_s3
-# def test_example_with_explicit_data_asset_names():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=[
+        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+        "my_base_directory/beta_here/beta-202001.txt",
+        "my_base_directory/beta_here/beta-202002.txt",
+        "my_base_directory/beta_here/beta-202003.txt",
+        "my_base_directory/beta_here/beta-202004.txt",
+        "my_base_directory/gamma-202001.csv",
+        "my_base_directory/gamma-202002.csv",
+        "my_base_directory/gamma-202003.csv",
+        "my_base_directory/gamma-202004.csv",
+        "my_base_directory/gamma-202005.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_example_with_explicit_data_asset_names(
+    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    yaml_string = f"""
+class_name: ConfiguredAssetAzureDataConnector
+datasource_name: FAKE_DATASOURCE_NAME
+container: my_container
+name_starts_with: my_base_directory/
+default_regex:
+   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+   group_names:
+       - data_asset_name
+       - year_dir
+       - month_dir
+assets:
+   alpha:
+       prefix: my_base_directory/alpha/files/go/here/
+       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+   beta:
+       prefix: my_base_directory/beta_here/
+       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
+   gamma:
+       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
 
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+   """
+    config = yaml.load(yaml_string)
+    my_data_connector: ConfiguredAssetAzureDataConnector = (
+        instantiate_class_from_config(
+            config,
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+            runtime_environment={"name": "my_data_connector"},
+        )
+    )
+    my_data_connector._refresh_data_references_cache()
 
-#    keys: List[str] = [
-#        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-#        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-#        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-#        "my_base_directory/beta_here/beta-202001.txt",
-#        "my_base_directory/beta_here/beta-202002.txt",
-#        "my_base_directory/beta_here/beta-202003.txt",
-#        "my_base_directory/beta_here/beta-202004.txt",
-#        "my_base_directory/gamma-202001.csv",
-#        "my_base_directory/gamma-202002.csv",
-#        "my_base_directory/gamma-202003.csv",
-#        "my_base_directory/gamma-202004.csv",
-#        "my_base_directory/gamma-202005.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
+    # assert len(my_data_connector.get_unmatched_data_references()) == 0
 
-#    yaml_string = f"""
-# class_name: ConfiguredAssetS3DataConnector
-# datasource_name: FAKE_DATASOURCE_NAME
-# bucket: {bucket}
-# prefix: my_base_directory/
-# default_regex:
-#    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
-#    group_names:
-#        - data_asset_name
-#        - year_dir
-#        - month_dir
-# assets:
-#    alpha:
-#        prefix: my_base_directory/alpha/files/go/here/
-#        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
-#    beta:
-#        prefix: my_base_directory/beta_here/
-#        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
-#    gamma:
-#        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+    # assert (
+    #     len(
+    #         my_data_connector.get_batch_definition_list_from_batch_request(
+    #             batch_request=BatchRequest(
+    #                 datasource_name="FAKE_DATASOURCE_NAME",
+    #                 data_connector_name="my_data_connector",
+    #                 data_asset_name="alpha",
+    #             )
+    #         )
+    #     )
+    #     == 3
+    # )
 
-#    """
-#    config = yaml.load(yaml_string)
-#    my_data_connector = instantiate_class_from_config(
-#        config,
-#        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-#        runtime_environment={"name": "my_data_connector"},
-#    )
-#    # noinspection PyProtectedMember
-#    my_data_connector._refresh_data_references_cache()
+    # assert (
+    #     len(
+    #         my_data_connector.get_batch_definition_list_from_batch_request(
+    #             batch_request=BatchRequest(
+    #                 datasource_name="FAKE_DATASOURCE_NAME",
+    #                 data_connector_name="my_data_connector",
+    #                 data_asset_name="beta",
+    #             )
+    #         )
+    #     )
+    #     == 4
+    # )
 
-#    assert len(my_data_connector.get_unmatched_data_references()) == 0
-
-#    assert (
-#        len(
-#            my_data_connector.get_batch_definition_list_from_batch_request(
-#                batch_request=BatchRequest(
-#                    datasource_name="FAKE_DATASOURCE_NAME",
-#                    data_connector_name="my_data_connector",
-#                    data_asset_name="alpha",
-#                )
-#            )
-#        )
-#        == 3
-#    )
-
-#    assert (
-#        len(
-#            my_data_connector.get_batch_definition_list_from_batch_request(
-#                batch_request=BatchRequest(
-#                    datasource_name="FAKE_DATASOURCE_NAME",
-#                    data_connector_name="my_data_connector",
-#                    data_asset_name="beta",
-#                )
-#            )
-#        )
-#        == 4
-#    )
-
-#    assert (
-#        len(
-#            my_data_connector.get_batch_definition_list_from_batch_request(
-#                batch_request=BatchRequest(
-#                    datasource_name="FAKE_DATASOURCE_NAME",
-#                    data_connector_name="my_data_connector",
-#                    data_asset_name="gamma",
-#                )
-#            )
-#        )
-#        == 5
-#    )
+    # assert (
+    #     len(
+    #         my_data_connector.get_batch_definition_list_from_batch_request(
+    #             batch_request=BatchRequest(
+    #                 datasource_name="FAKE_DATASOURCE_NAME",
+    #                 data_connector_name="my_data_connector",
+    #                 data_asset_name="gamma",
+    #             )
+    #         )
+    #     )
+    #     == 5
+    # )
