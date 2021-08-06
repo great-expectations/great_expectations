@@ -1,5 +1,5 @@
 # Redirect from what the browser serves
-/v2 https://legacy.docs.greatexpectations.io/en/latest/
+/v2 https://docs.greatexpectations.io/en/latest/
 /en/latest/  https://legacy.docs.greatexpectations.io/en/latest/
 /en/latest/index.html https://legacy.docs.greatexpectations.io/en/latest/index.html
 /en/latest/contributing.html https://legacy.docs.greatexpectations.io/en/latest/contributing.html
