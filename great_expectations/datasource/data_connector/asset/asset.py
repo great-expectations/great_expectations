@@ -17,23 +17,24 @@ class Asset:
         glob_directive: Optional[str] = None,
         pattern: Optional[str] = None,
         group_names: List[str] = None,
+        delimiter: Optional[str] = None,
+        batch_spec_passthrough: Optional[dict] = None,
         # S3
         bucket: Optional[str] = None,
         prefix: Optional[str] = None,
-        max_keys: int = None,
+        max_keys: Optional[int] = None,
         # Azure
         container: Optional[str] = None,
         name_starts_with: Optional[str] = None,
-        delimiter: Optional[str] = None,  # Both S3/Azure
-        batch_spec_passthrough: Optional[dict] = None,
     ):
         self._name = name
         self._base_directory = base_directory
         self._glob_directive = glob_directive
         self._pattern = pattern
-
         # Note: this may need to become a nested object to accommodate sorters
         self._group_names = group_names
+        self._delimiter = delimiter
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
 
         # S3
         self._bucket = bucket
@@ -43,11 +44,6 @@ class Asset:
         # Azure
         self._container = container
         self._name_starts_with = name_starts_with
-
-        # Both S3/Azure
-        self._delimiter = delimiter
-
-        self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
     def name(self) -> str:
