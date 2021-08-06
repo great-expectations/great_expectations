@@ -22,6 +22,26 @@ logger = logging.getLogger(__name__)
 
 
 class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
+    """
+    Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure
+
+    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+    can use to get individual batches of data. They add flexibility in how to obtain data
+    such as with time-based partitioning, downsampling, or other techniques appropriate
+    for the Datasource.
+
+    The ConfiguredAssetAzureDataConnector is one of two classes (InferredAssetAzureDataConnector being the
+    other one) designed for connecting to data on Azure.
+
+    A ConfiguredAssetAzureDataConnector requires an explicit listing of each DataAsset you want to connect to.
+    This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
+    with Azure's official SDK, we utilize terms like "container" and "name_starts_with".
+
+    As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
+    docs if a greater understanding of the supported authentication methods and general functionality is desired.
+    Source: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python
+    """
+
     def __init__(
         self,
         name: str,
@@ -36,6 +56,22 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
+        """
+        ConfiguredAssetDataConnector for connecting to Azure.
+
+        Args:
+            name (str): required name for DataConnector
+            datasource_name (str): required name for datasource
+            container (str): container name for Azure Blob Storage
+            assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
+            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+            default_regex (dict): optional regex configuration for filtering data_references
+            sorters (list): optional list of sorters for sorting data_references
+            name_starts_with (str): Azure prefix
+            delimiter (str): Azure delimiter
+            azure_options (dict): Wrapper object for **kwargs
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        """
         logger.debug(f'Constructing ConfiguredAssetAzureDataConnector "{name}".')
 
         super().__init__(
@@ -54,7 +90,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         if azure_options is None:
             azure_options = {}
 
-        try:
+        try:  # Both connection string and standard auth methods are supported
             if "conn_str" in azure_options:
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
             else:
@@ -65,6 +101,15 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
@@ -96,5 +141,6 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         path: str,
         data_asset_name: Optional[str] = None,
     ) -> str:
-        raise NotImplementedError()
+        # NOTE(cdkini): Not used by this class but required to fulfill parent class
         # Format: http://<storage_account_name>.blob.core.windows.net/<container_name>/<blob_name>
+        raise NotImplementedError()
