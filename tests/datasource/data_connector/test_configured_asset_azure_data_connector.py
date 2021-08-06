@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
@@ -1225,149 +1226,137 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
     assert expected == sorted_batch_definition_list
 
 
-# @mock_s3
-# def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
-
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "alex_20200809_1000.csv",
-#        "eugene_20200809_1500.csv",
-#        "james_20200811_1009.csv",
-#        "abe_20200809_1040.csv",
-#        "will_20200809_1002.csv",
-#        "james_20200713_1567.csv",
-#        "eugene_20201129_1900.csv",
-#        "will_20200810_1001.csv",
-#        "james_20200810_1003.csv",
-#        "alex_20200819_1300.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-
-#    my_data_connector_yaml = yaml.load(
-#        f"""
-#        class_name: ConfiguredAssetS3DataConnector
-#        datasource_name: test_environment
-#        #execution_engine:
-#        #    class_name: PandasExecutionEngine
-#        bucket: bucket
-#        assets:
-#            TestFiles:
-#                pattern: (.+)_(.+)_(.+)\\.csv
-#                group_names:
-#                    - name
-#                    - timestamp
-#                    - price
-#        default_regex:
-#            pattern: (.+)_.+_.+\\.csv
-#            group_names:
-#                - name
-#        sorters:
-#            - orderby: asc
-#              class_name: LexicographicSorter
-#              name: name
-#            - datetime_format: "%Y%m%d"
-#              orderby: desc
-#              class_name: DateTimeSorter
-#              name: timestamp
-#            - orderby: desc
-#              class_name: NumericSorter
-#              name: for_me_Me_Me
-#    """,
-#    )
-#    with pytest.raises(ge_exceptions.DataConnectorError):
-#        # noinspection PyUnusedLocal
-#        my_data_connector: ConfiguredAssetS3DataConnector = (
-#            instantiate_class_from_config(
-#                config=my_data_connector_yaml,
-#                runtime_environment={
-#                    "name": "general_s3_data_connector",
-#                    "datasource_name": "test_environment",
-#                },
-#                config_defaults={
-#                    "module_name": "great_expectations.datasource.data_connector"
-#                },
-#            )
-#        )
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=[
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
+    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    my_data_connector_yaml = yaml.load(
+        f"""
+       class_name: ConfiguredAssetAzureDataConnector
+       datasource_name: test_environment
+       execution_engine:
+           class_name: PandasExecutionEngine
+       container: my_container
+       assets:
+           TestFiles:
+               pattern: (.+)_(.+)_(.+)\\.csv
+               group_names:
+                   - name
+                   - timestamp
+                   - price
+       default_regex:
+           pattern: (.+)_.+_.+\\.csv
+           group_names:
+               - name
+       sorters:
+           - orderby: asc
+             class_name: LexicographicSorter
+             name: name
+           - datetime_format: "%Y%m%d"
+             orderby: desc
+             class_name: DateTimeSorter
+             name: timestamp
+           - orderby: desc
+             class_name: NumericSorter
+             name: for_me_Me_Me
+   """,
+    )
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_azure_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
 
 
-# @mock_s3
-# def test_return_all_batch_definitions_too_many_sorters():
-#    region_name: str = "us-east-1"
-#    bucket: str = "test_bucket"
-#    conn = boto3.resource("s3", region_name=region_name)
-#    conn.create_bucket(Bucket=bucket)
-#    client = boto3.client("s3", region_name=region_name)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=[
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_return_all_batch_definitions_too_many_sorters(
+    mock_service_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    my_data_connector_yaml = yaml.load(
+        f"""
+       class_name: ConfiguredAssetAzureDataConnector
+       datasource_name: test_environment
+       execution_engine:
+           class_name: PandasExecutionEngine
+       container: my_container
+       name_starts_with: ""
+       assets:
+           TestFiles:
+       default_regex:
+           pattern: (.+)_.+_.+\\.csv
+           group_names:
+               - name
+       sorters:
+           - orderby: asc
+             class_name: LexicographicSorter
+             name: name
+           - datetime_format: "%Y%m%d"
+             orderby: desc
+             class_name: DateTimeSorter
+             name: timestamp
+           - orderby: desc
+             class_name: NumericSorter
+             name: price
 
-#    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#    keys: List[str] = [
-#        "alex_20200809_1000.csv",
-#        "eugene_20200809_1500.csv",
-#        "james_20200811_1009.csv",
-#        "abe_20200809_1040.csv",
-#        "will_20200809_1002.csv",
-#        "james_20200713_1567.csv",
-#        "eugene_20201129_1900.csv",
-#        "will_20200810_1001.csv",
-#        "james_20200810_1003.csv",
-#        "alex_20200819_1300.csv",
-#    ]
-#    for key in keys:
-#        client.put_object(
-#            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#        )
-
-#    my_data_connector_yaml = yaml.load(
-#        f"""
-#        class_name: ConfiguredAssetS3DataConnector
-#        datasource_name: test_environment
-#        #execution_engine:
-#        #    class_name: PandasExecutionEngine
-#        bucket: {bucket}
-#        prefix: ""
-#        assets:
-#            TestFiles:
-#        default_regex:
-#            pattern: (.+)_.+_.+\\.csv
-#            group_names:
-#                - name
-#        sorters:
-#            - orderby: asc
-#              class_name: LexicographicSorter
-#              name: name
-#            - datetime_format: "%Y%m%d"
-#              orderby: desc
-#              class_name: DateTimeSorter
-#              name: timestamp
-#            - orderby: desc
-#              class_name: NumericSorter
-#              name: price
-
-#    """,
-#    )
-#    with pytest.raises(ge_exceptions.DataConnectorError):
-#        # noinspection PyUnusedLocal
-#        my_data_connector: ConfiguredAssetS3DataConnector = (
-#            instantiate_class_from_config(
-#                config=my_data_connector_yaml,
-#                runtime_environment={
-#                    "name": "general_s3_data_connector",
-#                    "datasource_name": "test_environment",
-#                },
-#                config_defaults={
-#                    "module_name": "great_expectations.datasource.data_connector"
-#                },
-#            )
-#        )
+   """,
+    )
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_azure_data_connector",
+                "datasource_name": "test_environment",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
 
 
 # @mock_s3
