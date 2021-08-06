@@ -1251,49 +1251,72 @@ assets:
         )
     )
 
-    # FIXME(cdkini): Add iterable side_effect (https://stackoverflow.com/questions/24897145/python-mock-multiple-return-values)
+    # Since we are using mocks, we need to redefine the output of subsequent calls to `list_azure_keys()`
+    # Our patched object provides the ability to define a "side_effect", an iterable containing return
+    # values for subsequent calls. Since `_refresh_data_references_cache()` makes multiple calls to
+    # this method (once per asset), we define our expected behavior below.
+    #
+    # Source: https://stackoverflow.com/questions/24897145/python-mock-multiple-return-values
+    mock_list_keys.side_effect = [
+        [  # Asset alpha
+            "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+            "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+            "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+        ],
+        [  # Asset beta
+            "my_base_directory/beta_here/beta-202001.txt",
+            "my_base_directory/beta_here/beta-202002.txt",
+            "my_base_directory/beta_here/beta-202003.txt",
+            "my_base_directory/beta_here/beta-202004.txt",
+        ],
+        [  # Asset gamma
+            "my_base_directory/gamma-202001.csv",
+            "my_base_directory/gamma-202002.csv",
+            "my_base_directory/gamma-202003.csv",
+            "my_base_directory/gamma-202004.csv",
+            "my_base_directory/gamma-202005.csv",
+        ],
+    ]
+
     my_data_connector._refresh_data_references_cache()
 
-    # FIXME(cdkini): Currently fails because `mock_list_keys` returns the same result each time
-    # Need to implement different return values depending on what input the mock recieves
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
-    # assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert (
+        len(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="alpha",
+                )
+            )
+        )
+        == 3
+    )
 
-    # assert (
-    #     len(
-    #         my_data_connector.get_batch_definition_list_from_batch_request(
-    #             batch_request=BatchRequest(
-    #                 datasource_name="FAKE_DATASOURCE_NAME",
-    #                 data_connector_name="my_data_connector",
-    #                 data_asset_name="alpha",
-    #             )
-    #         )
-    #     )
-    #     == 3
-    # )
+    assert (
+        len(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="beta",
+                )
+            )
+        )
+        == 4
+    )
 
-    # assert (
-    #     len(
-    #         my_data_connector.get_batch_definition_list_from_batch_request(
-    #             batch_request=BatchRequest(
-    #                 datasource_name="FAKE_DATASOURCE_NAME",
-    #                 data_connector_name="my_data_connector",
-    #                 data_asset_name="beta",
-    #             )
-    #         )
-    #     )
-    #     == 4
-    # )
-
-    # assert (
-    #     len(
-    #         my_data_connector.get_batch_definition_list_from_batch_request(
-    #             batch_request=BatchRequest(
-    #                 datasource_name="FAKE_DATASOURCE_NAME",
-    #                 data_connector_name="my_data_connector",
-    #                 data_asset_name="gamma",
-    #             )
-    #         )
-    #     )
-    #     == 5
-    # )
+    assert (
+        len(
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="gamma",
+                )
+            )
+        )
+        == 5
+    )
