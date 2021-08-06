@@ -19,58 +19,6 @@ from great_expectations.datasource.data_connector import (
 yaml = YAML()
 
 
-# # TODO(cdkini): Move to data_context/types/base.py test file
-# def test_schema_validation_raises_invalid_config_error_with_multiple_auth_methods():
-#     raise NotImplementedError()
-
-
-# # TODO(cdkini): Move to data_connector/util.py test file
-# def test_list_azure_keys_basic(blob_service_client: BlobServiceClient):
-#     keys = list_azure_keys(
-#         azure=blob_service_client,
-#         query_options={"container": CONTAINER_NAME},
-#         recursive=False,
-#     )
-#     assert keys == [
-#         "yellow_trip_data_sample_2018-01.csv",
-#         "yellow_trip_data_sample_2018-02.csv",
-#         "yellow_trip_data_sample_2018-03.csv",
-#     ]
-
-
-# # TODO(cdkini): Move to data_connector/util.py test file
-# def test_list_azure_keys_with_name_starts_with(blob_service_client: BlobServiceClient):
-#     keys = list_azure_keys(
-#         azure=blob_service_client,
-#         query_options={"name_starts_with": "2018/", "container": CONTAINER_NAME},
-#         recursive=False,
-#     )
-#     assert keys == [
-#         "2018/yellow_trip_data_sample_2018-01.csv",
-#         "2018/yellow_trip_data_sample_2018-02.csv",
-#         "2018/yellow_trip_data_sample_2018-03.csv",
-#     ]
-
-
-# # TODO(cdkini): Move to data_connector/util.py test file
-# def test_list_azure_keys_with_name_starts_with_and_recursive(
-#     blob_service_client: BlobServiceClient,
-# ):
-#     keys = list_azure_keys(
-#         azure=blob_service_client,
-#         query_options={"name_starts_with": "2018/", "container": CONTAINER_NAME},
-#         recursive=True,
-#     )
-#     assert keys == [
-#         "2018/2018-04/yellow_trip_data_sample_2018-04.csv",
-#         "2018/2018-05/yellow_trip_data_sample_2018-05.csv",
-#         "2018/2018-06/yellow_trip_data_sample_2018-06.csv",
-#         "2018/yellow_trip_data_sample_2018-01.csv",
-#         "2018/yellow_trip_data_sample_2018-02.csv",
-#         "2018/yellow_trip_data_sample_2018-03.csv",
-#     ]
-
-
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -1335,7 +1283,7 @@ assets:
     )
     my_data_connector._refresh_data_references_cache()
 
-    # assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     # assert (
     #     len(
