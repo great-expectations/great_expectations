@@ -217,10 +217,5 @@ diagnose and repair the underlying issue.  Detailed information follows:
             # If this isn't the case, return None, so we don't do any legacy logic.
             return None
 
-        warnings.warn(
-            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
-            DeprecationWarning,
-        )
-
         # With V2 API style rendering, the result had an "observed_value" entry that could be rendered.
         return result["result"].get("observed_value")
