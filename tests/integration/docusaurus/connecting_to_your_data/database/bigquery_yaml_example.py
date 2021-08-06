@@ -12,15 +12,6 @@ bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
-# This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
-
-load_data_into_database(
-    table_name="taxi_data",
-    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
-    connection_string=CONNECTION_STRING,
-)
-
 context = ge.get_context()
 
 datasource_yaml = f"""
