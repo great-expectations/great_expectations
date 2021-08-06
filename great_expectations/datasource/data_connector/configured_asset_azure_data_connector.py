@@ -69,7 +69,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters (list): optional list of sorters for sorting data_references
             name_starts_with (str): Azure prefix
             delimiter (str): Azure delimiter
-            azure_options (dict): Wrapper object for **kwargs
+            azure_options (dict): wrapper object for **kwargs
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing ConfiguredAssetAzureDataConnector "{name}".')
@@ -141,6 +141,6 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         path: str,
         data_asset_name: Optional[str] = None,
     ) -> str:
-        # NOTE(cdkini): Not used by this class but required to fulfill parent class
+        # Not used by this class but required to fulfill parent class
         # Format: http://<storage_account_name>.blob.core.windows.net/<container_name>/<blob_name>
         raise NotImplementedError()
