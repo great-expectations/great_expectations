@@ -1545,7 +1545,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
-            element_count=filtered_row_count,
+            element_count=total_count,
             nonnull_count=filtered_row_count,
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,

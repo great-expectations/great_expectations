@@ -74,7 +74,7 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
         "requirements": [],
     }
 
-    map_metric = "column_values.dateutil_parsable"
+    map_metric = "column_values.dateutil_parseable"
     success_keys = ("mostly",)
 
     default_kwarg_values = {
