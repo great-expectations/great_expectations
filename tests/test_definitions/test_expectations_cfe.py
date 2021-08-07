@@ -153,8 +153,6 @@ def pytest_generate_tests(metafunc):
                                     and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
                                     == "bigquery"
                                 ):
-                                    print("GENERATE TEST FOR BIG QUERY")
-                                    print("this isn't going to work either")
                                     generate_test = True
 
                             elif validator_with_data and isinstance(
