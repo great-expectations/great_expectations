@@ -40,8 +40,8 @@ def pytest_generate_tests(metafunc):
     parametrized_tests = []
     ids = []
     # expectation_dirs = ["column_aggregate_expectations"]
-    expectation_dirs = ["column_distributional_expectations"]
-    # expectation_dirs = ["column_map_expectations"]
+    # expectation_dirs = ["column_distributional_expectations"]
+    expectation_dirs = ["column_map_expectations"]
 
     ##### this is where we are
 
