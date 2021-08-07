@@ -22,7 +22,6 @@
     "tests" : [{
       "title": "basic_test_ignore_if_all_are_missing_the_default_behavior",
       "exact_match_out" : false,
-      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["w", "x"]
       },
@@ -34,7 +33,6 @@
     },{
       "title": "basic_test_ignore_if_any_are_missing",
       "exact_match_out" : false,
-      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["w", "x"],
         "ignore_row_if": "any_value_is_missing"
@@ -67,7 +65,6 @@
     },{
       "title": "unexpected_values",
       "exact_match_out" : false,
-      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -116,7 +113,6 @@
     },{
       "title": "unexpected_values_exact_match_out",
       "exact_match_out" : true,
-      "suppress_test_for": ["pandas"],
       "in": {
         "column_list": ["a", "b"]
       },

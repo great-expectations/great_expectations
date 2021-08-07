@@ -1854,8 +1854,6 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 def check_json_test_result(test, result, data_asset=None):
     # Check results
     if test["exact_match_out"] is True:
-        print(f'\n[ALEX_TEST] ACTUAL_RESULT:\n{result} ; TYPE: {str(type(result))}')
-        print(f'\n[ALEX_TEST] DESIRED_TESTR:\n{expectationValidationResultSchema.load(test["out"])} ; TYPE: {str(type(expectationValidationResultSchema.load(test["out"])))}')
         assert result == expectationValidationResultSchema.load(test["out"])
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)

@@ -504,15 +504,13 @@ class Validator:
         pbar = None
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
-            # TODO: <Alex>ALEX</Alex>
-            # if pbar is None:
-            #     pbar = tqdm(
-            #         total=len(ready_metrics) + len(needed_metrics),
-            #         desc="Calculating Metrics",
-            #         disable=len(graph._edges) < 3,
-            #     )
-            #     pbar.update(0)
-            # TODO: <Alex>ALEX</Alex>
+            if pbar is None:
+                pbar = tqdm(
+                    total=len(ready_metrics) + len(needed_metrics),
+                    desc="Calculating Metrics",
+                    disable=len(graph._edges) < 3,
+                )
+                pbar.update(0)
             metrics.update(
                 self._resolve_metrics(
                     execution_engine=self._execution_engine,
@@ -521,14 +519,10 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
             )
-            # TODO: <Alex>ALEX</Alex>
-            # pbar.update(len(ready_metrics))
-            # TODO: <Alex>ALEX</Alex>
+            pbar.update(len(ready_metrics))
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
-        # TODO: <Alex>ALEX</Alex>
-        # pbar.close()
-        # TODO: <Alex>ALEX</Alex>
+        pbar.close()
 
         return metrics
 
