@@ -39,6 +39,8 @@ def pytest_generate_tests(metafunc):
 
     parametrized_tests = []
     ids = []
+    #expectation_dirs = ["not_working"]
+
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
@@ -46,6 +48,7 @@ def pytest_generate_tests(metafunc):
         )
         backends = build_test_backends_list(metafunc)
         # backends.remove("bigquery")
+        #backends = ["bigquery"]
 
         for c in backends:
             for filename in test_configuration_files:
@@ -208,9 +211,8 @@ def pytest_generate_tests(metafunc):
                                 "bigquery" in test["suppress_test_for"]
                                 and BigQueryDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(
-                                    data_asset.engine.dialect, BigQueryDialect
-                                )
+                                and hasattr(data_asset.engine.dialect, "name")
+                                and data_asset.engine.dialect.name.lower() == "bigquery"
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
