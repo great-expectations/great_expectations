@@ -39,14 +39,14 @@ def pytest_generate_tests(metafunc):
 
     parametrized_tests = []
     ids = []
-    # expectation_dirs = ["column_aggregate_expectations"]
+    # expectation_dirs = ["column_aggregate_expectations"]  # THIS HAD 2 MISSING
     # expectation_dirs = ["column_distributional_expectations"]
-    # expectation_dirs = ["column_map_expectations"]
+    # expectation_dirs = ["column_map_expectations"] ### THIS IS GOOD
 
-    # expectation_dirs = ["column_pair_map_expectations"]
-    # expectation_dirs = ["multi_table_expectations"]
+    # expectation_dirs = ["column_pair_map_expectations"] ## THIS IS GOOD
+    # expectation_dirs = ["multi_table_expectations"] ## THIS IS GOOD
     # expectation_dirs = ["multicolumn_map_expectations"] ## THIS WORKED
-    expectation_dirs = ["other_expectations"]
+    # expectation_dirs = ["other_expectations"] ## THIS WORKED
 
     for expectation_category in expectation_dirs:
 
