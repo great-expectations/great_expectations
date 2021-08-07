@@ -1266,9 +1266,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_of_type",
             "expect_column_values_to_be_in_set",
             "expect_column_values_to_be_in_type_list",
-
         ]
-
 
     if context == "SparkDFDataset":
         return expectation_type in [

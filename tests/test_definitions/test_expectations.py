@@ -39,7 +39,7 @@ def pytest_generate_tests(metafunc):
 
     parametrized_tests = []
     ids = []
-    #expectation_dirs = ["not_working"]
+    # expectation_dirs = ["not_working"]
 
     for expectation_category in expectation_dirs:
 
@@ -48,7 +48,7 @@ def pytest_generate_tests(metafunc):
         )
         backends = build_test_backends_list(metafunc)
         # backends.remove("bigquery")
-        #backends = ["bigquery"]
+        # backends = ["bigquery"]
 
         for c in backends:
             for filename in test_configuration_files:
