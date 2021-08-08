@@ -312,8 +312,9 @@ def list_azure_keys(
     Returns:
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
-    container = query_options.get("container", "")
+    container: str = query_options["container"]
     container_client: ContainerClient = azure.get_container_client(container)
+
     path_list: List[str] = []
 
     def _walk_blob_hierarchy(name_starts_with: str) -> None:
@@ -324,7 +325,7 @@ def list_azure_keys(
             else:
                 path_list.append(item.name)
 
-    name_starts_with: str = query_options.get("name_starts_with", "")
+    name_starts_with: str = query_options["name_starts_with"]
     _walk_blob_hierarchy(name_starts_with)
 
     return path_list
