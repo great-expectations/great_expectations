@@ -69,12 +69,55 @@ def test_instantiation_with_account_url_and_credential(
             "credential": "my_credential",
         },
     )
-
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_conn):
+    my_data_connector = ConfiguredAssetAzureDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        container="my_container",
+        name_starts_with="",
+        assets={"alpha": {}},
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": "my_credential",
+        },
+    )
+    assert my_data_connector._account_name == "my_account_url"
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn):
+    my_data_connector = ConfiguredAssetAzureDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        container="my_container",
+        name_starts_with="",
+        assets={"alpha": {}},
+        azure_options={  # Representative of format noted in official docs
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "credential": "my_credential",
+        },
+    )
+    assert my_data_connector._account_name == "storagesample"
 
 
 @mock.patch(
@@ -1407,4 +1450,88 @@ azure_options:
             )
         )
         == 5
+    )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_get_full_file_path(
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    yaml_string = f"""
+class_name: ConfiguredAssetAzureDataConnector
+datasource_name: FAKE_DATASOURCE_NAME
+container: my_container
+name_starts_with: my_base_directory/
+default_regex:
+   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+   group_names:
+       - data_asset_name
+       - year_dir
+       - month_dir
+assets:
+   alpha:
+       prefix: my_base_directory/alpha/files/go/here/
+       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+   beta:
+       prefix: my_base_directory/beta_here/
+       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
+   gamma:
+       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+
+azure_options:
+   account_url: my_account_url.blob.core.windows.net
+   credential: my_credential
+   """
+    config = yaml.load(yaml_string)
+
+    mock_list_keys.return_value = [
+        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+        "my_base_directory/beta_here/beta-202001.txt",
+        "my_base_directory/beta_here/beta-202002.txt",
+        "my_base_directory/beta_here/beta-202003.txt",
+        "my_base_directory/beta_here/beta-202004.txt",
+        "my_base_directory/gamma-202001.csv",
+        "my_base_directory/gamma-202002.csv",
+        "my_base_directory/gamma-202003.csv",
+        "my_base_directory/gamma-202004.csv",
+        "my_base_directory/gamma-202005.csv",
+    ]
+
+    my_data_connector: ConfiguredAssetAzureDataConnector = (
+        instantiate_class_from_config(
+            config,
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+            runtime_environment={"name": "my_data_connector"},
+        )
+    )
+
+    assert (
+        my_data_connector._get_full_file_path(
+            "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
+        )
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+    )
+    assert (
+        my_data_connector._get_full_file_path(
+            "my_base_directory/beta_here/beta-202002.txt", "beta"
+        )
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
+    )
+    assert (
+        my_data_connector._get_full_file_path(
+            "my_base_directory/gamma-202005.csv", "gamma"
+        )
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
     )
