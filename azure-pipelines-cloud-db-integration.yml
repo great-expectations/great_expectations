@@ -112,7 +112,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, cloud_db_integration_expectations_cfe]
     jobs:
       - job: bigquery_expectations
         timeoutInMinutes: 0 # Maximize the time that this can run
