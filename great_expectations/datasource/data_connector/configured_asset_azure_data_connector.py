@@ -113,13 +113,6 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
             )
 
-    @staticmethod
-    def _parse_account_name_from_azure_options(azure_options: Dict[str, str]):
-        if "conn_str" in azure_options:
-            pass
-        else:
-            pass
-
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
