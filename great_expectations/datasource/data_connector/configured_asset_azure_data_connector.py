@@ -94,17 +94,19 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
         # use in authentication (but not both). If the format or content of the provided keys is invalid,
         # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
+        conn_str = azure_options.get("conn_str")
+        account_url = azure_options.get("account_url")
+        assert bool(conn_str) ^ bool(account_url)
+
         try:
-            if "conn_str" in azure_options:
-                conn_str = azure_options["conn_str"]
+            if conn_str is not None:
                 self._account_name = re.search(
                     r".*?AccountName=(.+?);.*?", conn_str
                 ).group(1)
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            else:
-                account_url = azure_options["account_url"]
+            elif account_url is not None:
                 self._account_name = re.search(
-                    r"(?:(https?://))?(.+?).blob.core.windows.net", account_url
+                    r"(?:https?://)?(.+?).blob.core.windows.net", account_url
                 ).group(1)
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
