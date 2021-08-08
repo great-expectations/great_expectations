@@ -156,5 +156,8 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         path: str,
         data_asset_name: Optional[str] = None,
     ) -> str:
-        # Format: http://<storage_account_name>.blob.core.windows.net/<container_name>/<blob_name>
-        return f"{self._account_name}.blob.core.windows.net/{os.path.join(self._container, path)}"
+        # data_asset_name isn't used in this method.
+        # It's only kept for compatibility with parent methods.
+        return os.path.join(
+            f"{self._account_name}.blob.core.windows.net", self._container, path
+        )
