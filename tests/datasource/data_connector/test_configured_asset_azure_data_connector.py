@@ -64,7 +64,10 @@ def test_instantiation_with_account_url_and_credential(
         container="my_container",
         name_starts_with="",
         assets={"alpha": {}},
-        azure_options={"account_url": "my_account_url", "credential": "my_credential"},
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": "my_credential",
+        },
     )
 
     assert my_data_connector.self_check() == expected_config_dict
@@ -72,6 +75,27 @@ def test_instantiation_with_account_url_and_credential(
     my_data_connector._refresh_data_references_cache()
     assert my_data_connector.get_data_reference_list_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
+    mock_azure_conn,
+):
+    with pytest.raises(ImportError):
+        ConfiguredAssetAzureDataConnector(
+            name="my_data_connector",
+            datasource_name="FAKE_DATASOURCE_NAME",
+            default_regex={
+                "pattern": "alpha-(.*)\\.csv",
+                "group_names": ["index"],
+            },
+            container="my_container",
+            name_starts_with="",
+            assets={"alpha": {}},
+            azure_options={"account_url": "not_a_valid_url"},
+        )
 
 
 @mock.patch(
@@ -139,6 +163,9 @@ def test_instantiation_with_test_yaml_config(
         name_starts_with: ""
         assets:
             alpha:
+        azure_options:
+            account_url: my_account_url.blob.core.windows.net
+            credential: my_credential
     """,
         return_mode="report_object",
     )
@@ -175,6 +202,9 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
         name_starts_with: ""
         assets:
             alpha:
+        azure_options:
+            account_url: my_account_url.blob.core.windows.net
+            credential: my_credential
     """,
         return_mode="report_object",
     )
@@ -223,13 +253,13 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
             pattern: beta-(.*)\\.csv
             group_names:
                 - index
-        azure_options:
-            account_url: my_account_url
-            credential: my_credential
         container: my_container
         name_starts_with: ""
         assets:
             alpha:
+        azure_options:
+            account_url: my_account_url.blob.core.windows.net
+            credential: my_credential
     """,
         return_mode="report_object",
     )
@@ -293,7 +323,10 @@ def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env
         container="my_container",
         name_starts_with="",
         assets={"alpha": {}},
-        azure_options={"account_url": "my_account_url"},
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": "my_credential",
+        },
     )
 
     with pytest.raises(ValueError):
@@ -334,6 +367,9 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
@@ -397,6 +433,9 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
@@ -561,6 +600,9 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
@@ -641,6 +683,9 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
@@ -824,6 +869,9 @@ def test_return_all_batch_definitions_basic_sorted(
            - orderby: desc
              class_name: NumericSorter
              name: price
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
      """,
     )
 
@@ -911,6 +959,9 @@ def test_return_all_batch_definitions_returns_specified_partition(
            - orderby: desc
              class_name: NumericSorter
              name: price
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
      """,
     )
 
@@ -1028,6 +1079,9 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
            - orderby: desc
              class_name: NumericSorter
              name: price
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
      """,
     )
 
@@ -1117,6 +1171,10 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
            - orderby: desc
              class_name: NumericSorter
              name: for_me_Me_Me
+
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
    """,
     )
 
@@ -1184,6 +1242,9 @@ def test_return_all_batch_definitions_too_many_sorters(
              class_name: NumericSorter
              name: price
 
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
    """,
     )
 
@@ -1246,6 +1307,9 @@ assets:
    gamma:
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
 
+azure_options:
+   account_url: my_account_url.blob.core.windows.net
+   credential: my_credential
    """
     config = yaml.load(yaml_string)
 
