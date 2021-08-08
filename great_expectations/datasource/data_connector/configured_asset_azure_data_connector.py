@@ -104,7 +104,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             else:
                 account_url = azure_options["account_url"]
                 self._account_name = re.search(
-                    r"(?:(https?://)?(.+?).blob.core.windows.net", account_url
+                    r"(?:(https?://))?(.+?).blob.core.windows.net", account_url
                 ).group(1)
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
