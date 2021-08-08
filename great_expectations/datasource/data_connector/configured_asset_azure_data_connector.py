@@ -1,6 +1,7 @@
 import logging
 import os
-from typing import List, Optional
+import re
+from typing import Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 
@@ -90,15 +91,34 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         if azure_options is None:
             azure_options = {}
 
-        try:  # Both connection string and standard auth methods are supported
+        # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
+        # use in authentication (but not both). If the format or content of the provided keys is invalid,
+        # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
+        try:
             if "conn_str" in azure_options:
+                conn_str = azure_options["conn_str"]
+                self._account_name = re.search(
+                    r".*?AccountName=(.+?);.*?", conn_str
+                ).group(1)
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
             else:
+                account_url = azure_options["account_url"]
+                self._account_name = re.search(
+                    r"(?:(https?://)?(.+?).blob.core.windows.net", account_url
+                ).group(1)
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             raise ImportError(
-                "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector)."
+                "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector). \
+                Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
             )
+
+    @staticmethod
+    def _parse_account_name_from_azure_options(azure_options: Dict[str, str]):
+        if "conn_str" in azure_options:
+            pass
+        else:
+            pass
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
         """
@@ -141,6 +161,5 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         path: str,
         data_asset_name: Optional[str] = None,
     ) -> str:
-        # Not used by this class but required to fulfill parent class
         # Format: http://<storage_account_name>.blob.core.windows.net/<container_name>/<blob_name>
-        raise NotImplementedError()
+        return f"{self._account_name}.blob.core.windows.net/{self._container}/{path}"
