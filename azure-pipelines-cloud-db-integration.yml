@@ -108,6 +108,12 @@ stages:
               GCP_PROJECT: $(GCP_PROJECT)
               GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
 
+  - stage: cloud_db_integration_expectations
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    dependsOn: [scope_check, lint]
+    jobs:
       - job: bigquery_expectations
         timeoutInMinutes: 0 # Maximize the time that this can run
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
