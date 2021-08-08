@@ -322,8 +322,8 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         f"""
            class_name: ConfiguredAssetAzureDataConnector
            datasource_name: test_environment
-           #execution_engine:
-           #    class_name: PandasExecutionEngine
+           execution_engine:
+               class_name: PandasExecutionEngine
            container: my_container
            name_starts_with: ""
            assets:
@@ -385,8 +385,8 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         f"""
            class_name: ConfiguredAssetAzureDataConnector
            datasource_name: test_environment
-           #execution_engine:
-           #    class_name: PandasExecutionEngine
+           execution_engine:
+               class_name: PandasExecutionEngine
            container: my_container
            name_starts_with: ""
            assets:
@@ -801,8 +801,8 @@ def test_return_all_batch_definitions_basic_sorted(
         f"""
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
-       #execution_engine:
-       #    class_name: PandasExecutionEngine
+       execution_engine:
+           class_name: PandasExecutionEngine
        container: my_container
        name_starts_with: ""
        assets:
@@ -888,8 +888,8 @@ def test_return_all_batch_definitions_returns_specified_partition(
         f"""
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
-       #execution_engine:
-       #    class_name: PandasExecutionEngine
+       execution_engine:
+           class_name: PandasExecutionEngine
        container: my_container
        name_starts_with: ""
        assets:
@@ -1005,8 +1005,8 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         f"""
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
-       #execution_engine:
-       #    class_name: PandasExecutionEngine
+       execution_engine:
+           class_name: PandasExecutionEngine
        container: my_container
        name_starts_with: ""
        assets:
