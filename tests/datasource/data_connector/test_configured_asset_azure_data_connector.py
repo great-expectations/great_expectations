@@ -77,6 +77,39 @@ def test_instantiation_with_account_url_and_credential(
 
 
 @mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
+    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_conn_str_and_credential(
+    mock_azure_conn, mock_list_keys, expected_config_dict
+):
+    my_data_connector = ConfiguredAssetAzureDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        container="my_container",
+        name_starts_with="",
+        assets={"alpha": {}},
+        azure_options={  # Representative of format noted in official docs
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "credential": "my_credential",
+        },
+    )
+
+    assert my_data_connector.self_check() == expected_config_dict
+
+    my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_unmatched_data_references() == []
+
+
+@mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_conn):
@@ -164,38 +197,19 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
             assets={"alpha": {}},
             azure_options={"account_url": "not_a_valid_url"},
         )
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
-)
-def test_instantiation_with_conn_str_and_credential(
-    mock_azure_conn, mock_list_keys, expected_config_dict
-):
-    my_data_connector = ConfiguredAssetAzureDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-        container="my_container",
-        name_starts_with="",
-        assets={"alpha": {}},
-        azure_options={  # Representative of format noted in official docs
-            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key"
-        },
-    )
-
-    assert my_data_connector.self_check() == expected_config_dict
-
-    my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
-    assert my_data_connector.get_unmatched_data_references() == []
+    with pytest.raises(ImportError):
+        ConfiguredAssetAzureDataConnector(
+            name="my_data_connector",
+            datasource_name="FAKE_DATASOURCE_NAME",
+            default_regex={
+                "pattern": "alpha-(.*)\\.csv",
+                "group_names": ["index"],
+            },
+            container="my_container",
+            name_starts_with="",
+            assets={"alpha": {}},
+            azure_options={"conn_str": "not_a_valid_conn_str"},
+        )
 
 
 @mock.patch(
