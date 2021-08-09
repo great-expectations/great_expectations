@@ -11,12 +11,12 @@ import SparkAdditionalNotes from '../components/spark_additional_notes.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to your data stored on a filesystem using spark.
+This guide will help you connect to your data stored on a filesystem using Spark.
 This will allow you to validate and explore your data.
 
 <Prerequisites>
 
-- Have a access to a working spark installation
+- Have access to a working Spark installation
 - Have access to data on a filesystem
 
 </Prerequisites>
