@@ -26,7 +26,7 @@ Profilers communicate what they *learn* about data, and what Data Docs uses to *
 When lots of Expectations are grouped together to define a kind of data asset, like "monthly taxi rides", we call it
 an `Expectation Suite`.
 
-`Datasources` are the first thing you'll need to configure to use Great Expectations. A Datasource brings together a way of interacting with data (like a database or spark cluster) and some specific data (a description of that taxi ride data for last month). With a Datasource, you can get a Batch of data or a Validator that can evaluate expectations on
+`Datasources` are the first thing you'll need to configure to use Great Expectations. A Datasource brings together a way of interacting with data (like a database or Spark cluster) and some specific data (a description of that taxi ride data for last month). With a Datasource, you can get a Batch of data or a Validator that can evaluate expectations on
 data.
 
 When you're deploying Great Expectations, you'll use a `Checkpoint` to run a validation, testing whether data meets expectations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
