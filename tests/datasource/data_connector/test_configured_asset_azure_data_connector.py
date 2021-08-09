@@ -1197,7 +1197,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
+def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_match_group(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
@@ -1249,7 +1249,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         "alex_20200819_1300.csv",
     ]
 
-    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
+    # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
