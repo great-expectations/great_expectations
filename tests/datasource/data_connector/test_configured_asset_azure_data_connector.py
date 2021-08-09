@@ -123,6 +123,31 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
+def test_instantiation_with_multiple_auth_methods_raises_error(
+    mock_azure_conn,
+):
+    with pytest.raises(AssertionError):
+        ConfiguredAssetAzureDataConnector(
+            name="my_data_connector",
+            datasource_name="FAKE_DATASOURCE_NAME",
+            default_regex={
+                "pattern": "alpha-(.*)\\.csv",
+                "group_names": ["index"],
+            },
+            container="my_container",
+            name_starts_with="",
+            assets={"alpha": {}},
+            azure_options={
+                "account_url": "account.blob.core.windows.net",
+                "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+                "credential": "my_credential",
+            },
+        )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
 def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
     mock_azure_conn,
 ):
