@@ -147,9 +147,10 @@ def pytest_generate_tests(metafunc):
                                 elif (
                                     "bigquery" in test["only_for"]
                                     and BigQueryDialect is not None
-                                    and isinstance(
-                                        data_asset.engine.dialect, BigQueryDialect
-                                    )
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
                                 ):
                                     generate_test = True
                             elif isinstance(data_asset, PandasDataset):
