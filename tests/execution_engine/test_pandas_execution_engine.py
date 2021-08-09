@@ -112,7 +112,6 @@ def test_get_compute_domain_with_multicolumn_domain():
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 2, 3], "d": [2, 7, 9, 2]}
     )
-    expected_identity = df.drop(columns=["d"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -129,9 +128,7 @@ def test_get_compute_domain_with_multicolumn_domain():
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
         domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="identity"
     )
-    assert data.equals(
-        expected_identity
-    ), "Data does not match after getting compute domain"
+    assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {
         "column_list": ["a", "b", "c"]
     }, "Compute domain kwargs should be existent"
