@@ -30,7 +30,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": True,
+        "catch_exceptions": False,
     }
 
     @classmethod
