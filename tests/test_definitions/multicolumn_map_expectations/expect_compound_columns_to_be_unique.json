@@ -103,7 +103,8 @@
           "missing_count": 1,
           "missing_percent": 10.0,
           "unexpected_count": 9,
-          "unexpected_percent": 90.0,
+          "unexpected_percent": 100.0,
+          "unexpected_percent_total": 90.0,
           "unexpected_percent_nonmissing": 100.0,
           "partial_unexpected_list": [
             {
@@ -144,9 +145,10 @@
             }
           ],
           "partial_unexpected_index_list": [0,1,2,3,4,5,6,7,8],
-          "partial_unexpected_counts": [
-            "partial_exception_counts requires a hashable type"
-          ],
+          "partial_unexpected_counts": [],
+          "details": {
+            "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
+          },
           "unexpected_list": [
             {
               "a": 1.0,

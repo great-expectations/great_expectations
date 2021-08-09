@@ -263,9 +263,12 @@ class Validator:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
-                    exception_message = "{}: {}".format(type(err).__name__, str(err))
+                    exception_message = f"{type(err).__name__}: {str(err)}"
 
-                    validation_result = ExpectationValidationResult(success=False)
+                    validation_result = ExpectationValidationResult(
+                        expectation_config=configuration,
+                        success=False,
+                    )
 
                     validation_result.exception_info = {
                         "raised_exception": raised_exception,
@@ -286,7 +289,7 @@ class Validator:
         return self._execution_engine
 
     def list_available_expectation_types(self):
-        """ Returns a list of all expectations available to the validator"""
+        """Returns a list of all expectations available to the validator"""
         keys = dir(self)
         return [
             expectation for expectation in keys if expectation.startswith("expect_")

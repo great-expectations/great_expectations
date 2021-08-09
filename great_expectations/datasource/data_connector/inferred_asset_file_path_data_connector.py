@@ -57,7 +57,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         )
 
     def _refresh_data_references_cache(self):
-        """ refreshes data_reference cache """
+        """refreshes data_reference cache"""
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 

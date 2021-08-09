@@ -459,12 +459,14 @@ def test_TupleS3StoreBackend_with_prefix():
         "this_is_a_test_prefix/my_file_BBB",
     }
 
-    assert my_store.get_url_for_key(
-        ("AAA",)
-    ) == "https://s3.amazonaws.com/{}/{}/my_file_AAA".format(bucket, prefix)
-    assert my_store.get_url_for_key(
-        ("BBB",)
-    ) == "https://s3.amazonaws.com/{}/{}/my_file_BBB".format(bucket, prefix)
+    assert (
+        my_store.get_url_for_key(("AAA",))
+        == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_AAA"
+    )
+    assert (
+        my_store.get_url_for_key(("BBB",))
+        == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_BBB"
+    )
 
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):

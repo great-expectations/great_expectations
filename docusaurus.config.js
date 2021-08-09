@@ -147,7 +147,7 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport],
           editUrl:
-            'https://github.com/great-expectations/great_expectations/tree/develop/docs/'
+            'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css')

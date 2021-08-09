@@ -1,9 +1,9 @@
 import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -173,7 +173,7 @@ def get_metric_provider(
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
-        raise MetricProviderError(
+        raise ge_exceptions.MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
@@ -188,7 +188,7 @@ def get_metric_function_type(
         ]
         return getattr(provider_fn, "metric_fn_type", None)
     except KeyError:
-        raise MetricProviderError(
+        raise ge_exceptions.MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
         )
 
@@ -201,7 +201,9 @@ def get_metric_kwargs(
     try:
         metric_definition = _registered_metrics.get(metric_name)
         if metric_definition is None:
-            raise MetricProviderError(f"No definition found for {metric_name}")
+            raise ge_exceptions.MetricProviderError(
+                f"No definition found for {metric_name}"
+            )
         default_kwarg_values = metric_definition["default_kwarg_values"]
         metric_kwargs = {
             "metric_domain_keys": metric_definition["metric_domain_keys"],
@@ -236,7 +238,9 @@ def get_metric_kwargs(
             metric_kwargs["metric_value_kwargs"] = metric_value_kwargs
         return metric_kwargs
     except KeyError:
-        raise MetricProviderError(f"Incomplete definition found for {metric_name}")
+        raise ge_exceptions.MetricProviderError(
+            f"Incomplete definition found for {metric_name}"
+        )
 
 
 def get_domain_metrics_dict_by_name(

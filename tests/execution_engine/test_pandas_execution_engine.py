@@ -10,7 +10,7 @@ import pytest
 from botocore.errorfactory import ClientError
 from moto import mock_s3
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
     PathBatchSpec,
@@ -19,7 +19,6 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
@@ -118,23 +117,23 @@ def test_get_compute_domain_with_multicolumn_domain():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="multicolumn"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="multicolumn"
     )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Accessor kwargs have been modified"
 
     # Trying same test with enum form of table domain - should work the same way
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="identity"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="identity"
     )
     assert data.equals(
         expected_identity
     ), "Data does not match after getting compute domain"
     assert compute_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
@@ -281,7 +280,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     )
     desired_metrics = (mean, stdev)
 
-    with pytest.raises(MetricProviderError) as e:
+    with pytest.raises(ge_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
@@ -386,6 +385,27 @@ def test_s3_files(s3, s3_bucket, test_df_small_csv):
     ]
     for key in keys:
         s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
+def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.parquet",
+        "directory/B-2.parquet",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    path = Path(tmpdir) / "file.parquet"
+    test_df_small.to_parquet(path)
+    for key in keys:
+        if key.endswith(".parquet"):
+            with open(path, "rb") as f:
+                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
+        else:
+            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
     return s3_bucket, keys
 
 
@@ -497,6 +517,16 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     full_path = f"s3a://{os.path.join(bucket, path)}"
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
+    df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
+    assert df.dataframe.shape == test_df_small.shape
+
+
+def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
+    bucket, keys = test_s3_files_parquet
+    path = [key for key in keys if key.endswith(".parquet")][0]
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+
+    batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.dataframe.shape == test_df_small.shape
 
