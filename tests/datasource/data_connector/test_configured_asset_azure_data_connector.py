@@ -44,6 +44,189 @@ def expected_config_dict():
     return config
 
 
+@pytest.fixture
+def expected_batch_definitions_unsorted():
+    """
+    Used to validate `get_batch_definition_list_from_batch_request()` outputs.
+    Input and output should maintain the same order (henced "unsorted")
+    """
+    expected = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "will", "timestamp": "20200810", "price": "1001"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+            ),
+        ),
+    ]
+    return expected
+
+
+@pytest.fixture
+def expected_batch_definitions_sorted():
+    """
+    Used to validate `get_batch_definition_list_from_batch_request()` outputs.
+    Input should be sorted based on some criteria, resulting in some change
+    between input and output.
+    """
+    expected = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200713", "price": "1567"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "will", "timestamp": "20200810", "price": "1001"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "will", "timestamp": "20200809", "price": "1002"}
+            ),
+        ),
+    ]
+    return expected
+
+
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -159,6 +342,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
 def test_instantiation_with_multiple_auth_methods_raises_error(
     mock_azure_conn,
 ):
+    # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
     with pytest.raises(AssertionError):
         ConfiguredAssetAzureDataConnector(
             name="my_data_connector",
@@ -184,6 +368,8 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
 def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
     mock_azure_conn,
 ):
+    # Raises error in ConfiguredAssetAzureDataConnector's constructor due to `account_url` not conforming to the expected format
+    # Format: <ACCOUNT>.blob.core.windows.net
     with pytest.raises(ImportError):
         ConfiguredAssetAzureDataConnector(
             name="my_data_connector",
@@ -197,6 +383,9 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
             assets={"alpha": {}},
             azure_options={"account_url": "not_a_valid_url"},
         )
+
+    # Raises error in ConfiguredAssetAzureDataConnector's constructor due to `conn_str` not conforming to the expected format
+    # Format: Must be a variable length, semicolon-delimited string containing "AccountName=<ACCOUNT>"
     with pytest.raises(ImportError):
         ConfiguredAssetAzureDataConnector(
             name="my_data_connector",
@@ -320,7 +509,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
-def test_instantiation_from_a_config_regex_does_not_match_paths(
+def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
@@ -362,24 +551,6 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
         ],
         "unmatched_data_reference_count": 3,
     }
-    assert mock_emit.call_count == 1
-
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ConfiguredAssetAzureDataConnector",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @mock.patch(
@@ -392,7 +563,7 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
-def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env_name_raises_error(
+def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector = ConfiguredAssetAzureDataConnector(
@@ -411,6 +582,7 @@ def test_get_batch_definition_list_from_batch_request_with_illegal_execution_env
         },
     )
 
+    # TODO(cdkini): Add comment around why and where error arises
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -483,6 +655,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         )
     )
 
+    # TODO(cdkini): Add comment around why and where error arises
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request()
 
@@ -521,21 +694,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
        """,
     )
 
-    mock_list_keys.return_value = (
-        [
-            "alex_20200809_1000.csv",
-            "eugene_20200809_1500.csv",
-            "james_20200811_1009.csv",
-            "abe_20200809_1040.csv",
-            "will_20200809_1002.csv",
-            "james_20200713_1567.csv",
-            "eugene_20201129_1900.csv",
-            "will_20200810_1001.csv",
-            "james_20200810_1003.csv",
-            "alex_20200819_1300.csv",
-        ],
-    )
-
     my_data_connector: ConfiguredAssetAzureDataConnector = (
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -549,6 +707,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         )
     )
 
+    # TODO(cdkini): Add comment around why and where error arises
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -557,97 +716,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
                 data_asset_name=None,
             )
         )
-
-
-@pytest.fixture
-def expected_batch_definitions_unsorted():
-    """
-    Used to validate `get_batch_definition_list_from_batch_request()` outputs.
-    Input and output should maintain the same order (henced "unsorted")
-    """
-    expected = [
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
-        ),
-    ]
-    return expected
 
 
 @mock.patch(
@@ -814,98 +882,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         )
     )
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
-
-
-@pytest.fixture
-def expected_batch_definitions_sorted():
-    """
-    Used to validate `get_batch_definition_list_from_batch_request()` outputs.
-    Input should be sorted based on some criteria, resulting in some change
-    between input and output.
-    """
-    expected = [
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
-        ),
-    ]
-    return expected
 
 
 @mock.patch(
@@ -1273,6 +1249,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         "alex_20200819_1300.csv",
     ]
 
+    # TODO(cdkini): Add comment around why and where error arises
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -1343,6 +1320,7 @@ def test_return_all_batch_definitions_too_many_sorters(
         "alex_20200819_1300.csv",
     ]
 
+    # TODO(cdkini): Add comment around why and where error arises
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -1381,10 +1359,10 @@ default_regex:
        - month_dir
 assets:
    alpha:
-       prefix: my_base_directory/alpha/files/go/here/
+       name_starts_with: my_base_directory/alpha/files/go/here/
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
    beta:
-       prefix: my_base_directory/beta_here/
+       name_starts_with: my_base_directory/beta_here/
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
    gamma:
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
