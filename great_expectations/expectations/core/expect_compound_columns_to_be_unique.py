@@ -109,15 +109,3 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 }
             )
         ]
-
-    @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        pass
