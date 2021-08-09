@@ -28,13 +28,13 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
-    such as with time-based partitioning, downsampling, or other techniques appropriate
-    for the Datasource.
+    such as with time-based partitioning, splitting and sampling, or other techniques appropriate
+    for obtaining batches of data.
 
     The ConfiguredAssetAzureDataConnector is one of two classes (InferredAssetAzureDataConnector being the
     other one) designed for connecting to data on Azure.
 
-    A ConfiguredAssetAzureDataConnector requires an explicit listing of each DataAsset you want to connect to.
+    A ConfiguredAssetAzureDataConnector requires an explicit specification of each DataAsset you want to connect to.
     This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
     with Azure's official SDK, we utilize terms like "container" and "name_starts_with".
 
@@ -94,8 +94,8 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
         # use in authentication (but not both). If the format or content of the provided keys is invalid,
         # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
-        conn_str = azure_options.get("conn_str")
-        account_url = azure_options.get("account_url")
+        conn_str: Optional[str] = azure_options.get("conn_str")
+        account_url: Optional[str] = azure_options.get("account_url")
         assert bool(conn_str) ^ bool(account_url)
 
         try:
