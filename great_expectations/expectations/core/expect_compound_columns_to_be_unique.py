@@ -35,7 +35,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": True,
+        "catch_exceptions": False,
     }
 
     @classmethod
@@ -109,15 +109,3 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 }
             )
         ]
-
-    @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        pass
