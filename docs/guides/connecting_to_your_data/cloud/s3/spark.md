@@ -17,7 +17,7 @@ This will allow you to validate and explore your data.
 <Prerequisites>
 
 - Have access to data on an AWS S3 bucket
-- Have a access to a working Spark installation
+- Have access to a working Spark installation
 
 </Prerequisites>
 
