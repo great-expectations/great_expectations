@@ -582,7 +582,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         },
     )
 
-    # TODO(cdkini): Add comment around why and where error arises
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
     with pytest.raises(ValueError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -655,7 +655,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         )
     )
 
-    # TODO(cdkini): Add comment around why and where error arises
+    # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request()
 
@@ -707,7 +707,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         )
     )
 
-    # TODO(cdkini): Add comment around why and where error arises
+    # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
@@ -1249,7 +1249,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         "alex_20200819_1300.csv",
     ]
 
-    # TODO(cdkini): Add comment around why and where error arises
+    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
@@ -1320,7 +1320,7 @@ def test_return_all_batch_definitions_too_many_sorters(
         "alex_20200819_1300.csv",
     ]
 
-    # TODO(cdkini): Add comment around why and where error arises
+    # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
