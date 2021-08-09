@@ -16,7 +16,7 @@ This will allow you to validate and explore your data.
 
 <Prerequisites>
 
-- Have a access to a working Spark installation
+- Have access to a working Spark installation
 - Have access to data on a filesystem
 
 </Prerequisites>
