@@ -16,7 +16,7 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 from great_expectations.validator.validator import Validator
 
 
-def test_expect_column_value_z_scores_to_be_less_than_impl():
+def test_pandas_expect_column_value_z_scores_to_be_less_than_impl():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -32,6 +32,32 @@ def test_expect_column_value_z_scores_to_be_less_than_impl():
     result = expectation.validate(Validator(execution_engine=engine))
     assert result == ExpectationValidationResult(
         success=True,
+        expectation_config={
+            "expectation_type": "expect_column_value_z_scores_to_be_less_than",
+            "kwargs": {
+                "column": "a",
+                "mostly": 0.9,
+                "threshold": 4,
+                "double_sided": True,
+            },
+            "meta": {},
+        },
+        result={
+            "element_count": 6,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        meta={},
     )
 
 
@@ -61,6 +87,32 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine)
     result = expectation.validate(Validator(execution_engine=engine))
     assert result == ExpectationValidationResult(
         success=True,
+        expectation_config={
+            "expectation_type": "expect_column_value_z_scores_to_be_less_than",
+            "kwargs": {
+                "column": "a",
+                "mostly": 0.9,
+                "threshold": 4,
+                "double_sided": True,
+            },
+            "meta": {},
+        },
+        result={
+            "element_count": 6,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        meta={},
     )
 
 
@@ -92,4 +144,30 @@ def test_spark_expect_column_value_z_scores_to_be_less_than_impl(
     result = expectation.validate(Validator(execution_engine=engine))
     assert result == ExpectationValidationResult(
         success=True,
+        expectation_config={
+            "expectation_type": "expect_column_value_z_scores_to_be_less_than",
+            "kwargs": {
+                "column": "a",
+                "mostly": 0.9,
+                "threshold": 4,
+                "double_sided": True,
+            },
+            "meta": {},
+        },
+        result={
+            "element_count": 6,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        meta={},
     )

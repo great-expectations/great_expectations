@@ -1,25 +1,6 @@
 {
-  "meta": {
-    "great_expectations_version": "0.9.11+20.gb9574e55.dirty",
-    "expectation_suite_name": "default",
-    "run_id": "20200411T010314.344479Z",
-    "batch_kwargs": {
-      "ge_batch_id": "3888859e-7b90-11ea-b685-acde48001122"
-    },
-    "expectation_suite_meta": {},
-    "batch_markers": {},
-    "batch_parameters": {}
-  },
-  "statistics": {
-    "evaluated_expectations": 22,
-    "successful_expectations": 20,
-    "unsuccessful_expectations": 2,
-    "success_percent": 90.9090909090909
-  },
-  "evaluation_parameters": {},
   "results": [
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -28,7 +9,6 @@
       "result": {
         "observed_value": 1313
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -37,10 +17,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_table_row_count_to_be_between"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -49,7 +30,6 @@
       "result": {
         "observed_value": 7
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -57,10 +37,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_table_column_count_to_equal"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -77,7 +58,6 @@
           "SexCode"
         ]
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -93,10 +73,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_table_columns_to_match_ordered_list"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -108,6 +89,7 @@
         "missing_percent": 0.0,
         "unexpected_count": 6,
         "unexpected_percent": 0.456968773800457,
+        "unexpected_percent_total": 0.456968773800457,
         "unexpected_percent_nonmissing": 0.456968773800457,
         "partial_unexpected_list": [
           "Carlsson, Mr Frans Olof",
@@ -140,7 +122,6 @@
           }
         ]
       },
-      "success": false,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -148,10 +129,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_be_unique"
-      }
+      },
+      "success": false,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -161,9 +143,9 @@
         "element_count": 1313,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
+        "unexpected_percent_total": 0.0,
         "partial_unexpected_list": []
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -171,10 +153,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_not_be_null"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -186,12 +169,12 @@
         "missing_percent": 0.0,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
+        "unexpected_percent_total": 0.0,
         "unexpected_percent_nonmissing": 0.0,
         "partial_unexpected_list": [],
         "partial_unexpected_index_list": [],
         "partial_unexpected_counts": []
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -200,10 +183,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_value_lengths_to_be_between"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -213,9 +197,9 @@
         "element_count": 1313,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
+        "unexpected_percent_total": 0.0,
         "partial_unexpected_list": []
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -223,10 +207,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_not_be_null"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -240,8 +225,8 @@
           "3rd"
         ],
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
+        "missing_count": null,
+        "missing_percent": null,
         "details": {
           "value_counts": [
             {
@@ -263,7 +248,6 @@
           ]
         }
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -277,10 +261,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_distinct_values_to_be_in_set"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -289,8 +274,8 @@
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
+        "missing_count": null,
+        "missing_percent": null,
         "details": {
           "observed_partition": {
             "values": [
@@ -322,7 +307,6 @@
           }
         }
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -345,10 +329,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_kl_divergence_to_be_less_than"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -359,7 +344,8 @@
         "missing_count": 557,
         "missing_percent": 42.421934501142424,
         "unexpected_count": 748,
-        "unexpected_percent": 56.96877380045697,
+        "unexpected_percent": 98.94179894179894,
+        "unexpected_percent_total": 56.96877380045697,
         "unexpected_percent_nonmissing": 98.94179894179894,
         "partial_unexpected_list": [
           29.0,
@@ -488,7 +474,6 @@
           }
         ]
       },
-      "success": false,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -496,10 +481,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_be_unique"
-      }
+      },
+      "success": false,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -509,9 +495,9 @@
         "element_count": 1313,
         "unexpected_count": 557,
         "unexpected_percent": 42.421934501142424,
+        "unexpected_percent_total": 42.421934501142424,
         "partial_unexpected_list": []
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -520,10 +506,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_not_be_null"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -535,7 +522,6 @@
         "missing_count": 557,
         "missing_percent": 42.421934501142424
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -545,10 +531,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_min_to_be_between"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -560,7 +547,6 @@
         "missing_count": 557,
         "missing_percent": 42.421934501142424
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -570,10 +556,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_max_to_be_between"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -585,7 +572,6 @@
         "missing_count": 557,
         "missing_percent": 42.421934501142424
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -595,10 +581,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_mean_to_be_between"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -610,7 +597,6 @@
         "missing_count": 557,
         "missing_percent": 42.421934501142424
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -620,10 +606,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_median_to_be_between"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -659,7 +646,6 @@
           ]
         }
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -699,10 +685,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_quantile_values_to_be_between"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -712,9 +699,9 @@
         "element_count": 1313,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
+        "unexpected_percent_total": 0.0,
         "partial_unexpected_list": []
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -722,10 +709,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_not_be_null"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -737,8 +725,8 @@
           "male"
         ],
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
+        "missing_count": null,
+        "missing_percent": null,
         "details": {
           "value_counts": [
             {
@@ -752,7 +740,6 @@
           ]
         }
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -764,10 +751,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_distinct_values_to_be_in_set"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -776,8 +764,8 @@
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
+        "missing_count": null,
+        "missing_percent": null,
         "details": {
           "observed_partition": {
             "values": [
@@ -801,7 +789,6 @@
           }
         }
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -820,10 +807,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_kl_divergence_to_be_less_than"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -833,9 +821,9 @@
         "element_count": 1313,
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
+        "unexpected_percent_total": 0.0,
         "partial_unexpected_list": []
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -843,10 +831,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_values_to_not_be_null"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -858,8 +847,8 @@
           1
         ],
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
+        "missing_count": null,
+        "missing_percent": null,
         "details": {
           "value_counts": [
             {
@@ -873,7 +862,6 @@
           ]
         }
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -885,10 +873,11 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_distinct_values_to_be_in_set"
-      }
+      },
+      "success": true,
+      "meta": {}
     },
     {
-      "meta": {},
       "exception_info": {
         "raised_exception": false,
         "exception_message": null,
@@ -897,8 +886,8 @@
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,
-        "missing_count": 0,
-        "missing_percent": 0.0,
+        "missing_count": null,
+        "missing_percent": null,
         "details": {
           "observed_partition": {
             "values": [
@@ -922,7 +911,6 @@
           }
         }
       },
-      "success": true,
       "expectation_config": {
         "meta": {},
         "kwargs": {
@@ -941,8 +929,34 @@
           "result_format": "SUMMARY"
         },
         "expectation_type": "expect_column_kl_divergence_to_be_less_than"
-      }
+      },
+      "success": true,
+      "meta": {}
     }
   ],
-  "success": false
+  "statistics": {
+    "evaluated_expectations": 22,
+    "successful_expectations": 20,
+    "unsuccessful_expectations": 2,
+    "success_percent": 90.9090909090909
+  },
+  "success": false,
+  "evaluation_parameters": {},
+  "meta": {
+    "great_expectations_version": "0.13.25+18.gef0fa6b73.dirty",
+    "expectation_suite_name": "default",
+    "run_id": {
+      "run_time": "2019-09-26T13:42:41+00:00",
+      "run_name": null
+    },
+    "batch_kwargs": {
+      "ge_batch_id": "82a8de80-e063-11e9-9828-acde48001122"
+    },
+    "batch_markers": {},
+    "batch_parameters": {},
+    "validation_time": "20190926T134241.000000Z",
+    "expectation_suite_meta": {
+      "great_expectations_version": "0.13.25+18.gef0fa6b73.dirty"
+    }
+  }
 }
