@@ -258,6 +258,8 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
                 "example_data_asset_names": [],
                 "data_assets": {},
                 "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
             },
         },
         "execution_engine": {

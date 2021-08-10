@@ -56,13 +56,7 @@ def test_basic_datasource_runtime_data_connector_self_check(
                 "data_assets": {},
                 "example_data_asset_names": [],
                 "example_unmatched_data_references": [],
-                "note": "RuntimeDataConnector "
-                "will not have "
-                "data_asset_names "
-                "until they are "
-                "passed in "
-                "through "
-                "RuntimeBatchRequest",
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
                 "unmatched_data_reference_count": 0,
             },
         },
