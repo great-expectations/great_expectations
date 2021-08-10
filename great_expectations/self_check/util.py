@@ -1201,7 +1201,6 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_of_type",  # unique to bigquery
             "expect_column_values_to_be_in_set",  # unique to bigquery
             "expect_column_values_to_be_in_type_list",  # unique to bigquery
-            "expect_column_values_to_be_in_type_list",  # unique to bigquery
         ]
 
     if context == "SparkDFDataset":
@@ -1259,14 +1258,11 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         return expectation_type in [
             "expect_column_kl_divergence_to_be_less_than",  # TODO: Takes over 64 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_values_to_be_in_set",  # TODO: No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01'] -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
-            # "expect_column_values_to_match_like_pattern_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132. ## DOUBLE CHECK
-            # "expect_column_values_to_not_match_like_pattern_list",  # TODO: "column_name with space" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132. ## DOUBLE CHECK
             "expect_column_values_to_be_in_type_list",  # TODO: AssertionError, follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
-            # "expect_column_most_common_value_to_be_in_set",  # ??
             "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_quantile_values_to_be_between",  # TODO: takes over 15 minutes to "collect" (haven't actually seen it complete yet) -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
             "expect_column_mean_to_be_between",  # TODO: "400 No matching signature for operator *" -- follow up / triage with https://github.com/great-expectations/great_expectations/issues/3132.
-            "expect_select_column_values_to_be_unique_within_record",  # Starting here, the list is com
+            "expect_select_column_values_to_be_unique_within_record",  # Starting here, the list is common to list expectations that are not working for all db backends
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
             "expect_column_values_to_match_strftime_format",

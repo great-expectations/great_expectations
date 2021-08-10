@@ -251,10 +251,10 @@ def column_reflection_fallback(
         columns_query: str = f"""
 SELECT
     SCHEMA_NAME(tab.schema_id) AS schema_name,
-    tab.name AS table_name, 
+    tab.name AS table_name,
     col.column_id AS column_id,
-    col.name AS column_name, 
-    t.name AS column_data_type,    
+    col.name AS column_name,
+    t.name AS column_data_type,
     col.max_length AS column_max_length,
     col.precision AS column_precision
 FROM sys.tables AS tab
@@ -264,7 +264,7 @@ FROM sys.tables AS tab
     ON col.user_type_id = t.user_type_id
 WHERE tab.name = '{selectable}'
 ORDER BY schema_name,
-    table_name, 
+    table_name,
     column_id
 """
         col_info_query: TextClause = sa.text(columns_query)
@@ -319,7 +319,8 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
 
     try:
         # Bigquery
-        if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        # if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "name") and (dialect.name == "bigquery"):
             dialect_supported = True
     except (
         AttributeError,

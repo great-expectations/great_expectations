@@ -2098,8 +2098,11 @@ WHERE
 
         try:
             # Bigquery
-            if isinstance(
-                self.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
+            # if isinstance(
+            #    self.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
+            # ):
+            if hasattr(self.sql_engine_dialect, "name") and (
+                self.sql_engine_dialect.name == "bigquery"
             ):
                 dialect_supported = True
         except (
