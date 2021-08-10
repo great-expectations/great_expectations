@@ -53,6 +53,85 @@ def test_reader_fn():
     assert "<function" in str(fn_new)
 
 
+def test_get_full_access_compute_domain_with_column_domain():
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    expected_column_df = df.iloc[:3]
+
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+    data = engine.get_full_access_compute_domain(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": "b<5",
+            "condition_parser": "pandas",
+        }
+    )
+    assert data.equals(
+        expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_full_access_compute_domain_with_column_pair_domain():
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    expected_column_pair_df = pd.DataFrame(
+        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
+    )
+
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+    data = engine.get_full_access_compute_domain(
+        domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "row_condition": "b>2",
+            "condition_parser": "pandas",
+            "ignore_row_if": "either_value_is_missing",
+        }
+    )
+    assert data.equals(
+        expected_column_pair_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_full_access_compute_domain_with_multicolumn_domain():
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        }
+    )
+    expected_multicolumn_df = pd.DataFrame(
+        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
+    )
+
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+    data = engine.get_full_access_compute_domain(
+        domain_kwargs={
+            "column_list": ["a", "c"],
+            "row_condition": "b>2",
+            "condition_parser": "pandas",
+            "ignore_row_if": "all_values_are_missing",
+        }
+    )
+    data = data.astype(int)
+    assert data.equals(
+        expected_multicolumn_df
+    ), "Data does not match after getting full access compute domain"
+
+
 def test_get_compute_domain_with_no_domain_kwargs():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
@@ -60,7 +139,7 @@ def test_get_compute_domain_with_no_domain_kwargs():
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={}, domain_type="identity"
+        domain_kwargs={}, domain_type="table"
     )
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
@@ -78,7 +157,7 @@ def test_get_compute_domain_with_no_domain_kwargs():
 def test_get_compute_domain_with_column_pair_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]})
-    expected_identity = df.drop(columns=["c"])
+    expected_column_pair_df = df.drop(columns=["c"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -91,20 +170,6 @@ def test_get_compute_domain_with_column_pair_domain():
         "column_A": "a",
         "column_B": "b",
     }, "Accessor kwargs have been modified"
-
-    # Trying same test with enum form of table domain - should work the same way
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column_A": "a", "column_B": "b"}, domain_type="identity"
-    )
-
-    assert data.equals(
-        expected_identity
-    ), "Data does not match after getting compute domain"
-    assert compute_kwargs == {
-        "column_A": "a",
-        "column_B": "b",
-    }, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
 def test_get_compute_domain_with_multicolumn_domain():
@@ -124,21 +189,10 @@ def test_get_compute_domain_with_multicolumn_domain():
         "column_list": ["a", "b", "c"]
     }, "Accessor kwargs have been modified"
 
-    # Trying same test with enum form of table domain - should work the same way
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="identity"
-    )
-    assert data.equals(df), "Data does not match after getting compute domain"
-    assert compute_kwargs == {
-        "column_list": ["a", "b", "c"]
-    }, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
 
 def test_get_compute_domain_with_column_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_identity = df.drop(columns=["b"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -148,17 +202,6 @@ def test_get_compute_domain_with_column_domain():
     assert data.equals(df), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
-
-    # Doing this using identity domain should yield different results
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column": "a"}, domain_type=MetricDomainTypes.IDENTITY
-    )
-
-    assert data.equals(
-        expected_identity
-    ), "Data does not match after getting compute domain"
-    assert compute_kwargs == {"column": "a"}, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
 def test_get_compute_domain_with_row_condition():
@@ -196,10 +239,11 @@ def test_get_compute_domain_with_unmeetable_row_condition():
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
         domain_kwargs={
+            "column": "a",
             "row_condition": "b > 24",
             "condition_parser": "pandas",
         },
-        domain_type="identity",
+        domain_type="column",
     )
     # Ensuring data has been properly queried
     assert data["b"].equals(
@@ -210,7 +254,7 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     assert (
         "row_condition" in compute_kwargs.keys()
     ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
+    assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
 
 # Just checking that the Pandas Execution Engine can perform these in sequence
