@@ -405,10 +405,11 @@ def datetime_to_int(dt: datetime.date) -> int:
 
 
 class AzureUrl:
+    """
+    Parses an Azure Blob Storage URL into its separate components
+    """
+
     def __init__(self, url: str):
-        """
-        Parses an Azure Blob Storage URL into its separate components
-        """
         search = re.search(
             r"^(?:https?://)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
         )
