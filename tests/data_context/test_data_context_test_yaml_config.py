@@ -1101,7 +1101,14 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
-    Tests output of RuntimeDataConnector
+    Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
+    RuntimeDataConnector. Even though the test directory contains multiple files that can be read-in
+    by GE, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
+
+    This is because the RuntimeDataConnector is not aware of data_assets until they are passed in
+    through the RuntimeBatchRequest.
+
+    The test asserts that the proper number of data_asset_names are returned and note is returned to the user.
     """
     base_directory = str(
         tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
@@ -1153,6 +1160,15 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         "boto3_options": {},
     }
     assert report_object["data_connectors"]["count"] == 1
+
+    # checking the correct number of data_assets have come back
+    assert (
+        report_object["data_connectors"]["default_runtime_data_connector_name"][
+            "data_asset_count"
+        ]
+        == 0
+    )
+
     # checking that note has come back
     assert (
         report_object["data_connectors"]["default_runtime_data_connector_name"]["note"]
@@ -1167,7 +1183,16 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
-    Tests the default configuration that we get for
+    Tests output of test_yaml_config() for a Datacontext configured with a Datasource with InferredAssetDataConnector
+    and RuntimeDataConnector.
+
+    1. The InferredAssetDataConnector will output 4 data_assets, which correspond to the files in the test_dir_charlie folder
+
+    2.  RuntimeDataConnector will output 0 data_assets, and return a "note" to the user. This is because the
+        RuntimeDataConnector is not aware of data_assets until they are passed in through the RuntimeBatchRequest.
+
+    The test asserts that the proper number of data_asset_names are returned for both DataConnectors, and in the case of
+    the RuntimeDataConnetor, the proper note is returned to the user.
     """
     base_directory = str(
         tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")

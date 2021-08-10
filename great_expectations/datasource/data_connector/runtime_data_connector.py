@@ -323,10 +323,11 @@ appear among the configured batch identifiers.
             pretty_print (bool): should the output be printed?
             max_examples (int): how many data_references should be printed?
 
+        Returns:
+            report_obj (dict): dictionary containing self_check output
         """
         if pretty_print:
-            print("\t" + self.name, ":", self.__class__.__name__)
-            print()
+            print(f"\t{self.name}:{self.__class__.__name__}\n")
         asset_names = self.get_available_data_asset_names()
         asset_names.sort()
         len_asset_names = len(asset_names)
@@ -343,7 +344,6 @@ appear among the configured batch identifiers.
             print(
                 f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
             )
-        if pretty_print:
             print(
                 "\t\t"
                 + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
@@ -353,11 +353,10 @@ appear among the configured batch identifiers.
         len_unmatched_data_references = len(unmatched_data_references)
 
         if pretty_print:
-            print(
-                f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):",
-                unmatched_data_references[:max_examples],
-            )
-            print()
+            if pretty_print:
+                print(
+                    f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}): {unmatched_data_references[:max_examples]}\n"
+                )
         report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         report_obj["example_unmatched_data_references"] = unmatched_data_references[
             :max_examples
