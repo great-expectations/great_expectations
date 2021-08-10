@@ -1442,7 +1442,7 @@ def _spark_column_map_condition_value_counts(
 
 def _spark_map_condition_rows(
     cls,
-    execution_engine: PandasExecutionEngine,
+    execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
