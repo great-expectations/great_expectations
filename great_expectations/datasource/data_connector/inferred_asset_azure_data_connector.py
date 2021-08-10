@@ -1,0 +1,132 @@
+import logging
+import os
+from typing import List, Optional
+
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import PathBatchSpec, AzureBatchSpec
+from great_expectations.exceptions.exceptions import ParserError
+
+from great_expectations.datasource.data_connector import (
+    InferredAssetFilePathDataConnector,
+)
+from great_expectations.datasource.data_connector.util import list_azure_keys
+from great_expectations.execution_engine import ExecutionEngine
+
+logger = logging.getLogger(__name__)
+
+
+class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
+    """
+    Extension of InferredAssetFilePathDataConnector used to connect to Azure blob store
+
+    The InferredAssetAzureDataConnector is one of two classes (ConfiguredAssetAzureDataConnector being the
+    other one) designed for connecting to filesystem-like data, more specifically files on Azure blob store. It
+    connects to assets inferred from container, prefix, and file name by default_regex.
+
+    As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
+    docs if a greater understanding of the supported authentication methods and general functionality is desired.
+    Source: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python
+    """
+
+    def __init__(
+        self,
+        name: str,
+        datasource_name: str,
+        container: str,
+        execution_engine: Optional[ExecutionEngine] = None,
+        default_regex: Optional[dict] = None,
+        sorters: Optional[list] = None,
+        name_starts_with: str = "",
+        delimiter: str = "/",
+        azure_options: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+    ):
+        """
+        InferredAssetAzureDataConnector for connecting to Azure Blob store.
+
+        Args:
+            name (str): required name for data_connector
+            datasource_name (str): required name for datasource
+            container (str): container for Azure blob store
+            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+            default_regex (dict): optional regex configuration for filtering data_references
+            sorters (list): optional list of sorters for sorting data_references
+            name_starts_with (str): Azure prefix
+            delimiter (str): Azure delimiter
+            azure_options (dict): wrapper object for **kwargs
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        """
+        logger.debug(f'Constructing InferredAssetAzureDataConnector "{name}".')
+
+        super().__init__(
+            name=name,
+            datasource_name=datasource_name,
+            execution_engine=execution_engine,
+            default_regex=default_regex,
+            sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
+        )
+
+        self._container = container
+        self._name_starts_with = os.path.join(name_starts_with, "")
+        self._delimiter = delimiter
+
+        if azure_options is None:
+            azure_options = {}
+
+        try:
+            if "conn_str" in azure_options:
+                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+            else:
+                self._azure = BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError):
+            raise ImportError(
+                "Unable to load Azure BlobServiceClient (it is required for InferredAssetAzureDataConnector)."
+            )
+
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: PathBatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+        return AzureBatchSpec(batch_spec)
+
+    def _get_data_reference_list(
+        self, data_asset_name: Optional[str] = None
+    ) -> List[str]:
+        """
+        List objects in the underlying data store to create a list of data_references.
+
+        This method is used to refresh the cache.
+        """
+        query_options: dict = {
+            "container": self._container,
+            "name_starts_with": self._name_starts_with,
+            "delimiter": self._delimiter,
+        }
+
+        path_list: List[str] = list_azure_keys(
+            azure=self._azure,
+            query_options=query_options,
+            recursive=True,
+        )
+        return path_list
+
+    def _get_full_file_path(
+        self,
+        path: str,
+        data_asset_name: Optional[str] = None,
+    ) -> str:
+        # data_assert_name isn't used in this method.
+        # It's only kept for compatibility with parent methods.
+        return os.path.join(
+            f"{self._account_name}.blob.core.windows.net", self._container, path
+        )

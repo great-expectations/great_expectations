@@ -20,8 +20,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
     the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
 
     *Note*: InferredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    InferredAssetFilesystemDataConnector and InferredAssetS3DataConnector are subclasses of
-    InferredAssetFilePathDataConnector.
+    InferredAssetAzureDataConnector, InferredAssetFilesystemDataConnector, and InferredAssetS3DataConnector
+    are subclasses of InferredAssetFilePathDataConnector.
     """
 
     def __init__(
