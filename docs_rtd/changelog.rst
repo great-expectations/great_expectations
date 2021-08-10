@@ -7,8 +7,10 @@ Changelog
 
 develop
 -----------------
-* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) #3182
-* [BUGFIX] Fix an error in how ExpectationValidationResults (EVR)s were compared. The bug could cause some EVRs toappear identical even when some result properties differed; the issue primarily affected a small number of internal tests, since EVR comparison is not used as part of the data validation flow. #3178
+* [BUGFIX] Restore support for V2 API style custom expectation rendering (#3179)
+* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) (#3182)
+* [BUGFIX] Fix an error in how ExpectationValidationResults (EVR)s were compared. The bug could cause some EVRs toappear identical even when some result properties differed; the issue primarily affected a small number of internal tests, since EVR comparison is not used as part of the data validation flow. (#3178)
+* [BUGFIX] Remove the filtering of `data` in `ExecutionEngine.get_compute_domain(domain_type=MetricDomainTypes.IDENTITY)` -- otherwise, `unexpected_rows` will not contain all columns. (#3161 which contains the closed PR #3191)
 
 0.13.26
 -----------------
