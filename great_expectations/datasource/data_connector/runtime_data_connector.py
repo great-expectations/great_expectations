@@ -316,7 +316,9 @@ appear among the configured batch identifiers.
         3. also print unmatched data_references, and allow the user to modify the regex or glob configuration if necessary
 
         However, in the case of the RuntimeDataConnector there is no example data_asset_names until the data is passed
-        in through the RuntimeBatchRequest. Therefore, there will be a
+        in through the RuntimeBatchRequest. Therefore, there will be a note displayed to the user saying that
+        RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest.
+
         Args:
             pretty_print (bool): should the output be printed?
             max_examples (int): how many data_references should be printed?
@@ -349,10 +351,16 @@ appear among the configured batch identifiers.
 
         unmatched_data_references = self.get_unmatched_data_references()
         len_unmatched_data_references = len(unmatched_data_references)
+
         if pretty_print:
             print(
                 f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):",
                 unmatched_data_references[:max_examples],
             )
             print()
+        report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
+        report_obj["example_unmatched_data_references"] = unmatched_data_references[
+            :max_examples
+        ]
+
         return report_obj

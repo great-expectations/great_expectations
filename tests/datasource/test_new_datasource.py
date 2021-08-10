@@ -196,7 +196,6 @@ data_connectors:
 
 def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     report = basic_pandas_datasource_v013.self_check()
-    print(report)
     assert report == {
         "execution_engine": {
             "caching": True,
@@ -226,6 +225,8 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
                 "example_data_asset_names": [],
                 "data_assets": {},
                 "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
             },
         },
     }

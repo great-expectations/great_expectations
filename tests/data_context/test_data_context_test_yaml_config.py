@@ -1242,9 +1242,12 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     assert report_object["data_connectors"]["default_runtime_data_connector_name"] == {
         "class_name": "RuntimeDataConnector",
         "data_asset_count": 0,
-        "example_data_asset_names": [],
         "data_assets": {},
-        "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+        "example_data_asset_names": [],
+        "example_unmatched_data_references": [],
+        "note": "RuntimeDataConnector will not have data_asset_names until they are "
+        "passed in through RuntimeBatchRequest",
+        "unmatched_data_reference_count": 0,
     }
     assert report_object["data_connectors"]["default_inferred_data_connector_name"] == {
         "class_name": "InferredAssetFilesystemDataConnector",
