@@ -746,12 +746,12 @@ def _pandas_multicolumn_map_condition_values(
     ) = metrics["unexpected_condition"]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
-    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_kwargs" keys.
     """
-    domain_args = copy.deepcopy(compute_domain_kwargs)
-    domain_args.update(accessor_domain_kwargs)
+    domain_kwargs = copy.deepcopy(compute_domain_kwargs)
+    domain_kwargs.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=domain_args,
+        domain_kwargs=domain_kwargs,
         domain_type=MetricDomainTypes.IDENTITY,
     )
 
@@ -796,12 +796,12 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
-    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_kwargs" keys.
     """
-    domain_args = copy.deepcopy(compute_domain_kwargs)
-    domain_args.update(accessor_domain_kwargs)
+    domain_kwargs = copy.deepcopy(compute_domain_kwargs)
+    domain_kwargs.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=domain_args,
+        domain_kwargs=domain_kwargs,
         domain_type=MetricDomainTypes.IDENTITY,
     )
 
@@ -912,12 +912,12 @@ def _pandas_map_condition_index(
     ) = metrics.get("unexpected_condition")
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
-    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_kwargs" keys.
     """
-    domain_args = copy.deepcopy(compute_domain_kwargs)
-    domain_args.update(accessor_domain_kwargs)
+    domain_kwargs = copy.deepcopy(compute_domain_kwargs)
+    domain_kwargs.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=domain_args,
+        domain_kwargs=domain_kwargs,
         domain_type=MetricDomainTypes.IDENTITY,
     )
 
@@ -1045,12 +1045,12 @@ def _pandas_map_condition_rows(
     ) = metrics.get("unexpected_condition")
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_compute_domain()", called with the
-    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_args" keys.
+    "domain_type=MetricDomainTypes.IDENTITY", must be supplied with all of the available "domain_kwargs" keys.
     """
-    domain_args = copy.deepcopy(compute_domain_kwargs)
-    domain_args.update(accessor_domain_kwargs)
+    domain_kwargs = copy.deepcopy(compute_domain_kwargs)
+    domain_kwargs.update(accessor_domain_kwargs)
     df, _, _ = execution_engine.get_compute_domain(
-        domain_kwargs=domain_args,
+        domain_kwargs=domain_kwargs,
         domain_type=MetricDomainTypes.IDENTITY,
     )
 
@@ -1446,7 +1446,7 @@ def _spark_column_map_condition_value_counts(
 
 def _spark_map_condition_rows(
     cls,
-    execution_engine: PandasExecutionEngine,
+    execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],

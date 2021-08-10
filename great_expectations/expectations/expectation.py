@@ -115,8 +115,6 @@ class Expectation(metaclass=MetaExpectation):
         1. `validate_configuration`, which should raise an error if the configuration
            will not be usable for the Expectation
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
-
-
     """
 
     version = ge_version
