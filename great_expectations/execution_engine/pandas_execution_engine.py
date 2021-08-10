@@ -213,7 +213,7 @@ Please check your config."""
 
         else:
             raise ge_exceptions.BatchSpecError(
-                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
+                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, not {batch_spec.__class__.__name__}"
             )
 
         df = self._apply_splitting_and_sampling_methods(batch_spec, df)
