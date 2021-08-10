@@ -13,12 +13,13 @@ import pandas as pd
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.core.util import AzureUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
@@ -27,6 +28,15 @@ try:
     import boto3
 except ImportError:
     boto3 = None
+
+try:
+    from azure.storage.blob import (
+        BlobClient,
+        BlobServiceClient,
+        StorageStreamDownloader,
+    )
+except:
+    azure = None
 
 
 logger = logging.getLogger(__name__)
@@ -78,12 +88,15 @@ Notes:
             "discard_subset_failing_expectations", False
         )
         boto3_options: dict = kwargs.pop("boto3_options", {})
+        azure_options: dict = kwargs.pop("azure_options", {})
 
-        # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
+        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
+            self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             self._s3 = None
+            self._azure = None
 
         super().__init__(*args, **kwargs)
 
@@ -139,6 +152,7 @@ Please check your config."""
                     "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."
                 )
             batch_spec.batch_data = "PandasDataFrame"
+
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
@@ -163,12 +177,36 @@ Please check your config."""
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
+
+        elif isinstance(batch_spec, AzureBatchSpec):
+            if self._azure is None:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a AzureBatchSpec,
+                        but the ExecutionEngine does not have an Azure client configured. Please check your config."""
+                )
+            azure_engine: BlobServiceClient = self._azure
+            azure_url = AzureUrl(batch_spec.path)
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
+            blob_client: BlobClient = azure_engine.get_blob_client(
+                container=azure_url.container, blob=azure_url.blob
+            )
+            azure_object: StorageStreamDownloader = blob_client.download_blob()
+            logger.debug(
+                f"Fetching Azure blob. Container: {azure_url.container} Blob: {azure_url.blob}"
+            )
+            reader_fn = self._get_reader_fn(reader_method, azure_url.blob)
+            buf = BytesIO(azure_object.readall())
+            buf.seek(0)
+            df = reader_fn(buf, **reader_options)
+
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options
             path: str = batch_spec.path
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
+
         else:
             raise ge_exceptions.BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"

@@ -10,6 +10,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     BatchMarkers,
     BatchSpec,
     PathBatchSpec,
@@ -236,6 +237,8 @@ class RuntimeDataConnector(DataConnector):
             parsed_url = urlparse(path)
             if "s3" in parsed_url.scheme:
                 return S3BatchSpec(batch_spec)
+            elif "blob.core.windows.net" in parsed_url.path:
+                return AzureBatchSpec(batch_spec)
             else:
                 return PathBatchSpec(batch_spec)
 
