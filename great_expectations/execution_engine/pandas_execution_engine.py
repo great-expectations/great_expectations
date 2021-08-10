@@ -90,12 +90,15 @@ Notes:
         boto3_options: dict = kwargs.pop("boto3_options", {})
         azure_options: dict = kwargs.pop("azure_options", {})
 
-        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
+        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
-            self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             self._s3 = None
+
+        try:
+            self._azure = BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError):
             self._azure = None
 
         super().__init__(*args, **kwargs)
@@ -104,6 +107,7 @@ Notes:
             {
                 "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
                 "boto3_options": boto3_options,
+                "azure_options": azure_options,
             }
         )
 
