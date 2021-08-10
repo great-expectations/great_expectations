@@ -334,7 +334,7 @@ appear among the configured batch identifiers.
             "data_asset_count": len_asset_names,
             "example_data_asset_names": asset_names[:max_examples],
             "data_assets": {},
-            "note": "RuntimeDataConnector will not have data asset until passed in through RuntimeBatchRequest"
+            "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
             # "data_reference_count": self.
         }
         if pretty_print:

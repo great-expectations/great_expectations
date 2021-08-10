@@ -1156,7 +1156,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     # checking that note has come back
     assert (
         report_object["data_connectors"]["default_runtime_data_connector_name"]["note"]
-        == "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+        == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
     )
 
 
@@ -1244,7 +1244,7 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         "data_asset_count": 0,
         "example_data_asset_names": [],
         "data_assets": {},
-        "note": "RuntimeDataConnector will not have data asset until passed in through RuntimeBatchRequest",
+        "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
     }
     assert report_object["data_connectors"]["default_inferred_data_connector_name"] == {
         "class_name": "InferredAssetFilesystemDataConnector",
