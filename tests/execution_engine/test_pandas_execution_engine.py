@@ -53,7 +53,7 @@ def test_reader_fn():
     assert "<function" in str(fn_new)
 
 
-def test_get_full_access_compute_domain_with_column_domain():
+def test_get_domain_records_with_column_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
@@ -62,7 +62,7 @@ def test_get_full_access_compute_domain_with_column_domain():
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data = engine.get_full_access_compute_domain(
+    data = engine.get_domain_records(
         domain_kwargs={
             "column": "a",
             "row_condition": "b<5",
@@ -74,7 +74,7 @@ def test_get_full_access_compute_domain_with_column_domain():
     ), "Data does not match after getting full access compute domain"
 
 
-def test_get_full_access_compute_domain_with_column_pair_domain():
+def test_get_domain_records_with_column_pair_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
         {
@@ -89,7 +89,7 @@ def test_get_full_access_compute_domain_with_column_pair_domain():
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data = engine.get_full_access_compute_domain(
+    data = engine.get_domain_records(
         domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -103,7 +103,7 @@ def test_get_full_access_compute_domain_with_column_pair_domain():
     ), "Data does not match after getting full access compute domain"
 
 
-def test_get_full_access_compute_domain_with_multicolumn_domain():
+def test_get_domain_records_with_multicolumn_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame(
         {
@@ -118,7 +118,7 @@ def test_get_full_access_compute_domain_with_multicolumn_domain():
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
-    data = engine.get_full_access_compute_domain(
+    data = engine.get_domain_records(
         domain_kwargs={
             "column_list": ["a", "c"],
             "row_condition": "b>2",
