@@ -57,7 +57,6 @@ class ExpectColumnPairValuesToBeEqual(TableExpectation):
 
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
     """
 
     # This dictionary contains metadata for display in the public gallery
