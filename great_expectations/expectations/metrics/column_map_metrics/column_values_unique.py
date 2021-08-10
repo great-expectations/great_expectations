@@ -62,7 +62,6 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         # the column we will be performing the expectation on, and the query is performed against it.
         dialect = kwargs.get("_dialect", None)
         sql_engine = kwargs.get("_sqlalchemy_engine", None)
-        # hacky fix
         if sql_engine and dialect:
             if hasattr(dialect, "dialect") and dialect.dialect.name == "mysql":
                 temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
