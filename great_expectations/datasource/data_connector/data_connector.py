@@ -257,6 +257,7 @@ class DataConnector:
                 f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):",
                 unmatched_data_references[:max_examples],
             )
+            print()
 
         report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         report_obj["example_unmatched_data_references"] = unmatched_data_references[

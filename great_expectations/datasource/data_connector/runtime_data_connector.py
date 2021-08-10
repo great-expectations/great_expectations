@@ -305,3 +305,54 @@ class RuntimeDataConnector(DataConnector):
 appear among the configured batch identifiers.
                     """
                 )
+
+    def self_check(self, pretty_print=True, max_examples=3):
+        """
+        Overrides the self_check method for RuntimeDataConnector. Normally the `self_check()` method will check
+        the configuration of the DataConnector by doing the following :
+
+        1. refresh or create data_reference_cache
+        2. print batch_definition_count and example_data_references for each data_asset_names
+        3. also print unmatched data_references, and allow the user to modify the regex or glob configuration if necessary
+
+        However, in the case of the RuntimeDataConnector there is no example data_asset_names until the data is passed
+        in through the RuntimeBatchRequest. Therefore, there will be a
+        Args:
+            pretty_print (bool): should the output be printed?
+            max_examples (int): how many data_references should be printed?
+
+        """
+        if pretty_print:
+            print("\t" + self.name, ":", self.__class__.__name__)
+            print()
+        asset_names = self.get_available_data_asset_names()
+        asset_names.sort()
+        len_asset_names = len(asset_names)
+
+        report_obj = {
+            "class_name": self.__class__.__name__,
+            "data_asset_count": len_asset_names,
+            "example_data_asset_names": asset_names[:max_examples],
+            "data_assets": {},
+            "note": "RuntimeDataConnector will not have data asset until passed in through RuntimeBatchRequest"
+            # "data_reference_count": self.
+        }
+        if pretty_print:
+            print(
+                f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
+            )
+        if pretty_print:
+            print(
+                "\t\t"
+                + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+            )
+
+        unmatched_data_references = self.get_unmatched_data_references()
+        len_unmatched_data_references = len(unmatched_data_references)
+        if pretty_print:
+            print(
+                f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):",
+                unmatched_data_references[:max_examples],
+            )
+            print()
+        return report_obj
