@@ -30,11 +30,10 @@ def test_self_check(basic_datasource):
     assert test_runtime_data_connector.self_check() == {
         "class_name": "RuntimeDataConnector",
         "data_asset_count": 0,
-        "example_data_asset_names": [],
         "data_assets": {},
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-        "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+        "example_data_asset_names": [],
+        "note": "RuntimeDataConnector will not have data_asset_names until they are "
+        "passed in through RuntimeBatchRequest",
     }
 
 
