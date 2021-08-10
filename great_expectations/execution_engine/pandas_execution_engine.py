@@ -394,21 +394,17 @@ Please check your config."""
 
         # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            # Ensuring column_A and column_B parameters provided
-            if (
+            # Ensuring that the "column_A" and "column_B" parameters are provided.
+            if not (
                 "column_A" in compute_domain_kwargs
                 and "column_B" in compute_domain_kwargs
             ):
-                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
-                    "column_A"
-                )
-                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
-                    "column_B"
-                )
-            else:
                 raise ge_exceptions.GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
+
+            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
             if "ignore_row_if" in compute_domain_kwargs:
                 # noinspection PyPep8Naming
@@ -433,38 +429,35 @@ Please check your config."""
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "ignore_row_if" in compute_domain_kwargs:
-                ignore_row_if = compute_domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "all_values_are_missing":
-                    data = data.dropna(how="all")
-                elif ignore_row_if == "any_value_is_missing":
-                    data = data.dropna(how="any")
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
-
-            if "column_list" in compute_domain_kwargs:
-                # If column_list exists
-                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                    "column_list"
+            # Ensuring that the "column_list" parameter is provided.
+            if "column_list" not in compute_domain_kwargs:
+                raise ge_exceptions.GreatExpectationsError(
+                    "column_list not found within compute_domain_kwargs"
                 )
 
-        # Filtering if identity
-        elif domain_type == MetricDomainTypes.IDENTITY:
+            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                "column_list"
+            )
+
             if "ignore_row_if" in compute_domain_kwargs:
                 ignore_row_if = compute_domain_kwargs["ignore_row_if"]
                 if ignore_row_if == "all_values_are_missing":
-                    data = data.dropna(how="all")
+                    data = data.dropna(
+                        axis=0, how="all", subset=accessor_domain_kwargs["column_list"]
+                    )
                 elif ignore_row_if == "any_value_is_missing":
-                    data = data.dropna(how="any")
+                    data = data.dropna(
+                        axis=0, how="any", subset=accessor_domain_kwargs["column_list"]
+                    )
                 else:
                     if ignore_row_if != "never":
                         raise ValueError(
                             f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                         )
 
+        # Filtering if identity
+        # TODO: <Alex>ALEX -- Add handling of "ignore_row_if" for COLUMN_PAIR domain_type and IDENTITY case.</Alex>
+        elif domain_type == MetricDomainTypes.IDENTITY:
             # If we would like our data to become a single column
             if "column" in compute_domain_kwargs:
                 data = pd.DataFrame(data[compute_domain_kwargs["column"]])
@@ -474,6 +467,7 @@ Please check your config."""
                 "column_B" in compute_domain_kwargs
             ):
 
+                # TODO: <Alex>ALEX -- Remove the filtering of "data" in IDENTITY -- otherwise, unexpected_rows will not contain all columns.  (See multicolumn implementation below for guidance.)</Alex>
                 # Dropping all not needed columns
                 column_a, column_b = (
                     compute_domain_kwargs["column_A"],
@@ -486,7 +480,25 @@ Please check your config."""
             else:
                 # If we would like our data to become a multicolumn
                 if "column_list" in compute_domain_kwargs:
-                    data = data[compute_domain_kwargs["column_list"]]
+                    if "ignore_row_if" in compute_domain_kwargs:
+                        ignore_row_if = compute_domain_kwargs["ignore_row_if"]
+                        if ignore_row_if == "all_values_are_missing":
+                            data = data.dropna(
+                                axis=0,
+                                how="all",
+                                subset=compute_domain_kwargs["column_list"],
+                            )
+                        elif ignore_row_if == "any_value_is_missing":
+                            data = data.dropna(
+                                axis=0,
+                                how="any",
+                                subset=compute_domain_kwargs["column_list"],
+                            )
+                        else:
+                            if ignore_row_if != "never":
+                                raise ValueError(
+                                    f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                                )
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
