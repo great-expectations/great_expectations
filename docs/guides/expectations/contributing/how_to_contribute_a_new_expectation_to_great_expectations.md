@@ -231,7 +231,7 @@ The parent class expects the variable `condition_metric_name` to be set. Change 
 
 The Expectation declares that it needs a yes/no Metric “X” and the Metric Provider declares that it can compute this Metric. A match made in heaven.
 
-* Implement the computation of the Metric in your new Metric Provider class for at least one Execution Engines that Great Expectations supports, such as pandas, sqlalchemy, or spark. Most contributors find that starting with Pandas is the easiest and fastest way to build.
+* Implement the computation of the Metric in your new Metric Provider class for at least one Execution Engines that Great Expectations supports, such as pandas, sqlalchemy, or Spark. Most contributors find that starting with Pandas is the easiest and fastest way to build.
 
 The parent class of your Metric Provider class is `ColumnMapMetricProvider`. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
 
@@ -353,7 +353,7 @@ The parent class expects the variable metric_name to be set. Change the value of
 
 The Expectation declares that it needs a Metric “X” and the Metric Provider declares that it can compute this Metric.
 
-* Implement the computation of the Metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: pandas, sqlalchemy, spark. Most contributors find starting with Pandas is the easiest and fastest way to build.
+* Implement the computation of the Metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: pandas, sqlalchemy, Spark. Most contributors find starting with Pandas is the easiest and fastest way to build.
 
 The parent class of your Metric Provider class is `ColumnAggregateMetricProvider`. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
 
