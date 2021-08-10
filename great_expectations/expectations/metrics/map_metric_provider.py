@@ -688,7 +688,7 @@ def _pandas_column_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-    df = execution_engine.get_full_access_compute_domain(
+    df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
 
@@ -745,11 +745,11 @@ def _pandas_multicolumn_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
     """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_full_access_compute_domain()" must be
-    supplied with all of the available "domain_kwargs" keys.
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_full_access_compute_domain(
+    df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
 
@@ -793,11 +793,11 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
     """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_full_access_compute_domain()" must be
-    supplied with all of the available "domain_kwargs" keys.
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_full_access_compute_domain(
+    df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
 
@@ -844,7 +844,7 @@ def _pandas_column_map_series_and_domain_values(
     assert (
         accessor_domain_kwargs == accessor_domain_kwargs_2
     ), "map_series and condition must have the same accessor kwargs"
-    df = execution_engine.get_full_access_compute_domain(
+    df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
 
@@ -907,11 +907,11 @@ def _pandas_map_condition_index(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
     """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_full_access_compute_domain()" must be
-    supplied with all of the available "domain_kwargs" keys.
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_full_access_compute_domain(
+    df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
 
@@ -968,7 +968,7 @@ def _pandas_column_map_condition_value_counts(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
-    df = execution_engine.get_full_access_compute_domain(
+    df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
 
@@ -1038,11 +1038,11 @@ def _pandas_map_condition_rows(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
     """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_full_access_compute_domain()" must be
-    supplied with all of the available "domain_kwargs" keys.
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_full_access_compute_domain(
+    df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
 
@@ -1123,7 +1123,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    selectable = execution_engine.get_full_access_compute_domain(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
 
@@ -1205,7 +1205,7 @@ def _sqlalchemy_column_map_condition_values(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    selectable = execution_engine.get_full_access_compute_domain(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
 
@@ -1254,7 +1254,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    selectable = execution_engine.get_full_access_compute_domain(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
 
@@ -1298,11 +1298,11 @@ def _sqlalchemy_map_condition_rows(
         "unexpected_condition"
     )
     """
-    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_full_access_compute_domain()" must be
-    supplied with all of the available "domain_kwargs" keys.
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_full_access_compute_domain(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
 

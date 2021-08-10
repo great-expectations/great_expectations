@@ -231,12 +231,12 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     assert found_message
 
 
-def test_get_full_access_compute_domain_with_column_domain(sa):
+def test_get_domain_records_with_column_domain(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
     engine = build_sa_engine(df, sa)
-    data = engine.get_full_access_compute_domain(
+    data = engine.get_domain_records(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b")<5',
@@ -256,7 +256,7 @@ def test_get_full_access_compute_domain_with_column_domain(sa):
     ), "Data does not match after getting full access compute domain"
 
 
-def test_get_full_access_compute_domain_with_column_pair_domain(sa):
+def test_get_domain_records_with_column_pair_domain(sa):
     df = pd.DataFrame(
         {
             "a": [1, 2, 3, 4, 5, 6],
@@ -265,7 +265,7 @@ def test_get_full_access_compute_domain_with_column_pair_domain(sa):
         }
     )
     engine = build_sa_engine(df, sa)
-    data = engine.get_full_access_compute_domain(
+    data = engine.get_domain_records(
         domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -289,7 +289,7 @@ def test_get_full_access_compute_domain_with_column_pair_domain(sa):
     ), "Data does not match after getting full access compute domain"
 
 
-def test_get_full_access_compute_domain_with_multicolumn_domain(sa):
+def test_get_domain_records_with_multicolumn_domain(sa):
     df = pd.DataFrame(
         {
             "a": [1, 2, 3, 4, None, 5],
@@ -298,7 +298,7 @@ def test_get_full_access_compute_domain_with_multicolumn_domain(sa):
         }
     )
     engine = build_sa_engine(df, sa)
-    data = engine.get_full_access_compute_domain(
+    data = engine.get_domain_records(
         domain_kwargs={
             "column_list": ["a", "c"],
             "row_condition": 'col("b")>2',

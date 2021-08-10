@@ -372,7 +372,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    def get_full_access_compute_domain(
+    def get_domain_records(
         self,
         domain_kwargs: Dict,
     ) -> Select:
@@ -557,7 +557,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             SqlAlchemy column
         """
         # Extracting value from enum if it is given for future computation
-        selectable = self.get_full_access_compute_domain(
+        selectable = self.get_domain_records(
             domain_kwargs=domain_kwargs,
         )
         domain_type = MetricDomainTypes(domain_type)

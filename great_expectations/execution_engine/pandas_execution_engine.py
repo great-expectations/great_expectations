@@ -276,7 +276,7 @@ Please check your config."""
             f'Unable to determine reader method from path: "{path}".'
         )
 
-    def get_full_access_compute_domain(
+    def get_domain_records(
         self,
         domain_kwargs: dict,
     ) -> pd.DataFrame:
@@ -407,7 +407,7 @@ Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_full_access_compute_domain(
+        data = self.get_domain_records(
             domain_kwargs=domain_kwargs,
         )
         # Extracting value from enum if it is given for future computation
