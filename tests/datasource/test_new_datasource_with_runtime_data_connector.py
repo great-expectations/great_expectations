@@ -47,7 +47,6 @@ def test_basic_datasource_runtime_data_connector_self_check(
     basic_datasource_with_runtime_data_connector,
 ):
     report = basic_datasource_with_runtime_data_connector.self_check()
-    print(report)
     assert report == {
         "execution_engine": {
             "caching": True,
