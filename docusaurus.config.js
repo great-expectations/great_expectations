@@ -5,8 +5,7 @@ const remarkCodeImport = require('remark-code-import')
 module.exports = {
   title: 'Great Expectations',
   tagline: 'Always know what to expect from your data.',
-  // TODO update for proper hosting URL once decisions are made
-  url: 'https://knoxpod.netlify.com', // Url to your site with no trailing slash
+  url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -24,14 +23,15 @@ module.exports = {
       disableSwitch: true
     },
     zoomSelector: '.markdown :not(em) > img',
-    // announcementBar: {
-    //   id: 'RTD_docs', // Link to RTD Docs
-    //   content:
-    //     '🔄 Older Documentation for Great Expectations can be found at the <a href="file:///Users/work/Development/great_expectations/docs_rtd/build/html/index.html">Read the Docs site</a> 🔄',
-    //   backgroundColor: '#32a852', // Defaults to `#fff`.
-    //   textColor: '#091E42', // Defaults to `#000`.
-    //   isCloseable: false, // Defaults to `true`.
-    // },
+    announcementBar: {
+      id: 'RTD_docs', // Link to RTD Docs
+      content:
+        '🔄 Older Documentation for Great Expectations can be found at the <a href="https://legacy.docs.greatexpectations.io">Read the Docs site</a> 🔄',
+      // backgroundColor: '#32a852', // Defaults to `#fff`.
+      backgroundColor: '#efefef', // Defaults to `#fff`.
+      textColor: '#091E42', // Defaults to `#000`.
+      isCloseable: false, // Defaults to `true`.
+    },
     navbar: {
       title: 'great_expectations',
       logo: {
@@ -44,18 +44,8 @@ module.exports = {
           position: 'right',
           items: [
             {
-              label: '0.13.10',
-              to: 'docs/'
-              // activeBasePath: 'docs',
-            },
-            {
-              label: '0.13.9',
-              to: 'docs/'
-              // activeBasePath: 'docs',
-            },
-            {
-              label: '0.13.8',
-              href: 'https://docs.greatexpectations.io/en/0.13.8/'
+              label: 'V2 Documentation',
+              href: 'https://legacy.docs.greatexpectations.io/en/latest'
               // activeBasePath: 'docs',
             }
           ]

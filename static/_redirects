@@ -1,10 +1,10 @@
 # Redirect from what the browser serves
-/v2 https://docs.greatexpectations.io/en/latest/
-/en/latest/  https://legacy.docs.greatexpectations.io/en/latest/
-/en/latest/index.html https://legacy.docs.greatexpectations.io/en/latest/index.html
-/en/latest/contributing.html https://legacy.docs.greatexpectations.io/en/latest/contributing.html
-/en/latest/reference.html https://legacy.docs.greatexpectations.io/en/latest/reference.html
-/en/latest/intro.html https://legacy.docs.greatexpectations.io/en/latest/intro.html
+/v2 https://legacy.docs.greatexpectations.io/en/latest/
+/en/latest/  https://docs.greatexpectations.io/docs/
+/en/latest/index.html https://docs.greatexpectations.io/docs/
+/en/latest/contributing.html https://legacy.docs.greatexpectations.io/docs/contributing/contributing
+/en/latest/reference.html https://legacy.docs.greatexpectations.io/docs/reference/glossary_of_expectations
+/en/latest/intro.html https://docs.greatexpectations.io/docs/
 /en/latest/contributing/levels_of_maturity.html https://legacy.docs.greatexpectations.io/en/latest/contributing/levels_of_maturity.html
 /en/latest/contributing/testing.html https://legacy.docs.greatexpectations.io/en/latest/contributing/testing.html
 /en/latest/contributing/make_changes_through_github.html https://legacy.docs.greatexpectations.io/en/latest/contributing/make_changes_through_github.html
