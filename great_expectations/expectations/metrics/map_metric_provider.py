@@ -733,6 +733,83 @@ def multicolumn_condition_partial(
 
         return wrapper
 
+    elif issubclass(engine, SqlAlchemyExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+            raise ValueError(
+                "SqlAlchemyExecutionEngine only supports map_condition_series for multicolumn_condition_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SqlAlchemyExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                # filter_column_isnull = kwargs.get(
+                #    "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
+                # )
+
+                (
+                    selectable,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+
+                column_select = [sa.column(column_name) for column_name in column_list]
+                dialect = execution_engine.dialect_module
+                expected_condition = metric_fn(
+                    cls,
+                    column_select,
+                    **metric_value_kwargs,
+                    _dialect=dialect,
+                    _table=selectable,
+                    _sqlalchemy_engine=sqlalchemy_engine,
+                    _metrics=metrics,
+                )
+                # if filter_column_isnull:
+                # If we "filter" (ignore) nulls then we allow null as part of our new expected condition
+                #    unexpected_condition = sa.and_(
+                #        sa.not_(sa.or_(column.is_(None) for column in column_select)),
+                #        sa.not_(expected_condition),
+                #    )
+                # else:
+                #    unexpected_condition = sa.not_(expected_condition)
+                unexpected_condition = sa.not_(expected_condition)
+                return (
+                    unexpected_condition,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
     else:
         raise ValueError("Unsupported engine for column_condition_partial")
 
