@@ -599,24 +599,6 @@ def multicolumn_function_partial(
                 metrics: Dict[str, Any],
                 runtime_configuration: Dict,
             ):
-                # filter_column_isnull = kwargs.get(
-                #    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
-                # )
-                # if filter_column_isnull:
-                #    compute_domain_kwargs = execution_engine.add_column_row_condition(
-                #        metric_domain_kwargs
-                #    )
-                # else:
-                # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
-                #    compute_domain_kwargs = metric_domain_kwargs
-                # (
-                #    selectable,
-                #    compute_domain_kwargs,
-                #    accessor_domain_kwargs,
-                # ) = execution_engine.get_compute_domain(
-                #    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
-                # )
-
                 (
                     selectable,
                     compute_domain_kwargs,
@@ -758,10 +740,6 @@ def multicolumn_condition_partial(
                 metrics: Dict[str, Any],
                 runtime_configuration: Dict,
             ):
-                # filter_column_isnull = kwargs.get(
-                #    "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
-                # )
-
                 (
                     selectable,
                     compute_domain_kwargs,
@@ -791,14 +769,7 @@ def multicolumn_condition_partial(
                     _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )
-                # if filter_column_isnull:
-                # If we "filter" (ignore) nulls then we allow null as part of our new expected condition
-                #    unexpected_condition = sa.and_(
-                #        sa.not_(sa.or_(column.is_(None) for column in column_select)),
-                #        sa.not_(expected_condition),
-                #    )
-                # else:
-                #    unexpected_condition = sa.not_(expected_condition)
+
                 unexpected_condition = sa.not_(expected_condition)
                 return (
                     unexpected_condition,
