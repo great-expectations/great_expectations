@@ -78,7 +78,7 @@ stages:
 
         - script: |
             pip install -r requirements-dev.txt
-
+            pip install .
           displayName: 'Install dependencies'
 
         - task: DownloadSecureFile@1

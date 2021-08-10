@@ -1,9 +1,9 @@
-trigger:
+schedules:
+- cron: "0 12 * * 0"
+  displayName: Weekly Sunday build
   branches:
     include:
-    - pre_pr-*
     - develop
-    - main
 
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
@@ -70,7 +70,7 @@ stages:
     dependsOn: [scope_check, lint, cloud_db_integration_expectations_cfe]
     jobs:
       - job: bigquery_expectations
-        timeoutInMinutes: 0 # Maximize the time that this can run
+        timeoutInMinutes: 0 # Maximize the time that pipelines remain open (6 hours currently)
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
 
         variables:
@@ -115,13 +115,17 @@ stages:
 
     jobs:
       - job: bigquery_expectations_cfe
-        timeoutInMinutes: 0 # Maximize the time that this can run
+        timeoutInMinutes: 0 # Maximize the time that pipelines remain open (6 hours currently)
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
 
         variables:
           python.version: '3.8'
 
         steps:
+          # delay the execution of the second stages so that we do not hit the rate limit for BigQuery
+          - bash: sleep 5m
+            displayName: Delay for BigQuery rate limit
+
           - task: UsePythonVersion@0
             inputs:
               versionSpec: '$(python.version)'
