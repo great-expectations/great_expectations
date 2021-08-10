@@ -1,6 +1,5 @@
 import logging
 from typing import Any, List, Optional, Tuple, Union, cast
-from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -225,19 +224,18 @@ class RuntimeDataConnector(DataConnector):
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-        if runtime_parameters.get("batch_data") is not None:
+        if "batch_data" in runtime_parameters:
             batch_spec["batch_data"] = runtime_parameters.get("batch_data")
             return RuntimeDataBatchSpec(batch_spec)
-        elif runtime_parameters.get("query"):
+        elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
             return RuntimeQueryBatchSpec(batch_spec)
-        elif runtime_parameters.get("path"):
-            path = runtime_parameters.get("path")
+        elif "path" in runtime_parameters:
+            path: str = runtime_parameters["path"]
             batch_spec["path"] = path
-            parsed_url = urlparse(path)
-            if "s3" in parsed_url.scheme:
+            if "s3" in path:
                 return S3BatchSpec(batch_spec)
-            elif "blob.core.windows.net" in parsed_url.path:
+            elif "blob.core.windows.net" in path:
                 return AzureBatchSpec(batch_spec)
             else:
                 return PathBatchSpec(batch_spec)
