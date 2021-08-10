@@ -519,7 +519,7 @@ def multicolumn_function_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -599,7 +599,7 @@ def multicolumn_condition_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
