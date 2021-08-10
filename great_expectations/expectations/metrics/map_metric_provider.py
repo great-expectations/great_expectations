@@ -1935,6 +1935,25 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_sqlalchemy_column_map_condition_value_counts,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
+                    elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_multicolumn_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_multicolumn_map_condition_filtered_row_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
                         metric_name=metric_name + ".condition",
