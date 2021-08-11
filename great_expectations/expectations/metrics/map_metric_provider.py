@@ -1847,15 +1847,6 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
                     )
-                    register_metric(
-                        metric_name=metric_name + ".unexpected_count",
-                        metric_domain_keys=metric_domain_keys,
-                        metric_value_keys=metric_value_keys,
-                        execution_engine=engine,
-                        metric_class=cls,
-                        metric_provider=_sqlalchemy_map_condition_unexpected_count,
-                        metric_fn_type=MetricFunctionTypes.VALUE,
-                    )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
                         register_metric(
                             metric_name=metric_name + ".unexpected_count.aggregate_fn",
@@ -1865,6 +1856,15 @@ class MapMetricProvider(MetricProvider):
                             metric_class=cls,
                             metric_provider=_sqlalchemy_map_condition_unexpected_count_aggregate_fn,
                             metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=metric_value_keys,
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=None,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                     elif (
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
@@ -1907,6 +1907,15 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=metric_value_keys,
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_map_condition_unexpected_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
                             metric_domain_keys=metric_domain_keys,
