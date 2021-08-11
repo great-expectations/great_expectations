@@ -361,7 +361,8 @@ Please check your config."""
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
-        if "table" in domain_kwargs:
+        table = domain_kwargs.get("table", None)
+        if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
