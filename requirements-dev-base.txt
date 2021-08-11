@@ -27,8 +27,9 @@ pypd==1.1.0  # all_tests
 pytest>=5.3.5,<6.0.0  # all_tests
 pytest-cov>=2.8.1  # all_tests
 pytest-order>=0.9.5 # all tests
+pytest-xdist==2.3.0 # all_tests
 pyupgrade==2.7.2  # lint
-typing-extensions>=3.10.0.0 # typing. Added 202108 @Shinnnyshinshin and @cdkini
 requirements-parser>=0.2.0  # all_tests
 s3fs>=0.5.1 # all_tests
+typing-extensions>=3.10.0.0 # typing. Added 202108 @Shinnnyshinshin and @cdkini
 xlrd>=1.1.0,<2.0.0  # all_tests
