@@ -115,8 +115,6 @@ class Expectation(metaclass=MetaExpectation):
         1. `validate_configuration`, which should raise an error if the configuration
            will not be usable for the Expectation
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
-
-
     """
 
     version = ge_version
@@ -1375,11 +1373,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "column_list",
         "row_condition",
         "condition_parser",
+        "ignore_row_if",
     )
     success_keys = tuple()
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "ignore_row_if": "all_value_are_missing",
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
@@ -1543,7 +1543,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
-            element_count=filtered_row_count,
+            element_count=total_count,
             nonnull_count=filtered_row_count,
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,
