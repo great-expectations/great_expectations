@@ -1416,12 +1416,11 @@ def test_get_compute_domain_with_nonexistent_condition_parser(
     # Expect GreatExpectationsError because parser doesn't exist
     with pytest.raises(ge_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        data = engine.get_domain_records(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "nonexistent",
             },
-            domain_type=MetricDomainTypes.IDENTITY,
         )
 
 

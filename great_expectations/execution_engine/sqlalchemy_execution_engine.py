@@ -714,8 +714,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
-            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY
+            domain_kwargs = query["domain_kwargs"]
+            selectable = self.get_domain_records(
+                domain_kwargs=domain_kwargs,
             )
             assert len(query["select"]) == len(query["ids"])
             try:
@@ -723,7 +724,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     sa.select(query["select"]).select_from(selectable)
                 ).fetchall()
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "

@@ -602,8 +602,8 @@ Please check your config."""
             aggregates[domain_id]["ids"].append(metric_to_resolve.id)
         for aggregate in aggregates.values():
             compute_domain_kwargs = aggregate["domain_kwargs"]
-            df, _, _ = self.get_compute_domain(
-                compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
+            df = self.get_domain_records(
+                domain_kwargs=compute_domain_kwargs,
             )
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []
