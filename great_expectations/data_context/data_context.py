@@ -1784,7 +1784,7 @@ class BaseDataContext:
         batch_definition = batch_list[-1].batch_definition
         execution_engine = self.datasources[
             batch_definition.datasource_name
-        ].execution_engine
+        ].get_execution_engine()
 
         validator = Validator(
             execution_engine=execution_engine,
