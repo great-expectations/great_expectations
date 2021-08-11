@@ -31,7 +31,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(TableExpectation):
         or_equal (boolean or None): If True, then values can be equal, not strictly greater
 
     Keyword Args:
-        allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
+        allow_cross_type_comparisons (boolean or None): If True, allow comparisons between types (e.g. integer and \
             string). Otherwise, attempting such comparisons will raise an exception.
 
     Keyword Args:

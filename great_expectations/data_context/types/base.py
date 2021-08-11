@@ -479,7 +479,9 @@ S3 type of the data connector (your data connector is "{data['class_name']}").  
 continue.
                 """
             )
-        if ("container" in data or "name_starts_with" in data) and not (
+        if (
+            "azure_options" in data or "container" in data or "name_starts_with" in data
+        ) and not (
             data["class_name"]
             in [
                 "InferredAssetAzureDataConnector",
@@ -492,17 +494,17 @@ Azure type of the data connector (your data connector is "{data['class_name']}")
 continue.
                     """
             )
-        if not (("conn_str" in data) ^ ("account_url" in data)) and data[
-            "class_name"
-        ] in [
+        if "azure_options" in data and data["class_name"] in [
             "InferredAssetAzureDataConnector",
             "ConfiguredAssetAzureDataConnector",
         ]:
-            raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
-                You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
-                """
-            )
+            azure_options = data["azure_options"]
+            if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
+                    You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
+                    """
+                )
         if (
             "data_asset_name_prefix" in data
             or "data_asset_name_suffix" in data
