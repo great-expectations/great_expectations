@@ -443,104 +443,106 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if "column" in domain_kwargs:
             return selectable
 
-        if "column_A" in domain_kwargs and "column_B" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                if self.active_batch_data.use_quoted_name:
-                    # If case matters...
-                    # noinspection PyPep8Naming
-                    column_A_name = quoted_name(domain_kwargs["column_A"])
-                    # noinspection PyPep8Naming
-                    column_B_name = quoted_name(domain_kwargs["column_B"])
-                else:
-                    # noinspection PyPep8Naming
-                    column_A_name = domain_kwargs["column_A"]
-                    # noinspection PyPep8Naming
-                    column_B_name = domain_kwargs["column_B"]
+        if (
+            "column_A" in domain_kwargs
+            and "column_B" in domain_kwargs
+            and "ignore_row_if" in domain_kwargs
+        ):
+            if self.active_batch_data.use_quoted_name:
+                # Checking if case-sensitive and using appropriate name
+                # noinspection PyPep8Naming
+                column_A_name = quoted_name(domain_kwargs["column_A"])
+                # noinspection PyPep8Naming
+                column_B_name = quoted_name(domain_kwargs["column_B"])
+            else:
+                # noinspection PyPep8Naming
+                column_A_name = domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = domain_kwargs["column_B"]
 
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "both_values_are_missing":
-                    selectable = (
-                        sa.select([sa.text("*")])
-                        .select_from(selectable)
-                        .where(
-                            sa.not_(
-                                sa.and_(
-                                    sa.column(column_A_name) == None,
-                                    sa.column(column_B_name) == None,
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "both_values_are_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.and_(
+                                sa.column(column_A_name) == None,
+                                sa.column(column_B_name) == None,
+                            )
+                        )
+                    )
+                )
+            elif ignore_row_if == "either_value_is_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.or_(
+                                sa.column(column_A_name) == None,
+                                sa.column(column_B_name) == None,
+                            )
+                        )
+                    )
+                )
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+            return selectable
+
+        if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
+            if self.active_batch_data.use_quoted_name:
+                # Checking if case-sensitive and using appropriate name
+                column_list = [
+                    quoted_name(domain_kwargs[column_name])
+                    for column_name in domain_kwargs["column_list"]
+                ]
+            else:
+                column_list = domain_kwargs["column_list"]
+
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "all_values_are_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.and_(
+                                *(
+                                    sa.column(column_name) == None
+                                    for column_name in column_list
                                 )
                             )
                         )
                     )
-                elif ignore_row_if == "either_value_is_missing":
-                    selectable = (
-                        sa.select([sa.text("*")])
-                        .select_from(selectable)
-                        .where(
-                            sa.not_(
-                                sa.or_(
-                                    sa.column(column_A_name) == None,
-                                    sa.column(column_B_name) == None,
+                )
+            elif ignore_row_if == "any_value_is_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.or_(
+                                *(
+                                    sa.column(column_name) == None
+                                    for column_name in column_list
                                 )
                             )
                         )
                     )
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
-
-                return selectable
-
-        if "column_list" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                if self.active_batch_data.use_quoted_name:
-                    # If case matters...
-                    column_list = [
-                        quoted_name(domain_kwargs[column_name])
-                        for column_name in domain_kwargs["column_list"]
-                    ]
-                else:
-                    column_list = domain_kwargs["column_list"]
-
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "all_values_are_missing":
-                    selectable = (
-                        sa.select([sa.text("*")])
-                        .select_from(selectable)
-                        .where(
-                            sa.not_(
-                                sa.and_(
-                                    *(
-                                        sa.column(column_name) == None
-                                        for column_name in column_list
-                                    )
-                                )
-                            )
-                        )
+                )
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
-                elif ignore_row_if == "any_value_is_missing":
-                    selectable = (
-                        sa.select([sa.text("*")])
-                        .select_from(selectable)
-                        .where(
-                            sa.not_(
-                                sa.or_(
-                                    *(
-                                        sa.column(column_name) == None
-                                        for column_name in column_list
-                                    )
-                                )
-                            )
-                        )
-                    )
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
 
-                return selectable
+            return selectable
 
         return selectable
 
