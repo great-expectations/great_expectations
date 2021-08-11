@@ -50,12 +50,12 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Select
+    from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
     reflection = None
     DefaultDialect = None
-    Select = None
+    Selectable = None
     TextClause = None
     quoted_name = None
     OperationalError = None
@@ -375,7 +375,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_domain_records(
         self,
         domain_kwargs: Dict,
-    ) -> Select:
+    ) -> Selectable:
         """
         Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
         obtain and/or query a batch. Returns in the format of an SqlAlchemy table/column(s) object.
@@ -422,6 +422,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             selectable = data_object.selectable
 
+        # Filtering by row condition.
         if (
             "row_condition" in domain_kwargs
             and domain_kwargs["row_condition"] is not None
@@ -463,9 +464,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.select([sa.text("*")])
                         .select_from(selectable)
                         .where(
-                            sa.and_(
-                                sa.column(column_A_name) != None,
-                                sa.column(column_A_name) != None,
+                            sa.not_(
+                                sa.and_(
+                                    sa.column(column_A_name) == None,
+                                    sa.column(column_B_name) == None,
+                                )
                             )
                         )
                     )
@@ -474,9 +477,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.select([sa.text("*")])
                         .select_from(selectable)
                         .where(
-                            sa.or_(
-                                sa.column(column_A_name) != None,
-                                sa.column(column_A_name) != None,
+                            sa.not_(
+                                sa.or_(
+                                    sa.column(column_A_name) == None,
+                                    sa.column(column_B_name) == None,
+                                )
                             )
                         )
                     )
@@ -541,7 +546,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         domain_kwargs: Dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Select, dict, dict]:
+    ) -> Tuple[Selectable, dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -556,10 +561,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             SqlAlchemy column
         """
-        # Extracting value from enum if it is given for future computation
         selectable = self.get_domain_records(
             domain_kwargs=domain_kwargs,
         )
+        # Extracting value from enum if it is given for future computation
         domain_type = MetricDomainTypes(domain_type)
 
         # Warning user if accessor keys are in any domain that is not of type table, will be ignored
@@ -646,15 +651,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" in compute_domain_kwargs:
-                # If column_list exists
-                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                    "column_list"
-                )
-            else:
+            # Ensuring column_list parameter is provided
+            if "column_list" not in domain_kwargs:
                 raise GreatExpectationsError(
-                    "column_list not found within compute_domain_kwargs"
+                    "column_list not found within domain_kwargs"
                 )
+
+            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                "column_list"
+            )
+            # Checking if table or identity or other provided, column is not specified. If it is, warning the user
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # Letting selectable fall through
@@ -879,7 +885,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Select, str]:
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Selectable, str]:
         table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -998,7 +1004,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     batch_spec=batch_spec
                 )
             else:
-                selectable: Select = self._build_selectable_from_batch_spec(
+                selectable: Selectable = self._build_selectable_from_batch_spec(
                     batch_spec=batch_spec
                 )
 

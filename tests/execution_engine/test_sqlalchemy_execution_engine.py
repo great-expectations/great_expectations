@@ -252,7 +252,7 @@ def test_get_domain_records_with_column_domain(sa):
     ).fetchall()
 
     assert (
-        expected_data == domain_data
+        domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
 
@@ -285,7 +285,31 @@ def test_get_domain_records_with_column_pair_domain(sa):
     ).fetchall()
 
     assert (
-        expected_data == domain_data
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "either_value_is_missing",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_column_pair_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+    engine = build_sa_engine(expected_column_pair_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
 
@@ -317,7 +341,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     ).fetchall()
 
     assert (
-        expected_data == domain_data
+        domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
 
