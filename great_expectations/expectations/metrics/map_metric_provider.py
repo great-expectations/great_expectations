@@ -1223,9 +1223,8 @@ def _sqlalchemy_map_condition_unexpected_count(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 
-    selectable, _, _ = execution_engine.get_compute_domain(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=MetricDomainTypes.IDENTITY,
     )
 
     return execution_engine.engine.execute(
@@ -1404,9 +1403,8 @@ def _sqlalchemy_multicolumn_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 
-    selectable, _, _ = execution_engine.get_compute_domain(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=MetricDomainTypes.IDENTITY,
     )
 
     if "column_list" not in accessor_domain_kwargs:
@@ -1448,9 +1446,8 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 ):
     """Return value counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
-    selectable, _, _ = execution_engine.get_compute_domain(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
-        domain_type=MetricDomainTypes.IDENTITY,
     )
 
     if "column_list" not in accessor_domain_kwargs:
