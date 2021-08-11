@@ -1201,6 +1201,8 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_column_values_to_be_of_type",  # unique to bigquery
             "expect_column_values_to_be_in_set",  # unique to bigquery
             "expect_column_values_to_be_in_type_list",  # unique to bigquery
+            "expect_column_values_to_match_like_pattern_list",  # unique to bigquery
+            "expect_column_values_to_not_match_like_pattern_list",  # unique to bigquery
         ]
 
     if context == "SparkDFDataset":
