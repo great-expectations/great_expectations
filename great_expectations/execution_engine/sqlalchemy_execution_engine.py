@@ -50,12 +50,12 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Select
+    from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
     reflection = None
     DefaultDialect = None
-    Select = None
+    Selectable = None
     TextClause = None
     quoted_name = None
     OperationalError = None
@@ -372,28 +372,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    def get_compute_domain(
+    def get_domain_records(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Select, dict, dict]:
-        """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
+    ) -> Selectable:
+        """
+        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
+        obtain and/or query a batch. Returns in the format of an SqlAlchemy table/column(s) object.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
-            SqlAlchemy column
+            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
         """
         # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -411,8 +404,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
@@ -431,6 +422,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             selectable = data_object.selectable
 
+        # Filtering by row condition.
         if (
             "row_condition" in domain_kwargs
             and domain_kwargs["row_condition"] is not None
@@ -449,6 +441,136 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
+        if "column" in domain_kwargs:
+            return selectable
+
+        if "column_A" in domain_kwargs and "column_B" in domain_kwargs:
+            if "ignore_row_if" in domain_kwargs:
+                if self.active_batch_data.use_quoted_name:
+                    # If case matters...
+                    # noinspection PyPep8Naming
+                    column_A_name = quoted_name(domain_kwargs["column_A"])
+                    # noinspection PyPep8Naming
+                    column_B_name = quoted_name(domain_kwargs["column_B"])
+                else:
+                    # noinspection PyPep8Naming
+                    column_A_name = domain_kwargs["column_A"]
+                    # noinspection PyPep8Naming
+                    column_B_name = domain_kwargs["column_B"]
+
+                ignore_row_if = domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "both_values_are_missing":
+                    selectable = (
+                        sa.select([sa.text("*")])
+                        .select_from(selectable)
+                        .where(
+                            sa.not_(
+                                sa.and_(
+                                    sa.column(column_A_name) == None,
+                                    sa.column(column_B_name) == None,
+                                )
+                            )
+                        )
+                    )
+                elif ignore_row_if == "either_value_is_missing":
+                    selectable = (
+                        sa.select([sa.text("*")])
+                        .select_from(selectable)
+                        .where(
+                            sa.not_(
+                                sa.or_(
+                                    sa.column(column_A_name) == None,
+                                    sa.column(column_B_name) == None,
+                                )
+                            )
+                        )
+                    )
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
+
+                return selectable
+
+        if "column_list" in domain_kwargs:
+            if "ignore_row_if" in domain_kwargs:
+                if self.active_batch_data.use_quoted_name:
+                    # If case matters...
+                    column_list = [
+                        quoted_name(domain_kwargs[column_name])
+                        for column_name in domain_kwargs["column_list"]
+                    ]
+                else:
+                    column_list = domain_kwargs["column_list"]
+
+                ignore_row_if = domain_kwargs["ignore_row_if"]
+                if ignore_row_if == "all_values_are_missing":
+                    selectable = (
+                        sa.select([sa.text("*")])
+                        .select_from(selectable)
+                        .where(
+                            sa.not_(
+                                sa.and_(
+                                    *(
+                                        sa.column(column_name) == None
+                                        for column_name in column_list
+                                    )
+                                )
+                            )
+                        )
+                    )
+                elif ignore_row_if == "any_value_is_missing":
+                    selectable = (
+                        sa.select([sa.text("*")])
+                        .select_from(selectable)
+                        .where(
+                            sa.not_(
+                                sa.or_(
+                                    *(
+                                        sa.column(column_name) == None
+                                        for column_name in column_list
+                                    )
+                                )
+                            )
+                        )
+                    )
+                else:
+                    if ignore_row_if != "never":
+                        raise ValueError(
+                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                        )
+
+                return selectable
+
+        return selectable
+
+    def get_compute_domain(
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> Tuple[Selectable, dict, dict]:
+        """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            SqlAlchemy column
+        """
+        selectable = self.get_domain_records(
+            domain_kwargs=domain_kwargs,
+        )
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+
         # Warning user if accessor keys are in any domain that is not of type table, will be ignored
         if (
             domain_type != MetricDomainTypes.TABLE
@@ -459,6 +581,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
+        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs = dict()
         if domain_type == MetricDomainTypes.TABLE:
             if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
@@ -499,6 +623,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 raise GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
@@ -526,62 +651,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 raise GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" in compute_domain_kwargs:
-                # If column_list exists
-                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                    "column_list"
+            # Ensuring column_list parameter is provided
+            if "column_list" not in domain_kwargs:
+                raise GreatExpectationsError(
+                    "column_list not found within domain_kwargs"
                 )
 
-        # Filtering if identity
-        elif domain_type == MetricDomainTypes.IDENTITY:
-            # If we would like our data to become a single column
-            if "column" in compute_domain_kwargs:
-                if self.active_batch_data.use_quoted_name:
-                    selectable = sa.select(
-                        [sa.column(quoted_name(compute_domain_kwargs["column"]))]
-                    ).select_from(selectable)
-                else:
-                    selectable = sa.select(
-                        [sa.column(compute_domain_kwargs["column"])]
-                    ).select_from(selectable)
-
-            # If we would like our data to now become a column pair
-            elif ("column_A" in compute_domain_kwargs) and (
-                "column_B" in compute_domain_kwargs
-            ):
-                if self.active_batch_data.use_quoted_name:
-                    selectable = sa.select(
-                        [
-                            sa.column(quoted_name(compute_domain_kwargs["column_A"])),
-                            sa.column(quoted_name(compute_domain_kwargs["column_B"])),
-                        ]
-                    ).select_from(selectable)
-                else:
-                    selectable = sa.select(
-                        [
-                            sa.column(compute_domain_kwargs["column_A"]),
-                            sa.column(compute_domain_kwargs["column_B"]),
-                        ]
-                    ).select_from(selectable)
-            else:
-                # If we would like our data to become a multicolumn
-                if "column_list" in compute_domain_kwargs:
-                    if self.active_batch_data.use_quoted_name:
-                        # Building a list of column objects used for sql alchemy selection
-                        to_select = [
-                            sa.column(quoted_name(col))
-                            for col in compute_domain_kwargs["column_list"]
-                        ]
-                        selectable = sa.select(to_select).select_from(selectable)
-                    else:
-                        to_select = [
-                            sa.column(col)
-                            for col in compute_domain_kwargs["column_list"]
-                        ]
-                        selectable = sa.select(to_select).select_from(selectable)
+            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                "column_list"
+            )
+            # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # Letting selectable fall through
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
@@ -805,7 +889,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Select, str]:
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Selectable, str]:
         table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -924,7 +1008,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     batch_spec=batch_spec
                 )
             else:
-                selectable: Select = self._build_selectable_from_batch_spec(
+                selectable: Selectable = self._build_selectable_from_batch_spec(
                     batch_spec=batch_spec
                 )
 
