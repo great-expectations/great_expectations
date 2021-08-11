@@ -176,8 +176,6 @@ def test_get_domain_records_with_column_domain(
         ],
         expected_column_pd_df.columns.tolist(),
     )
-    engine = basic_spark_df_execution_engine
-    engine.load_batch_data(batch_id="1234", batch_data=expected_column_df)
 
     assert dataframes_equal(
         data, expected_column_df
@@ -229,8 +227,55 @@ def test_get_domain_records_with_column_pair_domain(
         ],
         expected_column_pair_pd_df.columns.tolist(),
     )
+
+    assert dataframes_equal(
+        data, expected_column_pair_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
     engine = basic_spark_df_execution_engine
-    engine.load_batch_data(batch_id="1234", batch_data=expected_column_pair_df)
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "either_value_is_missing",
+        }
+    )
+    for column_name in data.columns:
+        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+
+    expected_column_pair_pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+    expected_column_pair_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pair_pd_df.to_records(index=False)
+        ],
+        expected_column_pair_pd_df.columns.tolist(),
+    )
 
     assert dataframes_equal(
         data, expected_column_pair_df
@@ -285,6 +330,55 @@ def test_get_domain_records_with_multicolumn_domain(
     )
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=expected_multicolumn_df)
+
+    assert dataframes_equal(
+        data, expected_multicolumn_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "any_value_is_missing",
+        }
+    )
+    for column_name in data.columns:
+        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+
+    expected_multicolumn_pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+
+    expected_multicolumn_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_multicolumn_pd_df.to_records(index=False)
+        ],
+        expected_multicolumn_pd_df.columns.tolist(),
+    )
 
     assert dataframes_equal(
         data, expected_multicolumn_df

@@ -368,57 +368,57 @@ Please check your config."""
         if "column" in domain_kwargs:
             return data
 
-        if "column_A" in domain_kwargs and "column_B" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                # noinspection PyPep8Naming
-                column_A_name = domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
-                column_B_name = domain_kwargs["column_B"]
+        if (
+            "column_A" in domain_kwargs
+            and "column_B" in domain_kwargs
+            and "ignore_row_if" in domain_kwargs
+        ):
+            # noinspection PyPep8Naming
+            column_A_name = domain_kwargs["column_A"]
+            # noinspection PyPep8Naming
+            column_B_name = domain_kwargs["column_B"]
 
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "both_values_are_missing":
-                    ignore_condition = (
-                        F.col(column_A_name).isNull() & F.col(column_B_name).isNull()
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "both_values_are_missing":
+                ignore_condition = (
+                    F.col(column_A_name).isNull() & F.col(column_B_name).isNull()
+                )
+                data = data.filter(~ignore_condition)
+            elif ignore_row_if == "either_value_is_missing":
+                ignore_condition = (
+                    F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
+                )
+                data = data.filter(~ignore_condition)
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
-                    data = data.filter(~ignore_condition)
-                elif ignore_row_if == "either_value_is_missing":
-                    ignore_condition = (
-                        F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
-                    )
-                    data = data.filter(~ignore_condition)
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
 
-                return data
+            return data
 
-        if "column_list" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                column_list = domain_kwargs["column_list"]
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "all_values_are_missing":
-                    ignore_condition = reduce(
-                        lambda column_a, column_b: column_a.isNull()
-                        & column_b.isNull(),
-                        map(F.col, column_list),
+        if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
+            column_list = domain_kwargs["column_list"]
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "all_values_are_missing":
+                ignore_condition = reduce(
+                    lambda column_a, column_b: column_a.isNull() & column_b.isNull(),
+                    map(F.col, column_list),
+                )
+                data = data.filter(~ignore_condition)
+            elif ignore_row_if == "any_value_is_missing":
+                ignore_condition = reduce(
+                    lambda column_a, column_b: column_a.isNull() | column_b.isNull(),
+                    map(F.col, column_list),
+                )
+                data = data.filter(~ignore_condition)
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
-                    data = data.filter(~ignore_condition)
-                elif ignore_row_if == "any_value_is_missing":
-                    ignore_condition = reduce(
-                        lambda column_a, column_b: column_a.isNotNull()
-                        | column_b.isNotNull(),
-                        map(F.col, column_list),
-                    )
-                    data = data.filter(~ignore_condition)
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
 
-                return data
+            return data
 
         return data
 
@@ -495,37 +495,27 @@ Please check your config."""
                     )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
-        # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" in compute_domain_kwargs:
-                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
-            else:
-                # If column not given
+            if "column" not in compute_domain_kwargs:
                 raise GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
 
-        # Else, if column pair values requested
+            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            # Ensuring column_A and column_B parameters provided
-            if (
+            if not (
                 "column_A" in compute_domain_kwargs
                 and "column_B" in compute_domain_kwargs
             ):
-                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
-                    "column_A"
-                )
-                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
-                    "column_B"
-                )
-            else:
                 raise GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
 
-        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            # Ensuring column_list parameter is provided
             if "column_list" not in domain_kwargs:
                 raise ge_exceptions.GreatExpectationsError(
                     "column_list not found within domain_kwargs"
