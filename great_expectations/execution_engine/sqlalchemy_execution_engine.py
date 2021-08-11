@@ -969,7 +969,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         """
             )
 
-        batch_data: SqlAlchemyBatchData
+        batch_data: Optional[SqlAlchemyBatchData] = None
         batch_markers: BatchMarkers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
