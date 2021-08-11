@@ -290,6 +290,12 @@ Please check your config."""
         Returns:
             A DataFrame (the data on which to compute)
         """
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "PandasExecutionEngine does not currently support multiple named tables."
+            )
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -327,56 +333,60 @@ Please check your config."""
         if "column" in domain_kwargs:
             return data
 
-        if "column_A" in domain_kwargs and "column_B" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                # noinspection PyPep8Naming
-                column_A_name = domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
-                column_B_name = domain_kwargs["column_B"]
+        if (
+            "column_A" in domain_kwargs
+            and "column_B" in domain_kwargs
+            and "ignore_row_if" in domain_kwargs
+        ):
+            # noinspection PyPep8Naming
+            column_A_name = domain_kwargs["column_A"]
+            # noinspection PyPep8Naming
+            column_B_name = domain_kwargs["column_B"]
 
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "both_values_are_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="all",
-                        subset=[column_A_name, column_B_name],
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "both_values_are_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="all",
+                    subset=[column_A_name, column_B_name],
+                )
+            elif ignore_row_if == "either_value_is_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="any",
+                    subset=[column_A_name, column_B_name],
+                )
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
-                elif ignore_row_if == "either_value_is_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="any",
-                        subset=[column_A_name, column_B_name],
-                    )
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
 
-                return data
+            return data
 
-        if "column_list" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "all_values_are_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="all",
-                        subset=domain_kwargs["column_list"],
-                    )
-                elif ignore_row_if == "any_value_is_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="any",
-                        subset=domain_kwargs["column_list"],
-                    )
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
+        if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
+            column_list = domain_kwargs["column_list"]
 
-                return data
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "all_values_are_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="all",
+                    subset=column_list,
+                )
+            elif ignore_row_if == "any_value_is_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="any",
+                    subset=column_list,
+                )
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+            return data
 
         return data
 
@@ -456,17 +466,14 @@ Please check your config."""
                     )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
-        # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
             if "column" in compute_domain_kwargs:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
-                # If column not given
                 raise ge_exceptions.GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
 
-        # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
             if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
                 raise ge_exceptions.GreatExpectationsError(
@@ -476,7 +483,6 @@ Please check your config."""
             accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
             accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             if "column_list" not in domain_kwargs:
                 raise ge_exceptions.GreatExpectationsError(
