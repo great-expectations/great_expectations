@@ -1452,8 +1452,9 @@ def _spark_map_condition_rows(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
