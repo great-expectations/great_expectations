@@ -939,3 +939,18 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
     )
     # check that the batch_spec_passthrough has worked
     assert batch[0].data.dataframe.head() == Row(x="1", y="2")
+
+
+def test_get_execution_engine(basic_pandas_datasource_v013):
+    execution_engine_1 = basic_pandas_datasource_v013.execution_engine
+    execution_engine_2 = basic_pandas_datasource_v013.execution_engine
+    execution_engine_3 = basic_pandas_datasource_v013.get_execution_engine(
+        reuse_engine=True
+    )
+    execution_engine_4 = basic_pandas_datasource_v013.get_execution_engine(
+        reuse_engine=False
+    )
+
+    assert execution_engine_1 == execution_engine_2
+    assert execution_engine_1 == execution_engine_3
+    assert execution_engine_1 != execution_engine_4

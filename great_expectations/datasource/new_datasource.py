@@ -42,10 +42,24 @@ class BaseDatasource:
         self._name = name
 
         self._data_context_root_directory = data_context_root_directory
+        self._execution_engine_config = execution_engine
+        self._execution_engine = None
+        self._execution_engine = self.get_execution_engine(
+            execution_engine_config=execution_engine, reuse_engine=False
+        )
+
+        self._data_connectors = {}
+
+    def get_execution_engine(self, execution_engine_config=None, reuse_engine=False):
+        if execution_engine_config is None:
+            execution_engine_config = self._execution_engine_config
+
+        if reuse_engine and isinstance(self._execution_engine, ExecutionEngine):
+            return self._execution_engine
 
         try:
-            self._execution_engine = instantiate_class_from_config(
-                config=execution_engine,
+            execution_engine = instantiate_class_from_config(
+                config=execution_engine_config,
                 runtime_environment={},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
@@ -54,8 +68,7 @@ class BaseDatasource:
             }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
-
-        self._data_connectors = {}
+        return execution_engine
 
     def get_batch_from_batch_definition(
         self,

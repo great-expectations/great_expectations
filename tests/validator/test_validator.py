@@ -773,3 +773,34 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     assert ve.value.args == (
         "Only one of batch_request or batch_request_list may be specified",
     )
+
+
+def test_instantiate_multiple_validators_use_multiple_execution_engines(
+    yellow_trip_pandas_data_context,
+):
+    context: DataContext = yellow_trip_pandas_data_context
+    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+
+    jan_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "01"}},
+    )
+
+    feb_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"month": "02"}},
+    )
+
+    first_validator = context.get_validator(
+        batch_request=jan_batch_request, expectation_suite=suite
+    )
+    second_validator = context.get_validator(
+        batch_request=feb_batch_request, expectation_suite=suite
+    )
+    assert first_validator.active_batch
+    assert second_validator.active_batch
+    assert first_validator.execution_engine != second_validator.execution_engine
