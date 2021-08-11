@@ -363,18 +363,20 @@ Please check your config."""
 
         if "column_list" in domain_kwargs:
             if "ignore_row_if" in domain_kwargs:
+                column_list = domain_kwargs["column_list"]
+
                 ignore_row_if = domain_kwargs["ignore_row_if"]
                 if ignore_row_if == "all_values_are_missing":
                     data = data.dropna(
                         axis=0,
                         how="all",
-                        subset=domain_kwargs["column_list"],
+                        subset=column_list,
                     )
                 elif ignore_row_if == "any_value_is_missing":
                     data = data.dropna(
                         axis=0,
                         how="any",
-                        subset=domain_kwargs["column_list"],
+                        subset=column_list,
                     )
                 else:
                     if ignore_row_if != "never":
@@ -462,19 +464,15 @@ Please check your config."""
                     )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
-        # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
             if "column" in compute_domain_kwargs:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
-                # If column not given
                 raise ge_exceptions.GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
 
-        # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            # Ensuring column_A and column_B parameters provided
             if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
                 raise ge_exceptions.GreatExpectationsError(
                     "column_A or column_B not found within domain_kwargs"
@@ -483,9 +481,7 @@ Please check your config."""
             accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
             accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            # Ensuring column_list parameter is provided
             if "column_list" not in domain_kwargs:
                 raise ge_exceptions.GreatExpectationsError(
                     "column_list not found within domain_kwargs"

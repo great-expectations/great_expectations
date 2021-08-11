@@ -386,7 +386,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
         """
-        # Extracting value from enum if it is given for future computation
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -606,10 +605,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
-        # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
             if "column" in compute_domain_kwargs:
-                # Checking if case- sensitive and using appropriate name
+                # Checking if case-sensitive and using appropriate name
                 if self.active_batch_data.use_quoted_name:
                     accessor_domain_kwargs["column"] = quoted_name(
                         compute_domain_kwargs.pop("column")
@@ -619,52 +617,54 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         "column"
                     )
             else:
-                # If column not given
                 raise GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
-        # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            # Ensuring column_A and column_B parameters provided
-            if (
+            if not (
                 "column_A" in compute_domain_kwargs
                 and "column_B" in compute_domain_kwargs
             ):
-                if self.active_batch_data.use_quoted_name:
-                    # If case matters...
-                    accessor_domain_kwargs["column_A"] = quoted_name(
-                        compute_domain_kwargs.pop("column_A")
-                    )
-                    accessor_domain_kwargs["column_B"] = quoted_name(
-                        compute_domain_kwargs.pop("column_B")
-                    )
-                else:
-                    accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
-                        "column_A"
-                    )
-                    accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
-                        "column_B"
-                    )
-            else:
                 raise GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
+
+            # Checking if case-sensitive and using appropriate name
+            if self.active_batch_data.use_quoted_name:
+                accessor_domain_kwargs["column_A"] = quoted_name(
+                    compute_domain_kwargs.pop("column_A")
+                )
+                accessor_domain_kwargs["column_B"] = quoted_name(
+                    compute_domain_kwargs.pop("column_B")
+                )
+            else:
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
+                    "column_A"
+                )
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
+                    "column_B"
+                )
+
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
-        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            # Ensuring column_list parameter is provided
             if "column_list" not in domain_kwargs:
                 raise GreatExpectationsError(
                     "column_list not found within domain_kwargs"
                 )
 
-            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                "column_list"
-            )
-            # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+            column_list = compute_domain_kwargs.pop("column_list")
+
+            # Checking if case-sensitive and using appropriate name
+            if self.active_batch_data.use_quoted_name:
+                accessor_domain_kwargs["column_list"] = [
+                    quoted_name(column_name) for column_name in column_list
+                ]
+            else:
+                accessor_domain_kwargs["column_list"] = column_list
+
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # Letting selectable fall through
