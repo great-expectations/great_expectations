@@ -58,10 +58,9 @@ def test_get_domain_records_with_column_domain():
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    expected_column_df = df.iloc[:3]
-
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
+
     data = engine.get_domain_records(
         domain_kwargs={
             "column": "a",
@@ -69,6 +68,9 @@ def test_get_domain_records_with_column_domain():
             "condition_parser": "pandas",
         }
     )
+
+    expected_column_df = df.iloc[:3]
+
     assert data.equals(
         expected_column_df
     ), "Data does not match after getting full access compute domain"
@@ -83,12 +85,9 @@ def test_get_domain_records_with_column_pair_domain():
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
-    )
-
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
+
     data = engine.get_domain_records(
         domain_kwargs={
             "column_A": "a",
@@ -98,6 +97,30 @@ def test_get_domain_records_with_column_pair_domain():
             "ignore_row_if": "either_value_is_missing",
         }
     )
+
+    expected_column_pair_df = pd.DataFrame(
+        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
+    )
+
+    assert data.equals(
+        expected_column_pair_df
+    ), "Data does not match after getting full access compute domain"
+
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": "a<6",
+            "condition_parser": "pandas",
+            "ignore_row_if": "either_value_is_missing",
+        }
+    )
+    data = data.astype(int)
+
+    expected_column_pair_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+
     assert data.equals(
         expected_column_pair_df
     ), "Data does not match after getting full access compute domain"
@@ -112,12 +135,9 @@ def test_get_domain_records_with_multicolumn_domain():
             "c": [1, 2, 3, 4, None, 6],
         }
     )
-    expected_multicolumn_df = pd.DataFrame(
-        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
-    )
-
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
+
     data = engine.get_domain_records(
         domain_kwargs={
             "column_list": ["a", "c"],
@@ -127,6 +147,40 @@ def test_get_domain_records_with_multicolumn_domain():
         }
     )
     data = data.astype(int)
+
+    expected_multicolumn_df = pd.DataFrame(
+        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
+    )
+
+    assert data.equals(
+        expected_multicolumn_df
+    ), "Data does not match after getting full access compute domain"
+
+    engine = PandasExecutionEngine()
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    # Loading batch data
+    engine.load_batch_data(batch_data=df, batch_id="1234")
+
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "row_condition": "a<6",
+            "condition_parser": "pandas",
+            "ignore_row_if": "any_value_is_missing",
+        }
+    )
+    data = data.astype(int)
+
+    expected_multicolumn_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+
     assert data.equals(
         expected_multicolumn_df
     ), "Data does not match after getting full access compute domain"
