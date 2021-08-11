@@ -422,6 +422,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             selectable = data_object.selectable
 
+        # Filtering by row condition.
         if (
             "row_condition" in domain_kwargs
             and domain_kwargs["row_condition"] is not None
@@ -646,15 +647,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" in compute_domain_kwargs:
-                # If column_list exists
-                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                    "column_list"
-                )
-            else:
+            # Ensuring column_list parameter is provided
+            if "column_list" not in domain_kwargs:
                 raise GreatExpectationsError(
-                    "column_list not found within compute_domain_kwargs"
+                    "column_list not found within domain_kwargs"
                 )
+
+            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
+                "column_list"
+            )
+            # Checking if table or identity or other provided, column is not specified. If it is, warning the user
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # Letting selectable fall through

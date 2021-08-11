@@ -252,7 +252,7 @@ def test_get_domain_records_with_column_domain(sa):
     ).fetchall()
 
     assert (
-        expected_data == domain_data
+        domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
 
@@ -285,7 +285,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
     ).fetchall()
 
     assert (
-        expected_data == domain_data
+        domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
 
@@ -317,7 +317,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     ).fetchall()
 
     assert (
-        expected_data == domain_data
+        domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
 

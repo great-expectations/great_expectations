@@ -290,6 +290,12 @@ Please check your config."""
         Returns:
             A DataFrame (the data on which to compute)
         """
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "PandasExecutionEngine does not currently support multiple named tables."
+            )
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -468,6 +474,7 @@ Please check your config."""
 
         # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            # Ensuring column_A and column_B parameters provided
             if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
                 raise ge_exceptions.GreatExpectationsError(
                     "column_A or column_B not found within domain_kwargs"
@@ -478,6 +485,7 @@ Please check your config."""
 
         # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            # Ensuring column_list parameter is provided
             if "column_list" not in domain_kwargs:
                 raise ge_exceptions.GreatExpectationsError(
                     "column_list not found within domain_kwargs"
