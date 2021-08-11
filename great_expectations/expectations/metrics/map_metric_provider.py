@@ -1208,31 +1208,6 @@ def _pandas_map_condition_rows(
     return df.iloc[: result_format["partial_unexpected_count"]]
 
 
-def _sqlalchemy_map_condition_unexpected_count(
-    cls,
-    execution_engine: SqlAlchemyExecutionEngine,
-    metric_domain_kwargs: Dict,
-    metric_value_kwargs: Dict,
-    metrics: Dict[str, Any],
-    **kwargs,
-):
-    """Returns unexpected count for MapExpectations"""
-    (
-        boolean_mapped_unexpected_values,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = metrics["unexpected_condition"]
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
-    )
-
-    return execution_engine.engine.execute(
-        sa.select([sa.func.count()])
-        .select_from(selectable)
-        .where(boolean_mapped_unexpected_values)
-    ).one()[0]
-
-
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -1906,7 +1881,7 @@ class MapMetricProvider(MetricProvider):
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
                             metric_class=cls,
-                            metric_provider=_sqlalchemy_map_condition_unexpected_count,
+                            metric_provider=_sqlalchemy_map_condition_unexpected_count_value,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
