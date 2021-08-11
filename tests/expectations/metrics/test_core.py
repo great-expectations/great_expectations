@@ -1743,7 +1743,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
 
     # First, assert Pass (no unexpected results).
-
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
         metric_domain_kwargs={"column_list": ["a", "b"]},
@@ -1773,7 +1772,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
     metrics.update(results)
 
     # Condition metrics return "negative logic" series.
-    assert list(metrics[condition_metric.id][0]) == [False, False, False]
+    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
     assert metrics[unexpected_count_metric.id] == 0
 
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
@@ -1793,8 +1792,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id].empty
-    assert len(metrics[unexpected_rows_metric.id].columns) == 4
+    assert len(metrics[unexpected_rows_metric.id]) == 0
 
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
@@ -1830,7 +1828,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
     metrics.update(results)
 
     # Condition metrics return "negative logic" series.
-    assert list(metrics[condition_metric.id][0]) == [False, False, True]
+    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
@@ -1850,13 +1848,8 @@ def test_map_multicolumn_sum_equal_sa(sa):
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id].equals(
-        pd.DataFrame(data={"a": [2], "b": [3], "c": [1], "d": [9]}, index=[2])
-    )
-    assert len(metrics[unexpected_rows_metric.id].columns) == 4
-    pd.testing.assert_index_equal(
-        metrics[unexpected_rows_metric.id].index, pd.Index([2])
-    )
+    assert metrics[unexpected_rows_metric.id] == [(2, 3, 1, 9)]
+    assert len(metrics[unexpected_rows_metric.id][0]) == 4
 
 
 def test_map_compound_columns_unique():
@@ -1915,7 +1908,7 @@ def test_map_compound_columns_unique():
     )
     metrics.update(results)
 
-    # Condition metrics return "negative logic" series.
+    # Condition metrics return "negative logic" series
     assert list(metrics[condition_metric.id][0]) == [False, False, False]
     assert metrics[unexpected_count_metric.id] == 0
 
