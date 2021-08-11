@@ -1908,7 +1908,7 @@ def test_map_compound_columns_unique():
     )
     metrics.update(results)
 
-    # Condition metrics return "negative logic" series
+    # Condition metrics return "negative logic" series.
     assert list(metrics[condition_metric.id][0]) == [False, False, False]
     assert metrics[unexpected_count_metric.id] == 0
 

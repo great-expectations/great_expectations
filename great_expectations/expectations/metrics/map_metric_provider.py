@@ -1222,7 +1222,6 @@ def _sqlalchemy_map_condition_unexpected_count(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-
     selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
