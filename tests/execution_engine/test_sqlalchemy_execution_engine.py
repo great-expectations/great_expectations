@@ -344,6 +344,36 @@ def test_get_domain_records_with_multicolumn_domain(sa):
         domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "any_value_is_missing",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_multicolumn_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+    engine = build_sa_engine(expected_multicolumn_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
 def test_get_compute_domain_with_no_domain_kwargs(sa):

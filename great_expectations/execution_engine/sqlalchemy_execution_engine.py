@@ -510,10 +510,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.select([sa.text("*")])
                         .select_from(selectable)
                         .where(
-                            sa.and_(
-                                *(
-                                    sa.column(column_name) != None
-                                    for column_name in column_list
+                            sa.not_(
+                                sa.and_(
+                                    *(
+                                        sa.column(column_name) == None
+                                        for column_name in column_list
+                                    )
                                 )
                             )
                         )
@@ -523,10 +525,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.select([sa.text("*")])
                         .select_from(selectable)
                         .where(
-                            sa.or_(
-                                *(
-                                    sa.column(column_name) != None
-                                    for column_name in column_list
+                            sa.not_(
+                                sa.or_(
+                                    *(
+                                        sa.column(column_name) == None
+                                        for column_name in column_list
+                                    )
                                 )
                             )
                         )
