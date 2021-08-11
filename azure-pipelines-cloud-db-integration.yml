@@ -1,7 +1,5 @@
 trigger:
-  branches:
-    include:
-    - pre_pr_cloud-db-integration-*
+  - pre_pr_cloud-db-integration-*
 
 schedules:
 - cron: "0 12 * * 0"
