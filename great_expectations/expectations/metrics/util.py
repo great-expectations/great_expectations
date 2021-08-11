@@ -319,8 +319,7 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
 
     try:
         # Bigquery
-        # if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
-        if hasattr(dialect, "name") and (dialect.name == "bigquery"):
+        if hasattr(dialect, "BigQueryDialect"):
             dialect_supported = True
     except (
         AttributeError,
