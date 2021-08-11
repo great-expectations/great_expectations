@@ -1,9 +1,6 @@
-trigger:
-  - pre_pr_cloud-db-integration-*
-
 schedules:
-- cron: "0 12 * * 0"
-  displayName: Weekly Sunday build
+- cron: "0 15 * * 3"
+  displayName: Weekly Sunday build "0 12 * * 0"
   branches:
     include:
     - develop
