@@ -1684,7 +1684,11 @@ WHERE
             type_module = self._get_dialect_type_module()
             for type_ in type_list:
                 try:
-                    type_class = getattr(type_module, type_)
+                    potential_type = getattr(type_module, type_)
+                    if not inspect.isclass(potential_type):
+                        type_class = type(potential_type)
+                    else:
+                        type_class = potential_type
                     types.append(type_class)
                 except AttributeError:
                     logger.debug("Unrecognized type: %s" % type_)
