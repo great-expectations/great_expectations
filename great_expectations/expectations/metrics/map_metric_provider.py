@@ -576,9 +576,9 @@ def multicolumn_function_partial(
 
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
-            partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
                 "SqlAlchemyExecutionEngine only supports map_series for multicolumn_function_partial partial_fn_type"
             )
@@ -717,9 +717,9 @@ def multicolumn_condition_partial(
 
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
-            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_FN]:
             raise ValueError(
                 "SqlAlchemyExecutionEngine only supports map_condition_series for multicolumn_condition_partial partial_fn_type"
             )
