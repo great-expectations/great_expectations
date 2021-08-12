@@ -952,11 +952,14 @@ def _pandas_column_pair_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return domain_values.to_dict("records")
+        return [list(element.values()) for element in domain_values.to_dict("records")]
     else:
-        return domain_values[: result_format["partial_unexpected_count"]].to_dict(
-            "records"
-        )
+        return [
+            list(element.values())
+            for element in domain_values[
+                : result_format["partial_unexpected_count"]
+            ].to_dict("records")
+        ]
 
 
 def _pandas_column_pair_map_condition_filtered_row_count(
