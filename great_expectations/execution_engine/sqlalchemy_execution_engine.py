@@ -608,20 +608,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" in compute_domain_kwargs:
-                # Checking if case-sensitive and using appropriate name
-                if self.active_batch_data.use_quoted_name:
-                    accessor_domain_kwargs["column"] = quoted_name(
-                        compute_domain_kwargs.pop("column")
-                    )
-                else:
-                    accessor_domain_kwargs["column"] = compute_domain_kwargs.pop(
-                        "column"
-                    )
-            else:
+            if "column" not in compute_domain_kwargs:
                 raise GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
+
+            # Checking if case-sensitive and using appropriate name
+            if self.active_batch_data.use_quoted_name:
+                accessor_domain_kwargs["column"] = quoted_name(
+                    compute_domain_kwargs.pop("column")
+                )
+            else:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
@@ -715,8 +714,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
-            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY
+            domain_kwargs = query["domain_kwargs"]
+            selectable = self.get_domain_records(
+                domain_kwargs=domain_kwargs,
             )
             assert len(query["select"]) == len(query["ids"])
             try:
@@ -724,7 +724,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     sa.select(query["select"]).select_from(selectable)
                 ).fetchall()
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
