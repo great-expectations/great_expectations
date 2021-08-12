@@ -1554,8 +1554,8 @@ def _spark_map_condition_unexpected_count_value(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
+    df = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
@@ -1573,8 +1573,8 @@ def spark_column_map_condition_values(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
+    df = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1616,8 +1616,8 @@ def _spark_column_map_condition_value_counts(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
+    df = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
@@ -1657,8 +1657,9 @@ def _spark_map_condition_rows(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    (df, _, _) = execution_engine.get_compute_domain(
-        domain_kwargs=compute_domain_kwargs, domain_type=MetricDomainTypes.IDENTITY
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
 
