@@ -1398,10 +1398,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             return False
         try:
             assert (
-                    "column_A" in configuration.kwargs
+                "column_A" in configuration.kwargs
             ), "'column_A' parameter is required for column pair map expectations"
             assert (
-                    "column_B" in configuration.kwargs
+                "column_B" in configuration.kwargs
             ), "'column_B' parameter is required for column pair map expectations"
             if "mostly" in configuration.kwargs:
                 mostly = configuration.kwargs["mostly"]
@@ -1426,7 +1426,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             self.map_metric, str
         ), "ColumnPairMapExpectation must override get_validation_dependencies or declare exactly one map_metric"
         assert (
-                self.metric_dependencies == tuple()
+            self.metric_dependencies == tuple()
         ), "ColumnPairMapExpectation must be configured using map_metric, and cannot have metric_dependencies declared."
         # convenient name for updates
 
@@ -1439,11 +1439,11 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
         metric_dependencies[
             self.map_metric + ".unexpected_count"
-            ] = MetricConfiguration(
+        ] = MetricConfiguration(
             self.map_metric + ".unexpected_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-            )
+        )
 
         metric_kwargs = get_metric_kwargs(
             metric_name="table.row_count",
@@ -1460,10 +1460,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             self.map_metric + ".filtered_row_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
-            )
+        )
         metric_dependencies[
             self.map_metric + ".filtered_row_count"
-            ] = MetricConfiguration(
+        ] = MetricConfiguration(
             metric_name=self.map_metric + ".filtered_row_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
@@ -1478,10 +1478,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             self.map_metric + ".unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
-            )
+        )
         metric_dependencies[
             self.map_metric + ".unexpected_values"
-            ] = MetricConfiguration(
+        ] = MetricConfiguration(
             metric_name=self.map_metric + ".unexpected_values",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
@@ -1494,7 +1494,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             self.map_metric + ".unexpected_rows",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
-            )
+        )
         metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
             metric_name=self.map_metric + ".unexpected_rows",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
@@ -1506,10 +1506,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 self.map_metric + ".unexpected_index_list",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
-                )
+            )
             metric_dependencies[
                 self.map_metric + ".unexpected_index_list"
-                ] = MetricConfiguration(
+            ] = MetricConfiguration(
                 metric_name=self.map_metric + ".unexpected_index_list",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
@@ -1555,7 +1555,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             # Vacuously true
             success = True
         else:
-            success_ratio = float(filtered_row_count - unexpected_count) / filtered_row_count
+            success_ratio = (
+                float(filtered_row_count - unexpected_count) / filtered_row_count
+            )
             success = success_ratio >= mostly
 
         return _format_map_output(
