@@ -11,9 +11,16 @@ import pytest
 from botocore.errorfactory import ClientError
 from moto import mock_s3
 
+try:
+    from azure.storage.blob import BlobServiceClient
+except:
+    azure = None
+
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -790,91 +797,138 @@ def test_constructor_with_azure_options(mock_azure_conn):
     assert engine.config.get("azure_options")["account_url"] == "my_account_url"
 
 
-def test_get_batch_with_split_on_whole_table_azure(
-    batch_with_split_on_whole_table_s3, test_df_small
-):
-    df = PandasExecutionEngine().get_batch_data(
-        batch_spec=batch_with_split_on_whole_table_s3
-    )
-    assert df.dataframe.shape == test_df_small.shape
+# @pytest.fixture
+# def s3(aws_credentials):
+#     with mock_s3():
+#         yield boto3.client("s3", region_name="us-east-1")
+
+# @pytest.fixture
+# def azure_container(s3):
+#     bucket: str = "test_bucket"
+#     s3.create_bucket(Bucket=bucket)
+#     return bucket
+
+# @pytest.fixture
+# def test_azure_files(s3, azure_container, test_df_small_csv):
+#     keys: List[str] = [
+#         "path/A-100.csv",
+#         "path/A-101.csv",
+#         "directory/B-1.csv",
+#         "directory/B-2.csv",
+#         "alpha-1.csv",
+#         "alpha-2.csv",
+#     ]
+#     for key in keys:
+#         s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+#     return azure_container, keys
 
 
-def test_get_batch_with_no_azure_configured(batch_with_split_on_whole_table_s3):
-    # if S3 was not configured
-    execution_engine_no_s3 = PandasExecutionEngine()
-    execution_engine_no_s3._s3 = None
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        execution_engine_no_s3.get_batch_data(
-            batch_spec=batch_with_split_on_whole_table_s3
-        )
-
-
-def test_get_batch_with_split_on_whole_table_azure_with_configured_asset_azure_data_connector(
-    test_s3_files, test_df_small
-):
-    bucket, _keys = test_s3_files
-    expected_df = test_df_small
-
-    my_data_connector = ConfiguredAssetS3DataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-        bucket=bucket,
-        prefix="",
-        assets={"alpha": {}},
-    )
-    batch_def = BatchDefinition(
-        datasource_name="FAKE_DATASOURCE_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        batch_identifiers=IDDict(index=1),
-        batch_spec_passthrough={
-            "reader_method": "read_csv",
-            "splitter_method": "_split_on_whole_table",
-        },
-    )
-    test_df = PandasExecutionEngine().get_batch_data(
-        batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
-    )
-    assert test_df.dataframe.shape == expected_df.shape
-
-    # if key does not exist
-    batch_def_no_key = BatchDefinition(
-        datasource_name="FAKE_DATASOURCE_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        batch_identifiers=IDDict(index=9),
-        batch_spec_passthrough={
-            "reader_method": "read_csv",
-            "splitter_method": "_split_on_whole_table",
-        },
-    )
-    with pytest.raises(ClientError):
-        PandasExecutionEngine().get_batch_data(
-            batch_spec=my_data_connector.build_batch_spec(
-                batch_definition=batch_def_no_key
-            )
-        )
-
-
-def test_get_batch_azure_compressed_files(test_s3_files_compressed, test_df_small):
-    bucket, keys = test_s3_files_compressed
+@pytest.fixture
+def batch_with_split_on_whole_table_azure() -> AzureBatchSpec:
+    container = "test_container"
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = os.path.join("mock_account.blob.core.windows.net", container, path)
 
-    batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
-    df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
-    assert df.dataframe.shape == test_df_small.shape
+    batch_spec = AzureBatchSpec(
+        path=full_path,
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    return batch_spec
 
 
-def test_get_batch_azure_parquet(test_s3_files_parquet, test_df_small):
-    bucket, keys = test_s3_files_parquet
-    path = [key for key in keys if key.endswith(".parquet")][0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+# TODO(cdkini): Implement Azure test!
+# @mock.patch(
+#     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient",
+#     new=BlobServiceClient
+# )
+# def test_get_batch_with_split_on_whole_table_azure(
+#     mock_azure_conn, batch_with_split_on_whole_table_azure, test_df_small
+# ):
+#     df = PandasExecutionEngine().get_batch_data(
+#         batch_spec=batch_with_split_on_whole_table_azure
+#     )
+#     assert df.dataframe.shape == test_df_small.shape
 
-    batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
-    df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
-    assert df.dataframe.shape == test_df_small.shape
+
+def test_get_batch_with_no_azure_configured(batch_with_split_on_whole_table_azure):
+    # if Azure BlobServiceClient was not configured
+    execution_engine_no_azure = PandasExecutionEngine()
+    execution_engine_no_azure._azure = None
+
+    # Raises error due the connection object not being set
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_azure.get_batch_data(
+            batch_spec=batch_with_split_on_whole_table_azure
+        )
+
+
+# # TODO(cdkini): Implement Azure test!
+# def test_get_batch_with_split_on_whole_table_azure_with_configured_asset_azure_data_connector(
+#     test_s3_files, test_df_small
+# ):
+#     bucket, _keys = test_s3_files
+#     expected_df = test_df_small
+
+#     my_data_connector = ConfiguredAssetS3DataConnector(
+#         name="my_data_connector",
+#         datasource_name="FAKE_DATASOURCE_NAME",
+#         default_regex={
+#             "pattern": "alpha-(.*)\\.csv",
+#             "group_names": ["index"],
+#         },
+#         bucket=bucket,
+#         prefix="",
+#         assets={"alpha": {}},
+#     )
+#     batch_def = BatchDefinition(
+#         datasource_name="FAKE_DATASOURCE_NAME",
+#         data_connector_name="my_data_connector",
+#         data_asset_name="alpha",
+#         batch_identifiers=IDDict(index=1),
+#         batch_spec_passthrough={
+#             "reader_method": "read_csv",
+#             "splitter_method": "_split_on_whole_table",
+#         },
+#     )
+#     test_df = PandasExecutionEngine().get_batch_data(
+#         batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
+#     )
+#     assert test_df.dataframe.shape == expected_df.shape
+
+#     # if key does not exist
+#     batch_def_no_key = BatchDefinition(
+#         datasource_name="FAKE_DATASOURCE_NAME",
+#         data_connector_name="my_data_connector",
+#         data_asset_name="alpha",
+#         batch_identifiers=IDDict(index=9),
+#         batch_spec_passthrough={
+#             "reader_method": "read_csv",
+#             "splitter_method": "_split_on_whole_table",
+#         },
+#     )
+#     with pytest.raises(ClientError):
+#         PandasExecutionEngine().get_batch_data(
+#             batch_spec=my_data_connector.build_batch_spec(
+#                 batch_definition=batch_def_no_key
+#             )
+#         )
+
+
+# # TODO(cdkini): Implement Azure test!
+# def test_get_batch_azure_parquet(test_s3_files_parquet, test_df_small):
+#     bucket, keys = test_s3_files_parquet
+#     path = [key for key in keys if key.endswith(".parquet")][0]
+#     full_path = f"s3a://{os.path.join(bucket, path)}"
+
+#     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
+#     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
+#     assert df.dataframe.shape == test_df_small.shape
