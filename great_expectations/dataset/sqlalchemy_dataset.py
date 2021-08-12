@@ -1632,6 +1632,8 @@ WHERE
             else:
                 type_module = self._get_dialect_type_module()
                 potential_type = getattr(type_module, type_)
+                # In the case of the PyAthena dialect we need to verify that
+                # the type returned is indeed a type and not an instance.
                 if not inspect.isclass(potential_type):
                     real_type = type(potential_type)
                 else:
@@ -1685,6 +1687,8 @@ WHERE
             for type_ in type_list:
                 try:
                     potential_type = getattr(type_module, type_)
+                    # In the case of the PyAthena dialect we need to verify that
+                    # the type returned is indeed a type and not an instance.
                     if not inspect.isclass(potential_type):
                         type_class = type(potential_type)
                     else:
