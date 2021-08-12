@@ -370,6 +370,7 @@ def test_expect_compound_columns_to_be_unique_with_no_rows(sa):
 
 def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
     from pyathena import sqlalchemy_athena
+
     engine = sa.create_engine("sqlite://")
 
     data = pd.DataFrame({"col": ["test_val1", "test_val2"]})
@@ -383,6 +384,7 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
 
 def test_expect_column_values_to_be_in_type_list_pyathena(sa):
     from pyathena import sqlalchemy_athena
+
     engine = sa.create_engine("sqlite://")
 
     data = pd.DataFrame({"col": ["test_val1", "test_val2"]})
@@ -391,4 +393,6 @@ def test_expect_column_values_to_be_in_type_list_pyathena(sa):
     dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
     dataset.dialect = sqlalchemy_athena
 
-    assert dataset.expect_column_values_to_be_in_type_list("col", type_list=["STRINGTYPE", "BOOLEAN"]).success
+    assert dataset.expect_column_values_to_be_in_type_list(
+        "col", type_list=["STRINGTYPE", "BOOLEAN"]
+    ).success
