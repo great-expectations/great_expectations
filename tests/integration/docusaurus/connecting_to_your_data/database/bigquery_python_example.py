@@ -5,21 +5,12 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
-# Google BigQuery config
-# TODO : configure additional environment variables for Azure pipeline to perform full integration tests on bigquery data.
+# GCP project and BigQuery dataset information
+# Not for general use. It is only to support testing.
 gcp_project = os.environ.get("GCP_PROJECT")
 bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
-
-# This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
-
-load_data_into_database(
-    table_name="taxi_data",
-    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
-    connection_string=CONNECTION_STRING,
-)
 
 context = ge.get_context()
 

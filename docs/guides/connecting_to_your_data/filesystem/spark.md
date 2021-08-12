@@ -11,12 +11,12 @@ import SparkAdditionalNotes from '../components/spark_additional_notes.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to your data stored on a filesystem using spark.
+This guide will help you connect to your data stored on a filesystem using Spark.
 This will allow you to validate and explore your data.
 
 <Prerequisites>
 
-- Have a access to a working spark installation
+- Have access to a working Spark installation
 - Have access to data on a filesystem
 
 </Prerequisites>
@@ -47,7 +47,7 @@ Using this example configuration, add in your path to a directory that contains 
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
@@ -86,7 +86,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 

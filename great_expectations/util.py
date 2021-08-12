@@ -55,7 +55,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "data_asset": "data_assets",
     "expectation": "expectations",
     "expectation_suite": "expectation_suites",
-    "expectation_suite_validation_result": "expectation_suite_validation_results",
+    "suite_validation_result": "suite_validation_results",
     "expectation_validation_result": "expectation_validation_results",
 }
 
@@ -65,7 +65,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "data_assets": "data_asset",
     "expectations": "expectation",
     "expectation_suites": "expectation_suite",
-    "expectation_suite_validation_results": "expectation_suite_validation_result",
+    "suite_validation_results": "suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
 }
 
@@ -117,6 +117,10 @@ def underscore(word: str) -> str:
     word = re.sub(r"([a-z\d])([A-Z])", r"\1_\2", word)
     word = word.replace("-", "_")
     return word.lower()
+
+
+def hyphen(input: str):
+    return input.replace("_", "-")
 
 
 def profile(func: Callable = None) -> Callable:
@@ -871,12 +875,12 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += "{}{}/\n".format(indent, os.path.basename(root))
+        output_str += f"{indent}{os.path.basename(root)}/\n"
         subindent = " " * 4 * (level + 1)
 
         files.sort()
         for f in files:
-            output_str += "{}{}\n".format(subindent, f)
+            output_str += f"{subindent}{f}\n"
 
     return output_str
 

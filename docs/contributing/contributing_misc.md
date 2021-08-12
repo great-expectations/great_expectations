@@ -27,7 +27,7 @@ GE core team members use this checklist to ship releases.
 
 4. In this branch, update the version number in the `great_expectations/deployment_version` file.
 
-5. Update the `changelog.rst: move all things under the `Develop` heading under a new heading with the new release number. NOTE: You should remove the `Develop` heading for the released version, it will be replaced in step #12.
+5. Update the `changelog.md` move all things under the `Develop` heading under a new heading with the new release number. NOTE: You should remove the `Develop` heading for the released version, it will be replaced in step #12.
 
 * Verify that any changes to requirements are specifically identified in the changelog
 
@@ -56,7 +56,7 @@ GE core team members use this checklist to ship releases.
 
 * Merge main into develop so that the tagged commit becomes part of the history for develop: git checkout develop; git pull; git merge main
 
-* On develop, add a new “Develop” section header to changelog.rst, and push the updated file with message “Update changelog for develop”
+* On develop, add a new “Develop” section header to changelog.md, and push the updated file with message “Update changelog for develop”
 
 13. [Create the release on GitHub](https://github.com/great-expectations/great_expectations/releases) with the version number. Copy the changelog notes into the release notes, and update any rst-specific links to use github issue numbers.
 
@@ -84,7 +84,7 @@ GE core team members use this checklist to ship releases.
 
 #### Beta Release Notes
 
-* To ship a beta release, follow the above checklist, but use the branch name `v0.13.x` as the equivalent of `main` and `v0.11.x-develop` as the equivalent of `develo`p
+* To ship a beta release, follow the above checklist, but use the branch name `v0.13.x` as the equivalent of `main` and `v0.11.x-develop` as the equivalent of `develop`
 
 * Ship the release using beta version numbers when updating the `great_expectations/deployment_version` and when creating the annotated tag (e.g. **0.13.0b0**)
 

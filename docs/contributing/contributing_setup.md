@@ -45,7 +45,7 @@ In order to contribute to Great Expectations, you will need the following:
 
 * We do not currently follow a strict naming convention for branches. Please pick something clear and self-explanatory, so that it will be easy for others to get the gist of your work.
 
-### Install python dependencies
+### Install Python dependencies
 
 #### 5. Create a new virtual environment
 
@@ -63,9 +63,9 @@ This is not required, but highly recommended.
 
 * MacOS users will be able to pip / pip3 install `requirements-dev.txt` using the above command from within conda, yet Windows users utilizing a conda environment will need to individually install all files within requirements-dev.txt
 
-* This will ensure that sure you have the right libraries installed in your python environment.
+* This will ensure that sure you have the right libraries installed in your Python environment.
 
-	* Note that you can also substitute requirements-dev-test.txt to only install requirements required for testing all backends, and requirements-dev-spark.txt or requirements-dev-sqlalchemy.txt if you would like to add support for spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
+	* Note that you can also substitute requirements-dev-test.txt to only install requirements required for testing all backends, and requirements-dev-spark.txt or requirements-dev-sqlalchemy.txt if you would like to add support for Spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
 
 	* [Installing Microsoft ODBC driver for MacOS](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos)
 
@@ -138,7 +138,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 * If you don’t have Java installed, you will probably need to install it and set your `PATH` or `JAVA_HOME` environment variables appropriately.
 
-* You can find official installation instructions for [spark here](https://spark.apache.org/docs/latest/index.html#downloading).
+* You can find official installation instructions for [Spark here](https://spark.apache.org/docs/latest/index.html#downloading).
 
 #### If you want to build documentation locally:
 

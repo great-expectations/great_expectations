@@ -129,6 +129,15 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
+        # Necessary when using RuntimeDataConnector with SimpleCheckpoint
+        if isinstance(config.batch_request, BatchRequest):
+            config.batch_request = config.batch_request.get_json_dict()
+        runtime_kwargs_batch_request = runtime_kwargs.get("batch_request")
+        if isinstance(runtime_kwargs_batch_request, BatchRequest):
+            runtime_kwargs[
+                "batch_request"
+            ] = runtime_kwargs_batch_request.to_json_dict()
+
         substituted_config: Union[CheckpointConfig, dict]
         if (
             self._substituted_config is not None
@@ -514,7 +523,7 @@ class LegacyCheckpoint(Checkpoint):
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            logger.info("Setting run_name to: {}".format(run_name))
+            logger.info(f"Setting run_name to: {run_name}")
 
         default_validation_operator = ActionListValidationOperator(
             data_context=self.data_context,

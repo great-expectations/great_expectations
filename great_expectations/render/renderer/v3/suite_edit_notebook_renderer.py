@@ -326,13 +326,13 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         for k, v in expectation_kwargs.items():
             if k == "column":
                 # make the column a positional argument
-                kwargs.insert(0, "{}='{}'".format(k, v))
+                kwargs.insert(0, f"{k}='{v}'")
             elif isinstance(v, str):
                 # Put strings in quotes
-                kwargs.append("{}='{}'".format(k, v))
+                kwargs.append(f"{k}='{v}'")
             else:
                 # Pass other types as is
-                kwargs.append("{}={}".format(k, v))
+                kwargs.append(f"{k}={v}")
 
         return ", ".join(kwargs)
 
@@ -346,7 +346,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             meta.pop(profiler)
 
         if meta.keys():
-            return ", meta={}".format(meta)
+            return f", meta={meta}"
 
         return ""
 
