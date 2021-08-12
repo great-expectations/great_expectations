@@ -28,6 +28,115 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
+@pytest.fixture(scope="function")
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+
+
+@pytest.fixture
+def s3(aws_credentials):
+    with mock_s3():
+        yield boto3.client("s3", region_name="us-east-1")
+
+
+@pytest.fixture
+def s3_bucket(s3):
+    bucket: str = "test_bucket"
+    s3.create_bucket(Bucket=bucket)
+    return bucket
+
+
+@pytest.fixture
+def test_df_small() -> pd.DataFrame:
+    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
+
+
+@pytest.fixture
+def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
+    path = Path(tmpdir) / "file.csv.gz"
+    test_df_small.to_csv(path, index=False, compression="gzip")
+    return path.read_bytes()
+
+
+@pytest.fixture
+def test_df_small_csv(test_df_small, tmpdir) -> bytes:
+    path = Path(tmpdir) / "file.csv"
+    test_df_small.to_csv(path, index=False)
+    return path.read_bytes()
+
+
+@pytest.fixture
+def test_s3_files(s3, s3_bucket, test_df_small_csv):
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    for key in keys:
+        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
+def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.parquet",
+        "directory/B-2.parquet",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    path = Path(tmpdir) / "file.parquet"
+    test_df_small.to_parquet(path)
+    for key in keys:
+        if key.endswith(".parquet"):
+            with open(path, "rb") as f:
+                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
+        else:
+            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
+def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
+    bucket, keys = test_s3_files
+    path = keys[0]
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+
+    batch_spec = S3BatchSpec(
+        path=full_path,
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    return batch_spec
+
+
+@pytest.fixture
+def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
+    keys: List[str] = [
+        "path/A-100.csv.gz",
+        "path/A-101.csv.gz",
+        "directory/B-1.csv.gz",
+        "directory/B-2.csv.gz",
+    ]
+
+    for key in keys:
+        s3.put_object(
+            Bucket=s3_bucket,
+            Body=test_df_small_csv_compressed,
+            Key=key,
+        )
+    return s3_bucket, keys
+
+
 def test_constructor_with_boto3_options():
     # default instantiation
     PandasExecutionEngine()
@@ -347,97 +456,6 @@ def test_get_batch_with_split_on_whole_table_filesystem(
     assert test_df.dataframe.shape == (5, 2)
 
 
-@pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-
-
-@pytest.fixture
-def s3(aws_credentials):
-    with mock_s3():
-        yield boto3.client("s3", region_name="us-east-1")
-
-
-@pytest.fixture
-def s3_bucket(s3):
-    bucket: str = "test_bucket"
-    s3.create_bucket(Bucket=bucket)
-    return bucket
-
-
-@pytest.fixture
-def test_df_small() -> pd.DataFrame:
-    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
-
-
-@pytest.fixture
-def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv.gz"
-    test_df_small.to_csv(path, index=False, compression="gzip")
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_df_small_csv(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv"
-    test_df_small.to_csv(path, index=False)
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_s3_files(s3, s3_bucket, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    for key in keys:
-        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.parquet",
-        "directory/B-2.parquet",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = Path(tmpdir) / "file.parquet"
-    test_df_small.to_parquet(path)
-    for key in keys:
-        if key.endswith(".parquet"):
-            with open(path, "rb") as f:
-                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
-        else:
-            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
-    bucket, keys = test_s3_files
-    path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
-
-    batch_spec = S3BatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
-
-
 def test_get_batch_with_split_on_whole_table_s3(
     batch_with_split_on_whole_table_s3, test_df_small
 ):
@@ -506,24 +524,6 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
                 batch_definition=batch_def_no_key
             )
         )
-
-
-@pytest.fixture
-def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
-    keys: List[str] = [
-        "path/A-100.csv.gz",
-        "path/A-101.csv.gz",
-        "directory/B-1.csv.gz",
-        "directory/B-2.csv.gz",
-    ]
-
-    for key in keys:
-        s3.put_object(
-            Bucket=s3_bucket,
-            Body=test_df_small_csv_compressed,
-            Key=key,
-        )
-    return s3_bucket, keys
 
 
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
@@ -784,3 +784,12 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     assert split_df.dataframe.shape == (2, 10)
     assert split_df.dataframe.id.min() == 54
     assert split_df.dataframe.id.max() == 59
+
+
+def test_get_batch_with_split_on_whole_table_azure(
+    batch_with_split_on_whole_table_s3, test_df_small
+):
+    df = PandasExecutionEngine().get_batch_data(
+        batch_spec=batch_with_split_on_whole_table_s3
+    )
+    assert df.dataframe.shape == test_df_small.shape
