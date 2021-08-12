@@ -79,6 +79,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "column_A": None,
         "column_B": None,
         "or_equal": None,
+        "mostly": 1.0,
         "parse_strings_as_datetimes": False,
         "allow_cross_type_comparisons": None,
         "ignore_row_if": "both_values_are_missing",
