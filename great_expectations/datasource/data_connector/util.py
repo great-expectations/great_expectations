@@ -9,20 +9,18 @@ import sre_parse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import pandas as pd
-
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequestBase,
-    RuntimeBatchRequest,
+from azure.core.paging import ItemPaged
+from azure.storage.blob import (
+    BlobPrefix,
+    BlobProperties,
+    BlobServiceClient,
+    ContainerClient,
 )
+
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
-    SqlAlchemyBatchData,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -287,6 +285,49 @@ def get_filesystem_one_level_directory_glob_path_list(
         os.path.relpath(str(posix_path), base_directory_path)
         for posix_path in globbed_paths
     ]
+    return path_list
+
+
+def list_azure_keys(
+    azure: BlobServiceClient,
+    query_options: dict,
+    recursive: bool = False,
+) -> List[str]:
+    """
+    Utilizes the Azure Blob Storage connection object to retrieve blob names based on user-provided criteria.
+
+    For InferredAssetAzureDataConnector, we take container and name_starts_with and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetAzureDataConnector, we take container and name_starts_with and
+    search for files using RegEx only at the level specified by that bucket and prefix.
+
+    This restriction for the ConfiguredAssetAzureDataConnector is needed, because paths on Azure are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
+
+    Args:
+        azure (BlobServiceClient): Azure connnection object responsible for accessing container
+        query_options (dict): Azure query attributes ("container", "name_starts_with", "delimiter")
+        recursive (bool): True for InferredAssetAzureDataConnector and False for ConfiguredAssetAzureDataConnector (see above)
+
+    Returns:
+        List of keys representing Azure file paths (as filtered by the query_options dict)
+    """
+    container: str = query_options["container"]
+    container_client: ContainerClient = azure.get_container_client(container)
+
+    path_list: List[str] = []
+
+    def _walk_blob_hierarchy(name_starts_with: str) -> None:
+        for item in container_client.walk_blobs(name_starts_with=name_starts_with):
+            if isinstance(item, BlobPrefix):
+                if recursive:
+                    _walk_blob_hierarchy(name_starts_with=item.name)
+            else:
+                path_list.append(item.name)
+
+    name_starts_with: str = query_options["name_starts_with"]
+    _walk_blob_hierarchy(name_starts_with)
+
     return path_list
 
 

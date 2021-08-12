@@ -205,6 +205,9 @@ class DataConnector:
             pretty_print (bool): should the output be printed?
             max_examples (int): how many data_references should be printed?
 
+        Returns:
+            report_obj (dict): dictionary containing self_check output
+
         """
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
@@ -254,8 +257,7 @@ class DataConnector:
         len_unmatched_data_references = len(unmatched_data_references)
         if pretty_print:
             print(
-                f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):",
-                unmatched_data_references[:max_examples],
+                f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):{unmatched_data_references[:max_examples]}\n"
             )
 
         report_obj["unmatched_data_reference_count"] = len_unmatched_data_references

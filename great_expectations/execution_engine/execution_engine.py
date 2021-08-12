@@ -301,6 +301,20 @@ class ExecutionEngine(ABC):
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
+    def get_domain_records(
+        self,
+        domain_kwargs: dict,
+    ) -> Any:
+        """
+        get_domain_records computes the full-access data (dataframe or selectable) for computing metrics based on the
+        given domain_kwargs and specific engine semantics.
+
+        Returns:
+            data corresponding to the compute domain
+        """
+
+        raise NotImplementedError
+
     def get_compute_domain(
         self,
         domain_kwargs: dict,

@@ -43,6 +43,26 @@
         "success": true
       }
     },{
+      "title": "row_condition_with_ignore_if_any_are_missing",
+      "only_for": ["pandas"],
+      "exact_match_out" : true,
+      "in": {
+        "column_list": ["w", "x"],
+        "row_condition": "x!=1 & w!=6",
+        "condition_parser": "pandas",
+        "ignore_row_if": "any_value_is_missing",
+        "result_format": "COMPLETE"
+      },
+      "out": {
+        "success": true,
+        "result": {
+          "element_count": 8,
+          "missing_count": 1,
+          "missing_percent": 12.5,
+          "unexpected_count": 0
+        }
+      }
+    },{
       "title": "unexpected_values",
       "exact_match_out" : false,
       "in": {
@@ -103,7 +123,8 @@
           "missing_count": 1,
           "missing_percent": 10.0,
           "unexpected_count": 9,
-          "unexpected_percent": 90.0,
+          "unexpected_percent": 100.0,
+          "unexpected_percent_total": 90.0,
           "unexpected_percent_nonmissing": 100.0,
           "partial_unexpected_list": [
             {
@@ -144,9 +165,9 @@
             }
           ],
           "partial_unexpected_index_list": [0,1,2,3,4,5,6,7,8],
-          "partial_unexpected_counts": [
-            "partial_exception_counts requires a hashable type"
-          ],
+          "details": {
+            "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
+          },
           "unexpected_list": [
             {
               "a": 1.0,
