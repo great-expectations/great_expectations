@@ -145,8 +145,11 @@ def pytest_generate_tests(metafunc):
                                     "bigquery" in test["only_for"]
                                     and BigQueryDialect is not None
                                     and hasattr(
-                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.BigQueryDialect
-                                    ),
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
                                 ):
                                     generate_test = True
 
@@ -245,8 +248,11 @@ def pytest_generate_tests(metafunc):
                                     SqlAlchemyBatchData,
                                 )
                                 and hasattr(
-                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.BigQueryDialect
+                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                    "name",
                                 )
+                                and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                == "bigquery"
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
