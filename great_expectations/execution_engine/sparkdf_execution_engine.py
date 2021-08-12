@@ -413,7 +413,6 @@ Please check your config."""
                     )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
-        # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
             if "column" in compute_domain_kwargs:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
@@ -423,25 +422,18 @@ Please check your config."""
                     "Column not provided in compute_domain_kwargs"
                 )
 
-        # Else, if column pair values requested
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            # Ensuring column_A and column_B parameters provided
-            if (
+            if not (
                 "column_A" in compute_domain_kwargs
                 and "column_B" in compute_domain_kwargs
             ):
-                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
-                    "column_A"
-                )
-                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
-                    "column_B"
-                )
-            else:
                 raise GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
 
-        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
+            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             if "column_list" in compute_domain_kwargs:
                 # If column_list exists
@@ -449,14 +441,12 @@ Please check your config."""
                     "column_list"
                 )
 
-        # Filtering if identity
         elif domain_type == MetricDomainTypes.IDENTITY:
 
             # If we would like our data to become a single column
             if "column" in compute_domain_kwargs:
                 data = data.select(compute_domain_kwargs["column"])
 
-            # If we would like our data to now become a column pair
             elif ("column_A" in compute_domain_kwargs) and (
                 "column_B" in compute_domain_kwargs
             ):
@@ -465,7 +455,6 @@ Please check your config."""
                 )
             else:
 
-                # If we would like our data to become a multicolumn
                 if "column_list" in compute_domain_kwargs:
                     data = data.select(compute_domain_kwargs["column_list"])
 

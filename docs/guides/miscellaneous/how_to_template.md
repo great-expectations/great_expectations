@@ -54,7 +54,7 @@ Next, do {concise description of what the user is going to do} using either {cho
   defaultValue='tab1'
   values={[
   {label: 'Using the CLI', value:'cli'},
-  {label: 'Using python', value:'python'},
+  {label: 'Using Python', value:'python'},
   ]}>
   <TabItem value="cli">
 
@@ -67,7 +67,7 @@ great_expectations --v3-api suite new
   </TabItem>
 <TabItem value="python">
 
-Run this code in python.
+Run this code in Python.
 
 ```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L3
 ```
