@@ -221,7 +221,10 @@ class MetaPandasDataset(Dataset):
             success_count = boolean_mapped_success_values.sum()
 
             unexpected_list = [
-                value_pair
+                # TODO: <Alex>ALEX</Alex>
+                # value_pair
+                {series_A.name: value_pair[0], series_B.name: value_pair[1]}
+                # TODO: <Alex>ALEX</Alex>
                 for value_pair in zip(
                     list(
                         series_A[

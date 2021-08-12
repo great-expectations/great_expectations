@@ -1,14 +1,6 @@
-from typing import Dict, Optional
+from typing import Optional
 
-from dateutil.parser import parse
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
@@ -18,10 +10,10 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import InvalidExpectationConfigurationError, TableExpectation
+from ..expectation import InvalidExpectationConfigurationError, ColumnPairMapExpectation
 
 
-class ExpectColumnPairValuesAToBeGreaterThanB(TableExpectation):
+class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     """
     Expect values in column A to be greater than column B.
 
@@ -72,7 +64,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(TableExpectation):
         "requirements": [],
     }
 
-    metric_dependencies = ("column_a_greater_than_b",)
+    map_metric = "column_pair_values.a_greater_than_b"
     success_keys = (
         "column_A",
         "column_B",
@@ -80,6 +72,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(TableExpectation):
         "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
         "or_equal",
+        "mostly",
     )
 
     default_kwarg_values = {

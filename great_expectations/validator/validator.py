@@ -164,6 +164,7 @@ class Validator:
         self._expose_dataframe_methods = value
 
     def __getattr__(self, name):
+        name = name.lower()
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
         elif (
