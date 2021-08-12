@@ -1631,7 +1631,12 @@ WHERE
                 success = True
             else:
                 type_module = self._get_dialect_type_module()
-                success = issubclass(col_type, getattr(type_module, type_))
+                potential_type = getattr(type_module, type_)
+                if not inspect.isclass(potential_type):
+                    real_type = type(potential_type)
+                else:
+                    real_type = potential_type
+                success = issubclass(col_type, real_type)
 
             return {"success": success, "result": {"observed_value": col_type.__name__}}
 
