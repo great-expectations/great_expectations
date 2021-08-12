@@ -3,6 +3,7 @@ import os
 import random
 from pathlib import Path
 from typing import List
+from unittest import mock
 
 import boto3
 import pandas as pd
@@ -27,7 +28,7 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
-def test_constructor():
+def test_constructor_with_boto3_options():
     # default instantiation
     PandasExecutionEngine()
 
@@ -39,6 +40,23 @@ def test_constructor():
     engine = PandasExecutionEngine(boto3_options=custom_boto3_options)
     assert "boto3_options" in engine.config
     assert engine.config.get("boto3_options")["region_name"] == "us-east-1"
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_constructor_with_azure_options(mock_azure_conn):
+    # default instantiation
+    PandasExecutionEngine()
+
+    # instantiation with custom parameters
+    engine = PandasExecutionEngine(discard_subset_failing_expectations=True)
+    assert "discard_subset_failing_expectations" in engine.config
+    assert engine.config.get("discard_subset_failing_expectations") is True
+    custom_azure_options = {"account_url": "my_account_url"}
+    engine = PandasExecutionEngine(azure_options=custom_azure_options)
+    assert "azure_options" in engine.config
+    assert engine.config.get("azure_options")["account_url"] == "my_account_url"
 
 
 def test_reader_fn():
