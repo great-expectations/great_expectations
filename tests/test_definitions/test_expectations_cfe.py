@@ -34,11 +34,9 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-    # expectation_dirs = ["known_not_to_work_with_cfe"]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
-    # backends = ["bigquery"]
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
@@ -147,11 +145,8 @@ def pytest_generate_tests(metafunc):
                                     "bigquery" in test["only_for"]
                                     and BigQueryDialect is not None
                                     and hasattr(
-                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                        "name",
-                                    )
-                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
-                                    == "bigquery"
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.BigQueryDialect
+                                    ),
                                 ):
                                     generate_test = True
 
@@ -250,11 +245,8 @@ def pytest_generate_tests(metafunc):
                                     SqlAlchemyBatchData,
                                 )
                                 and hasattr(
-                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                    "name",
+                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.BigQueryDialect
                                 )
-                                and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
-                                == "bigquery"
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]
