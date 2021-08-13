@@ -35,7 +35,7 @@
       }
     },{
       "title": "row_condition_with_ignore_if_any_are_missing",
-      "only_for": ["pandas"],
+      "suppress_test_for": "spark",
       "exact_match_out" : true,
       "in": {
         "column_list": ["w", "y"],
