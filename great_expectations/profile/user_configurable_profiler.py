@@ -114,11 +114,11 @@ class UserConfigurableProfiler:
                 batches=[self.profile_dataset],
             )
             self.all_table_columns = self.profile_dataset.get_metric(
-                MetricConfiguration("table.columns", dict())
+                MetricConfiguration("table.columns", {})
             )
         elif isinstance(self.profile_dataset, Validator):
             self.all_table_columns = self.profile_dataset.get_metric(
-                MetricConfiguration("table.columns", dict())
+                MetricConfiguration("table.columns", {})
             )
         else:
             self.all_table_columns = self.profile_dataset.get_table_columns()

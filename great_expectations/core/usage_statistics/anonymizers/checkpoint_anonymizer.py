@@ -10,7 +10,7 @@ class CheckpointAnonymizer(Anonymizer):
         self._ge_classes = [SimpleCheckpoint, Checkpoint]
 
     def anonymize_checkpoint_info(self, name, config):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
         self.anonymize_object_info(
