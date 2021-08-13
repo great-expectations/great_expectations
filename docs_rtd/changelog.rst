@@ -10,9 +10,6 @@ develop
 
 0.13.27
 -----------------
-* [FEATURE] Implement MulticolumnSumEqual metric for SQL Alchemy (#3212)
-* [FEATURE] Implement multicolumn helpers/providers for SQL Alchemy (#3212)
-* [BUGFIX] Remove the filtering of `data` in `ExecutionEngine.get_compute_domain(domain_type=MetricDomainTypes.IDENTITY)` -- otherwise, `unexpected_rows` will not contain all columns. (#3161 which contains the closed PR #3191)
 * [FEATURE] Accept row_condition (with condition_parser) and ignore_row_if parameters for expect_multicolumn_sum_to_equal (#3193)
 * [FEATURE] ConfiguredAssetDataConnector for Azure Blob Storage (#3141)
 * [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_domain_records() for SparkDFExecutionEngine (#3226)
@@ -20,21 +17,18 @@ develop
 * [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_full_access_compute_domain() for PandasExecutionEngine (#3210)
 * [FEATURE] Set foundation for Azure-related DataConnectors (#3188)
 * [FEATURE] Update ExpectCompoundColumnsToBeUnique for V3 API (#3161)
+* [BUGFIX] Wrap optional azure imports in data_connector setup
 * [BUGFIX] Fix incorrect schema validation for Azure data connectors (#3200)
 * [BUGFIX] Fix incorrect usage of "all()" in the comparison of validation results when executing an Expectation (#3178)
 * [BUGFIX] Fixes an error with expect_column_values_to_be_dateutil_parseable (#3190)
->>>>>>> release-prep-2021-08-12
 * [BUGFIX] Improve parsing of .ge_store_backend_id (#2952)
 * [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) (#3182)
 * [BUGFIX] Restore support for V2 API style custom expectation rendering (#3179) (Thanks @jdimatteo)
-* [BUGFIX] Restore support for V2 API style custom expectation rendering (#3179)
-* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) (#3182)
-* [BUGFIX] Fix an error in how ExpectationValidationResults (EVR)s were compared. The bug could cause some EVRs toappear identical even when some result properties differed; the issue primarily affected a small number of internal tests, since EVR comparison is not used as part of the data validation flow. (#3178)
 * [DOCS] Add `conda` as installation option in README (#3196) (Thanks @rpanai)
 * [DOCS] Standardize capitalization of "Python" in "Connecting to your data" section of new docs (#3209)
 * [DOCS] Standardize capitalization of Spark in docs (#3198)
 * [DOCS] Update BigQuery docs to clarify the use of temp tables (#3184)
-* [DOCS] GDOC-205/CREATE _redirects (#3192)
+* [DOCS] Create _redirects (#3192)
 * [ENHANCEMENT] RuntimeDataConnector messaging is made more clear for `test_yaml_config()` (#3206)
 * [MAINTENANCE] Add `credentials` YAML key support for `DataConnectors` (#3173)
 * [MAINTENANCE] Fix minor typo in S3 DataConnectors (#3194)

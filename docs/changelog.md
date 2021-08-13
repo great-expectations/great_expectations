@@ -13,6 +13,7 @@ title: Changelog
 * [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_full_access_compute_domain() for PandasExecutionEngine (#3210)
 * [FEATURE] Set foundation for Azure-related DataConnectors (#3188)
 * [FEATURE] Update ExpectCompoundColumnsToBeUnique for V3 API (#3161)
+* [BUGFIX] Wrap optional azure imports in data_connector setup 
 * [BUGFIX] Fix incorrect schema validation for Azure data connectors (#3200)
 * [BUGFIX] Fix incorrect usage of "all()" in the comparison of validation results when executing an Expectation (#3178)
 * [BUGFIX] Fixes an error with expect_column_values_to_be_dateutil_parseable (#3190)
@@ -23,7 +24,7 @@ title: Changelog
 * [DOCS] Standardize capitalization of "Python" in "Connecting to your data" section of new docs (#3209)
 * [DOCS] Standardize capitalization of Spark in docs (#3198)
 * [DOCS] Update BigQuery docs to clarify the use of temp tables (#3184)
-* [DOCS}/GDOC-205/CREATE _redirects (#3192)
+* [DOCS] Create _redirects (#3192)
 * [ENHANCEMENT] RuntimeDataConnector messaging is made more clear for `test_yaml_config()` (#3206)
 * [MAINTENANCE] Add `credentials` YAML key support for `DataConnectors` (#3173)
 * [MAINTENANCE] Fix minor typo in S3 DataConnectors (#3194)
