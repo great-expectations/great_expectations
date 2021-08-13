@@ -1110,19 +1110,39 @@ def test_column_pairs_equal_metric_pd():
 def test_column_pairs_greater_metric_pd():
     df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
-    desired_metric = MetricConfiguration(
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
         metric_name="column_pair_values.a_greater_than_b.condition",
-        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
-        metric_value_kwargs={
-            "or_equal": True,
+        metric_domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
             "ignore_row_if": "either_value_is_missing",
         },
+        metric_value_kwargs={
+            "or_equal": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
     assert (
-        results[desired_metric.id][0]
+        results[condition_metric.id][0]
         .reset_index(drop=True)
-        .equals(pd.Series([True, True, True, True]))
+        .equals(pd.Series([False, False, False, False]))
     )
 
 
