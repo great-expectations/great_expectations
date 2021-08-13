@@ -329,7 +329,7 @@ def test_resolve_metric_bundle():
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -337,7 +337,7 @@ def test_resolve_metric_bundle():
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -366,12 +366,12 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     mean = MetricConfiguration(
         metric_name="column.i_don't_exist",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     stdev = MetricConfiguration(
         metric_name="column.nonexistent",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metrics = (mean, stdev)
 

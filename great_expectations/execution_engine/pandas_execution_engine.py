@@ -224,7 +224,7 @@ Please check your config."""
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
-        reader_options = dict()
+        reader_options = {}
         if reader_method is None:
             path_guess = self.guess_reader_method_from_path(path)
             reader_method = path_guess["reader_method"]
@@ -424,7 +424,7 @@ Please check your config."""
         domain_type = MetricDomainTypes(domain_type)
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
+        accessor_domain_kwargs = {}
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(

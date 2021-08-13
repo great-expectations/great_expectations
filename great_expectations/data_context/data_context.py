@@ -337,7 +337,7 @@ class BaseDataContext:
         )
 
         # Init stores
-        self._stores = dict()
+        self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id

@@ -91,7 +91,7 @@ class Validator:
         if batches is None:
             batches = tuple()
 
-        self._batches = dict()
+        self._batches = {}
 
         for batch in batches:
             assert isinstance(
@@ -419,7 +419,7 @@ class Validator:
         """
         graph = ValidationGraph()
         if runtime_configuration is None:
-            runtime_configuration = dict()
+            runtime_configuration = {}
 
         if runtime_configuration.get("catch_exceptions", True):
             catch_exceptions = True
@@ -470,7 +470,7 @@ class Validator:
                     raise err
 
         if metrics is None:
-            metrics = dict()
+            metrics = {}
 
         metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
         for configuration in processed_configurations:

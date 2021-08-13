@@ -238,7 +238,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 nonnull_configuration = MetricConfiguration(
                     "column_values.nonnull.count",
                     metric_domain_kwargs=domain_kwargs,
-                    metric_value_kwargs=dict(),
+                    metric_value_kwargs=None,
                 )
                 #
                 # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuraiton here,
@@ -291,7 +291,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             nonnull_configuration = MetricConfiguration(
                 "column_values.nonnull.count",
                 metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs=dict(),
+                metric_value_kwargs=None,
             )
             dependencies["column.histogram"] = hist_metric_configuration
             dependencies["column_values.nonnull.count"] = nonnull_configuration
