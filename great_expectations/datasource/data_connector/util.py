@@ -9,11 +9,16 @@ import sre_parse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+from great_expectations.core.id_dict import IDDict
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.data_connector.sorter import Sorter
+
+logger = logging.getLogger(__name__)
+
 try:
-    from azure.core.paging import ItemPaged
     from azure.storage.blob import (
         BlobPrefix,
-        BlobProperties,
         BlobServiceClient,
         ContainerClient,
     )
@@ -26,13 +31,6 @@ except ImportError:
     logger.debug(
         "Unable to load azure types; install optional azure dependency for support."
     )
-
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
-from great_expectations.core.id_dict import IDDict
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector.sorter import Sorter
-
-logger = logging.getLogger(__name__)
 
 try:
     import pyspark
