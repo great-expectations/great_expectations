@@ -1173,7 +1173,7 @@ def test_column_pairs_equal_metric_pd():
     assert (
         results[condition_metric.id][0]
         .reset_index(drop=True)
-        .equals(pd.Series([False, False, False, True, True, False]))
+        .equals(pd.Series([False, False, False, True, True, True]))
     )
 
 
