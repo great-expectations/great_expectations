@@ -702,11 +702,12 @@ class ExpectationConfiguration(SerializableDictDot):
                 "row_condition",
                 "condition_parser",
             ],
-            "success_kwargs": ["value_pairs_set", "ignore_row_if"],
+            "success_kwargs": ["value_pairs_set", "ignore_row_if", "mostly"],
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
                 "ignore_row_if": "both_values_are_missing",
+                "mostly": None,
                 "result_format": "BASIC",
                 "include_config": True,
                 "catch_exceptions": False,
