@@ -20,6 +20,27 @@ module.exports = {
     colorMode: {
       disableSwitch: true
     },
+    gtag: {
+      // You can also use your "G-" Measurement ID here.
+      trackingID: 'UA-138955219-1',
+      // Optional fields.
+      anonymizeIP: true, // Should IPs be anonymized?
+    },
+    algolia: {
+      apiKey: '8709c7590891eefd523c1f30ce5a7297',
+      indexName: 'docs_intro',
+
+      // Optional: see doc section below
+      contextualSearch: true,
+
+      // Optional: see doc section below
+      appId: 'VA0TNB5QND',
+
+      // Optional: Algolia search parameters
+      searchParameters: {},
+
+      //... other Algolia params
+    },
     zoomSelector: ".markdown :not(em) > img",
     announcementBar: {
       id: "RTD_docs", // Link to RTD Docs
