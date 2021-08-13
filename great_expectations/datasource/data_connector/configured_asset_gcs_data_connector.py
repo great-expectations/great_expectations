@@ -32,8 +32,8 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: str = "",
-        delimiter: str = "/",
+        prefix: Optional[str] = None,
+        delimiter: Optional[str] = None,
         max_results: Optional[int] = None,
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -50,7 +50,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket_or_name = bucket_or_name
-        self._prefix = os.path.join(prefix, "")
+        self._prefix = prefix
         self._delimiter = delimiter
         self._max_results = max_results
 
