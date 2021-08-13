@@ -1438,7 +1438,7 @@
   dependencies:
     "@docusaurus/core" "2.0.0-beta.4"
 
-"@docusaurus/plugin-sitemap@2.0.0-beta.4":
+"@docusaurus/plugin-sitemap@2.0.0-beta.4", "@docusaurus/plugin-sitemap@^2.0.0-beta.4":
   version "2.0.0-beta.4"
   resolved "https://registry.yarnpkg.com/@docusaurus/plugin-sitemap/-/plugin-sitemap-2.0.0-beta.4.tgz#60b189107af772ef2bbc94b83055eff8a3013da3"
   integrity sha512-0sU1aMQmMN7fE3TlSM2wBZN/gFsuvo79DYxw8TIVtNakA84oDxurH/rhDQHwJ34JQufm5CuWNC1ICHtyI3qyWw==

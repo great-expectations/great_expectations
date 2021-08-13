@@ -28,7 +28,7 @@ module.exports = {
     },
     algolia: {
       apiKey: '8709c7590891eefd523c1f30ce5a7297',
-      indexName: 'docs_intro',
+      indexName: 'DOC_sitemap',
 
       // Optional: see doc section below
       contextualSearch: true,
