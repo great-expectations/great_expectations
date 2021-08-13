@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Wrap optional azure imports in data_connector setup
 
 0.13.27
 -----------------
@@ -17,7 +18,6 @@ develop
 * [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_full_access_compute_domain() for PandasExecutionEngine (#3210)
 * [FEATURE] Set foundation for Azure-related DataConnectors (#3188)
 * [FEATURE] Update ExpectCompoundColumnsToBeUnique for V3 API (#3161)
-* [BUGFIX] Wrap optional azure imports in data_connector setup
 * [BUGFIX] Fix incorrect schema validation for Azure data connectors (#3200)
 * [BUGFIX] Fix incorrect usage of "all()" in the comparison of validation results when executing an Expectation (#3178)
 * [BUGFIX] Fixes an error with expect_column_values_to_be_dateutil_parseable (#3190)
