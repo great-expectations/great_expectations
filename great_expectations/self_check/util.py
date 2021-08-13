@@ -513,14 +513,12 @@ def get_dataset(
         if not create_engine:
             return None
         engine = _create_bigquery_engine()
-
         schema = None
         if schemas and dataset_type in schemas:
             schema = schemas[dataset_type]
-
-        # BigQuery does not allow for column names to have spaces
-        if schema:
+            # BigQuery does not allow for column names to have spaces
             schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+
         df.columns = df.columns.str.replace(" ", "_")
 
         if table_name is None:
@@ -944,13 +942,12 @@ def build_sa_validator_with_data(
     # Add the data to the database as a new table
 
     if sa_engine_name == "bigquery":
-
         schema = None
         if schemas and sa_engine_name in schemas:
             schema = schemas[sa_engine_name]
-        # bigquery does not allow column names to have spaces
-        if schema:
+            # bigquery does not allow column names to have spaces
             schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+
         df.columns = df.columns.str.replace(" ", "_")
 
     sql_dtypes = {}
@@ -1973,6 +1970,13 @@ def generate_test_table_name(
 
 
 def _create_bigquery_engine() -> Engine:
-    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "superconductive-internal")
-    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
+
+    # The following environment variables will need to be
+    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", None)
+    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", None)
+
+    if not gcp_project or not bigquery_dataset:
+        raise ValueError(
+            "Environment Variables GE_TEST_BIGQUERY_PROJECT and GE_TEST_BIGQUERY_DATASET are required to run expectation tests"
+        )
     return create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}")

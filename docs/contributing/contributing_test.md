@@ -23,11 +23,11 @@ In order to run BigQuery tests, you first need to go through the following steps
 
 1. Select or create a Cloud Platform project.
 2. Setup Authentication.
-3. In your project, create a bigquery dataset named `test_ci` and set the dataset default table expiration to `.1` days
+3. In your project, create a BigQuery dataset named `test_ci` and set the dataset default table expiration to `.1` days
 
 * Select or create a Cloud Platform project.: [https://console.cloud.google.com/project](https://console.cloud.google.com/project)
 * Setup Authentication.: [https://googleapis.dev/python/google-api-core/latest/auth.html](https://googleapis.dev/python/google-api-core/latest/auth.html)
-* In your project, create a bigquery dataset named `test_ci`: [https://cloud.google.com/bigquery/docs/datasets](https://cloud.google.com/bigquery/docs/datasets)
+* In your project, create a BigQuery dataset named `test_ci`: [https://cloud.google.com/bigquery/docs/datasets](https://cloud.google.com/bigquery/docs/datasets)
 * Set the dataset default table expiration to `.1` days: [https://cloud.google.com/bigquery/docs/updating-datasets#table-expiration](https://cloud.google.com/bigquery/docs/updating-datasets#table-expiration)
 
 After setting up authentication, you can run with your project using the environment variable `GE_TEST_BIGQUERY_PROJECT`, e.g.
@@ -45,7 +45,7 @@ Experimental code in Great Expectations need only be tested lightly. We are movi
 
 Most of Great Expectations’ integration testing is in the CLI, which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should not include new integration tests, unless they change the CLI itself.
 
-Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to postgresql, sqlite, mssql, and bigquery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
+Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to postgresql, sqlite, mssql, and BigQuery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
 
 ### Unit tests for Expectations
 One of Great Expectations’ important promises is that the same Expectation will produce the same result across all supported execution environments: pandas, sqlalchemy, and Spark.

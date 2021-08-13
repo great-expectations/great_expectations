@@ -132,6 +132,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         AttributeError,
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
+        logger.debug(
+            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util"
+        )
         pass
 
     return None

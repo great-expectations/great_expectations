@@ -542,7 +542,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
-        if self.engine.dialect.name.lower() in [
+        dialect_name: str = self.engine.dialect.name.lower()
+
+        if dialect_name in [
             "postgresql",
             "mysql",
             "sqlite",
@@ -554,25 +556,23 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
-
-        elif self.engine.dialect.name.lower() == "snowflake":
+        elif dialect_name == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-
-        elif self.engine.dialect.name.lower() == "redshift":
+        elif dialect_name == "redshift":
             self.dialect = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif self.engine.dialect.name.lower() == "bigquery":
+        elif dialect_name == "bigquery":
             self.dialect = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
             )
-        elif self.engine.dialect.name.lower() == "awsathena":
+        elif dialect_name == "awsathena":
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
             )
-        elif self.engine.dialect.name.lower() == "bigquery":
+        elif dialect_name == "bigquery":
             self.dialect = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
             )
@@ -2104,6 +2104,9 @@ WHERE
             AttributeError,
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
+            logger.debug(
+                "Unable to load BigQueryDialect dialect while running expect_column_values_to_not_match_regex_list"
+            )
             pass
 
         if isinstance(
