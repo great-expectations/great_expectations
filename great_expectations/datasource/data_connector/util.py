@@ -17,6 +17,14 @@ from azure.storage.blob import (
     ContainerClient,
 )
 
+try:
+    from google.cloud import storage
+except ImportError:
+    storage = None
+    logger.debug(
+        "Unable to load GCS connection object; install optional google dependency for support"
+    )
+
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -329,6 +337,14 @@ def list_azure_keys(
     _walk_blob_hierarchy(name_starts_with)
 
     return path_list
+
+
+def list_gcs_keys(
+    gcs: storage.Client,
+    query_options: dict,
+    recursive: bool = False,
+) -> List[str]:
+    raise NotImplementedError()
 
 
 def list_s3_keys(
