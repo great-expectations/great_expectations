@@ -23,11 +23,14 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
     condition_metric_name = "column_pair_values.in_set"
-    condition_value_keys = (
-        "value_pairs_set",
+    condition_value_keys = ("value_pairs_set",)
+    condition_domain_keys = (
+        "batch_id",
+        "table",
+        "column_A",
+        "column_B",
         "ignore_row_if",
     )
-    condition_domain_keys = ("batch_id", "table", "column_A", "column_B")
 
     # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
     # noinspection PyPep8Naming
