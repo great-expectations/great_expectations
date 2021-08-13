@@ -19,9 +19,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
     # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
     # noinspection PyPep8Naming
-
-    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         allow_cross_type_comparisons = kwargs.get("allow_cross_type_comparisons")

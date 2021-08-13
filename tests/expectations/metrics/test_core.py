@@ -1096,15 +1096,85 @@ def test_table_metric_pd(caplog):
 
 
 def test_column_pairs_equal_metric_pd():
-    df = pd.DataFrame({"a": [1, 2, 3, 3], "b": [1, 2, 3, 3]})
+    df = pd.DataFrame({"a": [1, 2, 3, 3, 5, None], "b": [1, 2, 3, 4, None, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
-    desired_metric = MetricConfiguration(
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
         metric_name="column_pair_values.equal.condition",
-        metric_domain_kwargs={"column_A": "a", "column_B": "b"},
-        metric_value_kwargs=dict(),
+        metric_domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "ignore_row_if": "both_values_are_missing",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert results[desired_metric.id][0].equals(pd.Series([True, True, True, True]))
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    assert (
+        results[condition_metric.id][0]
+        .reset_index(drop=True)
+        .equals(pd.Series([False, False, False, True, True]))
+    )
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_pair_values.equal.condition",
+        metric_domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "ignore_row_if": "either_value_is_missing",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    assert (
+        results[condition_metric.id][0]
+        .reset_index(drop=True)
+        .equals(pd.Series([False, False, False, True]))
+    )
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_pair_values.equal.condition",
+        metric_domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "ignore_row_if": "never",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    assert (
+        results[condition_metric.id][0]
+        .reset_index(drop=True)
+        .equals(pd.Series([False, False, False, True, True, False]))
+    )
 
 
 def test_column_pairs_greater_metric_pd():
