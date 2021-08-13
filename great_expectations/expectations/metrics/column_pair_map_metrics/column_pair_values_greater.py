@@ -15,7 +15,10 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
     )
-    domain_keys = ("batch_id", "table", "column_A", "column_B")
+    condition_domain_keys = ("batch_id", "table", "column_A", "column_B")
+
+    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    # noinspection PyPep8Naming
 
     # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
     # noinspection PyPep8Naming
