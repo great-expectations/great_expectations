@@ -9,13 +9,23 @@ import sre_parse
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from azure.core.paging import ItemPaged
-from azure.storage.blob import (
-    BlobPrefix,
-    BlobProperties,
-    BlobServiceClient,
-    ContainerClient,
-)
+try:
+    from azure.core.paging import ItemPaged
+    from azure.storage.blob import (
+        BlobPrefix,
+        BlobProperties,
+        BlobServiceClient,
+        ContainerClient,
+    )
+except ImportError:
+    ItemPaged = None
+    BlobPrefix = None
+    BlobProperties = None
+    BlobServiceClient = None
+    ContainerClient = None
+    logger.debug(
+        "Unable to load azure types; install optional azure dependency for support."
+    )
 
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
