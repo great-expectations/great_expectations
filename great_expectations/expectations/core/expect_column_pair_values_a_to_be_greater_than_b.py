@@ -76,9 +76,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     )
 
     default_kwarg_values = {
-        "column_A": None,
-        "column_B": None,
-        "or_equal": None,
         "mostly": 1.0,
         "parse_strings_as_datetimes": False,
         "allow_cross_type_comparisons": None,
@@ -87,7 +84,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": True,
+        "catch_exceptions": False,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
