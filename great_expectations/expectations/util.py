@@ -478,8 +478,11 @@ legacy_method_parameters = {
     ),
     "expect_multicolumn_sum_to_equal": (
         "column_list",
+        "ignore_row_if",
         "sum_total",
         "result_format",
+        "row_condition",
+        "condition_parser",
         "include_config",
         "catch_exceptions",
         "meta",

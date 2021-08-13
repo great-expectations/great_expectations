@@ -194,48 +194,27 @@ test_StoreBackend_id_initialization__dir1/
         s3_store_backend.store_backend_id == s3_store_backend_duplicate.store_backend_id
     )
 
-    # TODO: Fix GCS Testing
     # TupleGCSStoreBackend
-    # Initialize without store_backend_id and check that it is generated correctly
+    # TODO: Improve GCS Testing e.g. using a docker service to mock
+    # Note: Currently there is not a great way to mock GCS so here we are just testing that a config
+    # with unreachable bucket returns the error store backend id
+    # If we were to mock GCS, we would need to provide the value returned from the TupleGCSStoreBackend which
+    # is circumventing actually testing the store backend.
+
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-        gcs_store_backend_with_base_public_path = TupleGCSStoreBackend(
-            filepath_template=None,
-            bucket=bucket,
-            prefix=prefix,
-            project=project,
-            base_public_path=base_public_path,
-        )
-
-        gcs_store_backend_with_base_public_path_duplicate = TupleGCSStoreBackend(
-            filepath_template=None,
-            bucket=bucket,
-            prefix=prefix,
-            project=project,
-            base_public_path=base_public_path,
-        )
-
-        assert gcs_store_backend_with_base_public_path.store_backend_id is not None
-        # Currently we don't have a good way to mock GCS functionality
-        # check_store_backend_store_backend_id_functionality(store_backend=gcs_store_backend_with_base_public_path)
-
-        # Create a new store with the same config and make sure it reports the same store_backend_id
-        assert (
-            gcs_store_backend_with_base_public_path.store_backend_id
-            == gcs_store_backend_with_base_public_path_duplicate.store_backend_id
-        )
-        store_error_uuid = "00000000-0000-0000-0000-00000000e003"
-        assert (
-            gcs_store_backend_with_base_public_path.store_backend_id != store_error_uuid
-        )
-        assert (
-            gcs_store_backend_with_base_public_path_duplicate.store_backend_id
-            != store_error_uuid
-        )
+    gcs_store_backend_with_base_public_path = TupleGCSStoreBackend(
+        filepath_template=None,
+        bucket=bucket,
+        prefix=prefix,
+        project=project,
+        base_public_path=base_public_path,
+    )
+    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    assert gcs_store_backend_with_base_public_path.store_backend_id == store_error_uuid
 
 
 @mock_s3
