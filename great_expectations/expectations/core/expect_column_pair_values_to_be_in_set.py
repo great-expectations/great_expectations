@@ -55,8 +55,6 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     success_keys = ("value_pairs_set", "ignore_row_if", "mostly")
 
     default_kwarg_values = {
-        "column_A": None,
-        "column_B": None,
         "mostly": 1.0,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
