@@ -581,7 +581,7 @@ def render_evaluation_parameter_string(render_func):
                     for param in current_expectation_params:
                         # "key in param" condition allows for eval param values to be rendered if arithmetic is present
                         if key == param or key in param:
-                            app_params = dict()
+                            app_params = {}
                             app_params["eval_param"] = key
                             app_params["eval_param_value"] = val
                             to_append = RenderedStringTemplateContent(

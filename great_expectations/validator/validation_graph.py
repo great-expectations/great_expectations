@@ -19,11 +19,11 @@ class MetricConfiguration:
         self._metric_domain_kwargs = metric_domain_kwargs
         if not isinstance(metric_value_kwargs, IDDict):
             if metric_value_kwargs is None:
-                metric_value_kwargs = dict()
+                metric_value_kwargs = {}
             metric_value_kwargs = IDDict(metric_value_kwargs)
         self._metric_value_kwargs = metric_value_kwargs
         if metric_dependencies is None:
-            metric_dependencies = dict()
+            metric_dependencies = {}
         self.metric_dependencies = metric_dependencies
 
     def __repr__(self):

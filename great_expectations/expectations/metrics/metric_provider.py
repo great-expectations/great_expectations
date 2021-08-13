@@ -99,7 +99,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
     domain_keys = tuple()
     value_keys = tuple()
-    default_kwarg_values = dict()
+    default_kwarg_values = {}
 
     @classmethod
     def _register_metric_functions(cls):
@@ -125,7 +125,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     # No metric name has been defined
                     continue
                 metric_definition_kwargs = getattr(
-                    metric_fn, "metric_definition_kwargs", dict()
+                    metric_fn, "metric_definition_kwargs", {}
                 )
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
@@ -191,7 +191,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
-            or dict()
+            or {}
         )
 
     @classmethod
@@ -203,7 +203,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         metric_name = metric.metric_name
-        dependencies = dict()
+        dependencies = {}
         for metric_fn_type in MetricPartialFunctionTypes:
             metric_suffix = "." + metric_fn_type.metric_suffix
             try:

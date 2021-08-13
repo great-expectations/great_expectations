@@ -608,7 +608,7 @@ Notes:
                     other_values = sorted(value_counts.index[n_bins:])
                     replace = {value: "(other)" for value in other_values}
             else:
-                replace = dict()
+                replace = {}
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
             return (
