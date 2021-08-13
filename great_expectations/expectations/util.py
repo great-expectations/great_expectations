@@ -163,6 +163,7 @@ legacy_method_parameters = {
         "column_B",
         "value_pairs_set",
         "ignore_row_if",
+        "mostly",
         "result_format",
         "include_config",
         "catch_exceptions",
