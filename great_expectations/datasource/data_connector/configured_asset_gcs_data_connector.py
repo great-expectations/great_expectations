@@ -27,13 +27,14 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         self,
         name: str,
         datasource_name: str,
-        bucket: str,
+        bucket_or_name: str,
         assets: dict,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         prefix: str = "",
         delimiter: str = "/",
+        max_results: Optional[int] = None,
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -48,9 +49,10 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-        self._bucket = bucket
+        self._bucket_or_name = bucket_or_name
         self._prefix = os.path.join(prefix, "")
         self._delimiter = delimiter
+        self._max_results = max_results
 
         if gcs_options is None:
             gcs_options = {}
@@ -69,21 +71,22 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         return GCSBatchSpec(batch_spec)
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
-        # TODO(cdkini): Change to GCS-specific usage
         query_options: dict = {
-            "Bucket": self._bucket,
-            "Prefix": self._prefix,
-            "Delimiter": self._delimiter,
+            "bucket_or_name": self._bucket_or_name,
+            "prefix": self._prefix,
+            "delimiter": self._delimiter,
+            "max_results": self._max_results,
         }
 
-        # TODO(cdkini): Change to GCS-specific usage
         if asset is not None:
             if asset.bucket:
-                query_options["Bucket"] = asset.bucket
+                query_options["bucket_or_name"] = asset.bucket_or_name
             if asset.prefix:
-                query_options["Prefix"] = asset.prefix
+                query_options["prefix"] = asset.prefix
             if asset.delimiter:
-                query_options["Delimiter"] = asset.delimiter
+                query_options["delimiter"] = asset.delimiter
+            if asset.max_results:
+                query_options["max_results"] = asset.max_results
 
         path_list: List[str] = [
             key
