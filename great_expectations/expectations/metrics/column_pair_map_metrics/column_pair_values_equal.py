@@ -18,12 +18,4 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
         if not ignore_row_if:
             ignore_row_if = "both_values_are_missing"
 
-        # bitwise operators compare boolean masks for ignore_row_if
-        if ignore_row_if == "both_values_are_missing":
-            row_filter = (column_A.notnull()) | (column_B.notnull())
-        elif ignore_row_if == "either_value_is_missing":
-            row_filter = (column_A.notnull()) & (column_B.notnull())
-        elif ignore_row_if == "never":
-            row_filter = column_A.notnull() | column_B.notnull() | True
-
-        return column_A[row_filter] == column_B[row_filter]
+        return column_A == column_B
