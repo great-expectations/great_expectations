@@ -7,6 +7,10 @@ Changelog
 
 develop
 -----------------
+
+0.13.28
+-----------------
+* [FEATURE] Implement ColumnPairValuesInSet metric for PandasExecutionEngine
 * [BUGFIX] Wrap optional azure imports in data_connector setup
 
 0.13.27
