@@ -1972,8 +1972,8 @@ def generate_test_table_name(
 def _create_bigquery_engine() -> Engine:
 
     # The following environment variables will need to be
-    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", None)
-    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", None)
+    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT")
+    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
 
     if not gcp_project or not bigquery_dataset:
         raise ValueError(
