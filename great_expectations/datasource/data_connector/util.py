@@ -23,9 +23,7 @@ try:
         ContainerClient,
     )
 except ImportError:
-    ItemPaged = None
     BlobPrefix = None
-    BlobProperties = None
     BlobServiceClient = None
     ContainerClient = None
     logger.debug(
