@@ -17,11 +17,7 @@ from great_expectations.datasource.data_connector.sorter import Sorter
 logger = logging.getLogger(__name__)
 
 try:
-    from azure.storage.blob import (
-        BlobPrefix,
-        BlobServiceClient,
-        ContainerClient,
-    )
+    from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
 except ImportError:
     BlobPrefix = None
     BlobServiceClient = None
