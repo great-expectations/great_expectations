@@ -2,6 +2,7 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations.core.util import (
+    AzureUrl,
     S3Url,
     sniff_s3_compression,
     substitute_all_strftime_format_strings,
@@ -61,3 +62,24 @@ def test_s3_suffix(url, expected):
 )
 def test_sniff_s3_compression(url, expected):
     assert sniff_s3_compression(S3Url(url)) == expected
+
+
+def test_azure_url():
+    url = AzureUrl("my_account.blob.core.windows.net/my_container/my_blob")
+    assert url.account_name == "my_account"
+    assert url.container == "my_container"
+    assert url.blob == "my_blob"
+
+
+def test_azure_url_with_https():
+    url = AzureUrl("https://my_account.blob.core.windows.net/my_container/my_blob")
+    assert url.account_name == "my_account"
+    assert url.container == "my_container"
+    assert url.blob == "my_blob"
+
+
+def test_azure_url_with_nested_blob():
+    url = AzureUrl("my_account.blob.core.windows.net/my_container/a/b/c/d/e/my_blob")
+    assert url.account_name == "my_account"
+    assert url.container == "my_container"
+    assert url.blob == "a/b/c/d/e/my_blob"
