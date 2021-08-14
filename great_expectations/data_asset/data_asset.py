@@ -318,7 +318,7 @@ class DataAsset:
 
                 if len(substituted_parameters) > 0:
                     if meta is None:
-                        meta = dict()
+                        meta = {}
                     meta["substituted_parameters"] = substituted_parameters
 
                 # Add meta to return object
