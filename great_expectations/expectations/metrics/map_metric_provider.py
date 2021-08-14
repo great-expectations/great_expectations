@@ -1997,7 +1997,7 @@ class MapMetricProvider(MetricProvider):
                 metric_domain_keys = cls.condition_domain_keys
                 metric_value_keys = cls.condition_value_keys
                 metric_definition_kwargs = getattr(
-                    condition_provider, "metric_definition_kwargs", dict()
+                    condition_provider, "metric_definition_kwargs", {}
                 )
                 domain_type = getattr(
                     condition_provider,
@@ -2301,7 +2301,7 @@ class MapMetricProvider(MetricProvider):
         base_metric_value_kwargs = {
             k: v for k, v in metric.metric_value_kwargs.items() if k != "result_format"
         }
-        dependencies = dict()
+        dependencies = {}
 
         metric_suffix = ".unexpected_count"
         if metric_name.endswith(metric_suffix):

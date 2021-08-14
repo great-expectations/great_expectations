@@ -1334,7 +1334,7 @@ Would you like to continue?"""
 
     # Some backends require named temporary table parameters. We specifically elicit those and add them
     # where appropriate.
-    temp_table_kwargs = dict()
+    temp_table_kwargs = {}
     datasource = context.get_datasource(datasource_name)
 
     if datasource.engine.dialect.name.lower() == "bigquery":
