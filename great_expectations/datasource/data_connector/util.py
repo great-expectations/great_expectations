@@ -344,7 +344,24 @@ def list_gcs_keys(
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
-    raise NotImplementedError()
+    """
+    TODO(cdkini): Write docstring!
+    """
+    keys: List[str] = []
+    prefix: Optional[str] = query_options["prefix"]
+    if prefix is None:
+        prefix = ""
+    depth: int = prefix.count("/")
+
+    for blob in gcs.list_blobs(**query_options):
+        name: str = blob.name
+        if name.endswith("/"):  # GCS includes directories in blob output
+            continue
+        # Must be recursive OR be non-recursive and share the exact same prefix
+        if recursive or name.count("/") == depth:
+            keys.append(name)
+
+    return keys
 
 
 def list_s3_keys(
