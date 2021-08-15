@@ -74,13 +74,13 @@ class MetaExpectation(ABCMeta):
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
         newclass._register_renderer_functions()
-        default_kwarg_values = dict()
+        default_kwarg_values = {}
         for base in reversed(bases):
-            default_kwargs = getattr(base, "default_kwarg_values", dict())
+            default_kwargs = getattr(base, "default_kwarg_values", {})
             default_kwarg_values = nested_update(default_kwarg_values, default_kwargs)
 
         newclass.default_kwarg_values = nested_update(
-            default_kwarg_values, attrs.get("default_kwarg_values", dict())
+            default_kwarg_values, attrs.get("default_kwarg_values", {})
         )
         return newclass
 
@@ -495,7 +495,7 @@ class Expectation(metaclass=MetaExpectation):
     ) -> "ExpectationValidationResult":
         if configuration is None:
             configuration = self.configuration
-        provided_metrics = dict()
+        provided_metrics = {}
         requested_metrics = self.get_validation_dependencies(
             configuration,
             execution_engine=execution_engine,
@@ -542,7 +542,7 @@ class Expectation(metaclass=MetaExpectation):
                     runtime_configuration=runtime_configuration,
                 ).get("result_format")
             ),
-            "metrics": dict(),
+            "metrics": {},
         }
 
     def get_domain_kwargs(

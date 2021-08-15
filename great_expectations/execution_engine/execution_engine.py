@@ -218,9 +218,9 @@ class ExecutionEngine(ABC):
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
         if metrics is None:
-            metrics = dict()
+            metrics = {}
 
-        resolved_metrics = dict()
+        resolved_metrics = {}
 
         metric_fn_bundle = []
         for metric_to_resolve in metrics_to_resolve:

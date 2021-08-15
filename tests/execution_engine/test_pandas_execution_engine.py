@@ -3,6 +3,7 @@ import os
 import random
 from pathlib import Path
 from typing import List
+from unittest import mock
 
 import boto3
 import pandas as pd
@@ -10,9 +11,16 @@ import pytest
 from botocore.errorfactory import ClientError
 from moto import mock_s3
 
+try:
+    from azure.storage.blob import BlobServiceClient
+except:
+    azure = None
+
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -27,7 +35,138 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
-def test_constructor():
+@pytest.fixture(scope="function")
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+
+
+@pytest.fixture
+def s3(aws_credentials):
+    with mock_s3():
+        yield boto3.client("s3", region_name="us-east-1")
+
+
+@pytest.fixture
+def s3_bucket(s3):
+    bucket: str = "test_bucket"
+    s3.create_bucket(Bucket=bucket)
+    return bucket
+
+
+@pytest.fixture
+def test_df_small() -> pd.DataFrame:
+    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
+
+
+@pytest.fixture
+def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
+    path = Path(tmpdir) / "file.csv.gz"
+    test_df_small.to_csv(path, index=False, compression="gzip")
+    return path.read_bytes()
+
+
+@pytest.fixture
+def test_df_small_csv(test_df_small, tmpdir) -> bytes:
+    path = Path(tmpdir) / "file.csv"
+    test_df_small.to_csv(path, index=False)
+    return path.read_bytes()
+
+
+@pytest.fixture
+def test_s3_files(s3, s3_bucket, test_df_small_csv):
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    for key in keys:
+        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
+def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.parquet",
+        "directory/B-2.parquet",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    path = Path(tmpdir) / "file.parquet"
+    test_df_small.to_parquet(path)
+    for key in keys:
+        if key.endswith(".parquet"):
+            with open(path, "rb") as f:
+                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
+        else:
+            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
+def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
+    bucket, keys = test_s3_files
+    path = keys[0]
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+
+    batch_spec = S3BatchSpec(
+        path=full_path,
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    return batch_spec
+
+
+@pytest.fixture
+def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
+    keys: List[str] = [
+        "path/A-100.csv.gz",
+        "path/A-101.csv.gz",
+        "directory/B-1.csv.gz",
+        "directory/B-2.csv.gz",
+    ]
+
+    for key in keys:
+        s3.put_object(
+            Bucket=s3_bucket,
+            Body=test_df_small_csv_compressed,
+            Key=key,
+        )
+    return s3_bucket, keys
+
+
+@pytest.fixture
+def azure_batch_spec() -> AzureBatchSpec:
+    container = "test_container"
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    path = keys[0]
+    full_path = os.path.join("mock_account.blob.core.windows.net", container, path)
+
+    batch_spec = AzureBatchSpec(
+        path=full_path,
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    return batch_spec
+
+
+def test_constructor_with_boto3_options():
     # default instantiation
     PandasExecutionEngine()
 
@@ -329,7 +468,7 @@ def test_resolve_metric_bundle():
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -337,7 +476,7 @@ def test_resolve_metric_bundle():
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -366,12 +505,12 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     mean = MetricConfiguration(
         metric_name="column.i_don't_exist",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     stdev = MetricConfiguration(
         metric_name="column.nonexistent",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metrics = (mean, stdev)
 
@@ -425,97 +564,6 @@ def test_get_batch_with_split_on_whole_table_filesystem(
         )
     )
     assert test_df.dataframe.shape == (5, 2)
-
-
-@pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-
-
-@pytest.fixture
-def s3(aws_credentials):
-    with mock_s3():
-        yield boto3.client("s3", region_name="us-east-1")
-
-
-@pytest.fixture
-def s3_bucket(s3):
-    bucket: str = "test_bucket"
-    s3.create_bucket(Bucket=bucket)
-    return bucket
-
-
-@pytest.fixture
-def test_df_small() -> pd.DataFrame:
-    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
-
-
-@pytest.fixture
-def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv.gz"
-    test_df_small.to_csv(path, index=False, compression="gzip")
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_df_small_csv(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv"
-    test_df_small.to_csv(path, index=False)
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_s3_files(s3, s3_bucket, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    for key in keys:
-        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.parquet",
-        "directory/B-2.parquet",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = Path(tmpdir) / "file.parquet"
-    test_df_small.to_parquet(path)
-    for key in keys:
-        if key.endswith(".parquet"):
-            with open(path, "rb") as f:
-                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
-        else:
-            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
-    bucket, keys = test_s3_files
-    path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
-
-    batch_spec = S3BatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
 
 
 def test_get_batch_with_split_on_whole_table_s3(
@@ -586,24 +634,6 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
                 batch_definition=batch_def_no_key
             )
         )
-
-
-@pytest.fixture
-def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
-    keys: List[str] = [
-        "path/A-100.csv.gz",
-        "path/A-101.csv.gz",
-        "directory/B-1.csv.gz",
-        "directory/B-2.csv.gz",
-    ]
-
-    for key in keys:
-        s3.put_object(
-            Bucket=s3_bucket,
-            Body=test_df_small_csv_compressed,
-            Key=key,
-        )
-    return s3_bucket, keys
 
 
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
@@ -864,3 +894,53 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     assert split_df.dataframe.shape == (2, 10)
     assert split_df.dataframe.id.min() == 54
     assert split_df.dataframe.id.max() == 59
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+)
+def test_constructor_with_azure_options(mock_azure_conn):
+    # default instantiation
+    PandasExecutionEngine()
+
+    # instantiation with custom parameters
+    engine = PandasExecutionEngine(discard_subset_failing_expectations=True)
+    assert "discard_subset_failing_expectations" in engine.config
+    assert engine.config.get("discard_subset_failing_expectations") is True
+    custom_azure_options = {"account_url": "my_account_url"}
+    engine = PandasExecutionEngine(azure_options=custom_azure_options)
+    assert "azure_options" in engine.config
+    assert engine.config.get("azure_options")["account_url"] == "my_account_url"
+
+
+@mock.patch(
+    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
+)
+def test_get_batch_data_with_azure_batch_spec(
+    mock_azure_conn,
+    azure_batch_spec,
+):
+    mock_blob_client = mock_azure_conn().get_blob_client()
+    mock_azure_obj = mock_blob_client.download_blob()
+    mock_azure_obj.readall.return_value = (
+        b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
+    )
+
+    df = PandasExecutionEngine().get_batch_data(batch_spec=azure_batch_spec)
+
+    mock_azure_conn().get_blob_client.assert_called_with(
+        container="test_container", blob="path/A-100.csv"
+    )
+    mock_azure_obj.readall.assert_called_once()
+
+    assert df.dataframe.shape == (3, 3)
+
+
+def test_get_batch_with_no_azure_configured(azure_batch_spec):
+    # if Azure BlobServiceClient was not configured
+    execution_engine_no_azure = PandasExecutionEngine()
+    execution_engine_no_azure._azure = None
+
+    # Raises error due the connection object not being set
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)
