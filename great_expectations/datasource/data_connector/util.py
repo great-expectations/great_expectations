@@ -345,7 +345,23 @@ def list_gcs_keys(
     recursive: bool = False,
 ) -> List[str]:
     """
-    TODO(cdkini): Write docstring!
+    Utilizes the GCS connection object to retrieve blob names based on user-provided criteria.
+
+    For InferredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and
+    search for files using RegEx only at the level specified by that bucket and prefix.
+
+    This restriction for the ConfiguredAssetGCSDataConnector is needed because paths on GCS are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name. Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible due to the path ambiguity.
+
+    Args:
+        gcs (storage.Client): GCS connnection object responsible for accessing bucket
+        query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
+        recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
+
+    Returns:
+        List of keys representing GCS file paths (as filtered by the `query_options` dict)
     """
     keys: List[str] = []
     prefix: Optional[str] = query_options["prefix"]
@@ -354,12 +370,12 @@ def list_gcs_keys(
     depth: int = prefix.count("/")
 
     for blob in gcs.list_blobs(**query_options):
-        name: str = blob.name
-        if name.endswith("/"):  # GCS includes directories in blob output
+        key: str = blob.name
+        if key.endswith("/"):  # GCS includes directories in blob output
             continue
         # Must be recursive OR be non-recursive and share the exact same prefix
-        if recursive or name.count("/") == depth:
-            keys.append(name)
+        if recursive or key.count("/") == depth:
+            keys.append(key)
 
     return keys
 
