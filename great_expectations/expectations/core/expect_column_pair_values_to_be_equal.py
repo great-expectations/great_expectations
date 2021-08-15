@@ -1,15 +1,6 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
@@ -19,15 +10,9 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import InvalidExpectationConfigurationError, TableExpectation
+from ..expectation import ColumnPairMapExpectation, InvalidExpectationConfigurationError
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
-
-
-class ExpectColumnPairValuesToBeEqual(TableExpectation):
+class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     """
     Expect the values in column A to be the same as column B.
 
@@ -72,7 +57,7 @@ class ExpectColumnPairValuesToBeEqual(TableExpectation):
         "requirements": [],
     }
 
-    metric_dependencies = ("equal_columns",)
+    map_metric = "column_pair_values.equal"
     success_keys = (
         "column_A",
         "column_B",
@@ -80,12 +65,9 @@ class ExpectColumnPairValuesToBeEqual(TableExpectation):
     )
 
     default_kwarg_values = {
-        "column_A": None,
-        "column_B": None,
-        "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
+        "mostly": 1.0,
         "parse_strings_as_datetimes": None,
         "result_format": "BASIC",
         "include_config": True,
