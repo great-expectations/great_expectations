@@ -12,6 +12,7 @@ from ...render.util import (
 )
 from ..expectation import ColumnPairMapExpectation, InvalidExpectationConfigurationError
 
+
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     """
     Expect the values in column A to be the same as column B.
