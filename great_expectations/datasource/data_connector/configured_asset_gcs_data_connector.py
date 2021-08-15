@@ -105,4 +105,4 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"gs://{os.path.join(self._bucket, path)}"
+        return f"gs://{os.path.join(self._bucket_or_name, path)}"
