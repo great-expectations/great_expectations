@@ -253,84 +253,37 @@ def test_instantiation_without_args(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
-# FIXME(cdkini): Add tests to gain coverage over alternative auth methods!
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+)
+def test_instantiation_with_credential_arg(
+    mock_gcs_conn, mock_list_keys, expected_config_dict
+):
+    Credentials = mock.Mock()
+    my_data_connector = ConfiguredAssetGCSDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        gcs_options={
+            "credentials": Credentials,
+        },
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        bucket_or_name="my_bucket",
+        prefix="",
+        assets={"alpha": {}},
+    )
 
-# @mock.patch(
-#     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-#     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-# )
-# @mock.patch(
-#     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
-# )
-# def test_instantiation_with_credential_arg(
-#     mock_gcs_conn, mock_list_keys, expected_config_dict
-# ):
-#     my_data_connector = ConfiguredAssetGCSDataConnector(
-#         name="my_data_connector",
-#         datasource_name="FAKE_DATASOURCE_NAME",
-#         default_regex={
-#             "pattern": "alpha-(.*)\\.csv",
-#             "group_names": ["index"],
-#         },
-#         bucket_or_name="my_bucket",
-#         prefix="",
-#         assets={"alpha": {}},
-#     )
+    assert my_data_connector.self_check() == expected_config_dict
 
-#     assert my_data_connector.self_check() == expected_config_dict
-
-#     my_data_connector._refresh_data_references_cache()
-#     assert my_data_connector.get_data_reference_list_count() == 3
-#     assert my_data_connector.get_unmatched_data_references() == []
-
-# @mock.patch(
-#     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-#     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-# )
-# @mock.patch(
-#     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
-# )
-# def test_instantiation_from_credential_json(
-#     mock_gcs_conn, mock_list_keys, expected_config_dict
-# ):
-#     my_data_connector = ConfiguredAssetGCSDataConnector(
-#         name="my_data_connector",
-#         datasource_name="FAKE_DATASOURCE_NAME",
-#         default_regex={
-#             "pattern": "alpha-(.*)\\.csv",
-#             "group_names": ["index"],
-#         },
-#         bucket_or_name="my_bucket",
-#         prefix="",
-#         assets={"alpha": {}},
-#     )
-
-#     assert my_data_connector.self_check() == expected_config_dict
-
-#     my_data_connector._refresh_data_references_cache()
-#     assert my_data_connector.get_data_reference_list_count() == 3
-#     assert my_data_connector.get_unmatched_data_references() == []
-
-
-# @mock.patch(
-#     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
-# )
-# def test_instantiation_with_multiple_auth_methods_raises_error(
-#     mock_gcs_conn,
-# ):
-#     # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
-#     with pytest.raises(AssertionError):
-#         ConfiguredAssetGCSDataConnector(
-#             name="my_data_connector",
-#             datasource_name="FAKE_DATASOURCE_NAME",
-#             default_regex={
-#                 "pattern": "alpha-(.*)\\.csv",
-#                 "group_names": ["index"],
-#             },
-#             bucket_or_name="my_bucket",
-#             prefix="",
-#             assets={"alpha": {}},
-#         )
+    my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_unmatched_data_references() == []
 
 
 @mock.patch(
