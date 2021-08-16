@@ -1788,7 +1788,6 @@ def _sqlalchemy_column_pair_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-
     selectable = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
