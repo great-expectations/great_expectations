@@ -1770,6 +1770,51 @@ def _sqlalchemy_column_map_condition_values(
     ]
 
 
+def _sqlalchemy_column_pair_map_condition_values(
+    cls,
+    execution_engine: SqlAlchemyExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+
+    selectable = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
+    )
+
+    # noinspection PyPep8Naming
+    column_A_name = accessor_domain_kwargs["column_A"]
+    # noinspection PyPep8Naming
+    column_B_name = accessor_domain_kwargs["column_B"]
+
+    column_list = [column_A_name, column_B_name]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    query = (
+        sa.select(sa.column(column_A_name), sa.column(column_B_name))
+        .select_from(selectable)
+        .where(boolean_mapped_unexpected_values)
+    )
+
+    result_format = metric_value_kwargs["result_format"]
+    if result_format["result_format"] != "COMPLETE":
+        query = query.limit(result_format["partial_unexpected_count"])
+
+    return [dict(val) for val in execution_engine.engine.execute(query).fetchall()]
+
+
 def _sqlalchemy_multicolumn_map_condition_values(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -2300,6 +2345,16 @@ class MapMetricProvider(MetricProvider):
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_sqlalchemy_column_map_condition_value_counts,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_column_pair_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
