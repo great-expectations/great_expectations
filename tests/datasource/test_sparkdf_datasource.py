@@ -107,8 +107,7 @@ def test_force_reuse_spark_context(
     """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession  # isort:skip
 
     dataset_name = "test_spark_dataset"
 
@@ -151,8 +150,7 @@ def test_spark_config_is_passed_through(
     """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession  # isort:skip
 
     dataset_name = "test_spark_dataset"
 
@@ -199,8 +197,8 @@ def test_erroring_force_reuse_spark_context(
 
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession
-    from py4j.java_collections import Py4JError
+    from pyspark.sql import SparkSession  # isort:skip
+    from py4j.java_collections import Py4JError  # isort:skip
 
     dataset_name = "test_dataset"
     tmp_parquet_filename = os.path.join(
