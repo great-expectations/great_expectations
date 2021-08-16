@@ -1815,6 +1815,38 @@ def _sqlalchemy_column_pair_map_condition_values(
     return [dict(val) for val in execution_engine.engine.execute(query).fetchall()]
 
 
+def _sqlalchemy_column_pair_map_condition_filtered_row_count(
+    cls,
+    execution_engine: SqlAlchemyExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return value counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    selectable = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
+    )
+
+    # noinspection PyPep8Naming
+    column_A_name = accessor_domain_kwargs["column_A"]
+    # noinspection PyPep8Naming
+    column_B_name = accessor_domain_kwargs["column_B"]
+
+    column_list = [column_A_name, column_B_name]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    return execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(selectable)
+    ).one()[0]
+
+
 def _sqlalchemy_multicolumn_map_condition_values(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -2355,6 +2387,15 @@ class MapMetricProvider(MetricProvider):
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_sqlalchemy_column_pair_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_sqlalchemy_column_pair_map_condition_filtered_row_count,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
