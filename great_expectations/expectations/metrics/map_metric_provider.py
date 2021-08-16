@@ -633,7 +633,11 @@ def column_pair_function_partial(
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
-                return column_pair_function, compute_domain_kwargs, accessor_domain_kwargs
+                return (
+                    column_pair_function,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
 
             return inner_func
 
