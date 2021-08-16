@@ -580,6 +580,65 @@ def column_pair_function_partial(
 
         return wrapper
 
+    elif issubclass(engine, SqlAlchemyExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
+            raise ValueError(
+                "SqlAlchemyExecutionEngine only supports map_fn for column_pair_function_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SqlAlchemyExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_list = [column_A_name, column_B_name]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                column_pair_function = metric_fn(
+                    cls,
+                    sa.column(column_A_name),
+                    sa.column(column_B_name),
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return column_pair_function, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
     else:
         raise ValueError("Unsupported engine for column_pair_function_partial")
 
