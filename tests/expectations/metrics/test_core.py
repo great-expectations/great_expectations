@@ -24,11 +24,11 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
-def test_metric_loads():
+def test_metric_loads_pd():
     assert get_metric_provider("column.max", PandasExecutionEngine()) is not None
 
 
-def test_basic_metric():
+def test_basic_metric_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
@@ -109,7 +109,7 @@ def test_stdev_metric_pd():
     assert results == {desired_metric.id: 1}
 
 
-def test_max_metric_pd_column_exists():
+def test_max_metric_column_exists_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
@@ -137,7 +137,7 @@ def test_max_metric_pd_column_exists():
     assert results == {desired_metric.id: 3}
 
 
-def test_max_metric_pd_column_does_not_exist():
+def test_max_metric_column_does_not_exist_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
@@ -171,7 +171,7 @@ def test_max_metric_pd_column_does_not_exist():
     )
 
 
-def test_max_metric_sa_column_exists(sa):
+def test_max_metric_column_exists_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
     metrics: dict = {}
@@ -213,7 +213,7 @@ def test_max_metric_sa_column_exists(sa):
     assert results == {desired_metric.id: 2}
 
 
-def test_max_metric_sa_column_does_not_exist(sa):
+def test_max_metric_column_does_not_exist_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
     metrics: dict = {}
@@ -245,7 +245,7 @@ def test_max_metric_sa_column_does_not_exist(sa):
     )
 
 
-def test_max_metric_spark_column_exists(spark_session):
+def test_max_metric_column_exists_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame({"a": [1, 2, 1]}),
@@ -291,7 +291,7 @@ def test_max_metric_spark_column_exists(spark_session):
     assert results == {desired_metric.id: 2}
 
 
-def test_max_metric_spark_column_does_not_exist(spark_session):
+def test_max_metric_column_does_not_exist_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame({"a": [1, 2, 1]}),
@@ -522,7 +522,7 @@ def test_map_column_value_lengths_between_pd():
     assert ser_expected_lengths.equals(result_series)
 
 
-def test_map_unique_pd_column_exists():
+def test_map_unique_column_exists_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, 4, None]}))
 
     metrics: dict = {}
@@ -584,7 +584,7 @@ def test_map_unique_pd_column_exists():
     assert metrics[unexpected_rows_metric.id]["a"].values == [3]
 
 
-def test_map_unique_pd_column_does_not_exist():
+def test_map_unique_column_does_not_exist_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
 
     metrics: dict = {}
@@ -615,7 +615,7 @@ def test_map_unique_pd_column_does_not_exist():
     )
 
 
-def test_map_unique_sa_column_exists(sa):
+def test_map_unique_column_exists_sa(sa):
     engine = build_sa_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
@@ -721,7 +721,7 @@ def test_map_unique_sa_column_exists(sa):
     assert results[desired_metric.id] == [(3, "baz"), (3, "qux")]
 
 
-def test_map_unique_sa_column_does_not_exist(sa):
+def test_map_unique_column_does_not_exist_sa(sa):
     engine = build_sa_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
@@ -756,7 +756,7 @@ def test_map_unique_sa_column_does_not_exist(sa):
     )
 
 
-def test_map_unique_spark_column_exists(spark_session):
+def test_map_unique_column_exists_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -854,7 +854,7 @@ def test_map_unique_spark_column_exists(spark_session):
     assert results[desired_metric.id] == [(3, "bar"), (3, "baz")]
 
 
-def test_map_unique_spark_column_does_not_exist(spark_session):
+def test_map_unique_column_does_not_exist_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1159,7 +1159,7 @@ def test_column_pairs_equal_metric_pd():
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
-            "ignore_row_if": "never",
+            "ignore_row_if": "neither",
         },
         metric_dependencies={
             "table.columns": table_columns_metric,
@@ -1436,7 +1436,7 @@ def test_distinct_metric_pd():
     assert results == {desired_metric.id: {1, 2, 3}}
 
 
-def test_sa_batch_aggregate_metrics(caplog, sa):
+def test_batch_aggregate_metrics_sa(caplog, sa):
     import datetime
 
     engine = build_sa_engine(
@@ -1562,7 +1562,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     assert found_message
 
 
-def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
+def test_batch_aggregate_metrics_spark(caplog, spark_session):
     import datetime
 
     engine: SparkDFExecutionEngine = build_spark_engine(
@@ -1679,7 +1679,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     assert found_message
 
 
-def test_map_multicolumn_sum_equal():
+def test_map_multicolumn_sum_equal_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
             data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
@@ -1963,7 +1963,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
     assert len(metrics[unexpected_rows_metric.id][0]) == 4
 
 
-def test_map_compound_columns_unique():
+def test_map_compound_columns_unique_pd():
     engine = build_pandas_engine(
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]})
     )
@@ -2118,7 +2118,7 @@ def test_map_compound_columns_unique():
     )
 
 
-def test_map_select_column_values_unique_within_record():
+def test_map_select_column_values_unique_within_record_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
             data={
