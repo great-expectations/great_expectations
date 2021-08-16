@@ -205,6 +205,7 @@ def test_erroring_when_using_external_spark_context(
         tmp_path_factory.mktemp(dataset_name).as_posix(), dataset_name
     )
     spark = SparkSession.builder.appName("local").master("local[1]").getOrCreate()
+    spark.conf.set("spark.sql.shuffle.partitions", "2")  # set some non default value
     data = {"col1": [0, 1, 2], "col2": ["a", "b", "c"]}
 
     spark_df = spark.createDataFrame(pd.DataFrame(data))
