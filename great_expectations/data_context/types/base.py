@@ -456,7 +456,7 @@ class DataConnectorConfigSchema(Schema):
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
 subclass of the FilePathDataConnector class (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -469,7 +469,7 @@ configuration to continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
 filesystem type of the data connector (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -484,7 +484,7 @@ configuration to continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
@@ -499,7 +499,7 @@ continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
@@ -512,7 +512,7 @@ continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3 type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
@@ -527,7 +527,7 @@ continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
 Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                     """
@@ -553,7 +553,7 @@ continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
 GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                     """
@@ -577,7 +577,7 @@ continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
@@ -819,7 +819,7 @@ class DatasourceConfigSchema(Schema):
         if "generators" in data:
             raise ge_exceptions.InvalidConfigError(
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
-                'GE, that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
+                'GE that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
             )
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
@@ -837,7 +837,7 @@ class DatasourceConfigSchema(Schema):
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data source, that are required only by a
+                f"""Your current configuration uses one or more keys in a data source that are required only by a
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
                 """
             )
