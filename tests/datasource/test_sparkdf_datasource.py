@@ -98,6 +98,97 @@ def test_sparkdf_datasource_custom_data_asset(
     assert res.success is True
 
 
+def test_force_reuse_spark_context(
+        data_context_parameterized_expectation_suite,
+        tmp_path_factory,
+        test_backends
+):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
+    from pyspark.sql import SparkSession
+    dataset_name = "test_spark_dataset"
+
+    spark = SparkSession.builder.appName("local").master("local[1]").getOrCreate()
+    data = {
+        "col1": [0, 1, 2],
+        "col2": ["a", "b", "c"]
+    }
+
+    spark_df = spark.createDataFrame(pd.DataFrame(data))
+    tmp_parquet_filename=os.path.join(
+        tmp_path_factory.mktemp(dataset_name).as_posix(),
+        dataset_name
+    )
+    spark_df.write.format("parquet").save(tmp_parquet_filename)
+
+    data_context_parameterized_expectation_suite.add_datasource(
+        dataset_name,
+        class_name="SparkDFDatasource",
+        force_reuse_spark_context=True,
+        module_name="great_expectations.datasource",
+        batch_kwargs_generators={}
+    )
+
+    df = spark.read.format("parquet").load(tmp_parquet_filename)
+    batch_kwargs = {"dataset": df, "datasource": dataset_name}
+    _ = (
+        data_context_parameterized_expectation_suite
+            .create_expectation_suite(dataset_name)
+    )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        batch_kwargs=batch_kwargs,
+        expectation_suite_name=dataset_name
+    )
+    results = batch.expect_column_max_to_be_between("col1", min_value=1, max_value=100)
+    assert results.success, "Failed to use external SparkSession"
+    spark.stop()
+
+
+def test_erroring_force_reuse_spark_context(
+        data_context_parameterized_expectation_suite,
+        tmp_path_factory,
+        test_backends
+):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+    from pyspark.sql import SparkSession
+    from py4j.java_collections import Py4JError
+    dataset_name = "test_dataset"
+    tmp_parquet_filename = os.path.join(
+        tmp_path_factory.mktemp(dataset_name).as_posix(),
+        dataset_name
+    )
+    spark = SparkSession.builder.appName("local").master("local[1]").getOrCreate()
+    data = {
+        "col1": [0, 1, 2],
+        "col2": ["a", "b", "c"]
+    }
+
+    spark_df = spark.createDataFrame(pd.DataFrame(data))
+    spark_df.write.format("parquet").save(tmp_parquet_filename)
+
+    data_context_parameterized_expectation_suite.add_datasource(
+        dataset_name,
+        class_name="SparkDFDatasource",
+        # not using to force_reuse_spark_context to create the expected Py4JError
+        module_name="great_expectations.datasource",
+        batch_kwargs_generators={}
+    )
+    with pytest.raises(Py4JError):
+        df = spark.read.format("parquet").load(tmp_parquet_filename)
+        batch_kwargs = {"dataset": df, "datasource": dataset_name}
+        _ = (
+            data_context_parameterized_expectation_suite
+                .create_expectation_suite(dataset_name)
+        )
+        batch = data_context_parameterized_expectation_suite.get_batch(
+            batch_kwargs=batch_kwargs,
+            expectation_suite_name=dataset_name
+        )
+        _ = batch.expect_column_max_to_be_between("col1", min=1, max=100)
+
+
 def test_create_sparkdf_datasource(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
