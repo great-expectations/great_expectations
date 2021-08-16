@@ -8,8 +8,7 @@ except ImportError:
     azure = None
 
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import PathBatchSpec, AzureBatchSpec
-
+from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
