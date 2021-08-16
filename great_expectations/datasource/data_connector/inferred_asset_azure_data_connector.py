@@ -2,9 +2,13 @@ import logging
 import os
 from typing import List, Optional
 
+try:
+    from azure.storage.blob import BlobServiceClient
+except ImportError:
+    azure = None
+
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, AzureBatchSpec
-from great_expectations.exceptions.exceptions import ParserError
 
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
@@ -17,11 +21,11 @@ logger = logging.getLogger(__name__)
 
 class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
     """
-    Extension of InferredAssetFilePathDataConnector used to connect to Azure blob store
+    Extension of InferredAssetFilePathDataConnector used to connect to Azure Blob Storage
 
     The InferredAssetAzureDataConnector is one of two classes (ConfiguredAssetAzureDataConnector being the
-    other one) designed for connecting to filesystem-like data, more specifically files on Azure blob store. It
-    connects to assets inferred from container, prefix, and file name by default_regex.
+    other one) designed for connecting to filesystem-like data, more specifically files on Azure Blob Storage. It
+    connects to assets inferred from container, name_starts_with, and file name by default_regex.
 
     As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
     docs if a greater understanding of the supported authentication methods and general functionality is desired.
@@ -42,12 +46,12 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
     ):
         """
-        InferredAssetAzureDataConnector for connecting to Azure Blob store.
+        InferredAssetAzureDataConnector for connecting to Azure Blob Storage.
 
         Args:
             name (str): required name for data_connector
             datasource_name (str): required name for datasource
-            container (str): container for Azure blob store
+            container (str): container for Azure Blob Storage
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
             sorters (list): optional list of sorters for sorting data_references
@@ -73,6 +77,15 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
 
         if azure_options is None:
             azure_options = {}
+
+        # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
+        # use in authentication (but not both). If the format or content of the provided keys is invalid,
+        # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
+        conn_str: Optional[str] = azure_options.get("conn_str")
+        account_url: Optional[str] = azure_options.get("account_url")
+        assert bool(conn_str) ^ bool(
+            account_url
+        ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
 
         try:
             if "conn_str" in azure_options:
@@ -125,7 +138,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         path: str,
         data_asset_name: Optional[str] = None,
     ) -> str:
-        # data_assert_name isn't used in this method.
+        # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         return os.path.join(
             f"{self._account_name}.blob.core.windows.net", self._container, path
