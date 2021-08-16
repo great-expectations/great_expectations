@@ -488,7 +488,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -583,7 +583,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
+        accessor_domain_kwargs = {}
         if domain_type == MetricDomainTypes.TABLE:
             if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
@@ -689,10 +689,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             Returns:
                 A dictionary of metric names and their corresponding now-queried values.
         """
-        resolved_metrics = dict()
+        resolved_metrics = {}
 
         # We need a different query for each domain (where clause).
-        queries: Dict[Tuple, dict] = dict()
+        queries: Dict[Tuple, dict] = {}
         for (
             metric_to_resolve,
             engine_fn,

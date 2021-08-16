@@ -23,7 +23,7 @@ class ValidationOperatorAnonymizer(Anonymizer):
     def anonymize_validation_operator_info(
         self, validation_operator_name, validation_operator_obj
     ):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(
             validation_operator_name
         )
