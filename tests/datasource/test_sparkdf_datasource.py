@@ -101,6 +101,10 @@ def test_sparkdf_datasource_custom_data_asset(
 def test_force_reuse_spark_context(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
+    """
+    Ensure that using an external sparkSession can be used by specfying the
+    force_reuse_spark_context argument.
+    """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
@@ -141,6 +145,10 @@ def test_force_reuse_spark_context(
 def test_spark_config_is_passed_through(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
+    """
+    Ensure that an external SparkSession is not stopped when the spark_config matches
+    the one specfied in the GE Context.
+    """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
@@ -184,6 +192,11 @@ def test_spark_config_is_passed_through(
 def test_erroring_force_reuse_spark_context(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
+    """
+    Ensure an external sparkSession is stopped/re-created when not fitting the
+    spark_config or not having force_reuse_spark_context=True
+    """
+
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
     from pyspark.sql import SparkSession
