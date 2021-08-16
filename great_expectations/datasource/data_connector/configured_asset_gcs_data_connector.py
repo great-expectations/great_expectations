@@ -24,7 +24,7 @@ from great_expectations.execution_engine import ExecutionEngine
 
 class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure
+    Extension of ConfiguredAssetFilePathDataConnector used to connect to GCS
 
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
