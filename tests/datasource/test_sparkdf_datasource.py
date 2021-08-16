@@ -187,7 +187,7 @@ def test_spark_config_is_passed_through(
     spark.stop()
 
 
-def test_erroring_force_reuse_spark_context(
+def test_erroring_when_using_external_spark_context(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
     """
