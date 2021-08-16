@@ -1,16 +1,20 @@
 ---
 title: How to contribute a new Expectation to Great Expectations
 ---
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
 
 This guide will help you add a new Expectation to Great Expectations’ shared library. Your Expectation will be featured in the Expectations Gallery, along with many others developed by data practitioners from around the world as part of this collaborative community effort.
 
 To watch the video complement to this guide that shows an Expectation being implemented in real time, click here.
 
-:::note Prerequisites:
-This how-to guide assumes you have already:
-* [Set up your dev environment](/docs/contributing/contributing_setup) to contribute
-* [Signed the Contributor License Agreement](/docs/contributing/contributing_checklist) (CLA)
-:::
+<Prerequisites>
+
+  * [Set up your dev environment](/docs/contributing/contributing_setup) to contribute
+  * [Signed the Contributor License Agreement](/docs/contributing/contributing_checklist) (CLA)
+
+</Prerequisites>
 
 ### Steps
 
@@ -49,7 +53,7 @@ Recently we introduced a fast-track release process for community contributed Ex
 	* `Column map Expectations`: `expect_column_values_...` (e.g., `expect_column_values_to_match_regex`)
 	* `Column aggregate Expectations`: `expect_column_...` (e.g., `expect_column_mean_to_be_between`)
 	* Column pair map Expectations: `expect_column_pair_values_...` (e.g., `expect_column_pair_values_to_be_in_set`)
-	* Table Expectatons: `expect_table_...` (e.g., `expect_table_row_count_to_be_equal`)
+	* Table Expectations: `expect_table_...` (e.g., `expect_table_row_count_to_be_equal`)
 
 2. Name the file
 
@@ -150,7 +154,7 @@ The value of `examples` is a list of examples.
 
 Each example is a dictionary with two keys:
 
-* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named “mostly_threes” with 10 rows. If you define multiple columns, make sure that they have the same number of rows. If possible, include test data and tests that includes null values (None in the python test definition).
+* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named “mostly_threes” with 10 rows. If you define multiple columns, make sure that they have the same number of rows. If possible, include test data and tests that includes null values (None in the Python test definition).
 
 * `tests`: a list of test cases that use the data defined above as input to validate
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
@@ -182,7 +186,17 @@ When you define data in your examples, we will mostly guess the type of the colu
 
 The details of this step differ based on the type of Expectations you are implementing. 
 
-##### ColumnMapExpectation
+<Tabs
+  groupId="expectation-type"
+  defaultValue='columnmap'
+  values={[
+  {label: 'ColumnMapExpectation', value:'columnmap'},
+  {label: 'ColumnExpectation', value:'column'},
+  {label: 'ColumnPairMapExpectation', value:'columnpairmap'},
+  {label: 'TableExpectation', value:'table'},
+  ]}>
+
+<TabItem value="columnmap">
 
 Expectations that extend ColumnMapExpectation class work as follows:
 
@@ -217,7 +231,7 @@ The parent class expects the variable `condition_metric_name` to be set. Change 
 
 The Expectation declares that it needs a yes/no Metric “X” and the Metric Provider declares that it can compute this Metric. A match made in heaven.
 
-* Implement the computation of the Metric in your new Metric Provider class for at least one Execution Engines that Great Expectations supports, such as pandas, sqlalchemy, or spark. Most contributors find that starting with Pandas is the easiest and fastest way to build.
+* Implement the computation of the Metric in your new Metric Provider class for at least one Execution Engines that Great Expectations supports, such as pandas, sqlalchemy, or Spark. Most contributors find that starting with Pandas is the easiest and fastest way to build.
 
 The parent class of your Metric Provider class is `ColumnMapMetricProvider`. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
 
@@ -285,7 +299,7 @@ A good example of this pattern is `expect_column_value_z_scores_to_be_less_than`
 
 The Expectation declares “column_values.z_score.under_threshold” as its `condition_metric_name` (the Metric that answers the yes/no question for every row).
 
-The `ColumnValuesZScore` Metric Provider class that computes this Metric declares an additonal metric:
+The `ColumnValuesZScore` Metric Provider class that computes this Metric declares an additional metric:
 
 ````console
 function_metric_name = "column_values.z_score"
@@ -299,8 +313,9 @@ Consult the following files for the details of this pattern:
 * [great-expectations/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/metrics/column_map_metrics/column_values_z_score.py)
 :::
 
+</TabItem>
+<TabItem value="column">
 
-##### ColumnExpectation
 Expectations that extend ColumnExpectation class are evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
 
 Define success_keys of your Expectation
@@ -338,9 +353,9 @@ The parent class expects the variable metric_name to be set. Change the value of
 
 The Expectation declares that it needs a Metric “X” and the Metric Provider declares that it can compute this Metric.
 
-* Implement the computation of the Metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: pandas, sqlalchemy, spark. Most contributors find starting with Pandas is the easiest and fastest way to build.
+* Implement the computation of the Metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: pandas, sqlalchemy, Spark. Most contributors find starting with Pandas is the easiest and fastest way to build.
 
-The parent class of your Metric Provider class is `ColumnMetricProvider`. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
+The parent class of your Metric Provider class is `ColumnAggregateMetricProvider`. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
 
 :::note
 
@@ -360,12 +375,20 @@ This means that the method `_pandas` is a metric function that is decorated as a
 
 Implement this method to compute your Metric.
 
+</TabItem>
+<TabItem value="columnpairmap">
 
-##### ColumnPairMapExpectation
-Under Construction
+:::caution Under Construction
+:::
 
-##### TableExpectation
-Under Construction
+</TabItem>
+<TabItem value="table">
+
+:::caution Under Construction
+:::
+
+</TabItem>
+</Tabs>
 
 #### 7. Fill in the `library_metadata` dictionary.
 

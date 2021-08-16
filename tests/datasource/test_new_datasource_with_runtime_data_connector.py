@@ -48,23 +48,25 @@ def test_basic_datasource_runtime_data_connector_self_check(
 ):
     report = basic_datasource_with_runtime_data_connector.self_check()
     assert report == {
-        "execution_engine": {
-            "caching": True,
-            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-            "class_name": "PandasExecutionEngine",
-            "discard_subset_failing_expectations": False,
-            "boto3_options": {},
-        },
         "data_connectors": {
             "count": 1,
             "test_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
                 "data_asset_count": 0,
-                "example_data_asset_names": [],
                 "data_assets": {},
-                "unmatched_data_reference_count": 0,
+                "example_data_asset_names": [],
                 "example_unmatched_data_references": [],
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+                "unmatched_data_reference_count": 0,
             },
+        },
+        "execution_engine": {
+            "boto3_options": {},
+            "azure_options": {},
+            "caching": True,
+            "class_name": "PandasExecutionEngine",
+            "discard_subset_failing_expectations": False,
+            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
         },
     }
 

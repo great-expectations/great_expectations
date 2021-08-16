@@ -1,31 +1,8 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-import numpy as np
-import pandas as pd
-from dateutil.parser import parse
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
 from ..expectation import ColumnPairMapExpectation, InvalidExpectationConfigurationError
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
 
 
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
@@ -59,7 +36,6 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -75,19 +51,11 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "requirements": [],
     }
 
-    map_metric = ("column_pair_values.in_set",)
-    domain_keys = (
-        "batch_id",
-        "table",
-        "row_condition",
-        "condition_parser",
-        "column_A",
-        "column_B",
-    )
+    map_metric = "column_pair_values.in_set"
     success_keys = ("value_pairs_set", "ignore_row_if", "mostly")
 
     default_kwarg_values = {
-        "mostly": 1,
+        "mostly": 1.0,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -111,45 +79,3 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
-
-    # TODO: fill out prescriptive renderer
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column_A",
-                "column_B",
-                "parse_strings_as_datetimes",
-                "ignore_row_if",
-                "mostly",
-                "or_equal",
-                "row_condition",
-                "condition_parser",
-            ],
-        )
-
-    # def _validate(
-    #     self,
-    #     configuration: ExpectationConfiguration,
-    #     metrics: Dict,
-    #     runtime_configuration: dict = None,
-    #     execution_engine: ExecutionEngine = None,
-    # ):
-    #     equal_columns = metrics.get("column_pair_values.in_set")
-    #     return {"success": equal_columns.all()}

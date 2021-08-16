@@ -1,10 +1,12 @@
 import datetime
+import gzip
 import json
 import locale
 import logging
 import os
 import random
 import shutil
+from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
@@ -2198,7 +2200,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     tmp_path_factory,
     monkeypatch,
 ):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -2377,10 +2379,18 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
         )
 
         datasource_config: str = f"""
-        class_name: SimpleSqlalchemyDatasource
-        connection_string: sqlite:///{db_file_path}
-        introspection:
-          whole_table: {{}}
+        class_name: Datasource
+        execution_engine:
+          class_name: SqlAlchemyExecutionEngine
+          connection_string: sqlite:///{db_file_path}
+        data_connectors:
+          default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+              - default_identifier_name
+          default_inferred_data_connector_name:
+            class_name: InferredAssetSqlDataConnector
+            name: whole_table
         """
 
         # noinspection PyUnusedLocal
@@ -2396,7 +2406,7 @@ def assetless_dataconnector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -2447,7 +2457,7 @@ def deterministic_asset_dataconnector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -2840,7 +2850,7 @@ def empty_context_with_checkpoint_stats_enabled(empty_data_context_stats_enabled
 
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
@@ -2945,7 +2955,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_no_config_store(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -2968,7 +2978,7 @@ def titanic_data_context_stats_enabled_no_config_store(tmp_path_factory, monkeyp
 
 @pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -2991,7 +3001,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -3014,7 +3024,7 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -3057,7 +3067,7 @@ def titanic_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        engine = create_engine(f"sqlite:///{titanic_db_path}")
         assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
         return engine
     except ImportError:
@@ -3804,6 +3814,20 @@ def filesystem_csv_2(tmp_path):
     return base_dir
 
 
+@pytest.fixture
+def filesystem_csv_2_gz(filesystem_csv_2):
+    _compress_csv_in_dir(filesystem_csv_2)
+    return filesystem_csv_2
+
+
+def _compress_csv_in_dir(dir: os.PathLike):
+    dir = Path(dir)
+    for file in dir.glob("*.csv"):
+        file_gz = file.with_name(file.name + ".gz")
+        file_gz.write_bytes(gzip.compress(file.read_bytes(), compresslevel=1))
+        file.unlink()
+
+
 @pytest.fixture(scope="function")
 def filesystem_csv_3(tmp_path):
     base_dir = tmp_path / "filesystem_csv_3"
@@ -4371,7 +4395,7 @@ def yellow_trip_pandas_data_context(
     where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
     batch_filter_parameters is set to "01", "02", or "03"
     """
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))

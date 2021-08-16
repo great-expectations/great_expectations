@@ -123,7 +123,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -131,7 +131,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -139,7 +139,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -147,7 +147,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -166,7 +166,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_1,
             "table.columns": table_columns_metric,
@@ -175,7 +175,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_2,
             "table.columns": table_columns_metric,
@@ -184,7 +184,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_3,
             "table.columns": table_columns_metric,
@@ -193,7 +193,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_4,
             "table.columns": table_columns_metric,
@@ -229,6 +229,150 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         ):
             found_message = True
     assert found_message
+
+
+def test_get_domain_records_with_column_domain(sa):
+    df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("b")<5',
+            "condition_parser": "great_expectations__experimental__",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_column_df = df.iloc[:3]
+    engine = build_sa_engine(expected_column_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_column_pair_domain(sa):
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "row_condition": 'col("b")>2',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "either_value_is_missing",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_column_pair_df = pd.DataFrame(
+        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
+    )
+    engine = build_sa_engine(expected_column_pair_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "either_value_is_missing",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_column_pair_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+    engine = build_sa_engine(expected_column_pair_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_multicolumn_domain(sa):
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        }
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["a", "c"],
+            "row_condition": 'col("b")>2',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "all_values_are_missing",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_multicolumn_df = pd.DataFrame(
+        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
+    )
+    engine = build_sa_engine(expected_multicolumn_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "any_value_is_missing",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_multicolumn_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+    )
+    engine = build_sa_engine(expected_multicolumn_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
 
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
@@ -281,30 +425,6 @@ def test_get_compute_domain_with_column_pair(sa):
         "column_B": "b",
     }, "Accessor kwargs have been modified"
 
-    # Building new engine so that values still found
-    engine = build_sa_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
-    )
-    data2, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column_A": "a", "column_B": "b"}, domain_type="identity"
-    )
-
-    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select([sa.column("a"), sa.column("b")]).select_from(
-            engine.active_batch_data.selectable
-        )
-    ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data2)).fetchall()
-
-    # Ensuring that with no domain nothing happens to the data itself
-    assert raw_data == domain_data, "Data does not match after getting compute domain"
-    assert compute_kwargs == {
-        "column_A": "a",
-        "column_B": "b",
-    }, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
 
 # Testing for only untested use case - multicolumn
 def test_get_compute_domain_with_multicolumn(sa):
@@ -331,26 +451,6 @@ def test_get_compute_domain_with_multicolumn(sa):
         "column_list": ["a", "b", "c"]
     }, "Accessor kwargs have been modified"
 
-    # Checking for identity
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="identity"
-    )
-
-    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select([sa.column("a"), sa.column("b"), sa.column("c")]).select_from(
-            engine.active_batch_data.selectable
-        )
-    ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
-
-    # Ensuring that with no domain nothing happens to the data itself
-    assert raw_data == domain_data, "Data does not match after getting compute domain"
-    assert compute_kwargs == {
-        "column_list": ["a", "b", "c"]
-    }, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
 def test_get_compute_domain_with_column_domain(sa):
@@ -374,27 +474,6 @@ def test_get_compute_domain_with_column_domain(sa):
     assert compute_kwargs == {}, "Compute domain kwargs should be existent"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
-    # Testing for identity
-    engine = build_sa_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
-    )
-
-    # Loading batch data
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column": "a"}, domain_type=MetricDomainTypes.IDENTITY
-    )
-
-    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select([sa.column("a")]).select_from(engine.active_batch_data.selectable)
-    ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
-
-    # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
-    assert raw_data == domain_data, "Data does not match after getting compute domain"
-    assert compute_kwargs == {"column": "a"}, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
 
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition(sa):
@@ -404,10 +483,11 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
         domain_kwargs={
+            "column": "a",
             "row_condition": 'col("b") > 24',
             "condition_parser": "great_expectations__experimental__",
         },
-        domain_type="identity",
+        domain_type="column",
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
@@ -424,7 +504,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
     assert (
         "row_condition" in compute_kwargs.keys()
     ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
+    assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
@@ -460,34 +540,6 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "b"}, "Accessor kwargs have been modified"
 
-    # Should react differently for domain type identity
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={
-            "column": "b",
-            "row_condition": 'col("b") == 2',
-            "condition_parser": "great_expectations__experimental__",
-        },
-        domain_type="identity",
-    )
-
-    # Ensuring data has been properly queried
-    # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    engine = build_sa_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
-    )
-    raw_data = engine.engine.execute(
-        sa.select(["*"])
-        .select_from(engine.active_batch_data.selectable)
-        .where(sa.column("b") == 2)
-    ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
-
-    # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
 
 def test_get_compute_domain_with_nonexistent_condition_parser(sa):
     engine = build_sa_engine(
@@ -514,22 +566,22 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     desired_metric_1 = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_4 = MetricConfiguration(
         metric_name="column.does_not_exist",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
@@ -594,7 +646,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     condition_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -609,7 +661,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "unexpected_condition": condition_metric,
         },

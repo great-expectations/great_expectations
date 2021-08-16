@@ -342,6 +342,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "batch_kwargs",
         "batch_markers",
         "batch_parameters",
+        "expectation_suite_meta",
         "expectation_suite_name",
         "great_expectations_version",
         "run_id",
@@ -488,7 +489,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 
     # Version, run_id, batch id will be different
     del expected_evrs.meta["great_expectations_version"]
+    del expected_evrs.meta["expectation_suite_meta"]["great_expectations_version"]
     del evrs.meta["great_expectations_version"]
+    del evrs.meta["expectation_suite_meta"]["great_expectations_version"]
 
     del expected_evrs.meta["run_id"]
     del evrs.meta["run_id"]
@@ -496,6 +499,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
 
+    del expected_evrs.meta["validation_time"]
     del evrs.meta["validation_time"]
 
     assert evrs == expected_evrs
@@ -1338,10 +1342,13 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
         # Version and RUN-ID will be different
     del expected_evrs.meta["great_expectations_version"]
     del evrs.meta["great_expectations_version"]
+    del expected_evrs.meta["expectation_suite_meta"]["great_expectations_version"]
+    del evrs.meta["expectation_suite_meta"]["great_expectations_version"]
     del expected_evrs.meta["run_id"]
-    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]
+    del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
+    del expected_evrs.meta["validation_time"]
     del evrs.meta["validation_time"]
 
     assert evrs == expected_evrs

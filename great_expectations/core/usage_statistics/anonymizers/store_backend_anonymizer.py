@@ -31,7 +31,7 @@ class StoreBackendAnonymizer(Anonymizer):
         assert (
             store_backend_obj or store_backend_object_config
         ), "Must pass store_backend_obj or store_backend_object_config."
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         if store_backend_obj is not None:
             self.anonymize_object_info(
                 object_=store_backend_obj,

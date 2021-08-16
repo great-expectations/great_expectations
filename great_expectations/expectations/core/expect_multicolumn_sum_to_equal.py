@@ -1,4 +1,4 @@
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -8,9 +8,7 @@ from great_expectations.render.types import (
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
-class ExpectMulticolumnSumToEqual(TableExpectation):
-    # This expectation is a stub - it needs migration to the modular expectation API
-
+class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -24,9 +22,16 @@ class ExpectMulticolumnSumToEqual(TableExpectation):
         "requirements": [],
     }
 
-    metric_dependencies = tuple()
-    success_keys = ()
-    default_kwarg_values = {}
+    map_metric = "multicolumn_sum.equal"
+    success_keys = ("sum_total",)
+    default_kwarg_values = {
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "ignore_row_if": "all_values_are_missing",
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+    }
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

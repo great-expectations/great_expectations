@@ -266,6 +266,10 @@ class BaseDataContext:
         "ConfiguredAssetFilesystemDataConnector",
         "InferredAssetS3DataConnector",
         "ConfiguredAssetS3DataConnector",
+        "InferredAssetAzureDataConnector",
+        "ConfiguredAssetAzureDataConnector",
+        "InferredAssetGCSDataConnector",
+        "ConfiguredAssetGCSDataConnector",
         "InferredAssetSqlDataConnector",
         "ConfiguredAssetSqlDataConnector",
     ]
@@ -336,7 +340,7 @@ class BaseDataContext:
         )
 
         # Init stores
-        self._stores = dict()
+        self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id
@@ -381,7 +385,7 @@ class BaseDataContext:
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-        # the expectations_store doesnt yet exist by:
+        # the expectations_store does not yet exist by:
         # adding the data_context_id from the project_config
         # to the store_config under the key manually_initialize_store_backend_id
         if (store_name == self.expectations_store_name) and store_config.get(
@@ -1355,7 +1359,7 @@ class BaseDataContext:
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            logger.info("Setting run_name to: {}".format(run_name))
+            logger.info(f"Setting run_name to: {run_name}")
         if evaluation_parameters is None:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
@@ -2570,9 +2574,7 @@ class BaseDataContext:
         datasource = self.get_datasource(datasource_name)
 
         if not dry_run:
-            logger.info(
-                "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
-            )
+            logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
 
         profiling_results = {}
 
@@ -2585,9 +2587,7 @@ class BaseDataContext:
             datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
         except KeyError:
             # KeyError will happen if there is not datasource
-            raise ge_exceptions.ProfilerError(
-                "No datasource {} found.".format(datasource_name)
-            )
+            raise ge_exceptions.ProfilerError(f"No datasource {datasource_name} found.")
 
         if batch_kwargs_generator_name is None:
             # if no generator name is passed as an arg and the datasource has only
@@ -2821,9 +2821,7 @@ class BaseDataContext:
             run_name = run_name or "profiling"
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        logger.info(
-            "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
-        )
+        logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
 
         if not additional_batch_kwargs:
             additional_batch_kwargs = {}
@@ -2904,7 +2902,7 @@ class BaseDataContext:
         )
         profiling_results["results"].append((expectation_suite, validation_results))
 
-        self.validations_store.set(
+        validation_ref = self.validations_store.set(
             key=ValidationResultIdentifier(
                 expectation_suite_identifier=ExpectationSuiteIdentifier(
                     expectation_suite_name=expectation_suite_name
@@ -2914,6 +2912,10 @@ class BaseDataContext:
             ),
             value=validation_results,
         )
+
+        if isinstance(validation_ref, GeCloudIdAwareRef):
+            ge_cloud_id = validation_ref.ge_cloud_id
+            validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
         if isinstance(batch, Dataset):
             # For datasets, we can produce some more detailed statistics
@@ -3668,7 +3670,7 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir):
-        """Check if all uncommitted direcotries exist."""
+        """Check if all uncommitted directories exist."""
         uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
         for directory in cls.UNCOMMITTED_DIRECTORIES:
             if not os.path.isdir(os.path.join(uncommitted_dir, directory)):

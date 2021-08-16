@@ -207,7 +207,7 @@ class HtmlSiteStore:
         # HtmlSiteStore instance leaves scope.
         # Doing it this way allows us to prevent namespace collisions among keys while still having multiple
         # backends that write to the same directory structure.
-        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
+        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
 
@@ -258,7 +258,7 @@ class HtmlSiteStore:
         else:
             # this method does not support getting the URL of static assets
             raise ValueError(
-                "Cannot get URL for resource {:s}".format(str(resource_identifier))
+                f"Cannot get URL for resource {str(resource_identifier):s}"
             )
 
         # <WILL> : this is a hack for Taylor. Change this back. 20200924

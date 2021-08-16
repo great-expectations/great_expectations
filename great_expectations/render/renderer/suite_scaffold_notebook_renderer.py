@@ -27,7 +27,7 @@ We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Cha
         )
 
         if not self.batch_kwargs:
-            self.batch_kwargs = dict()
+            self.batch_kwargs = {}
         self.add_code_cell(
             f"""\
 import great_expectations as ge

@@ -285,20 +285,27 @@ def test_test_column_aggregate_expectation_function():
         result={
             "observed_value": 3,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0.0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=False,
+        meta={},
+        expectation_config=None,
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
     )
 
     assert asset.test_column_aggregate_expectation_function(
         expect_second_value_to_be, column="x", value=3, include_config=False
     ) == ExpectationValidationResult(
         result={
-            "observed_value": 3.0,
+            "observed_value": 3,
             "element_count": 5,
-            "missing_count": 0,
-            "missing_percent": 0.0,
+            "missing_count": None,
+            "missing_percent": None,
         },
         success=True,
     )
