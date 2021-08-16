@@ -260,15 +260,52 @@ def test_instantiation_without_args(
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
-def test_instantiation_with_credential_arg(
-    mock_gcs_conn, mock_list_keys, expected_config_dict
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.service_account.Credentials.from_service_account_file"
+)
+def test_instantiation_with_filename_arg(
+    mock_auth_method, mock_gcs_conn, mock_list_keys, expected_config_dict
 ):
-    Credentials = mock.Mock()
     my_data_connector = ConfiguredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
         gcs_options={
-            "credentials": Credentials,
+            "filename": "my_filename.json",
+        },
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        bucket_or_name="my_bucket",
+        prefix="",
+        assets={"alpha": {}},
+    )
+
+    assert my_data_connector.self_check() == expected_config_dict
+
+    my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_unmatched_data_references() == []
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.service_account.Credentials.from_service_account_info"
+)
+def test_instantiation_with_info_arg(
+    mock_auth_method, mock_gcs_conn, mock_list_keys, expected_config_dict
+):
+    my_data_connector = ConfiguredAssetGCSDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        gcs_options={
+            "info": "my_info",
         },
         default_regex={
             "pattern": "alpha-(.*)\\.csv",

@@ -6,8 +6,10 @@ logger = logging.getLogger(__name__)
 
 try:
     from google.cloud import storage
+    from google.oauth2 import service_account
 except ImportError:
     storage = None
+    service_account = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
     )
@@ -96,7 +98,16 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             gcs_options = {}
 
         try:
-            self._gcs = storage.Client(**gcs_options)
+            credentials = None  # If configured with gcloud CLI / env vars
+            if "filename" in gcs_options:
+                credentials = service_account.Credentials.from_service_account_file(
+                    **gcs_options
+                )
+            elif "info" in gcs_options:
+                credentials = service_account.Credentials.from_service_account_info(
+                    **gcs_options
+                )
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for ConfiguredAssetGCSDataConnector)."
