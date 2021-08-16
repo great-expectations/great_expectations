@@ -18,16 +18,8 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
     # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
-        ignore_row_if = kwargs.get("ignore_row_if")
-        if not ignore_row_if:
-            ignore_row_if = "both_values_are_missing"
-
         return column_A == column_B
 
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
-        ignore_row_if = kwargs.get("ignore_row_if")
-        if not ignore_row_if:
-            ignore_row_if = "both_values_are_missing"
-
         return sa.case((column_A == column_B, True), else_=False)
