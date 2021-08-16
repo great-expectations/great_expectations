@@ -21,7 +21,7 @@ class SiteBuilderAnonymizer(Anonymizer):
         if module_name is None:
             module_name = "great_expectations.render.renderer.site_builder"
 
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         self.anonymize_object_info(
             object_config={"class_name": class_name, "module_name": module_name},
             anonymized_info_dict=anonymized_info_dict,

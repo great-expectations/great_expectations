@@ -11,14 +11,14 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     mp = ColumnMax()
-    metric = MetricConfiguration("column.max", dict(), dict())
+    metric = MetricConfiguration("column.max", {}, {})
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=SqlAlchemyExecutionEngine(engine=empty_sqlite_db)
     )
     assert dependencies["metric_partial_fn"].id[0] == "column.max.aggregate_fn"
 
     mp = ColumnMax()
-    metric = MetricConfiguration("column.max", dict(), dict())
+    metric = MetricConfiguration("column.max", {}, {})
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=PandasExecutionEngine()
     )
@@ -38,9 +38,7 @@ def test_get_aggregate_count_aware_metric_dependencies(
     spark_session, basic_spark_df_execution_engine
 ):
     mp = ColumnValuesNonNull()
-    metric = MetricConfiguration(
-        "column_values.nonnull.unexpected_count", dict(), dict()
-    )
+    metric = MetricConfiguration("column_values.nonnull.unexpected_count", {}, {})
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=PandasExecutionEngine()
     )
@@ -48,9 +46,7 @@ def test_get_aggregate_count_aware_metric_dependencies(
         dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
     )
 
-    metric = MetricConfiguration(
-        "column_values.nonnull.unexpected_count", dict(), dict()
-    )
+    metric = MetricConfiguration("column_values.nonnull.unexpected_count", {}, {})
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=basic_spark_df_execution_engine
     )
@@ -60,7 +56,7 @@ def test_get_aggregate_count_aware_metric_dependencies(
     )
 
     metric = MetricConfiguration(
-        "column_values.nonnull.unexpected_count.aggregate_fn", dict(), dict()
+        "column_values.nonnull.unexpected_count.aggregate_fn", {}, {}
     )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert (
@@ -70,22 +66,22 @@ def test_get_aggregate_count_aware_metric_dependencies(
 
 def test_get_map_metric_dependencies():
     mp = ColumnMapMetricProvider()
-    metric = MetricConfiguration("foo.unexpected_count", dict(), dict())
+    metric = MetricConfiguration("foo.unexpected_count", {}, {})
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_rows", dict(), dict())
+    metric = MetricConfiguration("foo.unexpected_rows", {}, {})
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_values", dict(), dict())
+    metric = MetricConfiguration("foo.unexpected_values", {}, {})
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_value_counts", dict(), dict())
+    metric = MetricConfiguration("foo.unexpected_value_counts", {}, {})
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
-    metric = MetricConfiguration("foo.unexpected_index_list", dict(), dict())
+    metric = MetricConfiguration("foo.unexpected_index_list", {}, {})
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"

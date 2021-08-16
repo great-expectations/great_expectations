@@ -79,7 +79,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -87,7 +87,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -101,7 +101,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "column.standard_deviation": stdev,
             "column.mean": mean,
@@ -157,7 +157,7 @@ def test_resolve_metrics_with_extraneous_value_key():
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -192,18 +192,18 @@ def test_resolve_metrics_with_incomplete_metric_input():
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "column.standard_deviation": stdev,
             "column.mean": mean,
