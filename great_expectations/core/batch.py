@@ -414,7 +414,7 @@ class Batch(DictDot):
     ):
         self._data = data
         if batch_request is None:
-            batch_request = dict()
+            batch_request = {}
         self._batch_request = batch_request
         if batch_definition is None:
             batch_definition = IDDict()

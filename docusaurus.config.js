@@ -12,7 +12,11 @@ module.exports = {
   favicon: "img/favicon.ico",
   organizationName: "great-expectations",
   projectName: "great_expectations",
-  plugins: ["plugin-image-zoom"],
+  plugins: [
+	//["plugin-image-zoom"],
+	require.resolve('@cmfcmf/docusaurus-search-local'),
+  ],
+
   themeConfig: {
     prism: {
       theme: require("prism-react-renderer/themes/vsDark")
@@ -25,21 +29,6 @@ module.exports = {
       trackingID: 'UA-138955219-1',
       // Optional fields.
       anonymizeIP: true, // Should IPs be anonymized?
-    },
-    algolia: {
-      apiKey: '8709c7590891eefd523c1f30ce5a7297',
-      indexName: 'docs_intro',
-
-      // Optional: see doc section below
-      contextualSearch: true,
-
-      // Optional: see doc section below
-      appId: 'VA0TNB5QND',
-
-      // Optional: Algolia search parameters
-      searchParameters: {},
-
-      //... other Algolia params
     },
     zoomSelector: ".markdown :not(em) > img",
     announcementBar: {

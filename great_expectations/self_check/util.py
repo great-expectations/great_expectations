@@ -187,7 +187,7 @@ except (ImportError, KeyError):
 class SqlAlchemyConnectionManager:
     def __init__(self):
         self.lock = threading.Lock()
-        self._connections = dict()
+        self._connections = {}
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:

@@ -173,7 +173,7 @@ def build_evaluation_parameters(
     exploratory work.
     """
     evaluation_args = copy.deepcopy(expectation_args)
-    substituted_parameters = dict()
+    substituted_parameters = {}
 
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
@@ -359,11 +359,11 @@ def parse_evaluation_parameter(
 
 
 def _deduplicate_evaluation_parameter_dependencies(dependencies):
-    deduplicated = dict()
+    deduplicated = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []
         metrics = set()
-        metric_kwargs = dict()
+        metric_kwargs = {}
         for metric in required_metrics:
             if isinstance(metric, str):
                 metrics.add(metric)
