@@ -226,7 +226,7 @@ def test_erroring_when_using_external_spark_context(
         batch = data_context_parameterized_expectation_suite.get_batch(
             batch_kwargs=batch_kwargs, expectation_suite_name=dataset_name
         )
-        _ = batch.expect_column_max_to_be_between("col1", min=1, max=100)
+        _ = batch.expect_column_max_to_be_between("col1", min_value=1, max_value=100)
 
 
 def test_create_sparkdf_datasource(
