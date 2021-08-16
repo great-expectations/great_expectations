@@ -390,7 +390,7 @@ Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
