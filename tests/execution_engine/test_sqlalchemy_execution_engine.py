@@ -271,7 +271,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_B": "b",
             "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
-            "ignore_row_if": "either_value_is_missing",
+            "ignore_row_if": "both_values_are_missing",
         }
     )
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
@@ -293,7 +293,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
         domain_kwargs={
             "column_A": "b",
             "column_B": "c",
-            "row_condition": 'col("a")<6',
+            "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
             "ignore_row_if": "either_value_is_missing",
         }
@@ -301,7 +301,35 @@ def test_get_domain_records_with_column_pair_domain(sa):
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
+    )
+    engine = build_sa_engine(expected_column_pair_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "neither",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_column_pair_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5],
+            "b": [2.0, 3.0, 4.0, 5.0, None],
+            "c": [1.0, 2.0, 3.0, 4.0, 5.0],
+        }
     )
     engine = build_sa_engine(expected_column_pair_df, sa)
     expected_data = engine.engine.execute(
@@ -355,7 +383,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     data = engine.get_domain_records(
         domain_kwargs={
             "column_list": ["b", "c"],
-            "row_condition": 'col("a")<6',
+            "row_condition": 'col("a")<5',
             "condition_parser": "great_expectations__experimental__",
             "ignore_row_if": "any_value_is_missing",
         }
@@ -363,7 +391,40 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
     expected_multicolumn_df = pd.DataFrame(
-        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
+    )
+    engine = build_sa_engine(expected_multicolumn_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        }
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "ignore_row_if": "never",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_multicolumn_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        },
+        index=[0, 1, 2, 3, 4, 5],
     )
     engine = build_sa_engine(expected_multicolumn_df, sa)
     expected_data = engine.engine.execute(

@@ -399,7 +399,7 @@ Please check your config."""
                     subset=[column_A_name, column_B_name],
                 )
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )

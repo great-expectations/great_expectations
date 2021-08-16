@@ -1305,14 +1305,12 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         ]
     if context == "pandas":
         return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
             "expect_table_row_count_to_equal_other_table",
             "expect_column_values_to_match_like_pattern",
             "expect_column_values_to_not_match_like_pattern",
             "expect_column_values_to_match_like_pattern_list",
             "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
