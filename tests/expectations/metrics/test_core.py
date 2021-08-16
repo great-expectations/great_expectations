@@ -1159,7 +1159,7 @@ def test_column_pairs_equal_metric_pd():
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
-            "ignore_row_if": "never",
+            "ignore_row_if": "neither",
         },
         metric_dependencies={
             "table.columns": table_columns_metric,
