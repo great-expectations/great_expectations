@@ -680,8 +680,8 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
-    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
+    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
+    # Source: https://cloud.google.com/storage/docs/listing-objects
     #
     # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
     # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
@@ -756,8 +756,8 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
-    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
+    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
+    # Source: https://cloud.google.com/storage/docs/listing-objects
     #
     # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
     # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
