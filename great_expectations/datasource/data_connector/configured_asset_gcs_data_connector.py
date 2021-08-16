@@ -23,6 +23,27 @@ from great_expectations.execution_engine import ExecutionEngine
 
 
 class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
+    """
+    Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure
+
+    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+    can use to get individual batches of data. They add flexibility in how to obtain data
+    such as with time-based partitioning, splitting and sampling, or other techniques appropriate
+    for obtaining batches of data.
+
+    The ConfiguredAssetGCSDataConnector is one of two classes (InferredAssetGCSDataConnector being the
+    other one) designed for connecting to data on GCS.
+
+    A ConfiguredAssetGCSDataConnector requires an explicit specification of each DataAsset you want to connect to.
+    This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
+    with Google's official SDK, we utilize terms like "bucket_or_name" and "max_results". Since we convert these keys from YAML
+    to Python and directly pass them in to the GCS connection object, maintaining consistency is necessary for proper usage.
+
+    As much of the interaction with the SDK is done through a GCS Storage Client, please refer to the official
+    docs if a greater understanding of the supported authentication methods and general functionality is desired.
+    Source: https://googleapis.dev/python/storage/latest/client.html
+    """
+
     def __init__(
         self,
         name: str,
@@ -38,6 +59,23 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
+        """
+        ConfiguredAssetDataConnector for connecting to GCS.
+
+        Args:
+            name (str): required name for DataConnector
+            datasource_name (str): required name for datasource
+            container (str): container name for Google Cloud Storage
+            assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
+            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+            default_regex (dict): optional regex configuration for filtering data_references
+            sorters (list): optional list of sorters for sorting data_references
+            prefix (str): GCS prefix
+            delimiter (str): GCS delimiter
+            max_results (int): max blob filepaths to return
+            gcs_options (dict): wrapper object for optional GCS **kwargs
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        """
         logger.debug(f'Constructing ConfiguredAssetGCSDataConnector "{name}".')
 
         super().__init__(
@@ -65,6 +103,15 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
