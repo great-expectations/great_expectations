@@ -683,7 +683,7 @@ class Expectation(metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def run_diagnostics(self, pretty_print=True):
+    def run_diagnostics(self, execution_engine_args=None, pretty_print=True):
         """
         Produce a diagnostic report about this expectation.
         The current uses for this method's output are
@@ -791,6 +791,9 @@ class Expectation(metaclass=MetaExpectation):
                     upstream_metrics=upstream_metrics,
                 )
                 report_obj.update({"execution_engines": execution_engines})
+
+            if execution_engine_args:
+                execution_engines.update(**execution_engine_args)
 
             try:
                 tests = self._get_examples(return_only_gallery_examples=False)

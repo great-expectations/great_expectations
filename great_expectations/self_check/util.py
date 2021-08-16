@@ -1477,19 +1477,22 @@ def generate_expectation_tests(
 
     # use the expectation_execution_engines_dict (if provided) to request only the appropriate backends
     if expectation_execution_engines_dict is not None:
+        expectation_execution_engines_args = expectation_execution_engines_dict.copy()
+
+        include_pandas = expectation_execution_engines_args.pop(
+            "PandasExecutionEngine", False
+        )
+        include_spark = expectation_execution_engines_args.pop(
+            "SparkDFExecutionEngine", False
+        )
+        include_sqlalchemy = expectation_execution_engines_args.pop(
+            "SqlAlchemyExecutionEngine", False
+        )
         backends = build_test_backends_list(
-            include_pandas=expectation_execution_engines_dict.get(
-                "PandasExecutionEngine"
-            )
-            == True,
-            include_spark=expectation_execution_engines_dict.get(
-                "SparkDFExecutionEngine"
-            )
-            == True,
-            include_sqlalchemy=expectation_execution_engines_dict.get(
-                "SqlAlchemyExecutionEngine"
-            )
-            == True,
+            include_pandas=include_pandas,
+            include_spark=include_spark,
+            include_sqlalchemy=include_sqlalchemy,
+            **expectation_execution_engines_args,
         )
     else:
         backends = build_test_backends_list()
