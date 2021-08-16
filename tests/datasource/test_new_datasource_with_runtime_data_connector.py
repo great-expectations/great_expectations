@@ -62,6 +62,7 @@ def test_basic_datasource_runtime_data_connector_self_check(
         },
         "execution_engine": {
             "boto3_options": {},
+            "azure_options": {},
             "caching": True,
             "class_name": "PandasExecutionEngine",
             "discard_subset_failing_expectations": False,
