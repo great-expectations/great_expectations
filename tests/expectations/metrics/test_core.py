@@ -1114,6 +1114,7 @@ def test_column_pairs_equal_metric_pd():
             "column_B": "b",
             "ignore_row_if": "both_values_are_missing",
         },
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },

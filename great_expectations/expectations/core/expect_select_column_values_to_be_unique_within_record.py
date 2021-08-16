@@ -1,4 +1,4 @@
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -9,7 +9,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectSelectColumnValuesToBeUniqueWithinRecord(ColumnMapExpectation):
+class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",
@@ -24,16 +24,12 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(ColumnMapExpectation):
         "requirements": [],
     }
 
-    metric_dependencies = tuple()
-    success_keys = (
-        "column_list",
-        "ignore_row_if",
-        "mostly",
-    )
+    map_metric = "select_column_values.unique.within_record"
+    success_keys = ()
     default_kwarg_values = {
-        "column_list": None,
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "ignore_row_if": "all_values_are_missing",
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
