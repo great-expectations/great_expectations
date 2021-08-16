@@ -365,19 +365,20 @@ def list_gcs_keys(
     Returns:
         List of keys representing GCS file paths (as filtered by the `query_options` dict)
     """
-    keys: List[str] = []
-    prefix: Optional[str] = query_options["prefix"]
-    if prefix is None:
-        prefix = ""
-    depth: int = prefix.count("/")
+    # Delimiter determines whether or not traversal of bucket is recursive
+    # Manually set to appropriate default if needed
+    delimiter = query_options["delimiter"]
+    if delimiter is None and not recursive:
+        query_options["delimiter"] = "/"
+    elif delimiter is not None and recursive:
+        query_options["delimiter"] = None
 
+    keys: List[str] = []
     for blob in gcs.list_blobs(**query_options):
-        key: str = blob.name
-        if key.endswith("/"):  # GCS includes directories in blob output
+        name: str = blob.name
+        if name.endswith("/"):  # GCS includes directories in blob output
             continue
-        # Must be recursive OR be non-recursive and share the exact same prefix
-        if recursive or key.count("/") == depth:
-            keys.append(key)
+        keys.append(name)
 
     return keys
 
