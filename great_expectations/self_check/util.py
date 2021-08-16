@@ -529,8 +529,7 @@ def get_dataset(
             index=False,
             if_exists="replace",
         )
-        bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
-        custom_sql = "SELECT * FROM " + bigquery_dataset + "." + table_name
+        custom_sql = f"SELECT * FROM {_bigquery_dataset()}.{table_name}"
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
@@ -1970,13 +1969,13 @@ def generate_test_table_name(
 
 
 def _create_bigquery_engine() -> Engine:
-
-    # The following environment variables will need to be
     gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT")
-    bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
-
-    if not gcp_project or not bigquery_dataset:
+    if not gcp_project:
         raise ValueError(
-            "Environment Variables GE_TEST_BIGQUERY_PROJECT and GE_TEST_BIGQUERY_DATASET are required to run expectation tests"
+            "Environment Variable GE_TEST_BIGQUERY_PROJECT is required to run expectation tests"
         )
-    return create_engine(f"bigquery://{gcp_project}/{bigquery_dataset}")
+    return create_engine(f"bigquery://{gcp_project}/{_bigquery_dataset()}")
+
+
+def _bigquery_dataset() -> str:
+    return os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")

@@ -54,6 +54,8 @@ After setting up authentication, you can run with your project using the environ
 
     GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT> pytest tests/test_definitions/test_expectations_cfe.py --bigquery --no-spark --no-postgresql -k bigquery
 
+Note that if you prefer to use a different dataset besides "test_ci", you can specify a different dataset with `GE_TEST_BIGQUERY_DATASET`.
+
 Writing unit and integration tests
 ----------------------------------
 
