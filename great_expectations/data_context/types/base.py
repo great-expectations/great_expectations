@@ -281,22 +281,35 @@ class DataConnectorConfig(DictDot):
         self,
         class_name,
         module_name=None,
+        credentials=None,
         assets=None,
         base_directory=None,
         glob_directive=None,
         default_regex=None,
         batch_identifiers=None,
-        bucket=None,
-        prefix=None,
-        delimiter=None,
-        max_keys=None,
-        boto3_options=None,
         sorters=None,
         batch_spec_passthrough=None,
+        # S3
+        boto3_options=None,
+        bucket=None,
+        max_keys=None,
+        # Azure
+        azure_options=None,
+        container=None,
+        name_starts_with=None,
+        # GCS
+        bucket_or_name=None,
+        max_results=None,
+        # Both S3/GCS
+        prefix=None,
+        # Both S3/Azure
+        delimiter=None,
         **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
+        if credentials is not None:
+            self.credentials = credentials
         if assets is not None:
             self.assets = assets
         if base_directory is not None:
@@ -307,20 +320,41 @@ class DataConnectorConfig(DictDot):
             self.default_regex = default_regex
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
-        if bucket is not None:
-            self.bucket = bucket
-        if prefix is not None:
-            self.prefix = prefix
-        if delimiter is not None:
-            self.delimiter = delimiter
-        if max_keys is not None:
-            self.max_keys = max_keys
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
         if sorters is not None:
             self.sorters = sorters
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
+
+        # S3
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
+        if bucket is not None:
+            self.bucket = bucket
+        if max_keys is not None:
+            self.max_keys = max_keys
+
+        # Azure
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if container is not None:
+            self.container = container
+        if name_starts_with is not None:
+            self.name_starts_with = name_starts_with
+
+        # GCS
+        if bucket_or_name is not None:
+            self.bucket_or_name = bucket_or_name
+        if max_results is not None:
+            self.max_results = max_results
+
+        # Both S3/GCS
+        if prefix is not None:
+            self.prefix = prefix
+
+        # Both S3/Azure
+        if delimiter is not None:
+            self.delimiter = delimiter
+
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -355,16 +389,38 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
     default_regex = fields.Dict(required=False, allow_none=True)
+    credentials = fields.Raw(required=False, allow_none=True)
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
-    bucket = fields.String(required=False, allow_none=True)
-    prefix = fields.String(required=False, allow_none=True)
-    delimiter = fields.String(required=False, allow_none=True)
-    max_keys = fields.Integer(required=False, allow_none=True)
+
+    # S3
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    bucket = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
+
+    # Azure
+    azure_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    container = fields.String(required=False, allow_none=True)
+    name_starts_with = fields.String(required=False, allow_none=True)
+
+    # GCS
+    gcs_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    bucket_or_name = fields.String(required=False, allow_none=True)
+    max_results = fields.String(required=False, allow_none=True)
+
+    # Both S3/GCS
+    prefix = fields.String(required=False, allow_none=True)
+
+    # Both S3/Azure
+    delimiter = fields.String(required=False, allow_none=True)
+
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
@@ -393,11 +449,15 @@ class DataConnectorConfigSchema(Schema):
                 "ConfiguredAssetFilesystemDataConnector",
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-subclass of the FilePathDataConnector class (your data conntector is "{data['class_name']}").  Please update your
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
+subclass of the FilePathDataConnector class (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )
@@ -409,17 +469,42 @@ configuration to continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-filesystem type of the data connector (your data conntector is "{data['class_name']}").  Please update your
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
+filesystem type of the data connector (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )
-        if (
-            "bucket" in data
-            or "prefix" in data
-            or "delimiter" in data
-            or "max_keys" in data
-        ) and not (
+        if ("delimiter" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if ("prefix" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if ("bucket" in data or "prefix" in data or "max_keys" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
@@ -427,10 +512,51 @@ configuration to continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
-S3 type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+S3 type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
+            )
+        if (
+            "azure_options" in data or "container" in data or "name_starts_with" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                    """
+            )
+        if "azure_options" in data and data["class_name"] in [
+            "InferredAssetAzureDataConnector",
+            "ConfiguredAssetAzureDataConnector",
+        ]:
+            azure_options = data["azure_options"]
+            if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
+                    You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
+                    """
+                )
+        if (
+            "gcs_options" in data or "bucket_or_name" in data or "max_results" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
+GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                    """
             )
         if (
             "data_asset_name_prefix" in data
@@ -451,8 +577,8 @@ continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
-SQL type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )
@@ -474,6 +600,8 @@ class ExecutionEngineConfig(DictDot):
         credentials=None,
         spark_config=None,
         boto3_options=None,
+        azure_options=None,
+        gcs_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -490,6 +618,10 @@ class ExecutionEngineConfig(DictDot):
             self.spark_config = spark_config
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if gcs_options is not None:
+            self.gcs_options = gcs_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -516,6 +648,12 @@ class ExecutionEngineConfigSchema(Schema):
     credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    azure_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    gcs_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     caching = fields.Boolean(required=False, allow_none=True)
@@ -565,6 +703,8 @@ class DatasourceConfig(DictDot):
         introspection=None,
         tables=None,
         boto3_options=None,
+        azure_options=None,
+        gcs_options=None,
         reader_method=None,
         reader_options=None,
         limit=None,
@@ -609,6 +749,10 @@ class DatasourceConfig(DictDot):
             self.tables = tables
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if gcs_options is not None:
+            self.gcs_options = gcs_options
         if reader_method is not None:
             self.reader_method = reader_method
         if reader_options is not None:
@@ -658,6 +802,12 @@ class DatasourceConfigSchema(Schema):
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    azure_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    gcs_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     reader_method = fields.String(required=False, allow_none=True)
     reader_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -669,7 +819,7 @@ class DatasourceConfigSchema(Schema):
         if "generators" in data:
             raise ge_exceptions.InvalidConfigError(
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
-                'GE, that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
+                'GE that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
             )
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
@@ -687,7 +837,7 @@ class DatasourceConfigSchema(Schema):
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data source, that are required only by a
+                f"""Your current configuration uses one or more keys in a data source that are required only by a
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
                 """
             )
@@ -1464,7 +1614,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         # Initialize base defaults
         super().__init__()
 
-        # Use default credentials if seprate credentials not supplied for expectations_store and validations_store
+        # Use default credentials if separate credentials not supplied for expectations_store and validations_store
         if expectations_store_credentials is None:
             expectations_store_credentials = default_credentials
         if validations_store_credentials is None:
@@ -1931,6 +2081,10 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def batch_request(self):
         return self._batch_request
+
+    @batch_request.setter
+    def batch_request(self, value: dict):
+        self._batch_request = value
 
     @property
     def expectation_suite_name(self):

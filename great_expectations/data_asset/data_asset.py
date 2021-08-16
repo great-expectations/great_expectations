@@ -318,7 +318,7 @@ class DataAsset:
 
                 if len(substituted_parameters) > 0:
                     if meta is None:
-                        meta = dict()
+                        meta = {}
                     meta["substituted_parameters"] = substituted_parameters
 
                 # Add meta to return object
@@ -977,6 +977,18 @@ class DataAsset:
 
             expectation_suite_name = expectation_suite.expectation_suite_name
 
+            expectation_meta = copy.deepcopy(expectation_suite.meta)
+
+            meta = {
+                "great_expectations_version": ge_version,
+                "expectation_suite_name": expectation_suite_name,
+                "run_id": run_id,
+                "batch_kwargs": self.batch_kwargs,
+                "batch_markers": self.batch_markers,
+                "batch_parameters": self.batch_parameters,
+                "validation_time": validation_time,
+                "expectation_suite_meta": expectation_meta,
+            }
             result = ExpectationSuiteValidationResult(
                 results=results,
                 success=statistics.success,
@@ -987,15 +999,7 @@ class DataAsset:
                     "success_percent": statistics.success_percent,
                 },
                 evaluation_parameters=runtime_evaluation_parameters,
-                meta={
-                    "great_expectations_version": ge_version,
-                    "expectation_suite_name": expectation_suite_name,
-                    "run_id": run_id,
-                    "batch_kwargs": self.batch_kwargs,
-                    "batch_markers": self.batch_markers,
-                    "batch_parameters": self.batch_parameters,
-                    "validation_time": validation_time,
-                },
+                meta=meta,
             )
 
             self._data_context = validate__data_context

@@ -2,15 +2,20 @@
 title: How to configure credentials using a secrets store 
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
 
 Choose which Secret Manager you are using:
- 1. [AWS Secrets Manager](#1-aws-secrets-manager)
- 2. [GCP Secret Manager](#2-gcp-secret-manager)
- 3. [Azure Key Vault](#3-azure-key-vault)
+<Tabs
+  groupId="secret-manager"
+  defaultValue='aws'
+  values={[
+  {label: 'AWS Secrets Manager', value:'aws'},
+  {label: 'GCP Secret Manager', value:'gcp'},
+  {label: 'Azure Key Vault', value:'azure'},
+  ]}>
 
----
-
-### 1. AWS Secrets Manager
+<TabItem value="aws">
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from AWS Secrets Manager.
 
@@ -94,9 +99,8 @@ datasources:
       database: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:PROD_DB_CREDENTIALS_DATABASE
 ```
 
----
-
-### 2. GCP Secret Manager
+</TabItem>
+<TabItem value="gcp">
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from GCP Secrets Manager.
 
@@ -174,9 +178,8 @@ datasources:
       database: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DATABASE
 ```
 
----
-
-### 3. Azure Key Vault
+</TabItem>
+<TabItem value="azure">
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from Azure Key Vault.
 
@@ -255,3 +258,6 @@ datasources:
       password: secret|https://${VAULT_NAME}.vault.azure.net/secrets/PROD_DB_CREDENTIALS_PASSWORD
       database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/PROD_DB_CREDENTIALS_DATABASE
 ```
+
+</TabItem>
+</Tabs>

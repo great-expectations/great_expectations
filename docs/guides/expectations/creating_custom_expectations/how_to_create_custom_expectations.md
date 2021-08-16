@@ -40,12 +40,12 @@ from great_expectations.execution_engine import (
    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics import (
-   ColumnMetricProvider,
+   ColumnAggregateMetricProvider,
    column_aggregate_value, column_aggregate_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
-class ColumnCustomMax(ColumnMetricProvider):
+class ColumnCustomMax(ColumnAggregateMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
     metric_name = "column.aggregate.custom.max"
@@ -212,7 +212,7 @@ It is often helpful to generate examples showing the functionality of your Expec
 
 If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the `tests/test_definitions/name_of_your_expectation directory`.
 
-#### 7. Import: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your plugins/ directory will make it *available* to import, you must still import the Expectation:
+#### 7. Import: To use a custom Expectation, you need to ensure it has been imported into the running Python interpreter. While including the module in your plugins/ directory will make it *available* to import, you must still import the Expectation:
 
 ````python
 # get a validator

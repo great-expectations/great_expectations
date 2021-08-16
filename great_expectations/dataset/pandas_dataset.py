@@ -590,7 +590,7 @@ Notes:
                 for lower, upper in zip(bins[:-1], bins[1:])
             ]
             if any(np.isnan(series)):
-                # Missings get digitized into bin = n_bins+1
+                # Missing get digitized into bin = n_bins+1
                 labels += ["(missing)"]
 
             return pd.Categorical.from_codes(
@@ -608,7 +608,7 @@ Notes:
                     other_values = sorted(value_counts.index[n_bins:])
                     replace = {value: "(other)" for value in other_values}
             else:
-                replace = dict()
+                replace = {}
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
             return (
@@ -1865,7 +1865,8 @@ Notes:
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
 
         Args:
             column_list (List[str]): \

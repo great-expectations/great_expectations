@@ -23,7 +23,7 @@ Steps
     sender_login: [login used to send the email]
     sender_password: [password used to send the email]
     sender_alias: [optional alias used to send the email (default = sender_login)]
-    receiver_emails: [adresses you want to send the email to]  # each address must be separated by commas
+    receiver_emails: [addresses you want to send the email to]  # each address must be separated by commas
 
 
 2. Open ``great_expectations.yml`` and add ``send_email_on_validation_result`` action to ``validation_operators``. Make sure the following section exists in the ``great_expectations.yml`` file.
@@ -50,7 +50,7 @@ Steps
                 renderer:
                   module_name: great_expectations.render.renderer.email_renderer
                   class_name: EmailRenderer
-                # put the actual following informations in the uncommitted/config_variables.yml file
+                # put the actual following information in the uncommitted/config_variables.yml file
                 # or pass in as environment variable
                 smtp_address: ${smtp_address}
                 smtp_port: ${smtp_port}
@@ -115,7 +115,7 @@ Additional notes
                 renderer:
                   module_name: great_expectations.render.renderer.email_renderer
                   class_name: EmailRenderer
-                # put the actual following informations in the uncommitted/config_variables.yml file
+                # put the actual following information in the uncommitted/config_variables.yml file
                 # or pass in as environment variable
                 smtp_address: ${smtp_address}
                 smtp_port: ${smtp_port}
@@ -128,7 +128,7 @@ Additional notes
 Additional resources
 --------------------
 
-- The EmailAction uses smtplib. You can get more informations about this module `here <https://docs.python.org/3/library/smtplib.html>`_.
+- The EmailAction uses smtplib. You can get more information about this module `here <https://docs.python.org/3/library/smtplib.html>`_.
 
 .. discourse::
     :topic_identifier: 234

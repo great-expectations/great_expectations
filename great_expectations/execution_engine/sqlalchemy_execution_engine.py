@@ -50,12 +50,12 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Select
+    from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
     reflection = None
     DefaultDialect = None
-    Select = None
+    Selectable = None
     TextClause = None
     quoted_name = None
     OperationalError = None
@@ -233,12 +233,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.dialect_module = None
 
+        # <WILL> 20210726 - engine_backup is used by the snowflake connector, which requires connection and engine
+        # to be closed and disposed separately. Currently self.engine can refer to either a Connection or Engine,
+        # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
+        # Connection can be handled separately.
+        self._engine_backup = None
         if self.engine and self.engine.dialect.name.lower() in [
             "sqlite",
             "mssql",
             "snowflake",
             "mysql",
         ]:
+            self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
 
@@ -366,28 +372,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    def get_compute_domain(
+    def get_domain_records(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Select, dict, dict]:
-        """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
+    ) -> Selectable:
+        """
+        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
+        obtain and/or query a batch. Returns in the format of an SqlAlchemy table/column(s) object.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
-            SqlAlchemy column
+            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
         """
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -405,8 +403,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
@@ -425,6 +421,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             selectable = data_object.selectable
 
+        # Filtering by row condition.
         if (
             "row_condition" in domain_kwargs
             and domain_kwargs["row_condition"] is not None
@@ -443,6 +440,138 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
+        if "column" in domain_kwargs:
+            return selectable
+
+        if (
+            "column_A" in domain_kwargs
+            and "column_B" in domain_kwargs
+            and "ignore_row_if" in domain_kwargs
+        ):
+            if self.active_batch_data.use_quoted_name:
+                # Checking if case-sensitive and using appropriate name
+                # noinspection PyPep8Naming
+                column_A_name = quoted_name(domain_kwargs["column_A"])
+                # noinspection PyPep8Naming
+                column_B_name = quoted_name(domain_kwargs["column_B"])
+            else:
+                # noinspection PyPep8Naming
+                column_A_name = domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = domain_kwargs["column_B"]
+
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "both_values_are_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.and_(
+                                sa.column(column_A_name) == None,
+                                sa.column(column_B_name) == None,
+                            )
+                        )
+                    )
+                )
+            elif ignore_row_if == "either_value_is_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.or_(
+                                sa.column(column_A_name) == None,
+                                sa.column(column_B_name) == None,
+                            )
+                        )
+                    )
+                )
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+            return selectable
+
+        if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
+            if self.active_batch_data.use_quoted_name:
+                # Checking if case-sensitive and using appropriate name
+                column_list = [
+                    quoted_name(domain_kwargs[column_name])
+                    for column_name in domain_kwargs["column_list"]
+                ]
+            else:
+                column_list = domain_kwargs["column_list"]
+
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "all_values_are_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.and_(
+                                *(
+                                    sa.column(column_name) == None
+                                    for column_name in column_list
+                                )
+                            )
+                        )
+                    )
+                )
+            elif ignore_row_if == "any_value_is_missing":
+                selectable = (
+                    sa.select([sa.text("*")])
+                    .select_from(selectable)
+                    .where(
+                        sa.not_(
+                            sa.or_(
+                                *(
+                                    sa.column(column_name) == None
+                                    for column_name in column_list
+                                )
+                            )
+                        )
+                    )
+                )
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+            return selectable
+
+        return selectable
+
+    def get_compute_domain(
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> Tuple[Selectable, dict, dict]:
+        """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            SqlAlchemy column
+        """
+        selectable = self.get_domain_records(
+            domain_kwargs=domain_kwargs,
+        )
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+
         # Warning user if accessor keys are in any domain that is not of type table, will be ignored
         if (
             domain_type != MetricDomainTypes.TABLE
@@ -450,9 +579,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and len(list(accessor_keys)) > 0
         ):
             logger.warning(
-                "Accessor keys ignored since Metric Domain Type is not 'table'"
+                'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
+        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs = {}
         if domain_type == MetricDomainTypes.TABLE:
             if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
@@ -476,106 +607,66 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
-        # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" in compute_domain_kwargs:
-                # Checking if case- sensitive and using appropriate name
-                if self.active_batch_data.use_quoted_name:
-                    accessor_domain_kwargs["column"] = quoted_name(
-                        compute_domain_kwargs.pop("column")
-                    )
-                else:
-                    accessor_domain_kwargs["column"] = compute_domain_kwargs.pop(
-                        "column"
-                    )
-            else:
-                # If column not given
+            if "column" not in compute_domain_kwargs:
                 raise GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
 
-        # Else, if column pair values requested
+            # Checking if case-sensitive and using appropriate name
+            if self.active_batch_data.use_quoted_name:
+                accessor_domain_kwargs["column"] = quoted_name(
+                    compute_domain_kwargs.pop("column")
+                )
+            else:
+                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            # Ensuring column_A and column_B parameters provided
-            if (
+            if not (
                 "column_A" in compute_domain_kwargs
                 and "column_B" in compute_domain_kwargs
             ):
-                if self.active_batch_data.use_quoted_name:
-                    # If case matters...
-                    accessor_domain_kwargs["column_A"] = quoted_name(
-                        compute_domain_kwargs.pop("column_A")
-                    )
-                    accessor_domain_kwargs["column_B"] = quoted_name(
-                        compute_domain_kwargs.pop("column_B")
-                    )
-                else:
-                    accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
-                        "column_A"
-                    )
-                    accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
-                        "column_B"
-                    )
-            else:
                 raise GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
 
-        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
-        elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" in compute_domain_kwargs:
-                # If column_list exists
-                accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                    "column_list"
+            # Checking if case-sensitive and using appropriate name
+            if self.active_batch_data.use_quoted_name:
+                accessor_domain_kwargs["column_A"] = quoted_name(
+                    compute_domain_kwargs.pop("column_A")
+                )
+                accessor_domain_kwargs["column_B"] = quoted_name(
+                    compute_domain_kwargs.pop("column_B")
+                )
+            else:
+                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
+                    "column_A"
+                )
+                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
+                    "column_B"
                 )
 
-        # Filtering if identity
-        elif domain_type == MetricDomainTypes.IDENTITY:
-            # If we would like our data to become a single column
-            if "column" in compute_domain_kwargs:
-                if self.active_batch_data.use_quoted_name:
-                    selectable = sa.select(
-                        [sa.column(quoted_name(compute_domain_kwargs["column"]))]
-                    ).select_from(selectable)
-                else:
-                    selectable = sa.select(
-                        [sa.column(compute_domain_kwargs["column"])]
-                    ).select_from(selectable)
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
-            # If we would like our data to now become a column pair
-            elif ("column_A" in compute_domain_kwargs) and (
-                "column_B" in compute_domain_kwargs
-            ):
-                if self.active_batch_data.use_quoted_name:
-                    selectable = sa.select(
-                        [
-                            sa.column(quoted_name(compute_domain_kwargs["column_A"])),
-                            sa.column(quoted_name(compute_domain_kwargs["column_B"])),
-                        ]
-                    ).select_from(selectable)
-                else:
-                    selectable = sa.select(
-                        [
-                            sa.column(compute_domain_kwargs["column_A"]),
-                            sa.column(compute_domain_kwargs["column_B"]),
-                        ]
-                    ).select_from(selectable)
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            if "column_list" not in domain_kwargs:
+                raise GreatExpectationsError(
+                    "column_list not found within domain_kwargs"
+                )
+
+            column_list = compute_domain_kwargs.pop("column_list")
+
+            # Checking if case-sensitive and using appropriate name
+            if self.active_batch_data.use_quoted_name:
+                accessor_domain_kwargs["column_list"] = [
+                    quoted_name(column_name) for column_name in column_list
+                ]
             else:
-                # If we would like our data to become a multicolumn
-                if "column_list" in compute_domain_kwargs:
-                    if self.active_batch_data.use_quoted_name:
-                        # Building a list of column objects used for sql alchemy selection
-                        to_select = [
-                            sa.column(quoted_name(col))
-                            for col in compute_domain_kwargs["column_list"]
-                        ]
-                        selectable = sa.select(to_select).select_from(selectable)
-                    else:
-                        to_select = [
-                            sa.column(col)
-                            for col in compute_domain_kwargs["column_list"]
-                        ]
-                        selectable = sa.select(to_select).select_from(selectable)
+                accessor_domain_kwargs["column_list"] = column_list
+
+            return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # Letting selectable fall through
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
@@ -598,10 +689,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             Returns:
                 A dictionary of metric names and their corresponding now-queried values.
         """
-        resolved_metrics = dict()
+        resolved_metrics = {}
 
         # We need a different query for each domain (where clause).
-        queries: Dict[Tuple, dict] = dict()
+        queries: Dict[Tuple, dict] = {}
         for (
             metric_to_resolve,
             engine_fn,
@@ -623,8 +714,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
-            selectable, compute_domain_kwargs, _ = self.get_compute_domain(
-                query["domain_kwargs"], domain_type=MetricDomainTypes.IDENTITY.value
+            domain_kwargs = query["domain_kwargs"]
+            selectable = self.get_domain_records(
+                domain_kwargs=domain_kwargs,
             )
             assert len(query["select"]) == len(query["ids"])
             try:
@@ -632,7 +724,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     sa.select(query["select"]).select_from(selectable)
                 ).fetchall()
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
@@ -650,6 +742,30 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
 
         return resolved_metrics
+
+    def close(self):
+        """
+        Note: Will 20210729
+
+        This is a helper function that will close and dispose Sqlalchemy objects that are used to connect to a database.
+        Databases like Snowflake require the connection and engine to be instantiated and closed separately, and not
+        doing so has caused problems with hanging connections.
+
+        Currently the ExecutionEngine does not support handling connections and engine separately, and will actually
+        override the engine with a connection in some cases, obfuscating what object is used to actually used by the
+        ExecutionEngine to connect to the external database. This will be handled in an upcoming refactor, which will
+        allow this function to eventually become:
+
+        self.connection.close()
+        self.engine.dispose()
+
+        More background can be found here: https://github.com/great-expectations/great_expectations/pull/3104/
+        """
+        if self._engine_backup:
+            self.engine.close()
+            self._engine_backup.dispose()
+        else:
+            self.engine.dispose()
 
     ### Splitter methods for partitioning tables ###
 
@@ -706,10 +822,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
-            *[
+            *(
                 sa.column(column_name) == column_value
                 for column_name, column_value in batch_identifiers.items()
-            ]
+            )
         )
 
     def _split_on_hashed_column(
@@ -775,7 +891,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Select, str]:
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Selectable, str]:
         table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -855,7 +971,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         """
             )
 
-        batch_data: SqlAlchemyBatchData
+        batch_data: Optional[SqlAlchemyBatchData] = None
         batch_markers: BatchMarkers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -894,7 +1010,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     batch_spec=batch_spec
                 )
             else:
-                selectable: Select = self._build_selectable_from_batch_spec(
+                selectable: Selectable = self._build_selectable_from_batch_spec(
                     batch_spec=batch_spec
                 )
 

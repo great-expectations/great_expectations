@@ -233,7 +233,7 @@ class LegacyDatasource:
         kwargs["class_name"] = class_name
         generator = self._build_batch_kwargs_generator(**kwargs)
         if "batch_kwargs_generators" not in self._datasource_config:
-            self._datasource_config["batch_kwargs_generators"] = dict()
+            self._datasource_config["batch_kwargs_generators"] = {}
         self._datasource_config["batch_kwargs_generators"][name] = kwargs
 
         return generator
@@ -320,7 +320,7 @@ class LegacyDatasource:
         if dataset_options is not None:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("dataset_options"):
-                batch_kwargs["dataset_options"] = dict()
+                batch_kwargs["dataset_options"] = {}
             batch_kwargs["dataset_options"].update(dataset_options)
 
         return batch_kwargs
