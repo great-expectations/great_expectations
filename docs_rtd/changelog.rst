@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
 
 0.13.28
 -----------------
