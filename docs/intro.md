@@ -3,7 +3,7 @@ title: Welcome
 slug: /
 ---
 
-THIS IS A CHANGE MADE TO TRIGGER THE DOCS INTEGRATION PIPELINE IN ORDER TO TEST SNOWFLAKE
+HELLO THERE :)
 
 Welcome to Great Expectations! 
 

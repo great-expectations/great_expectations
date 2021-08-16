@@ -89,6 +89,8 @@ stages:
               retryCount: '2'
 
         - script: |
+            sudo chown root:root $(gcp_authkey.securFilePath)
+            sudo chmod a+r $(gcp_authkey.securFilePath)
             pip install pytest pytest-azurepipelines
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
