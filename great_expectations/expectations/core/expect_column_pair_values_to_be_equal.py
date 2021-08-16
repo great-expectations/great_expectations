@@ -63,6 +63,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "column_A",
         "column_B",
         "ignore_row_if",
+        "mostly",
     )
 
     default_kwarg_values = {
