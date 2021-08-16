@@ -25,7 +25,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     }
 
     map_metric = "select_column_values.unique.within_record"
-    success_keys = ("sum_total",)
+    success_keys = ()
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
