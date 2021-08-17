@@ -150,15 +150,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data = {
             "data": {
                 "type": resource_type,
-                "attributes": {
-                    "account_id": account_id,
-                    attributes_key: value
-                },
+                "attributes": {"account_id": account_id, attributes_key: value},
             }
         }
 
         url = urljoin(
-            self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource_name)}"
+            self.ge_cloud_base_url,
+            f"accounts/" f"{account_id}/" f"{hyphen(resource_name)}",
         )
         try:
             response = requests.post(url, json=data, headers=self.auth_headers)
