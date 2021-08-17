@@ -366,7 +366,7 @@ def list_gcs_keys(
         List of keys representing GCS file paths (as filtered by the `query_options` dict)
     """
     # Delimiter determines whether or not traversal of bucket is recursive
-    # Manually set to appropriate default if needed
+    # Manually set to appropriate default if not already set by user
     delimiter = query_options["delimiter"]
     if delimiter is None and not recursive:
         query_options["delimiter"] = "/"

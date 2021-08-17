@@ -41,9 +41,14 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     with Google's official SDK, we utilize terms like "bucket_or_name" and "max_results". Since we convert these keys from YAML
     to Python and directly pass them in to the GCS connection object, maintaining consistency is necessary for proper usage.
 
+    This DataConnector supports the following methods of authentication:
+        1. Standard gcloud auth / GOOGLE_APPLICATION_CREDENTIALS environment variable workflow
+        2. Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_file
+        3. Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_info
+
     As much of the interaction with the SDK is done through a GCS Storage Client, please refer to the official
     docs if a greater understanding of the supported authentication methods and general functionality is desired.
-    Source: https://googleapis.dev/python/storage/latest/client.html
+    Source: https://googleapis.dev/python/google-api-core/latest/auth.html
     """
 
     def __init__(
