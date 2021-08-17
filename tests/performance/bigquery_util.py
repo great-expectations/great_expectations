@@ -1,5 +1,6 @@
 import os
 
+from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import BaseDataContext
@@ -9,22 +10,20 @@ from great_expectations.data_context.types.base import (
 )
 
 
-def setup_context_to_run_checkpoint(
-    checkpoint_name: str, table_names: list[str], html_dir: str
-) -> BaseDataContext:
-    # todo(jdimatteo) return checkpoint, remove checkpoint_name arg, time checkpoint.run, and rename setup_checkpoint
+def setup_checkpoint(table_names: list[str], html_dir: str) -> SimpleCheckpoint:
+    checkpoint_name = "my_checkpoint"
     datasource_and_dataconnector_name = "my_datasource_and_dataconnector"
+
     context = _create_context(datasource_and_dataconnector_name, table_names, html_dir)
     for table_name in table_names:
         _add_expectation_configuration(context=context, suite_name=table_name)
 
-    _add_checkpoint(
+    return _add_checkpoint(
         context,
         datasource_and_dataconnector_name,
         checkpoint_name,
         table_names,
     )
-    return context
 
 
 def _create_context(
@@ -77,7 +76,7 @@ def _add_checkpoint(
     datasource_and_dataconnector_name: str,
     checkpoint_name: str,
     suite_and_asset_names=[],
-):
+) -> SimpleCheckpoint:
     validations = [
         {
             "expectation_suite_name": suite_and_asset_name,
@@ -90,7 +89,7 @@ def _add_checkpoint(
         }
         for suite_and_asset_name in suite_and_asset_names
     ]
-    context.add_checkpoint(
+    return context.add_checkpoint(
         name=checkpoint_name, class_name="SimpleCheckpoint", validations=validations
     )
 

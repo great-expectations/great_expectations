@@ -15,15 +15,12 @@ from tests.performance import bigquery_util
 
 
 def test_bikeshare_trips_1_table(benchmark: BenchmarkFixture):
-    checkpoint_name = "my_checkpoint"
-    context = bigquery_util.setup_context_to_run_checkpoint(
-        checkpoint_name=checkpoint_name,
+    checkpoint = bigquery_util.setup_checkpoint(
         table_names=["bikeshare_trips_1"],
         html_dir=_html_dir(),
     )
     result: CheckpointResult = benchmark.pedantic(
-        context.run_checkpoint,
-        kwargs={"checkpoint_name": checkpoint_name},
+        checkpoint.run,
         iterations=1,
         rounds=1,
     )
