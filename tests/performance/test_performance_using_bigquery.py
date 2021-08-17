@@ -2,6 +2,7 @@
 #  include git describe output in json
 import os
 
+import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -14,9 +15,10 @@ from great_expectations.data_context.types.base import (
 from tests.performance import bigquery_util
 
 
-def test_bikeshare_trips_1_table(benchmark: BenchmarkFixture):
+@pytest.mark.parametrize("number_of_tables", [1, 2, 4, 100])
+def test_bikeshare_trips(benchmark: BenchmarkFixture, number_of_tables):
     checkpoint = bigquery_util.setup_checkpoint(
-        table_names=["bikeshare_trips_1"],
+        number_of_tables=number_of_tables,
         html_dir=_html_dir(),
     )
     result: CheckpointResult = benchmark.pedantic(

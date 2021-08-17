@@ -10,19 +10,27 @@ from great_expectations.data_context.types.base import (
 )
 
 
-def setup_checkpoint(table_names: list[str], html_dir: str) -> SimpleCheckpoint:
+def setup_checkpoint(number_of_tables: int, html_dir: str) -> SimpleCheckpoint:
     checkpoint_name = "my_checkpoint"
     datasource_and_dataconnector_name = "my_datasource_and_dataconnector"
 
-    context = _create_context(datasource_and_dataconnector_name, table_names, html_dir)
-    for table_name in table_names:
-        _add_expectation_configuration(context=context, suite_name=table_name)
+    # "setup_bigquery_tables_for_performance_test.sh" creates these tables, numbered from 1 to 100
+    assert 1 <= number_of_tables <= 100
+    suite_and_asset_names = [
+        f"bikeshare_trips_{i}" for i in range(1, number_of_tables + 1)
+    ]
+
+    context = _create_context(
+        datasource_and_dataconnector_name, suite_and_asset_names, html_dir
+    )
+    for suite_name in suite_and_asset_names:
+        _add_expectation_configuration(context=context, suite_name=suite_name)
 
     return _add_checkpoint(
         context,
         datasource_and_dataconnector_name,
         checkpoint_name,
-        table_names,
+        suite_and_asset_names,
     )
 
 
