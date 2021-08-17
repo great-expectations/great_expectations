@@ -1,6 +1,6 @@
 import logging
 from abc import ABCMeta
-from json import JSONDecodeError, loads
+from json import JSONDecodeError
 from typing import Dict, Optional
 from urllib.parse import urljoin
 
@@ -97,7 +97,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         pass
 
     def _update(self, ge_cloud_id, value, **kwargs):
-        ge_cloud_id = key[0]
         resource_type = self.ge_cloud_resource_type
         account_id = self.ge_cloud_credentials["account_id"]
 
