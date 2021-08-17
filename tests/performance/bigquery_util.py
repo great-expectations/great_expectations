@@ -90,7 +90,10 @@ def _add_checkpoint(
         for suite_and_asset_name in suite_and_asset_names
     ]
     return context.add_checkpoint(
-        name=checkpoint_name, class_name="SimpleCheckpoint", validations=validations
+        name=checkpoint_name,
+        class_name="SimpleCheckpoint",
+        validations=validations,
+        run_name_template="my_run_name",
     )
 
 
