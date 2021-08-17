@@ -1969,7 +1969,7 @@ def generate_test_table_name(
 
 def _create_bigquery_engine() -> Engine:
 
-    # The following environment variables will need to be
+    # The following environment variables will need to be instantiated
     gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT")
     bigquery_dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
 

@@ -2,9 +2,6 @@ stages:
   - stage: cloud_db_integration_expectations_cfe
     pool:
       vmImage: 'ubuntu-latest'
-    env:
-      GCP_PROJECT: $(GCP_PROJECT)
-      GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
 
     jobs:
       - job: bigquery_expectations
@@ -48,3 +45,5 @@ stages:
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
