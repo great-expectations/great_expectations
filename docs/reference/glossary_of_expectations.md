@@ -2,6 +2,12 @@
 title: Glossary of Expectations
 ---
 
+:::info WIP
+While we work on autodoc API generation for our newer docs, the legacy docs are currently up to date.
+:::
+
+[API Reference Link](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/index.html#)
+
 This is a list of all built-in Expectations. Expectations are extendable so you can create custom expectations for your data domain! To do so see this article: How to create custom Expectations.
 
 ## Dataset
