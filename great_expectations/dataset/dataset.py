@@ -4559,7 +4559,7 @@ class Dataset(MetaDataset):
             value_pairs_set (list of tuples): All the valid pairs to be matched
 
         Keyword Args:
-            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "never"
+            ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
 
         Other Parameters:
             result_format (str or None): \
