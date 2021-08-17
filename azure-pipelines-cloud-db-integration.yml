@@ -11,8 +11,6 @@ stages:
           python.version: '3.8'
 
         steps:
-          # delay the execution of the second stages so that we do not hit the rate limit for BigQuery
-          # - bash: sleep 5m
           #  displayName: Delay for BigQuery rate limit
 
           - task: UsePythonVersion@0
