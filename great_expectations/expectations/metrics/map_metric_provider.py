@@ -888,7 +888,7 @@ def multicolumn_function_partial(
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_series for multicolumn_function_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_fn for multicolumn_function_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -1029,7 +1029,7 @@ def multicolumn_condition_partial(
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_FN]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_series for multicolumn_condition_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_condition_fn for multicolumn_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -2407,15 +2407,6 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_count",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=_sqlalchemy_map_condition_unexpected_count_value,
-                            metric_fn_type=MetricFunctionTypes.VALUE,
-                        )
                         register_metric(
                             metric_name=metric_name + ".unexpected_values",
                             metric_domain_keys=metric_domain_keys,
