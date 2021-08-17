@@ -13,14 +13,14 @@ stages:
           matrix:
             expectations_cfe:
               test_script: 'tests/test_definitions/test_expectations_cfe.py'
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
-              GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
+              #GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              #GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
+              #GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
             expectations:
               test_script: 'tests/test_definitions/test_expectations.py'
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
-              GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
+              #GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              #GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
+              #GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
           maxParallel: 1
 
         steps:
@@ -50,6 +50,6 @@ stages:
 
             displayName: 'pytest'
             env:
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GOOGLE_APPLICATION_CREDENTIALS: $(GCP_AUTHKEY_SECUREFILEPATH)
               GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
