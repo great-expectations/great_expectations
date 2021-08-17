@@ -32,6 +32,8 @@ After setting up authentication, you can run with your project using the environ
     pytest tests/test_definitions/test_expectations_cfe.py --bigquery --no-spark --no-postgresql
 ```
 
+Note that if you prefer to use a different dataset besides "test_ci", you can specify a different dataset with `GE_TEST_BIGQUERY_DATASET`.
+
 ### Writing unit and integration tests
 
 Production code in Great Expectations must be thoroughly tested. In general, we insist on unit tests for all branches of every method, including likely error states. Most new feature contributions should include several unit tests. Contributions that modify or extend existing features should include a test of the new behavior.
