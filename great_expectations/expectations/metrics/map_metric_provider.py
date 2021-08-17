@@ -1787,8 +1787,13 @@ def _sqlalchemy_column_pair_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     # noinspection PyPep8Naming
@@ -1869,9 +1874,13 @@ def _sqlalchemy_multicolumn_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     if "column_list" not in accessor_domain_kwargs:
