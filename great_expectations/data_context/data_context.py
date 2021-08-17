@@ -240,7 +240,6 @@ class BaseDataContext:
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
-    GE_CLOUD_DOTFILE = ".great_expectations_cloud"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
@@ -3621,31 +3620,18 @@ class DataContext(BaseDataContext):
                 "to initialize a new DataContext"
             )
 
-        if ge_cloud_mode:
-            target_filename = cls.GE_CLOUD_DOTFILE
-        else:
-            target_filename = cls.GE_YML
-
         ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
-        if os.path.isfile(os.path.join(ge_dir, target_filename)):
+        if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
             message = """Warning. An existing `{}` was found here: {}.
     - No action was taken.""".format(
-                target_filename, ge_dir
+                cls.GE_YML, ge_dir
             )
             warnings.warn(message)
         else:
-            if ge_cloud_mode:
-                cls.write_project_template_to_ge_cloud(
-                    ge_cloud_base_url=ge_cloud_base_url,
-                    ge_cloud_account_id=ge_cloud_account_id,
-                    ge_cloud_access_token=ge_cloud_access_token,
-                    usage_statistics_enabled=usage_statistics_enabled,
-                )
-            else:
-                cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
+            cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
         if os.path.isfile(os.path.join(ge_dir, "notebooks")):
             message = """Warning. An existing `notebooks` directory was found here: {}.
@@ -3705,44 +3691,6 @@ class DataContext(BaseDataContext):
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
             else:
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
-
-    # TODO: update templates
-    @classmethod
-    def write_project_template_to_ge_cloud(
-        cls,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        usage_statistics_enabled=True,
-    ):
-        ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_account_id=ge_cloud_account_id,
-            ge_cloud_access_token=ge_cloud_access_token,
-        )
-        ge_cloud_config_dict.pop("ge_cloud_data_context_id")
-
-        missing_keys = []
-        for key, val in ge_cloud_config_dict.items():
-            if not val:
-                missing_keys.append(key)
-        if len(missing_keys) > 0:
-            raise DataContextError(
-                f"Arg(s) {missing_keys} required for ge_cloud_mode but neither provided nor found in "
-                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
-            )
-
-        if usage_statistics_enabled:
-            template = PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED
-        else:
-            template = PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED
-
-        config = json.dumps(yaml.load(template))
-
-        ge_cloud_data_context_store = cls.build_ge_cloud_data_context_store(
-            **ge_cloud_config_dict
-        )
-        ge_cloud_data_context_store._store_backend.set(("",), config)
 
     @classmethod
     def scaffold_directories(cls, base_dir):
@@ -3938,7 +3886,7 @@ class DataContext(BaseDataContext):
 
         # Determine the "context root directory" - this is the parent of "great_expectations" dir
         if context_root_dir is None:
-            context_root_dir = self.find_context_root_dir(ge_cloud_mode=ge_cloud_mode)
+            context_root_dir = self.find_context_root_dir()
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
 
@@ -3961,51 +3909,39 @@ class DataContext(BaseDataContext):
 
         :return: the configuration object read from the file
         """
-        if self.ge_cloud_mode:
-            config_key = ConfigurationIdentifier(
-                configuration_key=self.ge_cloud_config.ge_cloud_data_context_id
+        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        try:
+            with open(path_to_yml) as data:
+                config_commented_map_from_yaml = yaml.load(data)
+
+        except YAMLError as err:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
+                    err
+                )
             )
-            return self.ge_cloud_data_context_store.get(key=config_key)
-        else:
-            path_to_yml = os.path.join(self.root_directory, self.GE_YML)
-            try:
-                with open(path_to_yml) as data:
-                    config_commented_map_from_yaml = yaml.load(data)
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
+        except OSError:
+            raise ge_exceptions.ConfigNotFoundError()
 
-            except YAMLError as err:
-                raise ge_exceptions.InvalidConfigurationYamlError(
-                    "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
-                        err
-                    )
-                )
-            except DuplicateKeyError:
-                raise ge_exceptions.InvalidConfigurationYamlError(
-                    "Error: duplicate key found in project YAML file."
-                )
-            except OSError:
-                raise ge_exceptions.ConfigNotFoundError()
-
-            try:
-                return DataContextConfig.from_commented_map(
-                    commented_map=config_commented_map_from_yaml
-                )
-            except ge_exceptions.InvalidDataContextConfigError:
-                # Just to be explicit about what we intended to catch
-                raise
+        try:
+            return DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
+            )
+        except ge_exceptions.InvalidDataContextConfigError:
+            # Just to be explicit about what we intended to catch
+            raise
 
     def _save_project_config(self):
-        """Save the current project."""
+        """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
-        if self.ge_cloud_mode:
-            config_key = ConfigurationIdentifier(
-                configuration_key=self.ge_cloud_config.ge_cloud_data_context_id or ""
-            )
-            self.ge_cloud_data_context_store.set(config_key=config_key)
-        else:
-            config_filepath = os.path.join(self.root_directory, self.GE_YML)
-            with open(config_filepath, "w") as outfile:
-                self._project_config.to_yaml(outfile)
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self._project_config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store for store %s" % store_name)
@@ -4033,35 +3969,25 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
     @classmethod
-    def find_context_root_dir(cls, ge_cloud_mode=False):
-        if ge_cloud_mode:
-            target_filename = cls.GE_CLOUD_DOTFILE
-        else:
-            target_filename = cls.GE_YML
+    def find_context_root_dir(cls):
         result = None
-        target_path = None
+        yml_path = None
         ge_home_environment = os.getenv("GE_HOME")
         if ge_home_environment:
             ge_home_environment = os.path.expanduser(ge_home_environment)
             if os.path.isdir(ge_home_environment) and os.path.isfile(
-                os.path.join(ge_home_environment, target_filename)
+                os.path.join(ge_home_environment, "great_expectations.yml")
             ):
                 result = ge_home_environment
         else:
-            if ge_cloud_mode:
-                target_path = cls.find_ge_cloud_dotfile()
-            else:
-                target_path = cls.find_context_yml_file()
-            if target_path:
-                result = os.path.dirname(target_path)
+            yml_path = cls.find_context_yml_file()
+            if yml_path:
+                result = os.path.dirname(yml_path)
 
         if result is None:
             raise ge_exceptions.ConfigNotFoundError()
 
-        if ge_cloud_mode:
-            logger.debug("Context root dir found at: {}".format(result))
-        else:
-            logger.debug("Using project config: {}".format(target_path))
+        logger.debug(f"Using project config: {yml_path}")
         return result
 
     @classmethod
@@ -4138,34 +4064,6 @@ class DataContext(BaseDataContext):
             search_start_dir = os.path.dirname(search_start_dir)
 
         return yml_path
-
-    # TODO: Unify with find_context_yml_file at next major release
-    @classmethod
-    def find_ge_cloud_dotfile(cls, search_start_dir=None):
-        """Search for the GE Cloud  dotfile starting here and moving upward."""
-        dotfile_path = None
-        if search_start_dir is None:
-            search_start_dir = os.getcwd()
-
-        for i in range(4):
-            logger.debug(
-                "Searching for GE dotfile {} ({} layer deep)".format(
-                    search_start_dir, i
-                )
-            )
-
-            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
-
-            if os.path.isdir(potential_ge_dir):
-                potential_dotfile = os.path.join(potential_ge_dir, cls.GE_CLOUD_DOTFILE)
-                if os.path.isfile(potential_dotfile):
-                    dotfile_path = potential_dotfile
-                    logger.debug("Found dotfile at " + str(dotfile_path))
-                    break
-            # move up one directory
-            search_start_dir = os.path.dirname(search_start_dir)
-
-        return dotfile_path
 
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir):
