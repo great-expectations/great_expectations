@@ -34,6 +34,7 @@ def setup_checkpoint(number_of_tables: int, html_dir: str) -> SimpleCheckpoint:
 
 
 def expected_validation_results() -> list[dict]:
+    # todo(jdimatteo) maybe update test to read/write to a file if this becomes hard to maintain
     return [
         {
             "meta": {},
@@ -133,13 +134,32 @@ def _add_checkpoint(
 
 def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
     suite = context.create_expectation_suite(expectation_suite_name=suite_name)
-    # todo(jdimatteo) add more expectations to be more representative of use case I want to optimize
+    suite.add_expectation(
+        expectation_configuration=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_unique",
+            kwargs={"column": "trip_id"},
+        )
+    )
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={"column": "trip_id"},
         )
     )
+    suite.add_expectation(
+        expectation_configuration=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_of_type",
+            kwargs={"column": "trip_id", "type_": "INTEGER"},
+        )
+    )
+    suite.add_expectation(
+        expectation_configuration=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_of_type",
+            kwargs={"column": "bikeid", "type_": "STRING"},
+        )
+    )
+    # todo(jdimatteo): add for subscriber_type with expect_column_values_to_be_in_set and a few more to be similar to internal perf tests
+    # and update expected_validation_results
     # Save the expectation suite or else it doesn't show up in the data docs.
     context.save_expectation_suite(
         expectation_suite=suite, expectation_suite_name=suite_name

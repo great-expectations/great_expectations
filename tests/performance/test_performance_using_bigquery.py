@@ -31,6 +31,12 @@ def test_bikeshare_trips(
         rounds=1,
     )
 
+    import pydevd_pycharm
+
+    pydevd_pycharm.settrace(
+        "localhost", port=5324, stdoutToServer=True, stderrToServer=True
+    )
+
     # Do some basic sanity checks.
     assert result.success, result
     assert len(result.run_results) == number_of_tables
@@ -61,7 +67,8 @@ def test_bikeshare_trips(
     # Check that every expectation result was correct.
     expected_validation_results = bigquery_util.expected_validation_results()
     for run_result in result.run_results.values():
-        assert [
+        actual_results = [
             result.to_json_dict()
             for result in run_result["validation_result"]["results"]
-        ] == expected_validation_results
+        ]
+        assert actual_results == expected_validation_results, actual_results
