@@ -142,7 +142,10 @@ def test_force_reuse_spark_context(
 
 
 def test_spark_kwargs_are_passed_through(
-    data_context_parameterized_expectation_suite, tmp_path_factory, test_backends, spark_session
+    data_context_parameterized_expectation_suite,
+    tmp_path_factory,
+    test_backends,
+    spark_session,
 ):
     """
     Ensure that an external SparkSession is not stopped when the spark_config matches
@@ -159,8 +162,12 @@ def test_spark_kwargs_are_passed_through(
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource_config = data_context_parameterized_expectation_suite.get_datasource(dataset_name).config
-    assert datasource_config["spark_config"] == dict(spark_session.sparkContext.getConf().getAll())
+    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+        dataset_name
+    ).config
+    assert datasource_config["spark_config"] == dict(
+        spark_session.sparkContext.getConf().getAll()
+    )
     assert datasource_config["force_reuse_spark_context"] == False
 
     dataset_name = "test_spark_dataset_2"
@@ -172,7 +179,9 @@ def test_spark_kwargs_are_passed_through(
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
-    datasource_config = data_context_parameterized_expectation_suite.get_datasource(dataset_name).config
+    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+        dataset_name
+    ).config
     assert datasource_config["spark_config"] == {}
     assert datasource_config["force_reuse_spark_context"] == True
 
