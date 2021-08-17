@@ -558,6 +558,17 @@ GCS type of the data connector (your data connector is "{data['class_name']}"). 
 continue.
                     """
             )
+        if "gcs_options" in data and data["class_name"] in [
+            "InferredAssetGCSDataConnector",
+            "ConfiguredAssetGCSDataConnector",
+        ]:
+            gcs_options = data["gcs_options"]
+            if "filename" in gcs_options and "info" in gcs_options:
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your current configuration can only use a single method of authentication for the GCS type of data connector.
+                    You must only select one between `filename` (from_service_account_file) and `info` (from_service_account_info). Please update your configuration to continue.
+                    """
+                )
         if (
             "data_asset_name_prefix" in data
             or "data_asset_name_suffix" in data
