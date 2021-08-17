@@ -305,7 +305,7 @@ def test_instantiation_with_info_arg(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
         gcs_options={
-            "info": "my_info",
+            "info": "{ my_json: my_content }",
         },
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
