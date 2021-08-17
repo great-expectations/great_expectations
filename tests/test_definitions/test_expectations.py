@@ -77,14 +77,6 @@ def pytest_generate_tests(metafunc):
                                 )
                             )
                             for dataset in d["data"]:
-                                temp = get_dataset(
-                                    c,
-                                    dataset["data"],
-                                    dataset.get("schemas"),
-                                    table_name=dataset.get("dataset_name"),
-                                    sqlite_db_path=sqlite_db_path,
-                                )
-
                                 datasets.append(
                                     get_dataset(
                                         c,
