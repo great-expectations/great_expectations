@@ -13,8 +13,14 @@ stages:
           matrix:
             expectations_cfe:
               test_script: 'tests/test_definitions/test_expectations_cfe.py'
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GCP_PROJECT: $(GCP_PROJECT)
+              GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
             expectations:
               test_script: 'tests/test_definitions/test_expectations.py'
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GCP_PROJECT: $(GCP_PROJECT)
+              GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
           maxParallel: 1
 
         steps:
@@ -45,7 +51,3 @@ stages:
               pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics $(test_script)
 
             displayName: 'pytest'
-            env:
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GCP_PROJECT: $(GCP_PROJECT)
-              GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
