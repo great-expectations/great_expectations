@@ -1,3 +1,5 @@
+from dateutil.parser import parse
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -11,15 +13,27 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
     condition_metric_name = "column_pair_values.equal"
-    condition_value_keys = ("ignore_row_if",)
-    domain_keys = ("batch_id", "table", "column_A", "column_B")
-    default_kwarg_values = {"ignore_row_if": "both_values_are_missing"}
+    condition_value_keys = (
+        "ignore_row_if",
+        "parse_strings_as_datetimes",
+    )
+    condition_domain_keys = ("batch_id", "table", "column_A", "column_B")
 
     # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
-        return column_A == column_B
+        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
+        if parse_strings_as_datetimes:
+            return column_A.map(parse) == column_B.map(parse)
+        else:
+            return column_A == column_B
 
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
-        return sa.case((column_A == column_B, True), else_=False)
+        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
+        if parse_strings_as_datetimes:
+            return sa.case(
+                (column_A.map(parse) == column_B.map(parse), True), else_=False
+            )
+        else:
+            return sa.case((column_A == column_B, True), else_=False)
