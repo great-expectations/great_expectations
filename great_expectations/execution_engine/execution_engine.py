@@ -50,7 +50,6 @@ class MetricFunctionTypes(Enum):
 
 
 class MetricDomainTypes(Enum):
-    IDENTITY = "identity"  # Instructs ExecutionEngine not to split accessor_domain_kwargs out of domain_kwargs; hence, compute_domain_kwargs returned by ExecutionEngine will be domain_kwargs (unaltered).
     COLUMN = "column"
     COLUMN_PAIR = "column_pair"
     MULTICOLUMN = "multicolumn"
@@ -219,9 +218,9 @@ class ExecutionEngine(ABC):
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
         if metrics is None:
-            metrics = dict()
+            metrics = {}
 
-        resolved_metrics = dict()
+        resolved_metrics = {}
 
         metric_fn_bundle = []
         for metric_to_resolve in metrics_to_resolve:
@@ -299,6 +298,20 @@ class ExecutionEngine(ABC):
 
     def resolve_metric_bundle(self, metric_fn_bundle):
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
+        raise NotImplementedError
+
+    def get_domain_records(
+        self,
+        domain_kwargs: dict,
+    ) -> Any:
+        """
+        get_domain_records computes the full-access data (dataframe or selectable) for computing metrics based on the
+        given domain_kwargs and specific engine semantics.
+
+        Returns:
+            data corresponding to the compute domain
+        """
+
         raise NotImplementedError
 
     def get_compute_domain(

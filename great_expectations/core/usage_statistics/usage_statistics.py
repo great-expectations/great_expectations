@@ -45,7 +45,7 @@ STOP_SIGNAL = object()
 
 logger = logging.getLogger(__name__)
 
-_anonymizers = dict()
+_anonymizers = {}
 
 
 class UsageStatisticsHandler:
@@ -380,7 +380,7 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
 
 def add_datasource_usage_statistics(data_context, name, **kwargs):
     if not data_context._usage_statistics_handler:
-        return dict()
+        return {}
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:

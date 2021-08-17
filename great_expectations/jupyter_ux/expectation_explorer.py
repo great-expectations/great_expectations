@@ -122,6 +122,7 @@ class ExpectationExplorer:
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
                 "ignore_row_if",
+                "mostly",
             ],
             "expect_compound_columns_to_be_unique": ["ignore_row_if"],
             "expect_multicolumn_sum_to_equal": ["sum_total", "ignore_row_if"],
