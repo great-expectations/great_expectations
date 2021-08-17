@@ -141,10 +141,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if ge_cloud_id:
             return self._update(ge_cloud_id=ge_cloud_id, value=value, **kwargs)
 
-        resource = self.ge_cloud_resource_type
+        resource_type = self.ge_cloud_resource_type
+        resource_name = self.ge_cloud_resource_name
         account_id = self.ge_cloud_credentials["account_id"]
 
-        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource]
+        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         data = {
             "data": {
@@ -157,7 +158,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
 
         url = urljoin(
-            self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource)}"
+            self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource_name)}"
         )
         try:
             response = requests.post(url, json=data, headers=self.auth_headers)
@@ -166,7 +167,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((object_id,))
             return GeCloudResourceRef(
-                resource_type=self.ge_cloud_resource_type,
+                resource_type=resource_type,
                 ge_cloud_id=object_id,
                 url=object_url,
             )
