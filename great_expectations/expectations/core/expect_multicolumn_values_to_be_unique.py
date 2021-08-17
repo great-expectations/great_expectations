@@ -10,6 +10,39 @@ from great_expectations.render.util import (
 
 
 class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
+    """
+     Expect that the columns are unique together, e.g. a multi-column primary key
+     Note that all instances of any duplicates are considered failed
+
+     For example::
+
+         A B C
+         1 1 2 Fail
+         1 2 3 Pass
+         1 1 2 Fail
+         2 2 2 Pass
+         3 2 3 Pass
+
+     Args:
+         column_list (tuple or list): The column names to evaluate
+
+     Keyword Args:
+         ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+
+     Other Parameters:
+         result_format (str or None): \
+             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+         include_config (boolean): \
+             If True, then include the expectation config as part of the result object. \
+         catch_exceptions (boolean or None): \
+             If True, then catch exceptions and include them as part of the result object. \
+         meta (dict or None): \
+             A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+
+     Returns:
+         An ExpectationSuiteValidationResult
+    """
+
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",

@@ -15,27 +15,20 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         value_pairs_set (list of tuples): All the valid pairs to be matched
 
     Keyword Args:
-        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "never"
+        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
 
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
         include_config (boolean): \
             If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
 
     Returns:
         An ExpectationSuiteValidationResult
-
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
 
     # This dictionary contains metadata for display in the public gallery
