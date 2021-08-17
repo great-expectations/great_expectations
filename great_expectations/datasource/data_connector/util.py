@@ -23,7 +23,7 @@ except ImportError:
     BlobServiceClient = None
     ContainerClient = None
     logger.debug(
-        "Unable to load azure types; install optional azure dependency for support."
+        "Unable to load azure types; install optional Azure dependency for support."
     )
 
 try:
@@ -31,7 +31,7 @@ try:
 except ImportError:
     storage = None
     logger.debug(
-        "Unable to load GCS connection object; install optional google dependency for support"
+        "Unable to load GCS connection object; install optional Google dependency for support"
     )
 
 try:
@@ -41,7 +41,7 @@ except ImportError:
     pyspark = None
     pyspark_sql = None
     logger.debug(
-        "Unable to load pyspark and pyspark.sql; install optional spark dependency for support."
+        "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
     )
 
 

@@ -11,7 +11,7 @@ except ImportError:
     storage = None
     service_account = None
     logger.debug(
-        "Unable to load GCS connection object; install optional google dependency for support"
+        "Unable to load GCS connection object; install optional Google dependency for support"
     )
 
 from great_expectations.core.batch import BatchDefinition
