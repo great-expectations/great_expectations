@@ -1,4 +1,3 @@
-import copy
 import logging
 import uuid
 from functools import wraps
@@ -519,7 +518,7 @@ def column_pair_function_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -668,7 +667,7 @@ def column_pair_condition_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -1806,7 +1805,10 @@ def _sqlalchemy_column_pair_map_condition_values(
             )
 
     query = (
-        sa.select(sa.column(column_A_name), sa.column(column_B_name))
+        sa.select(
+            sa.column(column_A_name).label("unexpected_values_A"),
+            sa.column(column_B_name).label("unexpected_values_B"),
+        )
         .select_from(selectable)
         .where(boolean_mapped_unexpected_values)
     )
@@ -1815,7 +1817,10 @@ def _sqlalchemy_column_pair_map_condition_values(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
 
-    return [(val[0], val[1]) for val in execution_engine.engine.execute(query).fetchall()]
+    return [
+        (val.unexpected_values_A, val.unexpected_values_B)
+        for val in execution_engine.engine.execute(query).fetchall()
+    ]
 
 
 def _sqlalchemy_column_pair_map_condition_filtered_row_count(
@@ -2331,6 +2336,9 @@ class MapMetricProvider(MetricProvider):
                         metric_class=cls,
                         metric_provider=_sqlalchemy_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    print(
+                        f"\n[ALEX_TEST] METRIC_FN_TYPE: {metric_fn_type} ; TYPE: {str(type(metric_fn_type))}"
                     )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
                         register_metric(
