@@ -106,11 +106,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "data": {
                 "type": resource_type,
                 "id": ge_cloud_id,
-                "attributes": {attributes_key: value},
+                "attributes": {
+                    attributes_key: value,
+                    "account_id": account_id,
+                },
             }
         }
-
-        data["data"]["attributes"][post_body_key] = value
 
         url = urljoin(
             self.ge_cloud_base_url,
@@ -147,12 +148,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         data = {
             "data": {
-                "type": resource,
-                "attributes": {"account_id": account_id},
+                "type": resource_type,
+                "attributes": {
+                    "account_id": account_id,
+                    attributes_key: value
+                },
             }
         }
-
-        data["data"]["attributes"][attributes_key] = value
 
         url = urljoin(
             self.ge_cloud_base_url, f"accounts/" f"{account_id}/" f"{hyphen(resource)}"
