@@ -83,3 +83,7 @@ def test_azure_url_with_nested_blob():
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "a/b/c/d/e/my_blob"
+
+
+def test_gcs_url():
+    raise NotImplementedError()
