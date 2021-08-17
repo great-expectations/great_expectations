@@ -1,7 +1,6 @@
 import os
 
 from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
@@ -14,7 +13,7 @@ def setup_checkpoint(number_of_tables: int, html_dir: str) -> SimpleCheckpoint:
     checkpoint_name = "my_checkpoint"
     datasource_and_dataconnector_name = "my_datasource_and_dataconnector"
 
-    # "setup_bigquery_tables_for_performance_test.sh" creates these tables, numbered from 1 to 100
+    # These tables are created by "setup_bigquery_tables_for_performance_test.sh", with numbering from 1 to 100.
     assert 1 <= number_of_tables <= 100
     suite_and_asset_names = [
         f"bikeshare_trips_{i}" for i in range(1, number_of_tables + 1)
@@ -32,6 +31,33 @@ def setup_checkpoint(number_of_tables: int, html_dir: str) -> SimpleCheckpoint:
         checkpoint_name,
         suite_and_asset_names,
     )
+
+
+def expected_validation_results() -> list[dict]:
+    return [
+        {
+            "meta": {},
+            "expectation_config": {
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "kwargs": {"column": "trip_id"},
+                "meta": {},
+            },
+            "result": {
+                "element_count": 1342066,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "partial_unexpected_index_list": None,
+                "partial_unexpected_counts": [],
+            },
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+        }
+    ]
 
 
 def _create_context(
