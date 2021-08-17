@@ -2,6 +2,9 @@ stages:
   - stage: cloud_db_integration_expectations_cfe
     pool:
       vmImage: 'ubuntu-latest'
+    env:
+      GCP_PROJECT: $(GCP_PROJECT)
+      GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
 
     jobs:
       - job: bigquery_expectations
@@ -13,19 +16,11 @@ stages:
           matrix:
             expectations_cfe:
               test_script: 'tests/test_definitions/test_expectations_cfe.py'
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GCP_PROJECT: $(GCP_PROJECT)
-              GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
             expectations:
               test_script: 'tests/test_definitions/test_expectations.py'
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GCP_PROJECT: $(GCP_PROJECT)
-              GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
           maxParallel: 1
 
         steps:
-          #  displayName: Delay for BigQuery rate limit
-
           - task: UsePythonVersion@0
             inputs:
               versionSpec: '$(python.version)'
@@ -51,3 +46,5 @@ stages:
               pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics $(test_script)
 
             displayName: 'pytest'
+            env:
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
