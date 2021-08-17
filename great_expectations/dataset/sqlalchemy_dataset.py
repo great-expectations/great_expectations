@@ -572,10 +572,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
             )
-        elif dialect_name == "bigquery":
-            self.dialect = import_library_module(
-                module_name="pybigquery.sqlalchemy_bigquery"
-            )
         else:
             self.dialect = None
 
