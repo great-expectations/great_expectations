@@ -141,8 +141,8 @@ def test_force_reuse_spark_context(
     spark.stop()
 
 
-def test_spark_config_is_passed_through(
-    data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
+def test_spark_kwargs_are_passed_through(
+    data_context_parameterized_expectation_suite, tmp_path_factory, test_backends, spark_session
 ):
     """
     Ensure that an external SparkSession is not stopped when the spark_config matches
@@ -150,41 +150,31 @@ def test_spark_config_is_passed_through(
     """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession  # isort:skip
-
     dataset_name = "test_spark_dataset"
-
-    spark = SparkSession.builder.appName("local").master("local[1]").getOrCreate()
-    spark.conf.set("spark.sql.shuffle.partitions", "2")
-    data = {"col1": [0, 1, 2], "col2": ["a", "b", "c"]}
-
-    spark_df = spark.createDataFrame(pd.DataFrame(data))
-    tmp_parquet_filename = os.path.join(
-        tmp_path_factory.mktemp(dataset_name).as_posix(), dataset_name
-    )
-    spark_df.write.format("parquet").save(tmp_parquet_filename)
-
     data_context_parameterized_expectation_suite.add_datasource(
         dataset_name,
         class_name="SparkDFDatasource",
-        spark_config=dict(spark.sparkContext.getConf().getAll()),
+        spark_config=dict(spark_session.sparkContext.getConf().getAll()),
+        force_reuse_spark_context=False,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
     )
+    datasource_config = data_context_parameterized_expectation_suite.get_datasource(dataset_name).config
+    assert datasource_config["spark_config"] == dict(spark_session.sparkContext.getConf().getAll())
+    assert datasource_config["force_reuse_spark_context"] == False
 
-    df = spark.read.format("parquet").load(tmp_parquet_filename)
-    batch_kwargs = {"dataset": df, "datasource": dataset_name}
-    _ = data_context_parameterized_expectation_suite.create_expectation_suite(
-        dataset_name
+    dataset_name = "test_spark_dataset_2"
+    data_context_parameterized_expectation_suite.add_datasource(
+        dataset_name,
+        class_name="SparkDFDatasource",
+        spark_config={},
+        force_reuse_spark_context=True,
+        module_name="great_expectations.datasource",
+        batch_kwargs_generators={},
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
-        batch_kwargs=batch_kwargs, expectation_suite_name=dataset_name
-    )
-    results = batch.expect_column_max_to_be_between("col1", min_value=1, max_value=100)
-    assert (
-        results.success
-    ), "Failed to use external SparkSession eventhough the config is matching."
-    spark.stop()
+    datasource_config = data_context_parameterized_expectation_suite.get_datasource(dataset_name).config
+    assert datasource_config["spark_config"] == {}
+    assert datasource_config["force_reuse_spark_context"] == True
 
 
 def test_create_sparkdf_datasource(
