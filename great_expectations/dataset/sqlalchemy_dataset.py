@@ -582,10 +582,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
             )
-        elif dialect_name == "bigquery":
-            self.dialect = import_library_module(
-                module_name="pybigquery.sqlalchemy_bigquery"
-            )
         else:
             self.dialect = None
 
@@ -2115,7 +2111,8 @@ WHERE
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
             logger.debug(
-                "Unable to load BigQueryDialect dialect while running expect_column_values_to_not_match_regex_list"
+                "Unable to load BigQueryDialect dialect while running _get_dialect_like_pattern_expression",
+                exc_info=True,
             )
             pass
 

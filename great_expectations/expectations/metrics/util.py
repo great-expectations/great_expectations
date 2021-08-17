@@ -133,7 +133,8 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
         logger.debug(
-            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util"
+            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
+            exc_info=True,
         )
         pass
 
@@ -297,24 +298,6 @@ def parse_value_set(value_set):
         parse(value) if isinstance(value, str) else value for value in value_set
     ]
     return parsed_value_set
-
-
-def filter_pair_metric_nulls(column_A, column_B, ignore_row_if):
-    if ignore_row_if == "both_values_are_missing":
-        boolean_mapped_null_values = column_A.isnull() & column_B.isnull()
-    elif ignore_row_if == "either_value_is_missing":
-        boolean_mapped_null_values = column_A.isnull() | column_B.isnull()
-    elif ignore_row_if == "never":
-        boolean_mapped_null_values = column_A.map(lambda x: False)
-    else:
-        raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
-
-    assert len(column_A) == len(column_B), "Series A and B must be the same length"
-
-    return (
-        column_A[boolean_mapped_null_values == False],
-        column_B[boolean_mapped_null_values == False],
-    )
 
 
 def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=True):

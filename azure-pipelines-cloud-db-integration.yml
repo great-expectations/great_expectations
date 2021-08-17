@@ -1,61 +1,27 @@
 stages:
-  - stage: cloud_db_integration_expectations_cfe
+  - stage: cloud_db_integration
     pool:
       vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: bigquery_expectations_cfe
-        timeoutInMinutes: 0 # Maximize the time that pipelines remain open (6 hours currently)
-
-        variables:
-          python.version: '3.8'
-
-        steps:
-          # delay the execution of the second stages so that we do not hit the rate limit for BigQuery
-          # - bash: sleep 5m
-          #  displayName: Delay for BigQuery rate limit
-
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
-
-          - script: |
-              pip install -r requirements-dev.txt
-
-            displayName: 'Install dependencies'
-
-          - task: DownloadSecureFile@1
-            name: gcp_authkey
-            displayName: 'Download Google Service Account'
-            inputs:
-              secureFile: 'superconductive-service-acct.json'
-              retryCount: '2'
-
-          - script: |
-              pip install pytest pytest-azurepipelines
-              pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics tests/test_definitions/test_expectations_cfe.py
-
-            displayName: 'pytest'
-            env:
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GCP_PROJECT: $(GCP_PROJECT)
-              GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
-
-  - stage: cloud_db_integration_expectations
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    dependsOn: [cloud_db_integration_expectations_cfe]
     jobs:
       - job: bigquery_expectations
         timeoutInMinutes: 0 # Maximize the time that pipelines remain open (6 hours currently)
-
         variables:
           python.version: '3.8'
+
+        strategy:
+          matrix:
+            expectations_cfe:
+              test_script: 'tests/test_definitions/test_expectations_cfe.py'
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
+            expectations:
+              test_script: 'tests/test_definitions/test_expectations.py'
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
+          maxParallel: 1
 
         steps:
           - task: UsePythonVersion@0
@@ -80,10 +46,10 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics tests/test_definitions/test_expectations.py
+              pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics $(test_script)
 
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GCP_PROJECT: $(GCP_PROJECT)
-              GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
+              GE_TEST_BIGQUERY_PROJECT: $(GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
