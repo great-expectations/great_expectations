@@ -27,16 +27,12 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
         include_config (boolean): \
             If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
 
     Returns:
         An ExpectationSuiteValidationResult
