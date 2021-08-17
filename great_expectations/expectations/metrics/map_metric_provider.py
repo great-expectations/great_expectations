@@ -2337,9 +2337,6 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=_sqlalchemy_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
-                    print(
-                        f"\n[ALEX_TEST] METRIC_FN_TYPE: {metric_fn_type} ; TYPE: {str(type(metric_fn_type))}"
-                    )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
                         register_metric(
                             metric_name=metric_name + ".unexpected_count.aggregate_fn",
