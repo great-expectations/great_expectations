@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import logging
 import uuid
+import warnings
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
@@ -390,9 +391,17 @@ Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if not in ["neither", "never"]:
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+                if ignore_row_if == "never":
+                    warnings.warn(
+                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
+"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+""",
+                        DeprecationWarning,
                     )
 
             return data
