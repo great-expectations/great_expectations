@@ -1631,6 +1631,7 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
+
     return (
         sa.func.sum(
             sa.case(
@@ -1657,8 +1658,13 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     count_case_statement: List[sa.sql.elements.Label] = [
@@ -1787,8 +1793,13 @@ def _sqlalchemy_column_pair_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     # noinspection PyPep8Naming
@@ -1817,10 +1828,11 @@ def _sqlalchemy_column_pair_map_condition_values(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
 
-    return [
+    unexpected_list = [
         (val.unexpected_values_A, val.unexpected_values_B)
         for val in execution_engine.engine.execute(query).fetchall()
     ]
+    return unexpected_list
 
 
 def _sqlalchemy_column_pair_map_condition_filtered_row_count(
@@ -1869,9 +1881,13 @@ def _sqlalchemy_multicolumn_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     if "column_list" not in accessor_domain_kwargs:
@@ -2338,24 +2354,36 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_count.aggregate_fn",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=_sqlalchemy_map_condition_unexpected_count_aggregate_fn,
-                            metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
-                        )
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_count",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=None,
-                            metric_fn_type=MetricFunctionTypes.VALUE,
-                        )
+                        if domain_type == MetricDomainTypes.COLUMN:
+                            register_metric(
+                                metric_name=metric_name
+                                + ".unexpected_count.aggregate_fn",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=_sqlalchemy_map_condition_unexpected_count_aggregate_fn,
+                                metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
+                            )
+                            register_metric(
+                                metric_name=metric_name + ".unexpected_count",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=None,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
+                        else:
+                            register_metric(
+                                metric_name=metric_name + ".unexpected_count",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=_sqlalchemy_map_condition_unexpected_count_value,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
                     elif (
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
                     ):
