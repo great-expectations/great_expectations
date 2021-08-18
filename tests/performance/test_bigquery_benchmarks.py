@@ -2,12 +2,12 @@
 trends over time to identify/prevent performance regressions.
 """
 
-# todo(jdimatteo): add a performance test change log and only run performance test when that file changes.
-#  include git describe output in json.
+import time
+
 # todo(jdimatteo): include git freeze as an artifact to help reproducibility of performance tests.
-# todo(jdimatteo): disable this test unless argument --performance is included
 from pathlib import Path
 
+import _pytest.config
 import py.path
 import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
@@ -16,9 +16,23 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from tests.performance import bigquery_util
 
 
+@pytest.mark.parametrize("seconds", [0.01, 0.02, 0.04])
+def test_fake_sleep_passing(benchmark: BenchmarkFixture, seconds: float):
+    # todo(jdimatteo) remove this test
+    benchmark.pedantic(
+        time.sleep,
+        args=(seconds,),
+        iterations=1,
+        rounds=1,
+    )
+
+
 @pytest.mark.parametrize("number_of_tables", [1, 2, 4, 100])
 def test_bikeshare_trips_benchmark(
-    benchmark: BenchmarkFixture, tmpdir: py.path.local, number_of_tables: int
+    benchmark: BenchmarkFixture,
+    tmpdir: py.path.local,
+    number_of_tables: int,
+    pytestconfig: _pytest.config.Config,
 ):
     """Benchmark performance with a variety of expectations using the BigQuery public dataset
     bigquery-public-data.austin_bikeshare.bikeshare_trips.
@@ -34,6 +48,8 @@ def test_bikeshare_trips_benchmark(
     consider adding a new benchmark (or at least rename this benchmark to provide clarity that results are not directly
     comparable because of the data change).
     """
+    _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
+
     checkpoint = bigquery_util.setup_checkpoint(
         number_of_tables=number_of_tables,
         html_dir=tmpdir.strpath,
@@ -80,3 +96,14 @@ def test_bikeshare_trips_benchmark(
         ]
         # todo(jdimatteo) ignore order? ignore extra keys?
         assert actual_results == expected_validation_results
+
+
+def _skip_if_bigquery_performance_tests_not_enabled(
+    pytestconfig: _pytest.config.Config,
+):
+    if not pytestconfig.getoption("bigquery") or not pytestconfig.getoption(
+        "performance_tests"
+    ):
+        pytest.skip(
+            "This test requires --bigquery and --performance-tests flags to run."
+        )
