@@ -37,12 +37,77 @@ def expected_validation_results() -> list[dict]:
     # todo(jdimatteo) maybe update test to read/write to a file if this becomes hard to maintain
     return [
         {
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+            "result": {
+                "observed_value": [
+                    "trip_id",
+                    "subscriber_type",
+                    "bikeid",
+                    "start_time",
+                    "start_station_id",
+                    "start_station_name",
+                    "end_station_id",
+                    "end_station_name",
+                    "duration_minutes",
+                ]
+            },
             "meta": {},
             "expectation_config": {
-                "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {"column": "trip_id"},
                 "meta": {},
+                "kwargs": {
+                    "column_set": [
+                        "trip_id",
+                        "subscriber_type",
+                        "bikeid",
+                        "start_time",
+                        "start_station_id",
+                        "start_station_name",
+                        "end_station_id",
+                        "end_station_name",
+                        "duration_minutes",
+                    ]
+                },
+                "expectation_type": "expect_table_columns_to_match_set",
             },
+        },
+        {
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+            "result": {
+                "element_count": 1342066,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 0.0,
+                "unexpected_percent_nonmissing": 0.0,
+                "partial_unexpected_index_list": None,
+                "partial_unexpected_counts": [],
+            },
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {"column": "trip_id"},
+                "expectation_type": "expect_column_values_to_be_unique",
+            },
+        },
+        {
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
             "result": {
                 "element_count": 1342066,
                 "unexpected_count": 0,
@@ -51,13 +116,102 @@ def expected_validation_results() -> list[dict]:
                 "partial_unexpected_index_list": None,
                 "partial_unexpected_counts": [],
             },
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {"column": "trip_id"},
+                "expectation_type": "expect_column_values_to_not_be_null",
+            },
+        },
+        {
             "exception_info": {
                 "raised_exception": False,
                 "exception_traceback": None,
                 "exception_message": None,
             },
             "success": True,
-        }
+            "result": {"observed_value": "Integer"},
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {"column": "trip_id", "type_": "INTEGER"},
+                "expectation_type": "expect_column_values_to_be_of_type",
+            },
+        },
+        {
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+            "result": {"observed_value": "String"},
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {"column": "bikeid", "type_": "STRING"},
+                "expectation_type": "expect_column_values_to_be_of_type",
+            },
+        },
+        {
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+            "result": {
+                "element_count": 1342066,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "missing_count": 6551,
+                "missing_percent": 0.48812800562714503,
+                "unexpected_percent_total": 0.0,
+                "unexpected_percent_nonmissing": 0.0,
+                "partial_unexpected_index_list": None,
+                "partial_unexpected_counts": [],
+            },
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {
+                    "column": "subscriber_type",
+                    "value_set": _subscriber_types(),
+                },
+                "expectation_type": "expect_column_values_to_be_in_set",
+            },
+        },
+        {
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+            "result": {
+                "element_count": 1342066,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 0.0,
+                "unexpected_percent_nonmissing": 0.0,
+                "partial_unexpected_index_list": None,
+                "partial_unexpected_counts": [],
+            },
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {
+                    "column": "duration_minutes",
+                    "max_value": 36000,
+                    "min_value": 0,
+                },
+                "expectation_type": "expect_column_values_to_be_between",
+            },
+        },
     ]
 
 
@@ -136,6 +290,24 @@ def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
     suite = context.create_expectation_suite(expectation_suite_name=suite_name)
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
+            expectation_type="expect_table_columns_to_match_set",
+            kwargs={
+                "column_set": [
+                    "trip_id",
+                    "subscriber_type",
+                    "bikeid",
+                    "start_time",
+                    "start_station_id",
+                    "start_station_name",
+                    "end_station_id",
+                    "end_station_name",
+                    "duration_minutes",
+                ]
+            },
+        )
+    )
+    suite.add_expectation(
+        expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_unique",
             kwargs={"column": "trip_id"},
         )
@@ -158,9 +330,111 @@ def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
             kwargs={"column": "bikeid", "type_": "STRING"},
         )
     )
-    # todo(jdimatteo): add for subscriber_type with expect_column_values_to_be_in_set and a few more to be similar to internal perf tests
-    # and update expected_validation_results
+    suite.add_expectation(
+        expectation_configuration=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "subscriber_type",
+                "value_set": _subscriber_types(),
+            },
+        )
+    )
+    suite.add_expectation(
+        expectation_configuration=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_between",
+            kwargs={
+                "column": "duration_minutes",
+                "min_value": 0,
+                "max_value": 36000,
+            },
+        )
+    )
+
     # Save the expectation suite or else it doesn't show up in the data docs.
     context.save_expectation_suite(
         expectation_suite=suite, expectation_suite_name=suite_name
     )
+
+
+def _subscriber_types() -> list[str]:
+    return [
+        "Walk Up",
+        "24-Hour Kiosk (Austin B-cycle)",
+        "Annual Membership (Austin B-cycle)",
+        "Founding Member (Austin B-cycle)",
+        "Local365",
+        "Weekender",
+        "Local30",
+        "Annual",
+        "Explorer",
+        "Founding Member",
+        "RideScout Single Ride",
+        "Annual Member",
+        "7-Day",
+        "Annual (Denver B-cycle)",
+        "Semester Membership",
+        "Local365+Guest Pass",
+        "Annual Pass",
+        "Republic Rider (Annual)",
+        "null",
+        "Local365 Youth with helmet (age 13-17 riders)",
+        "Try Before You Buy Special",
+        "Annual Membership",
+        "Local365 ($80 plus tax)",
+        "Weekender ($15 plus tax)",
+        "Explorer ($8 plus tax)",
+        "Local30 ($11 plus tax)",
+        "Semester Membership (Austin B-cycle)",
+        "24-Hour-Online (Austin B-cycle)",
+        "Annual (Madison B-cycle)",
+        "Annual (Nashville B-cycle)",
+        "7-Day Membership (Austin B-cycle)",
+        "Annual (San Antonio B-cycle)",
+        "Annual Member (Houston B-cycle)",
+        "Annual (Boulder B-cycle)",
+        "Annual Membership (Fort Worth Bike Sharing)",
+        "Annual (Denver Bike Sharing)",
+        "Annual Plus",
+        "U.T. Student Membership",
+        "Local365 Youth (age 13-17 riders)",
+        "Madtown Monthly",
+        "Annual Plus Membership",
+        "HT Ram Membership",
+        "24 Hour Walk Up Pass",
+        "3-Day Weekender",
+        "3-Day Explorer",
+        "$1 Pay by Trip Fall Special",
+        "Single Trip",
+        "Single Trip (Pay-as-you-ride)",
+        "Pay-as-you-ride",
+        "Single Trip Ride",
+        "Annual ",
+        "Local365+Guest Pass- 1/2 off Anniversary Special",
+        "Local365- 1/2 off Anniversary Special",
+        "$1 Pay by Trip Winter Special",
+        "Single Trip ",
+        "Annual Membership ",
+        "ACL 2019 Pass",
+        "Local31",
+        "ACL Weekend Pass Special (Austin B-cycle)",
+        "Annual (Cincy Red Bike)",
+        "Membership: pay once  one-year commitment",
+        "Annual (Kansas City B-cycle)",
+        "Annual (Broward B-cycle)",
+        "Annual Pass (30 minute)",
+        "Annual Membership (Charlotte B-cycle)",
+        "FunFunFun Fest 3 Day Pass",
+        "Local365 Youth (age 13-17 riders)- 1/2 off Special",
+        "24-Hour Membership (Austin B-cycle)",
+        "Annual Membership (Indy - Pacers Bikeshare )",
+        "Annual Membership (GREENbike)",
+        "Denver B-cycle Founder",
+        "Republic Rider",
+        "Aluminum Access",
+        "Heartland Pass (Annual Pay)",
+        "UT Student Membership",
+        "PROHIBITED",
+        "RESTRICTED",
+        "Annual (Omaha B-cycle)",
+        "Heartland Pass (Monthly Pay)",
+    ]
