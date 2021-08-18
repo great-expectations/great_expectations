@@ -14,7 +14,9 @@
         "w": "IntegerType",
         "x": "IntegerType",
         "y": "StringType",
-        "z": "IntegerType"
+        "z": "IntegerType",
+        "a": "IntegerType",
+        "b": "IntegerType"
       }
     },
     "tests" : [{

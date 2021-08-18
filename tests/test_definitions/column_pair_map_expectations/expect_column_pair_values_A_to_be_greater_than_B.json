@@ -17,7 +17,8 @@
         "y": "IntegerType",
         "z": "IntegerType",
         "a": "StringType",
-        "b": "StringType"
+        "b": "StringType",
+        "c": "IntegerType"
       }
     },
     "tests" : [{
