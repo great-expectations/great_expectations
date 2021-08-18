@@ -1203,12 +1203,12 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_multicolumn_sum_to_equal",
-            "expect_column_values_to_be_between",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_of_type",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_in_set",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_in_type_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_match_like_pattern_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_not_match_like_pattern_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_between",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_of_type",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_in_set",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_in_type_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_match_like_pattern_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_not_match_like_pattern_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
         ]
 
     if context == "SparkDFDataset":
@@ -1287,7 +1287,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_match_json_schema",
             "expect_column_stdev_to_be_between",
             "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
+            # "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
             "expect_multicolumn_sum_to_equal",
@@ -2006,10 +2006,15 @@ def _create_bigquery_engine() -> Engine:
     gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT")
     if not gcp_project:
         raise ValueError(
-            "Environment Variable GE_TEST_BIGQUERY_PROJECT is required to run expectation tests"
+            "Environment Variable GE_TEST_BIGQUERY_PROJECT is required to run BigQuery expectation tests"
         )
     return create_engine(f"bigquery://{gcp_project}/{_bigquery_dataset()}")
 
 
 def _bigquery_dataset() -> str:
-    return os.getenv("GE_TEST_BIGQUERY_DATASET")
+    dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
+    if not dataset:
+        raise ValueError(
+            "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
+        )
+    return dataset
