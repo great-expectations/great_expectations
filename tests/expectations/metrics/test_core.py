@@ -1344,7 +1344,6 @@ def test_map_column_pairs_equal_metric_sa(sa):
     metric_name: str = "column_pair_values.equal"
     condition_metric_name: str = f"{metric_name}.condition"
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    partial_metric_name: str = f"{unexpected_count_metric_name}.aggregate_fn"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
 
@@ -1367,24 +1366,6 @@ def test_map_column_pairs_equal_metric_sa(sa):
     )
     metrics.update(results)
 
-    partial_metric = MetricConfiguration(
-        metric_name=partial_metric_name,
-        metric_domain_kwargs={
-            "column_A": "b",
-            "column_B": "c",
-        },
-        metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
-    )
-
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(partial_metric,), metrics=metrics
-    )
-    metrics.update(results)
-
     unexpected_count_metric = MetricConfiguration(
         metric_name=unexpected_count_metric_name,
         metric_domain_kwargs={
@@ -1394,7 +1375,6 @@ def test_map_column_pairs_equal_metric_sa(sa):
         metric_value_kwargs=None,
         metric_dependencies={
             "unexpected_condition": condition_metric,
-            "metric_partial_fn": partial_metric,
             "table.columns": table_columns_metric,
         },
     )
@@ -1472,24 +1452,6 @@ def test_map_column_pairs_equal_metric_sa(sa):
     )
     metrics.update(results)
 
-    partial_metric = MetricConfiguration(
-        metric_name=partial_metric_name,
-        metric_domain_kwargs={
-            "column_A": "a",
-            "column_B": "d",
-        },
-        metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
-    )
-
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(partial_metric,), metrics=metrics
-    )
-    metrics.update(results)
-
     unexpected_count_metric = MetricConfiguration(
         metric_name=unexpected_count_metric_name,
         metric_domain_kwargs={
@@ -1499,7 +1461,6 @@ def test_map_column_pairs_equal_metric_sa(sa):
         metric_value_kwargs=None,
         metric_dependencies={
             "unexpected_condition": condition_metric,
-            "metric_partial_fn": partial_metric,
             "table.columns": table_columns_metric,
         },
     )
@@ -2396,7 +2357,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
     metric_name: str = "multicolumn_sum.equal"
     condition_metric_name: str = f"{metric_name}.condition"
     unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    partial_metric_name: str = f"{unexpected_count_metric_name}.aggregate_fn"
     unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
     unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
 
@@ -2419,25 +2379,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
     )
     metrics.update(results)
 
-    partial_metric = MetricConfiguration(
-        metric_name=partial_metric_name,
-        metric_domain_kwargs={
-            "column_list": ["a", "b"],
-        },
-        metric_value_kwargs={
-            "sum_total": 5,
-        },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
-    )
-
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(partial_metric,), metrics=metrics
-    )
-    metrics.update(results)
-
     unexpected_count_metric = MetricConfiguration(
         metric_name=unexpected_count_metric_name,
         metric_domain_kwargs={
@@ -2446,7 +2387,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs=None,
         metric_dependencies={
             "unexpected_condition": condition_metric,
-            "metric_partial_fn": partial_metric,
             "table.columns": table_columns_metric,
         },
     )
@@ -2523,25 +2463,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
     )
     metrics.update(results)
 
-    partial_metric = MetricConfiguration(
-        metric_name=partial_metric_name,
-        metric_domain_kwargs={
-            "column_list": ["a", "b"],
-        },
-        metric_value_kwargs={
-            "sum_total": 5,
-        },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
-    )
-
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(partial_metric,), metrics=metrics
-    )
-    metrics.update(results)
-
     unexpected_count_metric = MetricConfiguration(
         metric_name=unexpected_count_metric_name,
         metric_domain_kwargs={
@@ -2550,7 +2471,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs=None,
         metric_dependencies={
             "unexpected_condition": condition_metric,
-            "metric_partial_fn": partial_metric,
             "table.columns": table_columns_metric,
         },
     )
