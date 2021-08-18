@@ -1203,12 +1203,12 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_multicolumn_sum_to_equal",
-            "expect_column_values_to_be_between",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_of_type",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_in_set",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_in_type_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_match_like_pattern_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_not_match_like_pattern_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_between",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_of_type",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_in_set",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_in_type_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_match_like_pattern_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_not_match_like_pattern_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
         ]
 
     if context == "SparkDFDataset":
