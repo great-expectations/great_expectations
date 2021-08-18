@@ -3,6 +3,8 @@ title: Changelog
 ---
 
 ### Develop
+* [BUGFIX] Fix deprecation warning for importing from collections (#3228)
+* [DOCS] Document BigQuery test dataset configuration (#3273)
 
 ### 0.13.28
 * [FEATURE] Implement ColumnPairValuesInSet metric for PandasExecutionEngine
