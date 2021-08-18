@@ -203,6 +203,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
             "class_name": "PandasExecutionEngine",
             "discard_subset_failing_expectations": False,
             "boto3_options": {},
+            "azure_options": {},
         },
         "data_connectors": {
             "count": 2,

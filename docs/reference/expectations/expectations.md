@@ -16,11 +16,11 @@ Great Expectations' built-in library includes more than 50 common Expectations, 
 * `expect_table_row_count_to_be_between`
 * `expect_column_median_to_be_between`
 
-For a full list of available Expectations, please check out the [Expectation Glossary](./). Please note that not all
+For a full list of available Expectations, please check out the [Expectation Glossary](../glossary_of_expectations). Please note that not all
 Expectations are implemented on all Execution Engines yet. You can see the grid of supported
-Expectations [here](./implemented_expectations). We welcome [contributions](./) to fill in the gaps.
+Expectations [here](./implemented_expectations). We welcome [contributions](../../contributing/contributing) to fill in the gaps.
 
-You can also extend Great Expectations by [creating your own custom Expectations](./).
+You can also extend Great Expectations by [creating your own custom Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations).
 
 Expectations *enhance communication* about your data and *improve quality* for data applications. Using Expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."

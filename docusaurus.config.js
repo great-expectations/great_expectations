@@ -12,13 +12,23 @@ module.exports = {
   favicon: "img/favicon.ico",
   organizationName: "great-expectations",
   projectName: "great_expectations",
-  plugins: ["plugin-image-zoom"],
+  plugins: [
+	//["plugin-image-zoom"],
+	require.resolve('@cmfcmf/docusaurus-search-local'),
+  ],
+
   themeConfig: {
     prism: {
       theme: require("prism-react-renderer/themes/vsDark")
     },
     colorMode: {
       disableSwitch: true
+    },
+    gtag: {
+      // You can also use your "G-" Measurement ID here.
+      trackingID: 'UA-138955219-1',
+      // Optional fields.
+      anonymizeIP: true, // Should IPs be anonymized?
     },
     zoomSelector: ".markdown :not(em) > img",
     announcementBar: {
