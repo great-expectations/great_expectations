@@ -49,9 +49,18 @@ logger = logging.getLogger(__name__)
 try:
     import pybigquery.sqlalchemy_bigquery
 
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
+    ###
+    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+    # to define an attribute "dialect". A PR has been submitted to fix this upstream
+    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+    # fix isn't present, add this "dialect" attribute here:
+    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
+        pybigquery.sqlalchemy_bigquery.dialect = (
+            pybigquery.sqlalchemy_bigquery.BigQueryDialect
+        )
+    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
+    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "dialect")
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
         bigquery_types_tuple = None
@@ -123,7 +132,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Bigquery
-        if issubclass(dialect.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "BigQueryDialect"):
             if positive:
                 return sa.func.REGEXP_CONTAINS(column, literal(regex))
             else:
@@ -132,6 +141,10 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         AttributeError,
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
+        logger.debug(
+            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
+            exc_info=True,
+        )
         pass
 
     return None
@@ -251,10 +264,10 @@ def column_reflection_fallback(
         columns_query: str = f"""
 SELECT
     SCHEMA_NAME(tab.schema_id) AS schema_name,
-    tab.name AS table_name, 
+    tab.name AS table_name,
     col.column_id AS column_id,
-    col.name AS column_name, 
-    t.name AS column_data_type,    
+    col.name AS column_name,
+    t.name AS column_data_type,
     col.max_length AS column_max_length,
     col.precision AS column_precision
 FROM sys.tables AS tab
@@ -264,7 +277,7 @@ FROM sys.tables AS tab
     ON col.user_type_id = t.user_type_id
 WHERE tab.name = '{selectable}'
 ORDER BY schema_name,
-    table_name, 
+    table_name,
     column_id
 """
         col_info_query: TextClause = sa.text(columns_query)
@@ -301,7 +314,7 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
 
     try:
         # Bigquery
-        if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "BigQueryDialect"):
             dialect_supported = True
     except (
         AttributeError,
