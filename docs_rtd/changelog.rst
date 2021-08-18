@@ -8,6 +8,9 @@ Changelog
 develop
 -----------------
 * [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
+* [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3228)
+* [DOCS] Document BigQuery test dataset configuration (#3273) (Thanks @jdimatteo)
 
 0.13.28
 -----------------
