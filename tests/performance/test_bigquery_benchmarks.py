@@ -1,4 +1,4 @@
-"""Provide performance measurements to quantify the impact of PRs that are intended to improve performance and measure
+"""Provide performance benchmarks to quantify the impact of PRs that are intended to improve performance and measure
 trends over time to identify/prevent performance regressions.
 """
 
@@ -6,7 +6,6 @@ trends over time to identify/prevent performance regressions.
 #  include git describe output in json.
 # todo(jdimatteo): include git freeze as an artifact to help reproducibility of performance tests.
 # todo(jdimatteo): disable this test unless argument --performance is included
-import os
 from pathlib import Path
 
 import py.path
@@ -14,12 +13,6 @@ import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    InMemoryStoreBackendDefaults,
-)
 from tests.performance import bigquery_util
 
 

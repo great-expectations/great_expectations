@@ -34,7 +34,6 @@ def setup_checkpoint(number_of_tables: int, html_dir: str) -> SimpleCheckpoint:
 
 
 def expected_validation_results() -> list[dict]:
-    # todo(jdimatteo) maybe update test to read/write to a file if this becomes hard to maintain
     return [
         {
             "exception_info": {
