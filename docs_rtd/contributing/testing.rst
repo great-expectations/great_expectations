@@ -41,20 +41,19 @@ In order to run BigQuery tests, you first need to go through the following steps
 
 1. `Select or create a Cloud Platform project.`_
 2. `Setup Authentication.`_
-3. `In your project, create a BigQuery dataset named "test_ci"`_ and `set the dataset default table expiration to .1 days`_
+3. `In your project, create a BigQuery dataset (e.g. named "test_ci")`_ and `set the dataset default table expiration to .1 days`_
 
 .. _Select or create a Cloud Platform project.: https://console.cloud.google.com/project
 .. _Setup Authentication.: https://googleapis.dev/python/google-api-core/latest/auth.html
-.. _`In your project, create a BigQuery dataset named "test_ci"`: https://cloud.google.com/bigquery/docs/datasets
+.. _`In your project, create a BigQuery dataset (e.g. named "test_ci")`: https://cloud.google.com/bigquery/docs/datasets
 .. _`set the dataset default table expiration to .1 days`: https://cloud.google.com/bigquery/docs/updating-datasets#table-expiration
 
-After setting up authentication, you can run with your project using the environment variable `GE_TEST_BIGQUERY_PROJECT`, e.g.
+After setting up authentication, you can run with your project using the environment variables `GE_TEST_BIGQUERY_PROJECT` and `GE_TEST_BIGQUERY_DATASET`, e.g.
 
 .. code-block::
 
-    GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT> pytest tests/test_definitions/test_expectations_cfe.py --bigquery --no-spark --no-postgresql -k bigquery
+    GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT> GE_TEST_BIGQUERY_DATASET=test_ci pytest tests/test_definitions/test_expectations_cfe.py --bigquery --no-spark --no-postgresql -k bigquery
 
-Note that if you prefer to use a different dataset besides "test_ci", you can specify a different dataset with `GE_TEST_BIGQUERY_DATASET`.
 
 Writing unit and integration tests
 ----------------------------------
