@@ -22,23 +22,13 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
         "condition_parser",
         "ignore_row_if",
     )
-    condition_value_keys = ("parse_strings_as_datetimes",)
+    condition_value_keys = ()
 
     # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
-        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
-        if parse_strings_as_datetimes:
-            return column_A.map(parse) == column_B.map(parse)
-        else:
-            return column_A == column_B
+        return column_A == column_B
 
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
-        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
-        if parse_strings_as_datetimes:
-            return sa.case(
-                (column_A.map(parse) == column_B.map(parse), True), else_=False
-            )
-        else:
-            return sa.case((column_A == column_B, True), else_=False)
+        return sa.case((column_A == column_B, True), else_=False)
