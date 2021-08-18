@@ -22,9 +22,7 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
         "condition_parser",
         "ignore_row_if",
     )
-    condition_value_keys = (
-        "parse_strings_as_datetimes",
-    )
+    condition_value_keys = ("parse_strings_as_datetimes",)
 
     # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
     @column_pair_condition_partial(engine=PandasExecutionEngine)
