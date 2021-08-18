@@ -85,10 +85,20 @@ except (ImportError, KeyError, AttributeError):
 try:
     import pybigquery.sqlalchemy_bigquery
 
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
+    ###
+    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+    # to define an attribute "dialect". A PR has been submitted to fix this upstream
+    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+    # fix isn't present, add this "dialect" attribute here:
+    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
+        pybigquery.sqlalchemy_bigquery.dialect = (
+            pybigquery.sqlalchemy_bigquery.BigQueryDialect
+        )
+
+    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     sa.dialects.registry.register(
-        "bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect"
+        "bigquery", "pybigquery.sqlalchemy_bigquery", "dialect"
     )
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
@@ -488,7 +498,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -583,7 +593,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
+        accessor_domain_kwargs = {}
         if domain_type == MetricDomainTypes.TABLE:
             if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
@@ -689,10 +699,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             Returns:
                 A dictionary of metric names and their corresponding now-queried values.
         """
-        resolved_metrics = dict()
+        resolved_metrics = {}
 
         # We need a different query for each domain (where clause).
-        queries: Dict[Tuple, dict] = dict()
+        queries: Dict[Tuple, dict] = {}
         for (
             metric_to_resolve,
             engine_fn,

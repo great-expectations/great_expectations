@@ -210,7 +210,7 @@ def test_get_domain_records_with_column_pair_domain(
             "column_B": "b",
             "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
-            "ignore_row_if": "either_value_is_missing",
+            "ignore_row_if": "both_values_are_missing",
         }
     )
 
@@ -255,7 +255,7 @@ def test_get_domain_records_with_column_pair_domain(
         domain_kwargs={
             "column_A": "b",
             "column_B": "c",
-            "row_condition": 'col("a")<6',
+            "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
             "ignore_row_if": "either_value_is_missing",
         }
@@ -264,7 +264,58 @@ def test_get_domain_records_with_column_pair_domain(
         data = data.withColumn(column_name, data[column_name].cast(LongType()))
 
     expected_column_pair_pd_df = pd.DataFrame(
-        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
+    )
+    expected_column_pair_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pair_pd_df.to_records(index=False)
+        ],
+        expected_column_pair_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_pair_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "neither",
+        }
+    )
+
+    expected_column_pair_pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5],
+            "b": [2.0, 3.0, 4.0, 5.0, None],
+            "c": [1.0, 2.0, 3.0, 4.0, 5.0],
+        }
     )
     expected_column_pair_df = spark_session.createDataFrame(
         [
@@ -357,7 +408,7 @@ def test_get_domain_records_with_multicolumn_domain(
     data = engine.get_domain_records(
         domain_kwargs={
             "column_list": ["b", "c"],
-            "row_condition": 'col("a")<6',
+            "row_condition": 'col("a")<5',
             "condition_parser": "great_expectations__experimental__",
             "ignore_row_if": "any_value_is_missing",
         }
@@ -366,7 +417,57 @@ def test_get_domain_records_with_multicolumn_domain(
         data = data.withColumn(column_name, data[column_name].cast(LongType()))
 
     expected_multicolumn_pd_df = pd.DataFrame(
-        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
+    )
+
+    expected_multicolumn_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_multicolumn_pd_df.to_records(index=False)
+        ],
+        expected_multicolumn_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_multicolumn_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "ignore_row_if": "never",
+        }
+    )
+
+    expected_multicolumn_pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        },
+        index=[0, 1, 2, 3, 4, 5],
     )
 
     expected_multicolumn_df = spark_session.createDataFrame(
@@ -1054,7 +1155,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -1062,7 +1163,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -1070,7 +1171,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -1078,7 +1179,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -1097,7 +1198,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_1,
             "table.columns": table_columns_metric,
@@ -1106,7 +1207,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_2,
             "table.columns": table_columns_metric,
@@ -1115,7 +1216,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_3,
             "table.columns": table_columns_metric,
@@ -1124,7 +1225,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_4,
             "table.columns": table_columns_metric,
@@ -1439,22 +1540,22 @@ def test_resolve_metric_bundle_with_nonexistent_metric(
     desired_metric_1 = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_4 = MetricConfiguration(
         metric_name="column.does_not_exist",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
 
     # Ensuring a metric provider error is raised if metric does not exist

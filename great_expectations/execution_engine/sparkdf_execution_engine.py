@@ -390,7 +390,7 @@ Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -455,7 +455,7 @@ Please check your config."""
         domain_type = MetricDomainTypes(domain_type)
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
+        accessor_domain_kwargs = {}
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
@@ -580,8 +580,8 @@ Please check your config."""
                 Returns:
                     A dictionary of the collected metrics over their respective domains
         """
-        resolved_metrics = dict()
-        aggregates: Dict[Tuple, dict] = dict()
+        resolved_metrics = {}
+        aggregates: Dict[Tuple, dict] = {}
         for (
             metric_to_resolve,
             engine_fn,

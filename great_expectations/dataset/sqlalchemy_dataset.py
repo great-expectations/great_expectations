@@ -93,6 +93,16 @@ except (ImportError, KeyError, AttributeError):
 try:
     import pybigquery.sqlalchemy_bigquery
 
+    ###
+    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+    # to define an attribute "dialect". A PR has been submitted to fix this upstream
+    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+    # fix isn't present, add this "dialect" attribute here:
+    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
+        pybigquery.sqlalchemy_bigquery.dialect = (
+            pybigquery.sqlalchemy_bigquery.BigQueryDialect
+        )
+
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
@@ -542,32 +552,33 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
-        if self.engine.dialect.name.lower() in [
+        dialect_name: str = self.engine.dialect.name.lower()
+
+        if dialect_name in [
             "postgresql",
             "mysql",
             "sqlite",
             "oracle",
             "mssql",
+            "bigquery",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
-
-        elif self.engine.dialect.name.lower() == "snowflake":
+        elif dialect_name == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-
-        elif self.engine.dialect.name.lower() == "redshift":
+        elif dialect_name == "redshift":
             self.dialect = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif self.engine.dialect.name.lower() == "bigquery":
+        elif dialect_name == "bigquery":
             self.dialect = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
             )
-        elif self.engine.dialect.name.lower() == "awsathena":
+        elif dialect_name == "awsathena":
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
             )
@@ -2093,14 +2104,16 @@ WHERE
 
         try:
             # Bigquery
-            if isinstance(
-                self.sql_engine_dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect
-            ):
+            if hasattr(self.sql_engine_dialect, "BigQueryDialect"):
                 dialect_supported = True
         except (
             AttributeError,
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
+            logger.debug(
+                "Unable to load BigQueryDialect dialect while running _get_dialect_like_pattern_expression",
+                exc_info=True,
+            )
             pass
 
         if isinstance(
