@@ -1,7 +1,6 @@
 import logging
 import os
 
-import pyparsing as pp
 import pytest
 
 import tests.test_utils as test_utils

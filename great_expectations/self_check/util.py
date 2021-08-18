@@ -100,6 +100,59 @@ except (ImportError, KeyError):
     SQLITE_TYPES = {}
 
 try:
+    import pybigquery.sqlalchemy_bigquery
+    import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+
+    ###
+    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+    # to define an attribute "dialect". A PR has been submitted to fix this upstream
+    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+    # fix isn't present, add this "dialect" attribute here:
+    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
+        pybigquery.sqlalchemy_bigquery.dialect = (
+            pybigquery.sqlalchemy_bigquery.BigQueryDialect
+        )
+
+    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+    sqlalchemy.dialects.registry.register(
+        "bigquery", "pybigquery.sqlalchemy_bigquery", "dialect"
+    )
+    try:
+        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
+        bigquery_types_tuple = {}
+        BIGQUERY_TYPES = {
+            "INTEGER": pybigquery.sqlalchemy_bigquery.INTEGER,
+            "NUMERIC": pybigquery.sqlalchemy_bigquery.NUMERIC,
+            "STRING": pybigquery.sqlalchemy_bigquery.STRING,
+            "BIGNUMERIC": pybigquery.sqlalchemy_bigquery.BIGNUMERIC,
+            "BYTES": pybigquery.sqlalchemy_bigquery.BYTES,
+            "BOOL": pybigquery.sqlalchemy_bigquery.BOOL,
+            "BOOLEAN": pybigquery.sqlalchemy_bigquery.BOOLEAN,
+            "TIMESTAMP": pybigquery.sqlalchemy_bigquery.TIMESTAMP,
+            "TIME": pybigquery.sqlalchemy_bigquery.TIME,
+            "FLOAT": pybigquery.sqlalchemy_bigquery.FLOAT,
+            "DATE": pybigquery.sqlalchemy_bigquery.DATE,
+            "DATETIME": pybigquery.sqlalchemy_bigquery.DATETIME,
+        }
+    except AttributeError:
+        # In older versions of the pybigquery driver, types were not exported, so we use a hack
+        logger.warning(
+            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+        )
+        from collections import namedtuple
+
+        BigQueryTypes = namedtuple(
+            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
+        )
+        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
+except (ImportError, AttributeError):
+    bigquery_types_tuple = None
+    BigQueryDialect = None
+    pybigquery = None
+
+
+try:
     import sqlalchemy.dialects.postgresql as postgresqltypes
     from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 
@@ -187,7 +240,7 @@ except (ImportError, KeyError):
 class SqlAlchemyConnectionManager:
     def __init__(self):
         self.lock = threading.Lock()
-        self._connections = dict()
+        self._connections = {}
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:
@@ -249,7 +302,7 @@ def get_dataset(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests."""
+    """Utility to create datasets for json-formatted tests"""
     df = pd.DataFrame(data)
     if dataset_type == "PandasDataset":
         if schemas and "pandas" in schemas:
@@ -466,6 +519,30 @@ def get_dataset(
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
+    elif dataset_type == "bigquery":
+        if not create_engine:
+            return None
+        engine = _create_bigquery_engine()
+        schema = None
+        if schemas and dataset_type in schemas:
+            schema = schemas[dataset_type]
+            # BigQuery does not allow for column names to have spaces
+            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+
+        df.columns = df.columns.str.replace(" ", "_")
+
+        if table_name is None:
+            table_name = generate_test_table_name()
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            if_exists="replace",
+        )
+        custom_sql = f"SELECT * FROM {_bigquery_dataset()}.{table_name}"
+        return SqlAlchemyDataset(
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
+        )
 
     elif dataset_type == "mssql":
         if not create_engine:
@@ -639,7 +716,6 @@ def get_dataset(
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
-
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -689,7 +765,7 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
+    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
         if not create_engine:
             return None
         return build_sa_validator_with_data(
@@ -839,12 +915,14 @@ def build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
+        "bigquery": pybigquery.sqlalchemy_bigquery.BigQueryDialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
         "postgresql": POSTGRESQL_TYPES,
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
+        "bigquery": BIGQUERY_TYPES,
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -861,6 +939,8 @@ def build_sa_validator_with_data(
             "for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
+    elif sa_engine_name == "bigquery":
+        engine = _create_bigquery_engine()
     else:
         engine = None
 
@@ -870,6 +950,15 @@ def build_sa_validator_with_data(
 
     # Add the data to the database as a new table
 
+    if sa_engine_name == "bigquery":
+        schema = None
+        if schemas and sa_engine_name in schemas:
+            schema = schemas[sa_engine_name]
+            # bigquery does not allow column names to have spaces
+            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+
+        df.columns = df.columns.str.replace(" ", "_")
+
     sql_dtypes = {}
     if (
         schemas
@@ -877,6 +966,7 @@ def build_sa_validator_with_data(
         and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
     ):
         schema = schemas[sa_engine_name]
+
         sql_dtypes = {
             col: dialect_types.get(sa_engine_name)[dtype]
             for (col, dtype) in schema.items()
@@ -1072,51 +1162,15 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
-            # "expect_column_to_exist",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_columns_to_match_set",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
-            # "expect_column_values_to_match_like_pattern",
-            # "expect_column_values_to_not_match_like_pattern",
-            # "expect_column_values_to_match_like_pattern_list",
-            # "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_sum_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_max_to_be_between",
-            # "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",
@@ -1125,62 +1179,47 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_table_row_count_to_equal_other_table",
             "expect_multicolumn_sum_to_equal",
         ]
-    if context == "SparkDFDataset":
+    if context in ["bigquery"]:
         return expectation_type in [
-            # "expect_column_to_exist",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_columns_to_match_set",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_values_to_be_between",
-            # "expect_column_values_to_be_increasing",
-            # "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
-            # "expect_column_values_to_match_strftime_format",
+            "expect_column_values_to_be_increasing",
+            "expect_column_values_to_be_decreasing",
+            "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
-            # "expect_column_values_to_match_json_schema",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
-            # "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
-            # "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_sum_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_max_to_be_between",
-            # "expect_column_chisquare_test_p_value_to_be_greater_than",
+            "expect_column_values_to_match_json_schema",
+            "expect_column_stdev_to_be_between",
+            "expect_column_most_common_value_to_be_in_set",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            # "expect_column_kl_divergence_to_be_less_than",
+            "expect_column_kl_divergence_to_be_less_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            # "expect_column_pair_values_to_be_equal",
-            # "expect_column_pair_values_A_to_be_greater_than_B",
-            # "expect_column_pair_values_to_be_in_set",
-            # "expect_select_column_values_to_be_unique_within_record",
+            "expect_column_chisquare_test_p_value_to_be_greater_than",
+            "expect_column_pair_values_to_be_equal",
+            "expect_column_pair_values_A_to_be_greater_than_B",
+            "expect_column_pair_values_to_be_in_set",
+            "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
-            # "expect_multicolumn_values_to_be_unique",
+            "expect_multicolumn_values_to_be_unique",
+            "expect_column_pair_cramers_phi_value_to_be_less_than",
+            "expect_multicolumn_sum_to_equal",
+            "expect_column_values_to_be_between",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_of_type",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_in_set",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_be_in_type_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_match_like_pattern_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            "expect_column_values_to_not_match_like_pattern_list",  # unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+        ]
+
+    if context == "SparkDFDataset":
+        return expectation_type in [
+            "expect_column_values_to_be_dateutil_parseable",
+            "expect_column_values_to_be_json_parseable",
+            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+            "expect_compound_columns_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_table_row_count_to_equal_other_table",
-            # "expect_multicolumn_sum_to_equal",
         ]
     if context == "PandasDataset":
         return expectation_type in [
@@ -1193,44 +1232,12 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
-            # "expect_table_columns_to_match_set",
-            # "expect_table_column_count_to_be_between",
-            # "expect_table_column_count_to_equal",
-            # "expect_column_to_exist",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
-            # "expect_table_row_count_to_equal_other_table",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
-            # "expect_column_values_to_match_like_pattern",
-            # "expect_column_values_to_not_match_like_pattern",
-            # "expect_column_values_to_match_like_pattern_list",
-            # "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
             # "expect_column_unique_value_count_to_be_between",
             # "expect_column_proportion_of_unique_values_to_be_between",
@@ -1238,13 +1245,53 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_max_to_be_between",
             # "expect_column_min_to_be_between",
             # "expect_column_sum_to_be_between",
+            # "expect_column_pair_values_A_to_be_greater_than_B",
+            # "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
             "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_column_kl_divergence_to_be_less_than",
+            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+            "expect_column_chisquare_test_p_value_to_be_greater_than",
+            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+            "expect_compound_columns_to_be_unique",
+        ]
+
+    if context == "bigquery":
+        ###
+        # NOTE: 20210729 - jdimatteo: It is relatively slow to create tables for
+        # all these tests in BigQuery, and if you want to run a single test then
+        # you can uncomment and modify the below line (which results in only the
+        # tests for "expect_column_values_to_not_be_null" being run):
+        # return expectation_type != "expect_column_values_to_not_be_null"
+        ###
+        # NOTE: 20210729 - jdimatteo: Below are temporarily not being tested
+        # with BigQuery. For each disabled test below, please include a link to
+        # a github issue tracking adding the test with BigQuery.
+        ###
+        return expectation_type in [
+            "expect_column_kl_divergence_to_be_less_than",  # TODO: Takes over 64 minutes to "collect" (haven't actually seen it complete yet) -- https://github.com/great-expectations/great_expectations/issues/3260
+            "expect_column_values_to_be_in_set",  # TODO: No matching signature for operator and AssertionError: expected ['2018-01-01T00:00:00'] but got ['2018-01-01'] -- https://github.com/great-expectations/great_expectations/issues/3260
+            "expect_column_values_to_be_in_type_list",  # TODO: AssertionError -- https://github.com/great-expectations/great_expectations/issues/3260
+            "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- https://github.com/great-expectations/great_expectations/issues/3260
+            "expect_column_quantile_values_to_be_between",  # TODO: takes over 15 minutes to "collect" (haven't actually seen it complete yet) -- https://github.com/great-expectations/great_expectations/issues/3260
+            "expect_column_mean_to_be_between",  # TODO: "400 No matching signature for operator *" -- https://github.com/great-expectations/great_expectations/issues/3260
+            "expect_select_column_values_to_be_unique_within_record",
+            "expect_column_values_to_be_increasing",
+            "expect_column_values_to_be_decreasing",
+            "expect_column_values_to_match_strftime_format",
+            "expect_column_values_to_be_dateutil_parseable",
+            "expect_column_values_to_be_json_parseable",
+            "expect_column_values_to_match_json_schema",
+            "expect_column_stdev_to_be_between",
+            "expect_column_pair_values_A_to_be_greater_than_B",
+            "expect_column_pair_values_to_be_equal",
+            "expect_column_pair_values_to_be_in_set",
+            "expect_multicolumn_values_to_be_unique",
+            "expect_multicolumn_sum_to_equal",
+            "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
@@ -1253,58 +1300,21 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     if context == "spark":
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
-            # "expect_table_columns_to_match_set",
-            # "expect_table_column_count_to_be_between",
-            # "expect_table_column_count_to_equal",
-            # "expect_column_to_exist",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
             "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
-            # "expect_column_values_to_be_increasing",
-            # "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
             "expect_column_values_to_not_match_regex_list",
             "expect_column_values_to_match_like_pattern",
             "expect_column_values_to_not_match_like_pattern",
             "expect_column_values_to_match_like_pattern_list",
             "expect_column_values_to_not_match_like_pattern_list",
-            # "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
-            # "expect_column_values_to_be_json_parseable",
-            # "expect_column_values_to_match_json_schema",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
-            # "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
-            # "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_max_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_sum_to_be_between",
             "expect_column_pair_values_A_to_be_greater_than_B",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
             "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
@@ -1312,31 +1322,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         ]
     if context == "pandas":
         return expectation_type in [
-            # "expect_table_columns_to_match_set",
-            "expect_select_column_values_to_be_unique_within_record",
-            # "expect_table_column_count_to_be_between",
-            # "expect_table_column_count_to_equal",
-            # "expect_column_to_exist",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
-            # "expect_column_values_to_be_increasing",
-            # "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
             "expect_column_values_to_match_like_pattern",
             "expect_column_values_to_not_match_like_pattern",
             "expect_column_values_to_match_like_pattern_list",
@@ -1358,18 +1344,16 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_max_to_be_between",
             # "expect_column_min_to_be_between",
             # "expect_column_sum_to_be_between",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
+            # "expect_column_pair_values_A_to_be_greater_than_B",
+            # "expect_column_pair_values_to_be_equal",
+            # "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
-            # "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            # "expect_compound_columns_to_be_unique",
         ]
+
     return False
 
 
@@ -1380,6 +1364,7 @@ def build_test_backends_list(
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
+    include_bigquery=False,
 ):
     test_backends = []
 
@@ -1452,6 +1437,17 @@ def build_test_backends_list(
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
+
+        if include_bigquery:
+            try:
+                engine = _create_bigquery_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError) as e:
+                raise ImportError(
+                    "bigquery tests are requested, but unable to connect"
+                ) from e
+            test_backends += ["bigquery"]
 
     return test_backends
 
@@ -2004,3 +2000,21 @@ def generate_test_table_name(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
     return table_name
+
+
+def _create_bigquery_engine() -> Engine:
+    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_BIGQUERY_PROJECT is required to run BigQuery expectation tests"
+        )
+    return create_engine(f"bigquery://{gcp_project}/{_bigquery_dataset()}")
+
+
+def _bigquery_dataset() -> str:
+    dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
+    if not dataset:
+        raise ValueError(
+            "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
+        )
+    return dataset
