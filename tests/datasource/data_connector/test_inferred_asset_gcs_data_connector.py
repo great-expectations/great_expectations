@@ -192,6 +192,51 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
+        "2020/01/alpha-1001.csv",
+        "2020/01/beta-1002.csv",
+        "2020/02/alpha-1003.csv",
+        "2020/02/beta-1004.csv",
+        "2020/03/alpha-1005.csv",
+        "2020/03/beta-1006.csv",
+        "2020/04/beta-1007.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+def test_get_batch_definition_list_from_batch_request_with_unknown_data_connector_raises_error(
+    mock_gcs_conn, mock_list_keys, mock_emit
+):
+    my_data_connector: InferredAssetGCSDataConnector = InferredAssetGCSDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
+            "group_names": ["year_dir", "month_dir", "data_asset_name"],
+        },
+        bucket_or_name="test_bucket",
+        prefix="",
+    )
+
+    my_data_connector._refresh_data_references_cache()
+
+    # Raises error in `DataConnector._validate_batch_request()` due to `data-connector_name` in BatchRequest not matching DataConnector name
+    with pytest.raises(ValueError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="FAKE_DATASOURCE_NAME",
+                data_connector_name="non_existent_data_connector",
+                data_asset_name="my_data_asset",
+            )
+        )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
         "A-100.csv",
         "A-101.csv",
         "B-1.csv",
@@ -325,96 +370,6 @@ def test_complex_regex_example_with_implicit_data_asset_names(
             ),
         )
     ]
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
-    return_value=[
-        "2020/01/alpha-1001.csv",
-        "2020/01/beta-1002.csv",
-        "2020/02/alpha-1003.csv",
-        "2020/02/beta-1004.csv",
-        "2020/03/alpha-1005.csv",
-        "2020/03/beta-1006.csv",
-        "2020/04/beta-1007.csv",
-    ],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
-)
-def test_get_batch_definition_list_from_batch_request_with_unknown_execution_env_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit
-):
-    my_data_connector: InferredAssetGCSDataConnector = InferredAssetGCSDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={
-            "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
-            "group_names": ["year_dir", "month_dir", "data_asset_name"],
-        },
-        bucket_or_name="test_bucket",
-        prefix="",
-    )
-
-    my_data_connector._refresh_data_references_cache()
-
-    # Test for an unknown execution environment
-    with pytest.raises(ValueError):
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="non_existent_datasource",
-                data_connector_name="my_data_connector",
-                data_asset_name="my_data_asset",
-            )
-        )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
-    return_value=[
-        "2020/01/alpha-1001.csv",
-        "2020/01/beta-1002.csv",
-        "2020/02/alpha-1003.csv",
-        "2020/02/beta-1004.csv",
-        "2020/03/alpha-1005.csv",
-        "2020/03/beta-1006.csv",
-        "2020/04/beta-1007.csv",
-    ],
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
-)
-def test_get_batch_definition_list_from_batch_request_with_unknown_data_connector_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit
-):
-    my_data_connector: InferredAssetGCSDataConnector = InferredAssetGCSDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={
-            "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
-            "group_names": ["year_dir", "month_dir", "data_asset_name"],
-        },
-        bucket_or_name="test_bucket",
-        prefix="",
-    )
-
-    my_data_connector._refresh_data_references_cache()
-
-    # Test for an unknown data_connector
-    with pytest.raises(ValueError):
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_DATASOURCE_NAME",
-                data_connector_name="non_existent_data_connector",
-                data_asset_name="my_data_asset",
-            )
-        )
 
 
 @mock.patch(
