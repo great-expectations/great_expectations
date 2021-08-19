@@ -267,10 +267,8 @@ class ExecutionEngine(ABC):
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
             if metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
-                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.WINDOW_FN,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
                 MetricPartialFunctionTypes.AGGREGATE_FN,
@@ -280,7 +278,11 @@ class ExecutionEngine(ABC):
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
-            elif metric_fn_type == MetricFunctionTypes.VALUE:
+            elif metric_fn_type in [
+                MetricFunctionTypes.VALUE,
+                MetricPartialFunctionTypes.MAP_SERIES,
+                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+            ]:
                 resolved_metrics[metric_to_resolve.id] = metric_fn(
                     **metric_provider_kwargs
                 )
