@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 
@@ -102,14 +102,20 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
         try:
             if conn_str is not None:
-                self._account_name = re.search(
-                    r".*?AccountName=(.+?);.*?", conn_str
-                ).group(1)
+                search = re.search(r".*?AccountName=(.+?);.*?", conn_str)
+                assert (
+                    search is not None
+                ), "The format of the provided `conn_str` is invalid; please ensure that it matches what is noted in the official SDK"
+                self._account_name = search.group(1)
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
             elif account_url is not None:
-                self._account_name = re.search(
+                search = re.search(
                     r"(?:https?://)?(.+?).blob.core.windows.net", account_url
-                ).group(1)
+                )
+                assert (
+                    search is not None
+                ), "The format of the provided `account_url` is invalid; please ensure that it matches what is noted in the official SDK"
+                self._account_name = search.group(1)
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             raise ImportError(
@@ -132,19 +138,26 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return AzureBatchSpec(batch_spec)
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list_for_asset(
+        self, asset: Optional[Union[dict, Asset]]
+    ) -> List[str]:
         query_options: dict = {
             "container": self._container,
             "name_starts_with": self._name_starts_with,
             "delimiter": self._delimiter,
         }
         if asset is not None:
-            if asset.container:
-                query_options["container"] = asset.container
-            if asset.name_starts_with:
-                query_options["name_starts_with"] = asset.name_starts_with
-            if asset.delimiter:
-                query_options["delimiter"] = asset.delimiter
+            if isinstance(asset, dict):
+                query_options.update(
+                    (k, asset[k]) for k in query_options.keys() & asset.keys()
+                )
+            else:
+                if asset.container:
+                    query_options["container"] = asset.container
+                if asset.name_starts_with:
+                    query_options["name_starts_with"] = asset.name_starts_with
+                if asset.delimiter:
+                    query_options["delimiter"] = asset.delimiter
 
         path_list: List[str] = list_azure_keys(
             azure=self._azure,
