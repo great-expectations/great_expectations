@@ -388,6 +388,9 @@ def column_condition_partial(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
+                # import pydevd_pycharm
+                # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
+
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module

@@ -246,7 +246,7 @@ def _create_context(
                 "execution_engine": {
                     "class_name": "SqlAlchemyExecutionEngine",
                     "connection_string": f"bigquery://{bigquery_project}/{bigquery_dataset}",
-                    "pool_size": 0,  # todo(jdimatteo) why doesn't this work?
+                    "pool_size": 0,  # todo(jdimatteo) why doesn't this work? in new_datasource.py line 55 -- where is self._execution_engine_config and why doesn't it include this pool_size?
                 },
                 "data_connectors": {
                     datasource_and_dataconnector_name: {
