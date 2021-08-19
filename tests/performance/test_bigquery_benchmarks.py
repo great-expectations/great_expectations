@@ -53,8 +53,6 @@ def test_bikeshare_trips_benchmark(
         html_dir=tmpdir.strpath,
     )
 
-    # import pydevd_pycharm
-    # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
     result: CheckpointResult = benchmark.pedantic(
         checkpoint.run,
         iterations=1,
@@ -77,6 +75,8 @@ def test_bikeshare_trips_benchmark(
         )
         == number_of_tables
     )
+    # import pydevd_pycharm
+    # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
     for field in ["data_asset_name", "table_name"]:
         assert (
             len(
