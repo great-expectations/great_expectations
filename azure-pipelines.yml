@@ -37,6 +37,59 @@ variables:
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
+  - stage: benchmarks
+    jobs:
+      - job: bigquery_benchmarks
+        # todo(jdimatteo) this should probably go in a separate file, or at least a later stage
+        # todo(jdimatteo) use python.version variable instead of hard coding 3.9
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.9'
+            displayName: 'Use Python 3.9'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install -r requirements-dev.txt
+              displayName: 'Install dependencies'
+
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct.json'
+              retryCount: '2'
+
+          - script: |
+              pip install pytest-azurepipelines
+              pip freeze > pip-freeze.txt
+              pytest -v \
+                tests/performance/test_bigquery_benchmarks.py \
+                --bigquery --performance-tests \
+                --junitxml=junit/test-results.xml \
+                --benchmark-json=junit/benchmark.json \
+                --no-spark --no-postgresql --napoleon-docstrings \
+                --cov=. --cov-report=xml --cov-report=html \
+                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+
+            displayName: 'pytest'
+            env:
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_BIGQUERY_PROJECT: $(GE_TEST_BIGQUERY_PROJECT)
+
+          - task: PublishTestResults@2
+            inputs:
+              searchFolder: junit
+              testResultsFiles: test-results.xml
+
+          - publish: junit/benchmark.json
+            artifact: BenchmarkResult
+
+          # The pip freeze output could be helpful to reproduce performance test results.
+          - publish: pip-freeze.txt
+            artifact: PipFreeze
   - stage: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
