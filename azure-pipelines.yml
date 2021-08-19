@@ -53,7 +53,7 @@ stages:
 
           - script: |
               pip install -r requirements-dev.txt --constraint constraints-dev.txt
-              displayName: 'Install dependencies'
+            displayName: 'Install dependencies'
 
           - task: DownloadSecureFile@1
             name: gcp_authkey
