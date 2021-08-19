@@ -674,7 +674,7 @@ def column_pair_function_partial(
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
-                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
                 # noinspection PyPep8Naming
@@ -697,7 +697,7 @@ def column_pair_function_partial(
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
-                return values, compute_domain_kwargs, accessor_domain_kwargs
+                return column_pair_function, compute_domain_kwargs, accessor_domain_kwargs
 
             return inner_func
 
@@ -825,7 +825,7 @@ def column_pair_condition_partial(
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
-                    metric_domain_kwargs, domain_type=domain_type
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
                 # noinspection PyPep8Naming
@@ -899,7 +899,7 @@ def column_pair_condition_partial(
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
-                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
                 # noinspection PyPep8Naming
@@ -2311,7 +2311,7 @@ def _spark_map_condition_unexpected_count_value(
     return filtered.count()
 
 
-def spark_column_map_condition_values(
+def _spark_column_map_condition_values(
     cls,
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,
@@ -2330,7 +2330,7 @@ def spark_column_map_condition_values(
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
-(spark_column_map_condition_values).
+(_spark_column_map_condition_values).
 """
         )
 
@@ -2693,6 +2693,7 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_sqlalchemy_multicolumn_map_condition_filtered_row_count,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
+                # TODO: <Alex>ALEX</Alex>
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
                         metric_name=metric_name + ".condition",
@@ -2713,24 +2714,35 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_count.aggregate_fn",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=_spark_map_condition_unexpected_count_aggregate_fn,
-                            metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
-                        )
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_count",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=None,
-                            metric_fn_type=MetricFunctionTypes.VALUE,
-                        )
+                        if domain_type == MetricDomainTypes.COLUMN:
+                            register_metric(
+                                metric_name=metric_name + ".unexpected_count.aggregate_fn",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=_spark_map_condition_unexpected_count_aggregate_fn,
+                                metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
+                            )
+                            register_metric(
+                                metric_name=metric_name + ".unexpected_count",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=None,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
+                        else:
+                            register_metric(
+                                metric_name=metric_name + ".unexpected_count",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=_spark_map_condition_unexpected_count_value,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
                     elif (
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
                     ):
@@ -2750,7 +2762,7 @@ class MapMetricProvider(MetricProvider):
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
                             metric_class=cls,
-                            metric_provider=spark_column_map_condition_values,
+                            metric_provider=_spark_column_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
@@ -2762,6 +2774,45 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_spark_column_map_condition_value_counts,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
+                    elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_column_pair_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_column_pair_map_condition_filtered_row_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                        register_metric(
+                            metric_name=metric_name + ".unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_multicolumn_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=metric_name + ".filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_multicolumn_map_condition_filtered_row_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                # TODO: <Alex>ALEX</Alex>
             elif metric_fn_type in [
                 MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_FN,
