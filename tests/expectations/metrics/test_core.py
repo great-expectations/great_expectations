@@ -1705,7 +1705,7 @@ def test_map_column_pairs_in_set_metric_pd():
 
 def test_map_column_pairs_in_set_metric_sa(sa):
     engine = build_sa_engine(
-        pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]}), sa
+        pd.DataFrame({"a": [10, 9, 3, 4, None, 3, None], "b": [1, 4, 2, 3, None, 3, 5]}), sa
     )
 
     metrics: dict = {}
@@ -1767,7 +1767,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     )
     metrics.update(results)
 
-    assert results[unexpected_values_metric.id][0] == (10, 1)
+    assert results[unexpected_values_metric.id] == [(10, 1), (9, 4)]
 
     condition_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.condition",
@@ -1802,7 +1802,6 @@ def test_map_column_pairs_in_set_metric_sa(sa):
             "ignore_row_if": "either_value_is_missing",
         },
         metric_value_kwargs={
-            "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
             "result_format": {
                 "result_format": "SUMMARY",
                 "partial_unexpected_count": 6,
