@@ -7,16 +7,6 @@ from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
-from great_expectations.exceptions.exceptions import ParserError
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
-from great_expectations.datasource.data_connector import (
-    InferredAssetFilePathDataConnector,
-)
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -31,8 +21,6 @@ except ImportError:
     logger.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
-
-INVALID_S3_CHARS = ["*"]
 
 
 class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):

@@ -23,7 +23,15 @@ except ImportError:
     BlobServiceClient = None
     ContainerClient = None
     logger.debug(
-        "Unable to load azure types; install optional azure dependency for support."
+        "Unable to load azure types; install optional Azure dependency for support."
+    )
+
+try:
+    from google.cloud import storage
+except ImportError:
+    storage = None
+    logger.debug(
+        "Unable to load GCS connection object; install optional Google dependency for support"
     )
 
 try:
@@ -33,7 +41,7 @@ except ImportError:
     pyspark = None
     pyspark_sql = None
     logger.debug(
-        "Unable to load pyspark and pyspark.sql; install optional spark dependency for support."
+        "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
     )
 
 
@@ -331,6 +339,48 @@ def list_azure_keys(
     _walk_blob_hierarchy(name_starts_with)
 
     return path_list
+
+
+def list_gcs_keys(
+    gcs: storage.Client,
+    query_options: dict,
+    recursive: bool = False,
+) -> List[str]:
+    """
+    Utilizes the GCS connection object to retrieve blob names based on user-provided criteria.
+
+    For InferredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and
+    search for files using RegEx only at the level specified by that bucket and prefix.
+
+    This restriction for the ConfiguredAssetGCSDataConnector is needed because paths on GCS are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name. Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible due to the path ambiguity.
+
+    Args:
+        gcs (storage.Client): GCS connnection object responsible for accessing bucket
+        query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
+        recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
+
+    Returns:
+        List of keys representing GCS file paths (as filtered by the `query_options` dict)
+    """
+    # Delimiter determines whether or not traversal of bucket is recursive
+    # Manually set to appropriate default if not already set by user
+    delimiter = query_options["delimiter"]
+    if delimiter is None and not recursive:
+        query_options["delimiter"] = "/"
+    elif delimiter is not None and recursive:
+        query_options["delimiter"] = None
+
+    keys: List[str] = []
+    for blob in gcs.list_blobs(**query_options):
+        name: str = blob.name
+        if name.endswith("/"):  # GCS includes directories in blob output
+            continue
+        keys.append(name)
+
+    return keys
 
 
 def list_s3_keys(
