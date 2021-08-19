@@ -75,7 +75,7 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
         return sa.case(
-            (sa.tuple_(column_A, column_B).in_(value_pairs_set), True), else_=False
+            [(sa.tuple_(column_A, column_B).in_(value_pairs_set), True)], else_=False
         )
 
     # # TODO: <Alex>ALEX -- Note: The Spark implementation below is a temporary placeholder.</Alex>
