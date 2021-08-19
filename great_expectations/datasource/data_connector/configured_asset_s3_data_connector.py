@@ -117,7 +117,11 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
-        if isinstance(asset, Asset):
+        if isinstance(asset, dict):
+            query_options.update(
+                (k, asset[k]) for k in query_options.keys() & asset.keys()
+            )
+        else:
             if asset.bucket:
                 query_options["Bucket"] = asset.bucket
             if asset.prefix:

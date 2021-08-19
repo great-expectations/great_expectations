@@ -82,6 +82,7 @@ class Asset:
     def batch_spec_passthrough(self) -> Optional[dict]:
         return self._batch_spec_passthrough
 
+    @property
     def bucket(self) -> Optional[str]:
         return self._bucket
 

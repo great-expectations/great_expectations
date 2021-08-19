@@ -370,7 +370,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
 ):
     # Raises error in ConfiguredAssetAzureDataConnector's constructor due to `account_url` not conforming to the expected format
     # Format: <ACCOUNT>.blob.core.windows.net
-    with pytest.raises(ImportError):
+    with pytest.raises(AssertionError):
         ConfiguredAssetAzureDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
@@ -386,7 +386,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
 
     # Raises error in ConfiguredAssetAzureDataConnector's constructor due to `conn_str` not conforming to the expected format
     # Format: Must be a variable length, semicolon-delimited string containing "AccountName=<ACCOUNT>"
-    with pytest.raises(ImportError):
+    with pytest.raises(AssertionError):
         ConfiguredAssetAzureDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
