@@ -10,6 +10,39 @@ from great_expectations.render.util import (
 
 
 class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
+    """
+    Expect the values for each record to be unique across the columns listed.
+    Note that records can be duplicated.
+
+    For example::
+
+        A B C
+        1 1 2 Fail
+        1 2 3 Pass
+        8 2 7 Pass
+        1 2 3 Pass
+        4 4 4 Fail
+
+    Args:
+        column_list (tuple or list): The column names to evaluate
+
+    Keyword Args:
+        ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+    """
+
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",

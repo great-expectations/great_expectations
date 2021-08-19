@@ -5,6 +5,11 @@
 import numpy as np
 import pandas as pd
 
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
+
 # TODO: <Alex>ALEX -- Uncomment later (if needed for SparkDFExecutionEngine and/or SqlAlchemyExecutionEngine) or delete.</Alex>
 # from great_expectations.execution_engine import (
 #     SparkDFExecutionEngine,
@@ -13,8 +18,7 @@ import pandas as pd
 #     MetricDomainTypes,
 #     MetricPartialFunctionTypes,
 # )
-# from great_expectations.expectations.metrics.import_manager import F, SQLContext
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -32,7 +36,7 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
         "ignore_row_if",
     )
 
-    # TODO: <Alex>ALEX -- temporarily only a Pandas implementation is provided (others to follow).</Alex>
+    # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
@@ -60,6 +64,19 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results)
+
+    @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column_A, column_B, **kwargs):
+        value_pairs_set = kwargs.get("value_pairs_set")
+
+        if value_pairs_set is None:
+            # vacuously true
+            return sa.case((column_A == column_B, True), else_=True)
+
+        value_pairs_set = [(x, y) for x, y in value_pairs_set]
+        return sa.case(
+            (sa.tuple_(column_A, column_B).in_(value_pairs_set), True), else_=False
+        )
 
     # # TODO: <Alex>ALEX -- Note: The Spark implementation below is a temporary placeholder.</Alex>
     # @metric_partial(

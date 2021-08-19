@@ -9,6 +9,32 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
+    """
+    Expects that the sum of row values is the same for each row, summing only values in columns specified in
+    column_list, and equal to the specific value, sum_total.
+
+    Args:
+        column_list (tuple or list): Set of columns to be checked
+        sum_total (int): \
+            expected sum of columns
+
+    Keyword Args:
+        ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+    """
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
