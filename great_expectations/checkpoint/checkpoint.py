@@ -754,7 +754,7 @@ def _run_validations(
     validation_results: List[ValidationOperatorResult] = []
     # import pydevd_pycharm
     # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
-    use_multiple_threads = True
+    use_multiple_threads = False
 
     try:
         # todo(jdimatteo): make max # threads configurable
