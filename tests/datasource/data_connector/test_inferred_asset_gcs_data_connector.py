@@ -132,7 +132,7 @@ def test_instantiation_with_filename_arg(
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
 )
-def test_instantiation_info_arg(
+def test_instantiation_with_info_arg(
     mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
 ):
     my_data_connector = InferredAssetGCSDataConnector(
@@ -195,66 +195,60 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         )
 
 
-# @mock_s3
-# def test_simple_regex_example_with_implicit_data_asset_names_self_check():
-#     region_name: str = "us-east-1"
-#     bucket: str = "test_bucket"
-#     conn = boto3.resource("s3", region_name=region_name)
-#     conn.create_bucket(Bucket=bucket)
-#     client = boto3.client("s3", region_name=region_name)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
+        "A-100.csv",
+        "A-101.csv",
+        "B-1.csv",
+        "B-2.csv",
+        "CCC.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+def test_simple_regex_example_with_implicit_data_asset_names_self_check(
+    mock_gcs_conn, mock_list_keys, mock_emit
+):
+    my_data_connector: InferredAssetGCSDataConnector = InferredAssetGCSDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": r"(.+)-(\d+)\.csv",
+            "group_names": [
+                "data_asset_name",
+                "number",
+            ],
+        },
+        bucket_or_name="test_bucket",
+        prefix="",
+    )
 
-#     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    my_data_connector._refresh_data_references_cache()
 
-#     keys: List[str] = [
-#         "A-100.csv",
-#         "A-101.csv",
-#         "B-1.csv",
-#         "B-2.csv",
-#         "CCC.csv",
-#     ]
-#     for key in keys:
-#         client.put_object(
-#             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#         )
+    self_check_report_object = my_data_connector.self_check()
 
-#     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
-#         name="my_data_connector",
-#         datasource_name="FAKE_DATASOURCE_NAME",
-#         default_regex={
-#             "pattern": r"(.+)-(\d+)\.csv",
-#             "group_names": [
-#                 "data_asset_name",
-#                 "number",
-#             ],
-#         },
-#         bucket=bucket,
-#         prefix="",
-#     )
-
-#     # noinspection PyProtectedMember
-#     my_data_connector._refresh_data_references_cache()
-
-#     self_check_report_object = my_data_connector.self_check()
-
-#     assert self_check_report_object == {
-#         "class_name": "InferredAssetS3DataConnector",
-#         "data_asset_count": 2,
-#         "example_data_asset_names": ["A", "B"],
-#         "data_assets": {
-#             "A": {
-#                 "example_data_references": ["A-100.csv", "A-101.csv"],
-#                 "batch_definition_count": 2,
-#             },
-#             "B": {
-#                 "example_data_references": ["B-1.csv", "B-2.csv"],
-#                 "batch_definition_count": 2,
-#             },
-#         },
-#         "example_unmatched_data_references": ["CCC.csv"],
-#         "unmatched_data_reference_count": 1,
-#         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-#         # "example_data_reference": {},
-#     }
+    assert self_check_report_object == {
+        "class_name": "InferredAssetGCSDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": ["A", "B"],
+        "data_assets": {
+            "A": {
+                "example_data_references": ["A-100.csv", "A-101.csv"],
+                "batch_definition_count": 2,
+            },
+            "B": {
+                "example_data_references": ["B-1.csv", "B-2.csv"],
+                "batch_definition_count": 2,
+            },
+        },
+        "example_unmatched_data_references": ["CCC.csv"],
+        "unmatched_data_reference_count": 1,
+    }
 
 
 # @mock_s3
