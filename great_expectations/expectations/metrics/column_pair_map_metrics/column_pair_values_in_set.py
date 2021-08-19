@@ -71,12 +71,21 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         if value_pairs_set is None:
             # vacuously true
-            return sa.case((column_A == column_B, True), else_=True)
+            return sa.case([(column_A == column_B, True)], else_=True)
 
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
+
+        # or_ implementation was required due to mssql issues with in_
+        cond = sa.or_()
+        for x, y in value_pairs_set:
+            cond = sa.or_(
+                sa.and_(column_A == x, column_B == y)
+            )
+
         return sa.case(
-            [(sa.tuple_(column_A, column_B).in_(value_pairs_set), True)], else_=False
+            [(cond, True)], else_=False
         )
+
 
     # # TODO: <Alex>ALEX -- Note: The Spark implementation below is a temporary placeholder.</Alex>
     # @metric_partial(
