@@ -354,7 +354,9 @@ class ValidationResultsPageRenderer(Renderer):
             run_name = run_id.get("run_name") or "__none__"
             try:
                 # 2020-07-27T17:19:32.959193+00:00
-                run_time = str(parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ"))
+                run_time = str(
+                    parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ")
+                )
             except (ValueError, TypeError):
                 run_time = "__none__"
         elif isinstance(run_id, RunIdentifier):
