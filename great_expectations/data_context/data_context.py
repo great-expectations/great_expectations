@@ -116,6 +116,8 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
+print("Hello world :)")
+
 
 class BaseDataContext:
     """

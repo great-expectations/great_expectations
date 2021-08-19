@@ -154,8 +154,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-xdist pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) -n 3 --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -228,8 +228,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-xdist pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) -n 3 --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
