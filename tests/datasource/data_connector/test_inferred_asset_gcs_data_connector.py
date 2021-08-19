@@ -2,24 +2,15 @@ from contextlib import ExitStack as does_not_raise
 from typing import List
 from unittest import mock
 
-import boto3
 import pandas as pd
 import pytest
-from moto import mock_s3
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
-    InferredAssetGCSDataConnector,
-    InferredAssetS3DataConnector,
-)
-from great_expectations.datasource.data_connector.inferred_asset_s3_data_connector import (
-    INVALID_S3_CHARS,
-    _check_valid_s3_path,
-)
+from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
 
 yaml = YAML()
 
@@ -475,97 +466,132 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
     }
 
 
-# @mock.patch(
-#     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-# )
-# @mock_s3
-# def test_test_yaml_config(mock_emit, empty_data_context_stats_enabled):
-#     context: DataContext = empty_data_context_stats_enabled
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
+        "2020/01/alpha-1001.csv",
+        "2020/01/beta-1002.csv",
+        "2020/02/alpha-1003.csv",
+        "2020/02/beta-1004.csv",
+        "2020/03/alpha-1005.csv",
+        "2020/03/beta-1006.csv",
+        "2020/04/beta-1007.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+def test_test_yaml_config(
+    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
 
-#     region_name: str = "us-east-1"
-#     bucket: str = "test_bucket"
-#     conn = boto3.resource("s3", region_name=region_name)
-#     conn.create_bucket(Bucket=bucket)
-#     client = boto3.client("s3", region_name=region_name)
+    report_object = context.test_yaml_config(
+        f"""
+module_name: great_expectations.datasource.data_connector
+class_name: InferredAssetGCSDataConnector
+datasource_name: FAKE_DATASOURCE
+name: TEST_DATA_CONNECTOR
+bucket_or_name: test_bucket
+prefix: ""
+default_regex:
+    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
+    """,
+        return_mode="report_object",
+    )
 
-#     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    assert report_object == {
+        "class_name": "InferredAssetGCSDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": ["alpha", "beta"],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "2020/01/alpha-*.csv",
+                    "2020/02/alpha-*.csv",
+                    "2020/03/alpha-*.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+            "beta": {
+                "example_data_references": [
+                    "2020/01/beta-*.csv",
+                    "2020/02/beta-*.csv",
+                    "2020/03/beta-*.csv",
+                ],
+                "batch_definition_count": 4,
+            },
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+    }
 
-#     keys: List[str] = [
-#         "2020/01/alpha-1001.csv",
-#         "2020/01/beta-1002.csv",
-#         "2020/02/alpha-1003.csv",
-#         "2020/02/beta-1004.csv",
-#         "2020/03/alpha-1005.csv",
-#         "2020/03/beta-1006.csv",
-#         "2020/04/beta-1007.csv",
-#     ]
-#     for key in keys:
-#         client.put_object(
-#             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#         )
 
-#     report_object = context.test_yaml_config(
-#         f"""
-# module_name: great_expectations.datasource.data_connector
-# class_name: InferredAssetS3DataConnector
-# datasource_name: FAKE_DATASOURCE
-# name: TEST_DATA_CONNECTOR
-# bucket: {bucket}
-# prefix: ""
-# default_regex:
-#     pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
-#     group_names:
-#         - year_dir
-#         - month_dir
-#         - data_asset_name
-#     """,
-#         return_mode="report_object",
-#     )
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
+        "2020/01/alpha-1001.csv",
+        "2020/01/beta-1002.csv",
+        "2020/02/alpha-1003.csv",
+        "2020/02/beta-1004.csv",
+        "2020/03/alpha-1005.csv",
+        "2020/03/beta-1006.csv",
+        "2020/04/beta-1007.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+def test_instantiation_with_test_yaml_config_emits_proper_payload(
+    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
 
-#     assert report_object == {
-#         "class_name": "InferredAssetS3DataConnector",
-#         "data_asset_count": 2,
-#         "example_data_asset_names": ["alpha", "beta"],
-#         "data_assets": {
-#             "alpha": {
-#                 "example_data_references": [
-#                     "2020/01/alpha-*.csv",
-#                     "2020/02/alpha-*.csv",
-#                     "2020/03/alpha-*.csv",
-#                 ],
-#                 "batch_definition_count": 3,
-#             },
-#             "beta": {
-#                 "example_data_references": [
-#                     "2020/01/beta-*.csv",
-#                     "2020/02/beta-*.csv",
-#                     "2020/03/beta-*.csv",
-#                 ],
-#                 "batch_definition_count": 4,
-#             },
-#         },
-#         "example_unmatched_data_references": [],
-#         "unmatched_data_reference_count": 0,
-#         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-#         # "example_data_reference": {},
-#     }
-#     assert mock_emit.call_count == 1
-#     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-#         "anonymized_name"
-#     ]
-#     expected_call_args_list = [
-#         mock.call(
-#             {
-#                 "event": "data_context.test_yaml_config",
-#                 "event_payload": {
-#                     "anonymized_name": anonymized_name,
-#                     "parent_class": "InferredAssetS3DataConnector",
-#                 },
-#                 "success": True,
-#             }
-#         ),
-#     ]
-#     assert mock_emit.call_args_list == expected_call_args_list
+    context.test_yaml_config(
+        f"""
+module_name: great_expectations.datasource.data_connector
+class_name: InferredAssetGCSDataConnector
+datasource_name: FAKE_DATASOURCE
+name: TEST_DATA_CONNECTOR
+bucket_or_name: test_bucket
+prefix: ""
+default_regex:
+    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    group_names:
+        - year_dir
+        - month_dir
+        - data_asset_name
+    """,
+        return_mode="report_object",
+    )
+
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "InferredAssetGCSDataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
 # @mock.patch(
