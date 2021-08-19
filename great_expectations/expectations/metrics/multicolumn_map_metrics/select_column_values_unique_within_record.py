@@ -34,14 +34,14 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_list, **kwargs):
         """
-        NOTE: The present approach relies on an inefficient query condition construction implementation, whose
-        computational cost is O(num_columns^2).  However, until a more efficient implementation compatible with
-        SQLAlchemy is available, this is the only feasible mechanism under the current architecture, where map metric
-        providers must return a condition (and do not have access to the selectable, such as the table of Batch data).
-        Nevertheless, query length limit for SQL databases is 1GB, and database engines processing queries efficiently.
+        The present approach relies on an inefficient query condition construction implementation, whose computational
+        cost is O(num_columns^2).  However, until a more efficient implementation compatible with SQLAlchemy is
+        available, this is the only feasible mechanism under the current architecture, where map metric providers must
+        return a condition.  Nevertheless, SQL query length limit is 1GB (sufficient for most practical scenarios).
         """
         num_columns = len(column_list)
 
+        # An arbitrary "num_columns" value used for issuing an explanatory message as a warning.
         if num_columns > 100:
             logger.warning(
                 f"""Batch data with {num_columns} columns is detected.  Computing the "{cls.condition_metric_name}" \
