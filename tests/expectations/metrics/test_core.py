@@ -1716,7 +1716,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    condition_metric_1 = MetricConfiguration(
+    condition_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.condition",
         metric_domain_kwargs={
             "column_A": "a",
@@ -1735,14 +1735,14 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         },
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(condition_metric_1,),
+        metrics_to_resolve=(condition_metric,),
         metrics=metrics,
     )
     metrics.update(results)
 
-    assert isinstance(metrics[condition_metric_1.id][0], sa.sql.elements.AsBoolean)
+    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
 
-    unexpected_values_metric_1 = MetricConfiguration(
+    unexpected_values_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.unexpected_values",
         metric_domain_kwargs={
             "column_A": "a",
@@ -1757,19 +1757,19 @@ def test_map_column_pairs_in_set_metric_sa(sa):
             },
         },
         metric_dependencies={
-            "unexpected_condition": condition_metric_1,
+            "unexpected_condition": condition_metric,
             "table.columns": table_columns_metric,
         },
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(unexpected_values_metric_1,),
+        metrics_to_resolve=(unexpected_values_metric,),
         metrics=metrics,
     )
     metrics.update(results)
 
-    assert results[unexpected_values_metric_1.id][0] == (10, 1)
+    assert results[unexpected_values_metric.id][0] == (10, 1)
 
-    condition_metric_2 = MetricConfiguration(
+    condition_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.condition",
         metric_domain_kwargs={
             "column_A": "a",
@@ -1787,14 +1787,14 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         },
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(condition_metric_2,),
+        metrics_to_resolve=(condition_metric,),
         metrics=metrics,
     )
     metrics.update(results)
 
-    assert isinstance(metrics[condition_metric_2.id][0], sa.sql.elements.AsBoolean)
+    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
 
-    unexpected_values_metric_2 = MetricConfiguration(
+    unexpected_values_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.unexpected_values",
         metric_domain_kwargs={
             "column_A": "a",
@@ -1809,17 +1809,17 @@ def test_map_column_pairs_in_set_metric_sa(sa):
             },
         },
         metric_dependencies={
-            "unexpected_condition": condition_metric_2,
+            "unexpected_condition": condition_metric,
             "table.columns": table_columns_metric,
         },
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(unexpected_values_metric_2,),
+        metrics_to_resolve=(unexpected_values_metric,),
         metrics=metrics,
     )
     metrics.update(results)
 
-    assert results[unexpected_values_metric_2.id] == []
+    assert results[unexpected_values_metric.id] == []
 
 
 def test_table_metric_spark(spark_session):
