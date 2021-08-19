@@ -750,42 +750,45 @@ def _run_validations(
     # todo(jdimatteo): restructuring code to help clarify what state is used during potentially dangerous multithreaded execution
     start_time = time.time()
 
-    # validation_futures: List[Future] = []
+    validation_futures: List[Future] = []
     validation_results: List[ValidationOperatorResult] = []
     # import pydevd_pycharm
     # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
+    use_multiple_threads = False
 
     try:
         # todo(jdimatteo): make max # threads configurable
-        # with ThreadPoolExecutor(max_workers=100) as executor:
-        for idx, validation_dict in enumerate(checkpoint_config.validations):
-            if False:
-                val_op_run_future = executor.submit(
-                    _run_validation,
-                    f"{name}-checkpoint-validation[{idx}]",
-                    run_id,
-                    checkpoint_config,
-                    validation_dict,
-                    result_format,
-                    data_context,
-                )
-                validation_futures.append(val_op_run_future)
-            else:
-                val_op_run_result = _run_validation(
-                    f"{name}-checkpoint-validation[{idx}]",
-                    run_id,
-                    checkpoint_config,
-                    validation_dict,
-                    result_format,
-                    data_context,
-                )
-                validation_results.append(val_op_run_result.run_results)
+        with ThreadPoolExecutor(max_workers=100) as executor:
+            for idx, validation_dict in enumerate(checkpoint_config.validations):
+                if use_multiple_threads:
+                    val_op_run_future = executor.submit(
+                        _run_validation,
+                        f"{name}-checkpoint-validation[{idx}]",
+                        run_id,
+                        checkpoint_config,
+                        validation_dict,
+                        result_format,
+                        data_context,
+                    )
+                    validation_futures.append(val_op_run_future)
+                else:
+                    val_op_run_result = _run_validation(
+                        f"{name}-checkpoint-validation[{idx}]",
+                        run_id,
+                        checkpoint_config,
+                        validation_dict,
+                        result_format,
+                        data_context,
+                    )
+                    validation_results.append(val_op_run_result)
 
         combined_results = {}
-        # for validation_future in validation_futures:
-        #    combined_results.update(validation_future.result().run_results)
-        for validation_result in validation_results:
-            combined_results.update(validation_result)
+        if use_multiple_threads:
+            for validation_future in validation_futures:
+                combined_results.update(validation_future.result().run_results)
+        else:
+            for validation_result in validation_results:
+                combined_results.update(validation_result.run_results)
     except (
         ge_exceptions.CheckpointError,
         ge_exceptions.ExecutionEngineError,
