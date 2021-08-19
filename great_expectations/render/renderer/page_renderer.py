@@ -91,7 +91,7 @@ class ValidationResultsPageRenderer(Renderer):
         elif isinstance(run_id, dict):
             run_name = run_id.get("run_name") or "__none__"
             try:
-                run_time = run_id.get("run_time")
+                run_time = parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ")
             except (ValueError, TypeError):
                 run_time = "__none__"
         elif isinstance(run_id, RunIdentifier):
