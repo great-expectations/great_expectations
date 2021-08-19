@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import time
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 from uuid import UUID
@@ -758,9 +758,9 @@ def _run_validations(
 
     try:
         # todo(jdimatteo): make max # threads configurable
-        with ThreadPoolExecutor(max_workers=20) as executor:
+        with ProcessPoolExecutor(max_workers=4) as process_executor:
             for idx, validation_dict in enumerate(checkpoint_config.validations):
-                val_op_run_future = executor.submit(
+                val_op_run_future = process_executor.submit(
                     _run_validation,
                     f"{name}-checkpoint-validation[{idx}]",
                     run_id,
