@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -33,7 +34,7 @@ def setup_checkpoint(number_of_tables: int, html_dir: str) -> SimpleCheckpoint:
     )
 
 
-def expected_validation_results() -> list[dict]:
+def expected_validation_results() -> List[dict]:
     return [
         {
             "exception_info": {
@@ -216,7 +217,7 @@ def expected_validation_results() -> list[dict]:
 
 def _create_context(
     datasource_and_dataconnector_name: str,
-    asset_names: list[str],
+    asset_names: List[str],
     html_dir: str,
 ) -> BaseDataContext:
     store_backend = {
@@ -355,7 +356,7 @@ def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
     )
 
 
-def _subscriber_types() -> list[str]:
+def _subscriber_types() -> List[str]:
     return [
         "Walk Up",
         "24-Hour Kiosk (Austin B-cycle)",

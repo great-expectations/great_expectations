@@ -3,8 +3,6 @@ trends over time to identify/prevent performance regressions.
 """
 
 import time
-
-# todo(jdimatteo): include git freeze as an artifact to help reproducibility of performance tests.
 from pathlib import Path
 
 import _pytest.config
