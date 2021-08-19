@@ -14,9 +14,15 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -253,12 +259,10 @@ class Checkpoint:
             runtime_kwargs=runtime_kwargs
         )
         run_name_template: Optional[str] = substituted_runtime_config.run_name_template
-        validations: list = substituted_runtime_config.validations
-        if len(validations) == 0:
+        if len(substituted_runtime_config.validations) == 0:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" does not contain any validations.'
             )
-        run_results = {}
 
         if run_name is None and run_name_template is not None:
             run_name: str = get_datetime_string_from_strftime_format(
@@ -267,55 +271,12 @@ class Checkpoint:
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
-        start_time = time.time()
-        for idx, validation_dict in enumerate(validations):
-            try:
-                substituted_validation_dict: dict = get_substituted_validation_dict(
-                    substituted_runtime_config=substituted_runtime_config,
-                    validation_dict=validation_dict,
-                )
-                batch_request: Union[
-                    BatchRequest, RuntimeBatchRequest
-                ] = substituted_validation_dict.get("batch_request")
-                expectation_suite_name: str = substituted_validation_dict.get(
-                    "expectation_suite_name"
-                )
-                action_list: list = substituted_validation_dict.get("action_list")
-
-                validator: Validator = self.data_context.get_validator(
-                    batch_request=batch_request,
-                    expectation_suite_name=expectation_suite_name,
-                )
-                action_list_validation_operator: ActionListValidationOperator = (
-                    ActionListValidationOperator(
-                        data_context=self.data_context,
-                        action_list=action_list,
-                        result_format=result_format,
-                        name=f"{self.name}-checkpoint-validation[{idx}]",
-                    )
-                )
-                val_op_run_result: ValidationOperatorResult = (
-                    action_list_validation_operator.run(
-                        assets_to_validate=[validator],
-                        run_id=run_id,
-                        evaluation_parameters=substituted_validation_dict.get(
-                            "evaluation_parameters"
-                        ),
-                        result_format=result_format,
-                    )
-                )
-                run_results.update(val_op_run_result.run_results)
-            except (
-                ge_exceptions.CheckpointError,
-                ge_exceptions.ExecutionEngineError,
-            ) as e:
-                raise ge_exceptions.CheckpointError(
-                    f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
-                )
-        end_time = time.time()
-        duration_sececonds = end_time - start_time
-        print(
-            f"todo(jdimatteo) checkpoint run validations loop took {duration_sececonds} seconds"
+        run_results = _run_validations(
+            self.name,
+            run_id,
+            substituted_runtime_config,
+            result_format,
+            self.data_context,
         )
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
@@ -773,3 +734,68 @@ class SimpleCheckpoint(Checkpoint):
             result_format=result_format,
             **kwargs,
         )
+
+
+def _run_validations(
+    name: str,
+    run_id: Optional[Union[str, RunIdentifier]],
+    checkpoint_config: CheckpointConfig,
+    result_format: Dict[str, str],
+    data_context,
+) -> Dict[
+    ValidationResultIdentifier,
+    Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
+]:
+    # todo(jdimatteo): restructuring code to help clarify what state is used during potentially dangerous multithreaded execution
+    start_time = time.time()
+    run_results = {}
+    for idx, validation_dict in enumerate(checkpoint_config.validations):
+        try:
+            substituted_validation_dict: dict = get_substituted_validation_dict(
+                substituted_runtime_config=checkpoint_config,
+                validation_dict=validation_dict,
+            )
+            batch_request: Union[
+                BatchRequest, RuntimeBatchRequest
+            ] = substituted_validation_dict.get("batch_request")
+            expectation_suite_name: str = substituted_validation_dict.get(
+                "expectation_suite_name"
+            )
+            action_list: list = substituted_validation_dict.get("action_list")
+
+            validator: Validator = data_context.get_validator(
+                batch_request=batch_request,
+                expectation_suite_name=expectation_suite_name,
+            )
+            action_list_validation_operator: ActionListValidationOperator = (
+                ActionListValidationOperator(
+                    data_context=data_context,
+                    action_list=action_list,
+                    result_format=result_format,
+                    name=f"{name}-checkpoint-validation[{idx}]",
+                )
+            )
+            val_op_run_result: ValidationOperatorResult = (
+                action_list_validation_operator.run(
+                    assets_to_validate=[validator],
+                    run_id=run_id,
+                    evaluation_parameters=substituted_validation_dict.get(
+                        "evaluation_parameters"
+                    ),
+                    result_format=result_format,
+                )
+            )
+            run_results.update(val_op_run_result.run_results)
+        except (
+            ge_exceptions.CheckpointError,
+            ge_exceptions.ExecutionEngineError,
+        ) as e:
+            raise ge_exceptions.CheckpointError(
+                f"Exception occurred while running validation[{idx}] of Checkpoint '{name}': {e.message}."
+            )
+    end_time = time.time()
+    duration_sececonds = end_time - start_time
+    print(
+        f"todo(jdimatteo) checkpoint _run_validations took {duration_sececonds} seconds"
+    )
+    return run_results
