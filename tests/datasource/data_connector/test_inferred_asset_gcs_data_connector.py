@@ -72,7 +72,82 @@ def test_instantiation_without_args(
         bucket_or_name="test_bucket",
         prefix="",
     )
-    print(my_data_connector.self_check())
+    assert my_data_connector.self_check() == expected_config_dict
+
+    my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_unmatched_data_references() == []
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.service_account.Credentials.from_service_account_file"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+def test_instantiation_with_filename_arg(
+    mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
+):
+    my_data_connector = InferredAssetGCSDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        gcs_options={
+            "filename": "my_filename.json",
+        },
+        default_regex={
+            "pattern": r"(.+)/(.+)-(\d+)\.csv",
+            "group_names": ["data_asset_name", "letter", "number"],
+        },
+        bucket_or_name="test_bucket",
+        prefix="",
+    )
+    assert my_data_connector.self_check() == expected_config_dict
+
+    my_data_connector._refresh_data_references_cache()
+    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_unmatched_data_references() == []
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.service_account.Credentials.from_service_account_info"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+def test_instantiation_info_arg(
+    mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
+):
+    my_data_connector = InferredAssetGCSDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        gcs_options={
+            "info": "{ my_json: my_content }",
+        },
+        default_regex={
+            "pattern": r"(.+)/(.+)-(\d+)\.csv",
+            "group_names": ["data_asset_name", "letter", "number"],
+        },
+        bucket_or_name="test_bucket",
+        prefix="",
+    )
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
