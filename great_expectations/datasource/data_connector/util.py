@@ -7,7 +7,7 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
@@ -357,6 +357,15 @@ def list_gcs_keys(
     but the full path that includes both the prefix and the file name. Otherwise, in the situations where multiple data assets
     share levels of a directory tree, matching files to data assets will not be possible due to the path ambiguity.
 
+    Please note that the SDK's `list_blobs` method takes in a `delimiter` key that drastically alters the traversal of a given bucket:
+        - If a delimiter is not set (default), the traversal is recursive and the output will contain all blobs in the current directory
+          as well as those in any nested directories.
+        - If a delimiter is set, the traversal will continue until that value is seen; as the default is "/", traversal will be scoped
+          within the current directory and end before visiting nested directories.
+
+    In order to provide users with finer control of their config while also ensuring output that is in line with the `recursive` arg,
+    we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
+
     Args:
         gcs (storage.Client): GCS connnection object responsible for accessing bucket
         query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
@@ -369,8 +378,18 @@ def list_gcs_keys(
     # Manually set to appropriate default if not already set by user
     delimiter = query_options["delimiter"]
     if delimiter is None and not recursive:
+        logger.warning(
+            'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
+            the delimiter that has been passed to gcs_options in your config cannot be empty; \
+            please note that the value is being set to the default "/" in order to work with the Google SDK.'
+        )
         query_options["delimiter"] = "/"
     elif delimiter is not None and recursive:
+        logger.warning(
+            "In order to access blobs with an InferredAssetGCSDataConnector, \
+            the delimiter that has been passed to gcs_options in your config must be empty; \
+            please note that the value is being set to None in order to work with the Google SDK."
+        )
         query_options["delimiter"] = None
 
     keys: List[str] = []
