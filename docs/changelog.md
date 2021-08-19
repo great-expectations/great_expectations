@@ -3,13 +3,67 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
+* [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3228)
+* [DOCS] Document BigQuery test dataset configuration (#3273) (Thanks @jdimatteo)
 
+### 0.13.28
+* [FEATURE] Implement ColumnPairValuesInSet metric for PandasExecutionEngine
+* [BUGFIX] Wrap optional azure imports in data_connector setup
+
+### 0.13.27
+* [FEATURE] Accept row_condition (with condition_parser) and ignore_row_if parameters for expect_multicolumn_sum_to_equal (#3193)
+* [FEATURE] ConfiguredAssetDataConnector for Azure Blob Storage (#3141)
+* [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_domain_records() for SparkDFExecutionEngine (#3226)
+* [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_domain_records() for SqlAlchemyExecutionEngine (#3215)
+* [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_full_access_compute_domain() for PandasExecutionEngine (#3210)
+* [FEATURE] Set foundation for Azure-related DataConnectors (#3188)
+* [FEATURE] Update ExpectCompoundColumnsToBeUnique for V3 API (#3161)
+* [BUGFIX] Fix incorrect schema validation for Azure data connectors (#3200)
+* [BUGFIX] Fix incorrect usage of "all()" in the comparison of validation results when executing an Expectation (#3178)
+* [BUGFIX] Fixes an error with expect_column_values_to_be_dateutil_parseable (#3190)
+* [BUGFIX] Improve parsing of .ge_store_backend_id (#2952)
+* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) (#3182)
+* [BUGFIX] Restore support for V2 API style custom expectation rendering (#3179) (Thanks @jdimatteo)
+* [DOCS] Add `conda` as installation option in README (#3196) (Thanks @rpanai)
+* [DOCS] Standardize capitalization of "Python" in "Connecting to your data" section of new docs (#3209)
+* [DOCS] Standardize capitalization of Spark in docs (#3198)
+* [DOCS] Update BigQuery docs to clarify the use of temp tables (#3184)
+* [DOCS] Create _redirects (#3192)
+* [ENHANCEMENT] RuntimeDataConnector messaging is made more clear for `test_yaml_config()` (#3206)
+* [MAINTENANCE] Add `credentials` YAML key support for `DataConnectors` (#3173)
+* [MAINTENANCE] Fix minor typo in S3 DataConnectors (#3194)
+* [MAINTENANCE] Fix typos in argument names and types (#3207)
+* [MAINTENANCE] Update changelog. (#3189)
+* [MAINTENANCE] Update documentation. (#3203)
+* [MAINTENANCE] Update validate_your_data.md (#3185)
+* [MAINTENANCE] update tests across execution engines and clean up coding patterns (#3223)
+
+### 0.13.26
+* [FEATURE] Enable BigQuery tests for Azure CI/CD (#3155)
+* [FEATURE] Implement MulticolumnMapExpectation class (#3134)
+* [FEATURE] Implement the MulticolumnSumEqual Metric for PandasExecutionEngine (#3130)
+* [FEATURE] Support row_condition and ignore_row_if Directives Combined for PandasExecutionEngine (#3150)
+* [FEATURE] Update ExpectMulticolumnSumToEqual for V3 API (#3136)
+* [FEATURE] add python3.9 to python versions (#3143) (Thanks @dswalter)
+* [FEATURE]/MER-16/MER-75/ADD_ROUTE_FOR_VALIDATION_RESULT (#3090) (Thanks @rreinoldsc)
+* [BUGFIX] Enable `--v3-api suite edit` to proceed without selecting DataConnectors (#3165)
+* [BUGFIX] Fix error when `RuntimeBatchRequest` is passed to `SimpleCheckpoint` with `RuntimeDataConnector` (#3152)
+* [BUGFIX] allow reader_options in the CLI so can read `.csv.gz` files (#2695) (Thanks @luke321321)
+* [DOCS] Apply Docusaurus tabs to relevant pages in new docs
+* [DOCS] Capitalize python to Python in docs (#3176)
+* [DOCS] Improve Core Concepts - Expectation Concepts (#2831)
+* [MAINTENANCE] Error messages must be friendly. (#3171)
+* [MAINTENANCE] Implement the "compound_columns_unique" metric for PandasExecutionEngine (with a unit test). (#3159)
+* [MAINTENANCE] Improve Coding Practices in "great_expectations/expectations/expectation.py" (#3151)
+* [MAINTENANCE] Update test_script_runner.py (#3177)
 
 ### 0.13.25
 * [FEATURE] Pass on meta-data from expectation json to validation result json (#2881) (Thanks @sushrut9898)
 * [FEATURE] Add sqlalchemy engine support for `column.most_common_value` metric (#3020) (Thanks @shpolina)
 * [BUGFIX] Added newline to CLI message for consistent formatting (#3127) (Thanks @ismaildawoodjee)
-* [BUGFIX] fix pip install snowflake build error with python 3.9 (#3119) (Thanks @jdimatteo)
+* [BUGFIX] fix pip install snowflake build error with Python 3.9 (#3119) (Thanks @jdimatteo)
 * [BUGFIX] Populate (data) asset name in data docs for RuntimeDataConnector (#3105) (Thanks @ceshine)
 * [DOCS] Correct path to docs_rtd/changelog.rst (#3120) (Thanks @jdimatteo)
 * [DOCS] Fix broken links in "How to write a 'How to Guide'" (#3112)

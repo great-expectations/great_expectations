@@ -764,20 +764,19 @@ def test_profiler_all_expectation_types_pandas(
         taxi_validator_pandas,
         semantic_types_dict=taxi_data_semantic_types,
         ignored_columns=taxi_data_ignored_columns,
-        # TODO: Add primary_or_compound_key test
-        #  primary_or_compound_key=[
-        #     "vendor_id",
-        #     "pickup_datetime",
-        #     "dropoff_datetime",
-        #     "trip_distance",
-        #     "pickup_location_id",
-        #     "dropoff_location_id",
-        #  ],
+        primary_or_compound_key=[
+            "vendor_id",
+            "pickup_datetime",
+            "dropoff_datetime",
+            "trip_distance",
+            "pickup_location_id",
+            "dropoff_location_id",
+        ],
     )
 
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
-    assert len(suite.expectations) == 45
+    assert len(suite.expectations) == 46
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -786,7 +785,6 @@ def test_profiler_all_expectation_types_pandas(
     unexpected_expectations = {
         "expect_column_values_to_be_unique",
         "expect_column_values_to_be_null",
-        "expect_compound_columns_to_be_unique",
     }
     assert expectations_from_suite == {
         i for i in possible_expectations_set if i not in unexpected_expectations
@@ -929,10 +927,26 @@ def test_profiler_all_expectation_types_sqlalchemy(
     assert results["success"]
 
 
-def test_error_handling_for_expect_compound_columns_to_be_unique(
-    taxi_validator_pandas, taxi_data_ignored_columns, caplog
+# TODO: When this expectation is implemented for V3, remove this test and test for this expectation.
+def test_expect_compound_columns_to_be_unique(
+    taxi_validator_spark, taxi_data_ignored_columns, caplog
 ):
-    # TODO: When this expectation is implemented for V3, remove this test and test for this expectation
+    """
+    Until all ExecutionEngine implementations for V3 are completed for this expectation:
+    1) Use the "taxi_validator_" argument for this test method, corresponding to one of the ExecutionEngine subclasses,
+       for which this expectation has not yet been implemented (and update the :param annotation below accordingly);
+    2) With every additional ExecutionEngine implementation for this expectation, update the corresponding
+       "test_profiler_all_expectation_types_" test method to include this expectation in the appropriate assertion.
+    3) Once this expectation has been implemented for all ExecutionEngine subclasses, delete this test method entirely.
+
+    :param taxi_validator_spark:
+    :param taxi_data_ignored_columns:
+    :param caplog:
+    :return:
+    """
+
+    taxi_validator = taxi_validator_spark
+
     ignored_columns = taxi_data_ignored_columns + [
         "pickup_datetime",
         "dropoff_datetime",
@@ -948,7 +962,7 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
     ]
 
     profiler = UserConfigurableProfiler(
-        taxi_validator_pandas,
+        taxi_validator,
         ignored_columns=ignored_columns,
         primary_or_compound_key=[
             "vendor_id",
@@ -965,14 +979,8 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
     log_warning_records = list(
         filter(lambda record: record.levelname == "WARNING", caplog.records)
     )
-    assert len(log_warning_records) == 1
-
-    assert (
-        log_warning_records[0].message
-        == "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
-    )
-
-    assert len(suite.expectations) == 2
+    assert len(log_warning_records) == 0
+    assert len(suite.expectations) == 3
 
     (
         columns_with_expectations,
@@ -982,12 +990,13 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
     expected_expectations = {
         "expect_table_columns_to_match_ordered_list",
         "expect_table_row_count_to_be_between",
+        "expect_compound_columns_to_be_unique",
     }
 
     assert expected_expectations == expectations_from_suite
 
     profiler_with_single_column_key = UserConfigurableProfiler(
-        taxi_validator_pandas,
+        taxi_validator,
         ignored_columns=ignored_columns,
         primary_or_compound_key=["pickup_datetime"],
     )

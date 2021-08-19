@@ -1163,9 +1163,9 @@ We could not determine the format of the file. What is it?
 
         reader_method = None
         try:
-            reader_method = datasource.guess_reader_method_from_path(path)[
-                "reader_method"
-            ]
+            reader_kwargs = datasource.guess_reader_method_from_path(path)
+            reader_method = reader_kwargs["reader_method"]
+            reader_options = reader_kwargs.get("reader_options", {})
         except BatchKwargsError:
             pass
 
@@ -1201,6 +1201,12 @@ We could not determine the format of the file. What is it?
         else:
             try:
                 batch_kwargs["reader_method"] = reader_method
+                reader_options = {
+                    **batch_kwargs.get("reader_options", {}),
+                    **reader_options,
+                }
+                if reader_options:
+                    batch_kwargs["reader_options"] = reader_options
                 if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":
                     header_row = click.confirm(
                         "\nDoes this file contain a header row?", default=True
@@ -1328,7 +1334,7 @@ Would you like to continue?"""
 
     # Some backends require named temporary table parameters. We specifically elicit those and add them
     # where appropriate.
-    temp_table_kwargs = dict()
+    temp_table_kwargs = {}
     datasource = context.get_datasource(datasource_name)
 
     if datasource.engine.dialect.name.lower() == "bigquery":

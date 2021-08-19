@@ -1,10 +1,12 @@
 import datetime
+import gzip
 import json
 import locale
 import logging
 import os
 import random
 import shutil
+from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
@@ -101,6 +103,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against mssql",
     )
     parser.addoption(
+        "--bigquery",
+        action="store_true",
+        help="If set, execute tests against bigquery",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests",
@@ -132,6 +139,7 @@ def build_test_backends_list_cfe(metafunc):
     include_postgresql = not metafunc.config.getoption("--no-postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
+    include_bigquery: bool = metafunc.config.getoption("--bigquery")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -139,6 +147,7 @@ def build_test_backends_list_cfe(metafunc):
         include_postgresql=include_postgresql,
         include_mysql=include_mysql,
         include_mssql=include_mssql,
+        include_bigquery=include_bigquery,
     )
     return test_backend_names
 
@@ -2377,10 +2386,18 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
         )
 
         datasource_config: str = f"""
-        class_name: SimpleSqlalchemyDatasource
-        connection_string: sqlite:///{db_file_path}
-        introspection:
-          whole_table: {{}}
+        class_name: Datasource
+        execution_engine:
+          class_name: SqlAlchemyExecutionEngine
+          connection_string: sqlite:///{db_file_path}
+        data_connectors:
+          default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+              - default_identifier_name
+          default_inferred_data_connector_name:
+            class_name: InferredAssetSqlDataConnector
+            name: whole_table
         """
 
         # noinspection PyUnusedLocal
@@ -3802,6 +3819,20 @@ def filesystem_csv_2(tmp_path):
     assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
     return base_dir
+
+
+@pytest.fixture
+def filesystem_csv_2_gz(filesystem_csv_2):
+    _compress_csv_in_dir(filesystem_csv_2)
+    return filesystem_csv_2
+
+
+def _compress_csv_in_dir(dir: os.PathLike):
+    dir = Path(dir)
+    for file in dir.glob("*.csv"):
+        file_gz = file.with_name(file.name + ".gz")
+        file_gz.write_bytes(gzip.compress(file.read_bytes(), compresslevel=1))
+        file.unlink()
 
 
 @pytest.fixture(scope="function")

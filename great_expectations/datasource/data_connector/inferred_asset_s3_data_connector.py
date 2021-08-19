@@ -137,7 +137,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         path: str,
         data_asset_name: Optional[str] = None,
     ) -> str:
-        # data_assert_name isn't used in this method.
+        # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         _check_valid_s3_path(path)
         return f"s3a://{os.path.join(self._bucket, path)}"
