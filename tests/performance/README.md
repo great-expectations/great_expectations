@@ -52,11 +52,3 @@ test_bikeshare_trips_benchmark[1] (1623_jdimatt)     7.4123 (1.15)     7.4123 (1
 ```
 
 Please refer to [pytest-benchmark documentation](https://pytest-benchmark.readthedocs.io/en/latest/comparing.html) for more info.
-
-# Viewing Saved Results
-
-Example:
-
-```
-
-```
