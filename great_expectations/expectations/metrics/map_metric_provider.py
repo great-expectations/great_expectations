@@ -518,7 +518,6 @@ def column_pair_function_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -605,7 +604,7 @@ def column_pair_function_partial(
                 runtime_configuration: Dict,
             ):
                 (
-                    df,
+                    selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
@@ -642,6 +641,68 @@ def column_pair_function_partial(
 
         return wrapper
 
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_FN,
+            MetricPartialFunctionTypes.WINDOW_FN,
+        ]:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_fn and window_fn for column_pair_function_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_list = [column_A_name, column_B_name]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                column_pair_function = metric_fn(
+                    cls,
+                    data[column_A_name],
+                    data[column_B_name],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return values, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
     else:
         raise ValueError("Unsupported engine for column_pair_function_partial")
 
@@ -667,7 +728,6 @@ def column_pair_condition_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -806,6 +866,72 @@ def column_pair_condition_partial(
 
         return wrapper
 
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_FN,
+            MetricPartialFunctionTypes.WINDOW_FN,
+        ]:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_fn and window_fn for column_pair_condition_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=compute_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_list = [column_A_name, column_B_name]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                expected_condition = metric_fn(
+                    cls,
+                    data[column_A_name],
+                    data[column_B_name],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~expected_condition,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
     else:
         raise ValueError("Unsupported engine for column_pair_condition_partial")
 
@@ -827,7 +953,6 @@ def multicolumn_function_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -925,7 +1050,7 @@ def multicolumn_function_partial(
 
                 column_select = [sa.column(column_name) for column_name in column_list]
                 dialect = execution_engine.dialect_module
-                column_function = metric_fn(
+                multicolumn_function = metric_fn(
                     cls,
                     column_select,
                     **metric_value_kwargs,
@@ -933,7 +1058,63 @@ def multicolumn_function_partial(
                     _table=selectable,
                     _metrics=metrics,
                 )
-                return column_function, compute_domain_kwargs, accessor_domain_kwargs
+                return multicolumn_function, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_FN,
+            MetricPartialFunctionTypes.WINDOW_FN,
+        ]:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_fn and window_fn for multicolumn_function_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                multicolumn_function = metric_fn(
+                    cls,
+                    data[column_list],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return multicolumn_function, compute_domain_kwargs, accessor_domain_kwargs
 
             return inner_func
 
@@ -964,7 +1145,6 @@ def multicolumn_condition_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -1081,6 +1261,66 @@ def multicolumn_condition_partial(
                 unexpected_condition = sa.not_(expected_condition)
                 return (
                     unexpected_condition,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_FN,
+            MetricPartialFunctionTypes.WINDOW_FN,
+        ]:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_fn and window_fn for multicolumn_function_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.ExecutionEngineError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                expected_condition = metric_fn(
+                    cls,
+                    data[column_list],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~expected_condition,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 )
