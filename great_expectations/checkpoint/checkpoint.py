@@ -748,44 +748,18 @@ def _run_validations(
 ]:
     # todo(jdimatteo): restructuring code to help clarify what state is used during potentially dangerous multithreaded execution
     start_time = time.time()
-    run_results = {}
+    validation_results: List[ValidationOperatorResult] = []
     for idx, validation_dict in enumerate(checkpoint_config.validations):
         try:
-            substituted_validation_dict: dict = get_substituted_validation_dict(
-                substituted_runtime_config=checkpoint_config,
-                validation_dict=validation_dict,
+            val_op_run_result = _run_validation(
+                f"{name}-checkpoint-validation[{idx}]",
+                run_id,
+                checkpoint_config,
+                validation_dict,
+                result_format,
+                data_context,
             )
-            batch_request: Union[
-                BatchRequest, RuntimeBatchRequest
-            ] = substituted_validation_dict.get("batch_request")
-            expectation_suite_name: str = substituted_validation_dict.get(
-                "expectation_suite_name"
-            )
-            action_list: list = substituted_validation_dict.get("action_list")
-
-            validator: Validator = data_context.get_validator(
-                batch_request=batch_request,
-                expectation_suite_name=expectation_suite_name,
-            )
-            action_list_validation_operator: ActionListValidationOperator = (
-                ActionListValidationOperator(
-                    data_context=data_context,
-                    action_list=action_list,
-                    result_format=result_format,
-                    name=f"{name}-checkpoint-validation[{idx}]",
-                )
-            )
-            val_op_run_result: ValidationOperatorResult = (
-                action_list_validation_operator.run(
-                    assets_to_validate=[validator],
-                    run_id=run_id,
-                    evaluation_parameters=substituted_validation_dict.get(
-                        "evaluation_parameters"
-                    ),
-                    result_format=result_format,
-                )
-            )
-            run_results.update(val_op_run_result.run_results)
+            validation_results.append(val_op_run_result.run_results)
         except (
             ge_exceptions.CheckpointError,
             ge_exceptions.ExecutionEngineError,
@@ -798,4 +772,49 @@ def _run_validations(
     print(
         f"todo(jdimatteo) checkpoint _run_validations took {duration_sececonds} seconds"
     )
-    return run_results
+
+    combined_results = {}
+    for result in validation_results:
+        combined_results.update(result)
+    return combined_results
+
+
+def _run_validation(
+    action_name: str,
+    run_id: Optional[Union[str, RunIdentifier]],
+    checkpoint_config: CheckpointConfig,
+    validation_dict: dict,
+    result_format: Dict[str, str],
+    data_context,
+) -> ValidationOperatorResult:
+    substituted_validation_dict: dict = get_substituted_validation_dict(
+        substituted_runtime_config=checkpoint_config,
+        validation_dict=validation_dict,
+    )
+    batch_request: Union[
+        BatchRequest, RuntimeBatchRequest
+    ] = substituted_validation_dict.get("batch_request")
+    expectation_suite_name: str = substituted_validation_dict.get(
+        "expectation_suite_name"
+    )
+    action_list: list = substituted_validation_dict.get("action_list")
+
+    validator: Validator = data_context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    action_list_validation_operator: ActionListValidationOperator = (
+        ActionListValidationOperator(
+            data_context=data_context,
+            action_list=action_list,
+            result_format=result_format,
+            name=action_name,
+        )
+    )
+    val_op_run_result: ValidationOperatorResult = action_list_validation_operator.run(
+        assets_to_validate=[validator],
+        run_id=run_id,
+        evaluation_parameters=substituted_validation_dict.get("evaluation_parameters"),
+        result_format=result_format,
+    )
+    return val_op_run_result
