@@ -1705,7 +1705,10 @@ def test_map_column_pairs_in_set_metric_pd():
 
 def test_map_column_pairs_in_set_metric_sa(sa):
     engine = build_sa_engine(
-        pd.DataFrame({"a": [10, 9, 3, 4, None, 3, None], "b": [1, 4, 2, 3, None, 3, 5]}), sa
+        pd.DataFrame(
+            {"a": [10, 9, 3, 4, None, 3, None], "b": [1, 4, 2, 3, None, 3, 5]}
+        ),
+        sa,
     )
 
     metrics: dict = {}
