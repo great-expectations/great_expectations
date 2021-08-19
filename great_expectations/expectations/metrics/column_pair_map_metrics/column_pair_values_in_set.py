@@ -78,14 +78,9 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
         # or_ implementation was required due to mssql issues with in_
         cond = sa.or_()
         for x, y in value_pairs_set:
-            cond = sa.or_(
-                sa.and_(column_A == x, column_B == y)
-            )
+            cond = sa.or_(sa.and_(column_A == x, column_B == y))
 
-        return sa.case(
-            [(cond, True)], else_=False
-        )
-
+        return sa.case([(cond, True)], else_=False)
 
     # # TODO: <Alex>ALEX -- Note: The Spark implementation below is a temporary placeholder.</Alex>
     # @metric_partial(
