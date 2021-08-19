@@ -155,55 +155,44 @@ def test_instantiation_info_arg(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
-# @mock_s3
-# def test_basic_instantiation():
-#     region_name: str = "us-east-1"
-#     bucket: str = "test_bucket"
-#     conn = boto3.resource("s3", region_name=region_name)
-#     conn.create_bucket(Bucket=bucket)
-#     client = boto3.client("s3", region_name=region_name)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    return_value=[
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+    ],
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
+    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    my_data_connector = InferredAssetGCSDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": r"(.+)/(.+)-(\d+)\.csv",
+            "group_names": ["data_asset_name", "letter", "number"],
+        },
+        bucket_or_name="test_bucket",
+        prefix="",
+    )
 
-#     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-#     keys: List[str] = [
-#         "path/A-100.csv",
-#         "path/A-101.csv",
-#         "directory/B-1.csv",
-#         "directory/B-2.csv",
-#     ]
-#     for key in keys:
-#         client.put_object(
-#             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#         )
-
-#     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
-#         name="my_data_connector",
-#         datasource_name="FAKE_DATASOURCE_NAME",
-#         default_regex={
-#             "pattern": r"(.+)/(.+)-(\d+)\.csv",
-#             "group_names": ["data_asset_name", "letter", "number"],
-#         },
-#         bucket=bucket,
-#         prefix="",
-#     )
-
-#     # noinspection PyProtectedMember
-#     my_data_connector._refresh_data_references_cache()
-
-#     assert my_data_connector.get_data_reference_list_count() == 4
-#     assert my_data_connector.get_unmatched_data_references() == []
-
-#     # Illegal execution environment name
-#     with pytest.raises(ValueError):
-#         print(
-#             my_data_connector.get_batch_definition_list_from_batch_request(
-#                 batch_request=BatchRequest(
-#                     datasource_name="something",
-#                     data_connector_name="my_data_connector",
-#                     data_asset_name="something",
-#                 )
-#             )
-#         )
+    # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
+    with pytest.raises(ValueError):
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="something",
+                data_connector_name="my_data_connector",
+                data_asset_name="something",
+            )
+        )
 
 
 # @mock_s3
