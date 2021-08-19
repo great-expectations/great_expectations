@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 import os
+import time
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 from uuid import UUID
@@ -266,6 +267,7 @@ class Checkpoint:
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
+        start_time = time.time()
         for idx, validation_dict in enumerate(validations):
             try:
                 substituted_validation_dict: dict = get_substituted_validation_dict(
@@ -310,6 +312,11 @@ class Checkpoint:
                 raise ge_exceptions.CheckpointError(
                     f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
                 )
+        end_time = time.time()
+        duration_sececonds = end_time - start_time
+        print(
+            f"todo(jdimatteo) checkpoint run validations loop took {duration_sececonds} seconds"
+        )
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
         )

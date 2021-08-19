@@ -27,6 +27,8 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, value_set, **kwargs):
+        # import pydevd_pycharm
+        # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
         if value_set is None:
             # vacuously true
             return True

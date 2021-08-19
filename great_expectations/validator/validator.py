@@ -3,6 +3,7 @@ import datetime
 import inspect
 import json
 import logging
+import time
 import traceback
 import warnings
 from collections import defaultdict, namedtuple
@@ -472,7 +473,15 @@ class Validator:
         if metrics is None:
             metrics = {}
 
+        start_time = time.time()
         metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
+        end_time = time.time()
+        duration_sececonds = end_time - start_time
+        print(
+            f"todo(jdimatteo) resolve_validation_graph took {duration_sececonds} seconds"
+        )
+        # import pydevd_pycharm
+        # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
