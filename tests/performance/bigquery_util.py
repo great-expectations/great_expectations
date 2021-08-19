@@ -246,6 +246,7 @@ def _create_context(
                 "execution_engine": {
                     "class_name": "SqlAlchemyExecutionEngine",
                     "connection_string": f"bigquery://{bigquery_project}/{bigquery_dataset}",
+                    "pool_size": 0,  # todo(jdimatteo) why doesn't this work?
                 },
                 "data_connectors": {
                     datasource_and_dataconnector_name: {

@@ -206,7 +206,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif credentials is not None:
             self.engine = self._build_engine(credentials=credentials, **kwargs)
         elif connection_string is not None:
-            self.engine = sa.create_engine(connection_string, **kwargs)
+            self.engine = sa.create_engine(connection_string, pool_size=0, **kwargs)
         elif url is not None:
             self.drivername = urlparse(url).scheme
             self.engine = sa.create_engine(url, **kwargs)
