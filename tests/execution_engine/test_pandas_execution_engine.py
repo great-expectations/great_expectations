@@ -939,7 +939,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
+    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
 )
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
@@ -986,56 +986,3 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
     # Raises error due the connection object not being set
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)
-
-
-@mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
-)
-def test_constructor_with_gcs_options(mock_gcs_conn):
-    raise NotImplementedError()
-    # # default instantiation
-    # PandasExecutionEngine()
-
-    # # instantiation with custom parameters
-    # engine = PandasExecutionEngine(discard_subset_failing_expectations=True)
-    # assert "discard_subset_failing_expectations" in engine.config
-    # assert engine.config.get("discard_subset_failing_expectations") is True
-    # custom_azure_options = {"account_url": "my_account_url"}
-    # engine = PandasExecutionEngine(azure_options=custom_azure_options)
-    # assert "azure_options" in engine.config
-    # assert engine.config.get("azure_options")["account_url"] == "my_account_url"
-
-
-@mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
-)
-def test_get_batch_data_with_azure_batch_spec(
-    mock_gcs_conn,
-    azure_batch_spec,
-):
-    raise NotImplementedError()
-    # mock_blob_client = mock_azure_conn().get_blob_client()
-    # mock_azure_obj = mock_blob_client.download_blob()
-    # mock_azure_obj.readall.return_value = (
-    #     b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
-    # )
-
-    # df = PandasExecutionEngine().get_batch_data(batch_spec=azure_batch_spec)
-
-    # mock_gcs_conn().get_blob_client.assert_called_with(
-    #     container="test_container", blob="path/A-100.csv"
-    # )
-    # mock_azure_obj.readall.assert_called_once()
-
-    # assert df.dataframe.shape == (3, 3)
-
-
-def test_get_batch_with_no_gcs_configured(gcs_batch_spec):
-    raise NotImplementedError()
-    # # if Azure BlobServiceClient was not configured
-    # execution_engine_no_azure = PandasExecutionEngine()
-    # execution_engine_no_azure._azure = None
-
-    # # Raises error due the connection object not being set
-    # with pytest.raises(ge_exceptions.ExecutionEngineError):
-    #     execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)

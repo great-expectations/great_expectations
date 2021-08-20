@@ -36,14 +36,6 @@ except ImportError:
     )
 
 try:
-    from google.cloud import storage
-except ImportError:
-    storage = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional google dependency for support"
-    )
-
-try:
     import pyspark
     import pyspark.sql as pyspark_sql
 except ImportError:
@@ -356,35 +348,32 @@ def list_gcs_keys(
     recursive: bool = False,
 ) -> List[str]:
     """
-        Utilizes the GCS connection object to retrieve blob names based on user-provided criteria.
+    Utilizes the GCS connection object to retrieve blob names based on user-provided criteria.
 
-        For InferredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and search for files using RegEx at and below the level
-        specified by those parameters. However, for ConfiguredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and
-        search for files using RegEx only at the level specified by that bucket and prefix.
+    For InferredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and
+    search for files using RegEx only at the level specified by that bucket and prefix.
 
-        This restriction for the ConfiguredAssetGCSDataConnector is needed because paths on GCS are comprised not only the leaf file name
-        but the full path that includes both the prefix and the file name. Otherwise, in the situations where multiple data assets
-        share levels of a directory tree, matching files to data assets will not be possible due to the path ambiguity.
+    This restriction for the ConfiguredAssetGCSDataConnector is needed because paths on GCS are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name. Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible due to the path ambiguity.
 
-    <<<<<<< HEAD
-    =======
-        Please note that the SDK's `list_blobs` method takes in a `delimiter` key that drastically alters the traversal of a given bucket:
-            - If a delimiter is not set (default), the traversal is recursive and the output will contain all blobs in the current directory
-              as well as those in any nested directories.
-            - If a delimiter is set, the traversal will continue until that value is seen; as the default is "/", traversal will be scoped
-              within the current directory and end before visiting nested directories.
+    Please note that the SDK's `list_blobs` method takes in a `delimiter` key that drastically alters the traversal of a given bucket:
+        - If a delimiter is not set (default), the traversal is recursive and the output will contain all blobs in the current directory
+          as well as those in any nested directories.
+        - If a delimiter is set, the traversal will continue until that value is seen; as the default is "/", traversal will be scoped
+          within the current directory and end before visiting nested directories.
 
-        In order to provide users with finer control of their config while also ensuring output that is in line with the `recursive` arg,
-        we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
+    In order to provide users with finer control of their config while also ensuring output that is in line with the `recursive` arg,
+    we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
 
-    >>>>>>> 5d818ee33263ffa0f4be5471a25c77ba6c8ef6f4
-        Args:
-            gcs (storage.Client): GCS connnection object responsible for accessing bucket
-            query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
-            recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
+    Args:
+        gcs (storage.Client): GCS connnection object responsible for accessing bucket
+        query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
+        recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
 
-        Returns:
-            List of keys representing GCS file paths (as filtered by the `query_options` dict)
+    Returns:
+        List of keys representing GCS file paths (as filtered by the `query_options` dict)
     """
     # Delimiter determines whether or not traversal of bucket is recursive
     # Manually set to appropriate default if not already set by user
