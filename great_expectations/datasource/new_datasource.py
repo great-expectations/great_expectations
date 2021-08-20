@@ -64,7 +64,7 @@ class BaseDatasource:
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
             self._datasource_config = {
-                "execution_engine": execution_engine,
+                "execution_engine": execution_engine_config,
             }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
@@ -350,6 +350,7 @@ class BaseDatasource:
 
     @property
     def config(self) -> dict:
+        print("DATASOURCE CONFIG !!!!!!!!!", self._datasource_config)
         return copy.deepcopy(self._datasource_config)
 
 
