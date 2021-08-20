@@ -1,8 +1,5 @@
-from contextlib import ExitStack as does_not_raise
-from typing import List
 from unittest import mock
 
-import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
@@ -1116,3 +1113,70 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 "module_name": "great_expectations.datasource.data_connector"
             },
         )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_get_full_file_path(
+    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    yaml_string = f"""
+class_name: InferredAssetGCSDataConnector
+datasource_name: FAKE_DATASOURCE_NAME
+bucket_or_name: my_bucket
+prefix: my_base_directory/
+default_regex:
+   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+   group_names:
+       - data_asset_name
+       - year_dir
+       - month_dir
+   """
+    config = yaml.load(yaml_string)
+
+    mock_list_keys.return_value = [
+        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+        "my_base_directory/beta_here/beta-202001.txt",
+        "my_base_directory/beta_here/beta-202002.txt",
+        "my_base_directory/beta_here/beta-202003.txt",
+        "my_base_directory/beta_here/beta-202004.txt",
+        "my_base_directory/gamma-202001.csv",
+        "my_base_directory/gamma-202002.csv",
+        "my_base_directory/gamma-202003.csv",
+        "my_base_directory/gamma-202004.csv",
+        "my_base_directory/gamma-202005.csv",
+    ]
+
+    my_data_connector: InferredAssetGCSDataConnector = instantiate_class_from_config(
+        config,
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        runtime_environment={"name": "my_data_connector"},
+    )
+
+    assert (
+        my_data_connector._get_full_file_path(
+            "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
+        )
+        == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+    )
+    assert (
+        my_data_connector._get_full_file_path(
+            "my_base_directory/beta_here/beta-202002.txt", "beta"
+        )
+        == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
+    )
+    assert (
+        my_data_connector._get_full_file_path(
+            "my_base_directory/gamma-202005.csv", "gamma"
+        )
+        == "gs://my_bucket/my_base_directory/gamma-202005.csv"
+    )
