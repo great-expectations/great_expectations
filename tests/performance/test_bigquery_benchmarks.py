@@ -1,7 +1,10 @@
-"""Provide performance benchmarks to quantify the impact of PRs that are intended to improve performance and measure
-trends over time to identify/prevent performance regressions.
+#!/usr/bin/env python3
+
+"""
+Test performance using bigquery.
 """
 
+import sys
 import time
 from pathlib import Path
 
@@ -108,3 +111,8 @@ def _skip_if_bigquery_performance_tests_not_enabled(
         pytest.skip(
             "This test requires --bigquery and --performance-tests flags to run."
         )
+
+
+if __name__ == "__main__":
+    # For profiling, it can be useful to support running this script directly instead of using pytest to run.
+    sys.exit(pytest.main(sys.argv))
