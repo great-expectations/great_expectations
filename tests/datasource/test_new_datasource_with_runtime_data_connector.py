@@ -3,7 +3,12 @@ from typing import Dict, List
 
 import pandas as pd
 import pytest
-import sqlalchemy
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
@@ -418,7 +423,7 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(sa):
 
 
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_self_check(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     db_file = file_relative_path(
         __file__,
@@ -451,7 +456,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
 
 
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_error_checking(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using
     test_query: str = "SELECT * FROM table_full__I;"
@@ -514,7 +519,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
 
 
 def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_query(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
     batch_identifiers = {
@@ -543,7 +548,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
 
 
 def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
     batch_identifiers = {
@@ -600,7 +605,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query(
 
 
 def test_set_data_asset_name_for_runtime_query_data(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
     batch_identifiers = {
@@ -629,7 +634,7 @@ def test_set_data_asset_name_for_runtime_query_data(
 
 
 def test_get_batch_definition_list_from_batch_request_length_one_from_query(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
 
@@ -663,7 +668,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
 
 
 def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_error(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
 
@@ -690,7 +695,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_e
 
 
 def test_get_batch_definitions_and_get_batch_basics_from_query(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine,
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
 
