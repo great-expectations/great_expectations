@@ -463,7 +463,7 @@ def test_build_sorters_from_config_bad_config():
         build_sorters_from_config(sorters_config)
 
 
-@mock.patch("great_expectations.datasource.data_connector.util.storage.Client")
+@mock.patch("great_expectations.datasource.data_connector.util.Client")
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}
