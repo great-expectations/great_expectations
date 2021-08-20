@@ -28,9 +28,9 @@ except ImportError:
     )
 
 try:
-    from google.cloud import storage
+    from google.cloud.storage import Client
 except ImportError:
-    storage = None
+    Client = None
     logger.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
@@ -343,7 +343,7 @@ def list_azure_keys(
 
 
 def list_gcs_keys(
-    gcs: storage.Client,
+    gcs: Client,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -368,7 +368,7 @@ def list_gcs_keys(
     we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
 
     Args:
-        gcs (storage.Client): GCS connnection object responsible for accessing bucket
+        gcs (Client): GCS connnection object responsible for accessing bucket
         query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
         recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
 

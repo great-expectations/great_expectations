@@ -38,6 +38,9 @@ try:
     )
 except:
     azure = None
+    BlobClient = None
+    BlobServiceClient = None
+    StorageStreamDownloader = None
 
 
 logger = logging.getLogger(__name__)

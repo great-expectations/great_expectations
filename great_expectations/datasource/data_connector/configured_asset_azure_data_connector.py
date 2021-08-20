@@ -9,6 +9,7 @@ try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
     azure = None
+    BlobServiceClient = None
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
