@@ -43,7 +43,9 @@ try:
         StorageStreamDownloader,
     )
 except ImportError:
-    azure = None
+    BlobClient = None
+    BlobServiceClient = None
+    StorageStreamDownloader = None
     logger.debug(
         "Unable to load Azure connection object; install optional azure dependency for support"
     )
