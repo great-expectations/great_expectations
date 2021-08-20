@@ -4,6 +4,7 @@ import hashlib
 import logging
 import pickle
 import random
+import warnings
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
@@ -399,9 +400,17 @@ Please check your config."""
                     subset=[column_A_name, column_B_name],
                 )
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if not in ["neither", "never"]:
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+                if ignore_row_if == "never":
+                    warnings.warn(
+                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
+"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+""",
+                        DeprecationWarning,
                     )
 
             return data

@@ -65,11 +65,11 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
+        "ignore_row_if": "both_values_are_missing",
         "mostly": 1.0,
-        "parse_strings_as_datetimes": None,
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": True,
+        "catch_exceptions": False,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
