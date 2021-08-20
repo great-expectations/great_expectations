@@ -702,11 +702,12 @@ class ExpectationConfiguration(SerializableDictDot):
                 "row_condition",
                 "condition_parser",
             ],
-            "success_kwargs": ["value_pairs_set", "ignore_row_if"],
+            "success_kwargs": ["value_pairs_set", "ignore_row_if", "mostly"],
             "default_kwarg_values": {
                 "row_condition": None,
                 "condition_parser": "pandas",
                 "ignore_row_if": "both_values_are_missing",
+                "mostly": None,
                 "result_format": "BASIC",
                 "include_config": True,
                 "catch_exceptions": False,
@@ -725,9 +726,12 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_multicolumn_sum_to_equal": {
-            "domain_kwargs": ["column_list"],
-            "success_kwargs": ["sum_total"],
+            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
+            "success_kwargs": ["sum_total", "ignore_row_if"],
             "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "all_values_are_missing",
                 "result_format": "BASIC",
                 "include_config": True,
                 "catch_exceptions": False,
@@ -1028,12 +1032,12 @@ class ExpectationConfiguration(SerializableDictDot):
             else:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
                 default_kwarg_values = expectation_kwargs_dict.get(
-                    "default_kwarg_values", dict()
+                    "default_kwarg_values", {}
                 )
                 domain_keys = expectation_kwargs_dict["domain_kwargs"]
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
-                "default_kwarg_values", dict()
+                "default_kwarg_values", {}
             )
             domain_keys = expectation_kwargs_dict["domain_kwargs"]
         domain_kwargs = {
@@ -1059,12 +1063,12 @@ class ExpectationConfiguration(SerializableDictDot):
             else:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
                 default_kwarg_values = expectation_kwargs_dict.get(
-                    "default_kwarg_values", dict()
+                    "default_kwarg_values", {}
                 )
                 success_keys = expectation_kwargs_dict["success_kwargs"]
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
-                "default_kwarg_values", dict()
+                "default_kwarg_values", {}
             )
             success_keys = expectation_kwargs_dict["success_kwargs"]
         domain_kwargs = self.get_domain_kwargs()
@@ -1087,12 +1091,12 @@ class ExpectationConfiguration(SerializableDictDot):
             else:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
                 default_kwarg_values = expectation_kwargs_dict.get(
-                    "default_kwarg_values", dict()
+                    "default_kwarg_values", {}
                 )
                 runtime_keys = self.runtime_kwargs
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
-                "default_kwarg_values", dict()
+                "default_kwarg_values", {}
             )
             runtime_keys = self.runtime_kwargs
 
@@ -1195,7 +1199,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        parsed_dependencies = dict()
+        parsed_dependencies = {}
         for key, value in self.kwargs.items():
             if isinstance(value, dict) and "$PARAMETER" in value:
                 param_string_dependencies = find_evaluation_parameter_dependencies(
@@ -1203,7 +1207,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
                 nested_update(parsed_dependencies, param_string_dependencies)
 
-        dependencies = dict()
+        dependencies = {}
         urns = parsed_dependencies.get("urns", [])
         for string_urn in urns:
             try:

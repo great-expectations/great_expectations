@@ -263,6 +263,10 @@ class BaseDataContext:
         "ConfiguredAssetFilesystemDataConnector",
         "InferredAssetS3DataConnector",
         "ConfiguredAssetS3DataConnector",
+        "InferredAssetAzureDataConnector",
+        "ConfiguredAssetAzureDataConnector",
+        "InferredAssetGCSDataConnector",
+        "ConfiguredAssetGCSDataConnector",
         "InferredAssetSqlDataConnector",
         "ConfiguredAssetSqlDataConnector",
     ]
@@ -333,7 +337,7 @@ class BaseDataContext:
         )
 
         # Init stores
-        self._stores = dict()
+        self._stores = {}
         self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id

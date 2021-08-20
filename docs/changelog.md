@@ -3,8 +3,68 @@ title: Changelog
 ---
 
 ### Develop
-* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) #3182
 
+
+### 0.13.29
+* [FEATURE] Implementation of the Metric "select_column_values.unique.within_record" for SQLAlchemyExecutionEngine (#3279)
+* [FEATURE] V3 implement ColumnPairValuesInSet for SQL Alchemy execution engine (#3278)
+* [FEATURE] Edtf with support levels (#2594) (thanks @mielvds)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine (#3267)
+* [FEATURE] add expectation for discrete column entropy  (#3049) (thanks @edjoesu)
+* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b Metric (#3268)
+* [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
+* [FEATURE] Add schema validation for different GCS auth methods (#3258)
+* [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine (#3256)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_equal expectation for PandasExecutionEngine (#3252)
+* [FEATURE] GCS DataConnector schema validation (#3253)
+* [FEATURE] Implementation of the "expect_select_column_values_to_be_unique_within_record" Expectation (#3251)
+* [FEATURE] Implement the SelectColumnValuesUniqueWithinRecord metric (for PandasExecutionEngine) (#3250)
+* [FEATURE] V3 - Implement ColumnPairValuesEqual for PandasExecutionEngine (#3243)
+* [FEATURE] Set foundation for GCS DataConnectors (#3220)
+* [FEATURE] Implement "expect_column_pair_values_to_be_in_set" expectation (support for PandasExecutionEngine) (#3242)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3228) (thanks @ismaildawoodjee)
+* [DOCS] Document BigQuery test dataset configuration (#3273) (Thanks @jdimatteo)
+* [DOCS] Syntax and Link (#3266)
+* [DOCS] API Links and Supporting Docs (#3265)
+* [DOCS] redir and search (#3249)
+* [MAINTENANCE] Update azure-pipelines-docs-integration.yml to include env vars for Azure docs integration tests
+* [MAINTENANCE] Allow Wrong ignore_row_if Directive from V2 with Deprecation Warning (#3274)
+* [MAINTENANCE] Refactor test structure for "Connecting to your data" cloud provider integration tests (#3277)
+* [MAINTENANCE] Make test method names consistent for Metrics tests (#3254)
+* [MAINTENANCE] Allow `PandasExecutionEngine` to accept `Azure DataConnectors` (#3214)
+* [MAINTENANCE] Standardize Arguments to MetricConfiguration Constructor; Use {} instead of dict(). (#3246)
+
+### 0.13.28
+* [FEATURE] Implement ColumnPairValuesInSet metric for PandasExecutionEngine
+* [BUGFIX] Wrap optional azure imports in data_connector setup
+
+### 0.13.27
+* [FEATURE] Accept row_condition (with condition_parser) and ignore_row_if parameters for expect_multicolumn_sum_to_equal (#3193)
+* [FEATURE] ConfiguredAssetDataConnector for Azure Blob Storage (#3141)
+* [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_domain_records() for SparkDFExecutionEngine (#3226)
+* [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_domain_records() for SqlAlchemyExecutionEngine (#3215)
+* [FEATURE] Replace MetricFunctionTypes.IDENTITY domain type with convenience method get_full_access_compute_domain() for PandasExecutionEngine (#3210)
+* [FEATURE] Set foundation for Azure-related DataConnectors (#3188)
+* [FEATURE] Update ExpectCompoundColumnsToBeUnique for V3 API (#3161)
+* [BUGFIX] Fix incorrect schema validation for Azure data connectors (#3200)
+* [BUGFIX] Fix incorrect usage of "all()" in the comparison of validation results when executing an Expectation (#3178)
+* [BUGFIX] Fixes an error with expect_column_values_to_be_dateutil_parseable (#3190)
+* [BUGFIX] Improve parsing of .ge_store_backend_id (#2952)
+* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) (#3182)
+* [BUGFIX] Restore support for V2 API style custom expectation rendering (#3179) (Thanks @jdimatteo)
+* [DOCS] Add `conda` as installation option in README (#3196) (Thanks @rpanai)
+* [DOCS] Standardize capitalization of "Python" in "Connecting to your data" section of new docs (#3209)
+* [DOCS] Standardize capitalization of Spark in docs (#3198)
+* [DOCS] Update BigQuery docs to clarify the use of temp tables (#3184)
+* [DOCS] Create _redirects (#3192)
+* [ENHANCEMENT] RuntimeDataConnector messaging is made more clear for `test_yaml_config()` (#3206)
+* [MAINTENANCE] Add `credentials` YAML key support for `DataConnectors` (#3173)
+* [MAINTENANCE] Fix minor typo in S3 DataConnectors (#3194)
+* [MAINTENANCE] Fix typos in argument names and types (#3207)
+* [MAINTENANCE] Update changelog. (#3189)
+* [MAINTENANCE] Update documentation. (#3203)
+* [MAINTENANCE] Update validate_your_data.md (#3185)
+* [MAINTENANCE] update tests across execution engines and clean up coding patterns (#3223)
 
 ### 0.13.26
 * [FEATURE] Enable BigQuery tests for Azure CI/CD (#3155)
