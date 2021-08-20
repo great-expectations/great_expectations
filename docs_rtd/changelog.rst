@@ -8,6 +8,13 @@ Changelog
 develop
 -----------------
 
+* [BUGFIX] Add force_reuse_spark_context to DatasourceConfigSchema
+* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) #3182
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_in_set expectation for SQL Alchemy execution engine (#3278, #3281)
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for SQL Alchemy execution engine (#3267)
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
+
 0.13.29
 -----------------
 * [FEATURE] Implementation of the Metric "select_column_values.unique.within_record" for SQLAlchemyExecutionEngine (#3279)
@@ -15,7 +22,7 @@ develop
 * [FEATURE] Edtf with support levels (#2594) (thanks @mielvds)
 * [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine (#3267)
 * [FEATURE] add expectation for discrete column entropy  (#3049) (thanks @edjoesu)
-* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b Metric (#3268)
+* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b (#3268)
 * [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
 * [FEATURE] Add schema validation for different GCS auth methods (#3258)
 * [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine (#3256)
@@ -37,6 +44,7 @@ develop
 * [MAINTENANCE] Make test method names consistent for Metrics tests (#3254)
 * [MAINTENANCE] Allow `PandasExecutionEngine` to accept `Azure DataConnectors` (#3214)
 * [MAINTENANCE] Standardize Arguments to MetricConfiguration Constructor; Use {} instead of dict(). (#3246)
+
 
 0.13.28
 -----------------
