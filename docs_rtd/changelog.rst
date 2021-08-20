@@ -7,6 +7,9 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_in_set expectation for SQL Alchemy execution engine (#3278, #3281)
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for SQL Alchemy execution engine (#3267)
+* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
 
 0.13.29
 -----------------
@@ -15,7 +18,7 @@ develop
 * [FEATURE] Edtf with support levels (#2594) (thanks @mielvds)
 * [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine (#3267)
 * [FEATURE] add expectation for discrete column entropy  (#3049) (thanks @edjoesu)
-* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b Metric (#3268)
+* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b (#3268)
 * [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
 * [FEATURE] Add schema validation for different GCS auth methods (#3258)
 * [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine (#3256)
