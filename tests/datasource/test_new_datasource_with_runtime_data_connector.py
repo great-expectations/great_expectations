@@ -81,11 +81,9 @@ def test_basic_datasource_runtime_data_connector_self_check(
     }
 
 
-def test_basic_datasource_runtime_data_connector_error_checking(
+def test_basic_datasource_runtime_data_connector_error_checking_unknown_datasource(
     basic_datasource_with_runtime_data_connector,
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     # Test for an unknown datasource
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -99,6 +97,10 @@ def test_basic_datasource_runtime_data_connector_error_checking(
             )
         )
 
+
+def test_basic_datasource_runtime_data_connector_error_checking_unknown_dataconnector(
+    basic_datasource_with_runtime_data_connector,
+):
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -111,6 +113,12 @@ def test_basic_datasource_runtime_data_connector_error_checking(
                 data_asset_name="my_data_asset",
             )
         )
+
+
+def test_basic_datasource_runtime_data_connector_error_checking_no_batch_idenfitiers(
+    basic_datasource_with_runtime_data_connector,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # Test for illegal absence of batch_identifiers when batch_data is specified
     with pytest.raises(ge_exceptions.DataConnectorError):
@@ -126,6 +134,13 @@ def test_basic_datasource_runtime_data_connector_error_checking(
                 batch_identifiers=None,
             )
         )
+
+
+def test_basic_datasource_runtime_data_connector_error_checking_incorrect_batch_idenfitiers(
+    basic_datasource_with_runtime_data_connector,
+):
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # Test for illegal falsiness of batch_identifiers when batch_data is specified
     with pytest.raises(ge_exceptions.DataConnectorError):
@@ -177,7 +192,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
     assert len(batch_list) == 1
 
 
-def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
+def test_batch_identifiers_and_batch_identifiers_error_mostly_legal_keys(
     basic_datasource_with_runtime_data_connector,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -189,8 +204,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     }
 
     # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
-    # configuration
-    # are not accepted.  In this test, all legal keys plus a single illegal key are present.
+    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -210,10 +224,15 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
             batch_request=batch_request
         )
 
+
+def test_batch_identifiers_and_batch_identifiers_error_one_illegal_key(
+    basic_datasource_with_runtime_data_connector,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
     batch_identifiers = {"unknown_key": "some_value"}
     # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
-    # configuration
-    # are not accepted.  In this test, a single illegal key is present.
+    # configuration are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -392,8 +411,12 @@ def test_get_batch_definitions_and_get_batch_basics(
 
 @pytest.fixture
 def db_file():
-    return file_relative_path(__file__, os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"))
-    
+    return file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+
 @pytest.fixture
 def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_file, sa):
     basic_datasource: Datasource = instantiate_class_from_config(
@@ -424,9 +447,6 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_self_check(
     db_file, datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
-    # Rest of the test
-    )
-
     report = (
         datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.self_check()
     )
@@ -452,11 +472,9 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     }
 
 
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_error_checking(
+def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_unknown_datasource(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
-    # interacting with the database using
-    test_query: str = "SELECT * FROM table_full__I;"
 
     # Test for an unknown datasource
     with pytest.raises(ValueError):
@@ -471,6 +489,10 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
             )
         )
 
+
+def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_unknown_dataconnector(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -483,6 +505,13 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
                 data_asset_name="my_data_asset",
             )
         )
+
+
+def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_no_batch_identifiers(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
 
     # Test for illegal absence of batch_identifiers when batch_data is specified
     with pytest.raises(ge_exceptions.DataConnectorError):
@@ -498,6 +527,13 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
                 batch_identifiers=None,
             )
         )
+
+
+def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_illegal_batch_identifiers(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
 
     # Test for illegal falsiness of batch_identifiers when batch_data is specified
     with pytest.raises(ge_exceptions.DataConnectorError):
@@ -518,6 +554,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
 def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_query(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
+    # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
@@ -544,9 +581,10 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
     assert len(batch_list) == 1
 
 
-def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query(
+def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mostly_legal_keys(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
+    # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
@@ -556,8 +594,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query(
     }
 
     # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
-    # configuration
-    # are not accepted.  In this test, all legal keys plus a single illegal key are present.
+    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -577,10 +614,15 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query(
             batch_request=batch_request
         )
 
+
+def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_single_illegal_key(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
     batch_identifiers = {"unknown_key": "some_value"}
     # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
-    # configuration
-    # are not accepted.  In this test, a single illegal key is present.
+    # configuration  are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
@@ -633,6 +675,7 @@ def test_set_data_asset_name_for_runtime_query_data(
 def test_get_batch_definition_list_from_batch_request_length_one_from_query(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
+    # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
     batch_identifiers = {
@@ -658,7 +701,6 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
     # they are ones that uniquely identify the data
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
-
     assert my_batch_1.batch_spec is not None
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1.data.selectable, sqlalchemy.Table)
@@ -667,6 +709,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
 def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_error(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
+    # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
     data_connector_name: str = "test_runtime_data_connector"
@@ -694,6 +737,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_e
 def test_get_batch_definitions_and_get_batch_basics_from_query(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
+    # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
     data_connector_name: str = "test_runtime_data_connector"
