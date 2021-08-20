@@ -1218,7 +1218,7 @@ def test_map_column_pairs_equal_metric_pd():
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
 
-    # Second, assert Fail (one unexpected result).
+    # Second, assert Fail (one or more unexpected results).
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -1433,7 +1433,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
 
-    # Second, assert Fail (one unexpected result).
+    # Second, assert Fail (one or more unexpected results).
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -1643,7 +1643,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
 
-    # Second, assert Fail (one unexpected result).
+    # Second, assert Fail (one or more unexpected results).
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -2773,7 +2773,7 @@ def test_map_multicolumn_sum_equal_pd():
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
 
-    # Second, assert Fail (one unexpected result).
+    # Second, assert Fail (one or more unexpected results).
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -2975,7 +2975,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
 
-    # Second, assert Fail (one unexpected result).
+    # Second, assert Fail (one or more unexpected results).
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -3172,7 +3172,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
 
-    # Second, assert Fail (one unexpected result).
+    # Second, assert Fail (one or more unexpected results).
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -3365,7 +3365,7 @@ def test_map_compound_columns_unique_pd():
     # Restore from saved original metrics in order to start fresh on testing for unexpected results.
     metrics = copy.deepcopy(metrics_save)
 
-    # Second, assert Fail (one unexpected result).
+    # Second, assert Fail (one or more unexpected results).
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
