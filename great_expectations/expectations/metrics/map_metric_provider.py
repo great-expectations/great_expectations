@@ -645,12 +645,9 @@ def column_pair_function_partial(
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [
-            MetricPartialFunctionTypes.MAP_FN,
-            MetricPartialFunctionTypes.WINDOW_FN,
-        ]:
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_fn and window_fn for column_pair_function_partial partial_fn_type"
+                "SparkDFExecutionEngine only supports map_fn for column_pair_function_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -872,14 +869,14 @@ def column_pair_condition_partial(
 
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
-            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
-            MetricPartialFunctionTypes.MAP_FN,
-            MetricPartialFunctionTypes.WINDOW_FN,
+            MetricPartialFunctionTypes.MAP_CONDITION_FN,
+            MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_fn and window_fn for column_pair_condition_partial partial_fn_type"
+                "SparkDFExecutionEngine only supports map_condition_fn for column_pair_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -1076,12 +1073,9 @@ def multicolumn_function_partial(
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [
-            MetricPartialFunctionTypes.MAP_FN,
-            MetricPartialFunctionTypes.WINDOW_FN,
-        ]:
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_fn and window_fn for multicolumn_function_partial partial_fn_type"
+                "SparkDFExecutionEngine only supports map_fn for multicolumn_function_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -1283,14 +1277,11 @@ def multicolumn_condition_partial(
 
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
-            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [
-            MetricPartialFunctionTypes.MAP_FN,
-            MetricPartialFunctionTypes.WINDOW_FN,
-        ]:
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_FN]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_fn and window_fn for multicolumn_function_partial partial_fn_type"
+                "SparkDFExecutionEngine only supports map_condition_fn for multicolumn_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -2582,13 +2573,12 @@ def _spark_multicolumn_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
         domain_values = (
-            domain_values.select(column_select).collect().toPandas().to_dict("records")
+            domain_values.select(column_select).toPandas().to_dict("records")
         )
     else:
         domain_values = (
             domain_values.select(column_select)
             .limit(result_format["partial_unexpected_count"])
-            .collect()
             .toPandas()
             .to_dict("records")
         )
