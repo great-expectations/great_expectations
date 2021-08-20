@@ -1,5 +1,6 @@
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import sa
@@ -22,11 +23,18 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
     )
     condition_value_keys = ()
 
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
+    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         return column_A == column_B
 
+    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
         return sa.case((column_A == column_B, True), else_=False)
+
+    # noinspection PyPep8Naming
+    @column_pair_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column_A, column_B, **kwargs):
+        row_wise_cond = column_A == column_B
+        return row_wise_cond
