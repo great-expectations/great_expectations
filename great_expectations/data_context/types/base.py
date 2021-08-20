@@ -562,8 +562,8 @@ continue.
             "InferredAssetGCSDataConnector",
             "ConfiguredAssetGCSDataConnector",
         ]:
-            azure_options = data["gcs_options"]
-            if "filename" in azure_options and "info" in azure_options:
+            gcs_options = data["gcs_options"]
+            if "filename" in gcs_options and "info" in gcs_options:
                 raise ge_exceptions.InvalidConfigError(
                     f"""Your current configuration can only use a single method of authentication for the GCS type of data connector.
                     You must only select one between `filename` (from_service_account_file) and `info` (from_service_account_info). Please update your configuration to continue.
@@ -788,7 +788,10 @@ class DatasourceConfigSchema(Schema):
 
     class_name = fields.String(missing="Datasource")
     module_name = fields.String(missing="great_expectations.datasource")
-
+    force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
+    spark_config = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
     )
