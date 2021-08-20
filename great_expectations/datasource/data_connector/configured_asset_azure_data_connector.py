@@ -8,7 +8,6 @@ import great_expectations.exceptions as ge_exceptions
 try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
-    azure = None
     BlobServiceClient = None
 
 from great_expectations.core.batch import BatchDefinition

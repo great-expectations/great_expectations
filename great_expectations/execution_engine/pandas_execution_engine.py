@@ -36,8 +36,7 @@ try:
         BlobServiceClient,
         StorageStreamDownloader,
     )
-except:
-    azure = None
+except ImportError:
     BlobClient = None
     BlobServiceClient = None
     StorageStreamDownloader = None
