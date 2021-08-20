@@ -47,7 +47,7 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.types import ClassConfig
-from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.util import load_class, verify_dynamic_loading_support, calculate_delta_durations
 from great_expectations.validator.validation_graph import (
     MetricConfiguration,
     MetricEdge,
@@ -1228,6 +1228,7 @@ set as active.
                 results = abbrev_results
 
             expectation_suite_name = expectation_suite.expectation_suite_name
+            run_duration = calculate_delta_durations(parse(validation_time), datetime.datetime.now(datetime.timezone.utc))
 
             result = ExpectationSuiteValidationResult(
                 results=results,
@@ -1247,6 +1248,7 @@ set as active.
                     "batch_markers": self.active_batch_markers,
                     "active_batch_definition": self.active_batch_definition,
                     "validation_time": validation_time,
+                    "run_duration": run_duration
                 },
             )
 
