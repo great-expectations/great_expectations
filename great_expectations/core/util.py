@@ -438,7 +438,7 @@ class GCSUrl:
     """
 
     def __init__(self, url: str):
-        search = re.search(r"^gs://(.+)/(.+)$", url)
+        search = re.search(r"^gs://([^/]+)/(.+)$", url)
         self._bucket = search.group(1)
         self._blob = search.group(2)
 
