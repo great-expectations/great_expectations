@@ -350,7 +350,6 @@ class BaseDatasource:
 
     @property
     def config(self) -> dict:
-        print("DATASOURCE CONFIG !!!!!!!!!", self._datasource_config)
         return copy.deepcopy(self._datasource_config)
 
 
