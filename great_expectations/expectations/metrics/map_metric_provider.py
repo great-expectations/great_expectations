@@ -350,7 +350,7 @@ def column_condition_partial(
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn for column_condition_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for column_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -802,7 +802,7 @@ def column_pair_condition_partial(
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn for column_pair_condition_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for column_pair_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -876,7 +876,7 @@ def column_pair_condition_partial(
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_condition_fn for column_pair_condition_partial partial_fn_type"
+                "SparkDFExecutionEngine only supports map_condition_fn and window_condition_fn for column_pair_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -1213,9 +1213,12 @@ def multicolumn_condition_partial(
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_FN]:
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_CONDITION_FN,
+            MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn for multicolumn_condition_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for multicolumn_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -1279,9 +1282,12 @@ def multicolumn_condition_partial(
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_FN]:
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_CONDITION_FN,
+            MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        ]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_condition_fn for multicolumn_condition_partial partial_fn_type"
+                "SparkDFExecutionEngine only supports map_condition_fn and window_condition_fn for multicolumn_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
