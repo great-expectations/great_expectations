@@ -1,3 +1,9 @@
+# Overview
+
+These performance benchmarks serve two purposes:
+1. Quantify the impact of PRs that are intended to improve performance, and
+2. Measure trends over time to identify/prevent performance regressions.
+
 # Configuring Data Before Running Performance Tests
 
 These performance tests use BigQuery.
@@ -17,7 +23,7 @@ For more information on getting started with BigQuery, please refer to the [cont
 Run the performance tests with pytest, e.g.
 
 ```
-pytest test_bigquery_benchmarks.py \
+pytest tests/performance/test_bigquery_benchmarks.py \
   --bigquery --performance-tests \
   -k test_bikeshare_trips_benchmark[1] \
   --benchmark-json=tests/performance/results/`date "+%H%M"`_${USER}.json \
@@ -41,7 +47,7 @@ The result is saved for comparisons as described below.
 Compare test results in this directory with `py.test-benchmark compare`, e.g.
 
 ```
-$ py.test-benchmark compare --group-by name results/initial_baseline.json results/*${USER}.json
+$ py.test-benchmark compare --group-by name tests/performance/results/initial_baseline.json tests/performance/results/*${USER}.json
 
 ---------------------------------------------------------------------------- benchmark 'test_bikeshare_trips_benchmark[1]': 2 tests ---------------------------------------------------------------------------
 Name (time in s)                                        Min               Max              Mean            StdDev            Median               IQR            Outliers     OPS            Rounds  Iterations

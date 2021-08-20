@@ -1,7 +1,7 @@
 """
-Provide performance benchmarks to quantify the impact of PRs that are intended to improve performance and measure
-trends over time to identify/prevent performance regressions.
+Test performance using bigquery.
 """
+
 from pathlib import Path
 
 import _pytest.config
