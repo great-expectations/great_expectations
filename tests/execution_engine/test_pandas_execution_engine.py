@@ -962,7 +962,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
 )
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
@@ -1012,7 +1012,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.execution_engine.pandas_execution_engine.Client",
 )
 def test_constructor_with_gcs_options(mock_gcs_conn):
     # default instantiation
@@ -1053,7 +1053,7 @@ def test_get_batch_data_with_gcs_batch_spec(
 
 
 def test_get_batch_with_no_gcs_configured(gcs_batch_spec):
-    # if Azure BlobServiceClient was not configured
+    # if GCS Client was not configured
     execution_engine_no_gcs = PandasExecutionEngine()
     execution_engine_no_gcs._gcs = None
 
