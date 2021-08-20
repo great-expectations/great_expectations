@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 """
 Test performance using bigquery.
 """
 
+import sys
 from pathlib import Path
 
 import _pytest.config
@@ -99,3 +102,8 @@ def _skip_if_bigquery_performance_tests_not_enabled(
         pytest.skip(
             "This test requires --bigquery and --performance-tests flags to run."
         )
+
+
+if __name__ == "__main__":
+    # For profiling, it can be useful to support running this script directly instead of using pytest to run.
+    sys.exit(pytest.main(sys.argv))
