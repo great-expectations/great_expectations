@@ -153,14 +153,14 @@ You can run just the Expectation tests with `pytest tests/test_definitions/test_
 
 ##### Configuring Data Before Running Performance Tests
 
-These performance tests use BigQuery.
+The performance tests use BigQuery.
 
-Before running a performance test, setup data with `setup_bigquery_tables_for_performance_test.sh`.
+Before running a performance test, setup data with `tests/performance/setup_bigquery_tables_for_performance_test.sh`.
 
 For example:
 
 ```bash
-GE_TEST_BIGQUERY_PEFORMANCE_DATASET=<YOUR_GCP_PROJECT> setup_bigquery_tables_for_performance_test.sh
+GE_TEST_BIGQUERY_PEFORMANCE_DATASET=<YOUR_GCP_PROJECT> tests/performance/setup_bigquery_tables_for_performance_test.sh
 ```
 
 For more information on getting started with BigQuery, please refer to the [above section on BigQuery tests](#bigquery-tests).
