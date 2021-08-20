@@ -67,7 +67,7 @@ but the package `{library_name}` containing this library is not installed.
     assert os.path.isfile(config_path)
 
     config = yaml.load(open(config_path))
-    assert config["datasources"] == dict()
+    assert config["datasources"] == {}
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
     assert (
@@ -306,7 +306,7 @@ but the package `pyspark` containing this library is not installed.
     assert os.path.isfile(config_path)
 
     config = yaml.load(open(config_path))
-    assert config["datasources"] == dict()
+    assert config["datasources"] == {}
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
     assert (

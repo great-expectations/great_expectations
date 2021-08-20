@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Set
 
 import boto3
+import pyparsing as pp
 from moto import mock_s3
 
 from great_expectations.data_context import BaseDataContext
@@ -125,15 +126,19 @@ def get_store_backend_id_from_s3(bucket: str, prefix: str, key: str) -> str:
     s3_response_object = boto3.client("s3").get_object(
         Bucket=bucket, Key=f"{prefix}/{key}"
     )
-    s3_response_object_body = (
+    ge_store_backend_id_file_contents = (
         s3_response_object["Body"]
         .read()
         .decode(s3_response_object.get("ContentEncoding", "utf-8"))
     )
-    store_backend_id_from_s3_file = s3_response_object_body.replace(
-        StoreBackend.STORE_BACKEND_ID_PREFIX, ""
+
+    store_backend_id_file_parser = StoreBackend.STORE_BACKEND_ID_PREFIX + pp.Word(
+        pp.hexnums + "-"
     )
-    return store_backend_id_from_s3_file
+    parsed_store_backend_id = store_backend_id_file_parser.parseString(
+        ge_store_backend_id_file_contents
+    )
+    return parsed_store_backend_id[1]
 
 
 def list_s3_bucket_contents(bucket: str, prefix: str) -> Set[str]:
