@@ -99,7 +99,7 @@ Notes:
 
         try:
             self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
+        except (NameError, TypeError, AttributeError):
             self._azure = None
 
         super().__init__(*args, **kwargs)
