@@ -677,6 +677,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             column_list = compute_domain_kwargs.pop("column_list")
 
+            if len(column_list) < 2:
+                raise GreatExpectationsError(
+                    "column_list must contain at least 2 columns"
+                )
+
             # Checking if case-sensitive and using appropriate name
             if self.active_batch_data.use_quoted_name:
                 accessor_domain_kwargs["column_list"] = [
