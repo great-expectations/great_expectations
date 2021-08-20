@@ -1705,7 +1705,10 @@ def test_map_column_pairs_in_set_metric_pd():
 
 def test_map_column_pairs_in_set_metric_sa(sa):
     engine = build_sa_engine(
-        pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]}), sa
+        pd.DataFrame(
+            {"a": [10, 9, 3, 4, None, 3, None], "b": [1, 4, 2, 3, None, 3, 5]}
+        ),
+        sa,
     )
 
     metrics: dict = {}
@@ -1767,9 +1770,58 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     )
     metrics.update(results)
 
-    print(f"UNEXPECTED VALUES RESULTS: {results[unexpected_values_metric.id][0]}")
+    assert results[unexpected_values_metric.id] == [(10, 1), (9, 4)]
 
-    assert results[unexpected_values_metric.id][0] == (10, 1)
+    condition_metric = MetricConfiguration(
+        metric_name="column_pair_values.in_set.condition",
+        metric_domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "ignore_row_if": "both_values_are_missing",
+        },
+        metric_value_kwargs={
+            "result_format": {
+                "result_format": "SUMMARY",
+                "partial_unexpected_count": 6,
+            },
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
+
+    unexpected_values_metric = MetricConfiguration(
+        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "ignore_row_if": "either_value_is_missing",
+        },
+        metric_value_kwargs={
+            "result_format": {
+                "result_format": "SUMMARY",
+                "partial_unexpected_count": 6,
+            },
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_values_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    assert results[unexpected_values_metric.id] == []
 
 
 def test_table_metric_spark(spark_session):
@@ -2550,6 +2602,202 @@ def test_map_multicolumn_sum_equal_sa(sa):
 
     # Condition metrics return "negative logic" series.
     assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name=unexpected_rows_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b", "c"],
+        },
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id] == [(2, 3, 1, 9)]
+    assert len(metrics[unexpected_rows_metric.id][0]) == 4
+
+    unexpected_values_metric = MetricConfiguration(
+        metric_name=unexpected_values_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b", "c"],
+        },
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert len(metrics[unexpected_values_metric.id]) == 1
+    assert metrics[unexpected_values_metric.id] == [{"a": 2, "b": 3, "c": 1}]
+
+
+def test_map_multicolumn_sum_equal_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    """
+    Two tests:
+    1. Pass -- no unexpected rows.
+    2. Fail -- one unexpected row.
+    """
+
+    # Save original metrics for testing unexpected results.
+    metrics_save: dict = copy.deepcopy(metrics)
+
+    metric_name: str = "multicolumn_sum.equal"
+    condition_metric_name: str = f"{metric_name}.condition"
+    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
+    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
+    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+
+    # First, assert Pass (no unexpected results).
+    condition_metric = MetricConfiguration(
+        metric_name=condition_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b"],
+        },
+        metric_value_kwargs={
+            "sum_total": 5,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name=unexpected_count_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b"],
+        },
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    # Condition metrics return "negative logic" series.
+    assert metrics[unexpected_count_metric.id] == 0
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name=unexpected_rows_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b"],
+        },
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert len(metrics[unexpected_rows_metric.id]) == 0
+
+    unexpected_values_metric = MetricConfiguration(
+        metric_name=unexpected_values_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b"],
+        },
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert len(metrics[unexpected_values_metric.id]) == 0
+    assert metrics[unexpected_values_metric.id] == []
+
+    # Restore from saved original metrics in order to start fresh on testing for unexpected results.
+    metrics = copy.deepcopy(metrics_save)
+
+    # Second, assert Fail (one unexpected result).
+
+    condition_metric = MetricConfiguration(
+        metric_name=condition_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b", "c"],
+        },
+        metric_value_kwargs={
+            "sum_total": 5,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name=unexpected_count_metric_name,
+        metric_domain_kwargs={
+            "column_list": ["a", "b", "c"],
+        },
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    # Condition metrics return "negative logic" series.
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
