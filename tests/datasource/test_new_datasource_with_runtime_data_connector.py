@@ -525,7 +525,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
 
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
     batch_request: dict = {
-        "datasource_name": basic_datasource_with_runtime_data_connector.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
         "runtime_parameters": {
@@ -536,7 +536,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
         Batch
-    ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
+    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
     assert len(batch_list) == 1
