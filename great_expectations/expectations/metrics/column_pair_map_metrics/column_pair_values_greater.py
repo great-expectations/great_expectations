@@ -63,7 +63,9 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         or_equal = kwargs.get("or_equal")
         if or_equal:
-            return sa.or_(column_A >= column_B, sa.and_(column_A == None, column_B == None))
+            return sa.or_(
+                column_A >= column_B, sa.and_(column_A == None, column_B == None)
+            )
         else:
             return column_A > column_B
 
