@@ -106,20 +106,20 @@ stages:
               numpy.version: '1.14.1'
               pandas.version: '0.23.4'
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
               numpy.version: '1.14.1'
               pandas.version: '0.25.3'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver "numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
               numpy.version: 'latest'
               pandas.version: 'latest'
               scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -148,7 +148,7 @@ stages:
 
           - script: |
               pip install $(GE_pytest_pip_opts)
-              pip install  --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver  --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
             displayName: 'Install dependencies'
@@ -184,19 +184,19 @@ stages:
             Python36:
               python.version: '3.6'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver "pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver "pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python38:
               python.version: '3.8'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python39:
               python.version: '3.9'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -221,7 +221,7 @@ stages:
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              pip install --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements.txt
               echo "about to run pip install $(GE_pytest_pip_opts)"
               pip install $(GE_pytest_pip_opts)
               pip install  .
@@ -265,8 +265,8 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt
-              pip install --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev-base.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
@@ -314,13 +314,13 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
@@ -347,8 +347,8 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
@@ -387,8 +387,8 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
@@ -407,7 +407,7 @@ stages:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_pip_opts: '--use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
 
         steps:
@@ -426,7 +426,7 @@ stages:
 
           - script: |
               pip install $(GE_pytest_pip_opts)
-              pip install --requirement requirements.txt
+              pip install --use-feature=fast-deps --use-deprecated=legacy-resolver --requirement requirements.txt
               pip install  .
             displayName: 'Install dependencies'
 
