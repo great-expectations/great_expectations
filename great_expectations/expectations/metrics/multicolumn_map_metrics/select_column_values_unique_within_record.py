@@ -51,14 +51,15 @@ metric for wide tables using SQLAlchemy leads to long WHERE clauses for the unde
 """
             )
 
-        conditions = []
-        for idx_src in range(num_columns - 1):
-            for idx_dest in range(idx_src + 1, num_columns):
-                conditions.append(column_list[idx_src] == column_list[idx_dest])
-
-        row_wise_cond = sa.not_(sa.or_(*conditions))
-
-        return sa.case([(row_wise_cond, True)], else_=False)
+        conditions = sa.or_(
+            *(
+                column_list[idx_src] == column_list[idx_dest]
+                for idx_src in range(num_columns - 1)
+                for idx_dest in range(idx_src + 1, num_columns)
+            )
+        )
+        row_wise_cond = sa.not_(sa.or_(conditions))
+        return row_wise_cond
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_list, **kwargs):

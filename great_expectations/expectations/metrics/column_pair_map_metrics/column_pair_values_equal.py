@@ -36,5 +36,5 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, **kwargs):
-        row_wise_cond = column_A == column_B
+        row_wise_cond = column_A.eqNullSafe(column_B)
         return row_wise_cond
