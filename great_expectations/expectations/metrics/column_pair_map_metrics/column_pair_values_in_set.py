@@ -71,7 +71,7 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
         ]
         row_wise_cond = sa.or_(*conditions)
 
-        return sa.case([(row_wise_cond, True)], else_=False)
+        return row_wise_cond
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)

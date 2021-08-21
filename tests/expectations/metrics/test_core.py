@@ -1383,8 +1383,6 @@ def test_map_column_pairs_equal_metric_sa(sa):
     )
     metrics.update(results)
 
-    # Condition metrics return "negative logic" series.
-    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
     assert metrics[unexpected_count_metric.id] == 0
 
     unexpected_rows_metric = MetricConfiguration(
@@ -1469,8 +1467,6 @@ def test_map_column_pairs_equal_metric_sa(sa):
     )
     metrics.update(results)
 
-    # Condition metrics return "negative logic" series.
-    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
     assert metrics[unexpected_count_metric.id] == 3
 
     unexpected_rows_metric = MetricConfiguration(
@@ -1843,8 +1839,6 @@ def test_map_column_pairs_greater_metric_sa(sa):
     )
     metrics.update(results)
 
-    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
-
     unexpected_values_metric = MetricConfiguration(
         metric_name="column_pair_values.a_greater_than_b.unexpected_values",
         metric_domain_kwargs={
@@ -2024,8 +2018,6 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     )
     metrics.update(results)
 
-    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
-
     unexpected_values_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.unexpected_values",
         metric_domain_kwargs={
@@ -2076,8 +2068,6 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         metrics=metrics,
     )
     metrics.update(results)
-
-    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
 
     unexpected_values_metric = MetricConfiguration(
         metric_name="column_pair_values.in_set.unexpected_values",
@@ -2927,8 +2917,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
     )
     metrics.update(results)
 
-    # Condition metrics return "negative logic" series.
-    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
     assert metrics[unexpected_count_metric.id] == 0
 
     unexpected_rows_metric = MetricConfiguration(
@@ -3011,8 +2999,6 @@ def test_map_multicolumn_sum_equal_sa(sa):
     )
     metrics.update(results)
 
-    # Condition metrics return "negative logic" series.
-    assert isinstance(metrics[condition_metric.id][0], sa.sql.elements.AsBoolean)
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(

@@ -63,9 +63,9 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         or_equal = kwargs.get("or_equal")
         if or_equal:
-            return sa.case((column_A >= column_B, True), else_=False)
+            return sa.or_(column_A >= column_B, sa.and_(column_A == None, column_B == None))
         else:
-            return sa.case((column_A > column_B, True), else_=False)
+            return column_A > column_B
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
@@ -80,6 +80,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         or_equal = kwargs.get("or_equal")
         if or_equal:
-            return column_A >= column_B
+            return (column_A >= column_B) | (column_A.eqNullSafe(column_B))
         else:
             return column_A > column_B
