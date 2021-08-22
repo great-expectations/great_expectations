@@ -63,7 +63,7 @@ def test_bikeshare_trips_benchmark(
     assert result.success, result
     assert len(result.run_results) == number_of_tables
     html_file_paths = list(Path(tmpdir).glob("validations/**/*.html"))
-    # todo(jdimatteo): assert len(html_file_paths) == number_of_tables
+    assert len(html_file_paths) == number_of_tables
 
     # Check that run results contain the right number of suites, assets, and table names.
     assert (
