@@ -1012,9 +1012,12 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
 
 
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.service_account",
 )
-def test_constructor_with_gcs_options(mock_gcs_conn):
+@mock.patch(
+    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+)
+def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     # default instantiation
     PandasExecutionEngine()
 
@@ -1031,7 +1034,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn):
 
 
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
 )
 def test_get_batch_data_with_gcs_batch_spec(
     mock_gcs_conn,

@@ -45,15 +45,13 @@ except ImportError:
     )
 
 try:
-    from google.cloud.storage import Client
-    from google.oauth2.service_account.Credentials import (
-        from_service_account_file,
-        from_service_account_info,
-    )
+    from google.auth.exceptions import DefaultCredentialsError
+    from google.cloud import storage
+    from google.oauth2 import service_account
 except ImportError:
-    Client = None
-    from_service_account_file = None
-    from_service_account_info = None
+    storage = None
+    service_account = None
+    DefaultCredentialsError = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
     )
@@ -126,11 +124,15 @@ Notes:
         try:
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
-                credentials = from_service_account_file(**gcs_options)
+                credentials = service_account.Credentials.from_service_account_file(
+                    **gcs_options
+                )
             elif "info" in gcs_options:
-                credentials = from_service_account_info(**gcs_options)
-            self._gcs = Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError):
+                credentials = service_account.Credentials.from_service_account_info(
+                    **gcs_options
+                )
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError, DefaultCredentialsError):
             self._gcs = None
 
         super().__init__(*args, **kwargs)
