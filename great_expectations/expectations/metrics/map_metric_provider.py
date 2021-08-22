@@ -17,6 +17,7 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     F,
     SparkDFExecutionEngine,
+    Window,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
@@ -2350,7 +2351,6 @@ def _spark_column_map_condition_values(
     df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
-    data = df.withColumn("__unexpected", unexpected_condition)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2366,8 +2366,19 @@ def _spark_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", unexpected_condition)
+        .orderBy(F.col("__row_number"))
+    )
+
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
+
     result_format = metric_value_kwargs["result_format"]
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
         rows = filtered.select(F.col(column_name)).collect()
     else:
@@ -2439,11 +2450,21 @@ def _spark_map_condition_rows(
     df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
-    data = df.withColumn("__unexpected", unexpected_condition)
+
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", unexpected_condition)
+        .orderBy(F.col("__row_number"))
+    )
+
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
     else:
@@ -2486,9 +2507,17 @@ def _spark_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    data = df.withColumn("__unexpected", boolean_mapped_unexpected_values)
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", boolean_mapped_unexpected_values)
+        .orderBy(F.col("__row_number"))
+    )
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -2577,9 +2606,17 @@ def _spark_multicolumn_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    data = df.withColumn("__unexpected", boolean_mapped_unexpected_values)
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", boolean_mapped_unexpected_values)
+        .orderBy(F.col("__row_number"))
+    )
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
 
     column_select = [F.col(column_name) for column_name in column_list]
 
