@@ -16,12 +16,14 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from tests.performance import bikeshare_benchmark_util
 
 
+@pytest.mark.parametrize("write_data_docs", [False, True])
 @pytest.mark.parametrize("number_of_tables", [1, 2, 4, 8, 16, 100])
 def test_bikeshare_trips_benchmark(
     benchmark: BenchmarkFixture,
     tmpdir: py.path.local,
-    number_of_tables: int,
     pytestconfig: _pytest.config.Config,
+    number_of_tables: int,
+    write_data_docs: bool,
 ):
     """Benchmark performance with a variety of expectations using the BigQuery public dataset
     bigquery-public-data.austin_bikeshare.bikeshare_trips.
@@ -41,7 +43,7 @@ def test_bikeshare_trips_benchmark(
 
     checkpoint = bikeshare_benchmark_util.create_checkpoint(
         number_of_tables=number_of_tables,
-        html_dir=tmpdir.strpath,
+        html_dir=tmpdir.strpath if write_data_docs else None,
     )
     result: CheckpointResult = benchmark.pedantic(
         checkpoint.run,
@@ -53,7 +55,7 @@ def test_bikeshare_trips_benchmark(
     assert result.success, result
     assert len(result.run_results) == number_of_tables
     html_file_paths = list(Path(tmpdir).glob("validations/**/*.html"))
-    assert len(html_file_paths) == number_of_tables
+    assert len(html_file_paths) == (number_of_tables if write_data_docs else 0)
 
     # Check that run results contain the right number of suites, assets, and table names.
     assert (

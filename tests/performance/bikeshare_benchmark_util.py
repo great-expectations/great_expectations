@@ -3,7 +3,7 @@ Helper utilities for creating and testing benchmarks using the BigQuery public d
 bigquery-public-data.austin_bikeshare.bikeshare_trips.
 """
 import os
-from typing import List
+from typing import List, Optional
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -14,13 +14,15 @@ from great_expectations.data_context.types.base import (
 )
 
 
-def create_checkpoint(number_of_tables: int, html_dir: str) -> SimpleCheckpoint:
+def create_checkpoint(
+    number_of_tables: int, html_dir: Optional[str] = None
+) -> SimpleCheckpoint:
     """Create a checkpoint from scratch, including setting up data sources/etc.
 
     Args:
         number_of_tables: Number of tables validated in the checkpoint. The tables are assumed to be created by
           "setup_bigquery_tables_for_performance_test.sh", which creates 100 tables, so this number must be <= 100.
-        html_dir: Directory path to write the HTML data docs to.
+        html_dir: Directory path to write the HTML Data Docs to. If not specified, Data Docs are not written.
 
     Returns:
     """
@@ -232,19 +234,22 @@ def expected_validation_results() -> List[dict]:
 def _create_context(
     datasource_and_dataconnector_name: str,
     asset_names: List[str],
-    html_dir: str,
+    html_dir: Optional[str] = None,
 ) -> BaseDataContext:
-    store_backend = {
-        "class_name": "TupleFilesystemStoreBackend",
-        "base_directory": html_dir,
-    }
-    data_docs_sites = {
-        "local_site": {
-            "class_name": "SiteBuilder",
-            "show_how_to_buttons": False,
-            "store_backend": store_backend,
+    data_docs_sites = (
+        {
+            "local_site": {
+                "class_name": "SiteBuilder",
+                "show_how_to_buttons": False,
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": html_dir,
+                },
+            }
         }
-    }
+        if html_dir
+        else None
+    )
     bigquery_project = os.environ["GE_TEST_BIGQUERY_PROJECT"]
     bigquery_dataset = os.environ.get(
         "GE_TEST_BIGQUERY_PEFORMANCE_DATASET", "performance_ci"
