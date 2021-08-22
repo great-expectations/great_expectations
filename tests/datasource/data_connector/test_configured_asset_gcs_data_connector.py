@@ -261,7 +261,7 @@ def test_instantiation_without_args(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.from_service_account_file"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.service_account.Credentials.from_service_account_file"
 )
 def test_instantiation_with_filename_arg(
     mock_auth_method, mock_gcs_conn, mock_list_keys, expected_config_dict
@@ -296,7 +296,7 @@ def test_instantiation_with_filename_arg(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.from_service_account_info"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.service_account.Credentials.from_service_account_info"
 )
 def test_instantiation_with_info_arg(
     mock_auth_method, mock_gcs_conn, mock_list_keys, expected_config_dict
