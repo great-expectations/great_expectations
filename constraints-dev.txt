@@ -12,4 +12,5 @@
 # botocore==1.19.52 is compatible with boto3==1.16.52
 botocore==1.19.52  # From aiobotocore v1.2.0 dependencies https://pypi.org/project/aiobotocore/
 boto3==1.16.52  # from botocore==1.19.52 dependency
+py4j==0.10.9
 # END NOTE
