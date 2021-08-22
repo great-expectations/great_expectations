@@ -4,6 +4,8 @@
 Test performance using bigquery.
 """
 
+import cProfile
+import os
 import sys
 from pathlib import Path
 
@@ -45,11 +47,17 @@ def test_bikeshare_trips_benchmark(
         number_of_tables=number_of_tables,
         html_dir=tmpdir.strpath if write_data_docs else None,
     )
-    result: CheckpointResult = benchmark.pedantic(
-        checkpoint.run,
-        iterations=1,
-        rounds=1,
-    )
+    if os.environ.get("CPROFILE_FILENAME"):
+        cProfile.runctx(
+            "checkpoint.run()", None, locals(), filename=os.environ["CPROFILE_FILENAME"]
+        )
+        return
+    else:
+        result: CheckpointResult = benchmark.pedantic(
+            checkpoint.run,
+            iterations=1,
+            rounds=1,
+        )
 
     # Do some basic sanity checks.
     assert result.success, result
