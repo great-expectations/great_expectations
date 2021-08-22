@@ -1092,3 +1092,208 @@ data_connectors:
 
     # No other usage stats calls detected
     assert mock_emit.call_count == 1
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+):
+    """
+    Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
+    RuntimeDataConnector. Even though the test directory contains multiple files that can be read-in
+    by GE, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
+
+    This is because the RuntimeDataConnector is not aware of data_assets until they are passed in
+    through the RuntimeBatchRequest.
+
+    The test asserts that the proper number of data_asset_names are returned and note is returned to the user.
+    """
+    base_directory = str(
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test_dir_charlie/A/A-1.csv",
+            "test_dir_charlie/A/A-2.csv",
+            "test_dir_charlie/A/A-3.csv",
+        ],
+        file_content_fn=lambda: test_df.to_csv(header=True, index=False),
+    )
+
+    context: DataContext = empty_data_context_stats_enabled
+
+    os.chdir(context.root_directory)
+    import great_expectations as ge
+
+    context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
+
+    yaml_config = f"""
+       class_name: Datasource
+
+       execution_engine:
+           class_name: PandasExecutionEngine
+
+       data_connectors:
+           default_runtime_data_connector_name:
+               class_name: RuntimeDataConnector
+               batch_identifiers:
+                   - default_identifier_name
+       """
+
+    # noinspection PyUnusedLocal
+    report_object = context.test_yaml_config(
+        name="my_directory_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+
+    assert report_object["execution_engine"] == {
+        "caching": True,
+        "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+        "class_name": "PandasExecutionEngine",
+        "discard_subset_failing_expectations": False,
+        "boto3_options": {},
+        "azure_options": {},
+    }
+    assert report_object["data_connectors"]["count"] == 1
+
+    # checking the correct number of data_assets have come back
+    assert (
+        report_object["data_connectors"]["default_runtime_data_connector_name"][
+            "data_asset_count"
+        ]
+        == 0
+    )
+
+    # checking that note has come back
+    assert (
+        report_object["data_connectors"]["default_runtime_data_connector_name"]["note"]
+        == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_datasource_configuration(
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+):
+    """
+    Tests output of test_yaml_config() for a Datacontext configured with a Datasource with InferredAssetDataConnector
+    and RuntimeDataConnector.
+
+    1. The InferredAssetDataConnector will output 4 data_assets, which correspond to the files in the test_dir_charlie folder
+
+    2.  RuntimeDataConnector will output 0 data_assets, and return a "note" to the user. This is because the
+        RuntimeDataConnector is not aware of data_assets until they are passed in through the RuntimeBatchRequest.
+
+    The test asserts that the proper number of data_asset_names are returned for both DataConnectors, and in the case of
+    the RuntimeDataConnetor, the proper note is returned to the user.
+    """
+    base_directory = str(
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test_dir_charlie/A/A-1.csv",
+            "test_dir_charlie/A/A-2.csv",
+            "test_dir_charlie/A/A-3.csv",
+            "test_dir_charlie/B/B-1.csv",
+            "test_dir_charlie/B/B-2.csv",
+            "test_dir_charlie/B/B-3.csv",
+            "test_dir_charlie/C/C-1.csv",
+            "test_dir_charlie/C/C-2.csv",
+            "test_dir_charlie/C/C-3.csv",
+            "test_dir_charlie/D/D-1.csv",
+            "test_dir_charlie/D/D-2.csv",
+            "test_dir_charlie/D/D-3.csv",
+        ],
+        file_content_fn=lambda: test_df.to_csv(header=True, index=False),
+    )
+
+    context: DataContext = empty_data_context_stats_enabled
+
+    os.chdir(context.root_directory)
+    import great_expectations as ge
+
+    context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
+
+    yaml_config = f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: PandasExecutionEngine
+
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        default_inferred_data_connector_name:
+            class_name: InferredAssetFilesystemDataConnector
+            base_directory: {base_directory}/test_dir_charlie
+            glob_directive: "*/*.csv"
+
+            default_regex:
+                pattern: (.+)/(.+)-(\\d+)\\.csv
+                group_names:
+                    - subdirectory
+                    - data_asset_name
+                    - number
+    """
+
+    # noinspection PyUnusedLocal
+    report_object = context.test_yaml_config(
+        name="my_directory_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+
+    assert report_object["execution_engine"] == {
+        "caching": True,
+        "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+        "class_name": "PandasExecutionEngine",
+        "discard_subset_failing_expectations": False,
+        "boto3_options": {},
+        "azure_options": {},
+    }
+    assert report_object["data_connectors"]["count"] == 2
+    assert report_object["data_connectors"]["default_runtime_data_connector_name"] == {
+        "class_name": "RuntimeDataConnector",
+        "data_asset_count": 0,
+        "data_assets": {},
+        "example_data_asset_names": [],
+        "example_unmatched_data_references": [],
+        "note": "RuntimeDataConnector will not have data_asset_names until they are "
+        "passed in through RuntimeBatchRequest",
+        "unmatched_data_reference_count": 0,
+    }
+    assert report_object["data_connectors"]["default_inferred_data_connector_name"] == {
+        "class_name": "InferredAssetFilesystemDataConnector",
+        "data_asset_count": 4,
+        "example_data_asset_names": ["A", "B", "C"],
+        "data_assets": {
+            "A": {
+                "batch_definition_count": 3,
+                "example_data_references": ["A/A-1.csv", "A/A-2.csv", "A/A-3.csv"],
+            },
+            "B": {
+                "batch_definition_count": 3,
+                "example_data_references": ["B/B-1.csv", "B/B-2.csv", "B/B-3.csv"],
+            },
+            "C": {
+                "batch_definition_count": 3,
+                "example_data_references": ["C/C-1.csv", "C/C-2.csv", "C/C-3.csv"],
+            },
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }
