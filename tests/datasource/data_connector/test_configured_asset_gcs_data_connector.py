@@ -230,7 +230,7 @@ def expected_batch_definitions_sorted():
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_instantiation_without_args(
     mock_gcs_conn, mock_list_keys, expected_config_dict
@@ -258,7 +258,7 @@ def test_instantiation_without_args(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.from_service_account_file"
@@ -293,7 +293,7 @@ def test_instantiation_with_filename_arg(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.from_service_account_info"
@@ -331,7 +331,7 @@ def test_instantiation_with_info_arg(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_instantiation_with_test_yaml_config(
     mock_gcs_conn,
@@ -371,7 +371,7 @@ def test_instantiation_with_test_yaml_config(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -423,7 +423,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -474,7 +474,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -509,7 +509,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -569,7 +569,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -620,7 +620,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     mock_gcs_conn,
@@ -696,7 +696,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     mock_gcs_conn,
@@ -772,7 +772,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_return_all_batch_definitions_basic_sorted(
     mock_gcs_conn,
@@ -859,7 +859,7 @@ def test_return_all_batch_definitions_basic_sorted(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 def test_return_all_batch_definitions_returns_specified_partition(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -962,7 +962,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
@@ -1049,7 +1049,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
@@ -1120,7 +1120,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
@@ -1187,7 +1187,7 @@ def test_return_all_batch_definitions_too_many_sorters(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
@@ -1315,7 +1315,7 @@ assets:
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.Client"
+    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",

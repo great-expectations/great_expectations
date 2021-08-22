@@ -5,13 +5,13 @@ from typing import List, Optional
 logger = logging.getLogger(__name__)
 
 try:
-    from google.cloud.storage import Client
+    from google.cloud import storage
     from google.oauth2.service_account.Credentials import (
         from_service_account_file,
         from_service_account_info,
     )
 except ImportError:
-    Client = None
+    storage = None
     from_service_account_file = None
     from_service_account_info = None
     logger.debug(
@@ -114,7 +114,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
                 credentials = from_service_account_info(info=info)
-            self._gcs = Client(credentials=credentials, **gcs_options)
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for ConfiguredAssetGCSDataConnector)."

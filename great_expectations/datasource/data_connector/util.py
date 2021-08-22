@@ -18,19 +18,17 @@ from great_expectations.datasource.data_connector.sorter import Sorter
 logger = logging.getLogger(__name__)
 
 try:
-    from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
+    from azure.storage.blob import BlobPrefix
 except ImportError:
     BlobPrefix = None
-    BlobServiceClient = None
-    ContainerClient = None
     logger.debug(
         "Unable to load azure types; install optional Azure dependency for support."
     )
 
 try:
-    from google.cloud.storage import Client
+    from google.cloud import storage
 except ImportError:
-    Client = None
+    storage = None
     logger.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
@@ -300,7 +298,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_azure_keys(
-    azure: BlobServiceClient,
+    azure,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -324,7 +322,7 @@ def list_azure_keys(
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
     container: str = query_options["container"]
-    container_client: ContainerClient = azure.get_container_client(container)
+    container_client = azure.get_container_client(container)
 
     path_list: List[str] = []
 
@@ -343,7 +341,7 @@ def list_azure_keys(
 
 
 def list_gcs_keys(
-    gcs: Client,
+    gcs,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -368,7 +366,7 @@ def list_gcs_keys(
     we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
 
     Args:
-        gcs (Client): GCS connnection object responsible for accessing bucket
+        gcs (storage.Client): GCS connnection object responsible for accessing bucket
         query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
         recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
 
