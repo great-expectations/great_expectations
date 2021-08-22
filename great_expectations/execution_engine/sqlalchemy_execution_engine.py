@@ -208,7 +208,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif connection_string is not None:
             # import pydevd_pycharm
             # pydevd_pycharm.settrace('localhost', port=5324, stdoutToServer=True, stderrToServer=True)
-            self.engine = sa.create_engine(connection_string, pool_size=0, **kwargs)
+            self.engine = sa.create_engine(connection_string, pool_size=2, **kwargs)
         elif url is not None:
             self.drivername = urlparse(url).scheme
             self.engine = sa.create_engine(url, **kwargs)
