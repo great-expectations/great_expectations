@@ -5,6 +5,6 @@
 
 --requirement requirements.txt
 
+--requirement requirements-dev-base.txt
 --requirement requirements-dev-spark.txt
 --requirement requirements-dev-sqlalchemy.txt
---requirement requirements-dev-base.txt
