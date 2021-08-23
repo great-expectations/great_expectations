@@ -238,7 +238,7 @@ def _create_context(
 
     data_context_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
-        data_docs_sites=data_docs_sites,
+        data_docs_sites=None,  # todo(jdimatteo) data_docs_sites,
         anonymous_usage_statistics={"enabled": False},
         datasources={
             datasource_and_dataconnector_name: {
