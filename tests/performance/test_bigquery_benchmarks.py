@@ -4,6 +4,7 @@
 Test performance using bigquery.
 """
 
+import cProfile
 import os
 import sys
 from pathlib import Path
@@ -11,7 +12,6 @@ from pathlib import Path
 import _pytest.config
 import py.path
 import pytest
-import yappi
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -48,13 +48,13 @@ def test_bikeshare_trips_benchmark(
         html_dir=tmpdir.strpath if write_data_docs else None,
     )
     if os.environ.get("GE_PROFILE_FILE_PATH"):
-        yappi.start()
-        result = checkpoint.run()
-        yappi.stop()
-
-        func_stats = yappi.get_func_stats()
-        func_stats.save(f"{os.environ['GE_PROFILE_FILE_PATH']}.callgrind", "CALLGRIND")
-        func_stats.save(f"{os.environ['GE_PROFILE_FILE_PATH']}.pstat", "PSTAT")
+        cProfile.runctx(
+            "checkpoint.run()",
+            None,
+            locals(),
+            filename=os.environ["GE_PROFILE_FILE_PATH"],
+        )
+        return
     else:
         result: CheckpointResult = benchmark.pedantic(
             checkpoint.run,
