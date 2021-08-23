@@ -99,7 +99,6 @@
             5,
             7
           ],
-          "partial_unexpected_counts": [],
           "details": {
             "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
           },
@@ -172,7 +171,6 @@
               "b": 2.0
             }
           ],
-          "partial_unexpected_counts": [],
           "details": {
             "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
           },

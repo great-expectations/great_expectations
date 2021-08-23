@@ -4,6 +4,7 @@ import hashlib
 import logging
 import pickle
 import random
+import warnings
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
@@ -13,12 +14,13 @@ import pandas as pd
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.core.util import AzureUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
@@ -27,6 +29,11 @@ try:
     import boto3
 except ImportError:
     boto3 = None
+
+try:
+    from azure.storage.blob import BlobServiceClient
+except:
+    BlobServiceClient = None
 
 
 logger = logging.getLogger(__name__)
@@ -78,12 +85,18 @@ Notes:
             "discard_subset_failing_expectations", False
         )
         boto3_options: dict = kwargs.pop("boto3_options", {})
+        azure_options: dict = kwargs.pop("azure_options", {})
 
-        # Try initializing boto3 client. If unsuccessful, we'll catch it when/if a S3BatchSpec is passed in.
+        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             self._s3 = None
+
+        try:
+            self._azure = BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError):
+            self._azure = None
 
         super().__init__(*args, **kwargs)
 
@@ -91,6 +104,7 @@ Notes:
             {
                 "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
                 "boto3_options": boto3_options,
+                "azure_options": azure_options,
             }
         )
 
@@ -139,6 +153,7 @@ Please check your config."""
                     "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."
                 )
             batch_spec.batch_data = "PandasDataFrame"
+
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
@@ -163,15 +178,39 @@ Please check your config."""
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
+
+        elif isinstance(batch_spec, AzureBatchSpec):
+            if self._azure is None:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a AzureBatchSpec,
+                        but the ExecutionEngine does not have an Azure client configured. Please check your config."""
+                )
+            azure_engine = self._azure
+            azure_url = AzureUrl(batch_spec.path)
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
+            blob_client = azure_engine.get_blob_client(
+                container=azure_url.container, blob=azure_url.blob
+            )
+            azure_object = blob_client.download_blob()
+            logger.debug(
+                f"Fetching Azure blob. Container: {azure_url.container} Blob: {azure_url.blob}"
+            )
+            reader_fn = self._get_reader_fn(reader_method, azure_url.blob)
+            buf = BytesIO(azure_object.readall())
+            buf.seek(0)
+            df = reader_fn(buf, **reader_options)
+
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options
             path: str = batch_spec.path
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
+
         else:
             raise ge_exceptions.BatchSpecError(
-                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
+                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, not {batch_spec.__class__.__name__}"
             )
 
         df = self._apply_splitting_and_sampling_methods(batch_spec, df)
@@ -224,7 +263,7 @@ Please check your config."""
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
-        reader_options = dict()
+        reader_options = {}
         if reader_method is None:
             path_guess = self.guess_reader_method_from_path(path)
             reader_method = path_guess["reader_method"]
@@ -290,6 +329,12 @@ Please check your config."""
         Returns:
             A DataFrame (the data on which to compute)
         """
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "PandasExecutionEngine does not currently support multiple named tables."
+            )
+
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
@@ -327,56 +372,68 @@ Please check your config."""
         if "column" in domain_kwargs:
             return data
 
-        if "column_A" in domain_kwargs and "column_B" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                # noinspection PyPep8Naming
-                column_A_name = domain_kwargs["column_A"]
-                # noinspection PyPep8Naming
-                column_B_name = domain_kwargs["column_B"]
+        if (
+            "column_A" in domain_kwargs
+            and "column_B" in domain_kwargs
+            and "ignore_row_if" in domain_kwargs
+        ):
+            # noinspection PyPep8Naming
+            column_A_name = domain_kwargs["column_A"]
+            # noinspection PyPep8Naming
+            column_B_name = domain_kwargs["column_B"]
 
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "both_values_are_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="all",
-                        subset=[column_A_name, column_B_name],
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "both_values_are_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="all",
+                    subset=[column_A_name, column_B_name],
+                )
+            elif ignore_row_if == "either_value_is_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="any",
+                    subset=[column_A_name, column_B_name],
+                )
+            else:
+                if ignore_row_if not in ["neither", "never"]:
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
-                elif ignore_row_if == "either_value_is_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="any",
-                        subset=[column_A_name, column_B_name],
-                    )
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
 
-                return data
-
-        if "column_list" in domain_kwargs:
-            if "ignore_row_if" in domain_kwargs:
-                ignore_row_if = domain_kwargs["ignore_row_if"]
-                if ignore_row_if == "all_values_are_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="all",
-                        subset=domain_kwargs["column_list"],
+                if ignore_row_if == "never":
+                    warnings.warn(
+                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
+"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+""",
+                        DeprecationWarning,
                     )
-                elif ignore_row_if == "any_value_is_missing":
-                    data = data.dropna(
-                        axis=0,
-                        how="any",
-                        subset=domain_kwargs["column_list"],
-                    )
-                else:
-                    if ignore_row_if != "never":
-                        raise ValueError(
-                            f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                        )
 
-                return data
+            return data
+
+        if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
+            column_list = domain_kwargs["column_list"]
+
+            ignore_row_if = domain_kwargs["ignore_row_if"]
+            if ignore_row_if == "all_values_are_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="all",
+                    subset=column_list,
+                )
+            elif ignore_row_if == "any_value_is_missing":
+                data = data.dropna(
+                    axis=0,
+                    how="any",
+                    subset=column_list,
+                )
+            else:
+                if ignore_row_if != "never":
+                    raise ValueError(
+                        f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+            return data
 
         return data
 
@@ -414,7 +471,7 @@ Please check your config."""
         domain_type = MetricDomainTypes(domain_type)
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = dict()
+        accessor_domain_kwargs = {}
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
@@ -456,17 +513,14 @@ Please check your config."""
                     )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
-        # If user has stated they want a column, checking if one is provided, and
         elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" in compute_domain_kwargs:
-                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
-            else:
-                # If column not given
+            if "column" not in compute_domain_kwargs:
                 raise ge_exceptions.GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
 
-        # Else, if column pair values requested
+            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
             if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
                 raise ge_exceptions.GreatExpectationsError(
@@ -476,7 +530,6 @@ Please check your config."""
             accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
             accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-        # Checking if table or identity or other provided, column is not specified. If it is, warning the user
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             if "column_list" not in domain_kwargs:
                 raise ge_exceptions.GreatExpectationsError(

@@ -1,4 +1,4 @@
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -9,7 +9,40 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectSelectColumnValuesToBeUniqueWithinRecord(ColumnMapExpectation):
+class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
+    """
+    Expect the values for each record to be unique across the columns listed.
+    Note that records can be duplicated.
+
+    For example::
+
+        A B C
+        1 1 2 Fail
+        1 2 3 Pass
+        8 2 7 Pass
+        1 2 3 Pass
+        4 4 4 Fail
+
+    Args:
+        column_list (tuple or list): The column names to evaluate
+
+    Keyword Args:
+        ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+    """
+
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",
@@ -24,16 +57,12 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(ColumnMapExpectation):
         "requirements": [],
     }
 
-    metric_dependencies = tuple()
-    success_keys = (
-        "column_list",
-        "ignore_row_if",
-        "mostly",
-    )
+    map_metric = "select_column_values.unique.within_record"
+    success_keys = ()
     default_kwarg_values = {
-        "column_list": None,
+        "row_condition": None,
+        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "ignore_row_if": "all_values_are_missing",
-        "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,

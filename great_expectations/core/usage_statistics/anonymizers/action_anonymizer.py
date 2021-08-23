@@ -30,7 +30,7 @@ class ActionAnonymizer(Anonymizer):
         ]
 
     def anonymize_action_info(self, action_name, action_obj):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(action_name)
 
         self.anonymize_object_info(

@@ -50,7 +50,6 @@ class MetricFunctionTypes(Enum):
 
 
 class MetricDomainTypes(Enum):
-    IDENTITY = "identity"  # Instructs ExecutionEngine not to split accessor_domain_kwargs out of domain_kwargs; hence, compute_domain_kwargs returned by ExecutionEngine will be domain_kwargs (unaltered).
     COLUMN = "column"
     COLUMN_PAIR = "column_pair"
     MULTICOLUMN = "multicolumn"
@@ -219,9 +218,9 @@ class ExecutionEngine(ABC):
             resolved_metrics (Dict): a dictionary with the values for the metrics that have just been resolved.
         """
         if metrics is None:
-            metrics = dict()
+            metrics = {}
 
-        resolved_metrics = dict()
+        resolved_metrics = {}
 
         metric_fn_bundle = []
         for metric_to_resolve in metrics_to_resolve:
