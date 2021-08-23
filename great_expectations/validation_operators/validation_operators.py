@@ -273,6 +273,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
+    @profile
     def run(
         self,
         assets_to_validate,
