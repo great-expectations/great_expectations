@@ -4,6 +4,12 @@ title: Changelog
 
 ### Develop
 
+### 0.13.30
+* [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_in_set for SQL Alchemy execution engine (#3281)
+* [FEATURE] Implement `ConfiguredAssetGCSDataConnector` (#3247)
+* [BUGFIX] Fix import issues around cloud providers (GCS/Azure/S3) (#3292)
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema (#3126) (thanks @gipaetusb and @mbakunze)
 
 ### 0.13.29
 * [FEATURE] Implementation of the Metric "select_column_values.unique.within_record" for SQLAlchemyExecutionEngine (#3279)
