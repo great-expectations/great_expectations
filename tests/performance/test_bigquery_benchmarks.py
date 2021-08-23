@@ -4,7 +4,6 @@
 Test performance using bigquery.
 """
 
-import cProfile
 import os
 import sys
 from pathlib import Path
@@ -47,11 +46,13 @@ def test_bikeshare_trips_benchmark(
         number_of_tables=number_of_tables,
         html_dir=tmpdir.strpath if write_data_docs else None,
     )
-    if os.environ.get("CPROFILE_FILENAME"):
-        cProfile.runctx(
-            "checkpoint.run()", None, locals(), filename=os.environ["CPROFILE_FILENAME"]
-        )
-        return
+    if os.environ.get("GE_VMPROF_FILE_PATH"):
+        import vmprof
+
+        with open(os.environ["GE_VMPROF_FILE_PATH"], "w+b") as profile_output:
+            vmprof.enable(profile_output.fileno())
+            result = checkpoint.run()
+            vmprof.disable()
     else:
         result: CheckpointResult = benchmark.pedantic(
             checkpoint.run,
