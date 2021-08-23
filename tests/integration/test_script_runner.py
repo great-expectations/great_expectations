@@ -38,11 +38,11 @@ docs_test_matrix = [
         "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/yaml_example.py",
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/python_example.py",
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     # {
