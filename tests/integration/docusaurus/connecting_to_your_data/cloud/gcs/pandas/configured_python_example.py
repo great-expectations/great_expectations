@@ -30,7 +30,7 @@ datasource_config["data_connectors"]["configured_data_connector_name"][
 ] = "superconductive-integration-tests"
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "prefix"
-] = "data/taxi_yellow_trip_data_samples"
+] = "data/taxi_yellow_trip_data_samples/"
 
 
 context.test_yaml_config(yaml.dump(datasource_config))

@@ -67,7 +67,7 @@ assert isinstance(validator, ge.validator.validator.Validator)
 
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
-    datasource_name="my_s3_datasource",
+    datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
