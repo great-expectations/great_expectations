@@ -45,13 +45,11 @@ except ImportError:
     )
 
 try:
-    from google.auth.exceptions import DefaultCredentialsError
     from google.cloud import storage
     from google.oauth2 import service_account
 except ImportError:
     storage = None
     service_account = None
-    DefaultCredentialsError = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
     )
@@ -132,7 +130,7 @@ Notes:
                     **gcs_options
                 )
             self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError, DefaultCredentialsError):
+        except (TypeError, AttributeError):
             self._gcs = None
 
         super().__init__(*args, **kwargs)
@@ -684,7 +682,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             hash_method = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -740,7 +738,7 @@ Please check your config."""
         """Hash the values in the named column, and split on that"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
