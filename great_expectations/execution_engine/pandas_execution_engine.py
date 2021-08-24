@@ -4,6 +4,7 @@ import hashlib
 import logging
 import pickle
 import random
+import warnings
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
@@ -30,13 +31,9 @@ except ImportError:
     boto3 = None
 
 try:
-    from azure.storage.blob import (
-        BlobClient,
-        BlobServiceClient,
-        StorageStreamDownloader,
-    )
+    from azure.storage.blob import BlobServiceClient
 except:
-    azure = None
+    BlobServiceClient = None
 
 
 logger = logging.getLogger(__name__)
@@ -188,14 +185,14 @@ Please check your config."""
                     f"""PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
-            azure_engine: BlobServiceClient = self._azure
+            azure_engine = self._azure
             azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            blob_client: BlobClient = azure_engine.get_blob_client(
+            blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
             )
-            azure_object: StorageStreamDownloader = blob_client.download_blob()
+            azure_object = blob_client.download_blob()
             logger.debug(
                 f"Fetching Azure blob. Container: {azure_url.container} Blob: {azure_url.blob}"
             )
@@ -399,9 +396,17 @@ Please check your config."""
                     subset=[column_A_name, column_B_name],
                 )
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if not in ["neither", "never"]:
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+                if ignore_row_if == "never":
+                    warnings.warn(
+                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
+"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+""",
+                        DeprecationWarning,
                     )
 
             return data
