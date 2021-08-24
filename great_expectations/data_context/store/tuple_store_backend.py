@@ -200,7 +200,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 [random.choice(list("ABCDEF0123456789")) for _ in range(size)]
             )
 
-        key = tuple([get_random_hex() for _ in range(self.key_length)])
+        key = tuple(get_random_hex() for _ in range(self.key_length))
         filepath = self._convert_key_to_filepath(key)
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
@@ -814,16 +814,13 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_key = self._convert_key_to_filepath(key)
         return gcs_object_key
 
-    def _move(self, source_key, dest_key, **kwargs):
-        pass
-
     def _get(self, key):
         gcs_object_key = self._build_gcs_object_key(key)
 
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
@@ -840,7 +837,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
 
         if isinstance(value, str):
@@ -856,7 +853,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
 
         source_filepath = self._convert_key_to_filepath(source_key)
         if not source_filepath.startswith(self.prefix):
@@ -936,7 +933,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud.exceptions import NotFound
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=list(bucket.list_blobs(prefix=self.prefix)))
         except NotFound:
@@ -1001,7 +998,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             ).get_container_client(self.container)
         else:
             raise StoreBackendError(
-                "Unable to initialze ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+                "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
             )
 
     def _get(self, key):

@@ -453,13 +453,13 @@ def load_data_context_with_error_handling(
                 from_cli_upgrade_command=from_cli_upgrade_command,
             )
         else:
-            cli_message("<red>{}</red>".format(err.message))
+            cli_message(f"<red>{err.message}</red>")
             sys.exit(1)
     except (
         ge_exceptions.ConfigNotFoundError,
         ge_exceptions.InvalidConfigError,
     ) as err:
-        cli_message("<red>{}</red>".format(err.message))
+        cli_message(f"<red>{err.message}</red>")
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:
         cli_message(err.cli.v012_colored_message)

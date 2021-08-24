@@ -139,7 +139,7 @@ def parse_row_condition_string_pandas_engine(condition_string):
         condition_string = "True"
 
     template_str = "if "
-    params = dict()
+    params = {}
 
     condition_string = (
         condition_string.replace("&", " AND ")

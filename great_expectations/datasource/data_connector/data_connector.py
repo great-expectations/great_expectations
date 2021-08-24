@@ -120,7 +120,7 @@ class DataConnector:
         # batch_spec_passthrough via Data Connector config
         batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
 
-        # batch_spec_passthrough from batch_definition supercedes batch_spec_passthrough from Data Connector config
+        # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config
         if isinstance(batch_definition.batch_spec_passthrough, dict):
             batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
 
@@ -205,6 +205,9 @@ class DataConnector:
             pretty_print (bool): should the output be printed?
             max_examples (int): how many data_references should be printed?
 
+        Returns:
+            report_obj (dict): dictionary containing self_check output
+
         """
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
@@ -254,8 +257,7 @@ class DataConnector:
         len_unmatched_data_references = len(unmatched_data_references)
         if pretty_print:
             print(
-                f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):",
-                unmatched_data_references[:max_examples],
+                f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):{unmatched_data_references[:max_examples]}\n"
             )
 
         report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
@@ -369,7 +371,7 @@ class DataConnector:
             )
         )
 
-        if pretty_print and df is not None:
+        if pretty_print and data is not None:
             print(f"\n\t\tShowing 5 rows")
             print(data)
 

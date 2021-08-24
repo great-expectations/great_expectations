@@ -10,12 +10,12 @@ import SparkDataContextNote from '../components/spark_data_context_note.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to your data in an in-memory dataframe using spark.
+This guide will help you connect to your data in an in-memory dataframe using Spark.
 This will allow you to validate and explore your data.
 
 <Prerequisites>
 
-- Have access to an in-memory spark dataframe
+- Have access to an in-memory Spark dataframe
 
 </Prerequisites>
 
@@ -43,7 +43,7 @@ Using this example configuration add in the path to a directory that contains so
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
@@ -80,7 +80,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 

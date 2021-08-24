@@ -54,8 +54,9 @@
         "success": false
       }
     },{
-      "title": "unexpected_values_exact_match_out",
+      "title": "unexpected_values_exact_match_out_with_index_list",
       "exact_match_out" : true,
+      "only_for": ["pandas"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -66,7 +67,8 @@
           "missing_count": 1,
           "missing_percent": 10.0,
           "unexpected_count": 5,
-          "unexpected_percent": 50.0,
+          "unexpected_percent": 55.55555555555556,
+          "unexpected_percent_total": 50.0,
           "unexpected_percent_nonmissing": 55.55555555555556,
           "partial_unexpected_list": [
             {
@@ -97,9 +99,9 @@
             5,
             7
           ],
-          "partial_unexpected_counts": [
-            "partial_exception_counts requires a hashable type"
-          ],
+          "details": {
+            "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
+          },
           "unexpected_list": [
             {
               "a": 1.0,
@@ -128,6 +130,137 @@
             4,
             5,
             7
+          ]
+        }
+      }
+    },{
+      "title": "unexpected_values_exact_match_out_no_index_list",
+      "exact_match_out" : true,
+      "suppress_test_for": ["pandas"],
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result": {
+          "element_count": 10,
+          "missing_count": 1,
+          "missing_percent": 10.0,
+          "unexpected_count": 5,
+          "unexpected_percent": 55.55555555555556,
+          "unexpected_percent_total": 50.0,
+          "unexpected_percent_nonmissing": 55.55555555555556,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "details": {
+            "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
+          },
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ]
+        }
+      }
+    },{
+      "title": "unexpected_values_exact_match_out_without_unexpected_index_list",
+      "exact_match_out" : true,
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result": {
+          "element_count": 10,
+          "missing_count": 1,
+          "missing_percent": 10.0,
+          "unexpected_count": 5,
+          "unexpected_percent": 55.55555555555556,
+          "unexpected_percent_total": 50.0,
+          "unexpected_percent_nonmissing": 55.55555555555556,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "details": {
+            "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
+          },
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
           ]
         }
       }

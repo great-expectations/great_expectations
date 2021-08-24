@@ -11,7 +11,7 @@ from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -127,9 +127,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
         table_domain_kwargs: dict = {
-            k: v
-            for k, v in metric.metric_domain_kwargs.items()
-            if k != MetricDomainTypes.COLUMN.value
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",

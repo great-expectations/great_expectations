@@ -82,7 +82,7 @@ class SqlAlchemyBatchData(BatchData):
 
         In the case of (2) and (3) you have the option to execute the query either as a temporary table, or as a subselect statement.
 
-        In general, temporary tables invite more optimization from the query engine itself. Subselect statements may sometimes be preffered, because they do not require write access on the database.
+        In general, temporary tables invite more optimization from the query engine itself. Subselect statements may sometimes be preferred, because they do not require write access on the database.
 
 
         """
