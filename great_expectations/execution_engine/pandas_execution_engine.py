@@ -594,9 +594,14 @@ Please check your config."""
                     "column_list not found within domain_kwargs"
                 )
 
-            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                "column_list"
-            )
+            column_list = compute_domain_kwargs.pop("column_list")
+
+            if len(column_list) < 2:
+                raise ge_exceptions.GreatExpectationsError(
+                    "column_list must contain at least 2 columns"
+                )
+
+            accessor_domain_kwargs["column_list"] = column_list
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
