@@ -433,7 +433,7 @@ class AzureUrl:
 
 class GCSUrl:
     """
-    Parses an Azure Blob Storage URL into its separate components
+    Parses a Google Cloud Storage URL into its separate components
     Format: gs://<BUCKET_OR_NAME>/<BLOB>
     """
 
