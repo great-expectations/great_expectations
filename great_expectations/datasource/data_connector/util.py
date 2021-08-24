@@ -18,11 +18,9 @@ from great_expectations.datasource.data_connector.sorter import Sorter
 logger = logging.getLogger(__name__)
 
 try:
-    from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
+    from azure.storage.blob import BlobPrefix
 except ImportError:
     BlobPrefix = None
-    BlobServiceClient = None
-    ContainerClient = None
     logger.debug(
         "Unable to load azure types; install optional Azure dependency for support."
     )
@@ -300,7 +298,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_azure_keys(
-    azure: BlobServiceClient,
+    azure,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -324,7 +322,7 @@ def list_azure_keys(
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
     container: str = query_options["container"]
-    container_client: ContainerClient = azure.get_container_client(container)
+    container_client = azure.get_container_client(container)
 
     path_list: List[str] = []
 
@@ -343,7 +341,7 @@ def list_azure_keys(
 
 
 def list_gcs_keys(
-    gcs: storage.Client,
+    gcs,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:

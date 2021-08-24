@@ -9,12 +9,13 @@ develop
 -----------------
 * [FEATURE] Performance tests using BigQuery backend (#3280)
 
-* [BUGFIX] Add force_reuse_spark_context to DatasourceConfigSchema
-* [BUGFIX] Remove fixture parameterization for Cloud DBs (Snowflake and BigQuery) #3182
-* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema
-* [FEATURE] Implement V3 expect_column_pair_values_to_be_in_set expectation for SQL Alchemy execution engine (#3278, #3281)
-* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for SQL Alchemy execution engine (#3267)
-* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
+0.13.30
+-----------------
+* [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_in_set for SQL Alchemy execution engine (#3281)
+* [FEATURE] Implement `ConfiguredAssetGCSDataConnector` (#3247)
+* [BUGFIX] Fix import issues around cloud providers (GCS/Azure/S3) (#3292)
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema (#3126) (thanks @gipaetusb and @mbakunze)
 
 0.13.29
 -----------------
@@ -45,7 +46,6 @@ develop
 * [MAINTENANCE] Make test method names consistent for Metrics tests (#3254)
 * [MAINTENANCE] Allow `PandasExecutionEngine` to accept `Azure DataConnectors` (#3214)
 * [MAINTENANCE] Standardize Arguments to MetricConfiguration Constructor; Use {} instead of dict(). (#3246)
-
 
 0.13.28
 -----------------
