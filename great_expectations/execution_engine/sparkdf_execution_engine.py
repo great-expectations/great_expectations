@@ -36,7 +36,7 @@ try:
     import pyspark
     import pyspark.sql.functions as F
     from pyspark import SparkContext
-    from pyspark.sql import DataFrame, SparkSession, Window
+    from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.types import (
         BooleanType,
         DateType,
@@ -49,9 +49,8 @@ try:
 except ImportError:
     pyspark = None
     SparkContext = None
-    DataFrame = None
     SparkSession = None
-    Window = None
+    DataFrame = None
     F = None
     StructType = (None,)
     StructField = (None,)
