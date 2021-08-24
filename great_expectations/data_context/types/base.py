@@ -504,7 +504,7 @@ S3/GCS type of the data connector (your data connector is "{data['class_name']}"
 continue.
                 """
             )
-        if ("bucket" in data or "prefix" in data or "max_keys" in data) and not (
+        if ("bucket" in data or "max_keys" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
