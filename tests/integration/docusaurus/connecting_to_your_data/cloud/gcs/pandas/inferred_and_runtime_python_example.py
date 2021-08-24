@@ -29,7 +29,7 @@ datasource_config = {
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "bucket"
+    "bucket_or_name"
 ] = "superconductive-public"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
