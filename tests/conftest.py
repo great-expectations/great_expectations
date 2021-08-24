@@ -4473,3 +4473,11 @@ def yellow_trip_pandas_data_context(
     assert context.root_directory == context_path
 
     return context
+
+
+@pytest.fixture
+def db_file():
+    return file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )

@@ -1575,7 +1575,12 @@ class BaseDataContext:
                 )
             datasource_name = batch_request.datasource_name
 
-        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        try:
+            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        except TypeError:
+            raise ge_exceptions.GreatExpectationsTypeError(
+                "RuntimeBatchRequest must be passed in as a named parameter: 'batch_request'. Please try again"
+            )
 
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
             raise ValueError("Must provide only one of batch_data, query, or path.")

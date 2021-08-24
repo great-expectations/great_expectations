@@ -356,6 +356,29 @@ is illegal.
                 """
             )
 
+    @staticmethod
+    def _validate_runtime_batch_request_specific_init_parameters(
+        runtime_parameters: dict = None,
+        batch_identifiers: dict = None,
+        batch_spec_passthrough: Optional[dict] = None,
+    ):
+        if not (runtime_parameters and isinstance(runtime_parameters, dict)):
+            raise TypeError(
+                f"""The type for runtime_parameters must be dictionary, and can either by in_memory_df, path, or query.
+                The type given is "{str(type(runtime_parameters))}", which is illegal."""
+            )
+
+        if not (batch_identifiers and isinstance(batch_identifiers, dict)):
+            raise TypeError(
+                f"""The type for batch_identifiers must be a dictionary, with keys being identifiers defined in the
+                data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
+            )
+
+        if batch_spec_passthrough and not (isinstance(batch_identifiers), dict):
+            raise TypeError(
+                f"""The type for batch_spec_passthrough must be a dictionary. The type given is "{str(type(batch_identifiers))}", which is illegal."""
+            )
+
 
 class RuntimeBatchRequest(BatchRequest):
     def __init__(
@@ -363,15 +386,19 @@ class RuntimeBatchRequest(BatchRequest):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
+        runtime_parameters: dict = None,
+        batch_identifiers: dict = None,
         batch_spec_passthrough: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        batch_identifiers: Optional[dict] = None,
     ):
         super().__init__(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_spec_passthrough=batch_spec_passthrough,
+        )
+
+        self._validate_runtime_batch_request_specific_init_parameters(
+            runtime_parameters, batch_identifiers, batch_spec_passthrough
         )
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
