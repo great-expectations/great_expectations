@@ -2,6 +2,7 @@ import copy
 import datetime
 import hashlib
 import logging
+import os
 import pickle
 import random
 import warnings
@@ -121,19 +122,23 @@ Notes:
         except (TypeError, AttributeError):
             self._azure = None
 
-        try:
-            credentials = None  # If configured with gcloud CLI / env vars
-            if "filename" in gcs_options:
-                credentials = service_account.Credentials.from_service_account_file(
-                    **gcs_options
-                )
-            elif "info" in gcs_options:
-                credentials = service_account.Credentials.from_service_account_info(
-                    **gcs_options
-                )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError, DefaultCredentialsError):
+        # Can only configure a GCS connection by 1) seting an env var OR 2) passing explicit credentials
+        if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") is None and gcs_options == {}:
             self._gcs = None
+        else:
+            try:
+                credentials = None  # If configured with gcloud CLI / env vars
+                if "filename" in gcs_options:
+                    credentials = service_account.Credentials.from_service_account_file(
+                        **gcs_options
+                    )
+                elif "info" in gcs_options:
+                    credentials = service_account.Credentials.from_service_account_info(
+                        **gcs_options
+                    )
+                self._gcs = storage.Client(credentials=credentials, **gcs_options)
+            except (TypeError, AttributeError):
+                self._gcs = None
 
         super().__init__(*args, **kwargs)
 
