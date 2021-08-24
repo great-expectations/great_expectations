@@ -329,6 +329,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
             "test_backends": [
                 {
                     "backend": "pandas",
+                    "dialects": None,
                 },
                 {
                     "backend": "sqlalchemy",
@@ -464,7 +465,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics(
-        execution_engine_args={"include_mysql": True}
-    )
+    self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics()
+
     print(json.dumps(self_check_report, indent=2))

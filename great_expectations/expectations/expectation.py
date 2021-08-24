@@ -683,7 +683,7 @@ class Expectation(metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def run_diagnostics(self, execution_engine_args=None, pretty_print=True):
+    def run_diagnostics(self, pretty_print=True):
         """
         Produce a diagnostic report about this expectation.
         The current uses for this method's output are
