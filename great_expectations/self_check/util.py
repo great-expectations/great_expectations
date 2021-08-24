@@ -1313,7 +1313,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     if context == "pandas":
         return expectation_type in [
             # "expect_table_columns_to_match_set",
-            "expect_select_column_values_to_be_unique_within_record",
+            # "expect_select_column_values_to_be_unique_within_record",
             # "expect_table_column_count_to_be_between",
             # "expect_table_column_count_to_equal",
             # "expect_column_to_exist",
@@ -1359,7 +1359,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_min_to_be_between",
             # "expect_column_sum_to_be_between",
             "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
+            # "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
             # "expect_multicolumn_sum_to_equal",
