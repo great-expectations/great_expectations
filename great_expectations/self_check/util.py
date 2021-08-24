@@ -1476,30 +1476,46 @@ def generate_expectation_tests(
     parametrized_tests = []
 
     # use the expectation_execution_engines_dict (if provided) to request only the appropriate backends
-    if expectation_execution_engines_dict is not None:
-        expectation_execution_engines_args = expectation_execution_engines_dict.copy()
+    for d in examples_config:
+        d = copy.deepcopy(d)
+        if expectation_execution_engines_dict is not None:
+            example_backends = [
+                backend_dict.get("backend")
+                for backend_dict in d.get("test_backends", [])
+            ]
 
-        include_pandas = expectation_execution_engines_args.pop(
-            "PandasExecutionEngine", False
-        )
-        include_spark = expectation_execution_engines_args.pop(
-            "SparkDFExecutionEngine", False
-        )
-        include_sqlalchemy = expectation_execution_engines_args.pop(
-            "SqlAlchemyExecutionEngine", False
-        )
-        backends = build_test_backends_list(
-            include_pandas=include_pandas,
-            include_spark=include_spark,
-            include_sqlalchemy=include_sqlalchemy,
-            **expectation_execution_engines_args,
-        )
-    else:
-        backends = build_test_backends_list()
+            example_sqlalchemy_dialects = [
+                dialect
+                for backend_dict in d.get("test_backends", {})
+                if (backend_dict.get("backend") == "sqlalchemy")
+                for dialect in backend_dict.get("dialects", [])
+            ]
 
-    for c in backends:
-        for d in examples_config:
-            d = copy.deepcopy(d)
+            backends = build_test_backends_list(
+                include_pandas=(
+                    expectation_execution_engines_dict.get("PandasExecutionEngine")
+                    == True
+                )
+                or ("pandas" in example_backends),
+                include_spark=(
+                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
+                    == True
+                )
+                or ("spark" in example_backends),
+                include_sqlalchemy=(
+                    expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine")
+                    == True
+                )
+                or ("sqlalchemy" in example_backends),
+                include_postgresql=("postgresql" in example_sqlalchemy_dialects),
+                include_mysql=("mysql" in example_sqlalchemy_dialects),
+                include_mssql=("mssql" in example_sqlalchemy_dialects),
+            )
+        else:
+            backends = build_test_backends_list()
+
+        for c in backends:
+
             datasets = []
             if candidate_test_is_on_temporary_notimplemented_list_cfe(
                 c, expectation_type
@@ -1863,6 +1879,7 @@ def check_json_test_result(test, result, data_asset=None):
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
+        print(result)
         for key, value in test["out"].items():
             # Apply our great expectations-specific test logic
 

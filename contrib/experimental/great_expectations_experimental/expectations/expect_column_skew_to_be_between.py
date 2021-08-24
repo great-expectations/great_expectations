@@ -326,7 +326,16 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "out": {"success": True, "observed_value": 0.9979514313860596},
                 },
             ],
-        },
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite", "postgresql"],
+                },
+            ],
+        }
     ]
 
     # This dictionary contains metadata for display in the public gallery
