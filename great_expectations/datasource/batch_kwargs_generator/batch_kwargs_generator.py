@@ -266,7 +266,7 @@ class BatchKwargsGenerator:
         if data_asset_name is not None:
             batch_parameters = {"data_asset_name": data_asset_name}
         else:
-            batch_parameters = dict()
+            batch_parameters = {}
         if partition_id is not None:
             batch_parameters["partition_id"] = partition_id
         batch_parameters.update(kwargs)

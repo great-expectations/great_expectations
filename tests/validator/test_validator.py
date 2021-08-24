@@ -22,7 +22,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
@@ -176,10 +175,10 @@ def test_populate_dependencies_with_incorrect_metric_name():
                 configuration,
                 execution_engine=engine,
             )
-        except MetricProviderError as e:
+        except ge_exceptions.MetricProviderError as e:
             graph = e
 
-    assert isinstance(graph, MetricProviderError)
+    assert isinstance(graph, ge_exceptions.MetricProviderError)
 
 
 def test_graph_validate(basic_datasource):
@@ -357,17 +356,27 @@ def test_graph_validate_with_runtime_config(basic_datasource):
             result={
                 "element_count": 8,
                 "unexpected_count": 1,
-                "unexpected_percent": 12.5,
+                "unexpected_percent": 14.285714285714285,
                 "partial_unexpected_list": [332.0],
                 "missing_count": 1,
                 "missing_percent": 12.5,
+                "unexpected_percent_total": 12.5,
                 "unexpected_percent_nonmissing": 14.285714285714285,
-                "partial_unexpected_index_list": None,
+                "partial_unexpected_index_list": [1],
                 "partial_unexpected_counts": [{"value": 332.0, "count": 1}],
                 "unexpected_list": [332.0],
-                "unexpected_index_list": None,
+                "unexpected_index_list": [1],
             },
-            expectation_config=None,
+            expectation_config={
+                "expectation_type": "expect_column_value_z_scores_to_be_less_than",
+                "kwargs": {
+                    "column": "b",
+                    "mostly": 1,
+                    "threshold": 2,
+                    "double_sided": True,
+                },
+                "meta": {},
+            },
             exception_info=None,
         )
     ]

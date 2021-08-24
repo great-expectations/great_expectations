@@ -195,7 +195,14 @@ class MetaPandasDataset(Dataset):
                 boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            # elif ignore_row_if == "neither":
             elif ignore_row_if == "never":
+                """
+                TODO: <Alex>Note: The value of the "ignore_row_if" directive in the commented out line above is correct.
+                However, fixing the error would constitute a breaking change.  Hence, the documentation is updated now
+                (8/16/2021), while the implementation is corrected as part of the Expectations V3 API release.
+                </Alex>
+                """
                 boolean_mapped_null_values = series_A.map(lambda x: False)
             else:
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
@@ -590,7 +597,7 @@ Notes:
                 for lower, upper in zip(bins[:-1], bins[1:])
             ]
             if any(np.isnan(series)):
-                # Missings get digitized into bin = n_bins+1
+                # Missing get digitized into bin = n_bins+1
                 labels += ["(missing)"]
 
             return pd.Categorical.from_codes(
@@ -608,7 +615,7 @@ Notes:
                     other_values = sorted(value_counts.index[n_bins:])
                     replace = {value: "(other)" for value in other_values}
             else:
-                replace = dict()
+                replace = {}
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
             return (
@@ -1865,7 +1872,8 @@ Notes:
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
 
         Args:
             column_list (List[str]): \

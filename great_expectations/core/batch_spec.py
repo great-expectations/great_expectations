@@ -51,6 +51,14 @@ class S3BatchSpec(PathBatchSpec):
     pass
 
 
+class AzureBatchSpec(PathBatchSpec):
+    pass
+
+
+class GCSBatchSpec(PathBatchSpec):
+    pass
+
+
 class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed

@@ -19,6 +19,7 @@ class SemanticDomainTypes(Enum):
     BINARY = "binary"
     CURRENCY = "currency"
     VALUE_SET = "value_set"
+    IDENTIFIER = "identifier"
     MISCELLANEOUS = "miscellaneous"
     UNKNOWN = "unknown"
 
@@ -79,21 +80,11 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             details=details,
         )
 
-    # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
-    @property
-    def id(self) -> str:
-        return IDDict(self.to_json_dict()).to_id()
-
-    def to_json_dict(self) -> dict:
-        json_dict: dict = {
-            "domain_type": self["domain_type"].value,
-            "domain_kwargs": self["domain_kwargs"].to_json_dict(),
-            "details": {key: value.value for key, value in self["details"].items()},
-        }
-        return filter_properties_dict(properties=json_dict, clean_falsy=True)
+    def __repr__(self):
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def __str__(self):
-        return json.dumps(self.to_json_dict(), indent=2)
+        return self.__repr__()
 
     def __eq__(self, other):
         return (other is not None) and (
@@ -111,6 +102,19 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
 
     def __ne__(self, other):
         return not self.__eq__(other=other)
+
+    # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
+    @property
+    def id(self) -> str:
+        return IDDict(self.to_json_dict()).to_id()
+
+    def to_json_dict(self) -> dict:
+        json_dict: dict = {
+            "domain_type": self["domain_type"].value,
+            "domain_kwargs": self["domain_kwargs"].to_json_dict(),
+            "details": {key: value.value for key, value in self["details"].items()},
+        }
+        return filter_properties_dict(properties=json_dict, clean_falsy=True)
 
     def _convert_dictionaries_to_domain_kwargs(
         self, source: Optional[Any] = None

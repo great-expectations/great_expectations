@@ -49,9 +49,18 @@ logger = logging.getLogger(__name__)
 try:
     import pybigquery.sqlalchemy_bigquery
 
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
+    ###
+    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+    # to define an attribute "dialect". A PR has been submitted to fix this upstream
+    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+    # fix isn't present, add this "dialect" attribute here:
+    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
+        pybigquery.sqlalchemy_bigquery.dialect = (
+            pybigquery.sqlalchemy_bigquery.BigQueryDialect
+        )
+    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
+    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "dialect")
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
         bigquery_types_tuple = None
@@ -123,7 +132,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Bigquery
-        if issubclass(dialect.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "BigQueryDialect"):
             if positive:
                 return sa.func.REGEXP_CONTAINS(column, literal(regex))
             else:
@@ -132,6 +141,10 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         AttributeError,
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
+        logger.debug(
+            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
+            exc_info=True,
+        )
         pass
 
     return None
@@ -251,10 +264,10 @@ def column_reflection_fallback(
         columns_query: str = f"""
 SELECT
     SCHEMA_NAME(tab.schema_id) AS schema_name,
-    tab.name AS table_name, 
+    tab.name AS table_name,
     col.column_id AS column_id,
-    col.name AS column_name, 
-    t.name AS column_data_type,    
+    col.name AS column_name,
+    t.name AS column_data_type,
     col.max_length AS column_max_length,
     col.precision AS column_precision
 FROM sys.tables AS tab
@@ -264,7 +277,7 @@ FROM sys.tables AS tab
     ON col.user_type_id = t.user_type_id
 WHERE tab.name = '{selectable}'
 ORDER BY schema_name,
-    table_name, 
+    table_name,
     column_id
 """
         col_info_query: TextClause = sa.text(columns_query)
@@ -296,30 +309,12 @@ def parse_value_set(value_set):
     return parsed_value_set
 
 
-def filter_pair_metric_nulls(column_A, column_B, ignore_row_if):
-    if ignore_row_if == "both_values_are_missing":
-        boolean_mapped_null_values = column_A.isnull() & column_B.isnull()
-    elif ignore_row_if == "either_value_is_missing":
-        boolean_mapped_null_values = column_A.isnull() | column_B.isnull()
-    elif ignore_row_if == "never":
-        boolean_mapped_null_values = column_A.map(lambda x: False)
-    else:
-        raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
-
-    assert len(column_A) == len(column_B), "Series A and B must be the same length"
-
-    return (
-        column_A[boolean_mapped_null_values == False],
-        column_B[boolean_mapped_null_values == False],
-    )
-
-
 def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=True):
     dialect_supported: bool = False
 
     try:
         # Bigquery
-        if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "BigQueryDialect"):
             dialect_supported = True
     except (
         AttributeError,
@@ -422,7 +417,7 @@ def validate_distribution_parameters(distribution, params):
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
         #    raise ValueError("Invalid parameters: %s" %poisson_msg)
 
-        # df is necessary and required to be positve
+        # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError("Invalid parameters: %s:" % chi2_msg)
 
@@ -503,7 +498,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
 
        See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods\
        to see an example of scipy's positional arguments. This function returns the arguments specified by the \
-       scipy.stat.distribution.cdf() for tha distribution.
+       scipy.stat.distribution.cdf() for that distribution.
 
        Args:
            distribution (string): \

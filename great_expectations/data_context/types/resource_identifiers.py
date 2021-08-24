@@ -55,7 +55,7 @@ class ExpectationSuiteIdentifierSchema(Schema):
 
 
 class BatchIdentifier(DataContextKey):
-    """A BatchIdentifier tracks """
+    """A BatchIdentifier tracks"""
 
     def __init__(
         self,
@@ -192,6 +192,11 @@ class ValidationResultIdentifier(DataContextKey):
             run_id=validation_result.meta.get("run_id"),
             batch_identifier=batch_identifier,
         )
+
+    # TODO: [Rob] nix method after GeCloudIdentifier is implemented
+    @classmethod
+    def from_ge_tuple(cls, tuple_):
+        return tuple_[0]
 
 
 class ValidationResultIdentifierSchema(Schema):

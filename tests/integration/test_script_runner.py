@@ -23,34 +23,42 @@ class BackendDependencies(enum.Enum):
 
 
 docs_test_matrix = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
     # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    #     "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     # },
     # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    #     "extra_backend_dependencies": BackendDependencies.BIGQUERY,
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py",
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     # },
     # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_python_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py",
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/yaml_example.py",
     #     "extra_backend_dependencies": BackendDependencies.SPARK,
     # },
     # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py",
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/python_example.py",
     #     "extra_backend_dependencies": BackendDependencies.SPARK,
     # },
     # {
@@ -174,11 +182,6 @@ docs_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
     },
 ]
-"""
-TODO(cdkini): Kept running into a sqlalchemy.exc.OperationalError when running Snowflake tests.
-Per discussion with Will, issue appears to be on the Snowflake side as opposed to something in our code.
-Commenting out until we figure out the issue.
-"""
 
 integration_test_matrix = [
     {

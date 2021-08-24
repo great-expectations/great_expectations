@@ -170,7 +170,7 @@ class SparkDFDatasource(LegacyDatasource):
         if reader_options:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(reader_options)
 
         if reader_method is not None:

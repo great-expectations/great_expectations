@@ -16,7 +16,9 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
 )
-from great_expectations.expectations.metrics.table_metric import TableMetricProvider
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
 
 
 class TableRowCount(TableMetricProvider):
@@ -49,7 +51,7 @@ class TableRowCount(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        return sa.func.count(), metric_domain_kwargs, dict()
+        return sa.func.count(), metric_domain_kwargs, {}
 
     @metric_partial(
         engine=SparkDFExecutionEngine,
@@ -64,4 +66,4 @@ class TableRowCount(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-        return F.count(F.lit(1)), metric_domain_kwargs, dict()
+        return F.count(F.lit(1)), metric_domain_kwargs, {}
