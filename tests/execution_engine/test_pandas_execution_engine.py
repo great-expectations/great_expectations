@@ -1046,7 +1046,9 @@ def test_get_batch_data_with_gcs_batch_spec(
         b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
     )
 
-    df = PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
+    # Necessary to pass kwargs to bypass "os.getenv | gcs_options == {}" check
+    kwargs = {"gcs_options": {"my_option": "my_value"}}
+    df = PandasExecutionEngine(**kwargs).get_batch_data(batch_spec=gcs_batch_spec)
 
     mock_gcs_conn().get_bucket.assert_called_with("test_bucket")
     mock_gcs_bucket.blob.assert_called_with("path/A-100.csv")
