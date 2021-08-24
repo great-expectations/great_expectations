@@ -416,7 +416,7 @@ class AzureUrl:
         )
         assert (
             search is not None
-        ), "The provided URL does not adhere to the format specified by the Azure SDK (<CONTAINER>.blob.core.windows.net/<BLOB>)"
+        ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
         self._account_name = search.group(1)
         self._container = search.group(2)
         self._blob = search.group(3)
