@@ -8,21 +8,21 @@ import numpy as np
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
-from great_expectations.execution_engine.sparkdf_execution_engine import (
-    F,
-    SparkDFExecutionEngine,
-)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
-    SqlAlchemyExecutionEngine,
-    sa,
 )
+from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
@@ -1049,11 +1049,13 @@ def multicolumn_function_partial(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                column_select = [sa.column(column_name) for column_name in column_list]
+                column_selector = [
+                    sa.column(column_name) for column_name in column_list
+                ]
                 dialect = execution_engine.dialect_module
                 multicolumn_function = metric_fn(
                     cls,
-                    column_select,
+                    column_selector,
                     **metric_value_kwargs,
                     _dialect=dialect,
                     _table=selectable,
@@ -1255,11 +1257,13 @@ def multicolumn_condition_partial(
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
-                column_select = [sa.column(column_name) for column_name in column_list]
+                column_selector = [
+                    sa.column(column_name) for column_name in column_list
+                ]
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
                     cls,
-                    column_select,
+                    column_selector,
                     **metric_value_kwargs,
                     _dialect=dialect,
                     _table=selectable,
@@ -2094,17 +2098,12 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
-    )
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
+    selectable = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
 
@@ -2164,9 +2163,9 @@ def _sqlalchemy_multicolumn_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    column_select = [sa.column(column_name) for column_name in column_list]
+    column_selector = [sa.column(column_name) for column_name in column_list]
     query = (
-        sa.select(column_select)
+        sa.select(column_selector)
         .select_from(selectable)
         .where(boolean_mapped_unexpected_values)
     )
@@ -2188,8 +2187,13 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     if "column_list" not in accessor_domain_kwargs:
@@ -2322,8 +2326,13 @@ def _spark_map_condition_unexpected_count_value(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
@@ -2345,7 +2354,6 @@ def _spark_column_map_condition_values(
     df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
-    data = df.withColumn("__unexpected", unexpected_condition)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2361,8 +2369,19 @@ def _spark_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", unexpected_condition)
+        .orderBy(F.col("__row_number"))
+    )
+
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
+
     result_format = metric_value_kwargs["result_format"]
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
         rows = filtered.select(F.col(column_name)).collect()
     else:
@@ -2426,15 +2445,29 @@ def _spark_map_condition_rows(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
-    data = df.withColumn("__unexpected", unexpected_condition)
+
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", unexpected_condition)
+        .orderBy(F.col("__row_number"))
+    )
+
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
     else:
@@ -2477,9 +2510,17 @@ def _spark_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    data = df.withColumn("__unexpected", boolean_mapped_unexpected_values)
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", boolean_mapped_unexpected_values)
+        .orderBy(F.col("__row_number"))
+    )
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -2568,22 +2609,30 @@ def _spark_multicolumn_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    data = df.withColumn("__unexpected", boolean_mapped_unexpected_values)
+    data = (
+        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
+        .withColumn("__unexpected", boolean_mapped_unexpected_values)
+        .orderBy(F.col("__row_number"))
+    )
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = (
+        data.filter(F.col("__unexpected") == True)
+        .drop(F.col("__unexpected"))
+        .drop(F.col("__row_number"))
+    )
 
-    column_select = [F.col(column_name) for column_name in column_list]
+    column_selector = [F.col(column_name) for column_name in column_list]
 
-    domain_values = filtered.select(column_select)
+    domain_values = filtered.select(column_selector)
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
         domain_values = (
-            domain_values.select(column_select).toPandas().to_dict("records")
+            domain_values.select(column_selector).toPandas().to_dict("records")
         )
     else:
         domain_values = (
-            domain_values.select(column_select)
+            domain_values.select(column_selector)
             .limit(result_format["partial_unexpected_count"])
             .toPandas()
             .to_dict("records")
