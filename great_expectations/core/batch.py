@@ -364,7 +364,7 @@ is illegal.
     ):
         if not (runtime_parameters and isinstance(runtime_parameters, dict)):
             raise TypeError(
-                f"""The type for runtime_parameters must be dictionary, and can either by in_memory_df, path, or query.
+                f"""The type for runtime_parameters must be dictionary.
                 The type given is "{str(type(runtime_parameters))}", which is illegal."""
             )
 
@@ -374,9 +374,9 @@ is illegal.
                 data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
             )
 
-        if batch_spec_passthrough and not (isinstance(batch_identifiers), dict):
+        if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
             raise TypeError(
-                f"""The type for batch_spec_passthrough must be a dictionary. The type given is "{str(type(batch_identifiers))}", which is illegal."""
+                f"""The type for batch_spec_passthrough must be a dictionary. The type given is "{str(type(batch_spec_passthrough))}", which is illegal."""
             )
 
 

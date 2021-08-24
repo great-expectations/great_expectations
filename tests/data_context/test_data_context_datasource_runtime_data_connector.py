@@ -106,6 +106,26 @@ def test_get_batch_failed_specification_no_runtime_parameters(
         )
 
 
+def test_get_batch_failed_specification_incorrect_batch_spec_passthrough(
+    data_context_with_datasource_sqlalchemy_engine,
+):
+    context = data_context_with_datasource_sqlalchemy_engine
+    with pytest.raises(TypeError):
+        # batch_identifiers missing
+        batch: list = context.get_batch_list(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="default_runtime_data_connector_name",
+                data_asset_name="default_data_asset_name",
+                runtime_parameters={
+                    "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+                },
+                batch_identifiers={"default_identifier_name": "identifier_name"},
+                batch_spec_passthrough=1,
+            )
+        )
+
+
 def test_get_batch_failed_specification_wrong_runtime_parameters(
     data_context_with_datasource_sqlalchemy_engine,
 ):
@@ -208,6 +228,28 @@ def test_get_validator_failed_specification_no_batch_identifier(
                     "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
                 },
                 batch_identifiers=None,
+            ),
+            expectation_suite_name="my_expectations",
+        )
+
+
+def test_get_validator_failed_specification_incorrect_batch_spec_passthrough(
+    data_context_with_datasource_sqlalchemy_engine,
+):
+    context = data_context_with_datasource_sqlalchemy_engine
+    context.create_expectation_suite("my_expectations")
+
+    with pytest.raises(TypeError):
+        validator: Validator = context.get_validator(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="default_runtime_data_connector_name",
+                data_asset_name="default_data_asset_name",  # this can be anything that identifies this data
+                runtime_parameters={
+                    "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+                },
+                batch_identifiers={"default_identifier_name": "identifier_name"},
+                batch_spec_passthrough=1,  # needs to be a dict
             ),
             expectation_suite_name="my_expectations",
         )
