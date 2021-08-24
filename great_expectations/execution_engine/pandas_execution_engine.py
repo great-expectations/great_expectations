@@ -31,13 +31,9 @@ except ImportError:
     boto3 = None
 
 try:
-    from azure.storage.blob import (
-        BlobClient,
-        BlobServiceClient,
-        StorageStreamDownloader,
-    )
+    from azure.storage.blob import BlobServiceClient
 except:
-    azure = None
+    BlobServiceClient = None
 
 
 logger = logging.getLogger(__name__)
@@ -189,14 +185,14 @@ Please check your config."""
                     f"""PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
-            azure_engine: BlobServiceClient = self._azure
+            azure_engine = self._azure
             azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            blob_client: BlobClient = azure_engine.get_blob_client(
+            blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
             )
-            azure_object: StorageStreamDownloader = blob_client.download_blob()
+            azure_object = blob_client.download_blob()
             logger.debug(
                 f"Fetching Azure blob. Container: {azure_url.container} Blob: {azure_url.blob}"
             )
@@ -540,9 +536,14 @@ Please check your config."""
                     "column_list not found within domain_kwargs"
                 )
 
-            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                "column_list"
-            )
+            column_list = compute_domain_kwargs.pop("column_list")
+
+            if len(column_list) < 2:
+                raise ge_exceptions.GreatExpectationsError(
+                    "column_list must contain at least 2 columns"
+                )
+
+            accessor_domain_kwargs["column_list"] = column_list
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
