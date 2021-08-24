@@ -213,7 +213,26 @@ def test_get_validator_failed_specification_no_batch_identifier(
         )
 
 
-def test_validator_wrong_runtime_parameters(
+def test_get_validator_failed_specification_no_runtime_parameters(
+    data_context_with_datasource_sqlalchemy_engine,
+):
+    context = data_context_with_datasource_sqlalchemy_engine
+    context.create_expectation_suite("my_expectations")
+    with pytest.raises(TypeError):
+        # batch_identifiers_missing
+        batch: list = context.get_validator(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="default_runtime_data_connector_name",
+                data_asset_name="default_data_asset_name",  # this can be anything that identifies this data
+                runtime_parameters=None,
+                batch_identifiers={"default_identifier_name": "identifier_name"},
+            ),
+            expectation_suite_name="my_expectations",
+        )
+
+
+def test_get_validator_wrong_runtime_parameters(
     data_context_with_datasource_sqlalchemy_engine,
 ):
     context = data_context_with_datasource_sqlalchemy_engine
