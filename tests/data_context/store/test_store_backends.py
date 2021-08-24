@@ -799,7 +799,7 @@ def test_TupleGCSStoreBackend():
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
         mock_client = mock_gcs_client.return_value
-        mock_bucket = mock_client.get_bucket.return_value
+        mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.blob.return_value
 
         my_store = TupleGCSStoreBackend(
@@ -812,7 +812,7 @@ def test_TupleGCSStoreBackend():
         my_store.set(("AAA",), "aaa", content_type="text/html")
 
         mock_gcs_client.assert_called_with("dummy-project")
-        mock_client.get_bucket.assert_called_with("leakybucket")
+        mock_client.bucket.assert_called_with("leakybucket")
         mock_bucket.blob.assert_called_with("this_is_a_test_prefix/my_file_AAA")
         # mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
         mock_blob.upload_from_string.assert_called_with(
@@ -821,7 +821,7 @@ def test_TupleGCSStoreBackend():
 
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         mock_client = mock_gcs_client.return_value
-        mock_bucket = mock_client.get_bucket.return_value
+        mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.blob.return_value
 
         my_store_with_no_filepath_template = TupleGCSStoreBackend(
@@ -833,7 +833,7 @@ def test_TupleGCSStoreBackend():
         )
 
         mock_gcs_client.assert_called_with("dummy-project")
-        mock_client.get_bucket.assert_called_with("leakybucket")
+        mock_client.bucket.assert_called_with("leakybucket")
         mock_bucket.blob.assert_called_with("this_is_a_test_prefix/AAA")
         # mock_bucket.blob.assert_any_call("this_is_a_test_prefix/.ge_store_backend_id")
         mock_blob.upload_from_string.assert_called_with(
@@ -843,14 +843,14 @@ def test_TupleGCSStoreBackend():
     with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
         mock_client = mock_gcs_client.return_value
-        mock_bucket = mock_client.get_bucket.return_value
+        mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.get_blob.return_value
         mock_str = mock_blob.download_as_string.return_value
 
         my_store.get(("BBB",))
 
         mock_gcs_client.assert_called_once_with("dummy-project")
-        mock_client.get_bucket.assert_called_once_with("leakybucket")
+        mock_client.bucket.assert_called_once_with("leakybucket")
         mock_bucket.get_blob.assert_called_once_with(
             "this_is_a_test_prefix/my_file_BBB"
         )
@@ -872,7 +872,7 @@ def test_TupleGCSStoreBackend():
         from google.cloud.exceptions import NotFound
 
         try:
-            mock_client.get_bucket.assert_called_once_with("leakybucket")
+            mock_client.bucket.assert_called_once_with("leakybucket")
         except NotFound:
             pass
 
