@@ -41,10 +41,10 @@ context.add_datasource(**datasource_config)
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
 batch_request = RuntimeBatchRequest(
-    datasource_name="my_s3_datasource",
+    datasource_name="my_gcs_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
-    runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your S3 path here.
+    runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your GCS path here.
     batch_identifiers={"default_identifier_name": "something_something"},
 )
 
@@ -52,7 +52,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters[
     "path"
-] = "s3a://superconductive-public/data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv"
+] = f"gs://superconductive-integration-tests/data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -88,9 +88,9 @@ print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["my_s3_datasource"]
+assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
 assert set(
-    context.get_available_data_asset_names()["my_s3_datasource"][
+    context.get_available_data_asset_names()["my_gcs_datasource"][
         "default_inferred_data_connector_name"
     ]
 ) == {
