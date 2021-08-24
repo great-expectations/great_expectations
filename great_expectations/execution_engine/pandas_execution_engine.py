@@ -45,11 +45,13 @@ except ImportError:
     )
 
 try:
+    from google.auth.exceptions import DefaultCredentialsError
     from google.cloud import storage
     from google.oauth2 import service_account
 except ImportError:
     storage = None
     service_account = None
+    DefaultCredentialsError = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
     )
@@ -130,7 +132,7 @@ Notes:
                     **gcs_options
                 )
             self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError, DefaultCredentialsError):
             self._gcs = None
 
         super().__init__(*args, **kwargs)
