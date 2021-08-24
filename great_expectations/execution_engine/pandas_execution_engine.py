@@ -21,7 +21,7 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
+from great_expectations.core.util import AzureUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
@@ -45,16 +45,14 @@ except ImportError:
     )
 
 try:
-    from google.auth.exceptions import DefaultCredentialsError
-    from google.cloud import storage
-    from google.oauth2 import service_account
-except ImportError:
-    storage = None
-    service_account = None
-    DefaultCredentialsError = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional google dependency for support"
+    from azure.storage.blob import (
+        BlobClient,
+        BlobServiceClient,
+        StorageStreamDownloader,
     )
+except:
+    azure = None
+
 
 
 HASH_THRESHOLD = 1e9
@@ -105,7 +103,6 @@ Notes:
         )
         boto3_options: dict = kwargs.pop("boto3_options", {})
         azure_options: dict = kwargs.pop("azure_options", {})
-        gcs_options: dict = kwargs.pop("gcs_options", {})
 
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         try:
@@ -114,26 +111,9 @@ Notes:
             self._s3 = None
 
         try:
-            if "conn_str" in azure_options:
-                self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            else:
-                self._azure = BlobServiceClient(**azure_options)
+            self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             self._azure = None
-
-        try:
-            credentials = None  # If configured with gcloud CLI / env vars
-            if "filename" in gcs_options:
-                credentials = service_account.Credentials.from_service_account_file(
-                    **gcs_options
-                )
-            elif "info" in gcs_options:
-                credentials = service_account.Credentials.from_service_account_info(
-                    **gcs_options
-                )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError, DefaultCredentialsError):
-            self._gcs = None
 
         super().__init__(*args, **kwargs)
 
@@ -142,7 +122,6 @@ Notes:
                 "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
                 "boto3_options": boto3_options,
                 "azure_options": azure_options,
-                "gcs_options": gcs_options,
             }
         )
 
@@ -223,39 +202,19 @@ Please check your config."""
                     f"""PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
-            azure_engine = self._azure
+            azure_engine: BlobServiceClient = self._azure
             azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            blob_client = azure_engine.get_blob_client(
+            blob_client: BlobClient = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
             )
-            azure_object = blob_client.download_blob()
+            azure_object: StorageStreamDownloader = blob_client.download_blob()
             logger.debug(
                 f"Fetching Azure blob. Container: {azure_url.container} Blob: {azure_url.blob}"
             )
             reader_fn = self._get_reader_fn(reader_method, azure_url.blob)
             buf = BytesIO(azure_object.readall())
-            buf.seek(0)
-            df = reader_fn(buf, **reader_options)
-
-        elif isinstance(batch_spec, GCSBatchSpec):
-            if self._gcs is None:
-                raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a GCSBatchSpec,
-                        but the ExecutionEngine does not have an GCS client configured. Please check your config."""
-                )
-            gcs_engine = self._gcs
-            gcs_url = GCSUrl(batch_spec.path)
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
-            gcs_blob = gcs_bucket.blob(gcs_url.blob)
-            logger.debug(
-                f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
-            )
-            reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
-            buf = BytesIO(gcs_blob.download_as_bytes())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 

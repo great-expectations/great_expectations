@@ -3,7 +3,6 @@ from freezegun import freeze_time
 
 from great_expectations.core.util import (
     AzureUrl,
-    GCSUrl,
     S3Url,
     sniff_s3_compression,
     substitute_all_strftime_format_strings,
@@ -83,16 +82,4 @@ def test_azure_url_with_nested_blob():
     url = AzureUrl("my_account.blob.core.windows.net/my_container/a/b/c/d/e/my_blob")
     assert url.account_name == "my_account"
     assert url.container == "my_container"
-    assert url.blob == "a/b/c/d/e/my_blob"
-
-
-def test_gcs_url():
-    url = GCSUrl("gs://my_bucket/my_blob")
-    assert url.bucket == "my_bucket"
-    assert url.blob == "my_blob"
-
-
-def test_gcs_url_with_nested_blob():
-    url = GCSUrl("gs://my_bucket/a/b/c/d/e/my_blob")
-    assert url.bucket == "my_bucket"
     assert url.blob == "a/b/c/d/e/my_blob"

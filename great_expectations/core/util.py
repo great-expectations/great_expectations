@@ -407,7 +407,6 @@ def datetime_to_int(dt: datetime.date) -> int:
 class AzureUrl:
     """
     Parses an Azure Blob Storage URL into its separate components
-    Format: <ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>
     """
 
     def __init__(self, url: str):
@@ -425,26 +424,6 @@ class AzureUrl:
     @property
     def container(self):
         return self._container
-
-    @property
-    def blob(self):
-        return self._blob
-
-
-class GCSUrl:
-    """
-    Parses an Azure Blob Storage URL into its separate components
-    Format: gs://<BUCKET_OR_NAME>/<BLOB>
-    """
-
-    def __init__(self, url: str):
-        search = re.search(r"^gs://([^/]+)/(.+)$", url)
-        self._bucket = search.group(1)
-        self._blob = search.group(2)
-
-    @property
-    def bucket(self):
-        return self._bucket
 
     @property
     def blob(self):
