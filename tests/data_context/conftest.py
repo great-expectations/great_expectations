@@ -215,7 +215,7 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
     class_name: Datasource
     execution_engine:
         class_name: SqlAlchemyExecutionEngine
-        connection_string: sqlite:///{db_file}
+        connection_string: sqlite://{db_file}
     data_connectors:
         default_runtime_data_connector_name:
             class_name: RuntimeDataConnector

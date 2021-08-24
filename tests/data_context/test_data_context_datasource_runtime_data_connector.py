@@ -166,7 +166,7 @@ def test_get_validator_successful_specification(
     assert isinstance(my_validator, Validator)
 
 
-def test_get_validator_ambiguous_specification(
+def test_get_validator_ambiguous_parameter(
     data_context_with_datasource_sqlalchemy_engine,
 ):
     """

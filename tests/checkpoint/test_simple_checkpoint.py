@@ -920,6 +920,10 @@ def runtime_batch_request():
         datasource_name="my_datasource",
         data_connector_name="my_runtime_data_connector",
         data_asset_name="users",
+        batch_identifiers={"pipeline_stage_name": "first"},  # defined in fixture
+        runtime_parameters={
+            "query": "SELECT * FROM taxi_data"
+        },  # not actually run, but used to test configuration
     )
     return runtime_batch_request
 
@@ -945,9 +949,11 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
         update_data_docs_action,
     ]
     assert checkpoint_config.batch_request == {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_runtime_data_connector",
+        "batch_identifiers": {"pipeline_stage_name": "first"},
         "data_asset_name": "users",
+        "data_connector_name": "my_runtime_data_connector",
+        "datasource_name": "my_datasource",
+        "runtime_parameters": {"query": "SELECT * FROM taxi_data"},
     }
     assert checkpoint_config.config_version == 1.0
     assert checkpoint_config.class_name == "Checkpoint"
