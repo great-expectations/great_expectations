@@ -4,6 +4,7 @@
 Test performance using bigquery.
 """
 
+import os
 import sys
 import time
 from pathlib import Path
@@ -51,9 +52,11 @@ def test_bikeshare_trips_benchmark(
     """
     _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
 
+    html_dir = os.environ.get("GE_BENCHMARK_HTML_DIRECTORY", tmpdir.strpath)
+
     checkpoint = bigquery_util.setup_checkpoint(
         number_of_tables=number_of_tables,
-        html_dir=tmpdir.strpath,
+        html_dir=html_dir,
     )
 
     result: CheckpointResult = benchmark.pedantic(
@@ -65,7 +68,7 @@ def test_bikeshare_trips_benchmark(
     # Do some basic sanity checks.
     assert result.success, result
     assert len(result.run_results) == number_of_tables
-    html_file_paths = list(Path(tmpdir).glob("validations/**/*.html"))
+    html_file_paths = list(Path(html_dir).glob("validations/**/*.html"))
     assert len(html_file_paths) == number_of_tables
 
     # Check that run results contain the right number of suites, assets, and table names.
