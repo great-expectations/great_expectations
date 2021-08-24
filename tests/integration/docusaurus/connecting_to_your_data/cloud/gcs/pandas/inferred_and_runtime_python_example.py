@@ -30,7 +30,7 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "bucket_or_name"
-] = "superconductive-public"
+] = "superconductive-integration-tests"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
 ] = "data/taxi_yellow_trip_data_samples/"
