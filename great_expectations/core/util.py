@@ -414,6 +414,9 @@ class AzureUrl:
         search = re.search(
             r"^(?:https?://)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
         )
+        assert (
+            search is not None
+        ), "The provided URL does not adhere to the format specified by the Azure SDK (<CONTAINER>.blob.core.windows.net/<BLOB>)"
         self._account_name = search.group(1)
         self._container = search.group(2)
         self._blob = search.group(3)
@@ -439,6 +442,9 @@ class GCSUrl:
 
     def __init__(self, url: str):
         search = re.search(r"^gs://([^/]+)/(.+)$", url)
+        assert (
+            search is not None
+        ), "The provided URL does not adhere to the format specified by the GCS SDK (gs://<BUCKET_OR_NAME>/<BLOB>)"
         self._bucket = search.group(1)
         self._blob = search.group(2)
 
