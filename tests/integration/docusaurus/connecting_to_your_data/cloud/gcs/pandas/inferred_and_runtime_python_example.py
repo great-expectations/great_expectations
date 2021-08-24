@@ -20,7 +20,7 @@ datasource_config = {
             "prefix": "<BUCKET_PATH_TO_DATA>",
             "default_regex": {
                 "group_names": ["data_asset_name"],
-                "pattern": "(.*)\\.csv",
+                "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv",
             },
         },
     },

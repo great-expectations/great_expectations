@@ -20,9 +20,9 @@ data_connectors:
         bucket_or_name: <YOUR_GCS_BUCKET_HERE>
         prefix: <BUCKET_PATH_TO_DATA>
         default_regex:
+            pattern: "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv",
             group_names:
                 - data_asset_name
-            pattern: (.*)\.csv
 """
 
 # Please note this override is only to provide good UX for docs and tests.
