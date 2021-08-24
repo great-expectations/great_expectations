@@ -2,6 +2,7 @@ from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import sa
@@ -28,7 +29,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         "allow_cross_type_comparisons",
     )
 
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
@@ -63,6 +63,25 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         or_equal = kwargs.get("or_equal")
         if or_equal:
-            return sa.case((column_A >= column_B, True), else_=False)
+            return sa.or_(
+                column_A >= column_B, sa.and_(column_A == None, column_B == None)
+            )
         else:
-            return sa.case((column_A > column_B, True), else_=False)
+            return column_A > column_B
+
+    # noinspection PyPep8Naming
+    @column_pair_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column_A, column_B, **kwargs):
+        allow_cross_type_comparisons = kwargs.get("allow_cross_type_comparisons")
+        if allow_cross_type_comparisons:
+            raise NotImplementedError
+
+        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+
+        or_equal = kwargs.get("or_equal")
+        if or_equal:
+            return (column_A >= column_B) | (column_A.eqNullSafe(column_B))
+        else:
+            return column_A > column_B
