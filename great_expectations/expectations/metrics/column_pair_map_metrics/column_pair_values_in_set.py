@@ -66,11 +66,12 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
 
         # or_ implementation was required due to mssql issues with in_
-        cond = sa.or_()
-        for x, y in value_pairs_set:
-            cond = sa.or_(cond, sa.and_(column_A == x, column_B == y))
+        conditions = [
+            sa.or_(sa.and_(column_A == x, column_B == y)) for x, y in value_pairs_set
+        ]
+        row_wise_cond = sa.or_(*conditions)
 
-        return sa.case([(cond, True)], else_=False)
+        return row_wise_cond
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
@@ -83,8 +84,9 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
         conditions = [
-            ((column_A == F.lit(x)) & (column_B == F.lit(y)))
+            (column_A.eqNullSafe(F.lit(x)) & column_B.eqNullSafe(F.lit(y)))
             for x, y in value_pairs_set
         ]
-        result_condition = reduce(lambda a, b: a | b, conditions)
-        return result_condition
+        row_wise_cond = reduce(lambda a, b: a | b, conditions)
+
+        return row_wise_cond

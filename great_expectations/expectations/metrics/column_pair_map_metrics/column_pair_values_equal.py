@@ -31,10 +31,13 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
-        return sa.case((column_A == column_B, True), else_=False)
+        row_wise_cond = sa.and_(
+            column_A == column_B, sa.not_(sa.or_(column_A == None, column_B == None))
+        )
+        return row_wise_cond
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, **kwargs):
-        row_wise_cond = column_A == column_B
+        row_wise_cond = column_A.eqNullSafe(column_B)
         return row_wise_cond
