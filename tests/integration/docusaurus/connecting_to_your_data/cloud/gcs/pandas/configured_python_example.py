@@ -32,36 +32,35 @@ datasource_config["data_connectors"]["configured_data_connector_name"][
     "prefix"
 ] = "data/taxi_yellow_trip_data_samples/"
 
-
 context.test_yaml_config(yaml.dump(datasource_config))
 
 context.add_datasource(**datasource_config)
 
-# Here is a BatchRequest naming a data_asset
-batch_request = BatchRequest(
-    datasource_name="my_gcs_datasource",
-    data_connector_name="configured_data_connector_name",
-    data_asset_name="<YOUR_DATA_ASSET_NAME>",
-)
+# # Here is a BatchRequest naming a data_asset
+# batch_request = BatchRequest(
+#     datasource_name="my_gcs_datasource",
+#     data_connector_name="configured_data_connector_name",
+#     data_asset_name="<YOUR_DATA_ASSET_NAME>",
+# )
 
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "taxi_data"
+# # Please note this override is only to provide good UX for docs and tests.
+# # In normal usage you'd set your data asset name directly in the BatchRequest above.
+# batch_request.data_asset_name = "taxi_data"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
-validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
-)
-print(validator.head())
+# context.create_expectation_suite(
+#     expectation_suite_name="test_suite", overwrite_existing=True
+# )
+# validator = context.get_validator(
+#     batch_request=batch_request, expectation_suite_name="test_suite"
+# )
+# print(validator.head())
 
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
-assert set(
-    context.get_available_data_asset_names()["my_gcs_datasource"][
-        "configured_data_connector_name"
-    ]
-) == {"taxi_data"}
+# # NOTE: The following code is only for testing and can be ignored by users.
+# assert isinstance(validator, ge.validator.validator.Validator)
+# assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
+# assert set(
+#     context.get_available_data_asset_names()["my_gcs_datasource"][
+#         "configured_data_connector_name"
+#     ]
+# ) == {"taxi_data"}
