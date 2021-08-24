@@ -410,14 +410,6 @@ def test_get_batch_definitions_and_get_batch_basics(
 
 
 @pytest.fixture
-def db_file():
-    return file_relative_path(
-        __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
-    )
-
-
-@pytest.fixture
 def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_file, sa):
     basic_datasource: Datasource = instantiate_class_from_config(
         yaml.load(
