@@ -758,7 +758,7 @@ def _run_validations(
 
     try:
         # todo(jdimatteo): make max # threads configurable
-        with ThreadPoolExecutor(max_workers=50) as executor:
+        with ThreadPoolExecutor(max_workers=100) as executor:
             for idx, validation_dict in enumerate(checkpoint_config.validations):
                 val_op_run_future = executor.submit(
                     _run_validation,
