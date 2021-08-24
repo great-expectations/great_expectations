@@ -72,7 +72,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         Args:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
-            container (str): container name for Google Cloud Storage
+            bucket_or_name (str): bucket name for Google Cloud Storage
             assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
