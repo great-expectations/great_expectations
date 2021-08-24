@@ -152,7 +152,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 #### Run tests to confirm that everything is working
 
-* You can run all tests by running `pytest` in the great_expectations directory root. Please see [Testing](docs/contributing/contributing_test) for testing options and details.
+* You can run all tests by running `pytest` in the great_expectations directory root. Please see [Testing](/docs/contributing/contributing_test) for testing options and details.
 
 #### Start coding!
 At this point, you have everything you need to start coding!
