@@ -1,4 +1,3 @@
-import os
 from typing import Dict, List
 
 import pandas as pd
@@ -18,10 +17,7 @@ from great_expectations.core.batch import (
     IDDict,
     RuntimeBatchRequest,
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.new_datasource import Datasource
 
 yaml = YAML()
@@ -85,6 +81,7 @@ def test_basic_datasource_runtime_data_connector_self_check(
 def test_basic_datasource_runtime_data_connector_error_checking_unknown_datasource(
     basic_datasource_with_runtime_data_connector,
 ):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     # Test for an unknown datasource
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -95,6 +92,8 @@ def test_basic_datasource_runtime_data_connector_error_checking_unknown_datasour
                 datasource_name="non_existent_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": test_df},
+                batch_identifiers={"default_identifier_name": "identifier_name"},
             )
         )
 
@@ -102,6 +101,8 @@ def test_basic_datasource_runtime_data_connector_error_checking_unknown_datasour
 def test_basic_datasource_runtime_data_connector_error_checking_unknown_dataconnector(
     basic_datasource_with_runtime_data_connector,
 ):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
@@ -112,6 +113,8 @@ def test_basic_datasource_runtime_data_connector_error_checking_unknown_dataconn
                 datasource_name=basic_datasource_with_runtime_data_connector.name,
                 data_connector_name="non_existent_data_connector",
                 data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": test_df},
+                batch_identifiers={"default_identifier_name": "identifier_name"},
             )
         )
 
@@ -122,7 +125,7 @@ def test_basic_datasource_runtime_data_connector_error_checking_no_batch_idenfit
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # Test for illegal absence of batch_identifiers when batch_data is specified
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -144,7 +147,7 @@ def test_basic_datasource_runtime_data_connector_error_checking_incorrect_batch_
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # Test for illegal falsiness of batch_identifiers when batch_data is specified
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -468,9 +471,10 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_unknown_datasource(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
-
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
     # Test for an unknown datasource
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -479,6 +483,8 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
                 datasource_name="non_existent_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
+                runtime_parameters={"query": test_query},
+                batch_identifiers=None,
             )
         )
 
@@ -486,8 +492,10 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_unknown_dataconnector(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
     # Test for an unknown data_connector
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -496,6 +504,8 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
                 datasource_name=datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
                 data_connector_name="non_existent_data_connector",
                 data_asset_name="my_data_asset",
+                runtime_parameters={"query": test_query},
+                batch_identifiers=None,
             )
         )
 
@@ -507,7 +517,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     test_query: str = "SELECT * FROM table_full__I;"
 
     # Test for illegal absence of batch_identifiers when batch_data is specified
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -529,7 +539,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     test_query: str = "SELECT * FROM table_full__I;"
 
     # Test for illegal falsiness of batch_identifiers when batch_data is specified
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -539,7 +549,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
                 runtime_parameters={"query": test_query},
-                batch_identifiers=dict(),
+                batch_identifiers={},
             )
         )
 
@@ -717,13 +727,13 @@ def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_e
         },
         "batch_identifiers": None,
     }
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    with pytest.raises(ge_exceptions.DataConnectorError):
+
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-            batch_request=batch_request
+            batch_request=RuntimeBatchRequest(**batch_request)
         )
 
 
