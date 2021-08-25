@@ -118,12 +118,12 @@ directory.
 
 ## Checkpoints (formerly known as Validation Operators)
 
-The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method
+The example above demonstrates how to validate one batch of data against one Expectation Suite. The `validate` method
 returns a dictionary of validation results. This is sufficient when exploring your data and getting to know Great
 Expectations. When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
 
 * validating a group of batches that are logically related
-* validating a batch against several expectation suites
+* validating a batch against several Expectation Suites
 * doing something with the validation results (e.g., saving them for a later review, sending notifications in case of
   failures, etc.).
 

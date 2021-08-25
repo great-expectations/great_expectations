@@ -6,7 +6,7 @@ title: Data Context
 A Data Context represents a Great Expectations project. It organizes storage and access for Expectation Suites,
 Datasources, notification settings, and data fixtures.
 
-The Data Context is configured via a yml file or directly in code. The configuration and managed expectation suites
+The Data Context is configured via a yml file or directly in code. The configuration and managed Expectation Suites
 should be stored in version control.
 
 Data Contexts manage connections to your data and compute resources, and support integration with execution frameworks (

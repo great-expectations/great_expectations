@@ -131,7 +131,7 @@ an `actions_results` key containing a dictionary where the top-level keys are na
 particular validation, with values containing any relevant outputs of that action (at minimum and in many cases, this
 would just be a dictionary with the action's `class_name`).
 
-The `run_results` dictionary can contain other keys that are relevant for a specific checkpoint implementation. For
+The `run_results` dictionary can contain other keys that are relevant for a specific Checkpoint implementation. For
 example, the `run_results` dictionary from a WarningAndFailureExpectationSuiteCheckpoint might have an extra key named "
 expectation_suite_severity_level" to indicate if the suite is at either a "warning" or "failure" level.
 

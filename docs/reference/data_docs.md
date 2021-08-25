@@ -33,7 +33,7 @@ For example, we have identified three common use cases for using documentation i
    updating data quality report, built from a chronological list of validations by run id.
 1. Share a spec of a dataset with a client or a partner. This is similar to API documentation in software development.
    This documentation would include profiling results of the dataset to give the reader a quick way to grasp what the
-   data looks like, and one or more expectation suites that encode what is expected from the data to be considered
+   data looks like, and one or more Expectation Suites that encode what is expected from the data to be considered
    valid.
 
 To support these (and possibly other) use cases Great Expectations has a concept of "data documentation site". Multiple
