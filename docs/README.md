@@ -51,7 +51,7 @@ If you are using GitHub pages for hosting, this command is a convenient way to b
 
 ## Other relevant files
 
-The following are a few details about other files docusaurus uses that you may wish to be familiar with.
+The following are a few details about other files Docusaurus uses that you may wish to be familiar with.
 
 - `../sidebars.js`: JavaScript that specifies the sidebar/navigation used in docs pages
 - `../src`: non-docs pages live here
