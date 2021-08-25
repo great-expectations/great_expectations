@@ -1159,6 +1159,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         "discard_subset_failing_expectations": False,
         "boto3_options": {},
         "azure_options": {},
+        "gcs_options": {},
     }
     assert report_object["data_connectors"]["count"] == 1
 
@@ -1264,6 +1265,7 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         "discard_subset_failing_expectations": False,
         "boto3_options": {},
         "azure_options": {},
+        "gcs_options": {},
     }
     assert report_object["data_connectors"]["count"] == 2
     assert report_object["data_connectors"]["default_runtime_data_connector_name"] == {
