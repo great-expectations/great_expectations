@@ -87,6 +87,6 @@ Additional notes
 
 Two Validation Operator classes are currently shipped with Great Expectations:
 
-* :py:class:`~great_expectations.validation_operators.ActionListValidationOperator` invokes a configurable list of actions on every Validation Result validation result. Firing a Slack notification and updating Data Docs are examples of these actions.
+* :py:class:`~great_expectations.validation_operators.ActionListValidationOperator` invokes a configurable list of actions on every Validation Result Validation Result. Firing a Slack notification and updating Data Docs are examples of these actions.
 
 * :py:class:`WarningAndFailureExpectationSuitesValidationOperator<great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator>` extends the class above and allows to group Expectation Suites into two groups - critical and warning.
