@@ -358,25 +358,29 @@ is illegal.
 
     @staticmethod
     def _validate_runtime_batch_request_specific_init_parameters(
-        runtime_parameters: dict = None,
-        batch_identifiers: dict = None,
+        runtime_parameters: Union[IDDict, dict],
+        batch_identifiers: Union[IDDict, dict],
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        if not (runtime_parameters and isinstance(runtime_parameters, dict)):
+        if not (
+            runtime_parameters and (isinstance(runtime_parameters, (dict, IDDict)))
+        ):
             raise TypeError(
-                f"""The type for runtime_parameters must be dictionary.
+                f"""The type for runtime_parameters must be dict or IDDict.
                 The type given is "{str(type(runtime_parameters))}", which is illegal."""
             )
 
-        if not (batch_identifiers and isinstance(batch_identifiers, dict)):
+        if not (batch_identifiers and isinstance(batch_identifiers, (dict, IDDict))):
             raise TypeError(
-                f"""The type for batch_identifiers must be a dictionary, with keys being identifiers defined in the
+                f"""The type for batch_identifiers must be a dict or IDDict, with keys being identifiers defined in the
                 data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
             )
 
-        if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
+        if batch_spec_passthrough and not (
+            isinstance(batch_spec_passthrough, (dict, IDDict))
+        ):
             raise TypeError(
-                f"""The type for batch_spec_passthrough must be a dictionary. The type given is "{str(type(batch_spec_passthrough))}", which is illegal."""
+                f"""The type for batch_spec_passthrough must be a dict or IDDict. The type given is "{str(type(batch_spec_passthrough))}", which is illegal."""
             )
 
 
