@@ -44,9 +44,9 @@ class RuntimeDataConnector(DataConnector):
         self,
         name: str,
         datasource_name: str,
-        execution_engine: ExecutionEngine,
-        batch_identifiers: list,
-        batch_spec_passthrough: dict,
+        execution_engine: Optional[ExecutionEngine] = None,
+        batch_identifiers: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
