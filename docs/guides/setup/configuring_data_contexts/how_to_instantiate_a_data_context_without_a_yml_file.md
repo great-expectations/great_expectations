@@ -32,7 +32,7 @@ Steps
         - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.FilesystemStoreBackendDefaults`
 
-    The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS s3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
+    The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS S3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 
     ```python
     from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig
