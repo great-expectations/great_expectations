@@ -57,6 +57,6 @@ The following are a few details about other files docusaurus uses that you may w
 - `../src`: non-docs pages live here
 - `../static`: static assets used in docs pages (such as CSS) live here
 - `../docusaurus.config.js`: the configuration file for Docusaurus
-- `../babel.config.js`: babel config file used when building
+- `../babel.config.js`: Babel config file used when building
 - `../package.json`: dependencies and scripts
 - `../yarn.lock`: dependency lock file that ensures reproducibility
