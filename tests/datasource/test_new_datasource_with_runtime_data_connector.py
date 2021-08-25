@@ -119,7 +119,7 @@ def test_basic_datasource_runtime_data_connector_error_checking_unknown_dataconn
         )
 
 
-def test_basic_datasource_runtime_data_connector_error_checking_no_batch_idenfitiers(
+def test_basic_datasource_runtime_data_connector_error_checking_no_batch_identifiers(
     basic_datasource_with_runtime_data_connector,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})

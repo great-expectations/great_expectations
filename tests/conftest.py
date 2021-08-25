@@ -184,7 +184,7 @@ def no_usage_stats(monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
         [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]

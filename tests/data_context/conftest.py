@@ -2,7 +2,6 @@ import os
 import shutil
 
 import pytest
-import yaml
 
 import great_expectations as ge
 from great_expectations.data_context.types.base import DataContextConfig
