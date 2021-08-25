@@ -85,10 +85,20 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
         if parse_strings_as_datetimes:
-            raise NotImplementedError
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
+            temp_column_A = column_A.map(parse)
+            temp_column_B = column_B.map(parse)
+        else:
+            temp_column_A = column_A
+            temp_column_B = column_B
 
         or_equal = kwargs.get("or_equal")
         if or_equal:
-            return (column_A >= column_B) | (column_A.eqNullSafe(column_B))
+            return (temp_column_A >= temp_column_B) | (temp_column_A.eqNullSafe(temp_column_B))
         else:
-            return column_A > column_B
+            return temp_column_A > temp_column_B
