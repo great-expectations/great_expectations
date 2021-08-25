@@ -11,7 +11,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
 - Configured a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md).
 - Configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
-- Create the Azure Blob container. If you also wish to [host and share data docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
+- Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
 - Identify the prefix (folder) where Validations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
 </Prerequisites>
@@ -62,7 +62,7 @@ Steps
     ```
 
     :::note
-    If the container is called ``$web`` (for [hosting and sharing data docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
+    If the container is called ``$web`` (for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
     :::
 
 4. **Copy existing Validations JSON files to the Azure blob**. (This step is optional).

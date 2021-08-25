@@ -109,13 +109,13 @@ redefined.
 
 For many use cases, the SimpleCheckpoint class can be used to simplify the process of specifying a Checkpoint
 configuration. SimpleCheckpoint provides a basic set of actions - store validation result, store evaluation parameters,
-update data docs, and optionally, send a Slack notification - allowing you to omit an `action_list` from your
+update Data Docs, and optionally, send a Slack notification - allowing you to omit an `action_list` from your
 configuration and at runtime.
 
 Configurations using the SimpleCheckpoint class can optionally specify four additional top-level keys that customize and
 extend the basic set of default actions:
 
-* `site_names`: a list of Data Docs site names to update as part of the update data docs action - defaults to "all"
+* `site_names`: a list of Data Docs site names to update as part of the update Data Docs action - defaults to "all"
 * `slack_webhook`: if provided, an action will be added that sends a Slack notification to the provided webhook
 * `notify_on`: used to define when a notification is fired, according to validation result outcome - `all`, `failure`,
   or `success`. Defaults to `all`.
