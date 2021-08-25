@@ -82,7 +82,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 #### If you want to develop against local postgresql:
 
-* To simplify setup, the repository includes a `docker-compose` file that can stand up a local postgresql container. To use it, you’ll need to have [docker installed](https://docs.docker.com/install/).
+* To simplify setup, the repository includes a `docker-compose` file that can stand up a local postgresql container. To use it, you’ll need to have [Docker installed](https://docs.docker.com/install/).
 
 * Navigate to `assets/docker/postgresql` in your `great_expectations` repo and run `docker-compose up -d`
 
@@ -96,7 +96,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 * Once you’re done testing, you can shut down your postgesql container by running `docker-compose down` from the same directory.
 
-* Caution: If another service is using port 5432, docker may start the container but silently fail to set up the port. In that case, you will probably see errors like this:
+* Caution: If another service is using port 5432, Docker may start the container but silently fail to set up the port. In that case, you will probably see errors like this:
 
 	````console
 	psycopg2.OperationalError: could not connect to server: Connection refused
@@ -116,7 +116,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 #### If you want to develop against local mysql:
 
-* To simplify setup, the repository includes a `docker-compose` file that can stand up a local mysqldb container. To use it, you’ll need to have [docker installed](https://docs.docker.com/install/).
+* To simplify setup, the repository includes a `docker-compose` file that can stand up a local mysqldb container. To use it, you’ll need to have [Docker installed](https://docs.docker.com/install/).
 
 * Navigate to `assets/docker/mysql` in your `great_expectations` repo and run `docker-compose up -d`
 
@@ -130,7 +130,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 * Once you’re done testing, you can shut down your mysql container by running `docker-compose down` from the same directory.
 
-* Caution: If another service is using port 3306, docker may start the container but silently fail to set up the port.
+* Caution: If another service is using port 3306, Docker may start the container but silently fail to set up the port.
 
 #### If you want to develop against local Spark:
 
