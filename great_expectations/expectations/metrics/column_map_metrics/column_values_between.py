@@ -165,11 +165,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         **kwargs
     ):
         if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
-
-            if max_value:
-                max_value = parse(max_value)
+            raise NotImplementedError
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
