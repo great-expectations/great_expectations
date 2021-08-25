@@ -78,11 +78,11 @@ This is not required, but highly recommended.
 	*`-e` will install Great Expectations in “editable” mode. This is not required, but is often very convenient as a developer.
 
 ### (Optional) Configure resources for testing and documentation
-Depending on which features of Great Expectations you want to work on, you may want to configure different backends for local testing, such as postgresql and Spark. Also, there are a couple of extra steps if you want to build documentation locally.
+Depending on which features of Great Expectations you want to work on, you may want to configure different backends for local testing, such as PostgreSQL and Spark. Also, there are a couple of extra steps if you want to build documentation locally.
 
-#### If you want to develop against local postgresql:
+#### If you want to develop against local PostgreSQL:
 
-* To simplify setup, the repository includes a `docker-compose` file that can stand up a local postgresql container. To use it, you’ll need to have [Docker installed](https://docs.docker.com/install/).
+* To simplify setup, the repository includes a `docker-compose` file that can stand up a local PostgreSQL container. To use it, you’ll need to have [Docker installed](https://docs.docker.com/install/).
 
 * Navigate to `assets/docker/postgresql` in your `great_expectations` repo and run `docker-compose up -d`
 
