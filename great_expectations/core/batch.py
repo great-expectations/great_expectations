@@ -179,9 +179,9 @@ class BatchRequestBase(DictDot):
 
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -290,9 +290,9 @@ class BatchRequest(BatchRequestBase):
 
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -383,11 +383,11 @@ is illegal.
 class RuntimeBatchRequest(BatchRequest):
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
-        runtime_parameters: dict = None,
-        batch_identifiers: dict = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        runtime_parameters: dict,
+        batch_identifiers: dict,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         super().__init__(
