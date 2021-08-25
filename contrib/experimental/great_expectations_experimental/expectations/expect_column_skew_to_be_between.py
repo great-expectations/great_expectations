@@ -117,6 +117,8 @@ class ColumnSkew(ColumnMetricProvider):
 
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
+    from sqlalchemy.exc import ProgrammingError
+
     simple_query: Select = sa.select(func).select_from(selectable)
 
     try:
@@ -130,7 +132,7 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
-        raise pe
+        raise pe()
 
         #
     # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
