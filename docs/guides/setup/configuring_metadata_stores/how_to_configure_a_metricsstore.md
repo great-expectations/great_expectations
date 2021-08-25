@@ -67,7 +67,6 @@ The `StoreMetricsValidationAction` processes an `ExpectationValidationResult` an
 Now, when your operator is executed, the requested metrics will be available in your database!
 
 
-<TODO: Replace below with example using v3 API (checkpoints to take place of validation operators).>
 ```python
 context.run_validation_operator('action_list_operator', (batch_kwargs, expectation_suite_name))
 ```
