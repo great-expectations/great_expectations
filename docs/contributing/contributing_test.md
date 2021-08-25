@@ -41,7 +41,7 @@ Experimental code in Great Expectations need only be tested lightly. We are movi
 
 Most of Great Expectations’ integration testing is in the CLI, which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should not include new integration tests, unless they change the CLI itself.
 
-Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to PostgreSQL, sqlite, mssql, and BigQuery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
+Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to PostgreSQL, SQLite, MSSQL, and BigQuery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
 
 ### Unit tests for Expectations
 One of Great Expectations’ important promises is that the same Expectation will produce the same result across all supported execution environments: pandas, sqlalchemy, and Spark.
