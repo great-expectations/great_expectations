@@ -33,7 +33,7 @@ Select data_connector
     2. default_runtime_data_connector_name
 : 1
 
-Which data asset (accessible by data connector "taxi_data_example_data_connector") would you like to use?
+Which data asset (accessible by Data Connector "taxi_data_example_data_connector") would you like to use?
     1. yellow_tripdata_sample_2019-01.csv
     2. yellow_tripdata_sample_2019-02.csv
 : 1
@@ -84,6 +84,6 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite. You can leave these defaults as-is for now - [learn more about the available parameters here](/docs/reference/profilers).
 
-4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the validation results. *We will explain the validation step later in the “Validate your data” section.*
+4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the “Validate your data” section.*
 
 **Let’s execute all the cells** and wait for Great Expectations to open a browser window with Data Docs. **Go to the next step in the tutorial** for an explanation of what you see in Data Docs!

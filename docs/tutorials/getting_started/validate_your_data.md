@@ -33,9 +33,9 @@ You can then execute all cells in the notebook in order to store the Checkpoint 
 
 - You configured the Checkpoint to validate the `yellow_tripdata_sample_2019-02.csv` (i.e. our February data) file.
 
-## How to run validation and inspect your validation results
+## How to run validation and inspect your Validation Results
 
-This is basically just a recap of the previous section on Data Docs! In order to build Data Docs and get your results in a nice, human-readable format, you can simply uncomment and run the last cell in the notebook. This will open Data Docs, where you can click on the latest validation run to see the validation results page for this Checkpoint run.
+This is basically just a recap of the previous section on Data Docs! In order to build Data Docs and get your results in a nice, human-readable format, you can simply uncomment and run the last cell in the notebook. This will open Data Docs, where you can click on the latest validation run to see the Validation Results page for this Checkpoint run.
 
 ![data_docs_failed_validation1](../../../docs/images/data_docs_taxi_failed_validation01.png)
 
@@ -45,7 +45,7 @@ You’ll see that the test suite failed when you ran it against the February dat
 
 We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that’s correct, and that’s we wanted. We know that in this example, the February data has data quality issues, which means we expect the validation to fail.
 
-On the validation results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the `passenger_count` column contained the value 0.0! This violates our Expectation, which makes the validation fail.
+On the Validation Results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the `passenger_count` column contained the value 0.0! This violates our Expectation, which makes the validation fail.
 
 ![data_docs_failed_validation2](../../../docs/images/data_docs_taxi_failed_validation02.png)
 
@@ -63,11 +63,11 @@ In this tutorial, we have covered the following basic capabilities of Great Expe
 
   - Creating an Expectation Suite using a automated profiling
 
-  - Exploring validation results in Data Docs
+  - Exploring Validation Results in Data Docs
 
   - Validating a new batch of data with a Checkpoint
 
-As a final, **optional step**, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, validation results, and Data Docs. And if you want to stop here, feel free to join our [Slack community](https://greatexpectations.io/slack) to say hi to fellow Great Expectations users in the **#beginners** channel!
+As a final, **optional step**, you can check out the next section on how to customize your deployment in order to configure options such as where to store Expectations, Validation Results, and Data Docs. And if you want to stop here, feel free to join our [Slack community](https://greatexpectations.io/slack) to say hi to fellow Great Expectations users in the **#beginners** channel!
 
 Also, if you would like to view the full script used in this Tutorial, see it on GitHub:
   - [getting_started.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/tutorials/getting-started/getting_started.py)

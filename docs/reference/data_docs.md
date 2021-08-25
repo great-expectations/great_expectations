@@ -6,12 +6,12 @@ title: Data Docs
 Data Docs compile Great Expectations objects such as Expectations and Validations into structured, formatted documents.
 In these documents, they attempt to capture the key characteristics of a dataset.
 
-One example of Data Docs is HTML documentation, which takes Expectation Suites and validation results and produces
+One example of Data Docs is HTML documentation, which takes Expectation Suites and Validation Results and produces
 clear, functional, and self-updating documentation of expected and observed data characteristics. Together with
 profiling, it can help to rapidly create a clearer picture of your data, and keep your entire team on the same page as
 data evolves.
 
-For example, the default `BasicDatasetProfiler` in Great Expectations will produce validation results which compile to a
+For example, the default `BasicDatasetProfiler` in Great Expectations will produce Validation Results which compile to a
 page for each table or DataFrame including an overview section:
 
 ![Image](../images/movie_db_profiling_screenshot_2.jpg)
@@ -27,7 +27,7 @@ particular data documentation use case.
 For example, we have identified three common use cases for using documentation in a data project. They are to:
 
 1. Visualize all Great Expectations artifacts from the local repository of a project as HTML: Expectation Suites,
-   validation results and profiling results.
+   Validation Results and profiling results.
 1. Maintain a "shared source of truth" for a team working on a data project. Such documentation renders all the
    artifacts committed in the source control system (Expectation Suites and profiling results) and a continuously
    updating data quality report, built from a chronological list of validations by run id.

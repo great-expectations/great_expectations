@@ -107,7 +107,7 @@ Each item under `datasets` includes three entries: `data`, `schemas`, and `tests
 
 …define the tests to be executed against the dataframe. Each item in `tests` must have `title`, `exact_match_out`, `in`, and `out`. The test runner will execute the named Expectation once for each item, with the values in `in` supplied as kwargs.
 
-The test passes if the values in the expectation validation result correspond with the values in `out`. If `exact_match_out` is true, then every field in the Expectation output must have a corresponding, matching field in `out`. If it’s false, then only the fields specified in `out` need to match. For most use cases, false is a better fit, because it allows narrower targeting of the relevant output.
+The test passes if the values in the expectation Validation Result correspond with the values in `out`. If `exact_match_out` is true, then every field in the Expectation output must have a corresponding, matching field in `out`. If it’s false, then only the fields specified in `out` need to match. For most use cases, false is a better fit, because it allows narrower targeting of the relevant output.
 
 `suppress_test_for` is an optional parameter to disable an Expectation for a specific list of backends.
 

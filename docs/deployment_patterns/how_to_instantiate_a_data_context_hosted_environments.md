@@ -5,7 +5,7 @@ title: Deploying Great Expectations in a hosted environment without file system 
 If you follow the steps of the [Getting Started](../tutorials/getting_started/intro) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
 
 #. The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
-#. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for validation results, etc.
+#. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for Validation Results, etc.
 
 
 However, you might not have these components available in hosted environments, such as [Databricks](./how_to_instantiate_a_data_context_on_databricks_spark_cluster), [AWS EMR](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster), Google Cloud Composer, and others. This workflow guide will outline the main steps required to successfully use Great Expectations in a hosted environment.
@@ -16,7 +16,7 @@ Step 1: Configure your Data Context
  Instead of using the Great Expectations CLI, you can create a Data Context directly in code. Your Data Context also manages the following components described in this guide:
 
 - Datasources to connect to data
-- Stores to save Expectations and validation results
+- Stores to save Expectations and Validation Results
 - Data Docs hosting
 
 The following guide gives an overview of creating an in-code Data Context including defaults to help you more quickly set one up for common configurations:

@@ -14,13 +14,13 @@ Checkpoints. At some point in the future Validation Operators will be fully depr
 :::
 
 The `batch.validate()` method evaluates one Batch of data against one Expectation Suite and returns a dictionary of
-validation results. This is sufficient when you explore your data and get to know Great Expectations. When deploying
+Validation Results. This is sufficient when you explore your data and get to know Great Expectations. When deploying
 Great Expectations in a real data pipeline, you will typically discover additional needs:
 
 * Validating a group of Batches that are logically related (for example, a Checkpoint for all staging tables).
 * Validating a Batch against several Expectation Suites (for example, run three suites to protect a machine learning
   model `churn.critical`, `churn.warning`, `churn.drift`).
-* Doing something with the validation results (for example, saving them for later review, sending notifications in case
+* Doing something with the Validation Results (for example, saving them for later review, sending notifications in case
   of failures, etc.).
 
 Checkpoints provide a convenient abstraction for bundling the validation of a Batch (or Batches) of data against an
@@ -34,7 +34,7 @@ The classes that implement Checkpoints are in the :py:mod:`great_expectations.ch
 ## Validation Actions
 
 Actions are Python classes with a `run` method that takes the result of validating a Batch against an Expectation Suite
-and does something with it (e.g., save validation results to disk, or send a Slack notification). Classes that implement
+and does something with it (e.g., save Validation Results to disk, or send a Slack notification). Classes that implement
 this API can be configured to be added to the list of actions used by a particular Checkpoint.
 
 Classes that implement Actions can be found in the :py:mod:`great_expectations.checkpoint.actions` module.
@@ -42,7 +42,7 @@ Classes that implement Actions can be found in the :py:mod:`great_expectations.c
 ## Checkpoint configuration
 
 A Checkpoint uses its configuration to determine what data to validate against which Expectation Suite(s), and what
-actions to perform on the validation results - these validations and actions are executed by calling a
+actions to perform on the Validation Results - these validations and actions are executed by calling a
 Checkpoint's `run` method (analogous to calling `validate` with a single Batch). Checkpoint configurations are very
 flexible. At one end of the spectrum, you can specify a complete configuration in a Checkpoint's YAML file, and simply
 call `my_checkpoint.run()`. At the other end, you can specify a minimal configuration in the YAML file and provide
@@ -108,7 +108,7 @@ redefined.
 ## SimpleCheckpoint class
 
 For many use cases, the SimpleCheckpoint class can be used to simplify the process of specifying a Checkpoint
-configuration. SimpleCheckpoint provides a basic set of actions - store validation result, store evaluation parameters,
+configuration. SimpleCheckpoint provides a basic set of actions - store Validation Result, store evaluation parameters,
 update Data Docs, and optionally, send a Slack notification - allowing you to omit an `action_list` from your
 configuration and at runtime.
 
@@ -117,7 +117,7 @@ extend the basic set of default actions:
 
 * `site_names`: a list of Data Docs site names to update as part of the update Data Docs action - defaults to "all"
 * `slack_webhook`: if provided, an action will be added that sends a Slack notification to the provided webhook
-* `notify_on`: used to define when a notification is fired, according to validation result outcome - `all`, `failure`,
+* `notify_on`: used to define when a notification is fired, according to Validation Result outcome - `all`, `failure`,
   or `success`. Defaults to `all`.
 * `notify_with`: a list of Data Docs site names for which to include a URL in any notifications - defaults to `all`
 
@@ -125,7 +125,7 @@ extend the basic set of default actions:
 
 The return object of a Checkpoint run is a CheckpointResult object. The `run_results` attribute forms the backbone of
 this type and defines the basic contract for what a Checkpoint's `run` method returns. It is a dictionary where the
-top-level keys are the ValidationResultIdentifiers of the validation results generated in the run. Each value is a
+top-level keys are the ValidationResultIdentifiers of the Validation Results generated in the run. Each value is a
 dictionary having at minimum, a `validation_result` key containing an ExpectationSuiteValidationResult and
 an `actions_results` key containing a dictionary where the top-level keys are names of actions performed after that
 particular validation, with values containing any relevant outputs of that action (at minimum and in many cases, this

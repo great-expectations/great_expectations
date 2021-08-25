@@ -28,8 +28,8 @@ Steps
    great_expectations --v3-api suite new --interactive
    ```
 
-   This command prompts you to select a datasource, a data connector, and a data asset so as to identify a sample
-   Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one data connector in
+   This command prompts you to select a Datasource, a Data Connector, and a Data Asset so as to identify a sample
+   Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one Data Connector in
    your datasource configuration), then Great Expectations will automatically select it for you (to speed up the process).
 
    Finally, unless you specify the name of the Expectation Suite on the command line (using the
