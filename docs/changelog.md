@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] Add "test_backends" key to Expectation.examples for specifying test backends and dialects (#3257) 
 
 ### 0.13.30
 * [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)

@@ -1473,7 +1473,8 @@ def generate_expectation_tests(
     """
     parametrized_tests = []
 
-    # use the expectation_execution_engines_dict (if provided) to request only the appropriate backends
+    # If Expectation.examples defines "test_backends", use that to determine backends and dialects to use.
+    # Otherwise, use the introspected expectation_execution_engines_dict.
     for d in examples_config:
         d = copy.deepcopy(d)
         if expectation_execution_engines_dict is not None:
