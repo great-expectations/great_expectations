@@ -165,3 +165,6 @@ To view the full scripts used in this page, see them on GitHub:
 - [bigquery_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py)
 - [bigquery_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py)
 
+## Next Steps
+
+<NextSteps />
