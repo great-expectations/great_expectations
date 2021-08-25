@@ -1,3 +1,4 @@
+import warnings
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
@@ -38,6 +39,12 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
         if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
             temp_column_A = column_A.map(parse)
             temp_column_B = column_B.map(parse)
         else:
