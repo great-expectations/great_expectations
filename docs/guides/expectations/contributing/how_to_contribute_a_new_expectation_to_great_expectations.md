@@ -400,8 +400,8 @@ library_metadata = {
     "tags": [  # Tags for this Expectation in the gallery
         #         "experimental"
     ],
-    "contributors": [  # Github handles for all contributors to this Expectation.
-        #         "@your_name_here", # Don't forget to add your github handle here!
+    "contributors": [  # GitHub handles for all contributors to this Expectation.
+        #         "@your_name_here", # Don't forget to add your GitHub handle here!
     ],
     "package": "experimental_expectations",
 }

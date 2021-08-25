@@ -53,7 +53,7 @@ If you are using GitHub pages for hosting, this command is a convenient way to b
 
 The following are a few details about other files docusaurus uses that you may wish to be familiar with.
 
-- `../sidebars.js`: javascript that specifies the sidebar/navigation used in docs pages
+- `../sidebars.js`: JavaScript that specifies the sidebar/navigation used in docs pages
 - `../src`: non-docs pages live here
 - `../static`: static assets used in docs pages (such as css) live here
 - `../docusaurus.config.js`: the configuration file for docusaurus
