@@ -27,8 +27,8 @@ The following guides will contain examples for each environment we have tested o
 
 - [AWS EMR](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
 - [Databricks](./how_to_instantiate_a_data_context_on_databricks_spark_cluster)
-- :ref:`deployment_google_cloud_composer` <TODO: Convert reference to "Google Cloud Composer" to docusaurus format.>
-- :ref:`deployment_astronomer` <TODO: Convert reference to "Astronomer" to docusaurus format.>
+- :ref:`deployment_google_cloud_composer`
+- :ref:`deployment_astronomer`
 
 
 Step 2: Create Expectation Suites and add Expectations

@@ -203,6 +203,6 @@ Additional notes
 
 Additional resources
 --------------------
-- How to create a Data Source in [Databricks AWS](../intro.md)  **TODO(cdkini): Currently missing stub in new docs so ref is broken**
-- How to create a Data Source in [Databricks Azure](../intro.md) **TODO(cdkini): Currently missing stub in new docs so ref is broken**
+- How to create a Data Source in [Databricks AWS](../intro.md) 
+- How to create a Data Source in [Databricks Azure](../intro.md)
 
