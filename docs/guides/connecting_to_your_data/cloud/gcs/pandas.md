@@ -38,7 +38,12 @@ Load your DataContext into memory using the `get_context()` method.
 
 ### 3. Configure your Datasource
 
-Using this example configuration, add in your GCS bucket and path to a directory that contains some of your data:
+Great Expectations provides two types of `DataConnectors` classes for connecting to GCS.
+  - An `InferredAssetGCSDataConnector` utilizes regular expressions to infer `data_asset_names` by evaluating filename patterns that exist in your bucket. This `DataConnector`, along with a `RuntimeDataConnector`, is provided as a default when utilizing our Jupyter Notebooks.
+  - A `ConfiguredAssetGCSDataConnector` requires an explicit listing of each `DataAsset` you want to connect to. This allows for more granularity and control than its `Inferred` counterpart but also requires a more complex setup.
+
+We've detailed example configurations for both options below for your reference.
+Using these example configurations, add in your GCS bucket and path to a directory that contains some of your data:
 
 <Tabs
   groupId="inferred-or-configured"
@@ -116,6 +121,8 @@ If you specified a GCS path containing CSV files you will see them listed as `Av
 Please note we support the following format for GCS URL's: `gs://<BUCKET_OR_NAME>/<BLOB>`
 
 Feel free to adjust your configuration and re-run `test_yaml_config()` as needed.
+
+#### Authentication
 
 ### 4. Save the Datasource configuration to your DataContext
 
