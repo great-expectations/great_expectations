@@ -19,7 +19,7 @@ GE core team members use this checklist to ship releases.
 
 1. If this is a major release (incrementing either the first or second version number) the manual acceptance testing must be completed.
 
-* This [private google doc](https://docs.google.com/document/d/16QJPSCawEkwuEjShZeHa01TlQm9nbUwS6GwmFewJ3EY) outlines the procedure. (Note this will be made public eventually)
+* This [private Google Doc](https://docs.google.com/document/d/16QJPSCawEkwuEjShZeHa01TlQm9nbUwS6GwmFewJ3EY) outlines the procedure. (Note this will be made public eventually)
 
 2. Merge all approved PRs into `develop`.
 
