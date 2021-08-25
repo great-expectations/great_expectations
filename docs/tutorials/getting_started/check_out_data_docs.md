@@ -4,7 +4,7 @@ title: How to use Data Docs
 
 [Data Docs](/docs/reference/data_docs) translate [Expectations](/docs/reference/expectations/expectations), [Validation Results](/docs/reference/validation), and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
 
-In the previous steps, when you executed the last cell in the Jupyter notebook, Great Expectations used the Expectation Suite you generated to validate the January data batch. It then compiled those validation results to HTML, and opened a browser window with a Data Docs validation results page:
+In the previous steps, when you executed the last cell in the Jupyter Notebook, Great Expectations used the Expectation Suite you generated to validate the January data batch. It then compiled those validation results to HTML, and opened a browser window with a Data Docs validation results page:
 
 ![edit](../../images/data_docs_taxi_demo01.png)
 

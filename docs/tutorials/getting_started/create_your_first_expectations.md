@@ -47,7 +47,7 @@ When you run this notebook, Great Expectations will store these expectations in 
 Would you like to proceed? [Y/n]: <press Enter>
 ```
 
-This will open up a **Jupyter notebook** that helps you create the new suite. Before diving into the notebook, let’s first explain what we just did.
+This will open up a **Jupyter Notebook** that helps you create the new suite. Before diving into the notebook, let’s first explain what we just did.
 
 **What just happened?**
 
@@ -58,15 +58,15 @@ You may now wonder why we chose the first file in this step. Here’s an explana
 
 Makes sense, right?
 
-After selecting the table, Great Expectations will open a Jupyter notebook which will take you through the next part of this workflow.
+After selecting the table, Great Expectations will open a Jupyter Notebook which will take you through the next part of this workflow.
 
 :::caution
 
-Don’t execute the Jupyter notebook cells just yet!
+Don’t execute the Jupyter Notebook cells just yet!
 
 :::
 
-## Creating Expectations in Jupyter notebooks
+## Creating Expectations in Jupyter Notebooks
 
 Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 

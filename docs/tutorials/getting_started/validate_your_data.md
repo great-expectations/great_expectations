@@ -6,18 +6,18 @@ title: Validate your data using a Checkpoint
 
 In normal usage, the best way to validate data is with a [Checkpoint](/docs/reference/checkpoints_and_actions). Checkpoints bundle [Batches](/docs/reference/datasources#Batches) of data with corresponding [Expectation Suites](/docs/reference/expectations/expectations) for validation.
 
-Let’s set up our first Checkpoint! **Go back to your terminal** and shut down the Jupyter notebook, if you haven’t yet. Then run the following command:
+Let’s set up our first Checkpoint! **Go back to your terminal** and shut down the Jupyter Notebook, if you haven’t yet. Then run the following command:
 
 
 ```console
 great_expectations --v3-api checkpoint new my_checkpoint
 ```
 
-This will open a **Jupyter notebook** that will allow you to complete the configuration of your Checkpoint.
+This will open a **Jupyter Notebook** that will allow you to complete the configuration of your Checkpoint.
 
 ## The `checkpoint new` notebook
 
-The Jupyter notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows to configure a Checkpoint to validate the February data:
+The Jupyter Notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows to configure a Checkpoint to validate the February data:
 
 
 ```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L117-L130

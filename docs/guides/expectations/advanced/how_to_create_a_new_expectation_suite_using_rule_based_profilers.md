@@ -52,7 +52,7 @@ data_connectors:
 - Save your datasource config
 
 ### 4. Configuring the Profiler
-- Now, we'll create a new script in the same top-level `taxi_profiling_tutorial` directory called `profiler_script.py`. If you prefer, you could open up a Jupyter notebook and run this there instead.
+- Now, we'll create a new script in the same top-level `taxi_profiling_tutorial` directory called `profiler_script.py`. If you prefer, you could open up a Jupyter Notebook and run this there instead.
 - At the top of this file, we will create a new yaml docstring assigned to a variable called `profiler_config`. This will look similar to the yaml docstring we used above when creating our Datasource. Over the next several steps, we will slowly add lines to this docstring by typing or pasting in the lines below
 ```python 
 profiler_config = """
