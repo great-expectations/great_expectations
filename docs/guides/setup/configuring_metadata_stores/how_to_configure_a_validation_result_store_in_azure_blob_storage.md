@@ -1,5 +1,5 @@
 ---
-title: How to configure a Validation Result store in Azure blob storage
+title: How to configure a Validation Result store in Azure Blob Storage
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
@@ -11,7 +11,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
 - Configured a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md).
 - Configured an Azure [storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
-- Create the Azure Blob container. If you also wish to [host and share data docs on Azure blob storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
+- Create the Azure Blob container. If you also wish to [host and share data docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
 - Identify the prefix (folder) where Validations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
 </Prerequisites>
@@ -19,9 +19,9 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
 Steps
 -----
 
-1. **Configure the** ``config_variables.yml`` **file with your azure storage credentials**
+1. **Configure the** ``config_variables.yml`` **file with your Azure storage credentials**
 
-    We recommend that azure storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add azure storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
+    We recommend that Azure storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add Azure storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
 
     ```yaml
     AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
@@ -62,7 +62,7 @@ Steps
     ```
 
     :::note
-    If the container is called ``$web`` (for [hosting and sharing data docs on Azure blob storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
+    If the container is called ``$web`` (for [hosting and sharing data docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
     :::
 
 4. **Copy existing Validations JSON files to the Azure blob**. (This step is optional).
