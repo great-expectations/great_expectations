@@ -3,6 +3,7 @@ from freezegun import freeze_time
 
 from great_expectations.core.util import (
     AzureUrl,
+    GCSUrl,
     S3Url,
     sniff_s3_compression,
     substitute_all_strftime_format_strings,
@@ -83,3 +84,45 @@ def test_azure_url_with_nested_blob():
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "a/b/c/d/e/my_blob"
+
+
+def test_azure_url_with_invalid_url():
+    with pytest.raises(AssertionError):
+        AzureUrl("my_bucket/my_blob")
+
+
+def test_azure_url_with_special_chars():
+    # Note that `url` conforms with the naming restrictions set by the Azure API
+    # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
+    url = AzureUrl(
+        "my_account.blob.core.windows.net/my-container_1.0/my-blob_`~!@#$%^&*()=+"
+    )
+    assert url.account_name == "my_account"
+    assert url.container == "my-container_1.0"
+    assert url.blob == "my-blob_`~!@#$%^&*()=+"
+
+
+def test_gcs_url():
+    url = GCSUrl("gs://my_bucket/my_blob")
+    assert url.bucket == "my_bucket"
+    assert url.blob == "my_blob"
+
+
+def test_gcs_url_with_nested_blob():
+    url = GCSUrl("gs://my_bucket/a/b/c/d/e/my_blob")
+    assert url.bucket == "my_bucket"
+    assert url.blob == "a/b/c/d/e/my_blob"
+
+
+def test_gcs_url_with_invalid_url():
+    with pytest.raises(AssertionError):
+        GCSUrl("my_bucket/my_blob")
+
+
+def test_gcs_url_with_special_chars():
+    # Note that `url` conforms with the naming restrictions set by the GCS API
+    # GCS bucket naming restrictions: https://cloud.google.com/storage/docs/naming-buckets
+    # GCS blob naming restrictions: https://cloud.google.com/storage/docs/naming-objects
+    url = GCSUrl("gs://my-bucket_1.0/my-blob_`~!@#$%^&*()=+")
+    assert url.bucket == "my-bucket_1.0"
+    assert url.blob == "my-blob_`~!@#$%^&*()=+"
