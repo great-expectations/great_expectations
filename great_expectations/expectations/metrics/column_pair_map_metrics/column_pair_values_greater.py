@@ -1,4 +1,5 @@
 import warnings
+
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
@@ -99,6 +100,8 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         or_equal = kwargs.get("or_equal")
         if or_equal:
-            return (temp_column_A >= temp_column_B) | (temp_column_A.eqNullSafe(temp_column_B))
+            return (temp_column_A >= temp_column_B) | (
+                temp_column_A.eqNullSafe(temp_column_B)
+            )
         else:
             return temp_column_A > temp_column_B
