@@ -41,7 +41,7 @@ Alternatively, you can treat Expectations like configs, and store them in a blob
 
 * [How to configure an Expectation store in Amazon S3](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3)
 * [How to configure an Expectation store in GCS](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs)
-* [How to configure an Expectation store in Azure blob storage](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage)
+* [How to configure an Expectation store in Azure Blob Storage](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage)
 * [How to configure an Expectation store to PostgreSQL](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql)
 * [How to configure an Expectation store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql)
 
@@ -51,7 +51,7 @@ By default, Validation Results are stored locally, in an uncommitted directory. 
 * [How to configure a Validation Result store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem)
 * [How to configure a Validation Result store in Amazon S3](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3)
 * [How to configure a Validation Result store in GCS](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs)
-* [How to configure a Validation Result store in Azure blob storage](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage)
+* [How to configure a Validation Result store in Azure Blob Storage](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage)
 * [How to configure a Validation Result store to PostgreSQL](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql)
 
 ## Options for customizing generated notebooks
@@ -81,7 +81,7 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 * [How to connect to data on Azure using Spark](/docs/guides/connecting_to_your_data/cloud/azure/spark)
 
 ## Options for hosting Data Docs
-By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure blob store), configured to share a static website.
+By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website.
 
 * [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
 * [How to host and share Data Docs on Azure Blob Storage](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage)
