@@ -53,6 +53,7 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
             parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set
@@ -71,4 +72,5 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
         return ~column.isin(value_set)

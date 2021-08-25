@@ -30,6 +30,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
         return set(column.unique())
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -49,6 +50,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
 
@@ -69,6 +71,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
 
@@ -116,6 +119,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
         return column.nunique()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -135,6 +139,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
         observed_value_counts = metrics["column.value_counts"]
         return len(observed_value_counts)
 
@@ -155,6 +160,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
         observed_value_counts = metrics["column.value_counts"]
         return len(observed_value_counts)
 
