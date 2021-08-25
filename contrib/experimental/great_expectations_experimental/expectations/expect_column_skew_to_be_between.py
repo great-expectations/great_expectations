@@ -335,7 +335,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                 },
                 {
                     "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
+                    "dialects": ["mysql", "postgresql"],
                 },
             ],
         }

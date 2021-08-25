@@ -1361,6 +1361,7 @@ def build_test_backends_list(
     include_pandas=True,
     include_spark=True,
     include_sqlalchemy=True,
+    include_sqlite=True,
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
@@ -1388,7 +1389,8 @@ def build_test_backends_list(
                 "sqlalchemy tests are requested, but sqlalchemy in not installed"
             )
 
-        test_backends += ["sqlite"]
+        if include_sqlite:
+            test_backends += ["sqlite"]
 
         if include_postgresql:
             ###
@@ -1475,34 +1477,42 @@ def generate_expectation_tests(
     for d in examples_config:
         d = copy.deepcopy(d)
         if expectation_execution_engines_dict is not None:
+            example_backends_is_defined = "test_backends" in d
             example_backends = [
                 backend_dict.get("backend")
                 for backend_dict in d.get("test_backends", [])
             ]
-
             example_sqlalchemy_dialects = [
                 dialect
                 for backend_dict in d.get("test_backends", {})
                 if (backend_dict.get("backend") == "sqlalchemy")
                 for dialect in backend_dict.get("dialects", [])
             ]
-
-            backends = build_test_backends_list(
-                include_pandas=(
-                    expectation_execution_engines_dict.get("PandasExecutionEngine")
-                    == True
-                )
-                or ("pandas" in example_backends),
-                include_spark=(
-                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
-                    == True
-                )
-                or ("spark" in example_backends),
-                include_sqlalchemy=(
+            include_sqlalchemy = (
+                ("sqlalchemy" in example_backends)
+                if example_backends_is_defined
+                else (
                     expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine")
                     == True
                 )
-                or ("sqlalchemy" in example_backends),
+            )
+            backends = build_test_backends_list(
+                include_pandas=("pandas" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("PandasExecutionEngine")
+                    == True
+                ),
+                include_spark=("spark" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
+                    == True
+                ),
+                include_sqlalchemy=include_sqlalchemy,
+                include_sqlite=("sqlite" in example_sqlalchemy_dialects)
+                if example_backends_is_defined
+                else include_sqlalchemy,
                 include_postgresql=("postgresql" in example_sqlalchemy_dialects),
                 include_mysql=("mysql" in example_sqlalchemy_dialects),
                 include_mssql=("mssql" in example_sqlalchemy_dialects),
