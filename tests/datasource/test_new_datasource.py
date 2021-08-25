@@ -204,6 +204,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
             "discard_subset_failing_expectations": False,
             "boto3_options": {},
             "azure_options": {},
+            "gcs_options": {},
         },
         "data_connectors": {
             "count": 2,
