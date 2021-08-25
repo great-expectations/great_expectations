@@ -28,11 +28,11 @@ Enter the path of the root directory where the data files are stored. If files a
 : data
 ````
 
-This will now **open up a new Jupyter Notebook** to complete the Datasource configuration.
+This will now **open up a new Jupyter notebook** to complete the Datasource configuration.
 
 ### The ```datasource new``` notebook
 
-The Jupyter Notebook contains some boilerplate code to configure your new Datasource. You can run the entire notebook as-is, but we recommend changing at least the Datasource name to something more specific.
+The Jupyter notebook contains some boilerplate code to configure your new Datasource. You can run the entire notebook as-is, but we recommend changing at least the Datasource name to something more specific.
 
 Edit the second code cell as follows:
 

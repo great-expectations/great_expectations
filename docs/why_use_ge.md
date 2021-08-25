@@ -44,7 +44,7 @@ Once you’ve created your Expectations, Great Expectations can load any batch o
 
 #### Data Docs
 
-Great Expectations renders Expectations to clean, human-readable documentation, which we call Data Docs, see the screenshot below. These HTML docs contain both your Expectation Suites as well as your data Validation Results each time validation is run – think of it as a continuously updated data quality report.
+Great Expectations renders Expectations to clean, human-readable documentation, which we call Data Docs, see the screenshot below. These HTML docs contain both your Expectation Suites as well as your data validation results each time validation is run – think of it as a continuously updated data quality report.
 
 ![Screenshot of Data Docs](../docs/guides/images/datadocs.png)
 
@@ -52,7 +52,7 @@ Great Expectations renders Expectations to clean, human-readable documentation, 
 
 Great Expectations currently supports native execution of Expectations against various Datasources, such as Pandas dataframes, Spark dataframes, and SQL databases via SQLAlchemy. This means you’re not tied to having your data in a database in order to validate it: You can also run Great Expectations against CSV files or any piece of data you can load into a dataframe.
 
-Great Expectations is highly configurable. It allows you to store all relevant metadata, such as the Expectations and Validation Results in file systems, database backends, as well as cloud storage such as S3 and Google Cloud Storage, by configuring metadata Stores.
+Great Expectations is highly configurable. It allows you to store all relevant metadata, such as the Expectations and validation results in file systems, database backends, as well as cloud storage such as S3 and Google Cloud Storage, by configuring metadata Stores.
 
 ### What does Great Expectations NOT do?
 
@@ -62,7 +62,7 @@ We integrate seamlessly with DAG execution tools such as [Airflow](https://airfl
 
 Great Expectations is NOT a data versioning tool.
 
-Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, Validation Results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
+Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
 
 Great Expectations currently works best in a Python environment.
 
