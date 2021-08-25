@@ -9,7 +9,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- Configured an [Azure storage account](https://docs.microsoft.com/en_us/azure/storage) and get the [connection string](https://docs.microsoft.com/en_us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
+- Configured an [Azure Storage account](https://docs.microsoft.com/en_us/azure/storage) and get the [connection string](https://docs.microsoft.com/en_us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
 - Create the Azure Blob container. If you also wish to [host and share data docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
 - Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
@@ -19,9 +19,9 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 Steps
 -----
 
-1. **Configure the** ``config_variables.yml`` **file with your Azure storage credentials**
+1. **Configure the** ``config_variables.yml`` **file with your Azure Storage credentials**
 
-    We recommend that Azure storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add Azure storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html).
+    We recommend that Azure Storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html).
 
     ```yaml
     AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
@@ -44,7 +44,7 @@ Steps
     ```
 
 
-3. **Update your configuration file to include a new store for Expectations on Azure storage account**
+3. **Update your configuration file to include a new store for Expectations on Azure Storage account**
 
     In our case, the name is set to ``expectations_AZ_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleAzureBlobStoreBackend``,  ``container`` will be set to the name of your blob container (the equivalent of S3 bucket for Azure) you wish to store your expectations, ``prefix`` will be set to the folder in the container where Expectation files will be located, and ``connection_string`` will be set to ``${AZURE_STORAGE_CONNECTION_STRING}``, which references the corresponding key in the ``config_variables.yml`` file.
 
