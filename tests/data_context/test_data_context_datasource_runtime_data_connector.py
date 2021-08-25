@@ -7,7 +7,7 @@ from great_expectations.validator.validator import Validator
 
 
 def test_get_batch_successful_specification(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     batch_list: list = context.get_batch_list(
@@ -26,7 +26,7 @@ def test_get_batch_successful_specification(
 
 
 def test_get_batch_ambiguous_parameter(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     """
     What does this test and why?
@@ -50,7 +50,7 @@ def test_get_batch_ambiguous_parameter(
 
 
 def test_get_batch_failed_specification_type_error(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     with pytest.raises(TypeError):
@@ -69,7 +69,7 @@ def test_get_batch_failed_specification_type_error(
 
 # this test should be working
 def test_get_batch_failed_specification_no_batch_identifier(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
 
@@ -89,7 +89,7 @@ def test_get_batch_failed_specification_no_batch_identifier(
 
 
 def test_get_batch_failed_specification_no_runtime_parameters(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
 
@@ -107,7 +107,7 @@ def test_get_batch_failed_specification_no_runtime_parameters(
 
 
 def test_get_batch_failed_specification_incorrect_batch_spec_passthrough(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     with pytest.raises(TypeError):
@@ -127,7 +127,7 @@ def test_get_batch_failed_specification_incorrect_batch_spec_passthrough(
 
 
 def test_get_batch_failed_specification_wrong_runtime_parameters(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     with pytest.raises(
@@ -146,7 +146,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters(
 
 
 def test_get_validator_successful_specification(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
@@ -167,7 +167,7 @@ def test_get_validator_successful_specification(
 
 
 def test_get_validator_ambiguous_parameter(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     """
     What does this test and why?
@@ -192,7 +192,7 @@ def test_get_validator_ambiguous_parameter(
         )
 
 
-def test_get_validator_wrong_type(data_context_with_datasource_sqlalchemy_engine):
+def test_get_validator_wrong_type(data_context_with_datasource_sqlalchemy_engine, sa):
     context = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
 
@@ -213,7 +213,7 @@ def test_get_validator_wrong_type(data_context_with_datasource_sqlalchemy_engine
 
 
 def test_get_validator_failed_specification_no_batch_identifier(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
@@ -234,7 +234,7 @@ def test_get_validator_failed_specification_no_batch_identifier(
 
 
 def test_get_validator_failed_specification_incorrect_batch_spec_passthrough(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
@@ -256,7 +256,7 @@ def test_get_validator_failed_specification_incorrect_batch_spec_passthrough(
 
 
 def test_get_validator_failed_specification_no_runtime_parameters(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
@@ -275,7 +275,7 @@ def test_get_validator_failed_specification_no_runtime_parameters(
 
 
 def test_get_validator_wrong_runtime_parameters(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
