@@ -104,7 +104,8 @@
           "max_value": "Jan 01 2020 12:00:02",
           "min_value": "Jan 01 1970 12:00:00",
           "parse_strings_as_datetimes": true
-        }
+        },
+        "suppress_test_for": ["sqlalchemy"]
       },
       {
         "title" : "missing_min_value",
@@ -204,7 +205,8 @@
           "column": "ts",
           "max_value": "Jan 01 2001 12:00:00",
           "min_value": "Jan 01 1990 12:00:00",
-          "parse_strings_as_datetimes": true
+          "parse_strings_as_datetimes": true,
+          "suppress_test_for": ["sqlalchemy"]
         }
       },
       {
