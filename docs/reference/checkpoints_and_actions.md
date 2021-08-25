@@ -26,7 +26,7 @@ Great Expectations in a real data pipeline, you will typically discover addition
 Checkpoints provide a convenient abstraction for bundling the validation of a Batch (or Batches) of data against an
 Expectation Suite (or several), as well as the actions that should be taken after the validation. Like Expectation
 Suites and Validation Results, Checkpoints are managed using a Data Context, and have their own Store which is used to
-persist their configurations to yaml files. These configurations can be committed to version control and shared with
+persist their configurations to YAML files. These configurations can be committed to version control and shared with
 your team.
 
 The classes that implement Checkpoints are in the :py:mod:`great_expectations.checkpoint` module.
@@ -44,12 +44,12 @@ Classes that implement Actions can be found in the :py:mod:`great_expectations.c
 A Checkpoint uses its configuration to determine what data to validate against which Expectation Suite(s), and what
 actions to perform on the validation results - these validations and actions are executed by calling a
 Checkpoint's `run` method (analogous to calling `validate` with a single Batch). Checkpoint configurations are very
-flexible. At one end of the spectrum, you can specify a complete configuration in a Checkpoint's yaml file, and simply
-call `my_checkpoint.run()`. At the other end, you can specify a minimal configuration in the yaml file and provide
+flexible. At one end of the spectrum, you can specify a complete configuration in a Checkpoint's YAML file, and simply
+call `my_checkpoint.run()`. At the other end, you can specify a minimal configuration in the YAML file and provide
 missing keys as kwargs when calling `run`.
 
 At runtime, a Checkpoint configuration has three required and three optional keys, and is built using a combination of
-the yaml configuration and any kwargs passed in at runtime:
+the YAML configuration and any kwargs passed in at runtime:
 
 **Required keys**
 
@@ -169,7 +169,7 @@ values={[
   <TabItem value="tab0">
   This configuration specifies full validation dictionaries - no nesting (defaults) are used. When run, this Checkpoint will perform one validation of a single batch of data, against a single Expectation Suite ("users.delivery").
 
-**yaml:**
+**YAML:**
 
   ```yaml
   name: my_fancy_checkpoint
@@ -215,7 +215,7 @@ values={[
   <TabItem value="tab1">
   This configuration specifies four top-level keys (`expectation_suite_name`, `action_list`, `evaluation_parameters`, and `runtime_configuration`) that can serve as defaults for each validation, allowing the keys to be omitted from the validation dictionaries. When run, this Checkpoint will perform two validations of two different batches of data, both against the same Expectation Suite ("users.delivery"). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
 
-**yaml**:
+**YAML**:
 
   ```yaml
   name: my_fancy_checkpoint
@@ -265,9 +265,9 @@ values={[
 
   </TabItem>
   <TabItem value="tab2">
-This configuration omits the `validations` key from the yaml, which means a `validations` list must be provided when the Checkpoint is run. Because `action_list`, `evaluation_parameters`, and `runtime_configuration` appear as top-level keys in the yaml configuration, these keys may be omitted from the validation dictionaries, unless a non-default value is desired. When run, this Checkpoint will perform two validations of two different batches of data, with each batch of data validated against a different Expectation Suite ("users.delivery" and "users.diagnostic", respectively). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
+This configuration omits the `validations` key from the YAML, which means a `validations` list must be provided when the Checkpoint is run. Because `action_list`, `evaluation_parameters`, and `runtime_configuration` appear as top-level keys in the YAML configuration, these keys may be omitted from the validation dictionaries, unless a non-default value is desired. When run, this Checkpoint will perform two validations of two different batches of data, with each batch of data validated against a different Expectation Suite ("users.delivery" and "users.diagnostic", respectively). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
 
-**yaml**:
+**YAML**:
 
   ```yaml
   name: my_base_checkpoint
@@ -329,7 +329,7 @@ This configuration omits the `validations` key from the yaml, which means a `val
   <TabItem value="tab3">
   This configuration references the Checkpoint detailed in the previous example ("Keys passed at runtime"), allowing the runtime call to `run_checkpoint` to be much slimmer.
 
-**yaml**:
+**YAML**:
 
   ```yaml
   name: my_fancy_checkpoint
@@ -366,7 +366,7 @@ context.run_checkpoint(
   <TabItem value="tab4">
   This configuration specifies the SimpleCheckpoint class under the `class_name` key, allowing for a much slimmer configuration.
 
-**yaml, using SimpleCheckpoint**:
+**YAML, using SimpleCheckpoint**:
 
   ```yaml
   name: my_checkpoint
@@ -388,7 +388,7 @@ context.run_checkpoint(
     - my_diagnostic_data_docs_site
   ```
 
-**Equivalent yaml, using Checkpoint**:
+**Equivalent YAML, using Checkpoint**:
 
   ```yaml
   name: my_checkpoint
