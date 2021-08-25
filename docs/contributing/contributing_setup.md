@@ -65,7 +65,7 @@ This is not required, but highly recommended.
 
 * This will ensure that sure you have the right libraries installed in your Python environment.
 
-	* Note that you can also substitute requirements-dev-test.txt to only install requirements required for testing all backends, and requirements-dev-spark.txt or requirements-dev-sqlalchemy.txt if you would like to add support for Spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
+	* Note that you can also substitute requirements-dev-test.txt to only install requirements required for testing all backends, and requirements-dev-spark.txt or requirements-dev-sqlalchemy.txt if you would like to add support for Spark or SQLAlchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
 
 	* [Installing Microsoft ODBC driver for MacOS](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos)
 

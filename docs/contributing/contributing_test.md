@@ -11,7 +11,7 @@ You can suppress these tests by adding the following flags:
 
 * `--no-postgresql` will skip postgres tests
 * `--no-spark` will skip spark tests
-* `--no-sqlalchemy` will skip all tests using sqlalchemy (i.e. all database backends)
+* `--no-sqlalchemy` will skip all tests using SQLAlchemy (i.e. all database backends)
 
 For example, you can run `pytest --no-spark --no-sqlalchemy` to skip all local backend tests (with the exception of the pandas backend). Please note that these tests will still be run by the CI as soon as you open a PR, so some tests might fail if your code changes affected them.
 
