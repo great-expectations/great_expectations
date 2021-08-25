@@ -24,7 +24,7 @@ This will allow you to validate and explore your data.
 
 <WhereToRunCode />
 
-### 2. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 2. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -132,6 +132,3 @@ To view the full scripts used in this page, see them on GitHub:
 - [pandas_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py)
 - [pandas_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py)
 
-## Next Steps
-
-<NextSteps />

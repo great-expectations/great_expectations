@@ -43,7 +43,7 @@ For this guide we will use a `connection_string` like this:
 bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>
 ```   
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -165,6 +165,3 @@ To view the full scripts used in this page, see them on GitHub:
 - [bigquery_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py)
 - [bigquery_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py)
 
-## Next Steps
-
-<NextSteps />

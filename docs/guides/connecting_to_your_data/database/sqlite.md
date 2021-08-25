@@ -45,7 +45,7 @@ sqlite:///<PATH_TO_DB_FILE>
 For more details on different ways to specify database files and information on how to connect to an in-memory SQLite database, please refer to the documentation on [SQLAlchemy](https://docs.sqlalchemy.org/en/14/core/engines.html#sqlite).
 
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -157,6 +157,3 @@ To view the full scripts used in this page, see them on GitHub:
 - [sqlite_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py)
 - [sqlite_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py)
 
-## Next Steps
-
-<NextSteps />
