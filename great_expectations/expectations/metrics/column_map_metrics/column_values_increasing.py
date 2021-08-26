@@ -1,6 +1,8 @@
+import warnings
 from typing import Any, Dict, Optional, Tuple
 
 import pandas as pd
+from dateutil.parser import parse
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -35,9 +37,16 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, strictly=None, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            raise NotImplementedError
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
 
-        series_diff = column.diff()
+            temp_column = column.map(parse)
+
+        series_diff = temp_column.diff()
         # The first element is null, so it gets a bye and is always treated as True
         series_diff[series_diff.isnull()] = 1
 

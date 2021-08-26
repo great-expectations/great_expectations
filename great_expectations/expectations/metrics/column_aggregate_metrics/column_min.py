@@ -32,6 +32,7 @@ class ColumnMin(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
             temp_column = column.map(parse)
             return temp_column.min()
         else:
