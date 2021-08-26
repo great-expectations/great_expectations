@@ -1,4 +1,3 @@
-import warnings
 from typing import Any, Dict, Optional, Tuple
 
 from great_expectations.core import ExpectationConfiguration
@@ -22,15 +21,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, parse_strings_as_datetimes=None, **kwargs):
-        if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
-
+    def _pandas(cls, column, **kwargs):
         return set(column.unique())
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -41,16 +32,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        parse_strings_as_datetimes=None,
     ):
-        if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
-
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
 
@@ -62,16 +44,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        parse_strings_as_datetimes=None,
     ):
-        if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
-
         observed_value_counts = metrics["column.value_counts"]
         return set(observed_value_counts.index)
 
@@ -112,14 +85,6 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, parse_strings_as_datetimes=None, **kwargs):
-        if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
-
         return column.nunique()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -130,16 +95,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        parse_strings_as_datetimes=None,
     ):
-        if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
-
         observed_value_counts = metrics["column.value_counts"]
         return len(observed_value_counts)
 
@@ -151,16 +107,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        parse_strings_as_datetimes=None,
     ):
-        if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
-
         observed_value_counts = metrics["column.value_counts"]
         return len(observed_value_counts)
 
