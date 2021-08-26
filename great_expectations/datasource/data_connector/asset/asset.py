@@ -18,18 +18,16 @@ class Asset:
         pattern: Optional[str] = None,
         group_names: Optional[List[str]] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        prefix: Optional[str] = None,
+        delimiter: Optional[str] = None,
         # S3
         max_keys: Optional[int] = None,
         # Azure
         container: Optional[str] = None,
-        name_starts_with: Optional[str] = None,
         # GCS
         max_results: Optional[int] = None,
         # Both S3/GCS
         bucket: Optional[str] = None,
-        prefix: Optional[str] = None,
-        # Both S3/Azure
-        delimiter: Optional[str] = None,
     ):
         self._name = name
         self._base_directory = base_directory
@@ -46,7 +44,6 @@ class Asset:
 
         # Azure
         self._container = container
-        self._name_starts_with = name_starts_with
 
         # GCS
         self._max_results = max_results
@@ -93,10 +90,6 @@ class Asset:
     @property
     def container(self) -> Optional[str]:
         return self._container
-
-    @property
-    def name_starts_with(self) -> Optional[str]:
-        return self._name_starts_with
 
     @property
     def max_results(self) -> Optional[int]:

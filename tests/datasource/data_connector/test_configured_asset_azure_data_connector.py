@@ -245,7 +245,7 @@ def test_instantiation_with_account_url_and_credential(
             "group_names": ["index"],
         },
         container="my_container",
-        name_starts_with="",
+        prefix="",
         assets={"alpha": {}},
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
@@ -277,7 +277,7 @@ def test_instantiation_with_conn_str_and_credential(
             "group_names": ["index"],
         },
         container="my_container",
-        name_starts_with="",
+        prefix="",
         assets={"alpha": {}},
         azure_options={  # Representative of format noted in official docs
             "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
@@ -304,7 +304,7 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
             "group_names": ["index"],
         },
         container="my_container",
-        name_starts_with="",
+        prefix="",
         assets={"alpha": {}},
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
@@ -326,7 +326,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
             "group_names": ["index"],
         },
         container="my_container",
-        name_starts_with="",
+        prefix="",
         assets={"alpha": {}},
         azure_options={  # Representative of format noted in official docs
             "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
@@ -352,7 +352,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
                 "group_names": ["index"],
             },
             container="my_container",
-            name_starts_with="",
+            prefix="",
             assets={"alpha": {}},
             azure_options={
                 "account_url": "account.blob.core.windows.net",
@@ -379,7 +379,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
                 "group_names": ["index"],
             },
             container="my_container",
-            name_starts_with="",
+            prefix="",
             assets={"alpha": {}},
             azure_options={"account_url": "not_a_valid_url"},
         )
@@ -395,7 +395,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
                 "group_names": ["index"],
             },
             container="my_container",
-            name_starts_with="",
+            prefix="",
             assets={"alpha": {}},
             azure_options={"conn_str": "not_a_valid_conn_str"},
         )
@@ -431,7 +431,7 @@ def test_instantiation_with_test_yaml_config(
             group_names:
                 - index
         container: my_container
-        name_starts_with: ""
+        prefix: ""
         assets:
             alpha:
         azure_options:
@@ -470,7 +470,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
             group_names:
                 - index
         container: my_container
-        name_starts_with: ""
+        prefix: ""
         assets:
             alpha:
         azure_options:
@@ -525,7 +525,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
             group_names:
                 - index
         container: my_container
-        name_starts_with: ""
+        prefix: ""
         assets:
             alpha:
         azure_options:
@@ -574,7 +574,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
             "group_names": ["index"],
         },
         container="my_container",
-        name_starts_with="",
+        prefix="",
         assets={"alpha": {}},
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
@@ -612,7 +612,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
            execution_engine:
                class_name: PandasExecutionEngine
            container: my_container
-           name_starts_with: ""
+           prefix: ""
            assets:
                TestFiles:
            default_regex:
@@ -679,7 +679,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
            execution_engine:
                class_name: PandasExecutionEngine
            container: my_container
-           name_starts_with: ""
+           prefix: ""
            assets:
                TestFiles:
            default_regex:
@@ -741,7 +741,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
            execution_engine:
                class_name: PandasExecutionEngine
            container: my_container
-           name_starts_with: ""
+           prefix: ""
            assets:
                TestFiles:
            default_regex:
@@ -824,7 +824,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
            execution_engine:
                class_name: PandasExecutionEngine
            container: my_container
-           name_starts_with: ""
+           prefix: ""
            assets:
                TestFiles:
            default_regex:
@@ -907,7 +907,7 @@ def test_return_all_batch_definitions_basic_sorted(
        execution_engine:
            class_name: PandasExecutionEngine
        container: my_container
-       name_starts_with: ""
+       prefix: ""
        assets:
            TestFiles:
        default_regex:
@@ -997,7 +997,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
        execution_engine:
            class_name: PandasExecutionEngine
        container: my_container
-       name_starts_with: ""
+       prefix: ""
        assets:
            TestFiles:
        default_regex:
@@ -1117,7 +1117,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
        execution_engine:
            class_name: PandasExecutionEngine
        container: my_container
-       name_starts_with: ""
+       prefix: ""
        assets:
            TestFiles:
        default_regex:
@@ -1282,7 +1282,7 @@ def test_return_all_batch_definitions_too_many_sorters(
        execution_engine:
            class_name: PandasExecutionEngine
        container: my_container
-       name_starts_with: ""
+       prefix: ""
        assets:
            TestFiles:
        default_regex:
@@ -1350,7 +1350,7 @@ def test_example_with_explicit_data_asset_names(
 class_name: ConfiguredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
 container: my_container
-name_starts_with: my_base_directory/
+prefix: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
    group_names:
@@ -1359,10 +1359,10 @@ default_regex:
        - month_dir
 assets:
    alpha:
-       name_starts_with: my_base_directory/alpha/files/go/here/
+       prefix: my_base_directory/alpha/files/go/here/
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
    beta:
-       name_starts_with: my_base_directory/beta_here/
+       prefix: my_base_directory/beta_here/
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
    gamma:
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
@@ -1486,7 +1486,7 @@ def test_get_full_file_path(
 class_name: ConfiguredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
 container: my_container
-name_starts_with: my_base_directory/
+prefix: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
    group_names:

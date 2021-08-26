@@ -35,8 +35,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
     other one) designed for connecting to data on Azure.
 
     A ConfiguredAssetAzureDataConnector requires an explicit specification of each DataAsset you want to connect to.
-    This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
-    with Azure's official SDK, we utilize terms like "container" and "name_starts_with".
+    This allows more fine-tuning, but also requires more setup.
 
     As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
     docs if a greater understanding of the supported authentication methods and general functionality is desired.
@@ -52,7 +51,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        name_starts_with: str = "",
+        prefix: str = "",
         delimiter: str = "/",
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -68,7 +67,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
             sorters (list): optional list of sorters for sorting data_references
-            name_starts_with (str): Azure prefix
+            prefix (str): Azure prefix
             delimiter (str): Azure delimiter
             azure_options (dict): wrapper object for **kwargs
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
@@ -85,7 +84,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._container = container
-        self._name_starts_with = os.path.join(name_starts_with, "")
+        self._prefix = os.path.join(prefix, "")
         self._delimiter = delimiter
 
         if azure_options is None:
@@ -133,16 +132,17 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         return AzureBatchSpec(batch_spec)
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+        # query_options keys must adhere to argument names used in Azure `walk_blobs()`
         query_options: dict = {
             "container": self._container,
-            "name_starts_with": self._name_starts_with,
+            "name_starts_with": self._prefix,
             "delimiter": self._delimiter,
         }
         if asset is not None:
             if asset.container:
                 query_options["container"] = asset.container
-            if asset.name_starts_with:
-                query_options["name_starts_with"] = asset.name_starts_with
+            if asset.prefix:
+                query_options["name_starts_with"] = asset.prefix
             if asset.delimiter:
                 query_options["delimiter"] = asset.delimiter
 
