@@ -45,6 +45,8 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
             )
 
             temp_column = column.map(parse)
+        else:
+            temp_column = column
 
         series_diff = temp_column.diff()
         # The first element is null, so it gets a bye and is always treated as True
