@@ -4,6 +4,7 @@ import os
 import random
 import re
 import shutil
+import warnings
 from abc import ABCMeta
 
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -960,8 +961,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     # We will use blobclient here
     def __init__(
         self,
-        container,
         connection_string,
+        bucket=None,
+        container=None,
         prefix="",
         filepath_template=None,
         filepath_prefix=None,
@@ -986,7 +988,14 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         )
         self.connection_string = connection_string
         self.prefix = prefix
-        self.container = container
+        if container:
+            warnings.warn(
+                "To ensure consistency across the GE stack, please utilize `bucket` instead of `container` moving forward",
+                DeprecationWarning,
+            )
+            self.bucket = container
+        else:
+            self.bucket = bucket
 
     def _get_container_client(self):
 
@@ -995,7 +1004,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         if self.connection_string:
             return BlobServiceClient.from_connection_string(
                 self.connection_string
-            ).get_container_client(self.container)
+            ).get_container_client(container=self.bucket)
         else:
             raise StoreBackendError(
                 "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
@@ -1063,7 +1072,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         az_blob_key = self._convert_key_to_filepath(key)
-        az_blob_path = os.path.join(self.container, self.prefix, az_blob_key)
+        az_blob_path = os.path.join(self.bucket, self.prefix, az_blob_key)
 
         return "https://{}.blob.core.windows.net/{}".format(
             self._get_container_client().account_name,

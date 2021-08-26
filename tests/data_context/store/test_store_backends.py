@@ -906,10 +906,10 @@ def test_TupleAzureBlobStoreBackend():
     """
     connection_string = "this_is_a_test_conn_string"
     prefix = "this_is_a_test_prefix"
-    container = "dummy-container"
+    bucket = "dummy-container"
 
     my_store = TupleAzureBlobStoreBackend(
-        connection_string=connection_string, prefix=prefix, container=container
+        connection_string=connection_string, prefix=prefix, bucket=bucket
     )
 
     with patch(
@@ -963,6 +963,22 @@ def test_TupleAzureBlobStoreBackend():
         mock_azure_blob_client.from_connection_string.assert_called_once()
         mock_container_client.assert_called_once()
         mock_container_client.list_blobs.assert_called_once_with("this_is_a_prefix")
+
+
+def test_TupleAzureStoreBackend_container_arg_deprecation():
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    connection_string = "this_is_a_test_conn_string"
+    prefix = "this_is_a_test_prefix"
+    container = "dummy-container"
+
+    with pytest.warns(DeprecationWarning):
+        TupleAzureBlobStoreBackend(
+            connection_string=connection_string, prefix=prefix, container=container
+        )
 
 
 @mock_s3
