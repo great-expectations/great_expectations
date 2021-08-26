@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -35,8 +37,14 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
         return ~column.isin(parsed_value_set)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, value_set, parse_strings_as_datetimes, **kwargs):
+    def _sqlalchemy(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
             parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set
