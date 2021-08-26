@@ -19,7 +19,7 @@ stages:
             #  extra_args: ''
             performance:
               test_script: 'tests/performance/test_bigquery_benchmarks.py'
-              extra_args: '--benchmark-json=junit/benchmark.json -k test_bikeshare_trips_benchmark[1] '
+              extra_args: '--performance_tests --benchmark-json=junit/benchmark.json -k test_bikeshare_trips_benchmark[1] '
           maxParallel: 1
 
         steps:
