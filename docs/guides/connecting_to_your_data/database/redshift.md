@@ -48,7 +48,7 @@ postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<S
 
 **Note**: Depending on your Redshift cluster configuration, you may or may not need the `sslmode` parameter. For more details, please refer to Amazon's documentation for [configuring security options on Amazon Redshift](https://docs.aws.amazon.com/redshift/latest/mgmt/connecting-ssl-support.html).
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
