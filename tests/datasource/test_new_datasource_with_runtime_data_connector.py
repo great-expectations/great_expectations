@@ -1013,4 +1013,4 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_directory_
     batch = batch_list[0]
 
     # 30000 means all 3 files were read as 1 CSV
-    print(batch.data.dataframe.count())
+    assert batch.data.dataframe.count() == 30000
