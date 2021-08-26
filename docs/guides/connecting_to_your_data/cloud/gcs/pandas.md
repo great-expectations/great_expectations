@@ -47,9 +47,8 @@ Great Expectations provides two types of `DataConnectors` classes for connecting
   - An `InferredAssetGCSDataConnector` utilizes regular expressions to infer `data_asset_names` by evaluating filename patterns that exist in your bucket. This `DataConnector`, along with a `RuntimeDataConnector`, is provided as a default when utilizing our Jupyter Notebooks.
   - A `ConfiguredAssetGCSDataConnector` requires an explicit listing of each `DataAsset` you want to connect to. This allows for more granularity and control than its `Inferred` counterpart but also requires a more complex setup.
 
-As the `InferredAssetDataConnectors` are generally simpler to use and have fewer options, we recommend starting with them.
+As the `InferredAssetDataConnectors` have fewer options and are generally simpler to use, we recommend starting with them.
 
-If you'd like to learn more about the difference between `Inferred` and `Configured`, please visit BLAHBLAHBLAH
 We've detailed example configurations for both options in the next section for your reference.
 
 #### Authentication / gcs_options
@@ -223,6 +222,10 @@ To view the full scripts used in this page, see them on GitHub:
 - [inferred_and_runtime_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py)
 - [configured_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py)
 - [configured_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py)
+
+To review the source code of these `DataConnectors`, also visit GitHub:
+- [ConfiguredAssetGCSDataConnector](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/datasource/data_connector/configured_asset_gcs_data_connector.py)
+- [InferredAssetGCSDataConnector](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/datasource/data_connector/inferred_asset_gcs_data_connector.py)
 
 ## Next Steps
 
