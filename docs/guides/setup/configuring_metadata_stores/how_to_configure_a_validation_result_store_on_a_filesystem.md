@@ -6,7 +6,7 @@ import Prerequisites from '../../../guides/connecting_to_your_data/components/pr
 
 By default, Validation results are stored in the ``uncommitted/validations/`` directory.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validations on your filesystem.
 
-This guide will explain how to use a Validation Action to update Data Docs sites with new validation results from Validation Operator runs.
+This guide will explain how to use a Validation Action to update Data Docs sites with new Validation Results from Validation Operator runs.
 
 <Prerequisites>
 
