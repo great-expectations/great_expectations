@@ -134,6 +134,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
         # query_options keys must adhere to argument names used in GCS `list_blobs()`
+        # API: https://googleapis.dev/python/storage/latest/client.html#google.cloud.storage.client.Client.list_blobs
         query_options: dict = {
             "bucket_or_name": self._bucket,
             "prefix": self._prefix,

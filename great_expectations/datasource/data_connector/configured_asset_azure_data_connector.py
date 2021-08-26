@@ -133,6 +133,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         # query_options keys must adhere to argument names used in Azure `walk_blobs()`
+        # API: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.containerclient?view=azure-python#walk-blobs-name-starts-with-none--include-none--delimiter--------kwargs-
         query_options: dict = {
             "container": self._container,
             "name_starts_with": self._prefix,

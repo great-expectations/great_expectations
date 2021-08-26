@@ -135,6 +135,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         # query_options keys must adhere to argument names used in GCS `list_blobs()`
+        # API: https://googleapis.dev/python/storage/latest/client.html#google.cloud.storage.client.Client.list_blobs
         query_options: dict = {
             "bucket_or_name": self._bucket,
             "prefix": self._prefix,
