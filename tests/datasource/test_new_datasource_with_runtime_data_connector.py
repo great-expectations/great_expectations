@@ -57,7 +57,7 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 
 
 @pytest.fixture
-def datasource_with_runtime_data_connector_and_sparkdf_execution_engine():
+def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(spark_session):
     basic_datasource: Datasource = instantiate_class_from_config(
         yaml.load(
             f"""
@@ -866,7 +866,9 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_path_panda
 
 
 def test_get_batch_definition_list_from_batch_request_length_one_from_path_spark(
-    datasource_with_runtime_data_connector_and_sparkdf_execution_engine, taxi_test_file
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file,
+    spark_session,
 ):
     batch_identifiers = {
         "airflow_run_id": 1234567890,
@@ -924,7 +926,9 @@ def test_get_batch_definitions_and_get_batch_basics_from_path_pandas(
 
 
 def test_get_batch_definitions_and_get_batch_basics_from_path_spark(
-    datasource_with_runtime_data_connector_and_sparkdf_execution_engine, taxi_test_file
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file,
+    spark_session,
 ):
 
     data_connector_name: str = "test_runtime_data_connector"
@@ -975,7 +979,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_directory_
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(IsADirectoryError):
+    with pytest.raises((IsADirectoryError, pd.errors.ParserError)):
         batch_list: List[
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
@@ -987,6 +991,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_directory_
 def test_get_batch_definition_list_from_batch_request_length_one_from_directory_spark(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
+    spark_session,
 ):
     batch_identifiers = {
         "airflow_run_id": 1234567890,
