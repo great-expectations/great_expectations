@@ -35,7 +35,6 @@ class ColumnMax(ColumnAggregateMetricProvider):
         else:
             return column.max()
 
-
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
