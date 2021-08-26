@@ -38,7 +38,7 @@ This is a basic generated Great Expectations script that runs a Checkpoint.
 Checkpoints are the primary method for validating batches of data in production and triggering any followup actions.
 
 A Checkpoint facilitates running a validation as well as configurable Actions such as updating Data Docs, sending a
-notification to team members about validation results, or storing a result in a shared cloud storage.
+notification to team members about Validation Results, or storing a result in a shared cloud storage.
 
 See also [How to configure a new Checkpoint using test_yaml_config](./how_to_configure_a_new_checkpoint_using_test_yaml_config) for more information about the Checkpoints and how to configure them in your Great Expectations environment.
 

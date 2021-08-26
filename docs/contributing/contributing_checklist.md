@@ -32,7 +32,7 @@ Once your code is ready, please go through the following checklist before submit
 
 * You can also rebase your branch from upstream/develop. In general, the steps are:
 
-	* Run git fetch upstream then git rebase upstream/develop.
+	* Run `git fetch` upstream then `git rebase upstream/develop`.
 
 	* Fix any merge conflicts that arise from the rebase.
 
@@ -40,7 +40,7 @@ Once your code is ready, please go through the following checklist before submit
 
 	* Re-run tests to ensure the rebase did not introduce any new issues.
 
-* Atlassian and Github both have good tutorials for rebasing: [Atlassian’s tutorial](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams), [Github’s tutorial](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/syncing-a-fork).
+* Atlassian and GitHub both have good tutorials for rebasing: [Atlassian’s tutorial](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams), [GitHub’s tutorial](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/syncing-a-fork).
 
 #### 4. Have you written and run all the tests you need?
 

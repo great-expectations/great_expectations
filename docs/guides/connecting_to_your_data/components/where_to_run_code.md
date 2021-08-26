@@ -13,7 +13,7 @@ Get an environment to run the code in this guide. Please choose an option below.
   ]}>
   <TabItem value="cli">
 
-If you use the Great Expectations CLI, run this command to automatically generate a pre-configured jupyter notebook. Then you can follow along in the YAML-based workflow below:
+If you use the Great Expectations CLI, run this command to automatically generate a pre-configured Jupyter Notebook. Then you can follow along in the YAML-based workflow below:
 
 ```console
 great_expectations --v3-api datasource new

@@ -1,5 +1,5 @@
 ---
-title: How to connect to a Postgresql database
+title: How to connect to a PostgreSQL database
 ---
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
@@ -9,7 +9,7 @@ import DatabaseCredentials from '../components/adding_database_credentials.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to data in a Postgresql database.
+This guide will help you connect to data in a PostgreSQL database.
 This will allow you to validate and explore your data.
 
 <Prerequisites>
@@ -26,7 +26,7 @@ This will allow you to validate and explore your data.
 
 ### 2. Install required dependencies
 
-First, install the necessary dependencies for Great Expectations to connect to your postgres database by running the following in your terminal:
+First, install the necessary dependencies for Great Expectations to connect to your Postgres database by running the following in your terminal:
 
 ```console
 pip install sqlalchemy psycopg2
