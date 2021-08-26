@@ -968,8 +968,8 @@ def test_TupleAzureBlobStoreBackend():
 def test_TupleAzureStoreBackend_container_arg_deprecation():
     """
     What does this test test and why?
-    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
-    and assert that the store backend makes the right calls for set, get, and list.
+    To test the deprecation warning in TupleAzureStoreBackend (conversion from
+    container to bucket)
     """
     connection_string = "this_is_a_test_conn_string"
     prefix = "this_is_a_test_prefix"
