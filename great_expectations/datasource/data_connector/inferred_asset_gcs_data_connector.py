@@ -36,9 +36,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
     other one) designed for connecting to data on GCS.
 
     An InferredAssetGCSDataConnector uses regular expressions to traverse through GCS buckets and implicitly
-    determine `data_asset_names`.  Please note that in order to maintain consistency with Google's official SDK,
-    we utilize terms like "bucket_or_name" and "max_results". Since we convert these keys from YAML to Python and
-    directly pass them in to the GCS connection object, maintaining consistency is necessary for proper usage.
+    determine `data_asset_names`.
 
     This DataConnector supports the following methods of authentication:
         1. Standard gcloud auth / GOOGLE_APPLICATION_CREDENTIALS environment variable workflow
@@ -54,7 +52,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         self,
         name: str,
         datasource_name: str,
-        bucket_or_name: str,
+        bucket: str,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
@@ -70,7 +68,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         Args:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
-            bucket_or_name (str): container name for Google Cloud Storage
+            bucket (str): bucket name for Google Cloud Storage
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
             sorters (list): optional list of sorters for sorting data_references
@@ -91,7 +89,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
-        self._bucket_or_name = bucket_or_name
+        self._bucket = bucket
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_results = max_results
@@ -135,8 +133,9 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
+        # query_options keys must adhere to argument names used in GCS `list_blobs()`
         query_options: dict = {
-            "bucket_or_name": self._bucket_or_name,
+            "bucket_or_name": self._bucket,
             "prefix": self._prefix,
             "delimiter": self._delimiter,
             "max_results": self._max_results,
@@ -159,4 +158,4 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"gs://{os.path.join(self._bucket_or_name, path)}"
+        return f"gs://{os.path.join(self._bucket, path)}"

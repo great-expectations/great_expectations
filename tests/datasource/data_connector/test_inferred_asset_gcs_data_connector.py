@@ -57,7 +57,7 @@ def test_instantiation_without_args(
             "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
     assert my_data_connector.self_check() == expected_config_dict
@@ -95,7 +95,7 @@ def test_instantiation_with_filename_arg(
             "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
     assert my_data_connector.self_check() == expected_config_dict
@@ -133,7 +133,7 @@ def test_instantiation_with_info_arg(
             "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
     assert my_data_connector.self_check() == expected_config_dict
@@ -168,7 +168,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
             "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
 
@@ -211,7 +211,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
             "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
             "group_names": ["year_dir", "month_dir", "data_asset_name"],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
 
@@ -257,7 +257,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
                 "number",
             ],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
 
@@ -312,7 +312,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
             "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
             "group_names": ["year_dir", "month_dir", "data_asset_name"],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
 
@@ -392,7 +392,7 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
             "pattern": r"(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "number"],
         },
-        bucket_or_name="test_bucket",
+        bucket="test_bucket",
         prefix="",
     )
 
@@ -447,7 +447,7 @@ module_name: great_expectations.datasource.data_connector
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE
 name: TEST_DATA_CONNECTOR
-bucket_or_name: test_bucket
+bucket: test_bucket
 prefix: ""
 default_regex:
     pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
@@ -515,7 +515,7 @@ module_name: great_expectations.datasource.data_connector
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE
 name: TEST_DATA_CONNECTOR
-bucket_or_name: test_bucket
+bucket: test_bucket
 prefix: ""
 default_regex:
     pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
@@ -578,7 +578,7 @@ class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE
 name: TEST_DATA_CONNECTOR
 
-bucket_or_name: test_bucket
+bucket: test_bucket
 prefix: ""
 
 default_regex:
@@ -652,7 +652,7 @@ def test_nested_directory_data_asset_name_in_folder(
     class_name: InferredAssetGCSDataConnector
     datasource_name: FAKE_DATASOURCE
     name: TEST_DATA_CONNECTOR
-    bucket_or_name: test_bucket
+    bucket: test_bucket
     prefix: ""
     default_regex:
         group_names:
@@ -716,7 +716,7 @@ def test_redundant_information_in_naming_convention_random_hash(
           class_name: InferredAssetGCSDataConnector
           datasource_name: FAKE_DATASOURCE
           name: TEST_DATA_CONNECTOR
-          bucket_or_name: test_bucket
+          bucket: test_bucket
           prefix: ""
           default_regex:
               group_names:
@@ -777,7 +777,7 @@ def test_redundant_information_in_naming_convention_timestamp(
           class_name: InferredAssetGCSDataConnector
           datasource_name: FAKE_DATASOURCE
           name: TEST_DATA_CONNECTOR
-          bucket_or_name: test_bucket
+          bucket: test_bucket
           prefix: ""
           default_regex:
               group_names:
@@ -837,7 +837,7 @@ def test_redundant_information_in_naming_convention_bucket(
           class_name: InferredAssetGCSDataConnector
           datasource_name: FAKE_DATASOURCE
           name: TEST_DATA_CONNECTOR
-          bucket_or_name: test_bucket
+          bucket: test_bucket
           prefix: ""
           default_regex:
               group_names:
@@ -896,7 +896,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
           class_name: InferredAssetGCSDataConnector
           datasource_name: test_environment
           name: my_inferred_asset_filesystem_data_connector
-          bucket_or_name: test_bucket
+          bucket: test_bucket
           prefix: ""
           default_regex:
               group_names:
@@ -1021,7 +1021,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
           class_name: InferredAssetGCSDataConnector
           datasource_name: test_environment
           name: my_inferred_asset_filesystem_data_connector
-          bucket_or_name: test_bucket
+          bucket: test_bucket
           prefix: ""
           default_regex:
               group_names:
@@ -1080,7 +1080,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
         class_name: InferredAssetGCSDataConnector
         datasource_name: test_environment
         name: my_inferred_asset_filesystem_data_connector
-        bucket_or_name: test_bucket
+        bucket: test_bucket
         prefix: ""
         default_regex:
             group_names:
@@ -1130,7 +1130,7 @@ def test_get_full_file_path(
     yaml_string = f"""
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-bucket_or_name: my_bucket
+bucket: my_bucket
 prefix: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$

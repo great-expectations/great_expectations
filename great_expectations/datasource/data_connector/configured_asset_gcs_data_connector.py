@@ -37,9 +37,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     other one) designed for connecting to data on GCS.
 
     A ConfiguredAssetGCSDataConnector requires an explicit specification of each DataAsset you want to connect to.
-    This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
-    with Google's official SDK, we utilize terms like "bucket_or_name" and "max_results". Since we convert these keys from YAML
-    to Python and directly pass them in to the GCS connection object, maintaining consistency is necessary for proper usage.
+    This allows more fine-tuning, but also requires more setup.
 
     This DataConnector supports the following methods of authentication:
         1. Standard gcloud auth / GOOGLE_APPLICATION_CREDENTIALS environment variable workflow
@@ -55,7 +53,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         self,
         name: str,
         datasource_name: str,
-        bucket_or_name: str,
+        bucket: str,
         assets: dict,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
@@ -72,7 +70,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         Args:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
-            bucket_or_name (str): bucket name for Google Cloud Storage
+            bucket (str): bucket name for Google Cloud Storage
             assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
@@ -94,7 +92,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-        self._bucket_or_name = bucket_or_name
+        self._bucket = bucket
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_results = max_results
@@ -136,8 +134,9 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         return GCSBatchSpec(batch_spec)
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+        # query_options keys must adhere to argument names used in GCS `list_blobs()`
         query_options: dict = {
-            "bucket_or_name": self._bucket_or_name,
+            "bucket_or_name": self._bucket,
             "prefix": self._prefix,
             "delimiter": self._delimiter,
             "max_results": self._max_results,
@@ -145,7 +144,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
 
         if asset is not None:
             if asset.bucket:
-                query_options["bucket_or_name"] = asset.bucket_or_name
+                query_options["bucket_or_name"] = asset.bucket
             if asset.prefix:
                 query_options["prefix"] = asset.prefix
             if asset.delimiter:
@@ -170,4 +169,4 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"gs://{os.path.join(self._bucket_or_name, path)}"
+        return f"gs://{os.path.join(self._bucket, path)}"

@@ -242,7 +242,7 @@ def test_instantiation_without_args(
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket_or_name="my_bucket",
+        bucket="my_bucket",
         prefix="",
         assets={"alpha": {}},
     )
@@ -276,7 +276,7 @@ def test_instantiation_with_filename_arg(
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket_or_name="my_bucket",
+        bucket="my_bucket",
         prefix="",
         assets={"alpha": {}},
     )
@@ -311,7 +311,7 @@ def test_instantiation_with_info_arg(
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket_or_name="my_bucket",
+        bucket="my_bucket",
         prefix="",
         assets={"alpha": {}},
     )
@@ -352,7 +352,7 @@ def test_instantiation_with_test_yaml_config(
             pattern: alpha-(.*)\\.csv
             group_names:
                 - index
-        bucket_or_name: my_bucket
+        bucket: my_bucket
         prefix: ""
         assets:
             alpha:
@@ -388,7 +388,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
             pattern: alpha-(.*)\\.csv
             group_names:
                 - index
-        bucket_or_name: my_bucket
+        bucket: my_bucket
         prefix: ""
         assets:
             alpha:
@@ -440,7 +440,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
             pattern: beta-(.*)\\.csv
             group_names:
                 - index
-        bucket_or_name: my_bucket
+        bucket: my_bucket
         prefix: ""
         assets:
             alpha:
@@ -486,7 +486,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket_or_name="my_bucket",
+        bucket="my_bucket",
         prefix="",
         assets={"alpha": {}},
     )
@@ -520,7 +520,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
+           bucket: my_bucket
            prefix: ""
            assets:
                TestFiles:
@@ -580,7 +580,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
+           bucket: my_bucket
            prefix: ""
            assets:
                TestFiles:
@@ -635,7 +635,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
+           bucket: my_bucket
            prefix: ""
            assets:
                TestFiles:
@@ -711,7 +711,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
+           bucket: my_bucket
            prefix: ""
            assets:
                TestFiles:
@@ -787,7 +787,7 @@ def test_return_all_batch_definitions_basic_sorted(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
+       bucket: my_bucket
        prefix: ""
        assets:
            TestFiles:
@@ -870,7 +870,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
+       bucket: my_bucket
        prefix: ""
        assets:
            TestFiles:
@@ -983,7 +983,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
+       bucket: my_bucket
        prefix: ""
        assets:
            TestFiles:
@@ -1066,7 +1066,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
+       bucket: my_bucket
        assets:
            TestFiles:
                pattern: (.+)_(.+)_(.+)\\.csv
@@ -1137,7 +1137,7 @@ def test_return_all_batch_definitions_too_many_sorters(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
+       bucket: my_bucket
        prefix: ""
        assets:
            TestFiles:
@@ -1201,7 +1201,7 @@ def test_example_with_explicit_data_asset_names(
     yaml_string = f"""
 class_name: ConfiguredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-bucket_or_name: my_bucket
+bucket: my_bucket
 prefix: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
@@ -1329,7 +1329,7 @@ def test_get_full_file_path(
     yaml_string = f"""
 class_name: ConfiguredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-bucket_or_name: my_bucket
+bucket: my_bucket
 prefix: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
