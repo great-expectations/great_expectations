@@ -272,6 +272,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "great_expectations_version",
         "run_id",
         "validation_time",
+        "run_duration"
     }
 
 

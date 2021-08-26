@@ -1068,7 +1068,13 @@ def delete_blank_lines(text: str) -> str:
     return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
 
 def calculate_delta_durations(start: datetime, end: datetime) -> str:
-    """Calculate the delta of two datetimes as a formatted string"""
+    """
+    Calculate the delta of two datetimes
+    
+    Returns:
+        string of date delta including microseconds
+    """
     duration = end - start
     
-    return str(timedelta(seconds=duration.seconds))
+    # return str(timedelta(microseconds = duration.microseconds))
+    return "DTBA"

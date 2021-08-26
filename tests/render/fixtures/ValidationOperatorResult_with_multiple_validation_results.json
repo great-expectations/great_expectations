@@ -26,7 +26,8 @@
             "pandas_data_fingerprint": "8c46fdaf0bd356fd58b7bcd9b2e6012d"
           },
           "batch_parameters": null,
-          "validation_time": "20200727T171932.962507Z"
+          "validation_time": "20200727T171932.962507Z",
+          "run_duration": "DTBA"
         },
         "evaluation_parameters": {},
         "results": [
@@ -408,7 +409,8 @@
             "pandas_data_fingerprint": "8c46fdaf0bd356fd58b7bcd9b2e6012d"
           },
           "batch_parameters": null,
-          "validation_time": "20200727T171932.962507Z"
+          "validation_time": "20200727T171932.962507Z",
+          "run_duration": "DTBA"
         },
         "evaluation_parameters": {},
         "results": [

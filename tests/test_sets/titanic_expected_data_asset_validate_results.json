@@ -238,6 +238,7 @@
     "expectation_suite_meta": {},
     "batch_markers": {},
     "batch_parameters": {},
-    "validation_time": "19551105T000000.000000Z"
+    "validation_time": "19551105T000000.000000Z",
+    "run_duration": "DTBA"
   }
 }

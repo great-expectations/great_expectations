@@ -344,7 +344,7 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_info(cls, validation_results):
         run_id = validation_results.meta["run_id"]
-        run_duration = validation_results.meta["run_duration"] or "__none__"
+        run_duration = validation_results.meta["run_duration"]
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -384,7 +384,7 @@ class ValidationResultsPageRenderer(Renderer):
                     ["Great Expectations Version", ge_version],
                     ["Run Name", run_name],
                     ["Run Time", run_time],
-                    ["Run Duration", run_duration],
+                    ["Run Duration", run_duration]
                 ],
                 "styling": {
                     "classes": ["col-12", "table-responsive", "mt-1"],

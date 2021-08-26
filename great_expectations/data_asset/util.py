@@ -14,7 +14,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-
+from datetime import timedelta
 
 def parse_result_format(result_format):
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
@@ -201,3 +201,15 @@ def recursively_convert_to_json_serializable(test_obj):
             "%s is of type %s which cannot be serialized."
             % (str(test_obj), type(test_obj).__name__)
         )
+
+def calculate_delta_durations(start: datetime, end: datetime) -> str:
+    """
+    Calculate the delta of two datetimes
+    
+    Returns:
+        string of date delta including microseconds
+    """
+    duration = end - start
+    
+    # return str(timedelta(microseconds = duration.microseconds))
+    return "DTBA"

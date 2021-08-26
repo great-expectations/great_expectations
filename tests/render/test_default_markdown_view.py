@@ -218,6 +218,7 @@ Q3  | 117.62
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32Z
+Run Duration | DTBA
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |
@@ -284,6 +285,7 @@ Q3  | 117.62
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32Z
+Run Duration | DTBA
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |
@@ -390,6 +392,7 @@ Q3  | 117.62
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32Z
+Run Duration | DTBA
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |
@@ -456,6 +459,7 @@ Q3  | 117.62
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32Z
+Run Duration | DTBA
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |

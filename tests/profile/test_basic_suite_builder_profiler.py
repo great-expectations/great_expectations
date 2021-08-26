@@ -347,6 +347,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "great_expectations_version",
         "run_id",
         "validation_time",
+        "run_duration"
     }
 
     assert expectation_suite.meta["notes"] == {
@@ -501,6 +502,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 
     del expected_evrs.meta["validation_time"]
     del evrs.meta["validation_time"]
+    del evrs.meta["run_duration"]
 
     assert evrs == expected_evrs
 
@@ -1350,5 +1352,6 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     del evrs.meta["batch_kwargs"]["ge_batch_id"]
     del expected_evrs.meta["validation_time"]
     del evrs.meta["validation_time"]
+    del evrs.meta["run_duration"]
 
     assert evrs == expected_evrs

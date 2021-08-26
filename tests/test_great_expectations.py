@@ -793,6 +793,7 @@ def test_validate():
             "expectation_suite_meta": {},
             "batch_markers": {},
             "batch_parameters": {},
+            "run_duration": "DTBA"
         },
         results=[
             ExpectationValidationResult(

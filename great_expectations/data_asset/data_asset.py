@@ -30,6 +30,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
+    calculate_delta_durations
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.marshmallow__shade import ValidationError
@@ -979,6 +980,8 @@ class DataAsset:
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
 
+            run_duration = calculate_delta_durations(parse(validation_time), datetime.datetime.now(datetime.timezone.utc))
+
             meta = {
                 "great_expectations_version": ge_version,
                 "expectation_suite_name": expectation_suite_name,
@@ -988,6 +991,7 @@ class DataAsset:
                 "batch_parameters": self.batch_parameters,
                 "validation_time": validation_time,
                 "expectation_suite_meta": expectation_meta,
+                "run_duration": run_duration
             }
             result = ExpectationSuiteValidationResult(
                 results=results,
@@ -996,7 +1000,7 @@ class DataAsset:
                     "evaluated_expectations": statistics.evaluated_expectations,
                     "successful_expectations": statistics.successful_expectations,
                     "unsuccessful_expectations": statistics.unsuccessful_expectations,
-                    "success_percent": statistics.success_percent,
+                    "success_percent": statistics.success_percent
                 },
                 evaluation_parameters=runtime_evaluation_parameters,
                 meta=meta,
