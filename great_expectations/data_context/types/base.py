@@ -482,11 +482,13 @@ continue.
             in [
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
-S3 type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )
