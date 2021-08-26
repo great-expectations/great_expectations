@@ -1503,9 +1503,9 @@ class BaseDataContext:
 
     def get_batch_list(
         self,
-        datasource_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
