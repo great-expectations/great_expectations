@@ -25,8 +25,8 @@ class ColumnMax(ColumnAggregateMetricProvider):
         if parse_strings_as_datetimes:
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
+will be deprecated in a future release. Please update code accordingly.
+""",
                 DeprecationWarning,
             )
 
@@ -47,8 +47,8 @@ class ColumnMax(ColumnAggregateMetricProvider):
         if parse_strings_as_datetimes:
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
+will be deprecated in a future release. Please update code accordingly.
+""",
                 DeprecationWarning,
             )
 
