@@ -1062,6 +1062,14 @@ class GeCloudConfig(DictDot):
         self.ge_cloud_account_id = ge_cloud_account_id
         self.ge_cloud_access_token = ge_cloud_access_token
 
+    def to_json_dict(self):
+        return {
+            "ge_cloud_base_url": self.ge_cloud_base_url,
+            "ge_cloud_data_context_id": self.ge_cloud_data_context_id,
+            "ge_cloud_account_id": self.ge_cloud_account_id,
+            "ge_cloud_access_token": self.ge_cloud_access_token,
+        }
+
 
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
