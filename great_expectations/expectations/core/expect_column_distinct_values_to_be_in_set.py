@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, List, Optional, Union
 
 import altair as alt
@@ -302,6 +303,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         value_set = self.get_success_kwargs(configuration).get("value_set") or []
 
         if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
             parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set

@@ -1,5 +1,7 @@
 import warnings
 
+from dateutil.parser import parse
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -28,17 +30,16 @@ class ColumnMax(ColumnAggregateMetricProvider):
                 DeprecationWarning,
             )
 
-        return column.max()
+            temp_column = column.map(parse)
+            return temp_column.max()
+        else:
+            return column.max()
+
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
+            raise NotImplementedError
 
         return sa.func.max(column)
 
@@ -51,5 +52,6 @@ class ColumnMax(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
+            raise NotImplementedError
 
         return F.max(column)

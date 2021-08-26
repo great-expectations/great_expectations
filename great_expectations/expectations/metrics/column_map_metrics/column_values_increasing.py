@@ -33,7 +33,10 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
     default_kwarg_values = {"strictly": False}
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, strictly=None, **kwargs):
+    def _pandas(cls, column, strictly=None, parse_strings_as_datetimes=None, **kwargs):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+
         series_diff = column.diff()
         # The first element is null, so it gets a bye and is always treated as True
         series_diff[series_diff.isnull()] = 1
@@ -55,7 +58,11 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
+        parse_strings_as_datetimes=None,
     ):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]

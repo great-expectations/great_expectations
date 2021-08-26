@@ -23,12 +23,8 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
+            raise NotImplementedError
+
         if value_set is None:
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
@@ -37,12 +33,8 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
+            raise NotImplementedError
+
         if value_set is None:
             # vacuously true
             return True
@@ -53,12 +45,8 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
-                DeprecationWarning,
-            )
+            raise NotImplementedError
+
         if value_set is None:
             # vacuously true
             return F.lit(True)
