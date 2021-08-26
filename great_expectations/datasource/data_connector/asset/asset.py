@@ -18,16 +18,11 @@ class Asset:
         pattern: Optional[str] = None,
         group_names: Optional[List[str]] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        bucket: Optional[str] = None,  # S3/GCS
+        container: Optional[str] = None,  # Azure
         prefix: Optional[str] = None,
         delimiter: Optional[str] = None,
-        # S3
         max_keys: Optional[int] = None,
-        # Azure
-        container: Optional[str] = None,
-        # GCS
-        max_results: Optional[int] = None,
-        # Both S3/GCS
-        bucket: Optional[str] = None,
     ):
         self._name = name
         self._base_directory = base_directory
@@ -36,20 +31,11 @@ class Asset:
         # Note: this may need to become a nested object to accommodate sorters
         self._group_names = group_names
         self._batch_spec_passthrough = batch_spec_passthrough or {}
+        self._bucket = bucket  # S3/GCS
+        self._container = container  # Azure
         self._prefix = prefix
         self._delimiter = delimiter
-
-        # S3
         self._max_keys = max_keys
-
-        # Azure
-        self._container = container
-
-        # GCS
-        self._max_results = max_results
-
-        # Both S3/GCS
-        self._bucket = bucket
 
     @property
     def name(self) -> str:
@@ -76,6 +62,14 @@ class Asset:
         return self._batch_spec_passthrough
 
     @property
+    def bucket(self) -> Optional[str]:
+        return self._bucket
+
+    @property
+    def container(self) -> Optional[str]:
+        return self._container
+
+    @property
     def prefix(self) -> Optional[str]:
         return self._prefix
 
@@ -86,15 +80,3 @@ class Asset:
     @property
     def max_keys(self) -> Optional[int]:
         return self._max_keys
-
-    @property
-    def container(self) -> Optional[str]:
-        return self._container
-
-    @property
-    def max_results(self) -> Optional[int]:
-        return self._max_results
-
-    @property
-    def bucket(self) -> Optional[str]:
-        return self._bucket

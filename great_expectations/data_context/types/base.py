@@ -134,7 +134,8 @@ class AssetConfig(DictDot):
         name=None,
         class_name=None,
         module_name=None,
-        bucket=None,
+        bucket=None,  # S3/GCS
+        container=None,  # Azure
         prefix=None,
         delimiter=None,
         max_keys=None,
@@ -147,6 +148,8 @@ class AssetConfig(DictDot):
         self._module_name = module_name
         if bucket is not None:
             self.bucket = bucket
+        if container is not None:
+            self.container = container
         if prefix is not None:
             self.prefix = prefix
         if delimiter is not None:
@@ -185,6 +188,7 @@ class AssetConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     bucket = fields.String(required=False, allow_none=True)
+    container = fields.String(required=False, allow_none=True)
     prefix = fields.String(required=False, allow_none=True)
     delimiter = fields.String(required=False, allow_none=True)
     max_keys = fields.Integer(required=False, allow_none=True)
@@ -285,25 +289,21 @@ class DataConnectorConfig(DictDot):
         assets=None,
         base_directory=None,
         glob_directive=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
         default_regex=None,
         batch_identifiers=None,
         sorters=None,
         batch_spec_passthrough=None,
         # S3
         boto3_options=None,
-        bucket=None,
-        max_keys=None,
         # Azure
         azure_options=None,
         container=None,
-        name_starts_with=None,
         # GCS
-        bucket_or_name=None,
-        max_results=None,
-        # Both S3/GCS
-        prefix=None,
-        # Both S3/Azure
-        delimiter=None,
+        gcs_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -316,6 +316,14 @@ class DataConnectorConfig(DictDot):
             self.base_directory = base_directory
         if glob_directive is not None:
             self.glob_directive = glob_directive
+        if bucket is not None:
+            self.bucket = bucket
+        if prefix is not None:
+            self.prefix = prefix
+        if delimiter is not None:
+            self.delimiter = delimiter
+        if max_keys is not None:
+            self.max_keys = max_keys
         if default_regex is not None:
             self.default_regex = default_regex
         if batch_identifiers is not None:
@@ -328,32 +336,16 @@ class DataConnectorConfig(DictDot):
         # S3
         if boto3_options is not None:
             self.boto3_options = boto3_options
-        if bucket is not None:
-            self.bucket = bucket
-        if max_keys is not None:
-            self.max_keys = max_keys
 
         # Azure
         if azure_options is not None:
             self.azure_options = azure_options
         if container is not None:
             self.container = container
-        if name_starts_with is not None:
-            self.name_starts_with = name_starts_with
 
         # GCS
-        if bucket_or_name is not None:
-            self.bucket_or_name = bucket_or_name
-        if max_results is not None:
-            self.max_results = max_results
-
-        # Both S3/GCS
-        if prefix is not None:
-            self.prefix = prefix
-
-        # Both S3/Azure
-        if delimiter is not None:
-            self.delimiter = delimiter
+        if gcs_options is not None:
+            self.gcs_options = gcs_options
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -383,6 +375,11 @@ class DataConnectorConfigSchema(Schema):
 
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    delimiter = fields.String(required=False, allow_none=True)
+
+    max_keys = fields.Integer(required=False, allow_none=True)
     sorters = fields.List(
         fields.Nested(SorterConfigSchema, required=False, allow_none=True),
         required=False,
@@ -398,28 +395,17 @@ class DataConnectorConfigSchema(Schema):
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
-    bucket = fields.String(required=False, allow_none=True)
-    max_keys = fields.Integer(required=False, allow_none=True)
 
     # Azure
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     container = fields.String(required=False, allow_none=True)
-    name_starts_with = fields.String(required=False, allow_none=True)
 
     # GCS
     gcs_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
-    bucket_or_name = fields.String(required=False, allow_none=True)
-    max_results = fields.String(required=False, allow_none=True)
-
-    # Both S3/GCS
-    prefix = fields.String(required=False, allow_none=True)
-
-    # Both S3/Azure
-    delimiter = fields.String(required=False, allow_none=True)
 
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
@@ -474,37 +460,24 @@ filesystem type of the data connector (your data connector is "{data['class_name
 configuration to continue.
                 """
             )
-        if ("delimiter" in data) and not (
+        if ("delimiter" in data or "prefix" in data or "max_keys" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
                 "InferredAssetAzureDataConnector",
                 "ConfiguredAssetAzureDataConnector",
-            ]
-        ):
-            raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector that are required only by an
-S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
-continue.
-                """
-            )
-        if ("prefix" in data) and not (
-            data["class_name"]
-            in [
-                "InferredAssetS3DataConnector",
-                "ConfiguredAssetS3DataConnector",
                 "InferredAssetGCSDataConnector",
                 "ConfiguredAssetGCSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
-S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+S3/Azure/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )
-        if ("bucket" in data or "max_keys" in data) and not (
+        if ("bucket" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
@@ -517,9 +490,7 @@ S3 type of the data connector (your data connector is "{data['class_name']}").  
 continue.
                 """
             )
-        if (
-            "azure_options" in data or "container" in data or "name_starts_with" in data
-        ) and not (
+        if ("azure_options" in data or "container" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetAzureDataConnector",
@@ -543,9 +514,7 @@ continue.
                     You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
                     """
                 )
-        if (
-            "gcs_options" in data or "bucket_or_name" in data or "max_results" in data
-        ) and not (
+        if ("gcs_options" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetGCSDataConnector",

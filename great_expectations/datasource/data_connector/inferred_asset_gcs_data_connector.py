@@ -58,7 +58,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         sorters: Optional[list] = None,
         prefix: Optional[str] = None,
         delimiter: Optional[str] = None,
-        max_results: Optional[int] = None,
+        max_keys: Optional[int] = None,
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -74,7 +74,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             sorters (list): optional list of sorters for sorting data_references
             prefix (str): GCS prefix
             delimiter (str): GCS delimiter
-            max_results (int): max blob filepaths to return
+            max_keys (int): max blob filepaths to return
             gcs_options (dict): wrapper object for optional GCS **kwargs
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
@@ -92,7 +92,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         self._bucket = bucket
         self._prefix = prefix
         self._delimiter = delimiter
-        self._max_results = max_results
+        self._max_keys = max_keys
 
         if gcs_options is None:
             gcs_options = {}
@@ -138,7 +138,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             "bucket_or_name": self._bucket,
             "prefix": self._prefix,
             "delimiter": self._delimiter,
-            "max_results": self._max_results,
+            "max_results": self._max_keys,
         }
 
         path_list: List[str] = [

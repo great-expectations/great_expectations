@@ -60,7 +60,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         sorters: Optional[list] = None,
         prefix: Optional[str] = None,
         delimiter: Optional[str] = None,
-        max_results: Optional[int] = None,
+        max_keys: Optional[int] = None,
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -95,7 +95,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         self._bucket = bucket
         self._prefix = prefix
         self._delimiter = delimiter
-        self._max_results = max_results
+        self._max_keys = max_keys
 
         if gcs_options is None:
             gcs_options = {}
@@ -139,7 +139,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             "bucket_or_name": self._bucket,
             "prefix": self._prefix,
             "delimiter": self._delimiter,
-            "max_results": self._max_results,
+            "max_results": self._max_keys,
         }
 
         if asset is not None:
@@ -149,8 +149,8 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
                 query_options["prefix"] = asset.prefix
             if asset.delimiter:
                 query_options["delimiter"] = asset.delimiter
-            if asset.max_results:
-                query_options["max_results"] = asset.max_results
+            if asset.max_keys:
+                query_options["max_results"] = asset.max_keys
 
         path_list: List[str] = [
             key
