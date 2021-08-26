@@ -16,13 +16,13 @@ develop
 * [FEATURE]/CHANGE run time format (#3272) (Thanks @serialbandicoot)
 * [DOCS] Fix misc errors in "How to create renderers for Custom Expectations" (#3315)
 * [DOCS] GDOC-217 remove stub links (#3314)
+* [DOCS] Remove misc TODOs to tidy up docs (#3313)
 * [DOCS] Standardize capitalization of various technologies in `docs` (#3312)
+* [DOCS] Fix broken link to Contributor docs (#3295) (Thanks @discdiver)
 * [MAINTENANCE] Additional tests for RuntimeDataConnector at Datasource-level (query) (#3288)
-* [MAINTENANCE] DOCS Fix broken link to Contributor docs (#3295) (Thanks @discdiver)
 * [MAINTENANCE] Update GCSStoreBackend + tests (#2630) (Thanks @hmandsager)
 * [MAINTENANCE] Write integration/E2E tests for `ConfiguredAssetAzureDataConnector` (#3204)
 * [MAINTENANCE] Write integration/E2E tests for both `GCSDataConnectors` (#3301)
-* [MAINTENANCE] docs: Remove misc TODOs to tidy up docs (#3313)
 
 0.13.30
 -----------------
