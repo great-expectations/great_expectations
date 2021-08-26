@@ -13,7 +13,7 @@ execution_engine:
 data_connectors:
     configured_data_connector_name:
         class_name: ConfiguredAssetGCSDataConnector
-        bucket_or_name: <YOUR_GCS_BUCKET_HERE>
+        bucket: <YOUR_GCS_BUCKET_HERE>
         prefix: <BUCKET_PATH_TO_DATA>
         assets:
             taxi_data:
