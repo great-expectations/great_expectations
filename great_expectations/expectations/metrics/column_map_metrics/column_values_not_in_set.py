@@ -25,7 +25,7 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
     )
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, value_set, **kwargs):
+    def _pandas(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
         if value_set is None:
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
@@ -55,5 +55,7 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
         return column.notin_(tuple(parsed_value_set))
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, value_set, **kwargs):
+    def _spark(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
         return ~column.isin(value_set)
