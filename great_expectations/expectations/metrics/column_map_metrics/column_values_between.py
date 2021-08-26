@@ -219,20 +219,16 @@ will be deprecated in a future release. Please update code accordingly.
         if parse_strings_as_datetimes:
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and \
-                will be deprecated in a future release. Please update code accordingly.
-                """,
+will be deprecated in a future release. Please update code accordingly.
+""",
                 DeprecationWarning,
             )
-
-            temp_column = F.to_date(column)
 
             if min_value:
                 min_value = parse(min_value)
 
             if max_value:
                 max_value = parse(max_value)
-        else:
-            temp_column = column
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
@@ -242,22 +238,22 @@ will be deprecated in a future release. Please update code accordingly.
 
         if min_value is None:
             if strict_max:
-                return temp_column < max_value
+                return column < max_value
             else:
-                return temp_column <= max_value
+                return column <= max_value
 
         elif max_value is None:
             if strict_min:
-                return min_value < temp_column
+                return min_value < column
             else:
-                return min_value <= temp_column
+                return min_value <= column
 
         else:
             if strict_min and strict_max:
-                return (min_value < temp_column) & (temp_column < max_value)
+                return (min_value < column) & (column < max_value)
             elif strict_min:
-                return (min_value < temp_column) & (temp_column <= max_value)
+                return (min_value < column) & (column <= max_value)
             elif strict_max:
-                return (min_value <= temp_column) & (temp_column < max_value)
+                return (min_value <= column) & (column < max_value)
             else:
-                return (min_value <= temp_column) & (temp_column <= max_value)
+                return (min_value <= column) & (column <= max_value)
