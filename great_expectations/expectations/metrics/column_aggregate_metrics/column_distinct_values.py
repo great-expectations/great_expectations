@@ -84,7 +84,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, parse_strings_as_datetimes=None, **kwargs):
+    def _pandas(cls, column, **kwargs):
         return column.nunique()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
