@@ -76,7 +76,7 @@ There are several paths to generating Expectations:
 1. Expertise. Rich experience from subject matter experts, Analysts, and data owners is often a critical source of
    Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure
    conditions can be can excellent way to generate Expectations.
-1. Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter notebooks)
+1. Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter Notebooks)
    is an important way to develop experience with both raw and derived datasets and generate useful and testable
    Expectations about characteristics that may be important for the data's eventual purpose, whether reporting or
    feeding another downstream model or data system.
