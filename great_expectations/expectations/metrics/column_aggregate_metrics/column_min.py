@@ -47,5 +47,15 @@ class ColumnMin(ColumnAggregateMetricProvider):
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            raise NotImplementedError
-        return F.min(column)
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
+
+            temp_column = F.to_date(column)
+        else:
+            temp_column = column
+
+        return F.min(temp_column)

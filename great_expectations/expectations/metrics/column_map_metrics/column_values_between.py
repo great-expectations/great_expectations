@@ -9,7 +9,7 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -223,11 +223,16 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
+            temp_column = F.to_date(column)
+
             if min_value:
                 min_value = parse(min_value)
 
             if max_value:
                 max_value = parse(max_value)
+        else:
+            temp_column = column
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
@@ -237,22 +242,22 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
 
         if min_value is None:
             if strict_max:
-                return column < max_value
+                return temp_column < max_value
             else:
-                return column <= max_value
+                return temp_column <= max_value
 
         elif max_value is None:
             if strict_min:
-                return min_value < column
+                return min_value < temp_column
             else:
-                return min_value <= column
+                return min_value <= temp_column
 
         else:
             if strict_min and strict_max:
-                return (min_value < column) & (column < max_value)
+                return (min_value < temp_column) & (temp_column < max_value)
             elif strict_min:
-                return (min_value < column) & (column <= max_value)
+                return (min_value < temp_column) & (temp_column <= max_value)
             elif strict_max:
-                return (min_value <= column) & (column < max_value)
+                return (min_value <= temp_column) & (temp_column < max_value)
             else:
-                return (min_value <= column) & (column <= max_value)
+                return (min_value <= temp_column) & (temp_column <= max_value)

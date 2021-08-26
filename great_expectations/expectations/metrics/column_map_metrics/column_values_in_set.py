@@ -45,9 +45,20 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            raise NotImplementedError
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
 
-        if value_set is None:
+            temp_column = F.to_date(column)
+            temp_value_set = F.to_date(value_set)
+        else:
+            temp_column = column
+            temp_value_set = value_set
+
+        if temp_value_set is None:
             # vacuously true
             return F.lit(True)
-        return column.isin(value_set)
+        return temp_column.isin(temp_value_set)

@@ -7,7 +7,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -51,6 +51,7 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
                 """,
                 DeprecationWarning,
             )
+
             temp_column_A = column_A.map(parse)
             temp_column_B = column_B.map(parse)
         else:
@@ -107,8 +108,8 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
                 """,
                 DeprecationWarning,
             )
-            temp_column_A = column_A.map(parse)
-            temp_column_B = column_B.map(parse)
+            temp_column_A = F.to_date(column_A)
+            temp_column_B = F.to_date(column_B)
         else:
             temp_column_A = column_A
             temp_column_B = column_B

@@ -51,6 +51,9 @@ class ColumnMax(ColumnAggregateMetricProvider):
                 """,
                 DeprecationWarning,
             )
-            raise NotImplementedError
 
-        return F.max(column)
+            temp_column = F.to_date(column)
+        else:
+            temp_column = column
+
+        return F.max(temp_column)

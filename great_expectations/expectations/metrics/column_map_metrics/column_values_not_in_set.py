@@ -10,6 +10,7 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -58,6 +59,17 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, value_set, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            raise NotImplementedError
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+                will be deprecated in a future release. Please update code accordingly.
+                """,
+                DeprecationWarning,
+            )
 
-        return ~column.isin(value_set)
+            temp_column = F.to_date(column)
+            temp_value_set = F.to_date(value_set)
+        else:
+            temp_column = column
+            temp_value_set = value_set
+
+        return ~temp_column.isin(temp_value_set)
