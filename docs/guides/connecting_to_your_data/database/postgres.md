@@ -42,7 +42,7 @@ For this guide we will use a `connection_string` like this:
 postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```   
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -154,6 +154,6 @@ To view the full scripts used in this page, see them on GitHub:
 - [postgres_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py)
 - [postgres_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py)
 
-## Next Steps
+## Next Steps	
 
-<NextSteps />
+<NextSteps />	
