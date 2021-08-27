@@ -313,6 +313,7 @@ class BaseDataContext:
         project_config,
         context_root_dir=None,
         runtime_environment=None,
+        ge_cloud_mode=False,
         ge_cloud_config=None,
     ):
         """DataContext constructor
@@ -330,6 +331,7 @@ class BaseDataContext:
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
+        self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
         self._project_config = project_config
         self._apply_global_config_overrides()
@@ -400,7 +402,7 @@ class BaseDataContext:
 
     @property
     def ge_cloud_mode(self):
-        return True if self.ge_cloud_config is not None else False
+        return self._ge_cloud_mode
 
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
@@ -3967,7 +3969,8 @@ class DataContext(BaseDataContext):
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
     ):
-
+        self._ge_cloud_mode = ge_cloud_mode
+        self._ge_cloud_config = None
         ge_cloud_config = None
         context_root_directory = None
         if ge_cloud_mode:
@@ -3994,6 +3997,7 @@ class DataContext(BaseDataContext):
             project_config,
             context_root_directory,
             runtime_environment,
+            ge_cloud_mode=ge_cloud_mode,
             ge_cloud_config=ge_cloud_config,
         )
 
