@@ -217,7 +217,6 @@ will be deprecated in a future release. Please update code accordingly.
         **kwargs
     ):
         if parse_strings_as_datetimes:
-            # we rely on Spark to detect datetime type from string
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and \
 will be deprecated in a future release. Please update code accordingly.
