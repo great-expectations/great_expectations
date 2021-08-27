@@ -1,4 +1,6 @@
 import json
+import logging
+import traceback
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -43,6 +45,32 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+
+logger = logging.getLogger(__name__)
+
+try:
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    ProgrammingError = None
+    Select = None
+
+try:
+    from sqlalchemy.engine.row import Row
+except ImportError:
+    try:
+        from sqlalchemy.engine.row import RowProxy
+
+        Row = RowProxy
+    except ImportError:
+        logger.debug(
+            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
+        )
+        RowProxy = None
+        Row = None
 
 
 class ColumnSkew(ColumnMetricProvider):
@@ -109,7 +137,6 @@ class ColumnSkew(ColumnMetricProvider):
         )
 
         column_skew = column_third_moment / (column_std ** 3) / (column_count - 1)
-        print(column_skew)
         if metric_value_kwargs["abs"]:
             return np.abs(column_skew)
         else:
@@ -117,13 +144,10 @@ class ColumnSkew(ColumnMetricProvider):
 
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
-    from sqlalchemy.exc import ProgrammingError
-
     simple_query: Select = sa.select(func).select_from(selectable)
 
     try:
         result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
-        print(result)
         return result
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
