@@ -26,13 +26,6 @@ class ColumnMin(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, parse_strings_as_datetimes=None, **kwargs):
         if parse_strings_as_datetimes:
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and \
-will be deprecated in a future release. Please update code accordingly.
-""",
-                DeprecationWarning,
-            )
-
             temp_column = column.map(parse)
             return temp_column.min()
         else:

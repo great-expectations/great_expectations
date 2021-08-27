@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -229,7 +230,14 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
+        parse_strings_as_datetimes=None,
     ):
+        warnings.warn(
+            """The parameter "parse_strings_as_datetimes" is no longer supported and \
+will be deprecated in a future release. Please update code accordingly.
+""",
+            DeprecationWarning,
+        )
         return self._validate_metric_value_between(
             metric_name="column.max",
             configuration=configuration,
