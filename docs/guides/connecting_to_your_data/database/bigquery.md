@@ -43,7 +43,7 @@ For this guide we will use a `connection_string` like this:
 bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>
 ```   
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 

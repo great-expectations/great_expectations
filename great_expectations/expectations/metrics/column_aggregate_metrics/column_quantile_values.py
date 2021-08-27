@@ -1,6 +1,6 @@
 import logging
 import traceback
-from collections import Iterable
+from collections.abc import Iterable
 from typing import Any, Dict, List, Tuple
 
 import numpy as np

@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import logging
 import uuid
+import warnings
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
@@ -390,9 +391,17 @@ Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if not in ["neither", "never"]:
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
+                    )
+
+                if ignore_row_if == "never":
+                    warnings.warn(
+                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
+"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+""",
+                        DeprecationWarning,
                     )
 
             return data
@@ -401,16 +410,16 @@ Please check your config."""
             column_list = domain_kwargs["column_list"]
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
-                ignore_condition = reduce(
-                    lambda column_a, column_b: column_a.isNull() & column_b.isNull(),
-                    map(F.col, column_list),
-                )
+                conditions = [
+                    F.col(column_name).isNull() for column_name in column_list
+                ]
+                ignore_condition = reduce(lambda a, b: a & b, conditions)
                 data = data.filter(~ignore_condition)
             elif ignore_row_if == "any_value_is_missing":
-                ignore_condition = reduce(
-                    lambda column_a, column_b: column_a.isNull() | column_b.isNull(),
-                    map(F.col, column_list),
-                )
+                conditions = [
+                    F.col(column_name).isNull() for column_name in column_list
+                ]
+                ignore_condition = reduce(lambda a, b: a | b, conditions)
                 data = data.filter(~ignore_condition)
             else:
                 if ignore_row_if != "never":
@@ -521,9 +530,14 @@ Please check your config."""
                     "column_list not found within domain_kwargs"
                 )
 
-            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                "column_list"
-            )
+            column_list = compute_domain_kwargs.pop("column_list")
+
+            if len(column_list) < 2:
+                raise ge_exceptions.GreatExpectationsError(
+                    "column_list must contain at least 2 columns"
+                )
+
+            accessor_domain_kwargs["column_list"] = column_list
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 

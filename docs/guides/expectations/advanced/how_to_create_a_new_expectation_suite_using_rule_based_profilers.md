@@ -48,12 +48,12 @@ data_connectors:
         pattern: (.+)_(\d.*)-(\d.*)\.csv
 """
 ```
-- Test your yaml config to make sure it works - you should see some of the taxi `csv` filenames listed
+- Test your YAML config to make sure it works - you should see some of the taxi `csv` filenames listed
 - Save your datasource config
 
 ### 4. Configuring the Profiler
-- Now, we'll create a new script in the same top-level `taxi_profiling_tutorial` directory called `profiler_script.py`. If you prefer, you could open up a Jupyter notebook and run this there instead.
-- At the top of this file, we will create a new yaml docstring assigned to a variable called `profiler_config`. This will look similar to the yaml docstring we used above when creating our Datasource. Over the next several steps, we will slowly add lines to this docstring by typing or pasting in the lines below
+- Now, we'll create a new script in the same top-level `taxi_profiling_tutorial` directory called `profiler_script.py`. If you prefer, you could open up a Jupyter Notebook and run this there instead.
+- At the top of this file, we will create a new YAML docstring assigned to a variable called `profiler_config`. This will look similar to the YAML docstring we used above when creating our Datasource. Over the next several steps, we will slowly add lines to this docstring by typing or pasting in the lines below
 ```python 
 profiler_config = """
 

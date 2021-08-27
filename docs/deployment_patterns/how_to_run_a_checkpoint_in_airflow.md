@@ -37,7 +37,7 @@ validation_task = BashOperator(
 
 ### Option 2: Running the `checkpoint script` output with a PythonOperator
 
-Another option is to use the output of the `great_expectations --v3-api checkpoint script` command and paste it into a method that is called from a PythonOperator in the DAG. This gives you more fine-grained control over how to respond to validation results:
+Another option is to use the output of the `great_expectations --v3-api checkpoint script` command and paste it into a method that is called from a PythonOperator in the DAG. This gives you more fine-grained control over how to respond to Validation Results:
 
 1. Run `great_expectations --v3-api checkpoint script`
 

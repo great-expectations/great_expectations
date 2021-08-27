@@ -320,6 +320,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     include_postgresql: bool = "postgresql" in test_backends
     include_mysql: bool = "mysql" in test_backends
     include_mssql: bool = "mssql" in test_backends
+    include_bigquery: bool = "bigquery" in test_backends
 
     if not create_engine:
         pytest.skip("Unable to import sqlalchemy.create_engine() -- skipping.")
@@ -331,6 +332,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
         include_postgresql=include_postgresql,
         include_mysql=include_mysql,
         include_mssql=include_mssql,
+        include_bigquery=include_bigquery,
     )
 
     df: pd.DataFrame = pd.DataFrame(

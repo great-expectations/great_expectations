@@ -7,7 +7,60 @@ Changelog
 
 develop
 -----------------
-* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
+
+0.13.31
+-----------------
+* [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)
+* [FEATURE] Enable column_pair expectations and tests for Spark (#3294)
+* [FEATURE] Implement `InferredAssetGCSDataConnector` (#3284)
+* [FEATURE]/CHANGE run time format (#3272) (Thanks @serialbandicoot)
+* [DOCS] Fix misc errors in "How to create renderers for Custom Expectations" (#3315)
+* [DOCS] GDOC-217 remove stub links (#3314)
+* [DOCS] Remove misc TODOs to tidy up docs (#3313)
+* [DOCS] Standardize capitalization of various technologies in `docs` (#3312)
+* [DOCS] Fix broken link to Contributor docs (#3295) (Thanks @discdiver)
+* [MAINTENANCE] Additional tests for RuntimeDataConnector at Datasource-level (query) (#3288)
+* [MAINTENANCE] Update GCSStoreBackend + tests (#2630) (Thanks @hmandsager)
+* [MAINTENANCE] Write integration/E2E tests for `ConfiguredAssetAzureDataConnector` (#3204)
+* [MAINTENANCE] Write integration/E2E tests for both `GCSDataConnectors` (#3301)
+
+0.13.30
+-----------------
+* [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_in_set for SQL Alchemy execution engine (#3281)
+* [FEATURE] Implement `ConfiguredAssetGCSDataConnector` (#3247)
+* [BUGFIX] Fix import issues around cloud providers (GCS/Azure/S3) (#3292)
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema (#3126) (thanks @gipaetusb and @mbakunze)
+
+0.13.29
+-----------------
+* [FEATURE] Implementation of the Metric "select_column_values.unique.within_record" for SQLAlchemyExecutionEngine (#3279)
+* [FEATURE] V3 implement ColumnPairValuesInSet for SQL Alchemy execution engine (#3278)
+* [FEATURE] Edtf with support levels (#2594) (thanks @mielvds)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine (#3267)
+* [FEATURE] add expectation for discrete column entropy  (#3049) (thanks @edjoesu)
+* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b (#3268)
+* [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
+* [FEATURE] Add schema validation for different GCS auth methods (#3258)
+* [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine (#3256)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_equal expectation for PandasExecutionEngine (#3252)
+* [FEATURE] GCS DataConnector schema validation (#3253)
+* [FEATURE] Implementation of the "expect_select_column_values_to_be_unique_within_record" Expectation (#3251)
+* [FEATURE] Implement the SelectColumnValuesUniqueWithinRecord metric (for PandasExecutionEngine) (#3250)
+* [FEATURE] V3 - Implement ColumnPairValuesEqual for PandasExecutionEngine (#3243)
+* [FEATURE] Set foundation for GCS DataConnectors (#3220)
+* [FEATURE] Implement "expect_column_pair_values_to_be_in_set" expectation (support for PandasExecutionEngine) (#3242)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3228) (thanks @ismaildawoodjee)
+* [DOCS] Document BigQuery test dataset configuration (#3273) (Thanks @jdimatteo)
+* [DOCS] Syntax and Link (#3266)
+* [DOCS] API Links and Supporting Docs (#3265)
+* [DOCS] redir and search (#3249)
+* [MAINTENANCE] Update azure-pipelines-docs-integration.yml to include env vars for Azure docs integration tests
+* [MAINTENANCE] Allow Wrong ignore_row_if Directive from V2 with Deprecation Warning (#3274)
+* [MAINTENANCE] Refactor test structure for "Connecting to your data" cloud provider integration tests (#3277)
+* [MAINTENANCE] Make test method names consistent for Metrics tests (#3254)
+* [MAINTENANCE] Allow `PandasExecutionEngine` to accept `Azure DataConnectors` (#3214)
+* [MAINTENANCE] Standardize Arguments to MetricConfiguration Constructor; Use {} instead of dict(). (#3246)
 
 0.13.28
 -----------------

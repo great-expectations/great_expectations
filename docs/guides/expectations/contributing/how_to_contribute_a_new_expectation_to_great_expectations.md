@@ -112,7 +112,6 @@ From this point on, we will start filling in the pieces of your Expectation. You
 :::note
 * If you prefer to do your development in Jupyter Notebook and copy your Expectation into the file after you are done, you will run run_diagnostics directly in the notebook (instead of executing the file):
 ````python
-# TODO: replace the class name with your Expectation's class name
 diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
 print(json.dumps(diagnostics_report, indent=2))
 ````
@@ -400,8 +399,8 @@ library_metadata = {
     "tags": [  # Tags for this Expectation in the gallery
         #         "experimental"
     ],
-    "contributors": [  # Github handles for all contributors to this Expectation.
-        #         "@your_name_here", # Don't forget to add your github handle here!
+    "contributors": [  # GitHub handles for all contributors to this Expectation.
+        #         "@your_name_here", # Don't forget to add your GitHub handle here!
     ],
     "package": "experimental_expectations",
 }
