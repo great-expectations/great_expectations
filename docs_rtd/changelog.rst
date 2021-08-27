@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [MAINTENANCE] Add temporary support and DeprecationMessages for parameter parse_strings_as_datetimes (#3310)
 
 0.13.31
 -----------------
