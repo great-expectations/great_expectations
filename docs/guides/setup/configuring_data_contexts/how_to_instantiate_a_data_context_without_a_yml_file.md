@@ -25,7 +25,6 @@ Steps
 
     Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can continue with the existing API sans defaults by omitting this parameter, and you can override all of the parameters as shown in the last example. Note that a parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
-    **TODO(cdkini): These are links to our API Reference, which has not yet been implemented. What should we do here?**
     The following ``store_backend_defaults`` are currently available: 
         - :py:class:`~great_expectations.data_context.types.base.S3StoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.GCSStoreBackendDefaults`
@@ -195,7 +194,7 @@ Steps
 
     If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
 
-    - [Deploying Great Expectations with Airflow](../../../../docs/intro.md) - **TODO(cdkini): Where do we link this?**
+    - [Deploying Great Expectations with Airflow](../../../../docs/intro.md)
 
 
 Additional resources
