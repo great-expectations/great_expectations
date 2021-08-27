@@ -57,7 +57,11 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import Store, TupleStoreBackend, GeCloudStoreBackend
+from great_expectations.data_context.store import (
+    GeCloudStoreBackend,
+    Store,
+    TupleStoreBackend,
+)
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -80,7 +84,8 @@ from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier, GeCloudIdentifier,
+    GeCloudIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
@@ -302,7 +307,13 @@ class BaseDataContext:
     @usage_statistics_enabled_method(
         event_name="data_context.__init__",
     )
-    def __init__(self, project_config, context_root_dir=None, runtime_environment=None, ge_cloud_config=None):
+    def __init__(
+        self,
+        project_config,
+        context_root_dir=None,
+        runtime_environment=None,
+        ge_cloud_config=None,
+    ):
         """DataContext constructor
 
         Args:
@@ -922,7 +933,6 @@ class BaseDataContext:
 
         if not config:
             config = self._project_config
-
 
         substituted_config_variables = substitute_all_config_variables(
             self.config_variables,
@@ -2095,7 +2105,10 @@ class BaseDataContext:
         return validation_operators
 
     def create_expectation_suite(
-        self, expectation_suite_name: str, overwrite_existing: Optional[bool] = False, ge_cloud_id: Optional[str] = None
+        self,
+        expectation_suite_name: str,
+        overwrite_existing: Optional[bool] = False,
+        ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2114,7 +2127,9 @@ class BaseDataContext:
             expectation_suite_name=expectation_suite_name
         )
         if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
-            key: GeCloudIdentifier = GeCloudIdentifier(resource_type="expectation_suite", ge_cloud_id=ge_cloud_id)
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            )
             if self.expectations_store.has_key(key) and not overwrite_existing:
                 raise ge_exceptions.DataContextError(
                     "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
@@ -2138,7 +2153,9 @@ class BaseDataContext:
         return expectation_suite
 
     def delete_expectation_suite(
-            self, expectation_suite_name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ):
         """Delete specified expectation suite from data_context expectation store.
 
@@ -2149,9 +2166,13 @@ class BaseDataContext:
             True for Success and False for Failure.
         """
         if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
-            key: GeCloudIdentifier = GeCloudIdentifier(resource_type="expectation_suite", ge_cloud_id=ge_cloud_id)
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            )
         else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(expectation_suite_name)
+            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                expectation_suite_name
+            )
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -2161,7 +2182,9 @@ class BaseDataContext:
             return True
 
     def get_expectation_suite(
-            self, expectation_suite_name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
@@ -2172,7 +2195,9 @@ class BaseDataContext:
             expectation_suite
         """
         if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
-            key: GeCloudIdentifier = GeCloudIdentifier(resource_type="expectation_suite", ge_cloud_id=ge_cloud_id)
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            )
         else:
             key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
@@ -2198,8 +2223,12 @@ class BaseDataContext:
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
-            self, expectation_suite: ExpectationSuite, expectation_suite_name: Optional[str] = None,
-            overwrite_existing: Optional[bool] = True, ge_cloud_id: Optional[str] = None):
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: Optional[bool] = True,
+        ge_cloud_id: Optional[str] = None,
+    ):
         """Save the provided expectation suite into the DataContext.
 
         Args:
@@ -2211,7 +2240,9 @@ class BaseDataContext:
             None
         """
         if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
-            key: GeCloudIdentifier = GeCloudIdentifier(resource_type="expectation_suite", ge_cloud_id=ge_cloud_id)
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            )
             if self.expectations_store.has_key(key) and not overwrite_existing:
                 raise ge_exceptions.DataContextError(
                     "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
@@ -3070,7 +3101,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             },
         )
         if isinstance(self.checkpoint_store.store_backend, GeCloudStoreBackend):
-            key: GeCloudIdentifier = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="contract", ge_cloud_id=ge_cloud_id
+            )
         else:
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_key=name,
@@ -3086,7 +3119,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
     ) -> Union[Checkpoint, LegacyCheckpoint]:
         if ge_cloud_id:
-            key: GeCloudIdentifier = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="contract", ge_cloud_id=ge_cloud_id
+            )
         else:
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_key=name,
@@ -3151,7 +3186,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ), "Must provide either name or ge_cloud_id."
 
         if ge_cloud_id:
-            key: GeCloudIdentifier = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="contract", ge_cloud_id=ge_cloud_id
+            )
         else:
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_key=name
@@ -3944,12 +3981,23 @@ class DataContext(BaseDataContext):
             )
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
-            context_root_dir = self.find_context_root_dir() if context_root_dir is None else context_root_dir
-            context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
+            context_root_dir = (
+                self.find_context_root_dir()
+                if context_root_dir is None
+                else context_root_dir
+            )
+            context_root_directory = os.path.abspath(
+                os.path.expanduser(context_root_dir)
+            )
             self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-        super().__init__(project_config, context_root_directory, runtime_environment, ge_cloud_config=ge_cloud_config)
+        super().__init__(
+            project_config,
+            context_root_directory,
+            runtime_environment,
+            ge_cloud_config=ge_cloud_config,
+        )
 
         # save project config if data_context_id auto-generated or global config values applied
         project_config_dict = dataContextConfigSchema.dump(project_config)

@@ -68,7 +68,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "expectation_suites": "expectation_suite",
     "suite_validation_results": "suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
-    "contracts": "contract"
+    "contracts": "contract",
 }
 
 

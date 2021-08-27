@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import Union, Optional
+from typing import Optional, Union
 from uuid import UUID
 
 from dateutil.parser import parse

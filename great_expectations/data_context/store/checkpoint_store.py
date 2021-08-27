@@ -4,10 +4,14 @@ import random
 import uuid
 from typing import Dict
 
-from great_expectations.data_context.store import ConfigurationStore, GeCloudStoreBackend
+from great_expectations.data_context.store import (
+    ConfigurationStore,
+    GeCloudStoreBackend,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier, GeCloudIdentifier,
+    ConfigurationIdentifier,
+    GeCloudIdentifier,
 )
 
 logger = logging.getLogger(__name__)
@@ -42,8 +46,7 @@ class CheckpointStore(ConfigurationStore):
         )
         if isinstance(self._store_backend, GeCloudStoreBackend):
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type="contract",
-                ge_cloud_id=str(uuid.uuid4())
+                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
             )
         else:
             test_key: ConfigurationIdentifier = self.key_class(

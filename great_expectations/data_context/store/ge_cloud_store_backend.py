@@ -24,7 +24,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "suite_validation_result": "result",
         "contract": "checkpoint_config",
         "data_context": "data_context_config",
-        "expectation_suite": "suite"
+        "expectation_suite": "suite",
     }
 
     def __init__(
@@ -201,7 +201,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             response = requests.get(url, headers=self.auth_headers)
             response_json = response.json()
-            keys = [(self.ge_cloud_resource_type, resource["id"],) for resource in response_json.get("data")]
+            keys = [
+                (
+                    self.ge_cloud_resource_type,
+                    resource["id"],
+                )
+                for resource in response_json.get("data")
+            ]
             return keys
         except Exception as e:
             logger.debug(str(e))

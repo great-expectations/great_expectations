@@ -331,7 +331,10 @@ def run_validation_operator_usage_statistics(
 
 
 def save_expectation_suite_usage_statistics(
-    data_context, expectation_suite, expectation_suite_name=None, ge_cloud_id=None  # self
+    data_context,
+    expectation_suite,
+    expectation_suite_name=None,
+    ge_cloud_id=None,  # self
 ):
     try:
         data_context_id = data_context.data_context_id
