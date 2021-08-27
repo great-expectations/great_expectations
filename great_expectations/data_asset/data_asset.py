@@ -31,7 +31,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
-    calculate_delta_durations
+    calculate_run_duration
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.marshmallow__shade import ValidationError
@@ -982,7 +982,7 @@ class DataAsset:
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
 
-            run_duration = calculate_delta_durations(start_time=start_time, end_time=time.monotonic())
+            run_duration = calculate_run_duration(start_time=start_time, end_time=time.monotonic())
 
             meta = {
                 "great_expectations_version": ge_version,

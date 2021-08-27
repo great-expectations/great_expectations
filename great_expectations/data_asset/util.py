@@ -203,7 +203,7 @@ def recursively_convert_to_json_serializable(test_obj):
             % (str(test_obj), type(test_obj).__name__)
         )
 
-def calculate_delta_durations(start_time: tm.monotonic, end_time: tm.monotonic) -> str:
+def calculate_run_duration(start_time: tm.monotonic, end_time: tm.monotonic) -> str:
     """
     Calculate the delta of two monotonic times
     
