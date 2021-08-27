@@ -1575,12 +1575,13 @@ class BaseDataContext:
                 )
             datasource_name = batch_request.datasource_name
 
-        try:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        except TypeError:
+        # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
+        # from passing in batch_request as an unnamed parameter.
+        if not isinstance(datasource_name, str):
             raise ge_exceptions.GreatExpectationsTypeError(
-                "RuntimeBatchRequest must be passed in as a named parameter: 'batch_request'. Please try again"
+                f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
             )
+        datasource: Datasource = self.datasources[datasource_name]
 
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
             raise ValueError("Must provide only one of batch_data, query, or path.")
