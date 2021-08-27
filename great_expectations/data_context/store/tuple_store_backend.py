@@ -990,7 +990,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.prefix = prefix
         if container:
             warnings.warn(
-                "To ensure consistency across the GE stack, please utilize `bucket` instead of `container` moving forward",
+                "For consistency, GE uses `bucket` across all `TupleStoreBackend` subclasses; use of `container` will be deprecated in a future release.",
                 DeprecationWarning,
             )
             self.bucket = container
