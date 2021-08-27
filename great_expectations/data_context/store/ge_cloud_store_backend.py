@@ -136,7 +136,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _set(self, key, value, **kwargs):
         # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_id = key[0]
+        ge_cloud_id = key[1]
 
         # if key has ge_cloud_id, perform _update instead
         if ge_cloud_id:
@@ -164,7 +164,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
-            object_url = self.get_url_for_key((object_id,))
+            object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
             return GeCloudResourceRef(
                 resource_type=resource_type,
                 ge_cloud_id=object_id,
@@ -201,17 +201,17 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             response = requests.get(url, headers=self.auth_headers)
             response_json = response.json()
-            keys = [(resource["id"],) for resource in response_json.get("data")]
+            keys = [(self.ge_cloud_resource_type, resource["id"],) for resource in response_json.get("data")]
             return keys
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to list keys in GE Cloud Store Backend.")
 
     def get_url_for_key(self, key, protocol=None):
-        ge_cloud_id = key[0]
+        ge_cloud_id = key[1]
         url = urljoin(
             self.ge_cloud_base_url,
-            f"accounts/{self.ge_cloud_credentials['account_id']}/{self.ge_cloud_resource_name}/{ge_cloud_id}",
+            f"accounts/{self.ge_cloud_credentials['account_id']}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
         )
         return url
 
@@ -219,7 +219,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
-        ge_cloud_id = key[0]
+        ge_cloud_id = key[1]
 
         data = {
             "data": {

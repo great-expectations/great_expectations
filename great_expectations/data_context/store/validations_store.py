@@ -1,10 +1,12 @@
 import random
+import uuid
 from typing import Dict
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -12,7 +14,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
+    ValidationResultIdentifier, GeCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -190,13 +192,20 @@ class ValidationsStore(Store):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
 
-        test_key = self._key_class(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="temporary_test_suite",
-            ),
-            run_id="temporary_test_run_id",
-            batch_identifier=test_key_name,
-        )
+        if isinstance(self._store_backend, GeCloudStoreBackend):
+            test_key: GeCloudIdentifier = self.key_class(
+                resource_type="contract",
+                ge_cloud_id=str(uuid.uuid4())
+            )
+
+        else:
+            test_key: ValidationResultIdentifier = self.key_class(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    expectation_suite_name="temporary_test_suite",
+                ),
+                run_id="temporary_test_run_id",
+                batch_identifier=test_key_name,
+            )
         test_value = ExpectationSuiteValidationResult(success=True)
 
         if pretty_print:

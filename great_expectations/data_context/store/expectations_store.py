@@ -205,7 +205,13 @@ class ExpectationsStore(Store):
         test_key_name = "test-key-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        test_key = self._key_class(test_key_name)
+        if isinstance(self._store_backend, GeCloudStoreBackend):
+            test_key: GeCloudIdentifier = self.key_class(
+                resource_type="contract",
+                ge_cloud_id=str(uuid.uuid4())
+            )
+        else:
+            test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)
         test_value = ExpectationSuite(test_key_name)
 
         if pretty_print:
