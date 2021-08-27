@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     PAYLOAD_ATTRIBUTES_KEYS = {
         "suite_validation_result": "result",
-        "checkpoint": "checkpoint_config",
+        "contract": "checkpoint_config",
         "data_context": "data_context_config",
+        "expectation_suite": "suite"
     }
 
     def __init__(
@@ -117,7 +118,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.ge_cloud_base_url,
             f"accounts/"
             f"{account_id}/"
-            f"{self.ge_cloud_resource_name}/"
+            f"{hyphen(self.ge_cloud_resource_name)}/"
             f"{ge_cloud_id}",
         )
         try:
@@ -234,7 +235,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.ge_cloud_base_url,
             f"accounts/"
             f"{self.ge_cloud_credentials['account_id']}/"
-            f"{self.ge_cloud_resource_name}/"
+            f"{hyphen(self.ge_cloud_resource_name)}/"
             f"{ge_cloud_id}",
         )
         try:
