@@ -5,6 +5,7 @@ import json
 import logging
 import traceback
 import warnings
+import time
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Dict, Iterable, List, Optional, Set
@@ -1088,6 +1089,7 @@ set as active.
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
+            start_time = time.monotonic()
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
@@ -1228,7 +1230,7 @@ set as active.
                 results = abbrev_results
 
             expectation_suite_name = expectation_suite.expectation_suite_name
-            run_duration = calculate_delta_durations(parse(validation_time), datetime.datetime.now(datetime.timezone.utc))
+            run_duration = calculate_delta_durations(start_time=start_time, end_time=time.monotonic())
 
             result = ExpectationSuiteValidationResult(
                 results=results,

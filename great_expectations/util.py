@@ -37,7 +37,6 @@ from great_expectations.exceptions import (
     PluginModuleNotFoundError,
 )
 from great_expectations.expectations.registry import _registered_expectations
-from datetime import timedelta
 
 try:
     # This library moved in python 3.8
@@ -1067,14 +1066,11 @@ def generate_library_json_from_registered_expectations():
 def delete_blank_lines(text: str) -> str:
     return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
 
-def calculate_delta_durations(start: datetime, end: datetime) -> str:
+def calculate_delta_durations(start_time: time.monotonic, end_time: time.monotonic) -> str:
     """
-    Calculate the delta of two datetimes
+    Calculate the delta of two monotonic times
     
     Returns:
-        string of date delta including microseconds
+        string of time delta 
     """
-    duration = end - start
-    
-    # return str(timedelta(microseconds = duration.microseconds))
-    return "DTBA"
+    return format(end_time - start_time, '.3f')

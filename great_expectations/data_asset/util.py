@@ -7,6 +7,7 @@ from functools import wraps
 
 import numpy as np
 import pandas as pd
+import time as tm
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -202,14 +203,11 @@ def recursively_convert_to_json_serializable(test_obj):
             % (str(test_obj), type(test_obj).__name__)
         )
 
-def calculate_delta_durations(start: datetime, end: datetime) -> str:
+def calculate_delta_durations(start_time: tm.monotonic, end_time: tm.monotonic) -> str:
     """
-    Calculate the delta of two datetimes
+    Calculate the delta of two monotonic times
     
     Returns:
         string of date delta including microseconds
     """
-    duration = end - start
-    
-    # return str(timedelta(microseconds = duration.microseconds))
-    return "DTBA"
+    return format(end_time - start_time, '.3f')

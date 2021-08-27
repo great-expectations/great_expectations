@@ -7,6 +7,7 @@ import logging
 import traceback
 import uuid
 import warnings
+import time
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
@@ -783,6 +784,7 @@ class DataAsset:
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
         try:
+            start_time = time.monotonic()
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
@@ -980,7 +982,7 @@ class DataAsset:
 
             expectation_meta = copy.deepcopy(expectation_suite.meta)
 
-            run_duration = calculate_delta_durations(parse(validation_time), datetime.datetime.now(datetime.timezone.utc))
+            run_duration = calculate_delta_durations(start_time=start_time, end_time=time.monotonic())
 
             meta = {
                 "great_expectations_version": ge_version,
