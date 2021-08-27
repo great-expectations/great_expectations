@@ -169,7 +169,7 @@ class ExpectationsStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
-        if isinstance(self.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
@@ -204,7 +204,7 @@ class ExpectationsStore(Store):
         test_key_name = "test-key-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        if isinstance(self._store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
                 resource_type="contract", ge_cloud_id=str(uuid.uuid4())
             )

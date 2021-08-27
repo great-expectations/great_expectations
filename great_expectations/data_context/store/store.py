@@ -80,6 +80,10 @@ class Store:
             )
 
     @property
+    def ge_cloud_mode(self):
+        return isinstance(self._store_backend, GeCloudStoreBackend)
+
+    @property
     def store_backend(self):
         return self._store_backend
 
@@ -98,7 +102,7 @@ class Store:
 
     @property
     def key_class(self):
-        if isinstance(self._store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             return GeCloudIdentifier
         return self._key_class
 
@@ -135,7 +139,7 @@ class Store:
     def get(self, key):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
-        elif isinstance(self.store_backend, GeCloudStoreBackend):
+        elif self.ge_cloud_mode:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             # TODO [Robby] MER-285: Handle non-200 http errors

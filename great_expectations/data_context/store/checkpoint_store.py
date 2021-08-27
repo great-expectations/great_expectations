@@ -44,7 +44,7 @@ class CheckpointStore(ConfigurationStore):
         test_checkpoint_configuration: CheckpointConfig = CheckpointConfig(
             **{"name": test_checkpoint_name}
         )
-        if isinstance(self._store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
                 resource_type="contract", ge_cloud_id=str(uuid.uuid4())
             )

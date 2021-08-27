@@ -2136,7 +2136,7 @@ class BaseDataContext:
         expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name
         )
-        if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
@@ -2175,7 +2175,7 @@ class BaseDataContext:
         Returns:
             True for Success and False for Failure.
         """
-        if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
@@ -2204,7 +2204,7 @@ class BaseDataContext:
         Returns:
             expectation_suite
         """
-        if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
@@ -2249,7 +2249,7 @@ class BaseDataContext:
         Returns:
             None
         """
-        if isinstance(self.expectations_store.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
@@ -3110,7 +3110,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
-        if isinstance(self.checkpoint_store.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="contract", ge_cloud_id=ge_cloud_id
             )
@@ -3212,7 +3212,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
 
     def list_checkpoints(self) -> List[str]:
-        if isinstance(self.checkpoint_store.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             return self.checkpoint_store.list_keys()
         else:
             return [x.configuration_key for x in self.checkpoint_store.list_keys()]

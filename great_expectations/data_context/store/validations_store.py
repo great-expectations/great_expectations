@@ -193,7 +193,7 @@ class ValidationsStore(Store):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
 
-        if isinstance(self._store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
                 resource_type="contract", ge_cloud_id=str(uuid.uuid4())
             )
