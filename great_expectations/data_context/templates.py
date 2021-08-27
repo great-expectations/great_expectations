@@ -170,8 +170,6 @@ datasources:
         class_name: RuntimeDataConnector
         batch_identifiers:
 
-config_variables_file_path: ${config_variables_file_path}
-
 plugins_directory: ${plugins_directory}
 
 stores:

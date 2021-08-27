@@ -956,7 +956,7 @@ class BaseDataContext:
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
-            **self.ge_cloud_config.to_json_dict(),
+            **(self.ge_cloud_config.to_json_dict() if self.ge_cloud_mode else {}),
         }
 
         return DataContextConfig(
