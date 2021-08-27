@@ -39,6 +39,7 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         column_B,
         allow_cross_type_comparisons=None,
         parse_strings_as_datetimes=None,
+        or_equal=None,
         **kwargs
     ):
         if allow_cross_type_comparisons:
@@ -58,7 +59,6 @@ will be deprecated in a future release. Please update code accordingly.
             temp_column_A = column_A
             temp_column_B = column_B
 
-        or_equal = kwargs.get("or_equal")
         if or_equal:
             return temp_column_A >= temp_column_B
         else:
@@ -72,6 +72,7 @@ will be deprecated in a future release. Please update code accordingly.
         column_B,
         allow_cross_type_comparisons=None,
         parse_strings_as_datetimes=None,
+        or_equal=None,
         **kwargs
     ):
         if allow_cross_type_comparisons:
@@ -80,7 +81,6 @@ will be deprecated in a future release. Please update code accordingly.
         if parse_strings_as_datetimes:
             raise NotImplementedError
 
-        or_equal = kwargs.get("or_equal")
         if or_equal:
             return sa.or_(
                 column_A >= column_B, sa.and_(column_A == None, column_B == None)
@@ -96,6 +96,7 @@ will be deprecated in a future release. Please update code accordingly.
         column_B,
         allow_cross_type_comparisons=None,
         parse_strings_as_datetimes=None,
+        or_equal=None,
         **kwargs
     ):
         if allow_cross_type_comparisons:
@@ -114,7 +115,6 @@ will be deprecated in a future release. Please update code accordingly.
             temp_column_A = column_A
             temp_column_B = column_B
 
-        or_equal = kwargs.get("or_equal")
         if or_equal:
             return (temp_column_A >= temp_column_B) | (
                 temp_column_A.eqNullSafe(temp_column_B)
