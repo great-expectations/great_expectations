@@ -169,6 +169,16 @@ datasources:
       my_runtime_data_connector:
         class_name: RuntimeDataConnector
         batch_identifiers:
+  default_pandas_datasource:
+      execution_engine:
+        module_name: great_expectations.execution_engine
+        class_name: PandasExecutionEngine
+      module_name: great_expectations.datasource
+      class_name: Datasource
+      data_connectors:
+        my_runtime_data_connector:
+          class_name: RuntimeDataConnector
+          batch_identifiers:
 
 plugins_directory: ${plugins_directory}
 
