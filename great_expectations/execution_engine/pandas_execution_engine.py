@@ -2,6 +2,7 @@ import copy
 import datetime
 import hashlib
 import logging
+import os
 import pickle
 import random
 import warnings
@@ -16,31 +17,46 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
+    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.util import AzureUrl, S3Url, sniff_s3_compression
+from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+
+logger = logging.getLogger(__name__)
 
 try:
     import boto3
 except ImportError:
     boto3 = None
+    logger.debug(
+        "Unable to load AWS connection object; install optional boto3 dependency for support"
+    )
 
 try:
-    from azure.storage.blob import (
-        BlobClient,
-        BlobServiceClient,
-        StorageStreamDownloader,
+    from azure.storage.blob import BlobServiceClient
+except ImportError:
+    BlobServiceClient = None
+    logger.debug(
+        "Unable to load Azure connection object; install optional azure dependency for support"
     )
-except:
-    azure = None
 
+try:
+    from google.auth.exceptions import DefaultCredentialsError
+    from google.cloud import storage
+    from google.oauth2 import service_account
+except ImportError:
+    storage = None
+    service_account = None
+    DefaultCredentialsError = None
+    logger.debug(
+        "Unable to load GCS connection object; install optional google dependency for support"
+    )
 
-logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
@@ -90,6 +106,7 @@ Notes:
         )
         boto3_options: dict = kwargs.pop("boto3_options", {})
         azure_options: dict = kwargs.pop("azure_options", {})
+        gcs_options: dict = kwargs.pop("gcs_options", {})
 
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         try:
@@ -98,9 +115,30 @@ Notes:
             self._s3 = None
 
         try:
-            self._azure = BlobServiceClient(**azure_options)
+            if "conn_str" in azure_options:
+                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+            else:
+                self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             self._azure = None
+
+        # Can only configure a GCS connection by 1) seting an env var OR 2) passing explicit credentials
+        if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") is None and gcs_options == {}:
+            self._gcs = None
+        else:
+            try:
+                credentials = None  # If configured with gcloud CLI / env vars
+                if "filename" in gcs_options:
+                    credentials = service_account.Credentials.from_service_account_file(
+                        **gcs_options
+                    )
+                elif "info" in gcs_options:
+                    credentials = service_account.Credentials.from_service_account_info(
+                        **gcs_options
+                    )
+                self._gcs = storage.Client(credentials=credentials, **gcs_options)
+            except (TypeError, AttributeError):
+                self._gcs = None
 
         super().__init__(*args, **kwargs)
 
@@ -109,6 +147,7 @@ Notes:
                 "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
                 "boto3_options": boto3_options,
                 "azure_options": azure_options,
+                "gcs_options": gcs_options,
             }
         )
 
@@ -189,19 +228,39 @@ Please check your config."""
                     f"""PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
-            azure_engine: BlobServiceClient = self._azure
+            azure_engine = self._azure
             azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            blob_client: BlobClient = azure_engine.get_blob_client(
+            blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
             )
-            azure_object: StorageStreamDownloader = blob_client.download_blob()
+            azure_object = blob_client.download_blob()
             logger.debug(
                 f"Fetching Azure blob. Container: {azure_url.container} Blob: {azure_url.blob}"
             )
             reader_fn = self._get_reader_fn(reader_method, azure_url.blob)
             buf = BytesIO(azure_object.readall())
+            buf.seek(0)
+            df = reader_fn(buf, **reader_options)
+
+        elif isinstance(batch_spec, GCSBatchSpec):
+            if self._gcs is None:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a GCSBatchSpec,
+                        but the ExecutionEngine does not have an GCS client configured. Please check your config."""
+                )
+            gcs_engine = self._gcs
+            gcs_url = GCSUrl(batch_spec.path)
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
+            gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
+            gcs_blob = gcs_bucket.blob(gcs_url.blob)
+            logger.debug(
+                f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
+            )
+            reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
+            buf = BytesIO(gcs_blob.download_as_bytes())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
@@ -540,9 +599,14 @@ Please check your config."""
                     "column_list not found within domain_kwargs"
                 )
 
-            accessor_domain_kwargs["column_list"] = compute_domain_kwargs.pop(
-                "column_list"
-            )
+            column_list = compute_domain_kwargs.pop("column_list")
+
+            if len(column_list) < 2:
+                raise ge_exceptions.GreatExpectationsError(
+                    "column_list must contain at least 2 columns"
+                )
+
+            accessor_domain_kwargs["column_list"] = column_list
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
@@ -625,7 +689,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             hash_method = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -681,7 +745,7 @@ Please check your config."""
         """Hash the values in the named column, and split on that"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
