@@ -11,12 +11,12 @@ stages:
 
         strategy:
           matrix:
-            # expectations_cfe:
-            #  test_script: 'tests/test_definitions/test_expectations_cfe.py'
-            #  extra_args: ''
-            # expectations:
-            #  test_script: 'tests/test_definitions/test_expectations.py'
-            #  extra_args: ''
+            expectations_cfe:
+              test_script: 'tests/test_definitions/test_expectations_cfe.py'
+              extra_args: ''
+            expectations:
+              test_script: 'tests/test_definitions/test_expectations.py'
+              extra_args: ''
             performance:
               test_script: 'tests/performance/test_bigquery_benchmarks.py'
               extra_args: '--performance-tests --benchmark-json=junit/benchmark.json -k test_bikeshare_trips_benchmark[1] '
