@@ -1,14 +1,17 @@
 import random
+import uuid
+from typing import Dict
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
+    ExpectationSuiteIdentifier, GeCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -150,14 +153,33 @@ class ExpectationsStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        ge_cloud_expectation_suite_id = response_json["data"]["id"]
+        expectation_suite_dict = response_json["data"]["attributes"]["suite"]
+        expectation_suite_dict[
+            "ge_cloud_id"
+        ] = ge_cloud_expectation_suite_id
+
+        return expectation_suite_dict
+
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
+        if isinstance(self.store_backend, GeCloudStoreBackend):
+            # GeCloudStoreBackend expects a json str
+            return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
     def deserialize(self, key, value):
-        return self._expectationSuiteSchema.loads(value)
+        if isinstance(value, dict):
+            return self._expectationSuiteSchema.load(value)
+        else:
+            return self._expectationSuiteSchema.loads(value)
 
     def self_check(self, pretty_print):
         return_obj = {}
