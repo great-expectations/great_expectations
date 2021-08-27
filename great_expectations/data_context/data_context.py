@@ -64,8 +64,9 @@ from great_expectations.data_context.store import (
 )
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
+    DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
-    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED, DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG,
+    PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
@@ -953,7 +954,7 @@ class BaseDataContext:
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
-            **self.ge_cloud_config.to_json_dict()
+            **self.ge_cloud_config.to_json_dict(),
         }
 
         return DataContextConfig(
@@ -4008,9 +4009,12 @@ class DataContext(BaseDataContext):
     def default_ge_cloud_data_context_config_template(self):
         config_commented_map_from_yaml = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
         try:
-            return DataContextConfig(**config_commented_map_from_yaml) if \
-                self.ge_cloud_mode else DataContextConfig.from_commented_map(
-                commented_map=config_commented_map_from_yaml
+            return (
+                DataContextConfig(**config_commented_map_from_yaml)
+                if self.ge_cloud_mode
+                else DataContextConfig.from_commented_map(
+                    commented_map=config_commented_map_from_yaml
+                )
             )
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
