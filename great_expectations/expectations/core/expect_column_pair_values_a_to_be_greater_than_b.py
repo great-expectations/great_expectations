@@ -69,7 +69,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
 
     default_kwarg_values = {
         "mostly": 1.0,
-        "parse_strings_as_datetimes": False,
+        "parse_strings_as_datetimes": None,
         "allow_cross_type_comparisons": None,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,

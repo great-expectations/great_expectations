@@ -105,7 +105,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "parse_strings_as_datetimes",
     )
 
-    default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": False}
+    default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": None}
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

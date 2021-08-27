@@ -94,7 +94,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "parse_strings_as_datetimes": False,
+        "parse_strings_as_datetimes": None,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
