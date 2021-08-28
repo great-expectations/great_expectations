@@ -97,3 +97,29 @@ assert (
         "default_inferred_data_connector_name"
     ]
 )
+
+
+# Here is a RuntimeBatchRequest using a path to a directory
+batch_request = RuntimeBatchRequest(
+    datasource_name="my_filesystem_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
+    runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your path here.
+    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_spec_passthrough={"reader_method": "csv", "reader_options": {"header": True}},
+)
+
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your path directly in the BatchRequest above.
+batch_request.runtime_parameters["path"] = "data/"
+
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
+
+print(validator.head())
+# assert that the 3 files in `data/` (each 10k lines) are read in as a single dataframe
+assert validator.active_batch.data.dataframe.count() == 30000
