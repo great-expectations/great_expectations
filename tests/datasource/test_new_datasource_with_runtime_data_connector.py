@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List
 
 import pandas as pd
@@ -20,7 +21,10 @@ from great_expectations.core.batch import (
     IDDict,
     RuntimeBatchRequest,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.datasource.new_datasource import Datasource
 
 yaml = YAML()
