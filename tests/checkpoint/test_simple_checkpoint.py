@@ -869,6 +869,23 @@ def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
     assert len(result.run_results) == 1
 
 
+def test_simple_checkpoint_error_with_invalid_top_level_batch_request(
+    simple_checkpoint_defaults,
+):
+    # raised by _validate_init_parameters() in BatchRequest.__init__()
+    with pytest.raises(TypeError):
+        # missing data_asset_name
+        result = simple_checkpoint_defaults.run(
+            run_name="bar",
+            batch_request={
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_special_data_connector",
+            },
+            expectation_suite_name="one",
+            validations=[{"expectation_suite_name": "one"}],
+        )
+
+
 def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence(
     context_with_data_source_and_empty_suite,
     simple_checkpoint_defaults,
@@ -914,8 +931,13 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert result.success
 
 
-@pytest.fixture
-def runtime_batch_request():
+def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector_creates_config(
+    context_with_data_source_and_empty_suite,
+    store_validation_result_action,
+    store_eval_parameter_action,
+    update_data_docs_action,
+):
+    context: DataContext = context_with_data_source_and_empty_suite
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_runtime_data_connector",
@@ -925,17 +947,7 @@ def runtime_batch_request():
             "query": "SELECT * FROM taxi_data"
         },  # not actually run, but used to test configuration
     )
-    return runtime_batch_request
 
-
-def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector_creates_config(
-    context_with_data_source_and_empty_suite,
-    runtime_batch_request,
-    store_validation_result_action,
-    store_eval_parameter_action,
-    update_data_docs_action,
-):
-    context: DataContext = context_with_data_source_and_empty_suite
     checkpoint = SimpleCheckpoint(
         name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
     )
