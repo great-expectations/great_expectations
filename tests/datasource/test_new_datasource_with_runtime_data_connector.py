@@ -1,4 +1,3 @@
-import os
 from typing import Dict, List
 
 import pandas as pd
@@ -21,10 +20,7 @@ from great_expectations.core.batch import (
     IDDict,
     RuntimeBatchRequest,
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.new_datasource import Datasource
 
 yaml = YAML()
@@ -479,6 +475,32 @@ def test_get_batch_definitions_and_get_batch_basics(
 # Tests with data passed in as query
 ####################################
 
+
+@pytest.fixture
+def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_file, sa):
+    basic_datasource: Datasource = instantiate_class_from_config(
+        yaml.load(
+            f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+
+    data_connectors:
+        test_runtime_data_connector:
+            module_name: great_expectations.datasource.data_connector
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - pipeline_stage_name
+                - airflow_run_id
+                - custom_key_0
+        """,
+        ),
+        runtime_environment={"name": "my_datasource"},
+        config_defaults={"module_name": "great_expectations.datasource"},
+    )
+    return basic_datasource
 
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_self_check(
     db_file, datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
