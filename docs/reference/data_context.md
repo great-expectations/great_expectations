@@ -6,11 +6,11 @@ title: Data Context
 A Data Context represents a Great Expectations project. It organizes storage and access for Expectation Suites,
 Datasources, notification settings, and data fixtures.
 
-The Data Context is configured via a yml file or directly in code. The configuration and managed expectation suites
+The Data Context is configured via a yml file or directly in code. The configuration and managed Expectation Suites
 should be stored in version control.
 
 Data Contexts manage connections to your data and compute resources, and support integration with execution frameworks (
-such as airflow, Nifi, dbt, or dagster) to describe and produce batches of data ready for analysis. Those features
+such as Airflow, Nifi, dbt, or Dagster) to describe and produce batches of data ready for analysis. Those features
 enable fetching, validation, profiling, and documentation of your data in a way that is meaningful within your existing
 infrastructure and work environment.
 
