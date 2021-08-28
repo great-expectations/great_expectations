@@ -849,7 +849,7 @@ def taxi_test_file():
             "..",
             "test_sets",
             "taxi_yellow_trip_data_samples",
-            "yellow_trip_data_sample_2018-01.csv",
+            "yellow_trip_data_sample_2019-01.csv",
         ),
     )
 
