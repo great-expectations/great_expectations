@@ -1,9 +1,87 @@
+import os
+
 import pytest
 
 import great_expectations
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.validator.validator import Validator
+
+
+@pytest.fixture
+def taxi_test_file():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_trip_data_samples",
+            "yellow_trip_data_sample_2018-01.csv",
+        ),
+    )
+
+
+@pytest.fixture
+def taxi_test_file_directory():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "..", "test_sets", "taxi_yellow_trip_data_samples", "first_3_files/"
+        ),
+    )
+
+
+def test_get_batch_successful_specification_spark(
+    data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
+):
+    context = data_context_with_datasource_spark_engine
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="default_data_asset_name",  # this can be anything that identifies this data
+            runtime_parameters={
+                "path": taxi_test_file_directory,
+            },
+            batch_identifiers={"default_identifier_name": 1234567890},
+            batch_spec_passthrough={
+                "reader_method": "csv",
+                "reader_options": {"header": True},
+            },
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+    batch = batch_list[0]
+    assert batch.data.dataframe.count() == 30000
+
+
+def test_get_batch_successful_specification_spark_batch_spec_in_config(
+    data_context_with_datasource_spark_engine_batch_spec_passthrough,
+    taxi_test_file_directory,
+    spark_session,
+):
+    context = data_context_with_datasource_spark_engine_batch_spec_passthrough
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="default_data_asset_name",  # this can be anything that identifies this data
+            runtime_parameters={
+                "path": taxi_test_file_directory,
+            },
+            batch_identifiers={"default_identifier_name": 1234567890},
+            # batch_spec_passthrough={
+            #                       "reader_method": "csv",
+            #                       "reader_options": {"header": True},
+            # },
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+    batch = batch_list[0]
+    assert batch.data.dataframe.count() == 30000
 
 
 def test_get_batch_successful_specification(
