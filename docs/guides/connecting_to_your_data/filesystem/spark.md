@@ -145,9 +145,11 @@ Then load data into the `Validator`.
 
 ### How to read-in multiple CSVs as a single Spark Dataframe
 
-Additional configuration for reading in CSVs through Spark can be configured using the `batch_spec_passthrough` parameter. 
+Additional configuration for reading in CSV files through the `SparkDFExecutionEngine` is possible through the `batch_spec_passthrough` parameter.
 
-For instance, imagine that you have a direcory with 3 files, each file having 10,000 lines each. 
+The `batch_spec_passthrough` allows for configurations to be passed through to the method that uses them, in this case the `spark.read.csv()` method. 
+
+For instance, if you have a directory with 3 CSV files with each file having 10,000 lines each: 
 
 ```bash
   taxi_data_files/yellow_trip_data_sample_2018-1.csv
@@ -155,15 +157,12 @@ For instance, imagine that you have a direcory with 3 files, each file having 10
   taxi_data_files/yellow_trip_data_sample_2018-3.csv
 ```
 
-You could write a `BatchRequest` that reads in the CSV folder can be read in by specifying the `reader_method` to be `csv` and for the `header` to be True. 
-
-These are the equiavlent method to what we would pass in to Spark.read.dataframe() function
-
+You could write a `BatchRequest` that reads in the entire folder as a single Spark Dataframe by specifying the `reader_method` to be `csv` in  and for the `header` to be True. 
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L106-L116
 ```
 
-Once that is done, then we could check that our validator included and make sure that it has the expected 30,000 lines. 
+Once that step is complete, then we could confirm that our `Validator` contains a batch that has a single data frame that contains the expected 30,000 lines. 
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L122-L130
 ```

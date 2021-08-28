@@ -502,6 +502,7 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
     )
     return basic_datasource
 
+
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_self_check(
     db_file, datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
