@@ -109,6 +109,29 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
     return basic_datasource
 
 
+@pytest.fixture
+def taxi_test_file():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_trip_data_samples",
+            "yellow_trip_data_sample_2018-01.csv",
+        ),
+    )
+
+
+@pytest.fixture
+def taxi_test_file_directory():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "..", "test_sets", "taxi_yellow_trip_data_samples", "first_3_files/"
+        ),
+    )
+
+
 #########################################
 # Tests with data passed in as batch_data
 #########################################
@@ -1158,30 +1181,7 @@ def test_get_batch_definitions_and_get_batch_basics_from_query(
 ###################################
 
 
-@pytest.fixture
-def taxi_test_file():
-    return file_relative_path(
-        __file__,
-        os.path.join(
-            "..",
-            "test_sets",
-            "taxi_yellow_trip_data_samples",
-            "yellow_trip_data_sample_2018-01.csv",
-        ),
-    )
-
-
-@pytest.fixture
-def taxi_test_file_directory():
-    return file_relative_path(
-        __file__,
-        os.path.join(
-            "..", "test_sets", "taxi_yellow_trip_data_samples", "first_3_files/"
-        ),
-    )
-
-
-def test_get_batch_definition_list_from_batch_request_length_one_from_path_pandas(
+def test_pandas_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_path(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
     batch_identifiers = {
@@ -1209,7 +1209,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_path_panda
     assert isinstance(my_batch_1.data, PandasBatchData)
 
 
-def test_get_batch_definition_list_from_batch_request_length_one_from_path_spark(
+def test_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_path(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file,
     spark_session,
@@ -1239,7 +1239,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_path_spark
     assert isinstance(my_batch_1.data, SparkDFBatchData)
 
 
-def test_get_batch_definitions_and_get_batch_basics_from_path_pandas(
+def test_pandas_execution_engine_get_batch_definitions_and_get_batch_basics_from_path(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
 
@@ -1269,7 +1269,7 @@ def test_get_batch_definitions_and_get_batch_basics_from_path_pandas(
     )
 
 
-def test_get_batch_definitions_and_get_batch_basics_from_path_spark(
+def test_sparkdf_execution_engine_get_batch_definitions_and_get_batch_basics_from_path(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file,
     spark_session,
@@ -1301,8 +1301,7 @@ def test_get_batch_definitions_and_get_batch_basics_from_path_spark(
     )
 
 
-# directory pandas
-def test_get_batch_definition_list_from_batch_request_length_one_from_directory_pandas(
+def test_pandas_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_directory(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
     taxi_test_file_directory,
 ):
@@ -1331,8 +1330,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_directory_
         )
 
 
-# directory spark
-def test_get_batch_definition_list_from_batch_request_length_one_from_directory_spark(
+def test_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_directory(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
     spark_session,
