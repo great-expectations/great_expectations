@@ -30,7 +30,7 @@ module.exports = {
           type: 'category',
           label: '⚙️ Setting up Great Expectations',
           items: [
-            'guides/setup/how_to_instantiate_a_data_context',
+            //'guides/setup/how_to_instantiate_a_data_context',
 
             {
               type: 'category',
@@ -85,10 +85,10 @@ module.exports = {
           type: 'category',
           label: '🔌 Connecting to your data',
           items: [
-            'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
-            'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
+            //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
+            //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
             'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-            'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
+            //'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
             {
               type: 'category',
               label: '💭 In_memory',
@@ -197,7 +197,7 @@ module.exports = {
           type: 'category',
           label: '✅ Validating your data',
           items: [
-            'guides/validation/how_to_validate_data_by_running_a_checkpoint',
+            // 'guides/validation/how_to_validate_data_by_running_a_checkpoint',
             {
               type: 'category',
               label: 'Advanced',
@@ -259,14 +259,14 @@ module.exports = {
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
-        {
-          type: 'category',
-          label: 'Contributing',
-          items: [
-            'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
-            'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
-          ]
-        }
+        //{
+          //type: 'category',
+          //label: 'Contributing',
+          //items: [
+            //'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
+            //'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
+          //]
+        //}
       ]
     },
     {
@@ -320,14 +320,14 @@ module.exports = {
             { type: 'doc', id: 'reference/supporting_resources' }
           ]
         },
-        {
-          type: 'category',
-          label: 'Spare Parts',
-          collapsed: true,
-          items: [
-            { type: 'doc', id: 'reference/spare_parts' }
-          ]
-        },
+        //{
+          //type: 'category',
+          //label: 'Spare Parts',
+          //collapsed: true,
+          //items: [
+            //{ type: 'doc', id: 'reference/spare_parts' }
+          //]
+        //},
         {
           type: 'category',
           label: 'API Reference',

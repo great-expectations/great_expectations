@@ -8,6 +8,30 @@ Changelog
 develop
 -----------------
 
+0.13.31
+-----------------
+* [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)
+* [FEATURE] Enable column_pair expectations and tests for Spark (#3294)
+* [FEATURE] Implement `InferredAssetGCSDataConnector` (#3284)
+* [FEATURE]/CHANGE run time format (#3272) (Thanks @serialbandicoot)
+* [DOCS] Fix misc errors in "How to create renderers for Custom Expectations" (#3315)
+* [DOCS] GDOC-217 remove stub links (#3314)
+* [DOCS] Remove misc TODOs to tidy up docs (#3313)
+* [DOCS] Standardize capitalization of various technologies in `docs` (#3312)
+* [DOCS] Fix broken link to Contributor docs (#3295) (Thanks @discdiver)
+* [MAINTENANCE] Additional tests for RuntimeDataConnector at Datasource-level (query) (#3288)
+* [MAINTENANCE] Update GCSStoreBackend + tests (#2630) (Thanks @hmandsager)
+* [MAINTENANCE] Write integration/E2E tests for `ConfiguredAssetAzureDataConnector` (#3204)
+* [MAINTENANCE] Write integration/E2E tests for both `GCSDataConnectors` (#3301)
+
+0.13.30
+-----------------
+* [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_in_set for SQL Alchemy execution engine (#3281)
+* [FEATURE] Implement `ConfiguredAssetGCSDataConnector` (#3247)
+* [BUGFIX] Fix import issues around cloud providers (GCS/Azure/S3) (#3292)
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema (#3126) (thanks @gipaetusb and @mbakunze)
+
 0.13.29
 -----------------
 * [FEATURE] Implementation of the Metric "select_column_values.unique.within_record" for SQLAlchemyExecutionEngine (#3279)
@@ -15,7 +39,7 @@ develop
 * [FEATURE] Edtf with support levels (#2594) (thanks @mielvds)
 * [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine (#3267)
 * [FEATURE] add expectation for discrete column entropy  (#3049) (thanks @edjoesu)
-* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b Metric (#3268)
+* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b (#3268)
 * [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
 * [FEATURE] Add schema validation for different GCS auth methods (#3258)
 * [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine (#3256)
