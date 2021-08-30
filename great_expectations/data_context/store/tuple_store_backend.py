@@ -963,7 +963,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self,
         connection_string,
         bucket=None,
-        container=None,
+        container=None,  # Deprecated
         prefix="",
         filepath_template=None,
         filepath_prefix=None,
