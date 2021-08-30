@@ -1020,7 +1020,7 @@ class ExpectationExplorer:
     def generate_parse_strings_as_datetimes_widget_dict(
         self,
         expectation_state,
-        parse_strings_as_datetimes=Optional[bool],
+        parse_strings_as_datetimes: Optional[bool] = None,
         column=None,
         **expectation_kwargs,
     ):

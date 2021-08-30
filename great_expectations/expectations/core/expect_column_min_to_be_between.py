@@ -216,7 +216,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-        parse_strings_as_datetimes=Optional[bool],
+        parse_strings_as_datetimes: Optional[bool] = None,
     ):
         if parse_strings_as_datetimes:
             warnings.warn(

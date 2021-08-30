@@ -24,7 +24,9 @@ class ColumnMin(ColumnAggregateMetricProvider):
     metric_name = "column.min"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, parse_strings_as_datetimes=Optional[bool], **kwargs):
+    def _pandas(
+        cls, column, parse_strings_as_datetimes: Optional[bool] = None, **kwargs
+    ):
         if parse_strings_as_datetimes:
             temp_column = column.map(parse)
             return temp_column.min()
@@ -32,14 +34,18 @@ class ColumnMin(ColumnAggregateMetricProvider):
             return column.min()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, parse_strings_as_datetimes=Optional[bool], **kwargs):
+    def _sqlalchemy(
+        cls, column, parse_strings_as_datetimes: Optional[bool] = None, **kwargs
+    ):
         if parse_strings_as_datetimes:
             raise NotImplementedError
 
         return sa.func.min(column)
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, parse_strings_as_datetimes=Optional[bool], **kwargs):
+    def _spark(
+        cls, column, parse_strings_as_datetimes: Optional[bool] = None, **kwargs
+    ):
         if parse_strings_as_datetimes:
             raise NotImplementedError
 

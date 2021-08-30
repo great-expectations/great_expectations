@@ -230,7 +230,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-        parse_strings_as_datetimes=Optional[bool],
+        parse_strings_as_datetimes: Optional[bool] = None,
     ):
         warnings.warn(
             """The parameter "parse_strings_as_datetimes" is no longer supported and \

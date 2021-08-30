@@ -51,7 +51,11 @@ will be deprecated in a future release. Please update code accordingly.
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-        cls, column, value_set, parse_strings_as_datetimes=Optional[bool], **kwargs
+        cls,
+        column,
+        value_set,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        **kwargs
     ):
         # no need to parse as datetime; just compare the strings as-is
         if parse_strings_as_datetimes:
@@ -69,7 +73,11 @@ will be deprecated in a future release. Please update code accordingly.
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(
-        cls, column, value_set, parse_strings_as_datetimes=Optional[bool], **kwargs
+        cls,
+        column,
+        value_set,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        **kwargs
     ):
         # no need to parse as datetime; just compare the strings as-is
         if parse_strings_as_datetimes:
