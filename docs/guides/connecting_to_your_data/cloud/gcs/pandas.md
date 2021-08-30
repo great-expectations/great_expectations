@@ -24,7 +24,7 @@ This will allow you to validate and explore your data.
 
 <WhereToRunCode />
 
-### 2. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 2. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -38,10 +38,6 @@ Load your DataContext into memory using the `get_context()` method.
 
 ### 3. Configure your Datasource
 
-Before showing any configurations, we believe it is important to discuss the following:
-
-#### Differences between DataConnectors
-
 Great Expectations provides two types of `DataConnectors` classes for connecting to GCS: `InferredAssetGCSDataConnector` and `ConfiguredAssetGCSDataConnector`
 
   - An `InferredAssetGCSDataConnector` utilizes regular expressions to infer `data_asset_names` by evaluating filename patterns that exist in your bucket. This `DataConnector`, along with a `RuntimeDataConnector`, is provided as a default when utilizing our Jupyter Notebooks.
@@ -51,7 +47,7 @@ As the `InferredAssetDataConnectors` have fewer options and are generally simple
 
 We've detailed example configurations for both options in the next section for your reference.
 
-#### Authentication / gcs_options
+:::info Authentication
 
 It is also important to note that GCS `DataConnectors` support various methods of authentication. You should be aware of the following options when configuring your own environment:
 * `gcloud` command line tool / `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
@@ -66,12 +62,18 @@ It is also important to note that GCS `DataConnectors` support various methods o
 Please note that if you use the `filename` or `info` options, you must supply these options to any GE objects that interact with GCS (i.e. `PandasExecutionEngine`). 
 The `gcs_options` dictionary is also responsible for storing any `**kwargs` you wish to pass to the GCS `storage.Client()` connection object (i.e. `project`)
 
+For more details regarding authentication, please visit the following:
+* [gcloud CLI Tutorial](https://cloud.google.com/storage/docs/reference/libraries)
+* [GCS Python API Docs](https://googleapis.dev/python/storage/latest/index.html)
+
+:::
+
 Using these example configurations, add in your GCS bucket and path to a directory that contains some of your data:
 <Tabs
   groupId="inferred-or-configured"
   defaultValue='inferred'
   values={[
-  {label: 'Inferred', value:'inferred'},
+  {label: 'Inferred + Runtime (Default)', value:'inferred'},
   {label: 'Configured', value:'configured'},
   ]}>
 
@@ -226,7 +228,3 @@ To view the full scripts used in this page, see them on GitHub:
 To review the source code of these `DataConnectors`, also visit GitHub:
 - [ConfiguredAssetGCSDataConnector](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/datasource/data_connector/configured_asset_gcs_data_connector.py)
 - [InferredAssetGCSDataConnector](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/datasource/data_connector/inferred_asset_gcs_data_connector.py)
-
-## Next Steps
-
-<NextSteps />
