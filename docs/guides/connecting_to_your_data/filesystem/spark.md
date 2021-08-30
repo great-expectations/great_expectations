@@ -145,11 +145,11 @@ Then load data into the `Validator`.
 
 ### How to read-in multiple CSVs as a single Spark Dataframe
 
-Additional configuration for reading in CSV files through the `SparkDFExecutionEngine` is possible through the `batch_spec_passthrough` parameter.
+More advanced configuration for reading in CSV files through the `SparkDFExecutionEngine` is possible through the `batch_spec_passthrough` parameter.  `batch_spec_passthrough` allows for reader-methods to be directly specified, 
+and backend-specific `reader_options` to be passed through to the actual reader-method, in this case `spark.read.csv()`. The following example shows how `batch_spec_passthrough` parameters can be added to the `BatchRequest`. However,
+the same parameters can be added to the Datasource configuration at the DataConnector level. 
 
-The `batch_spec_passthrough` allows for reader-methods to be specified, and for backend-specific `reader_options` to be passed through to the method that eventually uses them, in this case the `spark.read.csv()` method. 
-
-For instance, if you have a directory with 3 CSV files with each file having 10,000 lines each: 
+If you have a directory with 3 CSV files with each file having 10,000 lines each: 
 
 ```bash
   taxi_data_files/yellow_trip_data_sample_2019-1.csv
@@ -157,17 +157,15 @@ For instance, if you have a directory with 3 CSV files with each file having 10,
   taxi_data_files/yellow_trip_data_sample_2019-3.csv
 ```
 
-You could write a `BatchRequest` that reads in the entire folder as a single Spark Dataframe by specifying the `reader_method` to be `csv` in  and for the `reader_options` to set `header` to be True. 
+You could write a `BatchRequest` that reads in the entire folder as a single Spark Dataframe by specifying the `reader_method` to be `csv`, `header` to be set to `True` in the `reader_options`. 
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L106-L116
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L106-L113
 ```
 
-Once that step is complete, then we could confirm that our `Validator` contains a batch that has a single data frame that contains the expected 30,000 lines. 
+Once that step is complete, then we can confirm that our `Validator` contains a batch with the expected 30,000 lines. 
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L122-L130
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L119-L127
 ```
-
-**Note** The same `reader_`
 
 To view the full scripts used in this page, see them on GitHub:
 
