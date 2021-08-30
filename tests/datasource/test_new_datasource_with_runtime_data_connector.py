@@ -1,4 +1,3 @@
-import os
 from typing import Dict, List
 
 import pandas as pd
@@ -21,10 +20,7 @@ from great_expectations.core.batch import (
     IDDict,
     RuntimeBatchRequest,
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.new_datasource import Datasource
 
 yaml = YAML()
@@ -585,6 +581,18 @@ def test_sparkdf_execution_engine_no_batch_identifiers(
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # batch_identifiers missing
+            )
+        )
+
+
+def test_basic_datasource_runtime_data_connector_error_checking_no_batch_identifiers(
+    basic_datasource_with_runtime_data_connector,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    # Test for illegal absence of batch_identifiers when batch_data is specified
+    with pytest.raises(TypeError):
+        # noinspection PyUnusedLocal
         batch_list: List[
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
@@ -603,7 +611,6 @@ def test_sparkdf_execution_engine_incorrect_batch_identifiers(
     test_df = spark_session.createDataFrame(
         data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     )
-
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector
     with pytest.raises(ge_exceptions.DataConnectorError):
         # runtime_parameters are not configured in the DataConnector
@@ -845,6 +852,33 @@ def test_sparkdf_execution_engine_get_batch_definitions_and_get_batch_basics(
 ####################################
 # Tests with data passed in as query
 ####################################
+
+
+@pytest.fixture
+def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_file, sa):
+    basic_datasource: Datasource = instantiate_class_from_config(
+        yaml.load(
+            f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+
+    data_connectors:
+        test_runtime_data_connector:
+            module_name: great_expectations.datasource.data_connector
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - pipeline_stage_name
+                - airflow_run_id
+                - custom_key_0
+        """,
+        ),
+        runtime_environment={"name": "my_datasource"},
+        config_defaults={"module_name": "great_expectations.datasource"},
+    )
+    return basic_datasource
 
 
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_self_check(
