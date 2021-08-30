@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List
 
 import pandas as pd
@@ -20,7 +21,10 @@ from great_expectations.core.batch import (
     IDDict,
     RuntimeBatchRequest,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.datasource.new_datasource import Datasource
 
 yaml = YAML()
@@ -581,18 +585,6 @@ def test_sparkdf_execution_engine_no_batch_identifiers(
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # batch_identifiers missing
-            )
-        )
-
-
-def test_basic_datasource_runtime_data_connector_error_checking_no_batch_identifiers(
-    basic_datasource_with_runtime_data_connector,
-):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    # Test for illegal absence of batch_identifiers when batch_data is specified
-    with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
         batch_list: List[
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
