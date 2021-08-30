@@ -147,17 +147,17 @@ Then load data into the `Validator`.
 
 Additional configuration for reading in CSV files through the `SparkDFExecutionEngine` is possible through the `batch_spec_passthrough` parameter.
 
-The `batch_spec_passthrough` allows for configurations to be passed through to the method that uses them, in this case the `spark.read.csv()` method. 
+The `batch_spec_passthrough` allows for reader-methods to be specified, and for backend-specific `reader_options` to be passed through to the method that eventually uses them, in this case the `spark.read.csv()` method. 
 
 For instance, if you have a directory with 3 CSV files with each file having 10,000 lines each: 
 
 ```bash
-  taxi_data_files/yellow_trip_data_sample_2018-1.csv
-  taxi_data_files/yellow_trip_data_sample_2018-2.csv
-  taxi_data_files/yellow_trip_data_sample_2018-3.csv
+  taxi_data_files/yellow_trip_data_sample_2019-1.csv
+  taxi_data_files/yellow_trip_data_sample_2019-2.csv
+  taxi_data_files/yellow_trip_data_sample_2019-3.csv
 ```
 
-You could write a `BatchRequest` that reads in the entire folder as a single Spark Dataframe by specifying the `reader_method` to be `csv` in  and for the `header` to be True. 
+You could write a `BatchRequest` that reads in the entire folder as a single Spark Dataframe by specifying the `reader_method` to be `csv` in  and for the `reader_options` to set `header` to be True. 
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L106-L116
 ```
@@ -166,6 +166,8 @@ Once that step is complete, then we could confirm that our `Validator` contains 
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L122-L130
 ```
+
+**Note** The same `reader_`
 
 To view the full scripts used in this page, see them on GitHub:
 
