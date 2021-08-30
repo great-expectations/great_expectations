@@ -6,7 +6,7 @@ import warnings
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
-from typing import List
+from typing import List, Optional
 
 import jsonschema
 import numpy as np
@@ -849,7 +849,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column,  # pyspark.sql.DataFrame
         value_set,  # List[Any]
         mostly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -904,7 +904,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         max_value=None,
         strict_min=False,
         strict_max=False,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         output_strftime_format=None,
         allow_cross_type_comparisons=None,
         mostly=None,
@@ -1344,7 +1344,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column_A,
         column_B,
         or_equal=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         allow_cross_type_comparisons=None,
         ignore_row_if="both_values_are_missing",
         result_format=None,
@@ -1507,7 +1507,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column,  # pyspark.sql.DataFrame
         strictly=False,
         mostly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         output_strftime_format=None,
         result_format=None,
         include_config=True,
@@ -1569,7 +1569,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column,  # pyspark.sql.DataFrame
         strictly=False,
         mostly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         output_strftime_format=None,
         result_format=None,
         include_config=True,

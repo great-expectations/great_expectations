@@ -1,4 +1,5 @@
 import warnings
+from typing import Optional
 
 from dateutil.parser import parse
 
@@ -35,7 +36,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         allow_cross_type_comparisons=None,
         **kwargs
     ):
@@ -161,7 +162,7 @@ will be deprecated in a future release. Please update code accordingly.
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         **kwargs
     ):
         if parse_strings_as_datetimes:
@@ -213,7 +214,7 @@ will be deprecated in a future release. Please update code accordingly.
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         **kwargs
     ):
         if parse_strings_as_datetimes:

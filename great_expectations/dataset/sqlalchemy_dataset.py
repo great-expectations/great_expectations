@@ -5,7 +5,7 @@ import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -1710,7 +1710,7 @@ WHERE
         column,
         value_set,
         mostly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1733,7 +1733,7 @@ WHERE
         column,
         value_set,
         mostly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1755,7 +1755,7 @@ WHERE
         strict_min=False,
         strict_max=False,
         allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         output_strftime_format=None,
         mostly=None,
         result_format=None,

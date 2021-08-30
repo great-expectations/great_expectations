@@ -31,7 +31,9 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
     default_kwarg_values = {"strictly": False}
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, strictly, parse_strings_as_datetimes=None, **kwargs):
+    def _pandas(
+        cls, column, strictly, parse_strings_as_datetimes=Optional[bool], **kwargs
+    ):
         if parse_strings_as_datetimes:
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and \
@@ -65,7 +67,7 @@ will be deprecated in a future release. Please update code accordingly.
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
     ):
         if parse_strings_as_datetimes:
             raise NotImplementedError

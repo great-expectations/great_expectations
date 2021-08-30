@@ -5,7 +5,7 @@ import warnings
 from datetime import datetime
 from functools import wraps
 from operator import ge, gt, le, lt
-from typing import List
+from typing import List, Optional
 
 import jsonschema
 import numpy as np
@@ -1114,7 +1114,7 @@ Notes:
         column,
         value_set,
         mostly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         result_format=None,
         row_condition=None,
         condition_parser=None,
@@ -1140,7 +1140,7 @@ Notes:
         column,
         value_set,
         mostly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         result_format=None,
         row_condition=None,
         condition_parser=None,
@@ -1164,7 +1164,7 @@ Notes:
         max_value=None,
         strict_min=False,
         strict_max=False,  # tolerance=1e-9,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         output_strftime_format=None,
         allow_cross_type_comparisons=None,
         mostly=None,
@@ -1236,7 +1236,7 @@ Notes:
         self,
         column,
         strictly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         output_strftime_format=None,
         mostly=None,
         row_condition=None,
@@ -1275,7 +1275,7 @@ Notes:
         self,
         column,
         strictly=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         output_strftime_format=None,
         mostly=None,
         row_condition=None,
@@ -1749,7 +1749,7 @@ Notes:
         column_A,
         column_B,
         or_equal=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         allow_cross_type_comparisons=None,
         ignore_row_if="both_values_are_missing",
         result_format=None,

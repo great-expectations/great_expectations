@@ -1,4 +1,5 @@
 import warnings
+from typing import Optional
 
 from dateutil.parser import parse
 
@@ -38,7 +39,7 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         column_A,
         column_B,
         allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         or_equal=None,
         **kwargs
     ):
@@ -71,7 +72,7 @@ will be deprecated in a future release. Please update code accordingly.
         column_A,
         column_B,
         allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         or_equal=None,
         **kwargs
     ):
@@ -95,7 +96,7 @@ will be deprecated in a future release. Please update code accordingly.
         column_A,
         column_B,
         allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes=Optional[bool],
         or_equal=None,
         **kwargs
     ):
