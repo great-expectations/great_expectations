@@ -28,7 +28,11 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(
-        cls, column, value_set, parse_strings_as_datetimes: Optional[bool] = None, **kwargs
+        cls,
+        column,
+        value_set,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        **kwargs
     ):
         # no need to parse as datetime; just compare the strings as-is
         if parse_strings_as_datetimes:
