@@ -1180,8 +1180,10 @@ def test_get_batch_definitions_and_get_batch_basics_from_query(
 # Tests with data passed in as path
 ###################################
 
+# Tests with Pandas Execution Engine
 
-def test_pandas_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_path(
+
+def test_pandas_execution_engine_batch_definition_list_from_batch_request_success_file_path(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
     batch_identifiers = {
@@ -1207,101 +1209,44 @@ def test_pandas_execution_engine_get_batch_definition_list_from_batch_request_le
     assert my_batch_1.batch_spec is not None
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1.data, PandasBatchData)
+    assert len(my_batch_1.data.dataframe) == 10000
+    assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_path(
-    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
-    taxi_test_file,
-    spark_session,
+def test_pandas_execution_engine_batch_definition_list_from_batch_request_success_file_path_no_headers(
+    datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
     batch_identifiers = {
         "airflow_run_id": 1234567890,
     }
     batch_request: dict = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
         "runtime_parameters": {
             "path": taxi_test_file,
         },
         "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {"reader_options": {"header": None}},
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
         Batch
-    ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
     assert my_batch_1.batch_spec is not None
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
-    assert isinstance(my_batch_1.data, SparkDFBatchData)
-
-
-def test_pandas_execution_engine_get_batch_definitions_and_get_batch_basics_from_path(
-    datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
-):
-
-    data_connector_name: str = "test_runtime_data_connector"
-    data_asset_name: str = "test_asset_1"
-
-    batch_request: dict = {
-        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-        "runtime_parameters": {
-            "path": taxi_test_file,
-        },
-        "batch_identifiers": {
-            "airflow_run_id": 1234567890,
-        },
-    }
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-
+    assert isinstance(my_batch_1.data, PandasBatchData)
     assert (
-        len(
-            datasource_with_runtime_data_connector_and_pandas_execution_engine.get_available_batch_definitions(
-                batch_request=batch_request
-            )
-        )
-        == 1
-    )
+        len(my_batch_1.data.dataframe) == 10001
+    )  # one more line because of header being set to None
+    assert len(my_batch_1.data.dataframe.columns) == 18
 
 
-def test_sparkdf_execution_engine_get_batch_definitions_and_get_batch_basics_from_path(
-    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
-    taxi_test_file,
-    spark_session,
-):
-
-    data_connector_name: str = "test_runtime_data_connector"
-    data_asset_name: str = "test_asset_1"
-
-    batch_request: dict = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-        "runtime_parameters": {
-            "path": taxi_test_file,
-        },
-        "batch_identifiers": {
-            "airflow_run_id": 1234567890,
-        },
-    }
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-
-    assert (
-        len(
-            datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_available_batch_definitions(
-                batch_request=batch_request
-            )
-        )
-        == 1
-    )
-
-
-def test_pandas_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_directory(
+def test_pandas_execution_engine_batch_definition_list_from_batch_request_not_supported_file_directory(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
     taxi_test_file_directory,
 ):
@@ -1330,7 +1275,192 @@ def test_pandas_execution_engine_get_batch_definition_list_from_batch_request_le
         )
 
 
-def test_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one_from_directory(
+def test_pandas_execution_engine_batch_definition_list_from_batch_request_failed_wrong_file_path(
+    datasource_with_runtime_data_connector_and_pandas_execution_engine,
+):
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": "I_dont_exist",
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # raised by guess_reader_method_from_path() in ExecutionEngine
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        batch_list: List[
+            Batch
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+
+def test_pandas_execution_engine_batch_definition_list_from_batch_request_failed_wrong_reader_method(
+    datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
+):
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file,
+        },
+        "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {"reader_method": "i_am_not_valid"},
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # raised by _get_reader_fn() in ExecutionEngine
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        batch_list: List[
+            Batch
+        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+
+# Tests with SparkDF Execution Engine
+
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_success_file_path(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file,
+    spark_session,
+):
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file,
+        },
+        "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {"reader_options": {"header": True}},
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
+    assert isinstance(my_batch_1.data, SparkDFBatchData)
+    assert my_batch_1.data.dataframe.count() == 10000
+    assert len(my_batch_1.data.dataframe.columns) == 18
+
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_fail_directory_but_no_reader_method(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file_directory,
+    spark_session,
+):
+    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file_directory,
+        },
+        "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {"reader_options": {"header": True}},
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # raised by guess_reader_method_from_path() in SparkDFExecutionEngine
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        batch_list: List[
+            Batch
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_fail_directory_wrong_reader_method(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file_directory,
+    spark_session,
+):
+    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file_directory,
+        },
+        "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {
+            "reader_options": {"header": True},
+            "reader_method": "i_am_invalid",
+        },
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # raised by guess_reader_method_from_path() in SparkDFExecutionEngine
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        batch_list: List[
+            Batch
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_fail_file_path_wrong_reader_method(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file,
+    spark_session,
+):
+    # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file,
+        },
+        "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {
+            "reader_options": {"header": True},
+            "reader_method": "i_am_invalid",
+        },
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # raised by guess_reader_method_from_path() in SparkDFExecutionEngine
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        batch_list: List[
+            Batch
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_success_directory(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
     spark_session,
@@ -1357,7 +1487,105 @@ def test_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_l
     ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
-    batch = batch_list[0]
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
+    assert isinstance(my_batch_1.data, SparkDFBatchData)
+    assert my_batch_1.data.dataframe.count() == 30000  # 3 files read in as 1
+    assert len(my_batch_1.data.dataframe.columns) == 18
 
-    # 30000 means all 3 files were read as 1 CSV
-    assert batch.data.dataframe.count() == 30000
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_success_file_path_no_headers(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file,
+    spark_session,
+):
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
+    assert isinstance(my_batch_1.data, SparkDFBatchData)
+    assert (
+        my_batch_1.data.dataframe.count() == 10001
+    )  # headers are not read-in by default
+    assert len(my_batch_1.data.dataframe.columns) == 18
+
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_success_directory_no_headers(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file_directory,
+    spark_session,
+):
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file_directory,
+        },
+        "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {
+            "reader_method": "csv",
+        },
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
+    assert isinstance(my_batch_1.data, SparkDFBatchData)
+    assert my_batch_1.data.dataframe.count() == 30003  # 3 files read in as 1
+    assert len(my_batch_1.data.dataframe.columns) == 18
+
+
+def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_failed_wrong_file_path(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+):
+    batch_identifiers = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": "I_dont_exist",
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # raised by guess_reader_method_from_path() in ExecutionEngine
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        batch_list: List[
+            Batch
+        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
