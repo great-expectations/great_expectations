@@ -39,7 +39,7 @@ def test_self_check(basic_datasource):
     }
 
 
-def test_error_checking(basic_datasource):
+def test_error_checking_unknown_datasource(basic_datasource):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     test_runtime_data_connector: RuntimeDataConnector = (
@@ -57,8 +57,17 @@ def test_error_checking(basic_datasource):
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
                 runtime_parameters={"batch_data": test_df},
+                batch_identifiers={"airflow_run_id": "first"},
             )
         )
+
+
+def test_error_checking_unknown_data_connector(basic_datasource):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
@@ -71,11 +80,20 @@ def test_error_checking(basic_datasource):
                 data_connector_name="non_existent_data_connector",
                 data_asset_name="my_data_asset",
                 runtime_parameters={"batch_data": test_df},
+                batch_identifiers={"airflow_run_id": "first"},
             )
         )
 
+
+def test_error_checking_missing_runtime_parameters(basic_datasource):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
     # test for missing runtime_parameters arg
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
@@ -87,6 +105,14 @@ def test_error_checking(basic_datasource):
                 batch_identifiers={"pipeline_stage_name": "munge"},
             )
         )
+
+
+def test_error_checking_too_many_runtime_parameters(basic_datasource):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # test for too many runtime_parameters keys
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
