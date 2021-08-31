@@ -12,5 +12,5 @@ bq mk ${GE_TEST_BIGQUERY_PROJECT}:${dataset}
 
 for i in {1..100}
 do
-  bq cp bigquery-public-data:austin_bikeshare.bikeshare_trips ${GE_TEST_BIGQUERY_PROJECT}:${dataset}.bikeshare_trips_${i}
+  bq load --skip_leading_rows=1 ${GE_TEST_BIGQUERY_PROJECT}:${dataset}.taxi_trips_${i} ../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv bigquery_schema.json
 done

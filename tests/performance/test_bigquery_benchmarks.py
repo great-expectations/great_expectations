@@ -15,20 +15,21 @@ import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from tests.performance import bikeshare_benchmark_util
+from tests.performance import taxi_benchmark_util
 
 
 @pytest.mark.parametrize("write_data_docs", [False, True])
 @pytest.mark.parametrize("number_of_tables", [1, 2, 4, 8, 16, 100])
-def test_bikeshare_trips_benchmark(
+def test_taxi_trips_benchmark(
     benchmark: BenchmarkFixture,
     tmpdir: py.path.local,
     pytestconfig: _pytest.config.Config,
     number_of_tables: int,
     write_data_docs: bool,
 ):
-    """Benchmark performance with a variety of expectations using the BigQuery public dataset
-    bigquery-public-data.austin_bikeshare.bikeshare_trips.
+    """Benchmark performance with a variety of expectations using NYC Taxi data (yellow_trip_data_sample_2019-01.csv)
+    found in the tests/test_sets/taxi_yellow_trip_data_samples directory, and used extensively in unittest and
+    integration tests for Great Expectations.
 
     To simulate a more realistic usage of Great Expectations with several tables, this benchmark is run with 1 or more
     copies of the table, and each table has multiple expectations run on them. For simplicity, the expectations run on
@@ -41,9 +42,10 @@ def test_bikeshare_trips_benchmark(
     consider adding a new benchmark (or at least rename this benchmark to provide clarity that results are not directly
     comparable because of the data change).
     """
+
     _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
 
-    checkpoint = bikeshare_benchmark_util.create_checkpoint(
+    checkpoint = taxi_benchmark_util.create_checkpoint(
         number_of_tables=number_of_tables,
         html_dir=tmpdir.strpath if write_data_docs else None,
     )
@@ -90,7 +92,8 @@ def test_bikeshare_trips_benchmark(
         )
 
     # Check that every expectation result was correct.
-    expected_results = bikeshare_benchmark_util.expected_validation_results()
+    expected_results = taxi_benchmark_util.expected_validation_results()
+
     for run_result in result.run_results.values():
         actual_results = [
             result.to_json_dict()

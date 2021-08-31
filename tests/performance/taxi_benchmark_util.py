@@ -1,6 +1,7 @@
 """
-Helper utilities for creating and testing benchmarks using the BigQuery public dataset
-bigquery-public-data.austin_bikeshare.bikeshare_trips.
+Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow_trip_data_sample_2019-01.csv)
+    found in the tests/test_sets/taxi_yellow_trip_data_samples directory, and used extensively in unittest and
+    integration tests for Great Expectations.
 """
 import os
 from typing import List, Optional
@@ -31,9 +32,7 @@ def create_checkpoint(
 
     # These tables are created by "setup_bigquery_tables_for_performance_test.sh", with numbering from 1 to 100.
     assert 1 <= number_of_tables <= 100
-    suite_and_asset_names = [
-        f"bikeshare_trips_{i}" for i in range(1, number_of_tables + 1)
-    ]
+    suite_and_asset_names = [f"taxi_trips_{i}" for i in range(1, number_of_tables + 1)]
 
     context = _create_context(
         datasource_and_dataconnector_name, suite_and_asset_names, html_dir
@@ -50,165 +49,130 @@ def create_checkpoint(
 
 
 def expected_validation_results() -> List[dict]:
-    """The correct validation results for each table, intended to be used for testing benchmark runs."""
     return [
         {
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
-            "result": {
-                "observed_value": [
-                    "trip_id",
-                    "subscriber_type",
-                    "bikeid",
-                    "start_time",
-                    "start_station_id",
-                    "start_station_name",
-                    "end_station_id",
-                    "end_station_name",
-                    "duration_minutes",
-                ]
-            },
             "meta": {},
             "expectation_config": {
                 "meta": {},
                 "kwargs": {
                     "column_set": [
-                        "trip_id",
-                        "subscriber_type",
-                        "bikeid",
-                        "start_time",
-                        "start_station_id",
-                        "start_station_name",
-                        "end_station_id",
-                        "end_station_name",
-                        "duration_minutes",
+                        "vendor_id",
+                        "pickup_datetime",
+                        "dropoff_datetime",
+                        "passenger_count",
+                        "trip_distance",
+                        "rate_code_id",
+                        "store_and_fwd_flag",
+                        "pickup_location_id",
+                        "dropoff_location_id",
+                        "payment_type",
+                        "fare_amount",
+                        "extra",
+                        "mta_tax",
+                        "tip_amount",
+                        "tolls_amount",
+                        "improvement_surcharge",
+                        "total_amount",
+                        "congestion_surcharge",
                     ]
                 },
                 "expectation_type": "expect_table_columns_to_match_set",
             },
-        },
-        {
+            "result": {
+                "observed_value": [
+                    "vendor_id",
+                    "pickup_datetime",
+                    "dropoff_datetime",
+                    "passenger_count",
+                    "trip_distance",
+                    "rate_code_id",
+                    "store_and_fwd_flag",
+                    "pickup_location_id",
+                    "dropoff_location_id",
+                    "payment_type",
+                    "fare_amount",
+                    "extra",
+                    "mta_tax",
+                    "tip_amount",
+                    "tolls_amount",
+                    "improvement_surcharge",
+                    "total_amount",
+                    "congestion_surcharge",
+                ]
+            },
             "exception_info": {
                 "raised_exception": False,
                 "exception_traceback": None,
                 "exception_message": None,
             },
             "success": True,
-            "result": {
-                "element_count": 1342066,
-                "unexpected_count": 0,
-                "unexpected_percent": 0.0,
-                "partial_unexpected_list": [],
-                "missing_count": 0,
-                "missing_percent": 0.0,
-                "unexpected_percent_total": 0.0,
-                "unexpected_percent_nonmissing": 0.0,
-                "partial_unexpected_index_list": None,
-                "partial_unexpected_counts": [],
-            },
-            "meta": {},
-            "expectation_config": {
-                "meta": {},
-                "kwargs": {"column": "trip_id"},
-                "expectation_type": "expect_column_values_to_be_unique",
-            },
         },
         {
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
-            "result": {
-                "element_count": 1342066,
-                "unexpected_count": 0,
-                "unexpected_percent": 0.0,
-                "partial_unexpected_list": [],
-                "partial_unexpected_index_list": None,
-                "partial_unexpected_counts": [],
-            },
             "meta": {},
             "expectation_config": {
                 "meta": {},
-                "kwargs": {"column": "trip_id"},
+                "kwargs": {"column": "vendor_id"},
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
-        },
-        {
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
-            "result": {"observed_value": "Integer"},
-            "meta": {},
-            "expectation_config": {
-                "meta": {},
-                "kwargs": {"column": "trip_id", "type_": "INTEGER"},
-                "expectation_type": "expect_column_values_to_be_of_type",
-            },
-        },
-        {
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
-            "result": {"observed_value": "String"},
-            "meta": {},
-            "expectation_config": {
-                "meta": {},
-                "kwargs": {"column": "bikeid", "type_": "STRING"},
-                "expectation_type": "expect_column_values_to_be_of_type",
-            },
-        },
-        {
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
             "result": {
-                "element_count": 1342066,
+                "element_count": 10000,
                 "unexpected_count": 0,
                 "unexpected_percent": 0.0,
                 "partial_unexpected_list": [],
-                "missing_count": 6551,
-                "missing_percent": 0.48812800562714503,
-                "unexpected_percent_total": 0.0,
-                "unexpected_percent_nonmissing": 0.0,
                 "partial_unexpected_index_list": None,
                 "partial_unexpected_counts": [],
             },
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+        },
+        {
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {"column": "vendor_id", "type_": "INTEGER"},
+                "expectation_type": "expect_column_values_to_be_of_type",
+            },
+            "result": {"observed_value": "Integer"},
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+        },
+        {
+            "meta": {},
+            "expectation_config": {
+                "meta": {},
+                "kwargs": {"column": "pickup_datetime", "type_": "STRING"},
+                "expectation_type": "expect_column_values_to_be_of_type",
+            },
+            "result": {"observed_value": "String"},
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+        },
+        {
             "meta": {},
             "expectation_config": {
                 "meta": {},
                 "kwargs": {
-                    "column": "subscriber_type",
-                    "value_set": _subscriber_types(),
+                    "column": "rate_code_id",
+                    "value_set": [1, 2, 3, 4, 5, 6, 99],
                 },
                 "expectation_type": "expect_column_values_to_be_in_set",
             },
-        },
-        {
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
             "result": {
-                "element_count": 1342066,
+                "element_count": 10000,
                 "unexpected_count": 0,
-                "unexpected_percent": 0.0,
+                "unexpected_percent": 0,
                 "partial_unexpected_list": [],
                 "missing_count": 0,
                 "missing_percent": 0.0,
@@ -217,20 +181,47 @@ def expected_validation_results() -> List[dict]:
                 "partial_unexpected_index_list": None,
                 "partial_unexpected_counts": [],
             },
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+        },
+        {
             "meta": {},
             "expectation_config": {
                 "meta": {},
                 "kwargs": {
-                    "column": "duration_minutes",
-                    "max_value": 36000,
+                    "column": "trip_distance",
+                    "max_value": 1000.0,
                     "min_value": 0,
                 },
                 "expectation_type": "expect_column_values_to_be_between",
             },
+            "result": {
+                "element_count": 10000,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 0.0,
+                "unexpected_percent_nonmissing": 0.0,
+                "partial_unexpected_index_list": None,
+                "partial_unexpected_counts": [],
+            },
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
         },
     ]
 
 
+# TODO 20210830 - Will - this will need to be parameterized
 def _create_context(
     datasource_and_dataconnector_name: str,
     asset_names: List[str],
@@ -312,59 +303,68 @@ def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
             expectation_type="expect_table_columns_to_match_set",
             kwargs={
                 "column_set": [
-                    "trip_id",
-                    "subscriber_type",
-                    "bikeid",
-                    "start_time",
-                    "start_station_id",
-                    "start_station_name",
-                    "end_station_id",
-                    "end_station_name",
-                    "duration_minutes",
+                    "vendor_id",
+                    "pickup_datetime",
+                    "dropoff_datetime",
+                    "passenger_count",
+                    "trip_distance",
+                    "rate_code_id",
+                    "store_and_fwd_flag",
+                    "pickup_location_id",
+                    "dropoff_location_id",
+                    "payment_type",
+                    "fare_amount",
+                    "extra",
+                    "mta_tax",
+                    "tip_amount",
+                    "tolls_amount",
+                    "improvement_surcharge",
+                    "total_amount",
+                    "congestion_surcharge",
                 ]
             },
         )
     )
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_unique",
-            kwargs={"column": "trip_id"},
-        )
-    )
-    suite.add_expectation(
-        expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
-            kwargs={"column": "trip_id"},
+            kwargs={"column": "vendor_id"},
         )
     )
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
-            kwargs={"column": "trip_id", "type_": "INTEGER"},
+            kwargs={"column": "vendor_id", "type_": "INTEGER"},
         )
     )
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
-            kwargs={"column": "bikeid", "type_": "STRING"},
+            kwargs={"column": "pickup_datetime", "type_": "STRING"},
         )
     )
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
-            kwargs={
-                "column": "subscriber_type",
-                "value_set": _subscriber_types(),
-            },
+            # rate_code_id refers to the final rate code in effect at the end of the trip
+            # (https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_recordsgyellow.pdf)
+            # 1=Standard rate
+            # 2=JFK
+            # 3=Newark
+            # 4=Nassau or Westchester
+            # 5=Negotiated fare
+            # 6=Group ride
+            # 99=NA
+            kwargs={"column": "rate_code_id", "value_set": [1, 2, 3, 4, 5, 6, 99]},
         )
     )
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_between",
             kwargs={
-                "column": "duration_minutes",
+                "column": "trip_distance",
                 "min_value": 0,
-                "max_value": 36000,
+                "max_value": 1000.0,
             },
         )
     )
@@ -373,87 +373,3 @@ def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
     context.save_expectation_suite(
         expectation_suite=suite, expectation_suite_name=suite_name
     )
-
-
-def _subscriber_types() -> List[str]:
-    return [
-        "Walk Up",
-        "24-Hour Kiosk (Austin B-cycle)",
-        "Annual Membership (Austin B-cycle)",
-        "Founding Member (Austin B-cycle)",
-        "Local365",
-        "Weekender",
-        "Local30",
-        "Annual",
-        "Explorer",
-        "Founding Member",
-        "RideScout Single Ride",
-        "Annual Member",
-        "7-Day",
-        "Annual (Denver B-cycle)",
-        "Semester Membership",
-        "Local365+Guest Pass",
-        "Annual Pass",
-        "Republic Rider (Annual)",
-        "null",
-        "Local365 Youth with helmet (age 13-17 riders)",
-        "Try Before You Buy Special",
-        "Annual Membership",
-        "Local365 ($80 plus tax)",
-        "Weekender ($15 plus tax)",
-        "Explorer ($8 plus tax)",
-        "Local30 ($11 plus tax)",
-        "Semester Membership (Austin B-cycle)",
-        "24-Hour-Online (Austin B-cycle)",
-        "Annual (Madison B-cycle)",
-        "Annual (Nashville B-cycle)",
-        "7-Day Membership (Austin B-cycle)",
-        "Annual (San Antonio B-cycle)",
-        "Annual Member (Houston B-cycle)",
-        "Annual (Boulder B-cycle)",
-        "Annual Membership (Fort Worth Bike Sharing)",
-        "Annual (Denver Bike Sharing)",
-        "Annual Plus",
-        "U.T. Student Membership",
-        "Local365 Youth (age 13-17 riders)",
-        "Madtown Monthly",
-        "Annual Plus Membership",
-        "HT Ram Membership",
-        "24 Hour Walk Up Pass",
-        "3-Day Weekender",
-        "3-Day Explorer",
-        "$1 Pay by Trip Fall Special",
-        "Single Trip",
-        "Single Trip (Pay-as-you-ride)",
-        "Pay-as-you-ride",
-        "Single Trip Ride",
-        "Annual ",
-        "Local365+Guest Pass- 1/2 off Anniversary Special",
-        "Local365- 1/2 off Anniversary Special",
-        "$1 Pay by Trip Winter Special",
-        "Single Trip ",
-        "Annual Membership ",
-        "ACL 2019 Pass",
-        "Local31",
-        "ACL Weekend Pass Special (Austin B-cycle)",
-        "Annual (Cincy Red Bike)",
-        "Membership: pay once  one-year commitment",
-        "Annual (Kansas City B-cycle)",
-        "Annual (Broward B-cycle)",
-        "Annual Pass (30 minute)",
-        "Annual Membership (Charlotte B-cycle)",
-        "FunFunFun Fest 3 Day Pass",
-        "Local365 Youth (age 13-17 riders)- 1/2 off Special",
-        "24-Hour Membership (Austin B-cycle)",
-        "Annual Membership (Indy - Pacers Bikeshare )",
-        "Annual Membership (GREENbike)",
-        "Denver B-cycle Founder",
-        "Republic Rider",
-        "Aluminum Access",
-        "Heartland Pass (Annual Pay)",
-        "UT Student Membership",
-        "PROHIBITED",
-        "RESTRICTED",
-        "Annual (Omaha B-cycle)",
-        "Heartland Pass (Monthly Pay)",
-    ]
