@@ -1915,6 +1915,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     batch_request: dict = {
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
+        "datasource_name": None,
     }
 
     batch_request_file_path: str = os.path.join(
