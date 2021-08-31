@@ -110,7 +110,7 @@ Using these example configurations, add in your GCS bucket and path to a directo
   </Tabs>
 </TabItem>
 <TabItem value="configured">
-  The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regex and assets to fit your use-case.
+  The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
   <Tabs
     groupId="yaml-or-python"
     defaultValue='yaml'
