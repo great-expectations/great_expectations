@@ -151,7 +151,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Advanced',
+              label: 'Advanced', 
               items: [
                 'guides/connecting_to_your_data/advanced/database_credentials',
                 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
