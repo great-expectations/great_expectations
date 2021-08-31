@@ -169,16 +169,24 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequestBase(datasource_name="A")
+        batch_definition=A,
+        batch_request=BatchRequestBase(
+            datasource_name="A", data_connector_name=None, data_asset_name=None
+        ),
     )
 
     assert not batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequestBase(datasource_name="B")
+        batch_definition=A,
+        batch_request=BatchRequestBase(
+            datasource_name="B", data_connector_name=None, data_asset_name=None
+        ),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="a"),
+        batch_request=BatchRequestBase(
+            datasource_name="A", data_connector_name="a", data_asset_name=None
+        ),
     )
 
     assert batch_definition_matches_batch_request(
@@ -210,9 +218,12 @@ def test__batch_definition_matches_batch_request():
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
+            datasource_name=None,
+            data_connector_name=None,
+            data_asset_name=None,
             data_connector_query={
                 "batch_filter_parameters": {"id": "A"},
-            }
+            },
         ),
     )
 
