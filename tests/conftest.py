@@ -4506,7 +4506,7 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
 
 
 @pytest.fixture
-def data_context_with_datasource_spark_engine(empty_data_context):
+def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
     context = empty_data_context
     config = yaml.load(
         f"""
