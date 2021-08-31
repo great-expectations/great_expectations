@@ -179,9 +179,9 @@ class BatchRequestBase(DictDot):
 
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -290,9 +290,9 @@ class BatchRequest(BatchRequestBase):
 
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -356,22 +356,53 @@ is illegal.
                 """
             )
 
+    @staticmethod
+    def _validate_runtime_batch_request_specific_init_parameters(
+        runtime_parameters: Union[IDDict, dict],
+        batch_identifiers: Union[IDDict, dict],
+        batch_spec_passthrough: Optional[dict] = None,
+    ):
+        if not (
+            runtime_parameters and (isinstance(runtime_parameters, (dict, IDDict)))
+        ):
+            raise TypeError(
+                f"""The type for runtime_parameters must be dict or IDDict.
+                The type given is "{str(type(runtime_parameters))}", which is illegal."""
+            )
+
+        if not (batch_identifiers and isinstance(batch_identifiers, (dict, IDDict))):
+            raise TypeError(
+                f"""The type for batch_identifiers must be a dict or IDDict, with keys being identifiers defined in the
+                data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
+            )
+
+        if batch_spec_passthrough and not (
+            isinstance(batch_spec_passthrough, (dict, IDDict))
+        ):
+            raise TypeError(
+                f"""The type for batch_spec_passthrough must be a dict or IDDict. The type given is "{str(type(batch_spec_passthrough))}", which is illegal."""
+            )
+
 
 class RuntimeBatchRequest(BatchRequest):
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        runtime_parameters: dict,
+        batch_identifiers: dict,
         batch_spec_passthrough: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        batch_identifiers: Optional[dict] = None,
     ):
         super().__init__(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             batch_spec_passthrough=batch_spec_passthrough,
+        )
+
+        self._validate_runtime_batch_request_specific_init_parameters(
+            runtime_parameters, batch_identifiers, batch_spec_passthrough
         )
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
@@ -414,7 +445,7 @@ class Batch(DictDot):
     ):
         self._data = data
         if batch_request is None:
-            batch_request = dict()
+            batch_request = {}
         self._batch_request = batch_request
         if batch_definition is None:
             batch_definition = IDDict()

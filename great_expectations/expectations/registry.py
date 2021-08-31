@@ -8,9 +8,9 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
-_registered_expectations = dict()
-_registered_metrics = dict()
-_registered_renderers = dict()
+_registered_expectations = {}
+_registered_metrics = {}
+_registered_renderers = {}
 
 """
 {
@@ -103,7 +103,7 @@ def register_metric(
         Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]
     ] = None,
 ) -> dict:
-    res = dict()
+    res = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")
     if metric_provider is not None and metric_fn_type is not None:
@@ -130,7 +130,7 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys",
             )
-        providers = metric_definition.get("providers", dict())
+        providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
             current_provider_cls, current_provider_fn = providers[execution_engine_name]
             if current_provider_fn != metric_provider:

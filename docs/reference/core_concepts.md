@@ -26,12 +26,12 @@ Profilers communicate what they *learn* about data, and what Data Docs uses to *
 When lots of Expectations are grouped together to define a kind of data asset, like "monthly taxi rides", we call it
 an `Expectation Suite`.
 
-`Datasources` are the first thing you'll need to configure to use Great Expectations. A Datasource brings together a way of interacting with data (like a database or spark cluster) and some specific data (a description of that taxi ride data for last month). With a Datasource, you can get a Batch of data or a Validator that can evaluate expectations on
+`Datasources` are the first thing you'll need to configure to use Great Expectations. A Datasource brings together a way of interacting with data (like a database or Spark cluster) and some specific data (a description of that taxi ride data for last month). With a Datasource, you can get a Batch of data or a Validator that can evaluate expectations on
 data.
 
 When you're deploying Great Expectations, you'll use a `Checkpoint` to run a validation, testing whether data meets expectations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
 
-Great Expectations makes it possible to maintain state about data pipelines using `Stores`. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, Checkpoints, or even Data Docs sites. Stores, and other configuration, is managed using a `Data Context`. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
+Great Expectations makes it possible to maintain state about data pipelines using `Stores`. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, Checkpoints, or even Data Docs sites. Stores, and other configuration, is managed using a `Data Context`. The Data Context configuration is usually stored as a YAML file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
 
 ## Concepts in the codebase
 

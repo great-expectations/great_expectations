@@ -1,5 +1,5 @@
 ---
-title: How to connect to a Postgresql database
+title: How to connect to a PostgreSQL database
 ---
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
@@ -9,7 +9,7 @@ import DatabaseCredentials from '../components/adding_database_credentials.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to data in a Postgresql database.
+This guide will help you connect to data in a PostgreSQL database.
 This will allow you to validate and explore your data.
 
 <Prerequisites>
@@ -26,7 +26,7 @@ This will allow you to validate and explore your data.
 
 ### 2. Install required dependencies
 
-First, install the necessary dependencies for Great Expectations to connect to your postgres database by running the following in your terminal:
+First, install the necessary dependencies for Great Expectations to connect to your Postgres database by running the following in your terminal:
 
 ```console
 pip install sqlalchemy psycopg2
@@ -42,7 +42,7 @@ For this guide we will use a `connection_string` like this:
 postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```   
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -61,7 +61,7 @@ Load your DataContext into memory using the `get_context()` method.
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
@@ -100,7 +100,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
@@ -154,6 +154,6 @@ To view the full scripts used in this page, see them on GitHub:
 - [postgres_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py)
 - [postgres_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py)
 
-## Next Steps
+## Next Steps	
 
-<NextSteps />
+<NextSteps />	

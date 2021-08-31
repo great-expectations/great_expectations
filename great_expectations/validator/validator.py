@@ -91,7 +91,7 @@ class Validator:
         if batches is None:
             batches = tuple()
 
-        self._batches = dict()
+        self._batches = {}
 
         for batch in batches:
             assert isinstance(
@@ -164,6 +164,7 @@ class Validator:
         self._expose_dataframe_methods = value
 
     def __getattr__(self, name):
+        name = name.lower()
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
         elif (
@@ -418,7 +419,7 @@ class Validator:
         """
         graph = ValidationGraph()
         if runtime_configuration is None:
-            runtime_configuration = dict()
+            runtime_configuration = {}
 
         if runtime_configuration.get("catch_exceptions", True):
             catch_exceptions = True
@@ -469,7 +470,7 @@ class Validator:
                     raise err
 
         if metrics is None:
-            metrics = dict()
+            metrics = {}
 
         metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
         for configuration in processed_configurations:

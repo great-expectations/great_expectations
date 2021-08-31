@@ -3,6 +3,7 @@ import datetime
 import decimal
 import logging
 import os
+import re
 import sys
 import uuid
 from collections import OrderedDict
@@ -401,6 +402,59 @@ def parse_string_to_datetime(
 
 def datetime_to_int(dt: datetime.date) -> int:
     return int(dt.strftime("%Y%m%d%H%M%S"))
+
+
+class AzureUrl:
+    """
+    Parses an Azure Blob Storage URL into its separate components
+    Format: <ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>
+    """
+
+    def __init__(self, url: str):
+        search = re.search(
+            r"^(?:https?://)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
+        )
+        assert (
+            search is not None
+        ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
+        self._account_name = search.group(1)
+        self._container = search.group(2)
+        self._blob = search.group(3)
+
+    @property
+    def account_name(self):
+        return self._account_name
+
+    @property
+    def container(self):
+        return self._container
+
+    @property
+    def blob(self):
+        return self._blob
+
+
+class GCSUrl:
+    """
+    Parses a Google Cloud Storage URL into its separate components
+    Format: gs://<BUCKET_OR_NAME>/<BLOB>
+    """
+
+    def __init__(self, url: str):
+        search = re.search(r"^gs://([^/]+)/(.+)$", url)
+        assert (
+            search is not None
+        ), "The provided URL does not adhere to the format specified by the GCS SDK (gs://<BUCKET_OR_NAME>/<BLOB>)"
+        self._bucket = search.group(1)
+        self._blob = search.group(2)
+
+    @property
+    def bucket(self):
+        return self._bucket
+
+    @property
+    def blob(self):
+        return self._blob
 
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path

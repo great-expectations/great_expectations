@@ -44,7 +44,7 @@ For this guide we will use a `connection_string` like this:
 snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>
 ```   
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -53,7 +53,7 @@ Import these necessary packages and modules.
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L26
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L17
 ```
 
 ### 5. Configure your Datasource
@@ -63,16 +63,16 @@ Load your DataContext into memory using the `get_context()` method.
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L28-L42
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L19-L33
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L51
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L42
 ```
 
 </TabItem>
@@ -80,10 +80,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L28-L45
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L19-L36
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L51
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L42
 ```
 
 </TabItem>
@@ -102,17 +102,17 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L53
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L44
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L53
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L44
 ```
 
 </TabItem>
@@ -132,7 +132,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L56-L70
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L47-L61
 ```
 
   </TabItem>
@@ -141,7 +141,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L76-L87
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L67-L78
 ```
 
   </TabItem>

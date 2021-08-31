@@ -122,9 +122,10 @@ class ExpectationExplorer:
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
                 "ignore_row_if",
+                "mostly",
             ],
             "expect_compound_columns_to_be_unique": ["ignore_row_if"],
-            "expect_multicolumn_sum_to_equal": ["sum_total"],
+            "expect_multicolumn_sum_to_equal": ["sum_total", "ignore_row_if"],
             "expect_select_column_values_to_be_unique_within_record": ["ignore_row_if"],
             "expect_column_values_to_be_of_type": ["type_", "mostly"],
             "expect_column_values_to_be_in_type_list": ["type_list", "mostly"],

@@ -103,6 +103,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against mssql",
     )
     parser.addoption(
+        "--bigquery",
+        action="store_true",
+        help="If set, execute tests against bigquery",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests",
@@ -134,6 +139,7 @@ def build_test_backends_list_cfe(metafunc):
     include_postgresql = not metafunc.config.getoption("--no-postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
+    include_bigquery: bool = metafunc.config.getoption("--bigquery")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -141,6 +147,7 @@ def build_test_backends_list_cfe(metafunc):
         include_postgresql=include_postgresql,
         include_mysql=include_mysql,
         include_mssql=include_mssql,
+        include_bigquery=include_bigquery,
     )
     return test_backend_names
 
@@ -177,7 +184,7 @@ def no_usage_stats(monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
         [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
@@ -4465,4 +4472,79 @@ def yellow_trip_pandas_data_context(
     context: DataContext = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
+    return context
+
+
+@pytest.fixture
+def db_file():
+    return file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+
+@pytest.fixture
+def data_context_with_datasource_pandas_engine(empty_data_context):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
     return context
