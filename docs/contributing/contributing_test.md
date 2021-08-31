@@ -172,18 +172,18 @@ Run the performance tests with pytest, e.g.
 ```
 pytest tests/performance/test_bigquery_benchmarks.py \
   --bigquery --performance-tests \
-  -k test_bikeshare_trips_benchmark[1] \
+  -k 'test_taxi_trips_benchmark[1-True]'  \
   --benchmark-json=tests/performance/results/`date "+%H%M"`_${USER}.json \
   --no-spark --no-postgresql -rP -vv
 ```
 
-Some benchmarks take a long time to complete. In this example, only the relatively fast `test_bikeshare_trips_benchmark[1]` benchmark is run and the output should include runtime like the following:
+Some benchmarks take a long time to complete. In this example, only the relatively fast `test_taxi_trips_benchmark[1-True]` benchmark is run and the output should include runtime like the following:
 
 ```
 --------------------------------------------------- benchmark: 1 tests ---------------------------------------------------
 Name (time in s)                         Min     Max    Mean  StdDev  Median     IQR  Outliers     OPS  Rounds  Iterations
 --------------------------------------------------------------------------------------------------------------------------
-test_bikeshare_trips_benchmark[1]     8.2794  8.2794  8.2794  0.0000  8.2794  0.0000       0;0  0.1208       1           1
+test_taxi_trips_benchmark[1-True]     5.0488  5.0488  5.0488  0.0000  5.0488  0.0000       0;0  0.1981       1           1
 --------------------------------------------------------------------------------------------------------------------------
 ```
 
@@ -194,13 +194,13 @@ The result is saved for comparisons as described below.
 Compare test results in this directory with `py.test-benchmark compare`, e.g.
 
 ```
-$ py.test-benchmark compare --group-by name tests/performance/results/initial_baseline.json tests/performance/results/*${USER}.json
+$  py.test-benchmark compare --group-by name tests/performance/results/initial_baseline.json tests/performance/results/*${USER}.json                                                                   
 
----------------------------------------------------------------------------- benchmark 'test_bikeshare_trips_benchmark[1]': 2 tests ---------------------------------------------------------------------------
+---------------------------------------------------------------------------- benchmark 'test_taxi_trips_benchmark[1-True]': 2 tests ---------------------------------------------------------------------------
 Name (time in s)                                        Min               Max              Mean            StdDev            Median               IQR            Outliers     OPS            Rounds  Iterations
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_bikeshare_trips_benchmark[1] (initial_base)     6.4498 (1.0)      6.4498 (1.0)      6.4498 (1.0)      0.0000 (1.0)      6.4498 (1.0)      0.0000 (1.0)           0;0  0.1550 (1.0)           1           1
-test_bikeshare_trips_benchmark[1] (1623_jdimatt)     7.4123 (1.15)     7.4123 (1.15)     7.4123 (1.15)     0.0000 (1.0)      7.4123 (1.15)     0.0000 (1.0)           0;0  0.1349 (0.87)          1           1
+test_taxi_trips_benchmark[1-True] (initial_base)     5.0488 (1.0)      5.0488 (1.0)      5.0488 (1.0)      0.0000 (1.0)      5.0488 (1.0)      0.0000 (1.0)           0;0  0.1981 (1.0)           1           1
+test_taxi_trips_benchmark[1-True] (2114_work)        6.4675 (1.28)     6.4675 (1.28)     6.4675 (1.28)     0.0000 (1.0)      6.4675 (1.28)     0.0000 (1.0)           0;0  0.1546 (0.78)          1           1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ```
 
