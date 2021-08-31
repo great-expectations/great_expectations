@@ -44,7 +44,8 @@ module.exports = {
       title: "great_expectations",
       logo: {
         alt: "Great Expectations",
-        src: "img/logo.svg"
+        src: "img/logo.svg",
+        href: "https://greatexpectations.io"
       },
       items: [
         {
