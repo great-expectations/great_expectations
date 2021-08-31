@@ -2,8 +2,6 @@
 title: Connect to Data
 ---
 
-![minimap](../../images/minimap.png)
-
 Once you have a Data Context, you’ll want to connect to data. In Great Expectations, Datasources simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
 Let’s configure your first Datasource: a connection to the data directory we’ve provided in the repo. This could also be a database connection, but for now we’re just using a simple file store.
