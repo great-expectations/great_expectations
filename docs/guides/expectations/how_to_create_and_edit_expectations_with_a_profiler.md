@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations with a Profiler
+title: How to create and edit Expectations with a Profiler
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
