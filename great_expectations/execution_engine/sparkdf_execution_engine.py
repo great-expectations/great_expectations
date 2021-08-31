@@ -20,7 +20,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 
 from ..exceptions import (
-    BatchKwargsError,
     BatchSpecError,
     ExecutionEngineError,
     GreatExpectationsError,
@@ -267,7 +266,7 @@ Please check your config."""
     @staticmethod
     def guess_reader_method_from_path(path):
         """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
-        file extensions are used, returns BatchKwargsError stating that it is unable to determine the current path.
+        file extensions are used, returns ExecutionEngineError stating that it is unable to determine the current path.
 
         Args:
             path - A given file path
@@ -281,8 +280,8 @@ Please check your config."""
         elif path.endswith(".parquet"):
             return "parquet"
 
-        raise BatchKwargsError(
-            "Unable to determine reader method from path: %s" % path, {"path": path}
+        raise ExecutionEngineError(
+            "Unable to determine reader method from path: %s" % path
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
@@ -298,9 +297,8 @@ Please check your config."""
 
         """
         if reader_method is None and path is None:
-            raise BatchKwargsError(
-                "Unable to determine spark reader function without reader_method or path.",
-                {"reader_method": reader_method},
+            raise ExecutionEngineError(
+                "Unable to determine spark reader function without reader_method or path"
             )
 
         if reader_method is None:
@@ -312,9 +310,8 @@ Please check your config."""
                 return reader.format(reader_method_op).load
             return getattr(reader, reader_method_op)
         except AttributeError:
-            raise BatchKwargsError(
+            raise ExecutionEngineError(
                 "Unable to find reader_method %s in spark." % reader_method,
-                {"reader_method": reader_method},
             )
 
     def get_domain_records(

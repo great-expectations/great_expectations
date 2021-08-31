@@ -785,21 +785,21 @@ class Expectation(metaclass=MetaExpectation):
                     report_obj, e, traceback.format_exc()
                 )
 
-            execution_engines = None
+            introspected_execution_engines = None
             if upstream_metrics is not None:
-                execution_engines = self._get_execution_engine_dict(
+                introspected_execution_engines = self._get_execution_engine_dict(
                     upstream_metrics=upstream_metrics,
                 )
-                report_obj.update({"execution_engines": execution_engines})
+                report_obj.update({"execution_engines": introspected_execution_engines})
 
             try:
                 tests = self._get_examples(return_only_gallery_examples=False)
                 if len(tests) > 0:
-                    if execution_engines is not None:
+                    if introspected_execution_engines is not None:
                         test_results = self._get_test_results(
                             snake_name,
                             tests,
-                            execution_engines,
+                            introspected_execution_engines,
                         )
                         report_obj.update({"test_report": test_results})
             except Exception as e:

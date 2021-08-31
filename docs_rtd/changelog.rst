@@ -9,6 +9,22 @@ develop
 -----------------
 * [FEATURE] Performance tests using BigQuery backend (#3280)
 
+0.13.31
+-----------------
+* [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)
+* [FEATURE] Enable column_pair expectations and tests for Spark (#3294)
+* [FEATURE] Implement `InferredAssetGCSDataConnector` (#3284)
+* [FEATURE]/CHANGE run time format (#3272) (Thanks @serialbandicoot)
+* [DOCS] Fix misc errors in "How to create renderers for Custom Expectations" (#3315)
+* [DOCS] GDOC-217 remove stub links (#3314)
+* [DOCS] Remove misc TODOs to tidy up docs (#3313)
+* [DOCS] Standardize capitalization of various technologies in `docs` (#3312)
+* [DOCS] Fix broken link to Contributor docs (#3295) (Thanks @discdiver)
+* [MAINTENANCE] Additional tests for RuntimeDataConnector at Datasource-level (query) (#3288)
+* [MAINTENANCE] Update GCSStoreBackend + tests (#2630) (Thanks @hmandsager)
+* [MAINTENANCE] Write integration/E2E tests for `ConfiguredAssetAzureDataConnector` (#3204)
+* [MAINTENANCE] Write integration/E2E tests for both `GCSDataConnectors` (#3301)
+
 0.13.30
 -----------------
 * [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)
