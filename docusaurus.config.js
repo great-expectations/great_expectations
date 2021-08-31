@@ -9,7 +9,7 @@ module.exports = {
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
-  favicon: "img/favicon.ico",
+  favicon: "https://greatexpectations.io/favicon.ico",
   organizationName: "great-expectations",
   projectName: "great_expectations",
   plugins: [
