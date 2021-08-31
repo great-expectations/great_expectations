@@ -28,13 +28,13 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: '⚙️ Setting up Great Expectations',
+          label: 'Setting up Great Expectations',
           items: [
             //'guides/setup/how_to_instantiate_a_data_context',
 
             {
               type: 'category',
-              label: '🧰 Installation',
+              label: 'Installation',
               items: [
                 'guides/setup/installation/local',
                 'guides/setup/installation/databricks',
@@ -83,7 +83,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: '🔌 Connecting to your data',
+          label: 'Connecting to your data',
           items: [
             //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
             //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
@@ -91,7 +91,7 @@ module.exports = {
             //'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
             {
               type: 'category',
-              label: '💭 In_memory',
+              label: 'In_memory',
               items: [
                 'guides/connecting_to_your_data/in_memory/pandas',
                 'guides/connecting_to_your_data/in_memory/spark'
@@ -99,7 +99,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: '🚀 Database',
+              label: 'Database',
               items: [
                 'guides/connecting_to_your_data/database/athena',
                 'guides/connecting_to_your_data/database/bigquery',
@@ -113,7 +113,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: '📁 Filesystem',
+              label: 'Filesystem',
               items: [
                 'guides/connecting_to_your_data/filesystem/pandas',
                 'guides/connecting_to_your_data/filesystem/spark'
@@ -121,7 +121,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: '☁️ Cloud',
+              label: 'Cloud',
               items: [
                 'guides/connecting_to_your_data/cloud/s3/pandas',
                 'guides/connecting_to_your_data/cloud/s3/spark',
@@ -140,7 +140,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: '🔬 Advanced',
+              label: 'Advanced',
               items: [
                 'guides/connecting_to_your_data/advanced/database_credentials',
                 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
@@ -152,7 +152,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: '🧪 Creating and editing Expectations for your data',
+          label: 'Creating and editing Expectations for your data',
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
@@ -160,7 +160,7 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             {
               type: 'category',
-              label: '🔬 Advanced',
+              label: 'Advanced',
               items: [
                 'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
                 'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
@@ -195,7 +195,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: '✅ Validating your data',
+          label: 'Validating your data',
           items: [
             // 'guides/validation/how_to_validate_data_by_running_a_checkpoint',
             {
@@ -238,7 +238,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: '🧰 Miscellaneous',
+          label: 'Miscellaneous',
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
