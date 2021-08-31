@@ -134,8 +134,7 @@ class AssetConfig(DictDot):
         name=None,
         class_name=None,
         module_name=None,
-        bucket=None,  # S3/GCS
-        container=None,  # Azure
+        bucket=None,
         prefix=None,
         delimiter=None,
         max_keys=None,
@@ -148,8 +147,6 @@ class AssetConfig(DictDot):
         self._module_name = module_name
         if bucket is not None:
             self.bucket = bucket
-        if container is not None:
-            self.container = container
         if prefix is not None:
             self.prefix = prefix
         if delimiter is not None:
@@ -188,7 +185,6 @@ class AssetConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     bucket = fields.String(required=False, allow_none=True)
-    container = fields.String(required=False, allow_none=True)
     prefix = fields.String(required=False, allow_none=True)
     delimiter = fields.String(required=False, allow_none=True)
     max_keys = fields.Integer(required=False, allow_none=True)
@@ -297,12 +293,8 @@ class DataConnectorConfig(DictDot):
         batch_identifiers=None,
         sorters=None,
         batch_spec_passthrough=None,
-        # S3
         boto3_options=None,
-        # Azure
         azure_options=None,
-        container=None,
-        # GCS
         gcs_options=None,
         **kwargs,
     ):
@@ -332,18 +324,10 @@ class DataConnectorConfig(DictDot):
             self.sorters = sorters
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
-
-        # S3
         if boto3_options is not None:
             self.boto3_options = boto3_options
-
-        # Azure
         if azure_options is not None:
             self.azure_options = azure_options
-        if container is not None:
-            self.container = container
-
-        # GCS
         if gcs_options is not None:
             self.gcs_options = gcs_options
 
@@ -390,23 +374,15 @@ class DataConnectorConfigSchema(Schema):
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
-
-    # S3
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
-
-    # Azure
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
-    container = fields.String(required=False, allow_none=True)
-
-    # GCS
     gcs_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
-
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
@@ -460,7 +436,12 @@ filesystem type of the data connector (your data connector is "{data['class_name
 configuration to continue.
                 """
             )
-        if ("delimiter" in data or "prefix" in data or "max_keys" in data) and not (
+        if (
+            "bucket" in data
+            or "delimiter" in data
+            or "prefix" in data
+            or "max_keys" in data
+        ) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
@@ -477,22 +458,20 @@ S3/Azure/GCS type of the data connector (your data connector is "{data['class_na
 continue.
                 """
             )
-        if ("bucket" in data) and not (
+        if ("boto3_options" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
-                "InferredAssetGCSDataConnector",
-                "ConfiguredAssetGCSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
-S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+S3 type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
-                """
+                    """
             )
-        if ("azure_options" in data or "container" in data) and not (
+        if ("azure_options" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetAzureDataConnector",

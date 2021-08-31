@@ -46,7 +46,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         self,
         name: str,
         datasource_name: str,
-        container: str,
+        bucket: str,
         assets: dict,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
@@ -62,7 +62,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         Args:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
-            container (str): container name for Azure Blob Storage
+            bucket (str): container name for Azure Blob Storage
             assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
@@ -83,7 +83,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-        self._container = container
+        self._bucket = bucket
         self._prefix = os.path.join(prefix, "")
         self._delimiter = delimiter
 
@@ -135,13 +135,13 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         # query_options keys must adhere to argument names used in Azure `walk_blobs()`
         # API: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.containerclient?view=azure-python#walk-blobs-name-starts-with-none--include-none--delimiter--------kwargs-
         query_options: dict = {
-            "container": self._container,
+            "container": self._bucket,
             "name_starts_with": self._prefix,
             "delimiter": self._delimiter,
         }
         if asset is not None:
-            if asset.container:
-                query_options["container"] = asset.container
+            if asset.bucket:
+                query_options["container"] = asset.bucket
             if asset.prefix:
                 query_options["name_starts_with"] = asset.prefix
             if asset.delimiter:
@@ -162,5 +162,5 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         return os.path.join(
-            f"{self._account_name}.blob.core.windows.net", self._container, path
+            f"{self._account_name}.blob.core.windows.net", self._bucket, path
         )

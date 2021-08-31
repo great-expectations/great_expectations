@@ -244,7 +244,7 @@ def test_instantiation_with_account_url_and_credential(
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
+        bucket="my_container",
         prefix="",
         assets={"alpha": {}},
         azure_options={
@@ -276,7 +276,7 @@ def test_instantiation_with_conn_str_and_credential(
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
+        bucket="my_container",
         prefix="",
         assets={"alpha": {}},
         azure_options={  # Representative of format noted in official docs
@@ -303,7 +303,7 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
+        bucket="my_container",
         prefix="",
         assets={"alpha": {}},
         azure_options={
@@ -325,7 +325,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
+        bucket="my_container",
         prefix="",
         assets={"alpha": {}},
         azure_options={  # Representative of format noted in official docs
@@ -351,7 +351,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
             },
-            container="my_container",
+            bucket="my_container",
             prefix="",
             assets={"alpha": {}},
             azure_options={
@@ -378,7 +378,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
             },
-            container="my_container",
+            bucket="my_container",
             prefix="",
             assets={"alpha": {}},
             azure_options={"account_url": "not_a_valid_url"},
@@ -394,7 +394,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
             },
-            container="my_container",
+            bucket="my_container",
             prefix="",
             assets={"alpha": {}},
             azure_options={"conn_str": "not_a_valid_conn_str"},
@@ -430,7 +430,7 @@ def test_instantiation_with_test_yaml_config(
             pattern: alpha-(.*)\\.csv
             group_names:
                 - index
-        container: my_container
+        bucket: my_container
         prefix: ""
         assets:
             alpha:
@@ -469,7 +469,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
             pattern: alpha-(.*)\\.csv
             group_names:
                 - index
-        container: my_container
+        bucket: my_container
         prefix: ""
         assets:
             alpha:
@@ -524,7 +524,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
             pattern: beta-(.*)\\.csv
             group_names:
                 - index
-        container: my_container
+        bucket: my_container
         prefix: ""
         assets:
             alpha:
@@ -573,7 +573,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
+        bucket="my_container",
         prefix="",
         assets={"alpha": {}},
         azure_options={
@@ -611,7 +611,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
+           bucket: my_container
            prefix: ""
            assets:
                TestFiles:
@@ -678,7 +678,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
+           bucket: my_container
            prefix: ""
            assets:
                TestFiles:
@@ -740,7 +740,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
+           bucket: my_container
            prefix: ""
            assets:
                TestFiles:
@@ -823,7 +823,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
+           bucket: my_container
            prefix: ""
            assets:
                TestFiles:
@@ -906,7 +906,7 @@ def test_return_all_batch_definitions_basic_sorted(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
+       bucket: my_container
        prefix: ""
        assets:
            TestFiles:
@@ -996,7 +996,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
+       bucket: my_container
        prefix: ""
        assets:
            TestFiles:
@@ -1116,7 +1116,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
+       bucket: my_container
        prefix: ""
        assets:
            TestFiles:
@@ -1206,7 +1206,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
+       bucket: my_container
        assets:
            TestFiles:
                pattern: (.+)_(.+)_(.+)\\.csv
@@ -1281,7 +1281,7 @@ def test_return_all_batch_definitions_too_many_sorters(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
+       bucket: my_container
        prefix: ""
        assets:
            TestFiles:
@@ -1349,7 +1349,7 @@ def test_example_with_explicit_data_asset_names(
     yaml_string = f"""
 class_name: ConfiguredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-container: my_container
+bucket: my_container
 prefix: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
@@ -1485,7 +1485,7 @@ def test_get_full_file_path(
     yaml_string = f"""
 class_name: ConfiguredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-container: my_container
+bucket: my_container
 prefix: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$

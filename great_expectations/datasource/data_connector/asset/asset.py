@@ -18,8 +18,7 @@ class Asset:
         pattern: Optional[str] = None,
         group_names: Optional[List[str]] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        bucket: Optional[str] = None,  # S3/GCS
-        container: Optional[str] = None,  # Azure
+        bucket: Optional[str] = None,
         prefix: Optional[str] = None,
         delimiter: Optional[str] = None,
         max_keys: Optional[int] = None,
@@ -31,8 +30,7 @@ class Asset:
         # Note: this may need to become a nested object to accommodate sorters
         self._group_names = group_names
         self._batch_spec_passthrough = batch_spec_passthrough or {}
-        self._bucket = bucket  # S3/GCS
-        self._container = container  # Azure
+        self._bucket = bucket
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_keys = max_keys
@@ -64,10 +62,6 @@ class Asset:
     @property
     def bucket(self) -> Optional[str]:
         return self._bucket
-
-    @property
-    def container(self) -> Optional[str]:
-        return self._container
 
     @property
     def prefix(self) -> Optional[str]:
