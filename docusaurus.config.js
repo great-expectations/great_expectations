@@ -38,7 +38,7 @@ module.exports = {
       // backgroundColor: '#32a852', // Defaults to `#fff`.
       backgroundColor: "#efefef", // Defaults to `#fff`.
       textColor: "#091E42", // Defaults to `#000`.
-      isCloseable: false // Defaults to `true`.
+      isCloseable: false // Defaults to `true`. 
     },
     navbar: {
       title: "great_expectations",
