@@ -30,8 +30,13 @@ module.exports = {
           type: 'category',
           label: 'Setting up Great Expectations',
           items: [
-            //'guides/setup/how_to_instantiate_a_data_context',
-
+            {
+              type: 'category',
+              label: 'Core skills',
+              items: [
+                // 'guides/setup/how_to_instantiate_a_data_context',
+              ]
+            },
             {
               type: 'category',
               label: 'Installation',
@@ -85,10 +90,16 @@ module.exports = {
           type: 'category',
           label: 'Connecting to your data',
           items: [
-            //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
-            //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
-            'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-            //'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
+            {
+              type: 'category',
+              label: 'Core skills',
+              items: [
+                //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
+                //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
+                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
+                //'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
+              ]
+            },
             {
               type: 'category',
               label: 'In memory',
@@ -154,10 +165,16 @@ module.exports = {
           type: 'category',
           label: 'Creating and editing Expectations for your data',
           items: [
-            'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-            'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
-            'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
-            'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
+            {
+              type: 'category',
+              label: 'Core skills',
+              items: [
+                'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
+                'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
+                'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
+                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
+              ]
+            },
             {
               type: 'category',
               label: 'Configuring Profilers',
@@ -197,7 +214,13 @@ module.exports = {
           type: 'category',
           label: 'Validating your data',
           items: [
-            // 'guides/validation/how_to_validate_data_by_running_a_checkpoint',
+            {
+              type: 'category',
+              label: 'Core skills',
+              items: [
+                // 'guides/validation/how_to_validate_data_by_running_a_checkpoint',
+              ]
+            },
             {
               type: 'category',
               label: 'Checkpoints',
