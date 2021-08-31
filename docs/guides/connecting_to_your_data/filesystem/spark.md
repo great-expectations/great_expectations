@@ -141,9 +141,7 @@ Then load data into the `Validator`.
 
 ## Additional Notes
 
-<SparkAdditionalNotes />
-
-### How to read-in multiple CSVs as a single Spark Dataframe
+#### How to read-in multiple CSVs as a single Spark Dataframe
 
 More advanced configuration for reading in CSV files through the `SparkDFExecutionEngine` is possible through the `batch_spec_passthrough` parameter.  `batch_spec_passthrough` allows for reader-methods to be directly specified, 
 and backend-specific `reader_options` to be passed through to the actual reader-method, in this case `spark.read.csv()`. The following example shows how `batch_spec_passthrough` parameters can be added to the `BatchRequest`. However,
@@ -166,6 +164,8 @@ Once that step is complete, then we can confirm that our `Validator` contains a 
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L119-L127
 ```
+
+<SparkAdditionalNotes />
 
 To view the full scripts used in this page, see them on GitHub:
 
