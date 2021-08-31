@@ -43,7 +43,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Configuring Data Contexts',
+              label: 'Data Contexts',
               items: [
                 'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
                 'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
@@ -54,7 +54,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Configuring metadata Stores',
+              label: 'Metadata Stores',
               items: [
                 'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3',
                 'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage',
@@ -71,7 +71,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Configuring Data Docs',
+              label: 'Data Docs',
               items: [
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem',
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage',
