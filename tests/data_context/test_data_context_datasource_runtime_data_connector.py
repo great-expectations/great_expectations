@@ -6,6 +6,7 @@ import pytest
 import great_expectations
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
@@ -35,17 +36,31 @@ def taxi_test_file_directory():
     )
 
 
+@pytest.fixture()
+def test_df_pandas():
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    return test_df
+
+
+@pytest.fixture()
+def test_df_spark(spark_session):
+    test_df = spark_session.createDataFrame(
+        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    )
+    return test_df
+
+
 #########################################
 # Tests with data passed in as batch_data
 #########################################
 
 # Tests with PandasExecutionEngine : batch_data
 def test_get_batch_successful_specification_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
+
     batch_list: list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -60,7 +75,7 @@ def test_get_batch_successful_specification_pandas_engine(
 
 
 def test_get_batch_ambiguous_parameter_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
     """
     What does this test and why?
@@ -68,9 +83,9 @@ def test_get_batch_ambiguous_parameter_pandas_engine(
     get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
     """
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
+
     # raised by get_batch_list()
     with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
         batch_list: list = context.get_batch_list(
@@ -85,11 +100,10 @@ def test_get_batch_ambiguous_parameter_pandas_engine(
 
 
 def test_get_batch_failed_specification_type_error_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -105,11 +119,10 @@ def test_get_batch_failed_specification_type_error_pandas_engine(
 
 
 def test_get_batch_failed_specification_no_batch_identifier_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -138,11 +151,10 @@ def test_get_batch_failed_specification_no_batch_identifier_pandas_engine(
 
 
 def test_get_batch_failed_specification_no_runtime_parameters_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -171,11 +183,10 @@ def test_get_batch_failed_specification_no_runtime_parameters_pandas_engine(
 
 
 def test_get_batch_failed_specification_incorrect_batch_spec_passthrough_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -193,11 +204,10 @@ def test_get_batch_failed_specification_incorrect_batch_spec_passthrough_pandas_
 
 
 def test_get_batch_failed_specification_wrong_runtime_parameters_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
@@ -216,11 +226,10 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_pandas_engine(
 
 
 def test_get_validator_successful_specification_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     context.create_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
@@ -238,7 +247,7 @@ def test_get_validator_successful_specification_pandas_engine(
 
 
 def test_get_validator_ambiguous_parameter_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
     """
     What does this test and why?
@@ -246,9 +255,8 @@ def test_get_validator_ambiguous_parameter_pandas_engine(
     get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
     """
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     context.create_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
@@ -266,11 +274,10 @@ def test_get_validator_ambiguous_parameter_pandas_engine(
 
 
 def test_get_validator_wrong_type_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     context.create_expectation_suite("my_expectations")
 
@@ -292,11 +299,10 @@ def test_get_validator_wrong_type_pandas_engine(
 
 
 def test_get_validator_failed_specification_no_batch_identifier_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     context.create_expectation_suite("my_expectations")
 
@@ -328,11 +334,10 @@ def test_get_validator_failed_specification_no_batch_identifier_pandas_engine(
 
 
 def test_get_validator_failed_specification_incorrect_batch_spec_passthrough_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     context.create_expectation_suite("my_expectations")
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
@@ -352,11 +357,11 @@ def test_get_validator_failed_specification_incorrect_batch_spec_passthrough_pan
 
 
 def test_get_validator_failed_specification_no_runtime_parameters_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
+
     context.create_expectation_suite("my_expectations")
     with pytest.raises(TypeError):
         # runtime_parameters should not be None
@@ -385,11 +390,10 @@ def test_get_validator_failed_specification_no_runtime_parameters_pandas_engine(
 
 
 def test_get_validator_wrong_runtime_parameters_pandas_engine(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, test_df_pandas
 ):
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
     context = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
 
     context.create_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
@@ -413,13 +417,11 @@ def test_get_validator_wrong_runtime_parameters_pandas_engine(
 
 
 def test_get_batch_successful_specification_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
+
     batch_list: list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -434,7 +436,7 @@ def test_get_batch_successful_specification_sparkdf_engine(
 
 
 def test_get_batch_ambiguous_parameter_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     """
     What does this test and why?
@@ -442,11 +444,9 @@ def test_get_batch_ambiguous_parameter_sparkdf_engine(
     get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
     """
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
+
     # raised by get_batch_list()
     with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
         batch_list: list = context.get_batch_list(
@@ -461,13 +461,10 @@ def test_get_batch_ambiguous_parameter_sparkdf_engine(
 
 
 def test_get_batch_failed_specification_type_error_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -483,13 +480,10 @@ def test_get_batch_failed_specification_type_error_sparkdf_engine(
 
 
 def test_get_batch_failed_specification_no_batch_identifier_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -518,13 +512,10 @@ def test_get_batch_failed_specification_no_batch_identifier_sparkdf_engine(
 
 
 def test_get_batch_failed_specification_no_runtime_parameters_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -553,13 +544,10 @@ def test_get_batch_failed_specification_no_runtime_parameters_sparkdf_engine(
 
 
 def test_get_batch_failed_specification_incorrect_batch_spec_passthrough_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -577,13 +565,10 @@ def test_get_batch_failed_specification_incorrect_batch_spec_passthrough_sparkdf
 
 
 def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
@@ -602,13 +587,10 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
 
 
 def test_get_validator_successful_specification_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     context.create_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
@@ -626,7 +608,7 @@ def test_get_validator_successful_specification_sparkdf_engine(
 
 
 def test_get_validator_ambiguous_parameter_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     """
     What does this test and why?
@@ -634,11 +616,8 @@ def test_get_validator_ambiguous_parameter_sparkdf_engine(
     get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
     """
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     context.create_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
@@ -656,13 +635,10 @@ def test_get_validator_ambiguous_parameter_sparkdf_engine(
 
 
 def test_get_validator_wrong_type_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     context.create_expectation_suite("my_expectations")
 
@@ -684,13 +660,10 @@ def test_get_validator_wrong_type_sparkdf_engine(
 
 
 def test_get_validator_failed_specification_no_batch_identifier_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     context.create_expectation_suite("my_expectations")
 
@@ -722,13 +695,10 @@ def test_get_validator_failed_specification_no_batch_identifier_sparkdf_engine(
 
 
 def test_get_validator_failed_specification_incorrect_batch_spec_passthrough_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     context.create_expectation_suite("my_expectations")
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
@@ -748,13 +718,11 @@ def test_get_validator_failed_specification_incorrect_batch_spec_passthrough_spa
 
 
 def test_get_validator_failed_specification_no_runtime_parameters_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
+
     context.create_expectation_suite("my_expectations")
     with pytest.raises(TypeError):
         # runtime_parameters should not be None
@@ -783,13 +751,10 @@ def test_get_validator_failed_specification_no_runtime_parameters_sparkdf_engine
 
 
 def test_get_validator_wrong_runtime_parameters_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
-    test_df = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
-
     context = data_context_with_datasource_spark_engine
+    test_df = test_df_spark
 
     context.create_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
@@ -1191,7 +1156,7 @@ def test_get_batch_successful_specification_pandas_file_path(
     )
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
-    assert my_batch_1.batch_spec is not None
+    assert isinstance(my_batch_1.batch_spec, BatchSpec)
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1, Batch)
     assert isinstance(my_batch_1.data, PandasBatchData)
@@ -1217,7 +1182,7 @@ def test_get_batch_successful_specification_pandas_file_path_no_headers(
     )
     assert len(batch_list) == 1
     my_batch_1 = batch_list[0]
-    assert my_batch_1.batch_spec is not None
+    assert isinstance(my_batch_1.batch_spec, BatchSpec)
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1, Batch)
     assert isinstance(my_batch_1.data, PandasBatchData)
@@ -1307,7 +1272,7 @@ def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_succe
     assert len(batch_list) == 1
     assert isinstance(batch_list[0], Batch)
     batch = batch_list[0]
-    assert batch.batch_spec is not None
+    assert isinstance(batch.batch_spec, BatchSpec)
     assert batch.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(batch, Batch)
     assert isinstance(batch.data, SparkDFBatchData)
@@ -1378,7 +1343,7 @@ def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_succe
     assert len(batch_list) == 1
     assert isinstance(batch_list[0], Batch)
     batch = batch_list[0]
-    assert batch.batch_spec is not None
+    assert isinstance(batch.batch_spec, BatchSpec)
     assert batch.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(batch, Batch)
     assert isinstance(batch.data, SparkDFBatchData)
@@ -1408,7 +1373,7 @@ def test_get_batch_successful_specification_spark_directory(
     assert len(batch_list) == 1
     assert isinstance(batch_list[0], Batch)
     batch = batch_list[0]
-    assert batch.batch_spec is not None
+    assert isinstance(batch.batch_spec, BatchSpec)
     assert batch.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(batch, Batch)
     assert isinstance(batch.data, SparkDFBatchData)
@@ -1449,7 +1414,7 @@ def test_get_batch_successful_specification_spark_directory_batch_spec_passthrou
     assert len(batch_list) == 1
     assert isinstance(batch_list[0], Batch)
     batch = batch_list[0]
-    assert batch.batch_spec is not None
+    assert isinstance(batch.batch_spec, BatchSpec)
     assert batch.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(batch, Batch)
     assert isinstance(batch.data, SparkDFBatchData)
@@ -1478,7 +1443,7 @@ def test_get_batch_successful_specification_spark_directory_no_header(
     assert len(batch_list) == 1
     assert isinstance(batch_list[0], Batch)
     batch = batch_list[0]
-    assert batch.batch_spec is not None
+    assert isinstance(batch.batch_spec, BatchSpec)
     assert batch.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(batch, Batch)
     assert isinstance(batch.data, SparkDFBatchData)
@@ -1489,14 +1454,10 @@ def test_get_batch_successful_specification_spark_directory_no_header(
 def test_get_batch_spark_fail_wrong_file_path(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
-    # unique error that is caught here
-    import pyspark.sql.utils
-
     context = data_context_with_datasource_spark_engine
-    with pytest.raises(
-        (ge_exceptions.ExecutionEngineError, pyspark.sql.utils.AnalysisException)
-    ):
 
+    # raised by get_batch_data_and_markers() in SparkDFExecutionEngine.
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
         batch_list: list = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
