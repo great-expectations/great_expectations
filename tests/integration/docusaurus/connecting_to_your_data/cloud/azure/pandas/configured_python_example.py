@@ -15,19 +15,19 @@ datasource_config = {
     "execution_engine": {
         "class_name": "PandasExecutionEngine",
         "azure_options": {
-            "account_url": "<YOUR_ACCOUNT_URL>",
-            "credential": "<YOUR_CREDENTIAL>",
+            "account_url": "<YOUR_ACCOUNT_URL>",  # or `conn_str`
+            "credential": "<YOUR_CREDENTIAL>",  # if using a protected bucket
         },
     },
     "data_connectors": {
         "configured_data_connector_name": {
             "class_name": "ConfiguredAssetAzureDataConnector",
             "azure_options": {
-                "account_url": "<YOUR_ACCOUNT_URL>",
-                "credential": "<YOUR_CREDENTIAL>",
+                "account_url": "<YOUR_ACCOUNT_URL>",  # or `conn_str`
+                "credential": "<YOUR_CREDENTIAL>",  # if using a protected bucket
             },
-            "container": "superconductive-public",
-            "prefix": "data/taxi_yellow_trip_data_samples/",
+            "bucket": "<YOUR_AZURE_BUCKET_HERE>",
+            "prefix": "<BUCKET_PATH_TO_DATA>",
             "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
@@ -50,7 +50,7 @@ datasource_config["data_connectors"]["configured_data_connector_name"]["azure_op
     "credential"
 ] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"][
-    "container"
+    "bucket"
 ] = "superconductive-public"
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "prefix"

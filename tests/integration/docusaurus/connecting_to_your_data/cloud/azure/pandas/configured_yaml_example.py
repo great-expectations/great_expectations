@@ -16,15 +16,15 @@ execution_engine:
     class_name: PandasExecutionEngine
     azure_options:
         account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
-        credential: <YOUR_CREDENTIAL>   # if using a protected container
+        credential: <YOUR_CREDENTIAL>   # if using a protected bucket
 data_connectors:
     configured_data_connector_name:
         class_name: ConfiguredAssetAzureDataConnector
         azure_options:
             account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
-            credential: <YOUR_CREDENTIAL>   # if using a protected container
-        container: <YOUR_AZURE_CONTAINER_HERE>
-        prefix: <CONTAINER_PATH_TO_DATA>
+            credential: <YOUR_CREDENTIAL>   # if using a protected bucket
+        bucket: <YOUR_AZURE_BUCKET_HERE>
+        prefix: <BUCKET_PATH_TO_DATA>
         assets:
             taxi_data:
         default_regex:
@@ -37,10 +37,10 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
-    "<YOUR_AZURE_CONTAINER_HERE>", "superconductive-public"
+    "<YOUR_AZURE_BUCKET_HERE>", "superconductive-public"
 )
 datasource_yaml = datasource_yaml.replace(
-    "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
+    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
 )
 datasource_yaml = datasource_yaml.replace(
     "<YOUR_ACCOUNT_URL>", "superconductivetests.blob.core.windows.net"
