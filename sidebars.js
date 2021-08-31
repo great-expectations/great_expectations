@@ -91,7 +91,7 @@ module.exports = {
             //'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
             {
               type: 'category',
-              label: 'In_memory',
+              label: 'In memory',
               items: [
                 'guides/connecting_to_your_data/in_memory/pandas',
                 'guides/connecting_to_your_data/in_memory/spark'
@@ -160,20 +160,17 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             {
               type: 'category',
-              label: 'Advanced',
-              items: [
-                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
-                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
-              ]
+              label: 'Configuring Profilers',
+              items: []
             },
             {
               type: 'category',
-              label: 'Configuring Profilers',
-              items: []
+              label: 'Creating Custom Expectations',
+              items: [
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
+              ]
             },
             {
               type: 'category',
@@ -184,11 +181,14 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Creating Custom Expectations',
+              label: 'Advanced',
               items: [
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
+                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
+                'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
+                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
+                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
               ]
             }
           ]
@@ -200,27 +200,11 @@ module.exports = {
             // 'guides/validation/how_to_validate_data_by_running_a_checkpoint',
             {
               type: 'category',
-              label: 'Advanced',
-              items: [
-                'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
-                'guides/validation/advanced/how_to_implement_custom_notifications',
-                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
-              ]
-            },
-            {
-              type: 'category',
               label: 'Checkpoints',
               items: [
                 'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
                 'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
                 'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/validation/contributing/how_to_contribute_a_new_validation_action'
               ]
             },
             {
@@ -232,6 +216,22 @@ module.exports = {
                 'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Contributing',
+              items: [
+                'guides/validation/contributing/how_to_contribute_a_new_validation_action'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Advanced',
+              items: [
+                'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
+                'guides/validation/advanced/how_to_implement_custom_notifications',
+                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
               ]
             }
           ]
