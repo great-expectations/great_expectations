@@ -1,3 +1,6 @@
+/*
+This file must be monitored to insure its pristine state.
+*/
 module.exports = {
   docs: [
     {
