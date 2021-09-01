@@ -1,10 +1,10 @@
 stages:
-  - stage: cloud_db_integration_and_performance_tests
+  - stage: cloud_db_integration
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: bigquery_expectations_and_performance_tests
+      - job: bigquery_expectations
         timeoutInMinutes: 0 # Maximize the time that pipelines remain open (6 hours currently)
         variables:
           python.version: '3.8'
@@ -14,12 +14,12 @@ stages:
             performance:
               test_script: 'tests/performance/test_bigquery_benchmarks.py'
               extra_args: '--bigquery --performance-tests --no-spark --no-postgresql --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True] '
-            expectations_cfe:
-              test_script: 'tests/test_definitions/test_expectations_cfe.py'
-              extra_args: ''
-            expectations:
-              test_script: 'tests/test_definitions/test_expectations.py'
-              extra_args: ''
+#            expectations_cfe:
+#              test_script: 'tests/test_definitions/test_expectations_cfe.py'
+#              extra_args: ''
+#            expectations:
+#              test_script: 'tests/test_definitions/test_expectations.py'
+#              extra_args: ''
           maxParallel: 1
 
         steps:

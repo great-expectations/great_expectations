@@ -6,9 +6,6 @@ Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow
 import os
 from typing import List, Optional
 
-from ruamel import yaml
-
-from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import BaseDataContext
@@ -31,23 +28,21 @@ def create_checkpoint(
     Returns:
     """
     checkpoint_name = "my_checkpoint"
-    datasource_name = "my_datasource"
-    data_connector_name = "my_data_connector"
+    datasource_and_dataconnector_name = "my_datasource_and_dataconnector"
 
     # These tables are created by "setup_bigquery_tables_for_performance_test.sh", with numbering from 1 to 100.
     assert 1 <= number_of_tables <= 100
     suite_and_asset_names = [f"taxi_trips_{i}" for i in range(1, number_of_tables + 1)]
 
     context = _create_context(
-        datasource_name, data_connector_name, suite_and_asset_names, html_dir
+        datasource_and_dataconnector_name, suite_and_asset_names, html_dir
     )
     for suite_name in suite_and_asset_names:
         _add_expectation_configuration(context=context, suite_name=suite_name)
 
     return _add_checkpoint(
         context,
-        datasource_name,
-        data_connector_name,
+        datasource_and_dataconnector_name,
         checkpoint_name,
         suite_and_asset_names,
     )
@@ -226,13 +221,12 @@ def expected_validation_results() -> List[dict]:
     ]
 
 
+# TODO 20210830 - Will - this will need to be parameterized
 def _create_context(
-    datasource_name: str,
-    data_connector_name: str,
+    datasource_and_dataconnector_name: str,
     asset_names: List[str],
     html_dir: Optional[str] = None,
-) -> DataContext:
-
+) -> BaseDataContext:
     data_docs_sites = (
         {
             "local_site": {
@@ -249,40 +243,36 @@ def _create_context(
     )
     bigquery_project = os.environ["GE_TEST_BIGQUERY_PROJECT"]
     bigquery_dataset = os.environ.get(
-        "GE_TEST_BIGQUERY_PERFORMANCE_DATASET", "performance_ci"
+        "GE_TEST_BIGQUERY_PEFORMANCE_DATASET", "performance_ci"
     )
 
     data_context_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
         data_docs_sites=data_docs_sites,
         anonymous_usage_statistics={"enabled": False},
-    )
-
-    context = BaseDataContext(project_config=data_context_config)
-
-    datasource_config = {
-        "name": datasource_name,
-        "class_name": "Datasource",
-        "execution_engine": {
-            "class_name": "SqlAlchemyExecutionEngine",
-            "connection_string": f"bigquery://{bigquery_project}/{bigquery_dataset}",
-        },
-        "data_connectors": {
-            data_connector_name: {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "name": "whole_table",
-                "assets": {asset_name: {} for asset_name in asset_names},
+        datasources={
+            datasource_and_dataconnector_name: {
+                "class_name": "Datasource",
+                "execution_engine": {
+                    "class_name": "SqlAlchemyExecutionEngine",
+                    "connection_string": f"bigquery://{bigquery_project}/{bigquery_dataset}",
+                },
+                "data_connectors": {
+                    datasource_and_dataconnector_name: {
+                        "class_name": "ConfiguredAssetSqlDataConnector",
+                        "name": "whole_table",
+                        "assets": {asset_name: {} for asset_name in asset_names},
+                    },
+                },
             },
         },
-    }
-    context.add_datasource(**datasource_config)
-    return context
+    )
+    return BaseDataContext(project_config=data_context_config)
 
 
 def _add_checkpoint(
     context: BaseDataContext,
-    datasource_name: str,
-    data_connector_name: str,
+    datasource_and_dataconnector_name: str,
     checkpoint_name: str,
     suite_and_asset_names=[],
 ) -> SimpleCheckpoint:
@@ -290,8 +280,8 @@ def _add_checkpoint(
         {
             "expectation_suite_name": suite_and_asset_name,
             "batch_request": {
-                "datasource_name": datasource_name,
-                "data_connector_name": data_connector_name,
+                "datasource_name": datasource_and_dataconnector_name,
+                "data_connector_name": datasource_and_dataconnector_name,
                 "data_asset_name": suite_and_asset_name,
                 "batch_spec_passthrough": {"create_temp_table": False},
             },
