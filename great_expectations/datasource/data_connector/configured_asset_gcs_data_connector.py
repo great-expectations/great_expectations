@@ -2,6 +2,15 @@ import logging
 import os
 from typing import List, Optional
 
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetFilePathDataConnector,
+)
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.util import list_gcs_keys
+from great_expectations.execution_engine import ExecutionEngine
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -13,15 +22,6 @@ except ImportError:
     logger.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
-
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetFilePathDataConnector,
-)
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.util import list_gcs_keys
-from great_expectations.execution_engine import ExecutionEngine
 
 
 class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
