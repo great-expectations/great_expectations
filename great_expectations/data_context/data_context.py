@@ -1782,7 +1782,9 @@ class BaseDataContext:
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition = batch_list[-1].batch_definition
-        execution_engine = batch_list[-1].data.execution_engine
+        execution_engine = self.datasources[
+            batch_definition.datasource_name
+        ].execution_engine
 
         validator = Validator(
             execution_engine=execution_engine,

@@ -93,15 +93,10 @@ class Validator:
 
         self._batches = {}
 
-        for batch in batches:
-            assert isinstance(
-                batch, Batch
-            ), "batches provided to Validator must be Great Expectations Batch objects"
-            self._execution_engine.load_batch_data(batch.id, batch.data)
-            self._batches[batch.id] = batch
+        self.load_batch_list(batches)
 
         if len(batches) > 1:
-            logger.warning(
+            logger.debug(
                 f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
                 f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
             )
@@ -437,9 +432,12 @@ class Validator:
             except AssertionError as e:
                 raise InvalidExpectationConfigurationError(str(e))
 
-            expectation_impl = get_expectation_impl(configuration.expectation_type)
+            evaluated_config = copy.deepcopy(configuration)
+            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies = expectation_impl().get_validation_dependencies(
-                configuration, self._execution_engine, runtime_configuration
+                evaluated_config, self._execution_engine, runtime_configuration
             )["metrics"]
 
             try:
@@ -447,11 +445,11 @@ class Validator:
                     self.build_metric_dependency_graph(
                         graph,
                         metric,
-                        configuration,
+                        evaluated_config,
                         self._execution_engine,
                         runtime_configuration=runtime_configuration,
                     )
-                processed_configurations.append(configuration)
+                processed_configurations.append(evaluated_config)
             except Exception as err:
                 if catch_exceptions:
                     raised_exception = True
@@ -463,7 +461,7 @@ class Validator:
                             "exception_traceback": exception_traceback,
                             "exception_message": str(err),
                         },
-                        expectation_config=configuration,
+                        expectation_config=evaluated_config,
                     )
                     evrs.append(result)
                 else:
@@ -692,8 +690,14 @@ class Validator:
         """Getter for config value"""
         return self._validator_config.get(key)
 
-    def load_batch(self, batch_list: List[Batch]):
+    def load_batch_list(self, batch_list: List[Batch]):
         for batch in batch_list:
+            try:
+                assert isinstance(
+                    batch, Batch
+                ), "batches provided to Validator must be Great Expectations Batch objects"
+            except AssertionError as e:
+                logger.warning(str(e))
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
             # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
@@ -714,7 +718,7 @@ class Validator:
     @property
     def active_batch(self) -> Batch:
         """Getter for active batch"""
-        active_batch_id: str = self.execution_engine.active_batch_data_id
+        active_batch_id: str = self.active_batch_id
         batch: Batch = self.batches.get(active_batch_id) if active_batch_id else None
         return batch
 
@@ -729,7 +733,12 @@ class Validator:
     @property
     def active_batch_id(self) -> str:
         """Getter for active batch id"""
-        return self.execution_engine.active_batch_data_id
+        active_engine_batch_id = self._execution_engine.active_batch_data_id
+        if active_engine_batch_id != self._active_batch_id:
+            logger.debug(
+                "This validator has a different active batch id than its Execution Engine."
+            )
+        return self._active_batch_id
 
     @active_batch_id.setter
     def active_batch_id(self, batch_id: str):
@@ -744,7 +753,7 @@ set as active.
 """
             )
         else:
-            self.execution_engine._active_batch_data_id = batch_id
+            self._active_batch_id = batch_id
 
     @property
     def active_batch_markers(self):
