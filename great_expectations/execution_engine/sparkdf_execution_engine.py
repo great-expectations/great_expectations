@@ -239,6 +239,11 @@ Please check your config."""
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
                 )
+            # pyspark will raise an AnalysisException error if path is incorrect
+            except pyspark.sql.utils.AnalysisException:
+                raise ExecutionEngineError(
+                    f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
+                )
         else:
             raise BatchSpecError(
                 """
