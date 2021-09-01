@@ -3,8 +3,6 @@ import os
 import re
 from typing import Dict, List, Optional
 
-import great_expectations.exceptions as ge_exceptions
-
 try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
