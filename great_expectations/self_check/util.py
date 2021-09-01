@@ -1361,6 +1361,7 @@ def build_test_backends_list(
     include_pandas=True,
     include_spark=True,
     include_sqlalchemy=True,
+    include_sqlite=True,
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
@@ -1388,7 +1389,8 @@ def build_test_backends_list(
                 "sqlalchemy tests are requested, but sqlalchemy in not installed"
             )
 
-        test_backends += ["sqlite"]
+        if include_sqlite:
+            test_backends += ["sqlite"]
 
         if include_postgresql:
             ###
@@ -1471,28 +1473,56 @@ def generate_expectation_tests(
     """
     parametrized_tests = []
 
-    # use the expectation_execution_engines_dict (if provided) to request only the appropriate backends
-    if expectation_execution_engines_dict is not None:
-        backends = build_test_backends_list(
-            include_pandas=expectation_execution_engines_dict.get(
-                "PandasExecutionEngine"
+    # If Expectation.examples defines "test_backends", use that to determine backends and dialects to use.
+    # Otherwise, use the introspected expectation_execution_engines_dict.
+    for d in examples_config:
+        d = copy.deepcopy(d)
+        if expectation_execution_engines_dict is not None:
+            example_backends_is_defined = "test_backends" in d
+            example_backends = [
+                backend_dict.get("backend")
+                for backend_dict in d.get("test_backends", [])
+            ]
+            example_sqlalchemy_dialects = [
+                dialect
+                for backend_dict in d.get("test_backends", {})
+                if (backend_dict.get("backend") == "sqlalchemy")
+                for dialect in backend_dict.get("dialects", [])
+            ]
+            include_sqlalchemy = (
+                ("sqlalchemy" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine")
+                    == True
+                )
             )
-            == True,
-            include_spark=expectation_execution_engines_dict.get(
-                "SparkDFExecutionEngine"
+            backends = build_test_backends_list(
+                include_pandas=("pandas" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("PandasExecutionEngine")
+                    == True
+                ),
+                include_spark=("spark" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
+                    == True
+                ),
+                include_sqlalchemy=include_sqlalchemy,
+                include_sqlite=("sqlite" in example_sqlalchemy_dialects)
+                if example_backends_is_defined
+                else include_sqlalchemy,
+                include_postgresql=("postgresql" in example_sqlalchemy_dialects),
+                include_mysql=("mysql" in example_sqlalchemy_dialects),
+                include_mssql=("mssql" in example_sqlalchemy_dialects),
             )
-            == True,
-            include_sqlalchemy=expectation_execution_engines_dict.get(
-                "SqlAlchemyExecutionEngine"
-            )
-            == True,
-        )
-    else:
-        backends = build_test_backends_list()
+        else:
+            backends = build_test_backends_list()
 
-    for c in backends:
-        for d in examples_config:
-            d = copy.deepcopy(d)
+        for c in backends:
+
             datasets = []
             if candidate_test_is_on_temporary_notimplemented_list_cfe(
                 c, expectation_type
@@ -1856,6 +1886,7 @@ def check_json_test_result(test, result, data_asset=None):
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
+        print(result)
         for key, value in test["out"].items():
             # Apply our great expectations-specific test logic
 

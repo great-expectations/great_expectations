@@ -44,7 +44,7 @@ For this guide we will use a `connection_string` like this:
 mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```   
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 

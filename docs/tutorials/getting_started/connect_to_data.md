@@ -2,8 +2,6 @@
 title: Connect to Data
 ---
 
-![minimap](../../images/minimap.png)
-
 Once you have a Data Context, you’ll want to connect to data. In Great Expectations, Datasources simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
 Let’s configure your first Datasource: a connection to the data directory we’ve provided in the repo. This could also be a database connection, but for now we’re just using a simple file store.
@@ -28,11 +26,11 @@ Enter the path of the root directory where the data files are stored. If files a
 : data
 ````
 
-This will now **open up a new Jupyter notebook** to complete the Datasource configuration.
+This will now **open up a new Jupyter Notebook** to complete the Datasource configuration.
 
 ### The ```datasource new``` notebook
 
-The Jupyter notebook contains some boilerplate code to configure your new Datasource. You can run the entire notebook as-is, but we recommend changing at least the Datasource name to something more specific.
+The Jupyter Notebook contains some boilerplate code to configure your new Datasource. You can run the entire notebook as-is, but we recommend changing at least the Datasource name to something more specific.
 
 Edit the second code cell as follows:
 

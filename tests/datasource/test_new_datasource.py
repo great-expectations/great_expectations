@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -492,8 +492,9 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         },
         "batch_identifiers": None,
     }
-    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(TypeError):
+        batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
+
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
