@@ -44,7 +44,7 @@ batch_request = RuntimeBatchRequest(
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your GCS path here.
-    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
 # Please note this override is only to provide good UX for docs and tests.
