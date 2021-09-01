@@ -1344,6 +1344,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
         unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
         unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
+        unexpected_row_list = metrics.get(self.map_metric + ".unexpected_rows")
 
         if total_count is None or null_count is None:
             total_count = nonnull_count = 0
@@ -1366,6 +1367,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
+            unexpected_row_list=unexpected_row_list,
         )
 
 
@@ -1765,6 +1767,7 @@ def _format_map_output(
     unexpected_count,
     unexpected_list,
     unexpected_index_list,
+    unexpected_row_list=None,
 ):
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
@@ -1862,6 +1865,7 @@ def _format_map_output(
         {
             "unexpected_list": unexpected_list,
             "unexpected_index_list": unexpected_index_list,
+            "unexpected_row_list": unexpected_row_list,
         }
     )
 

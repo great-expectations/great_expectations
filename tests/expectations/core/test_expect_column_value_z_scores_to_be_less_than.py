@@ -1,5 +1,6 @@
 import pandas as pd
 
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -10,10 +11,66 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
 )
 from great_expectations.validator.validator import Validator
+
+
+def test_pandas_unexpected_rows():
+    df = pd.DataFrame(
+        {
+            "a": [1, 5, 22, 3, 5, 10],
+            "b": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
+        }
+    )
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=df)
+    engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=engine, batches=(batch,))
+    result = expectation.validate(validator)
+    assert result == ExpectationValidationResult(
+        success=True,
+        expectation_config={
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "a",
+                "mostly": 0.9,
+                "value_set": [1, 5, 22, 3],
+                "double_sided": True,
+            },
+            "meta": {},
+        },
+        result={
+            "element_count": 6,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "partial_unexpected_list": [],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 0.0,
+            "unexpected_percent_nonmissing": 0.0,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        meta={},
+    )
 
 
 def test_pandas_expect_column_value_z_scores_to_be_less_than_impl():
@@ -25,6 +82,9 @@ def test_pandas_expect_column_value_z_scores_to_be_less_than_impl():
             "mostly": 0.9,
             "threshold": 4,
             "double_sided": True,
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
         },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
@@ -37,7 +97,7 @@ def test_pandas_expect_column_value_z_scores_to_be_less_than_impl():
             "kwargs": {
                 "column": "a",
                 "mostly": 0.9,
-                "threshold": 4,
+                "threshold": 1e-10,
                 "double_sided": True,
             },
             "meta": {},
