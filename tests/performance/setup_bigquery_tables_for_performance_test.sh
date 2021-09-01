@@ -12,5 +12,8 @@ bq mk ${GE_TEST_BIGQUERY_PROJECT}:${dataset}
 
 for i in {1..100}
 do
-  bq load --skip_leading_rows=1 ${GE_TEST_BIGQUERY_PROJECT}:${dataset}.taxi_trips_${i} ../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv bigquery_schema.json
+  bq load --skip_leading_rows=1 \
+    ${GE_TEST_BIGQUERY_PROJECT}:${dataset}.taxi_trips_${i} \
+    ../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv \
+    bigquery_schema.json
 done

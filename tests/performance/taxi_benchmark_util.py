@@ -6,8 +6,6 @@ Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow
 import os
 from typing import List, Optional
 
-from ruamel import yaml
-
 from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
