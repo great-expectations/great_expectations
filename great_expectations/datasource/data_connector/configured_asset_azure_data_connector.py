@@ -153,12 +153,10 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return path_list
 
-    def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Asset] = None
     ) -> str:
-        # data_asset_name isn't used in this method.
+        # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         return os.path.join(
             f"{self._account_name}.blob.core.windows.net", self._container, path
