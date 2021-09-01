@@ -322,7 +322,7 @@ Please check your config."""
 
         """
         if reader_method is None and path is None:
-            raise ge_exceptions.BatchSpecError(
+            raise ge_exceptions.ExecutionEngineError(
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
@@ -340,7 +340,7 @@ Please check your config."""
                 reader_fn = partial(reader_fn, **reader_options)
             return reader_fn
         except AttributeError:
-            raise ge_exceptions.BatchSpecError(
+            raise ge_exceptions.ExecutionEngineError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
@@ -374,7 +374,7 @@ Please check your config."""
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise ge_exceptions.BatchSpecError(
+        raise ge_exceptions.ExecutionEngineError(
             f'Unable to determine reader method from path: "{path}".'
         )
 
