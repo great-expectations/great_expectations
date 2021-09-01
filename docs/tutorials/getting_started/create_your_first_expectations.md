@@ -1,7 +1,6 @@
 ---
 title: Create your first Expectations
 ---
-![minimap](../../images/minimap.png)
 
 [Expectations](/docs/reference/expectations/expectations) are the key concept in Great Expectations.
 
