@@ -72,6 +72,10 @@ class DataConnector:
         return self._datasource_name
 
     @property
+    def execution_engine(self) -> ExecutionEngine:
+        return self._execution_engine
+
+    @property
     def data_context_root_directory(self) -> str:
         return self._data_context_root_directory
 

@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from typing import List, Optional
 
 try:
@@ -7,13 +8,18 @@ try:
 except ImportError:
     azure = None
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_azure_keys
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,13 +93,20 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
 
         try:
-            if "conn_str" in azure_options:
+            if conn_str is not None:
+                self._account_name = re.search(
+                    r".*?AccountName=(.+?);.*?", conn_str
+                ).group(1)
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            else:
+            elif account_url is not None:
+                self._account_name = re.search(
+                    r"(?:https?://)?(.+?).blob.core.windows.net", account_url
+                ).group(1)
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             raise ImportError(
-                "Unable to load Azure BlobServiceClient (it is required for InferredAssetAzureDataConnector)."
+                "Unable to load Azure BlobServiceClient (it is required for InferredAssetAzureDataConnector). \
+                Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
             )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
@@ -139,6 +152,23 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return os.path.join(
-            f"{self._account_name}.blob.core.windows.net", self._container, path
-        )
+        # Pandas and Spark execution engines require separate paths for compatibility with Azure's API.
+
+        full_path: str
+        if isinstance(self.execution_engine, PandasExecutionEngine):
+            full_path = os.path.join(
+                f"{self._account_name}.blob.core.windows.net", self._container, path
+            )
+        elif isinstance(self.execution_engine, SparkDFExecutionEngine):
+            full_path = os.path.join(
+                f"{self._container}@{self._account_name}.blob.core.windows.net", path
+            )
+            full_path = f"wasbs://{full_path}"
+        else:
+            raise ge_exceptions.DataConnectorError(
+                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
+        "{self.__class__.__name__}".
+        """
+            )
+
+        return full_path
