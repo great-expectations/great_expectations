@@ -108,7 +108,7 @@ assert set(
 }
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
-assert len(batch_list) == 3
+assert len(batch_list) == 1
 
 batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000

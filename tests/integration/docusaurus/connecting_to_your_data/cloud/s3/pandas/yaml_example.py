@@ -106,31 +106,8 @@ assert set(
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
 }
 
-# TODO: <Alex>ALEX</Alex>
-# x = {
-#     "name": "my_s3_datasource",
-#     "class_name": "Datasource",
-#     "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-#     "data_connectors": {
-#         "default_runtime_data_connector_name": {
-#             "class_name": "RuntimeDataConnector",
-#             "batch_identifiers": ["default_identifier_name"],
-#         },
-#         "default_inferred_data_connector_name": {
-#             "class_name": "InferredAssetS3DataConnector",
-#             "bucket": "<YOUR_S3_BUCKET_HERE>",
-#             "prefix": "<BUCKET_PATH_TO_DATA>",
-#             "default_regex": {
-#                 "group_names": ["data_asset_name"],
-#                 "pattern": "(.*)\\.csv",
-#             },
-#         },
-#     },
-# }
-# TODO: <Alex>ALEX</Alex>
-
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
-assert len(batch_list) == 3
+assert len(batch_list) == 1
 
 batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000
