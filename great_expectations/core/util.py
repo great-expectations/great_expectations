@@ -410,6 +410,8 @@ class AzureUrl:
     Formats:
         WASBS (for Spark): "wasbs://<container name>@<account name>.blob.core.windows.net/<directory name>/<file name>"
         HTTP(S) (for Pandas) "<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>"
+
+        Reference: WASBS -- Windows Azure Storage Blob (https://datacadamia.com/azure/wasb).
     """
 
     def __init__(self, url: str):
