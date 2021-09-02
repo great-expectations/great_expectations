@@ -63,15 +63,14 @@ validator = context.get_validator(
 )
 print(validator.head())
 
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 
 batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000
-
-# NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
 
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
@@ -108,6 +107,7 @@ assert set(
 }
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+print(f"\n[ALEX_TEST] GCS_YAML_INFERRED_NUM_BATCHES: {len(batch_list)}")
 assert len(batch_list) == 3
 
 batch: Batch = batch_list[0]

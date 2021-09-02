@@ -108,6 +108,7 @@ assert set(
 }
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+print(f"\n[ALEX_TEST] GCS_DICT_INFERRED_NUM_BATCHES: {len(batch_list)}")
 assert len(batch_list) == 3
 
 batch: Batch = batch_list[0]
