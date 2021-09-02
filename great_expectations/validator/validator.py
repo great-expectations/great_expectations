@@ -741,7 +741,7 @@ class Validator:
         return self._active_batch_id
 
     @active_batch_id.setter
-    def active_batch_id(self, batch_id: str):
+    def active_batch_id(self, batch_id: str = None):
         assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
         available_batch_ids: Set[str] = set(self.batches.keys()).union(
             set(self.loaded_batch_ids)
