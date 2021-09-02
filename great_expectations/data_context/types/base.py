@@ -504,7 +504,7 @@ S3/GCS type of the data connector (your data connector is "{data['class_name']}"
 continue.
                 """
             )
-        if ("bucket" in data or "prefix" in data or "max_keys" in data) and not (
+        if ("bucket" in data or "max_keys" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
@@ -788,7 +788,10 @@ class DatasourceConfigSchema(Schema):
 
     class_name = fields.String(missing="Datasource")
     module_name = fields.String(missing="great_expectations.datasource")
-
+    force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
+    spark_config = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
     )

@@ -5,6 +5,46 @@ title: Changelog
 ### Develop
 
 
+### 0.13.32
+* [FEATURE] Add Performance Benchmarks Using BigQuery. (Thanks @jdimatteo)
+* [WIP] [FEATURE] add backend args to run_diagnostics (#3257) (Thanks @edjoesu)
+* [BUGFIX] Addresses Issue 2937. (#3236) (Thanks @BenGale93)
+* [BUGFIX] SQL dialect doesn't register for BigQuery for V2 (#3324)
+* [DOCS] "How to connect to data on GCS using Pandas" (#3311)
+* [MAINTENANCE] Add CODEOWNERS with a single check for sidebars.js (#3332)
+* [MAINTENANCE] Fix incorrect DataConnector usage of _get_full_file_path() API method. (#3336)
+* [MAINTENANCE] Make Pandas against S3 and GCS integration tests more robust by asserting on number of batches returned and row counts (#3341)
+* [MAINTENANCE] Make integration tests of Pandas against Azure more robust. (#3339)
+* [MAINTENANCE] Prepare AzureUrl to handle WASBS format (for Spark) (#3340)
+* [MAINTENANCE] Renaming default_batch_identifier in examples #3334
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (#3304)
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (Spark and Pandas) (#3325)
+* [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
+* [MAINTENANCE] Various doc patches (#3326)
+* [MAINTENANCE] clean up imports and method signatures (#3337)
+
+### 0.13.31
+* [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)
+* [FEATURE] Enable column_pair expectations and tests for Spark (#3294)
+* [FEATURE] Implement `InferredAssetGCSDataConnector` (#3284)
+* [FEATURE]/CHANGE run time format (#3272) (Thanks @serialbandicoot)
+* [DOCS] Fix misc errors in "How to create renderers for Custom Expectations" (#3315)
+* [DOCS] GDOC-217 remove stub links (#3314)
+* [DOCS] Remove misc TODOs to tidy up docs (#3313)
+* [DOCS] Standardize capitalization of various technologies in `docs` (#3312)
+* [DOCS] Fix broken link to Contributor docs (#3295) (Thanks @discdiver)
+* [MAINTENANCE] Additional tests for RuntimeDataConnector at Datasource-level (query) (#3288)
+* [MAINTENANCE] Update GCSStoreBackend + tests (#2630) (Thanks @hmandsager)
+* [MAINTENANCE] Write integration/E2E tests for `ConfiguredAssetAzureDataConnector` (#3204)
+* [MAINTENANCE] Write integration/E2E tests for both `GCSDataConnectors` (#3301)
+
+### 0.13.30
+* [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_in_set for SQL Alchemy execution engine (#3281)
+* [FEATURE] Implement `ConfiguredAssetGCSDataConnector` (#3247)
+* [BUGFIX] Fix import issues around cloud providers (GCS/Azure/S3) (#3292)
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema (#3126) (thanks @gipaetusb and @mbakunze)
+
 ### 0.13.29
 * [FEATURE] Implementation of the Metric "select_column_values.unique.within_record" for SQLAlchemyExecutionEngine (#3279)
 * [FEATURE] V3 implement ColumnPairValuesInSet for SQL Alchemy execution engine (#3278)

@@ -406,24 +406,77 @@ def datetime_to_int(dt: datetime.date) -> int:
 
 class AzureUrl:
     """
-    Parses an Azure Blob Storage URL into its separate components
+    Parses an Azure Blob Storage URL into its separate components.
+    Formats:
+        WASBS (for Spark): "wasbs://<CONTAINER>@<ACCOUNT_NAME>.blob.core.windows.net/<BLOB>"
+        HTTP(S) (for Pandas) "<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>"
+
+        Reference: WASBS -- Windows Azure Storage Blob (https://datacadamia.com/azure/wasb).
     """
 
     def __init__(self, url: str):
-        search = re.search(
-            r"^(?:https?://)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
-        )
-        self._account_name = search.group(1)
-        self._container = search.group(2)
-        self._blob = search.group(3)
+        search = re.search(r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$", url)
+        if search is None:
+            search = re.search(
+                r"^(https?:\/\/)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
+            )
+            assert (
+                search is not None
+            ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
+            self._protocol = search.group(1)
+            self._account_name = search.group(2)
+            self._container = search.group(3)
+            self._blob = search.group(4)
+        else:
+            search = re.search(
+                r"^(wasbs?:\/\/)?([^/]+)@(.+?).blob.core.windows.net/(.+)$", url
+            )
+            assert (
+                search is not None
+            ), "The provided URL does not adhere to the format specified by the Azure SDK (wasbs://<CONTAINER>@<ACCOUNT_NAME>.blob.core.windows.net/<BLOB>)"
+            self._protocol = search.group(1)
+            self._container = search.group(2)
+            self._account_name = search.group(3)
+            self._blob = search.group(4)
+
+    @property
+    def protocol(self):
+        return self._protocol
 
     @property
     def account_name(self):
         return self._account_name
 
     @property
+    def account_url(self):
+        return f"{self.account_name}.blob.core.windows.net"
+
+    @property
     def container(self):
         return self._container
+
+    @property
+    def blob(self):
+        return self._blob
+
+
+class GCSUrl:
+    """
+    Parses a Google Cloud Storage URL into its separate components
+    Format: gs://<BUCKET_OR_NAME>/<BLOB>
+    """
+
+    def __init__(self, url: str):
+        search = re.search(r"^gs://([^/]+)/(.+)$", url)
+        assert (
+            search is not None
+        ), "The provided URL does not adhere to the format specified by the GCS SDK (gs://<BUCKET_OR_NAME>/<BLOB>)"
+        self._bucket = search.group(1)
+        self._blob = search.group(2)
+
+    @property
+    def bucket(self):
+        return self._bucket
 
     @property
     def blob(self):
