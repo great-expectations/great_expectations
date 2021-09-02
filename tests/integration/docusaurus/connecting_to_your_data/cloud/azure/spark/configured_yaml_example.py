@@ -6,7 +6,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-azure_access_key = os.getenv("AZURE_ACCESS_KEY", "")
+credential = os.getenv("AZURE_ACCESS_KEY", "")
 
 context = ge.get_context()
 
@@ -16,12 +16,12 @@ class_name: Datasource
 execution_engine:
     class_name: SparkDFExecutionEngine
     azure_options:
-        access_key: <YOUR_ACCESS_KEY>
+        credential: <YOUR_CREDENTIAL>
 data_connectors:
     configured_data_connector_name:
         class_name: ConfiguredAssetAzureDataConnector
         azure_options:
-            access_key: <YOUR_ACCESS_KEY>
+            credential: <YOUR_CREDENTIAL>
         container: <YOUR_AZURE_CONTAINER_HERE>
         name_starts_with: <CONTAINER_PATH_TO_DATA>
         assets:
@@ -44,7 +44,7 @@ datasource_yaml = datasource_yaml.replace(
 datasource_yaml = datasource_yaml.replace(
     "<YOUR_ACCOUNT_URL>", "superconductivetests.blob.core.windows.net"
 )
-datasource_yaml = datasource_yaml.replace("<YOUR_ACCESS_KEY>", azure_access_key)
+datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", credential)
 
 context.test_yaml_config(datasource_yaml)
 

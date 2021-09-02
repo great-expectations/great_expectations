@@ -6,7 +6,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-azure_credential = os.getenv("AZURE_CREDENTIAL", "")
+credential = os.getenv("AZURE_CREDENTIAL", "")
 
 context = ge.get_context()
 
@@ -46,7 +46,7 @@ datasource_yaml = datasource_yaml.replace(
 datasource_yaml = datasource_yaml.replace(
     "<YOUR_ACCOUNT_URL>", "superconductivetests.blob.core.windows.net"
 )
-datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", azure_credential)
+datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", credential)
 
 context.test_yaml_config(datasource_yaml)
 

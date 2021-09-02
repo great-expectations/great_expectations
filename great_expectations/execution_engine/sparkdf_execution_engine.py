@@ -237,15 +237,15 @@ Please check your config."""
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
             try:
-                azure_access_key = self._azure_options.get("access_key")
+                credential = self._azure_options.get("credential")
                 storage_account_url = azure_url.account_url
-                if azure_access_key:
+                if credential:
                     self.spark.conf.set(
                         "fs.wasb.impl",
                         "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
                     )
                     self.spark.conf.set(
-                        "fs.azure.account.key." + storage_account_url, azure_access_key
+                        "fs.azure.account.key." + storage_account_url, credential
                     )
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(

@@ -251,7 +251,6 @@ def test_instantiation_with_account_url_and_credential(
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
             "credential": "my_credential",
-            "access_key": "my_access_key",
         },
     )
     assert my_data_connector.self_check() == expected_config_dict
@@ -284,7 +283,6 @@ def test_instantiation_with_conn_str_and_credential(
         azure_options={  # Representative of format noted in official docs
             "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
             "credential": "my_credential",
-            "access_key": "my_access_key",
         },
     )
 
@@ -312,7 +310,6 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
             "credential": "my_credential",
-            "access_key": "my_access_key",
         },
     )
     assert my_data_connector._account_name == "my_account_url"
@@ -335,7 +332,6 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
         azure_options={  # Representative of format noted in official docs
             "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
             "credential": "my_credential",
-            "access_key": "my_access_key",
         },
     )
     assert my_data_connector._account_name == "storagesample"
@@ -363,7 +359,6 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
                 "account_url": "account.blob.core.windows.net",
                 "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
                 "credential": "my_credential",
-                "access_key": "my_access_key",
             },
         )
 
@@ -443,7 +438,6 @@ def test_instantiation_with_test_yaml_config(
         azure_options:
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
-            access_key: my_access_key,
     """,
         return_mode="report_object",
     )
@@ -483,7 +477,6 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
         azure_options:
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
-            access_key: my_access_key,
     """,
         return_mode="report_object",
     )
@@ -539,7 +532,6 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
         azure_options:
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
-            access_key: my_access_key,
     """,
         return_mode="report_object",
     )
@@ -588,7 +580,6 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
             "credential": "my_credential",
-            "access_key": "my_access_key",
         },
     )
 
@@ -634,7 +625,6 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
            azure_options:
                account_url: my_account_url.blob.core.windows.net
                credential: my_credential
-               access_key: my_access_key,
        """,
     )
 
@@ -702,7 +692,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
            azure_options:
                account_url: my_account_url.blob.core.windows.net
                credential: my_credential
-               access_key: my_access_key,
        """,
     )
 
@@ -725,7 +714,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
 
@@ -765,7 +754,6 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
            azure_options:
                account_url: my_account_url.blob.core.windows.net
                credential: my_credential
-               access_key: my_access_key,
        """,
     )
 
@@ -807,7 +795,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
     )
@@ -849,7 +837,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
            azure_options:
                account_url: my_account_url.blob.core.windows.net
                credential: my_credential
-               access_key: my_access_key,
        """,
     )
 
@@ -944,7 +931,6 @@ def test_return_all_batch_definitions_basic_sorted(
        azure_options:
            account_url: my_account_url.blob.core.windows.net
            credential: my_credential
-           access_key: my_access_key,
      """,
     )
 
@@ -1035,7 +1021,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
        azure_options:
            account_url: my_account_url.blob.core.windows.net
            credential: my_credential
-           access_key: my_access_key,
      """,
     )
 
@@ -1156,7 +1141,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
        azure_options:
            account_url: my_account_url.blob.core.windows.net
            credential: my_credential
-           access_key: my_access_key,
      """,
     )
 
@@ -1250,7 +1234,6 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
        azure_options:
            account_url: my_account_url.blob.core.windows.net
            credential: my_credential
-           access_key: my_access_key,
    """,
     )
 
@@ -1322,7 +1305,6 @@ def test_return_all_batch_definitions_too_many_sorters(
        azure_options:
            account_url: my_account_url.blob.core.windows.net
            credential: my_credential
-           access_key: my_access_key,
    """,
     )
 
@@ -1389,7 +1371,6 @@ assets:
 azure_options:
    account_url: my_account_url.blob.core.windows.net
    credential: my_credential
-   access_key: my_access_key,
    """
     config = yaml.load(yaml_string)
 
@@ -1526,7 +1507,6 @@ assets:
 azure_options:
    account_url: my_account_url.blob.core.windows.net
    credential: my_credential
-   access_key: my_access_key,
    """
     config = yaml.load(yaml_string)
 

@@ -6,7 +6,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-azure_access_key = os.getenv("AZURE_ACCESS_KEY", "")
+credential = os.getenv("AZURE_ACCESS_KEY", "")
 
 context = ge.get_context()
 
@@ -16,14 +16,14 @@ datasource_config = {
     "execution_engine": {
         "class_name": "PandasExecutionEngine",
         "azure_options": {
-            "access_key": "<YOUR_ACCESS_KEY>",
+            "credential": "<YOUR_CREDENTIAL>",
         },
     },
     "data_connectors": {
         "configured_data_connector_name": {
             "class_name": "ConfiguredAssetAzureDataConnector",
             "azure_options": {
-                "access_key": "<YOUR_ACCESS_KEY>",
+                "credential": "<YOUR_CREDENTIAL>",
             },
             "container": "superconductive-public",
             "name_starts_with": "data/taxi_yellow_trip_data_samples/",
@@ -41,13 +41,13 @@ datasource_config = {
 datasource_config["execution_engine"]["azure_options"][
     "account_url"
 ] = "superconductivetests.blob.core.windows.net"
-datasource_config["execution_engine"]["azure_options"]["access_key"] = azure_access_key
+datasource_config["execution_engine"]["azure_options"]["credential"] = credential
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
 ] = "superconductivetests.blob.core.windows.net"
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
-    "access_key"
-] = azure_access_key
+    "credential"
+] = credential
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "container"
 ] = "superconductive-public"
