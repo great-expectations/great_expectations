@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Performance tests using BigQuery backend (#3280)
 
 0.13.31
 -----------------

@@ -1,11 +1,12 @@
 import os
+from typing import List
 
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 
-CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
+AZURE_CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
 context = ge.get_context()
 
@@ -42,13 +43,13 @@ datasource_config = {
 datasource_config["execution_engine"]["azure_options"][
     "account_url"
 ] = "superconductivetests.blob.core.windows.net"
-datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
+datasource_config["execution_engine"]["azure_options"]["credential"] = AZURE_CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
 ] = "superconductivetests.blob.core.windows.net"
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "credential"
-] = CREDENTIAL
+] = AZURE_CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "container"
 ] = "superconductive-public"
@@ -87,3 +88,9 @@ assert set(
         "configured_data_connector_name"
     ]
 ) == {"taxi_data"}
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000
