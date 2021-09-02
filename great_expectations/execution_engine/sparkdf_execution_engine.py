@@ -20,7 +20,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 
 from ..exceptions import (
-    BatchKwargsError,
     BatchSpecError,
     ExecutionEngineError,
     GreatExpectationsError,
@@ -224,7 +223,7 @@ Please check your config."""
             batch_spec.batch_data = "SparkDataFrame"
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options
+            reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
             try:
                 reader_options = self.spark.read.options(**reader_options)
@@ -239,6 +238,11 @@ Please check your config."""
                     """
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
+                )
+            # pyspark will raise an AnalysisException error if path is incorrect
+            except pyspark.sql.utils.AnalysisException:
+                raise ExecutionEngineError(
+                    f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
                 )
         else:
             raise BatchSpecError(
@@ -267,7 +271,7 @@ Please check your config."""
     @staticmethod
     def guess_reader_method_from_path(path):
         """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
-        file extensions are used, returns BatchKwargsError stating that it is unable to determine the current path.
+        file extensions are used, returns ExecutionEngineError stating that it is unable to determine the current path.
 
         Args:
             path - A given file path
@@ -281,8 +285,8 @@ Please check your config."""
         elif path.endswith(".parquet"):
             return "parquet"
 
-        raise BatchKwargsError(
-            "Unable to determine reader method from path: %s" % path, {"path": path}
+        raise ExecutionEngineError(
+            "Unable to determine reader method from path: %s" % path
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
@@ -298,9 +302,8 @@ Please check your config."""
 
         """
         if reader_method is None and path is None:
-            raise BatchKwargsError(
-                "Unable to determine spark reader function without reader_method or path.",
-                {"reader_method": reader_method},
+            raise ExecutionEngineError(
+                "Unable to determine spark reader function without reader_method or path"
             )
 
         if reader_method is None:
@@ -312,9 +315,8 @@ Please check your config."""
                 return reader.format(reader_method_op).load
             return getattr(reader, reader_method_op)
         except AttributeError:
-            raise BatchKwargsError(
+            raise ExecutionEngineError(
                 "Unable to find reader_method %s in spark." % reader_method,
-                {"reader_method": reader_method},
             )
 
     def get_domain_records(
@@ -438,8 +440,7 @@ Please check your config."""
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
-        or otherwise a Data Frame.
+        to obtain and/or query a batch. Returns in the format of a Spark DataFrame.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain

@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations based on domain knowledge, without inspecting data directly
+title: How to create and edit Expectations based on domain knowledge, without inspecting data directly
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
