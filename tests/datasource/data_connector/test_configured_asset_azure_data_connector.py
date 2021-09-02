@@ -1551,7 +1551,10 @@ azure_options:
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
             },
-            runtime_environment={"name": "my_data_connector", "execution_engine": PandasExecutionEngine()},
+            runtime_environment={
+                "name": "my_data_connector",
+                "execution_engine": PandasExecutionEngine(),
+            },
         )
     )
 
