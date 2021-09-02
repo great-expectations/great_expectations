@@ -380,3 +380,16 @@ def delete_config_from_filesystem(
         store_backend=store_backend_obj,
         configuration_key=configuration_key,
     )
+
+import re
+class AssertRegex:
+    """Assert that a given string meets some expectations."""
+
+    def __init__(self, pattern, flags=0):
+        self._regex = re.compile(pattern, flags)
+
+    def __eq__(self, actual):
+        return bool(self._regex.match(actual))
+
+    def __repr__(self):
+        return self._regex.pattern

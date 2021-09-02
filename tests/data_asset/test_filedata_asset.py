@@ -122,6 +122,8 @@ def test_file_format_map_output():
         result_format="BOOLEAN_ONLY",
         include_config=False,
     )
+    expectation.meta = {}
+
     expected_result = ExpectationValidationResult(success=False)
     assert expected_result == expectation
 
@@ -145,6 +147,7 @@ def test_file_format_map_output():
             "partial_unexpected_list": [],
         },
     )
+    expectation.meta = {}
 
     assert expected_result == expectation
 
@@ -165,6 +168,7 @@ def test_file_format_map_output():
             "partial_unexpected_list": [],
         },
     )
+    expectation.meta = {}
 
     assert expected_result == expectation
 
@@ -176,6 +180,7 @@ def test_file_format_map_output():
         result_format="COMPLETE",
         include_config=False,
     )
+    expectation.meta = {}
 
     expected_result = ExpectationValidationResult(
         success=False,

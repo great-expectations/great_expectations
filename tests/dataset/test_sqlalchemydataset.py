@@ -9,7 +9,7 @@ import pytest
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
 from great_expectations.self_check.util import get_dataset
 from great_expectations.util import is_library_loadable
-
+from tests.test_utils import AssertRegex
 
 @pytest.fixture
 def custom_dataset(sa):
@@ -228,18 +228,31 @@ def test_column_fallback(sa):
     assert set(fallback_dataset.get_table_columns()) == {"name", "age", "pet"}
 
     # check that the results are the same for a few expectations
-    assert dataset.expect_column_to_exist(
+    df1 = dataset.expect_column_to_exist(
         "age"
-    ) == fallback_dataset.expect_column_to_exist("age")
+    )
+    df1.meta = {"validation_duration": AssertRegex('\d+')}
+    assert df1 == fallback_dataset.expect_column_to_exist("age")
 
-    assert dataset.expect_column_mean_to_be_between(
+    df2 = dataset.expect_column_mean_to_be_between(
         "age", min_value=10
-    ) == fallback_dataset.expect_column_mean_to_be_between("age", min_value=10)
+    )
+    df2.meta = {}
+
+    df3 = fallback_dataset.expect_column_mean_to_be_between("age", min_value=10)
+    df3.meta = {}
+    assert df2 == df3
 
     # Test a failing expectation
-    assert dataset.expect_table_row_count_to_equal(
+    df4 = dataset.expect_table_row_count_to_equal(
         value=3
-    ) == fallback_dataset.expect_table_row_count_to_equal(value=3)
+    )
+    df4.meta = {}
+
+    df5 = fallback_dataset.expect_table_row_count_to_equal(value=3)
+    df5.meta = {}
+    
+    assert df4 == df5
 
 
 @pytest.fixture

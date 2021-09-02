@@ -1814,6 +1814,8 @@ def evaluate_json_test(data_asset, expectation_type, test):
     else:
         result = getattr(data_asset, expectation_type)(**test["in"])
 
+    # Reset meta as the validation_duration object is time dynamic - seems hacky though!
+    result['meta'] = {}
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 

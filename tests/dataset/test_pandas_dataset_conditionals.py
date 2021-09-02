@@ -65,8 +65,7 @@ def test_expectation_decorator_summary_mode():
         }
     )
 
-    assert (
-        df.expect_column_values_to_be_between(
+    t1 = df.expect_column_values_to_be_between(
             "x",
             min_value=1,
             max_value=5,
@@ -74,8 +73,9 @@ def test_expectation_decorator_summary_mode():
             condition_parser="pandas",
             row_condition="group=='a'",
         )
-        == exp_output
-    )
+    t1.meta = {} 
+
+    assert t1 == exp_output
 
     assert (
         df.expect_column_values_to_be_between(
@@ -96,8 +96,7 @@ def test_expectation_decorator_summary_mode():
         }
     )
 
-    assert (
-        df.expect_column_mean_to_be_between(
+    t2 = df.expect_column_mean_to_be_between(
             "x",
             3,
             7,
@@ -105,8 +104,9 @@ def test_expectation_decorator_summary_mode():
             row_condition="group=='a'",
             condition_parser="pandas",
         )
-        == exp_output
-    )
+    t2.meta = {}
+
+    assert t2 == exp_output
 
     assert (
         df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")
@@ -140,12 +140,12 @@ def test_positional_arguments():
         }
     )
 
-    assert (
-        df.expect_column_mean_to_be_between(
+    t1 = df.expect_column_mean_to_be_between(
             "x", 4, 6, condition_parser="pandas", row_condition='group=="a"'
         )
-        == exp_output
-    )
+    t1.meta = {}    
+    assert t1 == exp_output
+    
     assert df.expect_column_mean_to_be_between("x", 4, 6) != exp_output
 
     out = df.expect_column_values_to_be_between(
@@ -255,8 +255,7 @@ def test_result_format_argument_in_decorators():
         }
     )
 
-    assert (
-        df.expect_column_mean_to_be_between(
+    t1 = df.expect_column_mean_to_be_between(
             "x",
             4,
             6,
@@ -264,8 +263,9 @@ def test_result_format_argument_in_decorators():
             condition_parser="pandas",
             row_condition="group=='a'",
         )
-        == exp_output
-    )
+    t1.meta = {} 
+
+    assert t1 == exp_output
 
     assert (
         df.expect_column_mean_to_be_between("x", 4, 6, result_format=None) != exp_output
@@ -293,8 +293,7 @@ def test_result_format_argument_in_decorators():
         }
     )
 
-    assert (
-        df.expect_column_values_to_be_between(
+    t2 = df.expect_column_values_to_be_between(
             "y",
             1,
             6,
@@ -302,8 +301,8 @@ def test_result_format_argument_in_decorators():
             condition_parser="pandas",
             row_condition="group=='a'",
         )
-        == exp_output
-    )
+    t2.meta = {}    
+    assert t2 == exp_output
 
     assert (
         df.expect_column_values_to_be_between(

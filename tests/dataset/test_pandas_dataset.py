@@ -201,12 +201,12 @@ def test_expectation_decorator_summary_mode():
             },
         }
     )
-    assert (
-        df.expect_column_values_to_be_between(
+
+    t1 = df.expect_column_values_to_be_between(
             "x", min_value=1, max_value=5, result_format="SUMMARY"
         )
-        == exp_output
-    )
+    t1.meta = {}    
+    assert t1 == exp_output
 
     exp_output = expectationValidationResultSchema.load(
         {
@@ -220,10 +220,10 @@ def test_expectation_decorator_summary_mode():
         }
     )
 
-    assert (
-        df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")
-        == exp_output
-    )
+    t2 = df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")
+    t2.meta = {}
+    
+    assert t2 == exp_output
 
 
 def test_positional_arguments():
@@ -246,7 +246,10 @@ def test_positional_arguments():
         }
     )
 
-    assert df.expect_column_mean_to_be_between("x", 4, 6) == exp_output
+    t1 = df.expect_column_mean_to_be_between("x", 4, 6)
+    t1.meta = {}
+
+    assert t1 == exp_output
 
     out = df.expect_column_values_to_be_between("y", 1, 6)
     t = {
@@ -366,9 +369,11 @@ def test_result_format_argument_in_decorators():
             },
         }
     )
-    assert (
-        df.expect_column_mean_to_be_between("x", 4, 6, result_format=None) == exp_output
-    )
+
+    t1 = df.expect_column_mean_to_be_between("x", 4, 6, result_format=None)
+    t1.meta = {}
+    assert t1 == exp_output
+
 
     exp_output = expectationValidationResultSchema.load(
         {
@@ -392,10 +397,9 @@ def test_result_format_argument_in_decorators():
         }
     )
 
-    assert (
-        df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
-        == exp_output
-    )
+    t2 = df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
+    t2.meta = {}
+    assert t2 == exp_output
 
     # Test unknown output format
     with pytest.raises(ValueError):

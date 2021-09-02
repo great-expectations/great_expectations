@@ -11,6 +11,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from tests.test_utils import AssertRegex
 
 
 def test_get_and_save_expectation_suite(tmp_path_factory):
@@ -166,7 +167,7 @@ def test_expectation_meta():
     for expectation_config in suite.expectations:
         if expectation_config.expectation_type == "expect_column_median_to_be_between":
             k += 1
-            assert {"notes": "This expectation is for lolz."} == expectation_config.meta
+            assert {"notes": "This expectation is for lolz.", 'validation_duration': AssertRegex('\d+')} == expectation_config.meta
     assert 1 == k
 
     # This should raise an error because meta isn't serializable.
@@ -220,9 +221,13 @@ def test_test_column_map_expectation_function():
     ):
         return column % 2 == 1
 
-    assert asset.test_column_map_expectation_function(
+    column_map_1 = asset.test_column_map_expectation_function(
         is_odd, column="x", include_config=False
-    ) == ExpectationValidationResult(
+    )
+    assert column_map_1.meta == {"validation_duration": AssertRegex('\d+')}
+
+    column_map_1.meta = {}
+    assert column_map_1 == ExpectationValidationResult(
         result={
             "element_count": 5,
             "missing_count": 0,
@@ -235,24 +240,27 @@ def test_test_column_map_expectation_function():
         success=True,
     )
 
-    assert asset.test_column_map_expectation_function(
+    column_map_2 = asset.test_column_map_expectation_function(
         is_odd, "x", result_format="BOOLEAN_ONLY", include_config=False
-    ) == ExpectationValidationResult(success=True)
+    )
+    column_map_2.meta = {}
+    assert column_map_2 == ExpectationValidationResult(success=True)
 
-    assert asset.test_column_map_expectation_function(
+    column_map_3 = asset.test_column_map_expectation_function(
         is_odd, column="y", result_format="BOOLEAN_ONLY", include_config=False
-    ) == ExpectationValidationResult(success=False)
+    )
+    column_map_3.meta = {}
+    assert column_map_3 == ExpectationValidationResult(success=False)
 
-    assert (
-        asset.test_column_map_expectation_function(
+    column_map_4 = asset.test_column_map_expectation_function(
             is_odd,
             column="y",
             result_format="BOOLEAN_ONLY",
             mostly=0.7,
             include_config=False,
         )
-        == ExpectationValidationResult(success=True)
-    )
+    column_map_4.meta = {}   
+    assert column_map_4 == ExpectationValidationResult(success=True)
 
 
 def test_test_column_aggregate_expectation_function():
@@ -278,10 +286,18 @@ def test_test_column_aggregate_expectation_function():
                 "observed_value": self[column].iloc[1],
             },
         }
-
-    assert asset.test_column_aggregate_expectation_function(
+    column_aggregate_1 = asset.test_column_aggregate_expectation_function(
         expect_second_value_to_be, "x", 2, include_config=False
-    ) == ExpectationValidationResult(
+    )
+
+    assert column_aggregate_1.meta == {"validation_duration": AssertRegex('\d+')}
+
+    column_aggregate_2 = asset.test_column_aggregate_expectation_function(
+        expect_second_value_to_be, "x", 2, include_config=False
+    )
+    column_aggregate_2.meta = {}
+
+    assert column_aggregate_2 == ExpectationValidationResult(
         result={
             "observed_value": 3,
             "element_count": 5,
@@ -298,39 +314,41 @@ def test_test_column_aggregate_expectation_function():
         },
     )
 
-    assert asset.test_column_aggregate_expectation_function(
+    column_aggregated_3 = asset.test_column_aggregate_expectation_function(
         expect_second_value_to_be, column="x", value=3, include_config=False
-    ) == ExpectationValidationResult(
+    )
+    column_aggregated_3.meta = {}
+
+    assert column_aggregated_3 == ExpectationValidationResult(
         result={
             "observed_value": 3,
             "element_count": 5,
             "missing_count": None,
             "missing_percent": None,
         },
-        success=True,
+        success=True
     )
 
-    assert (
-        asset.test_column_aggregate_expectation_function(
+    column_aggregated_4 = asset.test_column_aggregate_expectation_function(
             expect_second_value_to_be,
             "y",
             value=3,
             result_format="BOOLEAN_ONLY",
             include_config=False,
         )
-        == ExpectationValidationResult(success=False)
-    )
+    column_aggregated_4.meta = {}
+    assert column_aggregated_4 == ExpectationValidationResult(success=False)
 
-    assert (
-        asset.test_column_aggregate_expectation_function(
+    column_aggregated_5 = asset.test_column_aggregate_expectation_function(
             expect_second_value_to_be,
             "y",
             2,
             result_format="BOOLEAN_ONLY",
             include_config=False,
         )
-        == ExpectationValidationResult(success=True)
-    )
+    column_aggregated_5.meta = {}
+
+    assert column_aggregated_5 ==ExpectationValidationResult(success=True)
 
 
 def test_format_map_output():
@@ -849,9 +867,14 @@ def test_test_expectation_function():
     def expect_dataframe_to_contain_7(self):
         return {"success": bool((self == 7).sum().sum() > 0)}
 
-    assert asset.test_expectation_function(
+    df_1 = asset.test_expectation_function(
         expect_dataframe_to_contain_7, include_config=False
-    ) == ExpectationValidationResult(success=True)
-    assert asset_2.test_expectation_function(
+    )
+    df_1.meta = {}
+    assert df_1 == ExpectationValidationResult(success=True)
+
+    df_2 = asset_2.test_expectation_function(
         expect_dataframe_to_contain_7, include_config=False
-    ) == ExpectationValidationResult(success=False)
+    )
+    df_2.meta = {}
+    assert df_2 == ExpectationValidationResult(success=False)

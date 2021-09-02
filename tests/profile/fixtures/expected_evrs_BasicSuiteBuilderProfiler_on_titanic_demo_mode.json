@@ -22,7 +22,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 1313
       },
@@ -42,7 +44,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 7
       },
@@ -70,7 +74,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": [
           "Unnamed: 0",
@@ -98,7 +104,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -127,7 +135,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "unexpected_count": 0,
@@ -153,7 +163,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 1,
         "element_count": 1313,
@@ -178,7 +190,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 1313,
         "element_count": 1313,
@@ -203,7 +217,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 657.0,
         "element_count": 1313,
@@ -228,7 +244,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 657.0,
         "element_count": 1313,
@@ -283,7 +301,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": {
           "quantiles": [
@@ -330,7 +350,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -386,7 +408,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "unexpected_count": 0,
@@ -411,7 +435,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "missing_count": 0,
@@ -440,7 +466,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "unexpected_count": 0,
@@ -470,7 +498,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": [
           "*",
@@ -533,7 +563,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,
@@ -586,7 +618,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "missing_count": 557,
@@ -739,7 +773,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "unexpected_count": 557,
@@ -765,7 +801,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 0.17,
         "element_count": 1313,
@@ -790,7 +828,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 71.0,
         "element_count": 1313,
@@ -815,7 +855,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 30.397989417989418,
         "element_count": 1313,
@@ -840,7 +882,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 28.0,
         "element_count": 1313,
@@ -895,7 +939,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": {
           "quantiles": [
@@ -942,7 +988,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "unexpected_count": 0,
@@ -970,7 +1018,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": [
           "female",
@@ -1019,7 +1069,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,
@@ -1064,7 +1116,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "unexpected_count": 0,
@@ -1092,7 +1146,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": [
           0,
@@ -1141,7 +1197,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,
@@ -1186,7 +1244,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "element_count": 1313,
         "unexpected_count": 0,
@@ -1214,7 +1274,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": [
           0,
@@ -1263,7 +1325,9 @@
         "exception_message": null,
         "exception_traceback": null
       },
-      "meta": {},
+      "meta": {
+        "validation_duration": "0.00000"
+      },
       "result": {
         "observed_value": 0.0,
         "element_count": 1313,

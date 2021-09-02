@@ -821,6 +821,9 @@ def test_validate():
                     "missing_count": 0,
                     "unexpected_index_list": [456],
                 },
+                meta={
+                    "validation_duration": "0.00000"
+                }
             )
         ],
         success=expected_results.success,  # unaffected

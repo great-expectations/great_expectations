@@ -19,7 +19,9 @@
         "expectation_type": "expect_table_row_count_to_be_between"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -39,7 +41,9 @@
         "expectation_type": "expect_table_column_count_to_equal"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -75,7 +79,9 @@
         "expectation_type": "expect_table_columns_to_match_ordered_list"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -131,7 +137,9 @@
         "expectation_type": "expect_column_values_to_be_unique"
       },
       "success": false,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -155,7 +163,9 @@
         "expectation_type": "expect_column_values_to_not_be_null"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -185,7 +195,9 @@
         "expectation_type": "expect_column_value_lengths_to_be_between"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -209,7 +221,9 @@
         "expectation_type": "expect_column_values_to_not_be_null"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -263,7 +277,9 @@
         "expectation_type": "expect_column_distinct_values_to_be_in_set"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -331,7 +347,9 @@
         "expectation_type": "expect_column_kl_divergence_to_be_less_than"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -483,7 +501,9 @@
         "expectation_type": "expect_column_values_to_be_unique"
       },
       "success": false,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -508,7 +528,9 @@
         "expectation_type": "expect_column_values_to_not_be_null"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -533,7 +555,9 @@
         "expectation_type": "expect_column_min_to_be_between"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -558,7 +582,9 @@
         "expectation_type": "expect_column_max_to_be_between"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -583,7 +609,9 @@
         "expectation_type": "expect_column_mean_to_be_between"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -608,7 +636,9 @@
         "expectation_type": "expect_column_median_to_be_between"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -687,7 +717,9 @@
         "expectation_type": "expect_column_quantile_values_to_be_between"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -711,7 +743,9 @@
         "expectation_type": "expect_column_values_to_not_be_null"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -753,7 +787,9 @@
         "expectation_type": "expect_column_distinct_values_to_be_in_set"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -809,7 +845,9 @@
         "expectation_type": "expect_column_kl_divergence_to_be_less_than"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -833,7 +871,9 @@
         "expectation_type": "expect_column_values_to_not_be_null"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -875,7 +915,9 @@
         "expectation_type": "expect_column_distinct_values_to_be_in_set"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     },
     {
       "exception_info": {
@@ -931,7 +973,9 @@
         "expectation_type": "expect_column_kl_divergence_to_be_less_than"
       },
       "success": true,
-      "meta": {}
+      "meta": {
+        "validation_duration": "0.00000"
+      }
     }
   ],
   "statistics": {
