@@ -92,7 +92,7 @@ class Validator:
             batches = tuple()
 
         self._batches = {}
-
+        self.active_batch_id = None
         self.load_batch_list(batches)
 
         if len(batches) > 1:
@@ -746,6 +746,9 @@ class Validator:
         available_batch_ids: Set[str] = set(self.batches.keys()).union(
             set(self.loaded_batch_ids)
         )
+        if batch_id is None:
+            batch_id = self.execution_engine.active_batch_data_id
+
         if batch_id not in available_batch_ids:
             raise ValueError(
                 f"""batch_id {batch_id} not found in loaded batches.  Batches must first be loaded before they can be \
