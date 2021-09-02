@@ -170,9 +170,7 @@ def test_column_map_expectation_decorator():
         success=True,
     )
 
-    t2 = df.expect_column_values_to_be_odd(
-        "all_missing"
-    )
+    t2 = df.expect_column_values_to_be_odd("all_missing")
     t2.meta = {}
 
     assert t2 == ExpectationValidationResult(
@@ -192,10 +190,8 @@ def test_column_map_expectation_decorator():
         },
         success=True,
     )
-    
-    t3 = df.expect_column_values_to_be_odd(
-        "odd_missing"
-    )
+
+    t3 = df.expect_column_values_to_be_odd("odd_missing")
     t3.meta = {}
 
     assert t3 == ExpectationValidationResult(
@@ -215,9 +211,7 @@ def test_column_map_expectation_decorator():
         success=True,
     )
 
-    t4 = df.expect_column_values_to_be_odd(
-        "mixed_missing"
-    )
+    t4 = df.expect_column_values_to_be_odd("mixed_missing")
     t4.meta = {}
 
     assert t4 == ExpectationValidationResult(
@@ -240,9 +234,7 @@ def test_column_map_expectation_decorator():
         success=False,
     )
 
-    t5 = df.expect_column_values_to_be_odd(
-        "mostly_odd"
-    )
+    t5 = df.expect_column_values_to_be_odd("mostly_odd")
     t5.meta = {}
 
     assert t5 == ExpectationValidationResult(
@@ -265,9 +257,7 @@ def test_column_map_expectation_decorator():
         success=False,
     )
 
-    t6 = df.expect_column_values_to_be_odd(
-        "mostly_odd", mostly=0.6
-    )
+    t6 = df.expect_column_values_to_be_odd("mostly_odd", mostly=0.6)
     t6.meta = {}
     assert t6 == ExpectationValidationResult(
         result={
@@ -289,24 +279,18 @@ def test_column_map_expectation_decorator():
         success=True,
     )
 
-    t7 = df.expect_column_values_to_be_odd(
-        "mostly_odd", result_format="BOOLEAN_ONLY"
-    )
+    t7 = df.expect_column_values_to_be_odd("mostly_odd", result_format="BOOLEAN_ONLY")
     t7.meta = {}
     assert t7 == ExpectationValidationResult(success=False)
 
     df.default_expectation_args["result_format"] = "BOOLEAN_ONLY"
-    t8 = df.expect_column_values_to_be_odd(
-        "mostly_odd"
-    )
+    t8 = df.expect_column_values_to_be_odd("mostly_odd")
     t8.meta = {}
 
     assert t8 == ExpectationValidationResult(success=False)
 
     df.default_expectation_args["result_format"] = "BASIC"
-    t9 = df.expect_column_values_to_be_odd(
-        "mostly_odd", include_config=True
-    )
+    t9 = df.expect_column_values_to_be_odd("mostly_odd", include_config=True)
     t9.meta = {}
 
     assert t9 == ExpectationValidationResult(
@@ -381,9 +365,7 @@ def test_column_aggregate_expectation_decorator():
         success=False,
     )
 
-    t3 = df.expect_column_median_to_be_odd(
-        "all_even", result_format="SUMMARY"
-    )
+    t3 = df.expect_column_median_to_be_odd("all_even", result_format="SUMMARY")
     t3.meta = {}
 
     assert t3 == ExpectationValidationResult(
@@ -396,9 +378,7 @@ def test_column_aggregate_expectation_decorator():
         success=False,
     )
 
-    t4 = df.expect_column_median_to_be_odd(
-        "all_even", result_format="BOOLEAN_ONLY"
-    )
+    t4 = df.expect_column_median_to_be_odd("all_even", result_format="BOOLEAN_ONLY")
     t4.meta = {}
     assert t4 == ExpectationValidationResult(success=False)
 
@@ -407,13 +387,9 @@ def test_column_aggregate_expectation_decorator():
     t5 = df.expect_column_median_to_be_odd("all_even")
     t5.meta = {}
 
-    assert t5 == ExpectationValidationResult(
-        success=False
-    )
+    assert t5 == ExpectationValidationResult(success=False)
 
-    t6 = df.expect_column_median_to_be_odd(
-        "all_even", result_format="BASIC"
-    )
+    t6 = df.expect_column_median_to_be_odd("all_even", result_format="BASIC")
     t6.meta = {}
 
     assert t6 == ExpectationValidationResult(
@@ -462,9 +438,7 @@ def test_column_pair_map_expectation_decorator():
     )
     df.set_default_expectation_argument("result_format", "COMPLETE")
     df.set_default_expectation_argument("include_config", False)
-    t1 = df.expect_column_pair_values_to_be_different(
-        "all_odd", "all_even"
-    )
+    t1 = df.expect_column_pair_values_to_be_different("all_odd", "all_even")
     t1.meta = {}
 
     assert t1 == ExpectationValidationResult(
@@ -508,9 +482,7 @@ def test_column_pair_map_expectation_decorator():
         },
     )
 
-    t3 = df.expect_column_pair_values_to_be_different(
-        "all_odd", "odd_missing"
-    )
+    t3 = df.expect_column_pair_values_to_be_different("all_odd", "odd_missing")
     t3.meta = {}
 
     assert t3 == ExpectationValidationResult(

@@ -167,7 +167,10 @@ def test_expectation_meta():
     for expectation_config in suite.expectations:
         if expectation_config.expectation_type == "expect_column_median_to_be_between":
             k += 1
-            assert {"notes": "This expectation is for lolz.", 'validation_duration': AssertRegex('\d+')} == expectation_config.meta
+            assert {
+                "notes": "This expectation is for lolz.",
+                "validation_duration": AssertRegex("\d+"),
+            } == expectation_config.meta
     assert 1 == k
 
     # This should raise an error because meta isn't serializable.
@@ -224,7 +227,7 @@ def test_test_column_map_expectation_function():
     column_map_1 = asset.test_column_map_expectation_function(
         is_odd, column="x", include_config=False
     )
-    assert column_map_1.meta == {"validation_duration": AssertRegex('\d+')}
+    assert column_map_1.meta == {"validation_duration": AssertRegex("\d+")}
 
     column_map_1.meta = {}
     assert column_map_1 == ExpectationValidationResult(
@@ -253,13 +256,13 @@ def test_test_column_map_expectation_function():
     assert column_map_3 == ExpectationValidationResult(success=False)
 
     column_map_4 = asset.test_column_map_expectation_function(
-            is_odd,
-            column="y",
-            result_format="BOOLEAN_ONLY",
-            mostly=0.7,
-            include_config=False,
-        )
-    column_map_4.meta = {}   
+        is_odd,
+        column="y",
+        result_format="BOOLEAN_ONLY",
+        mostly=0.7,
+        include_config=False,
+    )
+    column_map_4.meta = {}
     assert column_map_4 == ExpectationValidationResult(success=True)
 
 
@@ -286,11 +289,12 @@ def test_test_column_aggregate_expectation_function():
                 "observed_value": self[column].iloc[1],
             },
         }
+
     column_aggregate_1 = asset.test_column_aggregate_expectation_function(
         expect_second_value_to_be, "x", 2, include_config=False
     )
 
-    assert column_aggregate_1.meta == {"validation_duration": AssertRegex('\d+')}
+    assert column_aggregate_1.meta == {"validation_duration": AssertRegex("\d+")}
 
     column_aggregate_2 = asset.test_column_aggregate_expectation_function(
         expect_second_value_to_be, "x", 2, include_config=False
@@ -326,29 +330,29 @@ def test_test_column_aggregate_expectation_function():
             "missing_count": None,
             "missing_percent": None,
         },
-        success=True
+        success=True,
     )
 
     column_aggregated_4 = asset.test_column_aggregate_expectation_function(
-            expect_second_value_to_be,
-            "y",
-            value=3,
-            result_format="BOOLEAN_ONLY",
-            include_config=False,
-        )
+        expect_second_value_to_be,
+        "y",
+        value=3,
+        result_format="BOOLEAN_ONLY",
+        include_config=False,
+    )
     column_aggregated_4.meta = {}
     assert column_aggregated_4 == ExpectationValidationResult(success=False)
 
     column_aggregated_5 = asset.test_column_aggregate_expectation_function(
-            expect_second_value_to_be,
-            "y",
-            2,
-            result_format="BOOLEAN_ONLY",
-            include_config=False,
-        )
+        expect_second_value_to_be,
+        "y",
+        2,
+        result_format="BOOLEAN_ONLY",
+        include_config=False,
+    )
     column_aggregated_5.meta = {}
 
-    assert column_aggregated_5 ==ExpectationValidationResult(success=True)
+    assert column_aggregated_5 == ExpectationValidationResult(success=True)
 
 
 def test_format_map_output():
