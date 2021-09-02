@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 try:
     from azure.storage.blob import BlobServiceClient
@@ -15,7 +15,12 @@ from great_expectations.datasource.data_connector import (
 )
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import list_azure_keys
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -156,6 +161,17 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return os.path.join(
-            f"{self._account_name}.blob.core.windows.net", self._container, path
-        )
+        full_path: str
+        if isinstance(self.execution_engine, PandasExecutionEngine):
+            full_path = os.path.join(f"{self._account_name}.blob.core.windows.net", self._container, path)
+        elif isinstance(self.execution_engine, SparkDFExecutionEngine):
+            full_path = os.path.join(f"{self._container}@{self._account_name}.blob.core.windows.net", path)
+            full_path = f"wasbs://{full_path}"
+        else:
+            raise ge_exceptions.DataConnectorError(
+                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
+"{self.__class__.__name__}".
+"""
+            )
+
+        return full_path
