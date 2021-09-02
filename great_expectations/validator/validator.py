@@ -92,7 +92,7 @@ class Validator:
             batches = tuple()
 
         self._batches = {}
-        self.active_batch_id = None
+        # self.active_batch_id = None
         self.load_batch_list(batches)
 
         if len(batches) > 1:
