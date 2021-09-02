@@ -49,9 +49,9 @@ from great_expectations.expectations.registry import (
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.types import ClassConfig
 from great_expectations.util import (
+    calculate_run_duration,
     load_class,
     verify_dynamic_loading_support,
-    calculate_run_duration,
 )
 from great_expectations.validator.validation_graph import (
     MetricConfiguration,

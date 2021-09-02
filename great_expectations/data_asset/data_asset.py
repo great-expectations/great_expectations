@@ -31,10 +31,12 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
-    calculate_run_duration,
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.util import (
+    calculate_run_duration,
+)
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
