@@ -114,6 +114,25 @@ class RuntimeDataConnector(DataConnector):
         """Please see note in : _get_batch_definition_list_from_batch_request()"""
         return list(self._data_references_cache.keys())
 
+    # noinspection PyMethodOverriding
+    def get_batch_data_and_metadata(
+        self,
+        batch_definition: BatchDefinition,
+        runtime_parameters: dict,
+    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+        batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
+            batch_definition=batch_definition,
+            runtime_parameters=runtime_parameters,
+        )
+        batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
+            batch_spec=batch_spec
+        )
+        return (
+            batch_data,
+            batch_spec,
+            batch_markers,
+        )
+
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: RuntimeBatchRequest,
