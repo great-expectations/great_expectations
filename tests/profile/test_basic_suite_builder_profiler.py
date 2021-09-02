@@ -347,7 +347,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "great_expectations_version",
         "run_id",
         "validation_time",
-        "run_duration"
+        "run_duration",
     }
 
     assert expectation_suite.meta["notes"] == {

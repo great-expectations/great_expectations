@@ -384,7 +384,7 @@ class ValidationResultsPageRenderer(Renderer):
                     ["Great Expectations Version", ge_version],
                     ["Run Name", run_name],
                     ["Run Time", run_time],
-                    ["Run Duration", run_duration]
+                    ["Run Duration", run_duration],
                 ],
                 "styling": {
                     "classes": ["col-12", "table-responsive", "mt-1"],

@@ -1066,11 +1066,12 @@ def generate_library_json_from_registered_expectations():
 def delete_blank_lines(text: str) -> str:
     return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
 
+
 def calculate_run_duration(start_time: time.monotonic, end_time: time.monotonic) -> str:
     """
     Calculate the delta of two monotonic times
-    
+
     Returns:
-        string of time delta 
+        string of time delta
     """
-    return format(end_time - start_time, '.3f')
+    return format(end_time - start_time, ".3f")

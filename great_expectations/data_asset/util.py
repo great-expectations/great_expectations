@@ -16,6 +16,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 
+
 def parse_result_format(result_format):
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
@@ -202,12 +203,13 @@ def recursively_convert_to_json_serializable(test_obj):
             % (str(test_obj), type(test_obj).__name__)
         )
 
-#todo: ?? dupe method probably needs dropping for one in great_expections/util
+
+# todo: ?? dupe method probably needs dropping for one in great_expections/util
 def calculate_run_duration(start_time: tm.monotonic, end_time: tm.monotonic) -> str:
     """
     Calculate the delta of two monotonic times
-    
+
     Returns:
         string of date delta including microseconds
     """
-    return format(end_time - start_time, '.3f')
+    return format(end_time - start_time, ".3f")
