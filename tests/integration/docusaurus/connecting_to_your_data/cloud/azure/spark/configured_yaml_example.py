@@ -44,7 +44,7 @@ datasource_yaml = datasource_yaml.replace(
 datasource_yaml = datasource_yaml.replace(
     "<YOUR_ACCOUNT_URL>", "superconductivetests.blob.core.windows.net"
 )
-datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", azure_access_key)
+datasource_yaml = datasource_yaml.replace("<YOUR_ACCESS_KEY>", azure_access_key)
 
 context.test_yaml_config(datasource_yaml)
 

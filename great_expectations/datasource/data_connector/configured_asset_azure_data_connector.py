@@ -99,9 +99,10 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
         conn_str: Optional[str] = azure_options.get("conn_str")
         account_url: Optional[str] = azure_options.get("account_url")
-        assert bool(conn_str) ^ bool(
-            account_url
-        ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
+        access_key: Optional[str] = azure_options.get("access_key")
+        assert (
+            bool(conn_str) ^ bool(account_url) ^ bool(access_key)
+        ), "You must provide one of `conn_str`, or `account_url`, or `access_key` to the `azure_options` key in your config (but not both)"
 
         try:
             if conn_str is not None:
@@ -161,6 +162,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
+        # Pandas and Spark execution engines require separate paths for compatibility with Azure's API.
         full_path: str
         if isinstance(self.execution_engine, PandasExecutionEngine):
             full_path = os.path.join(
