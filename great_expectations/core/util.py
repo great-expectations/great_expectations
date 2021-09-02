@@ -408,7 +408,7 @@ class AzureUrl:
     """
     Parses an Azure Blob Storage URL into its separate components.
     Formats:
-        WASBS (for Spark): "wasbs://<container name>@<account name>.blob.core.windows.net/<directory name>/<file name>"
+        WASBS (for Spark): "wasbs://<CONTAINER>@<ACCOUNT_NAME>.blob.core.windows.net/<BLOB>"
         HTTP(S) (for Pandas) "<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>"
 
         Reference: WASBS -- Windows Azure Storage Blob (https://datacadamia.com/azure/wasb).
@@ -433,7 +433,7 @@ class AzureUrl:
             )
             assert (
                 search is not None
-            ), "The provided URL does not adhere to the format specified by the Azure SDK (wasbs://<container name>@<account name>.blob.core.windows.net/<directory name>/<file name>)"
+            ), "The provided URL does not adhere to the format specified by the Azure SDK (wasbs://<CONTAINER>@<ACCOUNT_NAME>.blob.core.windows.net/<BLOB>)"
             self._protocol = search.group(1)
             self._container = search.group(2)
             self._account_name = search.group(3)
