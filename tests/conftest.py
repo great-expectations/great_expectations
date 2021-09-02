@@ -117,6 +117,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run integration tests for docs",
     )
+    parser.addoption(
+        "--performance-tests",
+        action="store_true",
+        help="If set, run performance tests (which might also require additional arguments like --bigquery)",
+    )
 
 
 def build_test_backends_list(metafunc):
@@ -184,7 +189,7 @@ def no_usage_stats(monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
         [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
@@ -4472,4 +4477,107 @@ def yellow_trip_pandas_data_context(
     context: DataContext = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
+    return context
+
+
+@pytest.fixture
+def db_file():
+    return file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+
+@pytest.fixture
+def data_context_with_datasource_pandas_engine(empty_data_context):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_spark_engine_batch_spec_passthrough(
+    empty_data_context, spark_session
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+            batch_spec_passthrough:
+                reader_method: csv
+                reader_options:
+                    header: True
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
     return context
