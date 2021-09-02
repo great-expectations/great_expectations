@@ -174,12 +174,16 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self._spark_config = spark_config
         self.spark = spark
 
+        azure_options: dict = kwargs.pop("azure_options", {})
+        self._azure_options = azure_options
+
         super().__init__(*args, **kwargs)
 
         self._config.update(
             {
                 "persist": self._persist,
                 "spark_config": spark_config,
+                "azure_options": azure_options,
             }
         )
 
@@ -228,20 +232,21 @@ Please check your config."""
             batch_spec.batch_data = "SparkDataFrame"
 
         elif isinstance(batch_spec, AzureBatchSpec):
-            azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
             try:
-                azure_access_key = os.getenv("AZURE_ACCESS_KEY", "")
+                azure_access_key = self._azure_options.get("access_key")
                 storage_account_url = azure_url.account_url
-                self.spark.conf.set(
-                    "fs.wasb.impl", "org.apache.hadoop.fs.azure.NativeAzureFileSystem"
-                )
-                self.spark.conf.set(
-                    "fs.azure.account.key." + storage_account_url, azure_access_key
-                )
+                if azure_access_key:
+                    self.spark.conf.set(
+                        "fs.wasb.impl",
+                        "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
+                    )
+                    self.spark.conf.set(
+                        "fs.azure.account.key." + storage_account_url, azure_access_key
+                    )
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
