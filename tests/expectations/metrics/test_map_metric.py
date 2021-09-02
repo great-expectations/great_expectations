@@ -1,12 +1,21 @@
+import pandas as pd
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.metrics import ColumnMax, ColumnValuesNonNull
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
@@ -85,3 +94,64 @@ def test_get_map_metric_dependencies():
     metric = MetricConfiguration("foo.unexpected_index_list", {}, {})
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+
+
+def test_pandas_unexpected_rows():
+    df = pd.DataFrame(
+        {
+            "a": [1, 5, 22, 3, 5, 10],
+            "b": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
+        }
+    )
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=df)
+    engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=engine, batches=(batch,))
+    result = expectation.validate(validator)
+    assert result == ExpectationValidationResult(
+        success=False,
+        expectation_config={
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "a",
+                "mostly": 0.9,
+                "value_set": [1, 5, 22],
+            },
+            "meta": {},
+        },
+        result={
+            "element_count": 6,
+            "unexpected_count": 2,
+            "unexpected_percent": 33.33333333333333,
+            "partial_unexpected_list": [3, 10],
+            "unexpected_list": [3, 10],
+            "unexpected_row_list": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
+            "partial_unexpected_index_list": [3, 5],
+            "partial_unexpected_counts": [
+                {"value": 3, "count": 1},
+                {"value": 10, "count": 1},
+            ],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 33.33333333333333,
+            "unexpected_percent_nonmissing": 33.33333333333333,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        meta={},
+    )
