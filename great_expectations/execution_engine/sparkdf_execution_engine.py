@@ -15,7 +15,6 @@ from great_expectations.core.batch_spec import (
     GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
-    S3BatchSpec,
 )
 from great_expectations.core.util import AzureUrl
 from great_expectations.core.id_dict import IDDict
@@ -229,25 +228,6 @@ Please check your config."""
                 )
             batch_spec.batch_data = "SparkDataFrame"
 
-        elif isinstance(batch_spec, S3BatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
-            try:
-                reader: DataFrameReader = self.spark.read.options(**reader_options)
-                reader_fn: Callable = self._get_reader_fn(
-                    reader=reader,
-                    reader_method=reader_method,
-                    path=path,
-                )
-                batch_data = reader_fn(path)
-            except AttributeError:
-                raise ExecutionEngineError(
-                    """
-                    Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
-                    """
-                )
-
         elif isinstance(batch_spec, AzureBatchSpec):
             azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
@@ -255,10 +235,10 @@ Please check your config."""
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
             try:
-                AZURE_ACCESS_KEY = os.getenv("AZURE_ACCESS_KEY", "")
+                azure_access_key = os.getenv("AZURE_ACCESS_KEY", "")
                 storage_account_url = azure_url.account_url
                 self.spark.conf.set('fs.wasb.impl', 'org.apache.hadoop.fs.azure.NativeAzureFileSystem')
-                self.spark.conf.set('fs.azure.account.key.' + storage_account_url, AZURE_ACCESS_KEY)
+                self.spark.conf.set('fs.azure.account.key.' + storage_account_url, azure_access_key)
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
