@@ -9,10 +9,10 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
-    AzureBatchSpec,
 )
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -1598,4 +1598,3 @@ def test_get_batch_with_split_on_whole_table_azure(
     ).dataframe
     assert test_sparkdf.count() == 4
     assert len(test_sparkdf.columns) == 2
-

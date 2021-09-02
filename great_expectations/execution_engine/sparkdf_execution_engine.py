@@ -16,9 +16,8 @@ from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
-from great_expectations.core.util import AzureUrl
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.util import AzureUrl, get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -237,8 +236,12 @@ Please check your config."""
             try:
                 azure_access_key = os.getenv("AZURE_ACCESS_KEY", "")
                 storage_account_url = azure_url.account_url
-                self.spark.conf.set('fs.wasb.impl', 'org.apache.hadoop.fs.azure.NativeAzureFileSystem')
-                self.spark.conf.set('fs.azure.account.key.' + storage_account_url, azure_access_key)
+                self.spark.conf.set(
+                    "fs.wasb.impl", "org.apache.hadoop.fs.azure.NativeAzureFileSystem"
+                )
+                self.spark.conf.set(
+                    "fs.azure.account.key." + storage_account_url, azure_access_key
+                )
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
