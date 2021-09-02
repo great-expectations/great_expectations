@@ -223,7 +223,7 @@ Please check your config."""
             batch_spec.batch_data = "SparkDataFrame"
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options
+            reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
             try:
                 reader_options = self.spark.read.options(**reader_options)
@@ -440,8 +440,7 @@ Please check your config."""
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
-        or otherwise a Data Frame.
+        to obtain and/or query a batch. Returns in the format of a Spark DataFrame.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
