@@ -3,9 +3,9 @@ import datetime
 import inspect
 import json
 import logging
+import time
 import traceback
 import warnings
-import time
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Dict, Iterable, List, Optional, Set

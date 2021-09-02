@@ -7,7 +7,6 @@ from functools import wraps
 
 import numpy as np
 import pandas as pd
-import time as tm
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
