@@ -406,24 +406,48 @@ def datetime_to_int(dt: datetime.date) -> int:
 
 class AzureUrl:
     """
-    Parses an Azure Blob Storage URL into its separate components
-    Format: <ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>
+    Parses an Azure Blob Storage URL into its separate components.
+    Formats:
+        WASBS (for Spark): "wasbs://<container name>@<account name>.blob.core.windows.net/<directory name>/<file name>"
+        HTTP(S) (for Pandas) "<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>"
     """
 
     def __init__(self, url: str):
-        search = re.search(
-            r"^(?:https?://)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
-        )
-        assert (
-            search is not None
-        ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
-        self._account_name = search.group(1)
-        self._container = search.group(2)
-        self._blob = search.group(3)
+        search = re.search(r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$", url)
+        if search is None:
+            search = re.search(
+                r"^(https?:\/\/)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
+            )
+            assert (
+                search is not None
+            ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
+            self._protocol = search.group(1)
+            self._account_name = search.group(2)
+            self._container = search.group(3)
+            self._blob = search.group(4)
+        else:
+            search = re.search(
+                r"^(wasbs?:\/\/)?([^/]+)@(.+?).blob.core.windows.net/(.+)$", url
+            )
+            assert (
+                search is not None
+            ), "The provided URL does not adhere to the format specified by the Azure SDK (wasbs://<container name>@<account name>.blob.core.windows.net/<directory name>/<file name>)"
+            self._protocol = search.group(1)
+            self._container = search.group(2)
+            self._account_name = search.group(3)
+            self._blob = search.group(4)
+
+    @property
+    def protocol(self):
+        return self._protocol
 
     @property
     def account_name(self):
         return self._account_name
+
+    @property
+    def account_url(self):
+        return f"{self.account_name}.blob.core.windows.net"
 
     @property
     def container(self):
