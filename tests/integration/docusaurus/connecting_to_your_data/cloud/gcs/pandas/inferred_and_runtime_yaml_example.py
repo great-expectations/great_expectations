@@ -1,7 +1,9 @@
+from typing import List
+
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 
 context = ge.get_context()
 
@@ -61,6 +63,13 @@ validator = context.get_validator(
 )
 print(validator.head())
 
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000
+
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 
@@ -97,3 +106,9 @@ assert set(
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-02",
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
 }
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000
