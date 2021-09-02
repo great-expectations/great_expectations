@@ -537,10 +537,10 @@ continue.
             "ConfiguredAssetAzureDataConnector",
         ]:
             azure_options = data["azure_options"]
-            if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
+            if not (("conn_str" in azure_options) ^ ("account_url" in azure_options) ^ ("access_key" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
                     f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
-                    You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
+                    You must only select one between `conn_str`, or `account_url`, or `access_key`. Please update your configuration to continue.
                     """
                 )
         if (
