@@ -677,7 +677,7 @@ def test__get_data_reference_name(basic_datasource):
     )
 
 
-def test_batch_identifiers_and_batch_identifiers_datetime(
+def test_batch_identifiers_datetime(
     basic_datasource,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
