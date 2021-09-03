@@ -577,9 +577,10 @@ class BaseDataContext:
             UUID to use as the data_context_id
         """
 
-        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        # if in ge_cloud_mode, use ge_cloud_account_id
         if self.ge_cloud_mode:
             return self.ge_cloud_config.ge_cloud_account_id
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
         ]
