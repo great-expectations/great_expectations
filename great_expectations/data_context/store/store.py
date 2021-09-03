@@ -154,13 +154,13 @@ class Store:
         else:
             return None
 
-    def set(self, key, value):
+    def set(self, key, value, **kwargs):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self._store_backend.set(key, value)
+            return self._store_backend.set(key, value, **kwargs)
         else:
             self._validate_key(key)
             return self._store_backend.set(
-                self.key_to_tuple(key), self.serialize(key, value)
+                self.key_to_tuple(key), self.serialize(key, value), **kwargs
             )
 
     def list_keys(self):
