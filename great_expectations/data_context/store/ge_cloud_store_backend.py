@@ -27,9 +27,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "expectation_suite": "suite",
     }
 
-    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
-        "expectation_suite": {"clause_id"}
-    }
+    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {"expectation_suite": {"clause_id"}}
 
     def __init__(
         self,
@@ -140,7 +138,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     @property
     def allowed_set_kwargs(self):
-        return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(self.ge_cloud_resource_type, set())
+        return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(
+            self.ge_cloud_resource_type, set()
+        )
 
     def validate_set_kwargs(self, kwargs):
         kwarg_names = set(kwargs.keys())
@@ -172,7 +172,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "attributes": {
                     "account_id": account_id,
                     attributes_key: value,
-                    **(kwargs if self.validate_set_kwargs(kwargs) else {})
+                    **(kwargs if self.validate_set_kwargs(kwargs) else {}),
                 },
             }
         }

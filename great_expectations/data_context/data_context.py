@@ -2162,7 +2162,7 @@ class BaseDataContext:
         expectation_suite_name: str,
         overwrite_existing: Optional[bool] = False,
         ge_cloud_id: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2282,7 +2282,7 @@ class BaseDataContext:
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: Optional[bool] = True,
         ge_cloud_id: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """Save the provided expectation suite into the DataContext.
 
@@ -4083,7 +4083,9 @@ class DataContext(BaseDataContext):
     def _save_project_config(self):
         """Save the current project to disk."""
         if self.ge_cloud_mode:
-            logger.debug("ge_cloud_mode detected - skipping DataContect._save_project_config")
+            logger.debug(
+                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+            )
             return
         logger.debug("Starting DataContext._save_project_config")
 

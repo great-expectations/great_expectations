@@ -171,18 +171,20 @@ def ge_cloud_runtime_base_url():
 
 @pytest.fixture
 def ge_cloud_runtime_account_id():
-    return 'a8a35168-68d5-4366-90ae-00647463d37e'
+    return "a8a35168-68d5-4366-90ae-00647463d37e"
 
 
 @pytest.fixture
 def ge_cloud_runtime_access_token():
-    return 'b17bc2539062410db0a30e28fb0ee930'
+    return "b17bc2539062410db0a30e28fb0ee930"
 
 
 @pytest.fixture
 def mocked_global_config_dirs(tmp_path):
     mock_global_config_dot_dir = tmp_path / ".great_expectations"
-    mock_global_config_dot_dir_file = mock_global_config_dot_dir / "great_expectations.conf"
+    mock_global_config_dot_dir_file = (
+        mock_global_config_dot_dir / "great_expectations.conf"
+    )
     mock_global_config_dot_dir.mkdir(parents=True)
     mock_global_config_etc_dir = tmp_path / "etc"
     mock_global_config_etc_file = mock_global_config_etc_dir / "great_expectations.conf"
@@ -190,21 +192,34 @@ def mocked_global_config_dirs(tmp_path):
 
     mock_global_config_paths = [
         str(mock_global_config_dot_dir_file),
-        str(mock_global_config_etc_file)
+        str(mock_global_config_etc_file),
     ]
 
-    return (mock_global_config_dot_dir, mock_global_config_etc_dir, mock_global_config_paths)
+    return (
+        mock_global_config_dot_dir,
+        mock_global_config_etc_dir,
+        mock_global_config_paths,
+    )
 
 
 @pytest.fixture
 def data_context_with_mocked_global_config_dirs(mocked_global_config_dirs):
-    with patch("great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
-               new_callable=PropertyMock) as mock:
-        mock_global_config_dot_dir, mock_global_config_etc_dir, mock_global_config_paths = mocked_global_config_dirs
+    with patch(
+        "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
+        new_callable=PropertyMock,
+    ) as mock:
+        (
+            mock_global_config_dot_dir,
+            mock_global_config_etc_dir,
+            mock_global_config_paths,
+        ) = mocked_global_config_dirs
         mock.return_value = mock_global_config_paths
 
         shutil.copy(
-            file_relative_path(__file__, "fixtures/conf/great_expectations_cloud_config_complete_1.conf"),
-            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf"))
+            file_relative_path(
+                __file__,
+                "fixtures/conf/great_expectations_cloud_config_complete_1.conf",
+            ),
+            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
         )
         yield DataContext
