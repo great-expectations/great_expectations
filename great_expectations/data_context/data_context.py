@@ -331,6 +331,7 @@ class BaseDataContext:
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
+        self._project_config_with_variables_substituted = None
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
         self._project_config = project_config
@@ -810,7 +811,9 @@ class BaseDataContext:
 
     @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
-        return self.get_config_with_variables_substituted()
+        if self._project_config_with_variables_substituted is None:
+            self._project_config_with_variables_substituted = self.get_config_with_variables_substituted()
+        return self._project_config_with_variables_substituted
 
     @property
     def anonymous_usage_statistics(self):
