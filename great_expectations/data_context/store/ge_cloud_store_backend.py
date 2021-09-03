@@ -142,7 +142,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def allowed_set_kwargs(self):
         return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(self.ge_cloud_resource_type, set())
 
-    def validate_kwargs(self, kwargs):
+    def validate_set_kwargs(self, kwargs):
         kwarg_names = set(kwargs.keys())
         if len(kwarg_names) == 0:
             return True
@@ -169,8 +169,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data = {
             "data": {
                 "type": resource_type,
-                "attributes": {"account_id": account_id, attributes_key: value},
-                **(kwargs if self.allowed_set_kwargs(kwargs) else {})
+                "attributes": {
+                    "account_id": account_id,
+                    attributes_key: value,
+                    **(kwargs if self.validate_set_kwargs(kwargs) else {})
+                },
             }
         }
 
