@@ -959,13 +959,6 @@ class BaseDataContext:
         environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
         be optional in GE Cloud mode).
         """
-        ge_cloud_config_variable_defaults = {
-            "plugins_directory": self._normalize_absolute_or_relative_path(
-                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
-            ),
-            "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
-        }
-
         if not config:
             config = self._project_config
 
@@ -986,6 +979,12 @@ class BaseDataContext:
         }
 
         if self.ge_cloud_mode:
+            ge_cloud_config_variable_defaults = {
+                "plugins_directory": self._normalize_absolute_or_relative_path(
+                    DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+                ),
+                "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
+            }
             for config_variable, value in ge_cloud_config_variable_defaults.items():
                 if substitutions.get(config_variable) is None:
                     logger.info(
