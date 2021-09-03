@@ -6,7 +6,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
+CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
 
 context = ge.get_context()
 
@@ -14,16 +14,14 @@ datasource_yaml = f"""
 name: my_azure_datasource
 class_name: Datasource
 execution_engine:
-    class_name: PandasExecutionEngine
+    class_name: SparkDFExecutionEngine
     azure_options:
-        account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
-        credential: <YOUR_CREDENTIAL>   # if using a protected container
+        credential: <YOUR_CREDENTIAL>
 data_connectors:
     configured_data_connector_name:
         class_name: ConfiguredAssetAzureDataConnector
         azure_options:
-            account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
-            credential: <YOUR_CREDENTIAL>   # if using a protected container
+            credential: <YOUR_CREDENTIAL>
         container: <YOUR_AZURE_CONTAINER_HERE>
         name_starts_with: <CONTAINER_PATH_TO_DATA>
         assets:
