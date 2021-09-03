@@ -996,13 +996,6 @@ class BaseDataContext:
                         f"great_expectations.conf file located at one of the above paths, in a section named "
                         f'"ge_cloud_config".'
                     )
-                    print(
-                        f'Config variable "{config_variable}" was not found in environment or global config ('
-                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}". If you would like to '
-                        f"use a different value, please specify it in an environment variable or in a "
-                        f"great_expectations.conf file located at one of the above paths, in a section named "
-                        f'"ge_cloud_config"'
-                    )
                     substitutions[config_variable] = value
 
         return DataContextConfig(
