@@ -79,7 +79,7 @@ from great_expectations.data_context.types.base import (
     GeCloudConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema,
+    datasourceConfigSchema, DEFAULT_USAGE_STATISTICS_URL,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -945,6 +945,11 @@ class BaseDataContext:
             return {}
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+        ge_cloud_config_variable_defaults = {
+            "plugins_directory": self._normalize_absolute_or_relative_path(
+                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value),
+            "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL
+        }
 
         if not config:
             config = self._project_config
@@ -961,6 +966,22 @@ class BaseDataContext:
             **self.runtime_environment,
             **(self.ge_cloud_config.to_json_dict() if self.ge_cloud_mode else {}),
         }
+
+        if self.ge_cloud_mode:
+            for config_variable, value in ge_cloud_config_variable_defaults.items():
+                if substitutions.get(config_variable) is None:
+                    logger.info(f'Config variable "{config_variable}" was not found in environment or global config ('
+                                f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
+                                f'like to '
+                                f'use a different value, please specify it in an environment variable or in a '
+                                f'great_expectations.conf file located at one of the above paths, in a section named '
+                                f'"ge_cloud_config".')
+                    print(f'Config variable "{config_variable}" was not found in environment or global config ('
+                                f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}". If you would like to '
+                                f'use a different value, please specify it in an environment variable or in a '
+                                f'great_expectations.conf file located at one of the above paths, in a section named '
+                                f'"ge_cloud_config"')
+                    substitutions[config_variable] = value
 
         return DataContextConfig(
             **substitute_all_config_variables(
