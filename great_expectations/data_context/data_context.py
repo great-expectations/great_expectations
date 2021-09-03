@@ -3982,7 +3982,7 @@ class DataContext(BaseDataContext):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
         ge_cloud_config = None
-        context_root_directory = None
+
         if ge_cloud_mode:
             ge_cloud_config = self.get_ge_cloud_config(
                 ge_cloud_base_url=ge_cloud_base_url,
@@ -3990,6 +3990,11 @@ class DataContext(BaseDataContext):
                 ge_cloud_access_token=ge_cloud_access_token,
             )
             self._ge_cloud_config = ge_cloud_config
+            # in ge_cloud_mode, if not provided, set context_root_dir to cwd
+            if context_root_dir is None:
+                context_root_dir = os.getcwd()
+                logger.info(f'context_root_dir was not provided - defaulting to current working directory "'
+                            f'{context_root_dir}".')
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
             context_root_dir = (
@@ -3997,10 +4002,11 @@ class DataContext(BaseDataContext):
                 if context_root_dir is None
                 else context_root_dir
             )
-            context_root_directory = os.path.abspath(
-                os.path.expanduser(context_root_dir)
-            )
-            self._context_root_directory = context_root_directory
+
+        context_root_directory = os.path.abspath(
+            os.path.expanduser(context_root_dir)
+        )
+        self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
         super().__init__(
