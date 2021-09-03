@@ -332,7 +332,6 @@ class BaseDataContext:
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
-        self._project_config_with_variables_substituted = None
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
         self._project_config = project_config
@@ -621,7 +620,6 @@ class BaseDataContext:
         """
 
         self._project_config["stores"][store_name] = store_config
-        self.refresh_substituted_project_config()
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -640,7 +638,6 @@ class BaseDataContext:
         self._project_config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
-        self.refresh_substituted_project_config()
         config = self.project_config_with_variables_substituted.validation_operators[
             validation_operator_name
         ]
@@ -815,17 +812,7 @@ class BaseDataContext:
 
     @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
-        if self._project_config_with_variables_substituted is None:
-            self._project_config_with_variables_substituted = (
-                self.get_config_with_variables_substituted()
-            )
-        return self._project_config_with_variables_substituted
-
-    def refresh_substituted_project_config(self):
-        self._project_config_with_variables_substituted = (
-            self.get_config_with_variables_substituted()
-        )
-        return True
+        return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
@@ -1114,7 +1101,6 @@ class BaseDataContext:
                 # datasource_name].remove()
                 del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
-                self.refresh_substituted_project_config()
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
 
@@ -1935,7 +1921,6 @@ class BaseDataContext:
             CommentedMap(**config)
         )
         self._project_config["datasources"][name] = datasource_config
-        self.refresh_substituted_project_config()
         datasource_config = self.project_config_with_variables_substituted.datasources[
             name
         ]
@@ -1950,7 +1935,6 @@ class BaseDataContext:
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
                 del self._project_config["datasources"][name]
-                self.refresh_substituted_project_config()
                 raise e
         else:
             datasource = None
@@ -3455,7 +3439,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 store_name = instantiated_class.store_name or store_name
                 self._project_config["stores"][store_name] = config
-                self.refresh_substituted_project_config()
 
                 store_anonymizer = StoreAnonymizer(self.data_context_id)
                 usage_stats_event_payload = store_anonymizer.anonymize_store_info(
