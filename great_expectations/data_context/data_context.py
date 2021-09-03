@@ -70,6 +70,7 @@ from great_expectations.data_context.templates import (
 )
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
+    DEFAULT_USAGE_STATISTICS_URL,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
@@ -79,7 +80,7 @@ from great_expectations.data_context.types.base import (
     GeCloudConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
-    datasourceConfigSchema, DEFAULT_USAGE_STATISTICS_URL,
+    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -812,7 +813,9 @@ class BaseDataContext:
     @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         if self._project_config_with_variables_substituted is None:
-            self._project_config_with_variables_substituted = self.get_config_with_variables_substituted()
+            self._project_config_with_variables_substituted = (
+                self.get_config_with_variables_substituted()
+            )
         return self._project_config_with_variables_substituted
 
     @property
@@ -957,8 +960,9 @@ class BaseDataContext:
         """
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
-                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value),
-            "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL
+                DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+            ),
+            "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }
 
         if not config:
@@ -983,17 +987,21 @@ class BaseDataContext:
         if self.ge_cloud_mode:
             for config_variable, value in ge_cloud_config_variable_defaults.items():
                 if substitutions.get(config_variable) is None:
-                    logger.info(f'Config variable "{config_variable}" was not found in environment or global config ('
-                                f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
-                                f'like to '
-                                f'use a different value, please specify it in an environment variable or in a '
-                                f'great_expectations.conf file located at one of the above paths, in a section named '
-                                f'"ge_cloud_config".')
-                    print(f'Config variable "{config_variable}" was not found in environment or global config ('
-                                f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}". If you would like to '
-                                f'use a different value, please specify it in an environment variable or in a '
-                                f'great_expectations.conf file located at one of the above paths, in a section named '
-                                f'"ge_cloud_config"')
+                    logger.info(
+                        f'Config variable "{config_variable}" was not found in environment or global config ('
+                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
+                        f"like to "
+                        f"use a different value, please specify it in an environment variable or in a "
+                        f"great_expectations.conf file located at one of the above paths, in a section named "
+                        f'"ge_cloud_config".'
+                    )
+                    print(
+                        f'Config variable "{config_variable}" was not found in environment or global config ('
+                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}". If you would like to '
+                        f"use a different value, please specify it in an environment variable or in a "
+                        f"great_expectations.conf file located at one of the above paths, in a section named "
+                        f'"ge_cloud_config"'
+                    )
                     substitutions[config_variable] = value
 
         return DataContextConfig(
@@ -3993,8 +4001,10 @@ class DataContext(BaseDataContext):
             # in ge_cloud_mode, if not provided, set context_root_dir to cwd
             if context_root_dir is None:
                 context_root_dir = os.getcwd()
-                logger.info(f'context_root_dir was not provided - defaulting to current working directory "'
-                            f'{context_root_dir}".')
+                logger.info(
+                    f'context_root_dir was not provided - defaulting to current working directory "'
+                    f'{context_root_dir}".'
+                )
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
             context_root_dir = (
@@ -4003,9 +4013,7 @@ class DataContext(BaseDataContext):
                 else context_root_dir
             )
 
-        context_root_directory = os.path.abspath(
-            os.path.expanduser(context_root_dir)
-        )
+        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
