@@ -6,7 +6,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-credential = os.getenv("AZURE_CREDENTIAL", "")
+CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
 context = ge.get_context()
 
@@ -27,8 +27,8 @@ datasource_config = {
                 "account_url": "<YOUR_ACCOUNT_URL>",
                 "credential": "<YOUR_CREDENTIAL>",
             },
-            "container": "superconductive-public",
-            "name_starts_with": "data/taxi_yellow_trip_data_samples/",
+            "container": "<YOUR_CONTAINER>",
+            "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
             "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
@@ -43,13 +43,13 @@ datasource_config = {
 datasource_config["execution_engine"]["azure_options"][
     "account_url"
 ] = "superconductivetests.blob.core.windows.net"
-datasource_config["execution_engine"]["azure_options"]["credential"] = credential
+datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
 ] = "superconductivetests.blob.core.windows.net"
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "credential"
-] = credential
+] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "container"
 ] = "superconductive-public"
