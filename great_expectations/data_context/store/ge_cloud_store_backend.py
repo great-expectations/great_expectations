@@ -27,6 +27,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "expectation_suite": "suite",
     }
 
+    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
+        "expectation_suite": {"clause_id"}
+    }
+
     def __init__(
         self,
         ge_cloud_credentials: Dict,
@@ -134,6 +138,20 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to update object in GE Cloud Store Backend."
             )
 
+    @property
+    def allowed_set_kwargs(self):
+        return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(self.ge_cloud_resource_type, set())
+
+    def validate_kwargs(self, kwargs):
+        kwarg_names = set(kwargs.keys())
+        if len(kwarg_names) == 0:
+            return True
+        if kwarg_names <= self.allowed_set_kwargs:
+            return True
+        if not (kwarg_names <= self.allowed_set_kwargs):
+            extra_kwargs = kwarg_names - self.allowed_set_kwargs
+            raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
+
     def _set(self, key, value, **kwargs):
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_id = key[1]
@@ -152,6 +170,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "data": {
                 "type": resource_type,
                 "attributes": {"account_id": account_id, attributes_key: value},
+                **(kwargs if self.allowed_set_kwargs(kwargs) else {})
             }
         }
 
