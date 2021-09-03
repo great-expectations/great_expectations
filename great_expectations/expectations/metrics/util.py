@@ -222,10 +222,14 @@ def get_sqlalchemy_column_metadata(
 
         inspector: reflection.Inspector = reflection.Inspector.from_engine(engine)
         try:
-            columns = inspector.get_columns(
-                table_selectable,
-                schema=schema_name,
-            )
+            # if a custom query was passed
+            if isinstance(table_selectable, TextClause):
+                columns = table_selectable.columns().columns
+            else:
+                columns = inspector.get_columns(
+                    table_selectable,
+                    schema=schema_name,
+                )
         except (
             KeyError,
             AttributeError,
@@ -294,7 +298,11 @@ ORDER BY schema_name,
             for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
         ]
     else:
-        query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+        # if a custom query was passed
+        if isinstance(selectable, TextClause):
+            query: TextClause = selectable
+        else:
+            query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys

@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335)
 
 0.13.32
 -----------------

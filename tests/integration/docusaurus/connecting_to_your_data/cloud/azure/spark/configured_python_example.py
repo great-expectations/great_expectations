@@ -6,7 +6,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
+CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
 
 context = ge.get_context()
 
@@ -16,7 +16,6 @@ datasource_config = {
     "execution_engine": {
         "class_name": "PandasExecutionEngine",
         "azure_options": {
-            "account_url": "<YOUR_ACCOUNT_URL>",
             "credential": "<YOUR_CREDENTIAL>",
         },
     },
@@ -24,7 +23,6 @@ datasource_config = {
         "configured_data_connector_name": {
             "class_name": "ConfiguredAssetAzureDataConnector",
             "azure_options": {
-                "account_url": "<YOUR_ACCOUNT_URL>",
                 "credential": "<YOUR_CREDENTIAL>",
             },
             "container": "<YOUR_CONTAINER>",
