@@ -25,6 +25,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "contract": "checkpoint_config",
         "data_context": "data_context_config",
         "expectation_suite": "suite",
+        "rendered_data_doc":"rendered_data_doc"
     }
 
     def __init__(
@@ -36,6 +37,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         suppress_store_backend_id: Optional[bool] = True,
         manually_initialize_store_backend_id: Optional[str] = "",
         store_name: Optional[str] = None,
+        # TODO These may not be necessary if we dont define a GE Store directly inside docs store
+        # filepath_prefix = None,
+        # filepath_suffix = None,
+        # filepath_template = None
     ):
         super().__init__(
             fixed_length_key=True,

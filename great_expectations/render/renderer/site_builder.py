@@ -8,11 +8,12 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
-    RenderedSectionIdentifier
+    GeCloudIdentifier
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier
+    ValidationResultIdentifier,
+    GeCloudIdentifier
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
@@ -402,7 +403,7 @@ class DefaultSiteSectionBuilder:
                 continue
 
             if self.run_name_filter:
-                if not resource_key_passes_run_name_filter(
+                if not resource_key_passes_run_name_filter and type(resource_key) != GeCloudIdentifier(
                     resource_key, self.run_name_filter
                 ):
                     continue
@@ -448,9 +449,8 @@ class DefaultSiteSectionBuilder:
             try:
                 rendered_content = self.renderer_class.render(resource)
                 self.target_store.set(
-                    RenderedSectionIdentifier(
-                        rendered_section_name=self.name,
-                        resource_identifier=resource_key,
+                    GeCloudIdentifier(
+                        resource_type=resource_key,
                     ),
                     rendered_content,
                 )

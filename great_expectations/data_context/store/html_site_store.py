@@ -7,7 +7,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
-    RenderedSectionIdentifier
+    GeCloudIdentifier
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -22,6 +22,7 @@ from great_expectations.util import (
 
 from ...core.data_context_key import DataContextKey
 from .tuple_store_backend import TupleStoreBackend
+from .ge_cloud_store_backend import GeCloudStoreBackend
 
 logger = logging.getLogger(__name__)
 
@@ -108,9 +109,9 @@ class HtmlSiteStore:
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
-        if not issubclass(store_class, TupleStoreBackend):
+        if not issubclass(store_class, (TupleStoreBackend, GeCloudStoreBackend)):
             raise DataContextError(
-                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend"
+                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend or GeCloudStoreBackend"
             )
         if "filepath_template" in store_backend or (
             "fixed_length_key" in store_backend
@@ -291,7 +292,7 @@ class HtmlSiteStore:
                 return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
-        if not isinstance(key, (SiteSectionIdentifier,RenderedSectionIdentifier)):
+        if not isinstance(key, (SiteSectionIdentifier,GeCloudIdentifier)):
             raise TypeError(
                 "key: {!r} must a SiteSectionIdentifier or RenderedSectionIdentifier, not {!r}".format(
                     key,
@@ -303,6 +304,7 @@ class HtmlSiteStore:
             try:
                 if isinstance(key.resource_identifier, key_class):
                     return
+
             except TypeError:
                 # it's ok to have a key that is not a type (e.g. the string "index_page")
                 continue
@@ -393,12 +395,13 @@ class HtmlSiteStore:
                             )
                             content_type = "text/html; charset=utf8"
 
-                    self.store_backends["static_assets"].set(
-                        store_key,
-                        f.read(),
-                        content_encoding=content_encoding,
-                        content_type=content_type,
-                    )
+                    if not isinstance(self.store_backends["static_assets"], GeCloudStoreBackend):
+                        self.store_backends["static_assets"].set(
+                            store_key,
+                            f.read(),
+                            content_encoding=content_encoding,
+                            content_type=content_type,
+                        )
 
     @property
     def config(self) -> dict:
