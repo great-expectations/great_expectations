@@ -578,7 +578,7 @@ class BaseDataContext:
 
         # if in ge_cloud_mode, use ge_cloud_account_id
         if self.ge_cloud_mode:
-            return self.ge_cloud_config.ge_cloud_account_id
+            return self.ge_cloud_config.account_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
@@ -3935,9 +3935,9 @@ class DataContext(BaseDataContext):
             )
         )
         return {
-            "ge_cloud_base_url": ge_cloud_base_url,
-            "ge_cloud_account_id": ge_cloud_account_id,
-            "ge_cloud_access_token": ge_cloud_access_token,
+            "base_url": ge_cloud_base_url,
+            "account_id": ge_cloud_account_id,
+            "access_token": ge_cloud_access_token,
         }
 
     def get_ge_cloud_config(

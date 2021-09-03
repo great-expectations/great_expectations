@@ -1064,21 +1064,16 @@ class NotebooksConfigSchema(Schema):
 
 
 class GeCloudConfig(DictDot):
-    def __init__(
-        self,
-        ge_cloud_base_url: str,
-        ge_cloud_account_id: str,
-        ge_cloud_access_token: str,
-    ):
-        self.ge_cloud_base_url = ge_cloud_base_url
-        self.ge_cloud_account_id = ge_cloud_account_id
-        self.ge_cloud_access_token = ge_cloud_access_token
+    def __init__(self, base_url: str, account_id: str, access_token: str):
+        self.base_url = base_url
+        self.account_id = account_id
+        self.access_token = access_token
 
     def to_json_dict(self):
         return {
-            "ge_cloud_base_url": self.ge_cloud_base_url,
-            "ge_cloud_account_id": self.ge_cloud_account_id,
-            "ge_cloud_access_token": self.ge_cloud_access_token,
+            "base_url": self.base_url,
+            "account_id": self.account_id,
+            "access_token": self.access_token,
         }
 
 
