@@ -912,7 +912,11 @@ class BaseDataContext:
     #####
 
     def _load_config_variables_file(self):
-        """Get all config variables from the default location."""
+        """
+        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables are
+        loaded from a global great_expectations.conf file, located at one of the paths defined in
+        self.GLOBAL_CONFIG_PATHS (in order of search precedence).
+        """
         if self.ge_cloud_mode:
             for config_path in self.GLOBAL_CONFIG_PATHS:
                 if os.path.isfile(config_path):
@@ -945,6 +949,12 @@ class BaseDataContext:
             return {}
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
                 DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value),
@@ -960,6 +970,9 @@ class BaseDataContext:
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
+        # for ge_cloud_mode: in most cases, self.ge_cloud_config will be a subset of substituted_config_variables,
+        # but if one or more ge_cloud_config values are passed in at runtime, they will be reflected in
+        # self.ge_cloud_config and will take precedence
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
@@ -3938,6 +3951,10 @@ class DataContext(BaseDataContext):
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
     ):
+        """
+        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        """
         ge_cloud_config_dict = self._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_account_id=ge_cloud_account_id,
@@ -4060,7 +4077,12 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        :return: the configuration object read from the file
+        For Data Contexts in GE Cloud mode, a default configuration template with pre-defined ${
+        SOME_VARIABLE} variables is returned. (see
+        great_expectations.data_context.templates.DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG). These variables are
+        substituted later using the same process referenced above.
+
+        :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
             return self.default_ge_cloud_data_context_config_template
