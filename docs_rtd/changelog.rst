@@ -7,7 +7,26 @@ Changelog
 
 develop
 -----------------
-* [FEATURE] Performance tests using BigQuery backend (#3280)
+* [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335)
+
+0.13.32
+-----------------
+* [FEATURE] Add Performance Benchmarks Using BigQuery. (Thanks @jdimatteo)
+* [WIP] [FEATURE] add backend args to run_diagnostics (#3257) (Thanks @edjoesu)
+* [BUGFIX] Addresses Issue 2937. (#3236) (Thanks @BenGale93)
+* [BUGFIX] SQL dialect doesn't register for BigQuery for V2 (#3324)
+* [DOCS] "How to connect to data on GCS using Pandas" (#3311)
+* [MAINTENANCE] Add CODEOWNERS with a single check for sidebars.js (#3332)
+* [MAINTENANCE] Fix incorrect DataConnector usage of _get_full_file_path() API method. (#3336)
+* [MAINTENANCE] Make Pandas against S3 and GCS integration tests more robust by asserting on number of batches returned and row counts (#3341)
+* [MAINTENANCE] Make integration tests of Pandas against Azure more robust. (#3339)
+* [MAINTENANCE] Prepare AzureUrl to handle WASBS format (for Spark) (#3340)
+* [MAINTENANCE] Renaming default_batch_identifier in examples #3334
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (#3304)
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (Spark and Pandas) (#3325)
+* [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
+* [MAINTENANCE] Various doc patches (#3326)
+* [MAINTENANCE] clean up imports and method signatures (#3337)
 
 0.13.31
 -----------------
