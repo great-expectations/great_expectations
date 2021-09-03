@@ -96,7 +96,7 @@ class BatchIdentifierSchema(Schema):
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifer
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
     and run_id.
     """
 
@@ -304,6 +304,70 @@ class SiteSectionIdentifier(DataContextKey):
         elif tuple_[0] == "expectations":
             return cls(
                 site_section_name=tuple_[0],
+                resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
+            )
+        else:
+            raise InvalidDataContextKeyError(
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+            )
+
+class RenderedSectionIdentifier(DataContextKey):
+    """
+    A RenderedSectionIdentifier identifies a docs artifact that has been processed by a renderer using its
+    """
+    def __init__(self, rendered_section_name, resource_identifier):
+        self._rendered_section_name = rendered_section_name
+        if rendered_section_name in ["validations", "profiling"]:
+            if isinstance(resource_identifier, ValidationResultIdentifier):
+                self._resource_identifier = resource_identifier
+            elif isinstance(resource_identifier, (tuple, list)):
+                self._resource_identifier = ValidationResultIdentifier(
+                    *resource_identifier
+                )
+            else:
+                self._resource_identifier = ValidationResultIdentifier(
+                    **resource_identifier
+                )
+        elif rendered_section_name == "expectations":
+            if isinstance(resource_identifier, ExpectationSuiteIdentifier):
+                self._resource_identifier = resource_identifier
+            elif isinstance(resource_identifier, (tuple, list)):
+                self._resource_identifier = ExpectationSuiteIdentifier(
+                    *resource_identifier
+                )
+            else:
+                self._resource_identifier = ExpectationSuiteIdentifier(
+                    **resource_identifier
+                )
+        else:
+            raise InvalidDataContextKeyError(
+                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+            )
+
+    @property
+    def rendered_section_name(self):
+        return self._rendered_section_name
+
+    @property
+    def resource_identifier(self):
+        return self._resource_identifier
+
+    def to_tuple(self):
+        rendered_section_identifier_tuple_list = [self.rendered_section_name] + list(
+            self.resource_identifier.to_tuple()
+        )
+        return tuple(rendered_section_identifier_tuple_list)
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        if tuple_[0] == "validations":
+            return cls(
+                rendered_section_name=tuple_[0],
+                resource_identifier=ValidationResultIdentifier.from_tuple(tuple_[1:]),
+            )
+        elif tuple_[0] == "expectations":
+            return cls(
+                rendered_section_name=tuple_[0],
                 resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
             )
         else:

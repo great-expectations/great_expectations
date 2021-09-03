@@ -7,6 +7,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
+    RenderedSectionIdentifier
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -290,9 +291,9 @@ class HtmlSiteStore:
                 return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
-        if not isinstance(key, SiteSectionIdentifier):
+        if not isinstance(key, (SiteSectionIdentifier,RenderedSectionIdentifier)):
             raise TypeError(
-                "key: {!r} must a SiteSectionIdentifier, not {!r}".format(
+                "key: {!r} must a SiteSectionIdentifier or RenderedSectionIdentifier, not {!r}".format(
                     key,
                     type(key),
                 )

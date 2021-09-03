@@ -8,10 +8,11 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
+    RenderedSectionIdentifier
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
+    ValidationResultIdentifier
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
@@ -446,6 +447,13 @@ class DefaultSiteSectionBuilder:
 
             try:
                 rendered_content = self.renderer_class.render(resource)
+                self.target_store.set(
+                    RenderedSectionIdentifier(
+                        rendered_section_name=self.name,
+                        resource_identifier=resource_key,
+                    ),
+                    rendered_content,
+                )
                 viewable_content = self.view_class.render(
                     rendered_content,
                     data_context_id=self.data_context_id,
