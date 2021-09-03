@@ -1,6 +1,5 @@
-from typing import List
-
 import datetime
+from typing import List
 
 import pandas as pd
 import pytest
@@ -705,14 +704,17 @@ def test_expectation_with_batch_identifiers_datetime(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    batch_definition = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
-    )[0]
+    batch_definition = (
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )[0]
+    )
 
-    batch = Batch(data=test_df, batch_request=batch_request, batch_definition=batch_definition)
+    batch = Batch(
+        data=test_df, batch_request=batch_request, batch_definition=batch_definition
+    )
 
     try:
         batch.id
     except TypeError:
         pytest.fail()
-
