@@ -341,7 +341,7 @@ class RenderedSectionIdentifier(DataContextKey):
                 )
         else:
             raise InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "RenderedSectionIdentifier only supports 'validations' and 'expectations' as rendered section names"
             )
 
     @property
@@ -372,7 +372,7 @@ class RenderedSectionIdentifier(DataContextKey):
             )
         else:
             raise InvalidDataContextKeyError(
-                "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
+                "RenderedSectionIdentifier only supports 'validations' and 'expectations' as rendered section names"
             )
 
 
