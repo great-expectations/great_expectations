@@ -160,3 +160,18 @@ def basic_data_context_config():
             },
         }
     )
+
+
+@pytest.fixture
+def ge_cloud_runtime_base_url():
+    return "https://api.dev.greatexpectations.io/runtime"
+
+
+@pytest.fixture
+def ge_cloud_runtime_account_id():
+    return '37ba8ec2-f731-4c99-8fe0-6300691cee8a'
+
+
+@pytest.fixture
+def ge_cloud_runtime_access_token():
+    return '94b01aa36c9b4e918d93d67be6bd9d0f'
