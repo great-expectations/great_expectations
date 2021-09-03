@@ -540,7 +540,7 @@ continue.
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
                     f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
-                    You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
+                    You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
                     """
                 )
         if (

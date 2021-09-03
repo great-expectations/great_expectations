@@ -106,7 +106,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
 
