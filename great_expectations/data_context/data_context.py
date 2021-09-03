@@ -2120,8 +2120,9 @@ class BaseDataContext:
             name,
             value,
         ) in self.project_config_with_variables_substituted.stores.items():
-            value["name"] = name
-            stores.append(value)
+            store_config = copy.deepcopy(value)
+            store_config["name"] = name
+            stores.append(store_config)
         return stores
 
     def list_active_stores(self):
