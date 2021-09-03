@@ -166,7 +166,7 @@ datasources:
     module_name: great_expectations.datasource
     class_name: Datasource
     data_connectors:
-      my_runtime_data_connector:
+      default_runtime_data_connector:
         class_name: RuntimeDataConnector
         batch_identifiers:
   default_pandas_datasource:
@@ -176,7 +176,7 @@ datasources:
       module_name: great_expectations.datasource
       class_name: Datasource
       data_connectors:
-        my_runtime_data_connector:
+        default_runtime_data_connector:
           class_name: RuntimeDataConnector
           batch_identifiers:
 
@@ -227,7 +227,6 @@ checkpoint_store_name: default_checkpoint_store
 data_docs_sites:
   default_site:
     class_name: SiteBuilder
-    # set to false to hide how-to buttons in Data Docs
     show_how_to_buttons: true
     store_backend:
       class_name: GeCloudStoreBackend
