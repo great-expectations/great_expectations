@@ -3750,10 +3750,6 @@ class DataContext(BaseDataContext):
         project_root_dir=None,
         usage_statistics_enabled=True,
         runtime_environment=None,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_mode: bool = False,
     ):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
