@@ -2162,6 +2162,7 @@ class BaseDataContext:
         expectation_suite_name: str,
         overwrite_existing: Optional[bool] = False,
         ge_cloud_id: Optional[str] = None,
+        **kwargs
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2202,7 +2203,7 @@ class BaseDataContext:
                     )
                 )
 
-        self.expectations_store.set(key, expectation_suite)
+        self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
 
     def delete_expectation_suite(
@@ -2281,6 +2282,7 @@ class BaseDataContext:
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: Optional[bool] = True,
         ge_cloud_id: Optional[str] = None,
+        **kwargs
     ):
         """Save the provided expectation suite into the DataContext.
 
@@ -2322,7 +2324,7 @@ class BaseDataContext:
                 )
 
         self._evaluation_parameter_dependencies_compiled = False
-        return self.expectations_store.set(key, expectation_suite)
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
         """
