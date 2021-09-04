@@ -203,7 +203,27 @@ def mocked_global_config_dirs(tmp_path):
 
 
 @pytest.fixture
-def data_context_with_mocked_global_config_dirs(mocked_global_config_dirs):
+def data_context_with_empty_global_config_dirs(
+    mocked_global_config_dirs,
+):
+    with patch(
+        "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
+        new_callable=PropertyMock,
+    ) as mock:
+        (
+            mock_global_config_dot_dir,
+            mock_global_config_etc_dir,
+            mock_global_config_paths,
+        ) = mocked_global_config_dirs
+        mock.return_value = mock_global_config_paths
+
+        yield
+
+
+@pytest.fixture
+def data_context_with_complete_global_config_in_dot_and_etc_dirs(
+    mocked_global_config_dirs,
+):
     with patch(
         "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
         new_callable=PropertyMock,
@@ -222,4 +242,83 @@ def data_context_with_mocked_global_config_dirs(mocked_global_config_dirs):
             ),
             str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
         )
-        yield DataContext
+        shutil.copy(
+            file_relative_path(
+                __file__,
+                "fixtures/conf/great_expectations_cloud_config_complete_2.conf",
+            ),
+            str(os.path.join(mock_global_config_etc_dir, "great_expectations.conf")),
+        )
+        yield
+
+
+@pytest.fixture
+def data_context_with_complete_global_config_in_dot_dir_only(mocked_global_config_dirs):
+    with patch(
+        "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
+        new_callable=PropertyMock,
+    ) as mock:
+        (
+            mock_global_config_dot_dir,
+            mock_global_config_etc_dir,
+            mock_global_config_paths,
+        ) = mocked_global_config_dirs
+        mock.return_value = mock_global_config_paths
+
+        shutil.copy(
+            file_relative_path(
+                __file__,
+                "fixtures/conf/great_expectations_cloud_config_complete_1.conf",
+            ),
+            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
+        )
+        yield
+
+
+@pytest.fixture
+def data_context_with_complete_global_config_in_etc_dir_only(mocked_global_config_dirs):
+    with patch(
+        "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
+        new_callable=PropertyMock,
+    ) as mock:
+        (
+            mock_global_config_dot_dir,
+            mock_global_config_etc_dir,
+            mock_global_config_paths,
+        ) = mocked_global_config_dirs
+        mock.return_value = mock_global_config_paths
+
+        shutil.copy(
+            file_relative_path(
+                __file__,
+                "fixtures/conf/great_expectations_cloud_config_complete_2.conf",
+            ),
+            str(os.path.join(mock_global_config_etc_dir, "great_expectations.conf")),
+        )
+        yield
+
+
+@pytest.fixture
+def data_context_with_incomplete_global_config_in_dot_dir_only(
+    mocked_global_config_dirs,
+):
+    # missing access_token
+    with patch(
+        "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
+        new_callable=PropertyMock,
+    ) as mock:
+        (
+            mock_global_config_dot_dir,
+            mock_global_config_etc_dir,
+            mock_global_config_paths,
+        ) = mocked_global_config_dirs
+        mock.return_value = mock_global_config_paths
+
+        shutil.copy(
+            file_relative_path(
+                __file__,
+                "fixtures/conf/great_expectations_cloud_config_minimal_missing_token_1.conf",
+            ),
+            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
+        )
+        yield
