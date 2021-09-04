@@ -23,6 +23,11 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
         ge_cloud_account_id=ge_cloud_runtime_account_id,
         ge_cloud_access_token=ge_cloud_runtime_access_token,
     )
+    global_usage_statistics_url = context._get_global_config_value(
+        environment_variable="GE_USAGE_STATISTICS_URL",
+        conf_file_section="anonymous_usage_statistics",
+        conf_file_option="usage_statistics_url",
+    )
     expected_ge_cloud_config = {
         "base_url": ge_cloud_runtime_base_url,
         "account_id": ge_cloud_runtime_account_id,
@@ -32,7 +37,8 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
         "anonymous_usage_statistics": {
             "data_context_id": "a8a35168-68d5-4366-90ae-00647463d37e",
             "enabled": False,
-            "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics/complete/version/1",
+            "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+                                    "/complete/version/1" if not global_usage_statistics_url else global_usage_statistics_url,
         },
         "checkpoint_store_name": "default_checkpoint_store",
         "config_variables_file_path": None,
@@ -153,6 +159,11 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
         context = DataContext(
             context_root_dir="/my/context/root/dir", ge_cloud_mode=True
         )
+        global_usage_statistics_url = context._get_global_config_value(
+            environment_variable="GE_USAGE_STATISTICS_URL",
+            conf_file_section="anonymous_usage_statistics",
+            conf_file_option="usage_statistics_url",
+        )
         expected_ge_cloud_config = {
             key[9:].lower(): val for key, val in ge_cloud_config_env_vars.items()
         }
@@ -193,7 +204,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
             "anonymous_usage_statistics": {
                 "enabled": False,
                 "data_context_id": "cef8f675-a10f-4fa9-86db-0789d9189dee",
-                "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics",
+                "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics" if not global_usage_statistics_url else global_usage_statistics_url,
             },
             "stores": {
                 "default_evaluation_parameter_store": {
@@ -273,6 +284,11 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
     data_context_with_complete_global_config_in_dot_dir_only,
 ):
     context = DataContext(ge_cloud_mode=True)
+    global_usage_statistics_url = context._get_global_config_value(
+        environment_variable="GE_USAGE_STATISTICS_URL",
+        conf_file_section="anonymous_usage_statistics",
+        conf_file_option="usage_statistics_url",
+    )
     expected_ge_cloud_config = {
         "base_url": "https://api.dev.greatexpectations.io/complete/version-1",
         "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
@@ -378,7 +394,8 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
         "anonymous_usage_statistics": {
             "enabled": False,
             "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics/complete/version/1",
+            "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+                                    "/complete/version/1" if not global_usage_statistics_url else global_usage_statistics_url,
         },
         "expectations_store_name": "default_expectations_store",
         "config_version": 3.0,
@@ -395,6 +412,11 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
     data_context_with_complete_global_config_in_etc_dir_only,
 ):
     context = DataContext(ge_cloud_mode=True)
+    global_usage_statistics_url = context._get_global_config_value(
+        environment_variable="GE_USAGE_STATISTICS_URL",
+        conf_file_section="anonymous_usage_statistics",
+        conf_file_option="usage_statistics_url",
+    )
     expected_ge_cloud_config = {
         "base_url": "https://api.dev.greatexpectations.io/complete/version-2",
         "account_id": "31c84fc9-6659-4411-a911-4276bb464583",
@@ -404,7 +426,8 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
         "expectations_store_name": "default_expectations_store",
         "anonymous_usage_statistics": {
             "enabled": False,
-            "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics/complete/version/2",
+            "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+                                    "/complete/version/2" if not global_usage_statistics_url else global_usage_statistics_url,
             "data_context_id": "31c84fc9-6659-4411-a911-4276bb464583",
         },
         "stores": {
@@ -524,6 +547,11 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
             ge_cloud_mode=True,
             ge_cloud_base_url="https://my/runtime/base/url/takes/top/precedence",
         )
+        global_usage_statistics_url = context._get_global_config_value(
+            environment_variable="GE_USAGE_STATISTICS_URL",
+            conf_file_section="anonymous_usage_statistics",
+            conf_file_option="usage_statistics_url",
+        )
         expected_ge_cloud_config = {
             "base_url": "https://my/runtime/base/url/takes/top/precedence",
             "account_id": "c865b794-5d61-4f7e-8c9c-a60ef5bef785",
@@ -552,7 +580,8 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
             "evaluation_parameter_store_name": "default_evaluation_parameter_store",
             "notebooks": None,
             "anonymous_usage_statistics": {
-                "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics/complete/version/1",
+                "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1"
+                                        "/usage_statistics/complete/version/1" if not global_usage_statistics_url else global_usage_statistics_url,
                 "data_context_id": "c865b794-5d61-4f7e-8c9c-a60ef5bef785",
                 "enabled": False,
             },
