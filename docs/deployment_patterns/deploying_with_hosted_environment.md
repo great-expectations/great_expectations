@@ -27,8 +27,8 @@ The following guides will contain examples for each environment we have tested o
 
 - [How to instantiate a Data Context on an EMR Spark cluster](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
 - [How to instantiate a Data Context on Databricks Spark cluster](./how_to_instantiate_a_data_context_on_databricks_spark_cluster)
-- [Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)](./)
-- [Deploying Great Expectations with Astronomer](./)
+- [Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)](./deploying_with_google_cloud_composer)
+- [Deploying Great Expectations with Astronomer](./deploying_with_astronomer)
 
 
 Step 2: Create Expectation Suites and add Expectations
