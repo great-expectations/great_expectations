@@ -383,7 +383,7 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
     ):
         pytest.skip("Skipping mysql tests")
     elif dependencies == BackendDependencies.MSSQL and (
-        pytest_args.no_mssql or pytest_args.no_sqlalchemy
+        not pytest_args.mssql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mssql tests")
     elif dependencies == BackendDependencies.BIGQUERY and pytest_args.no_sqlalchemy:
