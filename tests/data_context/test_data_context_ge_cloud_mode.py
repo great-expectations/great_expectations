@@ -646,6 +646,4 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
     data_context_with_incomplete_global_config_in_dot_dir_only,
 ):
     with pytest.raises(DataContextError):
-        DataContext(
-            context_root_dir="/my/context/root/dir", ge_cloud_mode=True
-        )
+        DataContext(context_root_dir="/my/context/root/dir", ge_cloud_mode=True)
