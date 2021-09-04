@@ -38,7 +38,9 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
             "data_context_id": "a8a35168-68d5-4366-90ae-00647463d37e",
             "enabled": False,
             "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-                                    "/complete/version/1" if not global_usage_statistics_url else global_usage_statistics_url,
+            "/complete/version/1"
+            if not global_usage_statistics_url
+            else global_usage_statistics_url,
         },
         "checkpoint_store_name": "default_checkpoint_store",
         "config_variables_file_path": None,
@@ -204,7 +206,9 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
             "anonymous_usage_statistics": {
                 "enabled": False,
                 "data_context_id": "cef8f675-a10f-4fa9-86db-0789d9189dee",
-                "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics" if not global_usage_statistics_url else global_usage_statistics_url,
+                "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+                if not global_usage_statistics_url
+                else global_usage_statistics_url,
             },
             "stores": {
                 "default_evaluation_parameter_store": {
@@ -395,7 +399,9 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
             "enabled": False,
             "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-                                    "/complete/version/1" if not global_usage_statistics_url else global_usage_statistics_url,
+            "/complete/version/1"
+            if not global_usage_statistics_url
+            else global_usage_statistics_url,
         },
         "expectations_store_name": "default_expectations_store",
         "config_version": 3.0,
@@ -427,7 +433,9 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
         "anonymous_usage_statistics": {
             "enabled": False,
             "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-                                    "/complete/version/2" if not global_usage_statistics_url else global_usage_statistics_url,
+            "/complete/version/2"
+            if not global_usage_statistics_url
+            else global_usage_statistics_url,
             "data_context_id": "31c84fc9-6659-4411-a911-4276bb464583",
         },
         "stores": {
@@ -581,7 +589,9 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
             "notebooks": None,
             "anonymous_usage_statistics": {
                 "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1"
-                                        "/usage_statistics/complete/version/1" if not global_usage_statistics_url else global_usage_statistics_url,
+                "/usage_statistics/complete/version/1"
+                if not global_usage_statistics_url
+                else global_usage_statistics_url,
                 "data_context_id": "c865b794-5d61-4f7e-8c9c-a60ef5bef785",
                 "enabled": False,
             },
