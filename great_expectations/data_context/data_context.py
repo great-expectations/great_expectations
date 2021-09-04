@@ -3961,9 +3961,13 @@ class DataContext(BaseDataContext):
             if not val:
                 missing_keys.append(key)
         if len(missing_keys) > 0:
+            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            global_config_path_str = [
+                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+            ]
             raise DataContextError(
-                f"Arg(s) {missing_keys} required for ge_cloud_mode but neither provided nor found in "
-                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
+                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({(', ').join(global_config_path_str)})."
             )
 
         return GeCloudConfig(**ge_cloud_config_dict)
