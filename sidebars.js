@@ -278,9 +278,11 @@ module.exports = {
       type: 'category',
       label: 'Deployment Patterns',
       items: [
-        'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
+        'deployment_patterns/deploying_with_hosted_environment',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster',
+        'deployment_patterns/deploying_with_google_cloud_composer',
+        'deployment_patterns/deploying_with_astronomer',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
         //{
           //type: 'category',
