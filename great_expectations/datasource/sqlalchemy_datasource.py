@@ -240,21 +240,29 @@ class SqlAlchemyDatasource(LegacyDatasource):
                 self.engine = kwargs.pop("engine")
 
             else:
-                # Default to an unlimited pool size to prevent a concurrency bottleneck.
+                # Default to an unlimited pool size and unlimited overflow to prevent a concurrency bottleneck.
+                # todo(jdimatteo): this feels hacky... maybe instead add to kwargs if not already set? maybe only if experimental concurrency is enabled?
+                # todo(jdimatteo): would 100 be a better max pool size?
                 pool_size = kwargs.pop("pool_size", 0)
+                max_overflow = kwargs.pop("max_overflow", -1)
 
                 # if a connection string or url was provided, use that
                 if "connection_string" in kwargs:
                     connection_string = kwargs.pop("connection_string")
                     self.engine = create_engine(
-                        connection_string, pool_size=pool_size, **kwargs
+                        connection_string,
+                        pool_size=pool_size,
+                        max_overflow=max_overflow,
+                        **kwargs
                     )
                     connection = self.engine.connect()
                     connection.close()
                 elif "url" in credentials:
                     url = credentials.pop("url")
                     self.drivername = urlparse(url).scheme
-                    self.engine = create_engine(url, pool_size=pool_size, **kwargs)
+                    self.engine = create_engine(
+                        url, pool_size=pool_size, max_overflow=max_overflow, **kwargs
+                    )
                     connection = self.engine.connect()
                     connection.close()
 
@@ -267,7 +275,10 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     ) = self._get_sqlalchemy_connection_options(**kwargs)
                     self.drivername = drivername
                     self.engine = create_engine(
-                        options, pool_size=pool_size, **create_engine_kwargs
+                        options,
+                        pool_size=pool_size,
+                        max_overflow=max_overflow,
+                        **create_engine_kwargs
                     )
                     connection = self.engine.connect()
                     connection.close()
