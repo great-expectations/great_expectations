@@ -6,6 +6,7 @@ from dateutil.parser import parse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
+from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -306,8 +307,9 @@ class ActionListValidationOperator(ValidationOperator):
 
         run_results = {}
 
+        async_executor = AsyncExecutor(concurrency_enabled=len(assets_to_validate) > 1)
+        batch_and_async_result_tuples = []
         for item in assets_to_validate:
-            run_result_obj = {}
             batch = self._build_batch_from_item(item)
 
             if hasattr(batch, "active_batch_id"):
@@ -315,6 +317,21 @@ class ActionListValidationOperator(ValidationOperator):
             else:
                 batch_identifier = batch.batch_id
 
+            batch_and_async_result_tuples.append(
+                (
+                    batch,
+                    async_executor.submit(
+                        batch.validate,
+                        run_id=run_id,
+                        result_format=result_format
+                        if result_format
+                        else self.result_format,
+                        evaluation_parameters=evaluation_parameters,
+                    ),
+                )
+            )
+
+        for batch, async_batch_validation_result in batch_and_async_result_tuples:
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
@@ -323,21 +340,18 @@ class ActionListValidationOperator(ValidationOperator):
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )
-            batch_validation_result = batch.validate(
-                run_id=run_id,
-                result_format=result_format if result_format else self.result_format,
-                evaluation_parameters=evaluation_parameters,
-            )
-            run_result_obj["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(
                 batch,
                 expectation_suite_identifier,
                 batch._expectation_suite,
-                batch_validation_result,
+                async_batch_validation_result.result(),
                 run_id,
             )
 
-            run_result_obj["actions_results"] = batch_actions_results
+            run_result_obj = {
+                "validation_result": async_batch_validation_result.result(),
+                "actions_results": batch_actions_results,
+            }
             run_results[validation_result_id] = run_result_obj
 
         return ValidationOperatorResult(

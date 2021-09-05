@@ -266,7 +266,7 @@ class Checkpoint:
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
-        async_executor = AsyncExecutor(concurrency_enabled=True)
+        async_executor = AsyncExecutor(concurrency_enabled=len(validations) > 1)
         async_val_op_run_results: List[AsyncResult[ValidationOperatorResult]] = []
         for idx, validation_dict in enumerate(validations):
             try:
