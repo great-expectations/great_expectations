@@ -1,27 +1,21 @@
+import logging
 from typing import List
 
+import pandas as pd
 import pytest
 
-import pandas as pd
-
-import logging
-
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    InMemoryStoreBackendDefaults,
-)
-from great_expectations.data_context import (
-    BaseDataContext,
-)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.batch import (
-    RuntimeBatchRequest,
+from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.validator.validator import Validator
 
@@ -51,7 +45,10 @@ def in_memory_runtime_context():
                 "data_connectors": {
                     "runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": ["id_key_0", "id_key_1",],
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
                     }
                 },
             },
@@ -65,7 +62,10 @@ def in_memory_runtime_context():
                 "data_connectors": {
                     "runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": ["id_key_0", "id_key_1", ],
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
                     }
                 },
             },
@@ -110,7 +110,9 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     }
     expectation_meta: dict = {"Notes": "Some notes"}
 
-    expectation_arguments_without_meta: dict = dict(**runtime_environment_arguments, **expectation_arguments)
+    expectation_arguments_without_meta: dict = dict(
+        **runtime_environment_arguments, **expectation_arguments
+    )
 
     expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
@@ -141,24 +143,40 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
 
     # Test calling "validator.validate()" explicitly.
 
-    validator_validation: ExpectationSuiteValidationResult = validator.validate(**runtime_environment_arguments)
+    validator_validation: ExpectationSuiteValidationResult = validator.validate(
+        **runtime_environment_arguments
+    )
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 1
 
     result: ExpectationValidationResult = results[0]
-    assert ("exception_traceback" not in result.exception_info) or not result.exception_info["exception_traceback"]
-    assert ("exception_message" not in result.exception_info) or not result.exception_info["exception_message"]
+    assert (
+        "exception_traceback" not in result.exception_info
+    ) or not result.exception_info["exception_traceback"]
+    assert (
+        "exception_message" not in result.exception_info
+    ) or not result.exception_info["exception_message"]
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(**expectation_arguments_without_meta, **expectation_meta)
+    expectation_parameters: dict = dict(
+        **expectation_arguments_without_meta, **expectation_meta
+    )
 
-    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(**expectation_parameters)
-    assert ("exception_traceback" not in result.exception_info) or not result.exception_info["exception_traceback"]
-    assert ("exception_message" not in result.exception_info) or not result.exception_info["exception_message"]
+    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+        **expectation_parameters
+    )
+    assert (
+        "exception_traceback" not in result.exception_info
+    ) or not result.exception_info["exception_traceback"]
+    assert (
+        "exception_message" not in result.exception_info
+    ) or not result.exception_info["exception_message"]
 
 
-def test_catch_exceptions_exception_occurred_catch_exceptions_false(in_memory_runtime_context, test_spark_df):
+def test_catch_exceptions_exception_occurred_catch_exceptions_false(
+    in_memory_runtime_context, test_spark_df
+):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: str = "SUMMARY"
     runtime_environment_arguments = {
@@ -172,7 +190,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(in_memory_ru
     }
     expectation_meta: dict = {"Notes": "Some notes"}
 
-    expectation_arguments_without_meta: dict = dict(**runtime_environment_arguments, **expectation_arguments)
+    expectation_arguments_without_meta: dict = dict(
+        **runtime_environment_arguments, **expectation_arguments
+    )
 
     expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
@@ -201,26 +221,36 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(in_memory_ru
         expectation_suite=suite,
     )
 
-    expected_exception_message: str = 'Error: The column "unknown_column" in BatchData does not exist.'
+    expected_exception_message: str = (
+        'Error: The column "unknown_column" in BatchData does not exist.'
+    )
 
     # Test calling "validator.validate()" explicitly.
 
     with pytest.raises(ge_exceptions.ExecutionEngineError) as e:
         # noinspection PyUnusedLocal
-        validator_validation: ExpectationSuiteValidationResult = validator.validate(**runtime_environment_arguments)
+        validator_validation: ExpectationSuiteValidationResult = validator.validate(
+            **runtime_environment_arguments
+        )
     assert e.value.message == expected_exception_message
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(**expectation_arguments_without_meta, **expectation_meta)
+    expectation_parameters: dict = dict(
+        **expectation_arguments_without_meta, **expectation_meta
+    )
 
     with pytest.raises(ge_exceptions.ExecutionEngineError) as e:
         # noinspection PyUnusedLocal
-        result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(**expectation_parameters)
+        result: ExpectationValidationResult = (
+            validator.expect_column_values_to_not_be_null(**expectation_parameters)
+        )
     assert e.value.message == expected_exception_message
 
 
-def test_catch_exceptions_exception_occurred_catch_exceptions_true(in_memory_runtime_context, test_spark_df):
+def test_catch_exceptions_exception_occurred_catch_exceptions_true(
+    in_memory_runtime_context, test_spark_df
+):
     catch_exceptions: bool = True  # expect exceptions to be caught
     result_format: str = "SUMMARY"
     runtime_environment_arguments = {
@@ -234,7 +264,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(in_memory_run
     }
     expectation_meta: dict = {"Notes": "Some notes"}
 
-    expectation_arguments_without_meta: dict = dict(**runtime_environment_arguments, **expectation_arguments)
+    expectation_arguments_without_meta: dict = dict(
+        **runtime_environment_arguments, **expectation_arguments
+    )
 
     expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
@@ -263,11 +295,15 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(in_memory_run
         expectation_suite=suite,
     )
 
-    expected_exception_message: str = 'Error: The column "unknown_column" in BatchData does not exist.'
+    expected_exception_message: str = (
+        'Error: The column "unknown_column" in BatchData does not exist.'
+    )
 
     # Test calling "validator.validate()" explicitly.
 
-    validator_validation: ExpectationSuiteValidationResult = validator.validate(**runtime_environment_arguments)
+    validator_validation: ExpectationSuiteValidationResult = validator.validate(
+        **runtime_environment_arguments
+    )
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 1
 
@@ -278,9 +314,13 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(in_memory_run
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(**expectation_arguments_without_meta, **expectation_meta)
+    expectation_parameters: dict = dict(
+        **expectation_arguments_without_meta, **expectation_meta
+    )
 
-    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(**expectation_parameters)
+    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+        **expectation_parameters
+    )
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
