@@ -12,6 +12,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
+from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
@@ -257,7 +258,6 @@ class Checkpoint:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" does not contain any validations.'
             )
-        run_results = {}
 
         if run_name is None and run_name_template is not None:
             run_name: str = get_datetime_string_from_strftime_format(
@@ -266,6 +266,8 @@ class Checkpoint:
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
+        async_executor = AsyncExecutor(concurrency_enabled=True)
+        async_val_op_run_results: List[AsyncResult[ValidationOperatorResult]] = []
         for idx, validation_dict in enumerate(validations):
             try:
                 substituted_validation_dict: dict = get_substituted_validation_dict(
@@ -292,8 +294,9 @@ class Checkpoint:
                         name=f"{self.name}-checkpoint-validation[{idx}]",
                     )
                 )
-                val_op_run_result: ValidationOperatorResult = (
-                    action_list_validation_operator.run(
+                async_val_op_run_results.append(
+                    async_executor.submit(
+                        action_list_validation_operator.run,
                         assets_to_validate=[validator],
                         run_id=run_id,
                         evaluation_parameters=substituted_validation_dict.get(
@@ -302,7 +305,6 @@ class Checkpoint:
                         result_format=result_format,
                     )
                 )
-                run_results.update(val_op_run_result.run_results)
             except (
                 ge_exceptions.CheckpointError,
                 ge_exceptions.ExecutionEngineError,
@@ -310,6 +312,11 @@ class Checkpoint:
                 raise ge_exceptions.CheckpointError(
                     f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
                 )
+
+        run_results = {}
+        for async_val_op_run in async_val_op_run_results:
+            run_results.update(async_val_op_run.result().run_results)
+
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
         )
