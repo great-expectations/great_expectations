@@ -51,12 +51,17 @@ def test_taxi_trips_benchmark(
     consider adding a new benchmark (or at least rename this benchmark to provide clarity that results are not directly
     comparable because of the data change).
     """
-
     _skip_if_bigquery_performance_tests_not_enabled(pytestconfig)
+
+    html_dir = (
+        os.environ.get("GE_BENCHMARK_HTML_DIRECTORY", tmpdir.strpath)
+        if write_data_docs
+        else None
+    )
 
     checkpoint = taxi_benchmark_util.create_checkpoint(
         number_of_tables=number_of_tables,
-        html_dir=tmpdir.strpath if write_data_docs else None,
+        html_dir=html_dir,
         backend_api=backend_api,
     )
     if os.environ.get("GE_PROFILE_FILE_PATH"):
@@ -77,8 +82,9 @@ def test_taxi_trips_benchmark(
     # Do some basic sanity checks.
     assert result.success, result
     assert len(result.run_results) == number_of_tables
-    html_file_paths = list(Path(tmpdir).glob("validations/**/*.html"))
-    assert len(html_file_paths) == (number_of_tables if write_data_docs else 0)
+    if write_data_docs:
+        html_file_paths = list(Path(html_dir).glob("validations/**/*.html"))
+        assert len(html_file_paths) == number_of_tables
 
     # Check that run results contain the right number of suites, assets, and table names.
     assert (
