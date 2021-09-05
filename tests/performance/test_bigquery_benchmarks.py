@@ -7,6 +7,7 @@ Test performance using bigquery.
 import cProfile
 import os
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 
 import _pytest.config
@@ -18,6 +19,13 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from tests.performance import taxi_benchmark_util
 
 
+@pytest.mark.parametrize(
+    "backend_api",
+    [
+        "V2",  # Batch Kwargs API
+        "V3",  # Batch Request API
+    ],
+)
 @pytest.mark.parametrize("write_data_docs", [False, True])
 @pytest.mark.parametrize("number_of_tables", [1, 2, 4, 8, 16, 100])
 def test_taxi_trips_benchmark(
@@ -26,6 +34,7 @@ def test_taxi_trips_benchmark(
     pytestconfig: _pytest.config.Config,
     number_of_tables: int,
     write_data_docs: bool,
+    backend_api: str,
 ):
     """Benchmark performance with a variety of expectations using NYC Taxi data (yellow_trip_data_sample_2019-01.csv)
     found in the tests/test_sets/taxi_yellow_trip_data_samples directory, and used extensively in unittest and
@@ -48,6 +57,7 @@ def test_taxi_trips_benchmark(
     checkpoint = taxi_benchmark_util.create_checkpoint(
         number_of_tables=number_of_tables,
         html_dir=tmpdir.strpath if write_data_docs else None,
+        backend_api=backend_api,
     )
     if os.environ.get("GE_PROFILE_FILE_PATH"):
         cProfile.runctx(
@@ -80,11 +90,12 @@ def test_taxi_trips_benchmark(
         )
         == number_of_tables
     )
-    for field in ["data_asset_name", "table_name"]:
+    batch_key = "batch_spec" if backend_api == "V3" else "batch_kwargs"
+    for field in ["data_asset_name", "table_name" if backend_api == "V3" else "table"]:
         assert (
             len(
                 {
-                    run_result["validation_result"]["meta"]["batch_spec"][field]
+                    run_result["validation_result"]["meta"][batch_key][field]
                     for run_result in result.run_results.values()
                 }
             )
@@ -101,12 +112,29 @@ def test_taxi_trips_benchmark(
         ]
         assert len(expected_results) == len(actual_results)
         for expected_result, actual_result in zip(expected_results, actual_results):
-            # Assert individual keys so that test doesn't fail if new keys are added.
-            # Note: if this proves too fragile, consider enhancing logic to ignore extra nested keys and/or only check
-            # specific keys.
-            for expected_key in expected_result.keys():
-                assert expected_key in actual_result
-                assert expected_result[expected_key] == actual_result[expected_key]
+            description_for_error_reporting = (
+                f'{expected_result["expectation_config"]["expectation_type"]} result'
+            )
+            _recursively_assert_actual_result_matches_expected_result_keys(
+                expected_result, actual_result, description_for_error_reporting
+            )
+
+
+def _recursively_assert_actual_result_matches_expected_result_keys(
+    expected, actual, description_for_error_reporting
+):
+    """Only assert on keys that exist in the expected result, so that test is less fragile and doesn't incorrectly fail
+    when new keys are added."""
+    if isinstance(expected, Mapping):
+        for expected_key in expected.keys():
+            assert expected_key in actual.keys(), description_for_error_reporting
+            _recursively_assert_actual_result_matches_expected_result_keys(
+                expected[expected_key],
+                actual[expected_key],
+                description_for_error_reporting + f'["{expected_key}"]',
+            )
+    else:
+        assert expected == actual, description_for_error_reporting
 
 
 def _skip_if_bigquery_performance_tests_not_enabled(
