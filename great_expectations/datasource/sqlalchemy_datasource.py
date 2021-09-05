@@ -239,30 +239,38 @@ class SqlAlchemyDatasource(LegacyDatasource):
             if "engine" in kwargs:
                 self.engine = kwargs.pop("engine")
 
-            # if a connection string or url was provided, use that
-            elif "connection_string" in kwargs:
-                connection_string = kwargs.pop("connection_string")
-                self.engine = create_engine(connection_string, **kwargs)
-                connection = self.engine.connect()
-                connection.close()
-            elif "url" in credentials:
-                url = credentials.pop("url")
-                self.drivername = urlparse(url).scheme
-                self.engine = create_engine(url, **kwargs)
-                connection = self.engine.connect()
-                connection.close()
-
-            # Otherwise, connect using remaining kwargs
             else:
-                (
-                    options,
-                    create_engine_kwargs,
-                    drivername,
-                ) = self._get_sqlalchemy_connection_options(**kwargs)
-                self.drivername = drivername
-                self.engine = create_engine(options, **create_engine_kwargs)
-                connection = self.engine.connect()
-                connection.close()
+                # Default to an unlimited pool size to prevent a concurrency bottleneck.
+                pool_size = kwargs.pop("pool_size", 0)
+
+                # if a connection string or url was provided, use that
+                if "connection_string" in kwargs:
+                    connection_string = kwargs.pop("connection_string")
+                    self.engine = create_engine(
+                        connection_string, pool_size=pool_size, **kwargs
+                    )
+                    connection = self.engine.connect()
+                    connection.close()
+                elif "url" in credentials:
+                    url = credentials.pop("url")
+                    self.drivername = urlparse(url).scheme
+                    self.engine = create_engine(url, pool_size=pool_size, **kwargs)
+                    connection = self.engine.connect()
+                    connection.close()
+
+                # Otherwise, connect using remaining kwargs
+                else:
+                    (
+                        options,
+                        create_engine_kwargs,
+                        drivername,
+                    ) = self._get_sqlalchemy_connection_options(**kwargs)
+                    self.drivername = drivername
+                    self.engine = create_engine(
+                        options, pool_size=pool_size, **create_engine_kwargs
+                    )
+                    connection = self.engine.connect()
+                    connection.close()
 
             # since we switched to lazy loading of Datasources when we initialise a DataContext,
             # the dialect of SQLAlchemy Datasources cannot be obtained reliably when we send
