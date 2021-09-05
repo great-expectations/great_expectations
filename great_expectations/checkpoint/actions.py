@@ -43,7 +43,7 @@ class ValidationAction:
     def run(
         self,
         validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         **kwargs,
     ):
@@ -768,7 +768,7 @@ class StoreEvaluationParametersAction(ValidationAction):
     def _run(
         self,
         validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         payload=None,
     ):
@@ -786,7 +786,7 @@ class StoreEvaluationParametersAction(ValidationAction):
                 )
             )
 
-        self.data_context.store_evaluation_parameters(validation_result_suite)
+        self.data_context.store_evaluation_parameters(validation_result_suite_identifier, validation_result_suite)
 
 
 class StoreMetricsAction(ValidationAction):

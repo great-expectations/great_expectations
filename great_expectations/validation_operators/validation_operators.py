@@ -3,11 +3,14 @@ import warnings
 from collections import OrderedDict
 
 from dateutil.parser import parse
+from typing import Union
+
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
+from great_expectations.core.batch import Batch
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -349,8 +352,8 @@ class ActionListValidationOperator(ValidationOperator):
 
     def _run_actions(
         self,
-        batch,
-        expectation_suite_identifier,
+        batch: Union[Batch, DataAsset],
+        expectation_suite_identifier: ExpectationSuiteIdentifier,
         expectation_suite,
         batch_validation_result,
         run_id,

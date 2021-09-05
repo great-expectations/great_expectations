@@ -133,7 +133,7 @@ class ValidationResultIdentifier(DataContextKey):
         self._batch_identifier = batch_identifier
 
     @property
-    def expectation_suite_identifier(self):
+    def expectation_suite_identifier(self) -> ExpectationSuiteIdentifier:
         return self._expectation_suite_identifier
 
     @property
