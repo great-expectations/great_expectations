@@ -786,7 +786,7 @@ class StoreEvaluationParametersAction(ValidationAction):
                 )
             )
 
-        self.data_context.store_evaluation_parameters(validation_result_suite_identifier, validation_result_suite)
+        self.data_context.store_evaluation_parameters(validation_result_suite)
 
 
 class StoreMetricsAction(ValidationAction):

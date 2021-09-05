@@ -2273,7 +2273,8 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies(self.get_expectation_suite(validation_results.meta["expectation_suite_name"]))
+            expectation_suite_name = validation_results.meta["expectation_suite_name"]
+            self._compile_evaluation_parameter_dependencies(self.get_expectation_suite(expectation_suite_name))
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
