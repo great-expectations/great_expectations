@@ -469,6 +469,8 @@ class Validator:
         if metrics is None:
             metrics = {}
 
+        # Since metrics can serve multiple expectations in a suite and are resolved together through validation graph,
+        # an exception occurring as part of resolving the combined validation graph impacts all expectations in suite.
         try:
             metrics = self.resolve_validation_graph(
                 graph, metrics, runtime_configuration
