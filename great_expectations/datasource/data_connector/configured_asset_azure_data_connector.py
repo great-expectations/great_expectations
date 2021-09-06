@@ -1,15 +1,14 @@
 import logging
 import os
 import re
-from typing import Dict, List, Optional
-
-import great_expectations.exceptions as ge_exceptions
+from typing import List, Optional
 
 try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
     BlobServiceClient = None
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector import (
@@ -17,7 +16,11 @@ from great_expectations.datasource.data_connector import (
 )
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import list_azure_keys
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -153,13 +156,27 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return path_list
 
-    def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Asset] = None
     ) -> str:
-        # data_asset_name isn't used in this method.
+        # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return os.path.join(
-            f"{self._account_name}.blob.core.windows.net", self._container, path
-        )
+        # Pandas and Spark execution engines require separate paths for compatibility with Azure's API.
+        full_path: str
+        if isinstance(self.execution_engine, PandasExecutionEngine):
+            full_path = os.path.join(
+                f"{self._account_name}.blob.core.windows.net", self._container, path
+            )
+        elif isinstance(self.execution_engine, SparkDFExecutionEngine):
+            full_path = os.path.join(
+                f"{self._container}@{self._account_name}.blob.core.windows.net", path
+            )
+            full_path = f"wasbs://{full_path}"
+        else:
+            raise ge_exceptions.DataConnectorError(
+                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
+"{self.__class__.__name__}".
+"""
+            )
+
+        return full_path

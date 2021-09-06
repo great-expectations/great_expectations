@@ -65,41 +65,78 @@ def test_sniff_s3_compression(url, expected):
     assert sniff_s3_compression(S3Url(url)) == expected
 
 
-def test_azure_url():
+def test_azure_pandas_url():
     url = AzureUrl("my_account.blob.core.windows.net/my_container/my_blob")
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "my_blob"
 
 
-def test_azure_url_with_https():
+def test_azure_pandas_url_with_https():
     url = AzureUrl("https://my_account.blob.core.windows.net/my_container/my_blob")
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "my_blob"
 
 
-def test_azure_url_with_nested_blob():
+def test_azure_pandas_url_with_nested_blob():
     url = AzureUrl("my_account.blob.core.windows.net/my_container/a/b/c/d/e/my_blob")
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "a/b/c/d/e/my_blob"
 
 
-def test_azure_url_with_invalid_url():
-    with pytest.raises(AssertionError):
-        AzureUrl("my_bucket/my_blob")
-
-
-def test_azure_url_with_special_chars():
+def test_azure_pandas_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
     url = AzureUrl(
         "my_account.blob.core.windows.net/my-container_1.0/my-blob_`~!@#$%^&*()=+"
     )
     assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
     assert url.container == "my-container_1.0"
     assert url.blob == "my-blob_`~!@#$%^&*()=+"
+
+
+def test_azure_spark_url():
+    url = AzureUrl("my_container@my_account.blob.core.windows.net/my_blob")
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my_container"
+    assert url.blob == "my_blob"
+
+
+def test_azure_spark_url_with_wasbs():
+    url = AzureUrl("wasbs://my_container@my_account.blob.core.windows.net/my_blob")
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my_container"
+    assert url.blob == "my_blob"
+
+
+def test_azure_spark_url_with_nested_blob():
+    url = AzureUrl("my_container@my_account.blob.core.windows.net/a/b/c/d/e/my_blob")
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my_container"
+    assert url.blob == "a/b/c/d/e/my_blob"
+
+
+def test_azure_spark_url_with_special_chars():
+    # Note that `url` conforms with the naming restrictions set by the Azure API
+    # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
+    url = AzureUrl(
+        "my-container_1.0@my_account.blob.core.windows.net/my-blob_`~!@#$%^&*()=+"
+    )
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my-container_1.0"
+    assert url.blob == "my-blob_`~!@#$%^&*()=+"
+
+
+def test_azure_url_with_invalid_url():
+    with pytest.raises(AssertionError):
+        AzureUrl("my_bucket/my_blob")
 
 
 def test_gcs_url():
