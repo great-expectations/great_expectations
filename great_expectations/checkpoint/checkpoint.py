@@ -276,20 +276,13 @@ class Checkpoint:
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
-                action_list: list = substituted_validation_dict.get("action_list")
 
                 validator: Validator = self.data_context.get_validator(
                     batch_request=batch_request,
                     expectation_suite_name=expectation_suite_name,
                 )
-                action_list_validation_operator: ActionListValidationOperator = (
-                    ActionListValidationOperator(
-                        data_context=self.data_context,
-                        action_list=action_list,
-                        result_format=result_format,
-                        name=f"{self.name}-checkpoint-validation[{idx}]",
-                    )
-                )
+
+                action_list: list = substituted_validation_dict.get("action_list")
                 runtime_configuration_validation = substituted_validation_dict.get(
                     "runtime_configuration", {}
                 )
@@ -299,13 +292,22 @@ class Checkpoint:
                 result_format_validation = runtime_configuration_validation.get(
                     "result_format"
                 )
-                result_format_validation = result_format or result_format_validation
+                result_format = result_format or result_format_validation
 
-                if result_format_validation is None:
-                    result_format_validation = {"result_format": "SUMMARY"}
+                if result_format is None:
+                    result_format = {"result_format": "SUMMARY"}
+
+                action_list_validation_operator: ActionListValidationOperator = (
+                    ActionListValidationOperator(
+                        data_context=self.data_context,
+                        action_list=action_list,
+                        result_format=result_format,
+                        name=f"{self.name}-checkpoint-validation[{idx}]",
+                    )
+                )
 
                 operator_run_kwargs = {
-                    "result_format": result_format_validation,
+                    "result_format": result_format,
                 }
 
                 if catch_exceptions_validation is not None:
