@@ -4,8 +4,8 @@
 
 set -eu
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 BENCHMARK_JSON_FILE_NAME_PREFIX" >&2
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $0 [BENCHMARK_JSON_FILE_NAME_PREFIX] [OPTIONAL_PYTEST_ARGS]" >&2
   exit 1
 fi
 
@@ -20,6 +20,7 @@ do
     --benchmark-json=${benchmark_json} \
     --no-spark --no-postgresql --bigquery --performance-tests \
     -q -p no:warnings \
+    "${@:2}" \
     2> /dev/null
   set +x
   # Remove some unnecessary personally identifiable fields.
