@@ -1063,6 +1063,42 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class ConcurrencyConfig(DictDot):
+    """WARNING: This class is experimental."""
+
+    def __init__(self, enabled=False):
+        self._enabled = enabled
+
+    @property
+    def enabled(self):
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, enabled):
+        # todo(jdimatteo) remove?
+        if not isinstance(enabled, bool):
+            raise ValueError("concurrency enabled property must be boolean")
+        self._enabled = enabled
+
+
+class ConcurrencyConfigSchema(Schema):
+    """WARNING: This class is experimental."""
+
+    enabled = fields.Boolean(default=False)
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_concurrency_config(self, data, **kwargs):
+        # todo(jdimatteo) can I delete this?
+        return ConcurrencyConfig(**data)
+
+    # noinspection PyUnusedLocal
+    @post_dump()
+    def filter_implicit(self, data, **kwargs):
+        # todo(jdimatteo) can I delete this?
+        return data
+
+
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
@@ -1089,6 +1125,7 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    concurrency = fields.Nested(ConcurrencyConfigSchema)
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
@@ -1694,6 +1731,7 @@ class DataContextConfig(BaseYamlConfig):
         anonymous_usage_statistics=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
+        concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1740,6 +1778,11 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
+        if concurrency is None:
+            concurrency = ConcurrencyConfig()
+        elif isinstance(concurrency, dict):
+            concurrency = ConcurrencyConfig(**concurrency)
+        self.concurrency: ConcurrencyConfig = concurrency
 
         super().__init__(commented_map=commented_map)
 
@@ -2179,3 +2222,4 @@ sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
+concurrencyConfigSchema = ConcurrencyConfigSchema()

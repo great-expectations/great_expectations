@@ -254,6 +254,7 @@ def _create_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
         data_docs_sites=data_docs_sites,
         anonymous_usage_statistics={"enabled": False},
+        concurrency={"enabled": True},
     )
 
     context = BaseDataContext(project_config=data_context_config)

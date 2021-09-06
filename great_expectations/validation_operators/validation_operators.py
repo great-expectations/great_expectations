@@ -307,7 +307,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         run_results = {}
 
-        async_executor = AsyncExecutor(concurrency_enabled=len(assets_to_validate) > 1)
+        async_executor = AsyncExecutor(self.data_context.concurrency)
         batch_and_async_result_tuples = []
         for item in assets_to_validate:
             batch = self._build_batch_from_item(item)
