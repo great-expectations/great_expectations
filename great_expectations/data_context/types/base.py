@@ -1066,7 +1066,7 @@ class NotebooksConfigSchema(Schema):
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
-    def __init__(self, enabled=False):
+    def __init__(self, enabled: Optional[bool] = False):
         self._enabled = enabled
 
     @property
@@ -1079,6 +1079,22 @@ class ConcurrencyConfig(DictDot):
         if not isinstance(enabled, bool):
             raise ValueError("concurrency enabled property must be boolean")
         self._enabled = enabled
+
+    def add_sqlalchemy_create_engine_parameters(self, parameters):
+        ###
+        # NOTE: 20210906 - jdimatteo: This method is only called with the V2 API at the time of this writing, and is not
+        # hooked up with the V3 API. This logic may need to be refactored in order to work with the V3 API.
+
+        if not self._enabled:
+            return
+
+        # Set pool_size and max_overflow to unlimited prevent a concurrency bottleneck.
+        if "pool_size" not in parameters:
+            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.pool_size
+            parameters["pool_size"] = 0
+        if "max_overflow" not in parameters:
+            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.max_overflow
+            parameters["max_overflow"] = -1
 
 
 class ConcurrencyConfigSchema(Schema):

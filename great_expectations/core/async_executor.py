@@ -37,11 +37,28 @@ class AsyncExecutor:
     WARNING: This class is experimental.
     """
 
-    def __init__(self, concurrency_config: ConcurrencyConfig):
-        self._concurrency_enabled = concurrency_config.enabled
+    def __init__(
+        self,
+        concurrency_config: ConcurrencyConfig,
+        max_workers_if_concurrency_enabled: int,
+    ):
+        # Only enable concurrency if it is enabled in the config AND there is more than 1 max worker specified.
+        self._concurrency_enabled = (
+            concurrency_config.enabled and max_workers_if_concurrency_enabled > 1
+        )
 
         self._thread_pool_executor = (
-            ThreadPoolExecutor(max_workers=100) if self._concurrency_enabled else None
+            ThreadPoolExecutor(
+                max_workers=min(
+                    # Use no more than 100 threads, because most databases won't benefit from more than 100 concurrent
+                    # queries (e.g. see the BigQuery concurrent rate limit of 100 documented at
+                    # https://cloud.google.com/bigquery/quotas#query_jobs).
+                    100,
+                    max_workers_if_concurrency_enabled,
+                )
+            )
+            if self._concurrency_enabled
+            else None
         )
 
     @property
