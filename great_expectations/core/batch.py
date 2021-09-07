@@ -5,6 +5,7 @@ import json
 from typing import Dict, Optional, Union
 
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import filter_properties_dict
@@ -122,12 +123,14 @@ class BatchDefinition(SerializableDictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
 
     def get_json_dict(self) -> dict:
-        return {
-            "datasource_name": self.datasource_name,
-            "data_connector_name": self.data_connector_name,
-            "data_asset_name": self.data_asset_name,
-            "batch_identifiers": self.batch_identifiers,
-        }
+        return convert_to_json_serializable(
+            {
+                "datasource_name": self.datasource_name,
+                "data_connector_name": self.data_connector_name,
+                "data_asset_name": self.data_asset_name,
+                "batch_identifiers": self.batch_identifiers,
+            }
+        )
 
     @property
     def id(self) -> str:

@@ -1,9 +1,10 @@
 import os
+from typing import List
 
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
@@ -79,3 +80,9 @@ assert set(
         "configured_data_connector_name"
     ]
 ) == {"taxi_data"}
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000

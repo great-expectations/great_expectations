@@ -1,20 +1,25 @@
 stages:
-  - stage: cloud_db_integration
+  - stage: cloud_db_integration_and_performance_tests
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: bigquery_expectations
+      - job: bigquery_expectations_and_performance_tests
         timeoutInMinutes: 0 # Maximize the time that pipelines remain open (6 hours currently)
         variables:
           python.version: '3.8'
 
         strategy:
           matrix:
+            performance:
+              test_script: 'tests/performance/test_bigquery_benchmarks.py'
+              extra_args: '--bigquery --performance-tests --no-spark --no-postgresql --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True] '
             expectations_cfe:
               test_script: 'tests/test_definitions/test_expectations_cfe.py'
+              extra_args: ''
             expectations:
               test_script: 'tests/test_definitions/test_expectations.py'
+              extra_args: ''
           maxParallel: 1
 
         steps:
@@ -27,7 +32,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install -r requirements-dev.txt
+              pip install -r requirements-dev.txt --constraint constraints-dev.txt
 
             displayName: 'Install dependencies'
 
@@ -39,11 +44,30 @@ stages:
               retryCount: '2'
 
           - script: |
-              pip install pytest pytest-azurepipelines
-              pytest -v --no-spark --no-postgresql --bigquery --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics $(test_script)
+              pip install pytest-azurepipelines
+              pip freeze > pip-freeze.txt
+              mkdir -p junit
+              pytest -v $(test_script) \
+                $(extra_args) \
+                --bigquery \
+                --junitxml=junit/test-results.xml \
+                --no-spark --no-postgresql --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+                --ignore=tests/cli --ignore=tests/integration/usage_statistics
 
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
               GE_TEST_BIGQUERY_PROJECT: $(GE_TEST_BIGQUERY_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+
+          - task: PublishTestResults@2
+            inputs:
+              searchFolder: junit
+              testResultsFiles: test-results.xml
+
+          - publish: junit/benchmark.json
+            artifact: BenchmarkResult
+
+          # The pip freeze output could be helpful to reproduce performance test results.
+          - publish: pip-freeze.txt
+            artifact: PipFreeze

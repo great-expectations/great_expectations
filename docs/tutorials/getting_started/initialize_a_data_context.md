@@ -2,8 +2,6 @@
 title: Initialize a Data Context
 ---
 
-![minimap](../../images/minimap.png)
-
 :::note Prerequisites
 - You need a Python environment where you can install Great Expectations and other dependencies, e.g. a virtual environment.
 :::

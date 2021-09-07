@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -266,6 +266,7 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
         },
         "execution_engine": {
             "caching": True,
+            "azure_options": {},
             "class_name": "SparkDFExecutionEngine",
             "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
             "persist": True,

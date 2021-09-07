@@ -117,6 +117,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run integration tests for docs",
     )
+    parser.addoption(
+        "--performance-tests",
+        action="store_true",
+        help="If set, run performance tests (which might also require additional arguments like --bigquery)",
+    )
 
 
 def build_test_backends_list(metafunc):
@@ -4518,6 +4523,34 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_spark_engine_batch_spec_passthrough(
+    empty_data_context, spark_session
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+            batch_spec_passthrough:
+                reader_method: csv
+                reader_options:
+                    header: True
         """,
     )
     context.add_datasource(
