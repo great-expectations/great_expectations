@@ -2160,7 +2160,7 @@ class BaseDataContext:
                 "expectation_suite %s not found" % expectation_suite_name
             )
 
-    def list_expectation_suite_names(self):
+    def list_expectation_suite_names(self) -> List[str]:
         """Lists the available expectation suite names"""
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()
@@ -2273,8 +2273,14 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
+            # get the expectation suite if it exists, otherwise None
             expectation_suite_name = validation_results.meta["expectation_suite_name"]
-            self._compile_evaluation_parameter_dependencies(self.get_expectation_suite(expectation_suite_name))
+            if expectation_suite_name in self.list_expectation_suite_names():
+                expectation_suite = self.get_expectation_suite(expectation_suite_name)
+            else:
+                expectation_suite = None
+
+            self._compile_evaluation_parameter_dependencies(expectation_suite)
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -2306,9 +2312,17 @@ class BaseDataContext:
     def _compile_evaluation_parameter_dependencies(self, expectation_suite):
         self._evaluation_parameter_dependencies = {}
 
-        dependencies = expectation_suite.get_evaluation_parameter_dependencies()
-        if len(dependencies) > 0:
-            nested_update(self._evaluation_parameter_dependencies, dependencies)
+        # only if we don't have an expectation suite do we do a key scan
+        if(expectation_suite is None):
+            for key in self.expectations_store.list_keys():
+                expectation_suite = self.expectations_store.get(key)
+                if not expectation_suite:
+                    continue
+
+        if(expectation_suite):
+            dependencies = expectation_suite.get_evaluation_parameter_dependencies()
+            if len(dependencies) > 0:
+                nested_update(self._evaluation_parameter_dependencies, dependencies)
 
         self._evaluation_parameter_dependencies_compiled = True
 
@@ -2448,7 +2462,7 @@ class BaseDataContext:
                 if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder = instantiate_class_from_config(
+                    site_builder: SiteBuilder = instantiate_class_from_config(
                         config=complete_site_config,
                         runtime_environment={
                             "data_context": self,

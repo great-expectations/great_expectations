@@ -12,6 +12,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
@@ -78,7 +79,7 @@ def in_memory_param_store(request, test_backends):
 
 
 def test_evaluation_parameter_store_methods(
-    data_context_parameterized_expectation_suite,
+    data_context_parameterized_expectation_suite: DataContext,
 ):
     run_id = RunIdentifier(run_name="20191125T000000.000000Z")
     source_patient_data_results = ExpectationSuiteValidationResult(
