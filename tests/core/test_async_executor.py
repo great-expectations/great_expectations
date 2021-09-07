@@ -34,10 +34,21 @@ def test_data_context_concurrency_property():
 
 
 def test_async_executor_concurrency_enabled():
-    async_executor = AsyncExecutor(ConcurrencyConfig(enabled=True))
+    async_executor = AsyncExecutor(
+        ConcurrencyConfig(enabled=True), max_workers_if_concurrency_enabled=100
+    )
     assert async_executor.concurrency_enabled
 
 
 def test_async_executor_concurrency_disabled():
-    async_executor = AsyncExecutor(ConcurrencyConfig(enabled=False))
+    async_executor = AsyncExecutor(
+        ConcurrencyConfig(enabled=False), max_workers_if_concurrency_enabled=100
+    )
+    assert not async_executor.concurrency_enabled
+
+
+def test_async_executor_concurrency_disabled_because_max_workers():
+    async_executor = AsyncExecutor(
+        ConcurrencyConfig(enabled=True), max_workers_if_concurrency_enabled=1
+    )
     assert not async_executor.concurrency_enabled

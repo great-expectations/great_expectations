@@ -64,7 +64,7 @@ class AsyncExecutor:
         )
 
     @property
-    def concurrency_enabled(self):
+    def concurrency_enabled(self) -> bool:
         return self._concurrency_enabled
 
     def submit(self, fn, *args, **kwargs) -> AsyncResult:
