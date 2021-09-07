@@ -2602,7 +2602,8 @@ class BaseDataContext:
                         ] = site_builder.get_resource_url(only_if_exists=False)
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
-                            resource_identifiers, build_index=build_index and not self.ge_cloud_mode
+                            resource_identifiers,
+                            build_index=build_index and not self.ge_cloud_mode,
                         )
                         if index_page_resource_identifier_tuple:
                             index_page_locator_infos[
@@ -3955,7 +3956,6 @@ class DataContext(BaseDataContext):
             ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
         )
-
 
         missing_keys = []
         for key, val in ge_cloud_config_dict.items():
