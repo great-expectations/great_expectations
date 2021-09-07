@@ -326,16 +326,12 @@ def _add_checkpoint(
     elif backend_api == "V2":
         batches = [
             {
-                "expectation_suite_names": [
-                    suite_and_asset_name
-                ],  # todo(jdimatteo) really plural/list?
+                "expectation_suite_names": [suite_and_asset_name],
                 "batch_kwargs": {
                     "datasource": datasource_name,
                     "data_asset_name": suite_and_asset_name,
                     "table": suite_and_asset_name,
-                    "batch_spec_passthrough": {
-                        "create_temp_table": False
-                    },  # todo(jdimatteo) does this do anything?
+                    "batch_spec_passthrough": {"create_temp_table": False},
                 },
             }
             for suite_and_asset_name in suite_and_asset_names

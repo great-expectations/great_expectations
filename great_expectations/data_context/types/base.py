@@ -1073,13 +1073,6 @@ class ConcurrencyConfig(DictDot):
     def enabled(self):
         return self._enabled
 
-    @enabled.setter
-    def enabled(self, enabled):
-        # todo(jdimatteo) remove?
-        if not isinstance(enabled, bool):
-            raise ValueError("concurrency enabled property must be boolean")
-        self._enabled = enabled
-
     def add_sqlalchemy_create_engine_parameters(self, parameters):
         if not self._enabled:
             return
@@ -1097,18 +1090,6 @@ class ConcurrencyConfigSchema(Schema):
     """WARNING: This class is experimental."""
 
     enabled = fields.Boolean(default=False)
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_concurrency_config(self, data, **kwargs):
-        # todo(jdimatteo) can I delete this?
-        return ConcurrencyConfig(**data)
-
-    # noinspection PyUnusedLocal
-    @post_dump()
-    def filter_implicit(self, data, **kwargs):
-        # todo(jdimatteo) can I delete this?
-        return data
 
 
 class DataContextConfigSchema(Schema):

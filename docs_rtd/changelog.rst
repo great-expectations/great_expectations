@@ -9,7 +9,7 @@ develop
 -----------------
 * [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335)
 * [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable for datetimes (#3349)
-* [FEATURE] Add experimental multithreaded checkpoint speedup. (@jdimatteo)
+* [FEATURE] Experimental multithreaded checkpoint speedup (#3362)
 
 0.13.32
 -----------------
