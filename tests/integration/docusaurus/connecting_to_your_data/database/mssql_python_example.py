@@ -51,7 +51,7 @@ batch_request = RuntimeBatchRequest(
     datasource_name="my_mssql_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
-    runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
+    runtime_parameters={"query": "SELECT TOP 10 * from taxi_data"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
