@@ -920,7 +920,10 @@ def test_return_all_batch_definitions_basic_sorted(
 
     assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"] == 10
+    assert (
+        self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"]
+        == 10
+    )
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
@@ -1005,7 +1008,10 @@ def test_return_all_batch_definitions_returns_specified_partition(
     print(self_check_report["data_assets"])
     assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"] == 10
+    assert (
+        self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"]
+        == 10
+    )
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_request: BatchRequest = BatchRequest(
@@ -1119,7 +1125,10 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
     assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"] == 10
+    assert (
+        self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"]
+        == 10
+    )
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
@@ -1269,6 +1278,7 @@ def test_return_all_batch_definitions_too_many_sorters(
                 "module_name": "great_expectations.datasource.data_connector"
             },
         )
+
 
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
