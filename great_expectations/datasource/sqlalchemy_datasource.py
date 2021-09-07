@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import (
@@ -240,8 +241,12 @@ class SqlAlchemyDatasource(LegacyDatasource):
                 self.engine = kwargs.pop("engine")
 
             else:
-                # Add any set concurrency related parameters.
-                data_context.concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
+                concurrency = (
+                    data_context.concurrency
+                    if data_context is not None
+                    else ConcurrencyConfig()
+                )
+                concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
 
                 # if a connection string or url was provided, use that
                 if "connection_string" in kwargs:
