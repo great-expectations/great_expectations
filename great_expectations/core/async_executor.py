@@ -116,7 +116,7 @@ def patch_https_connection_pool():
     WARNING: This function is experimental.
     """
     ###
-    # NOTE: 20210907 - jdimatteo: The python requests pool size can bottle neck concurrency and result in errors
+    # NOTE: 20210907 - jdimatteo: The python requests pool size can bottleneck concurrency and result in warnings
     # like "WARNING  urllib3.connectionpool:connectionpool.py:304 Connection pool is full, discarding connection:
     # bigquery.googleapis.com". To remove this bottleneck, patch the https connection pool as described at
     # https://stackoverflow.com/a/22253656/1007353. After upgrading from the deprecated packages pybigquery and
