@@ -16,7 +16,10 @@ import pytest
 from pytest_benchmark.fixture import BenchmarkFixture
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core.async_executor import patch_https_connection_pool
 from tests.performance import taxi_benchmark_util
+
+patch_https_connection_pool()
 
 
 @pytest.mark.parametrize(
