@@ -46,6 +46,14 @@ docs_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -71,22 +79,31 @@ docs_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/yaml_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/python_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/yaml_example.py",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/python_example.py",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
-    # },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    # S3
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/yaml_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/python_example.py",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
