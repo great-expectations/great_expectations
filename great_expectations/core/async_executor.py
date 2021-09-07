@@ -62,6 +62,16 @@ class AsyncExecutor:
             else None
         )
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, ext, exv, trb):
+        self.shutdown()
+
+    def shutdown(self):
+        if self._thread_pool_executor is not None:
+            self._thread_pool_executor.shutdown()
+
     @property
     def execute_concurrently(self) -> bool:
         return self._execute_concurrently

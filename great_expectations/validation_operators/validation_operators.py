@@ -305,57 +305,55 @@ class ActionListValidationOperator(ValidationOperator):
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        run_results = {}
+        with AsyncExecutor(
+            self.data_context.concurrency, max_workers=len(assets_to_validate)
+        ) as async_executor:
+            batch_and_async_result_tuples = []
+            for item in assets_to_validate:
+                batch = self._build_batch_from_item(item)
 
-        async_executor = AsyncExecutor(
-            self.data_context.concurrency,
-            max_workers=len(assets_to_validate),
-        )
-        batch_and_async_result_tuples = []
-        for item in assets_to_validate:
-            batch = self._build_batch_from_item(item)
+                if hasattr(batch, "active_batch_id"):
+                    batch_identifier = batch.active_batch_id
+                else:
+                    batch_identifier = batch.batch_id
 
-            if hasattr(batch, "active_batch_id"):
-                batch_identifier = batch.active_batch_id
-            else:
-                batch_identifier = batch.batch_id
-
-            batch_and_async_result_tuples.append(
-                (
-                    batch,
-                    async_executor.submit(
-                        batch.validate,
-                        run_id=run_id,
-                        result_format=result_format
-                        if result_format
-                        else self.result_format,
-                        evaluation_parameters=evaluation_parameters,
-                    ),
+                batch_and_async_result_tuples.append(
+                    (
+                        batch,
+                        async_executor.submit(
+                            batch.validate,
+                            run_id=run_id,
+                            result_format=result_format
+                            if result_format
+                            else self.result_format,
+                            evaluation_parameters=evaluation_parameters,
+                        ),
+                    )
                 )
-            )
 
-        for batch, async_batch_validation_result in batch_and_async_result_tuples:
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=batch._expectation_suite.expectation_suite_name
-            )
-            validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch_identifier,
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-            )
-            batch_actions_results = self._run_actions(
-                batch,
-                expectation_suite_identifier,
-                batch._expectation_suite,
-                async_batch_validation_result.result(),
-                run_id,
-            )
+            run_results = {}
+            for batch, async_batch_validation_result in batch_and_async_result_tuples:
+                expectation_suite_identifier = ExpectationSuiteIdentifier(
+                    expectation_suite_name=batch._expectation_suite.expectation_suite_name
+                )
+                validation_result_id = ValidationResultIdentifier(
+                    batch_identifier=batch_identifier,
+                    expectation_suite_identifier=expectation_suite_identifier,
+                    run_id=run_id,
+                )
+                batch_actions_results = self._run_actions(
+                    batch,
+                    expectation_suite_identifier,
+                    batch._expectation_suite,
+                    async_batch_validation_result.result(),
+                    run_id,
+                )
 
-            run_result_obj = {
-                "validation_result": async_batch_validation_result.result(),
-                "actions_results": batch_actions_results,
-            }
-            run_results[validation_result_id] = run_result_obj
+                run_result_obj = {
+                    "validation_result": async_batch_validation_result.result(),
+                    "actions_results": batch_actions_results,
+                }
+                run_results[validation_result_id] = run_result_obj
 
         return ValidationOperatorResult(
             run_id=run_id,

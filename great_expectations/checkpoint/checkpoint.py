@@ -266,59 +266,62 @@ class Checkpoint:
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
-        async_executor = AsyncExecutor(
-            self.data_context.concurrency,
-            max_workers=len(validations),
-        )
-        async_val_op_run_results: List[AsyncResult[ValidationOperatorResult]] = []
-        for idx, validation_dict in enumerate(validations):
-            try:
-                substituted_validation_dict: dict = get_substituted_validation_dict(
-                    substituted_runtime_config=substituted_runtime_config,
-                    validation_dict=validation_dict,
-                )
-                batch_request: Union[
-                    BatchRequest, RuntimeBatchRequest
-                ] = substituted_validation_dict.get("batch_request")
-                expectation_suite_name: str = substituted_validation_dict.get(
-                    "expectation_suite_name"
-                )
-                action_list: list = substituted_validation_dict.get("action_list")
-
-                validator: Validator = self.data_context.get_validator(
-                    batch_request=batch_request,
-                    expectation_suite_name=expectation_suite_name,
-                )
-                action_list_validation_operator: ActionListValidationOperator = (
-                    ActionListValidationOperator(
-                        data_context=self.data_context,
-                        action_list=action_list,
-                        result_format=result_format,
-                        name=f"{self.name}-checkpoint-validation[{idx}]",
+        with AsyncExecutor(
+            self.data_context.concurrency, max_workers=len(validations)
+        ) as async_executor:
+            async_validation_operator_results: List[
+                AsyncResult[ValidationOperatorResult]
+            ] = []
+            for idx, validation_dict in enumerate(validations):
+                try:
+                    substituted_validation_dict: dict = get_substituted_validation_dict(
+                        substituted_runtime_config=substituted_runtime_config,
+                        validation_dict=validation_dict,
                     )
-                )
-                async_val_op_run_results.append(
-                    async_executor.submit(
-                        action_list_validation_operator.run,
-                        assets_to_validate=[validator],
-                        run_id=run_id,
-                        evaluation_parameters=substituted_validation_dict.get(
-                            "evaluation_parameters"
-                        ),
-                        result_format=result_format,
+                    batch_request: Union[
+                        BatchRequest, RuntimeBatchRequest
+                    ] = substituted_validation_dict.get("batch_request")
+                    expectation_suite_name: str = substituted_validation_dict.get(
+                        "expectation_suite_name"
                     )
-                )
-            except (
-                ge_exceptions.CheckpointError,
-                ge_exceptions.ExecutionEngineError,
-            ) as e:
-                raise ge_exceptions.CheckpointError(
-                    f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
-                )
+                    action_list: list = substituted_validation_dict.get("action_list")
 
-        run_results = {}
-        for async_val_op_run in async_val_op_run_results:
-            run_results.update(async_val_op_run.result().run_results)
+                    validator: Validator = self.data_context.get_validator(
+                        batch_request=batch_request,
+                        expectation_suite_name=expectation_suite_name,
+                    )
+                    action_list_validation_operator: ActionListValidationOperator = (
+                        ActionListValidationOperator(
+                            data_context=self.data_context,
+                            action_list=action_list,
+                            result_format=result_format,
+                            name=f"{self.name}-checkpoint-validation[{idx}]",
+                        )
+                    )
+                    async_validation_operator_results.append(
+                        async_executor.submit(
+                            action_list_validation_operator.run,
+                            assets_to_validate=[validator],
+                            run_id=run_id,
+                            evaluation_parameters=substituted_validation_dict.get(
+                                "evaluation_parameters"
+                            ),
+                            result_format=result_format,
+                        )
+                    )
+                except (
+                    ge_exceptions.CheckpointError,
+                    ge_exceptions.ExecutionEngineError,
+                ) as e:
+                    raise ge_exceptions.CheckpointError(
+                        f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
+                    )
+
+            run_results = {}
+            for async_validation_operator_result in async_validation_operator_results:
+                run_results.update(
+                    async_validation_operator_result.result().run_results
+                )
 
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
