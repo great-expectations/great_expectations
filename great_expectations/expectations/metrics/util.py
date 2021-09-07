@@ -57,6 +57,12 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 try:
+    import sqlalchemy_dremio.pyodbc
+    registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+except ImportError:
+    sqlalchemy_dremio = None
+
+try:
     import pybigquery.sqlalchemy_bigquery
 
     ###
@@ -157,6 +163,20 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
             exc_info=True,
         )
+        pass
+
+    try:
+        # Dremio
+        # if issubclass(dialect.dialect, sqlalchemy_dremio.pyodbc.dialect):
+        if hasattr(dialect, "DremioDialect"):
+            if positive:
+                return sa.func.REGEXP_MATCHES(column, literal(regex))
+            else:
+                return sa.not_(sa.func.REGEXP_MATCHES(column, literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
     return None
@@ -359,6 +379,11 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+    try:
+        if hasattr(dialect, "DremioDialect"):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass

@@ -76,6 +76,13 @@ except ImportError:
     sqlalchemy_redshift = None
 
 try:
+    import sqlalchemy_dremio.pyodbc
+    if sa:
+        sa.dialects.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+except ImportError:
+    sqlalchemy_dremio = None
+
+try:
     import snowflake.sqlalchemy.snowdialect
 
     if sa:
@@ -243,6 +250,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
+        elif self.engine.dialect.name.lower() == "dremio":
+            self.dialect_module = import_library_module(
+                module_name="sqlalchemy_dremio.pyodbc"
+        )
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"

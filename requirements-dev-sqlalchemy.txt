@@ -8,6 +8,7 @@ pyathena>=1.11
 pybigquery>=0.4.15  # sqlalchemy_tests
 PyMySQL>=0.9.3,<0.10  # sqlalchemy_tests
 pyodbc>=4.0.30  # sqlalchemy_tests
+sqlalchemy-dremio>=1.2.1
 
 # NOTE - 20200825
 # snowflake-connector-python is implied by snowflake-sqlalchemy, but has produced multiple
