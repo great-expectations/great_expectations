@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] added casting of numeric value to fix redshift issue (#3293)
 
 0.13.31
 -----------------
