@@ -14,7 +14,7 @@ datasource_config = {
     "name": "my_azure_datasource",
     "class_name": "Datasource",
     "execution_engine": {
-        "class_name": "PandasExecutionEngine",
+        "class_name": "SparkDFExecutionEngine",
         "azure_options": {
             "credential": "<YOUR_CREDENTIAL>",
         },
@@ -64,6 +64,7 @@ batch_request = BatchRequest(
     datasource_name="my_azure_datasource",
     data_connector_name="configured_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
+    batch_spec_passthrough={"reader_method": "csv", "reader_options": {"header": True}},
 )
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -91,4 +92,4 @@ batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 3
 
 batch: Batch = batch_list[0]
-assert batch.data.dataframe.shape[0] == 10000
+assert batch.data.dataframe.count() == 10000

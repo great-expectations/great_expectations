@@ -2,7 +2,6 @@ import copy
 import datetime
 import hashlib
 import logging
-import os
 import uuid
 import warnings
 from functools import reduce
@@ -260,9 +259,6 @@ Please check your config."""
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
                 )
-
-        elif isinstance(batch_spec, GCSBatchSpec):
-            raise NotImplementedError("Currently unsupported.")
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
