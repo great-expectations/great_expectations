@@ -52,7 +52,7 @@ datasource_config["data_connectors"]["configured_data_connector_name"]["azure_op
 ] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "container"
-] = "superconductive-public"
+] = "taxidataset"
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "name_starts_with"
 ] = "data/taxi_yellow_trip_data_samples/"

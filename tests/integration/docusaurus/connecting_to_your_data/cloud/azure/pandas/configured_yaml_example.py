@@ -37,9 +37,7 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<YOUR_AZURE_CONTAINER_HERE>", "superconductive-public"
-)
+datasource_yaml = datasource_yaml.replace("<YOUR_AZURE_CONTAINER_HERE>", "taxidataset")
 datasource_yaml = datasource_yaml.replace(
     "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
 )
