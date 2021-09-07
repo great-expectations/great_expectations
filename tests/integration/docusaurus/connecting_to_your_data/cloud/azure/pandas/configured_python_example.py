@@ -1,9 +1,10 @@
 import os
+from typing import List
 
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
@@ -26,8 +27,8 @@ datasource_config = {
                 "account_url": "<YOUR_ACCOUNT_URL>",
                 "credential": "<YOUR_CREDENTIAL>",
             },
-            "container": "superconductive-public",
-            "name_starts_with": "data/taxi_yellow_trip_data_samples/",
+            "container": "<YOUR_CONTAINER>",
+            "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
             "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
@@ -87,3 +88,9 @@ assert set(
         "configured_data_connector_name"
     ]
 ) == {"taxi_data"}
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000

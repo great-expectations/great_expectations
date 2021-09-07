@@ -335,6 +335,7 @@ def save_expectation_suite_usage_statistics(
     expectation_suite,
     expectation_suite_name=None,
     ge_cloud_id=None,  # self
+    **kwargs
 ):
     try:
         data_context_id = data_context.data_context_id

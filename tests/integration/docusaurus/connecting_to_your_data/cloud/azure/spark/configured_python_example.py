@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from ruamel import yaml
@@ -5,33 +6,53 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
+CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
+
 context = ge.get_context()
 
 datasource_config = {
-    "name": "my_gcs_datasource",
+    "name": "my_azure_datasource",
     "class_name": "Datasource",
-    "execution_engine": {"class_name": "PandasExecutionEngine"},
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",
+        "azure_options": {
+            "credential": "<YOUR_CREDENTIAL>",
+        },
+    },
     "data_connectors": {
         "configured_data_connector_name": {
-            "class_name": "ConfiguredAssetGCSDataConnector",
-            "bucket_or_name": "<YOUR_GCS_BUCKET_HERE>",
-            "prefix": "<BUCKET_PATH_TO_DATA>",
+            "class_name": "ConfiguredAssetAzureDataConnector",
+            "azure_options": {
+                "credential": "<YOUR_CREDENTIAL>",
+            },
+            "container": "<YOUR_CONTAINER>",
+            "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
             "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
                 "group_names": ["year", "month"],
             },
-        }
+        },
     },
 }
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
+datasource_config["execution_engine"]["azure_options"][
+    "account_url"
+] = "superconductivetests.blob.core.windows.net"
+datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
+datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
+    "account_url"
+] = "superconductivetests.blob.core.windows.net"
+datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
+    "credential"
+] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"][
-    "bucket_or_name"
-] = "superconductive-integration-tests"
+    "container"
+] = "superconductive-public"
 datasource_config["data_connectors"]["configured_data_connector_name"][
-    "prefix"
+    "name_starts_with"
 ] = "data/taxi_yellow_trip_data_samples/"
 
 context.test_yaml_config(yaml.dump(datasource_config))
@@ -40,7 +61,7 @@ context.add_datasource(**datasource_config)
 
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
-    datasource_name="my_gcs_datasource",
+    datasource_name="my_azure_datasource",
     data_connector_name="configured_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
@@ -57,16 +78,14 @@ validator = context.get_validator(
 )
 print(validator.head())
 
-
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
+assert [ds["name"] for ds in context.list_datasources()] == ["my_azure_datasource"]
 assert set(
-    context.get_available_data_asset_names()["my_gcs_datasource"][
+    context.get_available_data_asset_names()["my_azure_datasource"][
         "configured_data_connector_name"
     ]
 ) == {"taxi_data"}
-
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 3

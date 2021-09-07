@@ -70,6 +70,7 @@ from great_expectations.data_context.templates import (
 )
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
+    DEFAULT_USAGE_STATISTICS_URL,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
@@ -575,9 +576,10 @@ class BaseDataContext:
             UUID to use as the data_context_id
         """
 
-        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        # if in ge_cloud_mode, use ge_cloud_account_id
         if self.ge_cloud_mode:
-            return self.ge_cloud_config.ge_cloud_account_id
+            return self.ge_cloud_config.account_id
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
         ]
@@ -909,7 +911,11 @@ class BaseDataContext:
     #####
 
     def _load_config_variables_file(self):
-        """Get all config variables from the default location."""
+        """
+        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables are
+        loaded from a global great_expectations.conf file, located at one of the paths defined in
+        self.GLOBAL_CONFIG_PATHS (in order of search precedence).
+        """
         if self.ge_cloud_mode:
             for config_path in self.GLOBAL_CONFIG_PATHS:
                 if os.path.isfile(config_path):
@@ -942,7 +948,12 @@ class BaseDataContext:
             return {}
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
-
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
         if not config:
             config = self._project_config
 
@@ -952,12 +963,34 @@ class BaseDataContext:
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
+        # for ge_cloud_mode: in most cases, self.ge_cloud_config will be a subset of substituted_config_variables,
+        # but if one or more ge_cloud_config values are passed in at runtime, they will be reflected in
+        # self.ge_cloud_config and will take precedence
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
             **(self.ge_cloud_config.to_json_dict() if self.ge_cloud_mode else {}),
         }
+
+        if self.ge_cloud_mode:
+            ge_cloud_config_variable_defaults = {
+                "plugins_directory": self._normalize_absolute_or_relative_path(
+                    DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+                ),
+                "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
+            }
+            for config_variable, value in ge_cloud_config_variable_defaults.items():
+                if substitutions.get(config_variable) is None:
+                    logger.info(
+                        f'Config variable "{config_variable}" was not found in environment or global config ('
+                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
+                        f"like to "
+                        f"use a different value, please specify it in an environment variable or in a "
+                        f"great_expectations.conf file located at one of the above paths, in a section named "
+                        f'"ge_cloud_config".'
+                    )
+                    substitutions[config_variable] = value
 
         return DataContextConfig(
             **substitute_all_config_variables(
@@ -2083,8 +2116,9 @@ class BaseDataContext:
             name,
             value,
         ) in self.project_config_with_variables_substituted.stores.items():
-            value["name"] = name
-            stores.append(value)
+            store_config = copy.deepcopy(value)
+            store_config["name"] = name
+            stores.append(store_config)
         return stores
 
     def list_active_stores(self):
@@ -2128,6 +2162,7 @@ class BaseDataContext:
         expectation_suite_name: str,
         overwrite_existing: Optional[bool] = False,
         ge_cloud_id: Optional[str] = None,
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2168,7 +2203,7 @@ class BaseDataContext:
                     )
                 )
 
-        self.expectations_store.set(key, expectation_suite)
+        self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
 
     def delete_expectation_suite(
@@ -2247,6 +2282,7 @@ class BaseDataContext:
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: Optional[bool] = True,
         ge_cloud_id: Optional[str] = None,
+        **kwargs,
     ):
         """Save the provided expectation suite into the DataContext.
 
@@ -2288,7 +2324,7 @@ class BaseDataContext:
                 )
 
         self._evaluation_parameter_dependencies_compiled = False
-        return self.expectations_store.set(key, expectation_suite)
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
         """
@@ -3712,10 +3748,6 @@ class DataContext(BaseDataContext):
         project_root_dir=None,
         usage_statistics_enabled=True,
         runtime_environment=None,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_mode: bool = False,
     ):
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -3903,9 +3935,9 @@ class DataContext(BaseDataContext):
             )
         )
         return {
-            "ge_cloud_base_url": ge_cloud_base_url,
-            "ge_cloud_account_id": ge_cloud_account_id,
-            "ge_cloud_access_token": ge_cloud_access_token,
+            "base_url": ge_cloud_base_url,
+            "account_id": ge_cloud_account_id,
+            "access_token": ge_cloud_access_token,
         }
 
     def get_ge_cloud_config(
@@ -3914,7 +3946,10 @@ class DataContext(BaseDataContext):
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
     ):
-
+        """
+        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        """
         ge_cloud_config_dict = self._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_account_id=ge_cloud_account_id,
@@ -3927,46 +3962,16 @@ class DataContext(BaseDataContext):
             if not val:
                 missing_keys.append(key)
         if len(missing_keys) > 0:
+            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            global_config_path_str = [
+                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+            ]
             raise DataContextError(
-                f"Arg(s) {missing_keys} required for ge_cloud_mode but neither provided nor found in "
-                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
+                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({(', ').join(global_config_path_str)})."
             )
 
         return GeCloudConfig(**ge_cloud_config_dict)
-
-    @classmethod
-    def build_ge_cloud_data_context_store(
-        cls, ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token
-    ):
-        store_config = {
-            "class_name": "DataContextStore",
-            "store_backend": {
-                "class_name": "GeCloudStoreBackend",
-                "ge_cloud_base_url": ge_cloud_base_url,
-                "ge_cloud_resource_type": "data_context",
-                "ge_cloud_credentials": {
-                    "access_token": ge_cloud_access_token,
-                    "account_id": ge_cloud_account_id,
-                },
-                "suppress_store_backend_id": True,
-            },
-        }
-        return build_store_from_config(
-            store_name="data_context_store",
-            store_config=store_config,
-        )
-
-    @property
-    def ge_cloud_data_context_store(self):
-        if not self._ge_cloud_data_context_store:
-            data_context_store = self.build_ge_cloud_data_context_store(
-                ge_cloud_base_url=self.ge_cloud_config.ge_cloud_base_url,
-                ge_cloud_account_id=self.ge_cloud_config.ge_cloud_account_id,
-                ge_cloud_access_token=self.ge_cloud_config.ge_cloud_access_token,
-            )
-            self._ge_cloud_data_context_store = data_context_store
-            return data_context_store
-        return self._ge_cloud_data_context_store
 
     def __init__(
         self,
@@ -3980,7 +3985,7 @@ class DataContext(BaseDataContext):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
         ge_cloud_config = None
-        context_root_directory = None
+
         if ge_cloud_mode:
             ge_cloud_config = self.get_ge_cloud_config(
                 ge_cloud_base_url=ge_cloud_base_url,
@@ -3988,6 +3993,13 @@ class DataContext(BaseDataContext):
                 ge_cloud_access_token=ge_cloud_access_token,
             )
             self._ge_cloud_config = ge_cloud_config
+            # in ge_cloud_mode, if not provided, set context_root_dir to cwd
+            if context_root_dir is None:
+                context_root_dir = os.getcwd()
+                logger.info(
+                    f'context_root_dir was not provided - defaulting to current working directory "'
+                    f'{context_root_dir}".'
+                )
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
             context_root_dir = (
@@ -3995,10 +4007,9 @@ class DataContext(BaseDataContext):
                 if context_root_dir is None
                 else context_root_dir
             )
-            context_root_directory = os.path.abspath(
-                os.path.expanduser(context_root_dir)
-            )
-            self._context_root_directory = context_root_directory
+
+        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
+        self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
         super().__init__(
@@ -4038,7 +4049,12 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        :return: the configuration object read from the file
+        For Data Contexts in GE Cloud mode, a default configuration template with pre-defined ${
+        SOME_VARIABLE} variables is returned. (see
+        great_expectations.data_context.templates.DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG). These variables are
+        substituted later using the same process referenced above.
+
+        :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
             return self.default_ge_cloud_data_context_config_template
@@ -4071,6 +4087,11 @@ class DataContext(BaseDataContext):
 
     def _save_project_config(self):
         """Save the current project to disk."""
+        if self.ge_cloud_mode:
+            logger.debug(
+                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+            )
+            return
         logger.debug("Starting DataContext._save_project_config")
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
