@@ -276,7 +276,9 @@ def data_context_with_complete_global_config_in_dot_dir_only(mocked_global_confi
 
 
 @pytest.fixture
-def data_context_with_complete_global_config_with_usage_stats_section_in_dot_dir_only(mocked_global_config_dirs):
+def data_context_with_complete_global_config_with_usage_stats_section_in_dot_dir_only(
+    mocked_global_config_dirs,
+):
     with patch(
         "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
         new_callable=PropertyMock,
