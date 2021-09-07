@@ -37,7 +37,7 @@ module.exports = {
               label: '🧰 Installation',
               items: [
                 'guides/setup/installation/local',
-                'guides/setup/installation/databricks',
+                // 'guides/setup/installation/databricks',
                 'guides/setup/installation/spark_emr'
               ]
             },
@@ -103,7 +103,7 @@ module.exports = {
               items: [
                 'guides/connecting_to_your_data/database/athena',
                 'guides/connecting_to_your_data/database/bigquery',
-                'guides/connecting_to_your_data/database/mssql',
+                // 'guides/connecting_to_your_data/database/mssql',
                 'guides/connecting_to_your_data/database/mysql',
                 'guides/connecting_to_your_data/database/postgres',
                 'guides/connecting_to_your_data/database/redshift',
@@ -126,26 +126,26 @@ module.exports = {
                 'guides/connecting_to_your_data/cloud/s3/pandas',
                 'guides/connecting_to_your_data/cloud/s3/spark',
                 'guides/connecting_to_your_data/cloud/gcs/pandas',
-                'guides/connecting_to_your_data/cloud/gcs/spark',
-                'guides/connecting_to_your_data/cloud/azure/pandas',
-                'guides/connecting_to_your_data/cloud/azure/spark'
+                //'guides/connecting_to_your_data/cloud/gcs/spark',
+                //'guides/connecting_to_your_data/cloud/azure/pandas',
+                //'guides/connecting_to_your_data/cloud/azure/spark'
               ]
             },
-            {
-              type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/connecting_to_your_data/contributing/how_to_add_support_for_a_new_sqlalchemy_dialect'
-              ]
-            },
+            //{
+              //type: 'category',
+              //label: 'Contributing',
+              //items: [
+                //'guides/connecting_to_your_data/contributing/how_to_add_support_for_a_new_sqlalchemy_dialect'
+              //]
+            //},
             {
               type: 'category',
               label: '🔬 Advanced',
               items: [
                 'guides/connecting_to_your_data/advanced/database_credentials',
-                'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
-                'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
-                'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
+                // 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
+		// 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
+                // 'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
               ]
             }
           ]
@@ -187,7 +187,7 @@ module.exports = {
               label: 'Creating Custom Expectations',
               items: [
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             }
@@ -216,13 +216,13 @@ module.exports = {
                 'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config'
               ]
             },
-            {
-              type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/validation/contributing/how_to_contribute_a_new_validation_action'
-              ]
-            },
+            //{
+              //type: 'category',
+              //label: 'Contributing',
+              //items: [
+                //'guides/validation/contributing/how_to_contribute_a_new_validation_action'
+              //]
+            //},
             {
               type: 'category',
               label: 'Validation Actions',
@@ -308,7 +308,7 @@ module.exports = {
             { type: 'doc', id: 'reference/profilers' },
             { type: 'doc', id: 'reference/expectations/result_format' },
             { type: 'doc', id: 'reference/expectations/standard_arguments' },
-            { type: 'doc', id: 'reference/stores' },
+            // { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
             { type: 'doc', id: 'reference/validation' }
           ]

@@ -69,7 +69,6 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 
 * [How to connect to a Athena database](/docs/guides/connecting_to_your_data/database/athena)
 * [How to connect to a BigQuery database](/docs/guides/connecting_to_your_data/database/bigquery)
-* [How to connect to a MSSQL database](/docs/guides/connecting_to_your_data/database/mssql)
 * [How to connect to a MySQL database](/docs/guides/connecting_to_your_data/database/mysql)
 * [How to connect to a Postgres database](/docs/guides/connecting_to_your_data/database/postgres)
 * [How to connect to a Redshift database](/docs/guides/connecting_to_your_data/database/redshift)
@@ -91,8 +90,6 @@ By default, Data Docs are stored locally, in an uncommitted directory. This is g
 ## Additional Checkpoints and Actions
 Most teams will want to configure various Checkpoints and Validation Actions as part of their deployment. There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.
 
-* [How to update Data Docs as a Validation Action](/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action)
-* [How to store Validation Results as a Validation Action](/docs/guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action)
 * [How to trigger Slack notifications as a Validation Action](/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action)
 * [How to trigger Opsgenie notifications as a Validation Action](/docs/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action)
 * [How to trigger Email as a Validation Action](/docs/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action)
