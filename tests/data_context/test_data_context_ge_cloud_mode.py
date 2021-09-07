@@ -681,6 +681,93 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
         )
 
 
+def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
+    data_context_with_complete_global_config_with_usage_stats_section_in_dot_dir_only
+):
+    context = DataContext(ge_cloud_mode=True)
+    global_usage_statistics_url = context._get_global_config_value(
+        environment_variable="GE_USAGE_STATISTICS_URL",
+        conf_file_section="anonymous_usage_statistics",
+        conf_file_option="usage_statistics_url",
+    )
+    expected_ge_cloud_config = {'access_token': '91bec65bf3fa41b99a98de6f2563eab0',
+                                'account_id': '0ccac18e-7631-4bdd-8a42-3c35cce574c6',
+                                'base_url': 'https://api.dev.greatexpectations.io/complete/version-1'}
+    expected_project_config_with_variables_substituted = {'validations_store_name': 'default_validations_store',
+                                                          'checkpoint_store_name': 'default_checkpoint_store',
+                                                          'datasources': {'default_spark_datasource': {
+                                                              'module_name': 'great_expectations.datasource',
+                                                              'data_connectors': {'default_runtime_data_connector': {
+                                                                  'batch_identifiers': None,
+                                                                  'class_name': 'RuntimeDataConnector'}},
+                                                              'class_name': 'Datasource', 'execution_engine': {
+                                                                  'module_name': 'great_expectations.execution_engine',
+                                                                  'class_name': 'SparkDFExecutionEngine'}},
+                                                                          'default_pandas_datasource': {
+                                                                              'module_name': 'great_expectations.datasource',
+                                                                              'data_connectors': {
+                                                                                  'default_runtime_data_connector': {
+                                                                                      'batch_identifiers': None,
+                                                                                      'class_name': 'RuntimeDataConnector'}},
+                                                                              'class_name': 'Datasource',
+                                                                              'execution_engine': {
+                                                                                  'module_name': 'great_expectations.execution_engine',
+                                                                                  'class_name': 'PandasExecutionEngine'}}},
+                                                          'data_docs_sites': {
+                                                              'default_site': {'class_name': 'SiteBuilder',
+                                                                               'show_how_to_buttons': True,
+                                                                               'store_backend': {
+                                                                                   'class_name': 'GeCloudStoreBackend',
+                                                                                   'ge_cloud_base_url': 'https://api.dev.greatexpectations.io/complete/version-1',
+                                                                                   'ge_cloud_resource_type': 'rendered_data_doc',
+                                                                                   'ge_cloud_credentials': {
+                                                                                       'access_token': '91bec65bf3fa41b99a98de6f2563eab0',
+                                                                                       'account_id': '0ccac18e-7631-4bdd-8a42-3c35cce574c6'},
+                                                                                   'suppress_store_backend_id': True},
+                                                                               'site_index_builder': {
+                                                                                   'class_name': 'DefaultSiteIndexBuilder'}}},
+                                                          'config_version': 3.0, 'stores': {
+            'default_evaluation_parameter_store': {'class_name': 'EvaluationParameterStore'},
+            'default_expectations_store': {'class_name': 'ExpectationsStore',
+                                           'store_backend': {'class_name': 'GeCloudStoreBackend',
+                                                             'ge_cloud_base_url': 'https://api.dev.greatexpectations.io/complete/version-1',
+                                                             'ge_cloud_resource_type': 'expectation_suite',
+                                                             'ge_cloud_credentials': {
+                                                                 'access_token': '91bec65bf3fa41b99a98de6f2563eab0',
+                                                                 'account_id': '0ccac18e-7631-4bdd-8a42-3c35cce574c6'},
+                                                             'suppress_store_backend_id': True}},
+            'default_validations_store': {'class_name': 'ValidationsStore',
+                                          'store_backend': {'class_name': 'GeCloudStoreBackend',
+                                                            'ge_cloud_base_url': 'https://api.dev.greatexpectations.io/complete/version-1',
+                                                            'ge_cloud_resource_type': 'suite_validation_result',
+                                                            'ge_cloud_credentials': {
+                                                                'access_token': '91bec65bf3fa41b99a98de6f2563eab0',
+                                                                'account_id': '0ccac18e-7631-4bdd-8a42-3c35cce574c6'},
+                                                            'suppress_store_backend_id': True}},
+            'default_checkpoint_store': {'class_name': 'CheckpointStore',
+                                         'store_backend': {'class_name': 'GeCloudStoreBackend',
+                                                           'ge_cloud_base_url': 'https://api.dev.greatexpectations.io/complete/version-1',
+                                                           'ge_cloud_resource_type': 'contract',
+                                                           'ge_cloud_credentials': {
+                                                               'access_token': '91bec65bf3fa41b99a98de6f2563eab0',
+                                                               'account_id': '0ccac18e-7631-4bdd-8a42-3c35cce574c6'},
+                                                           'suppress_store_backend_id': True}}},
+                                                          'config_variables_file_path': None, 'notebooks': None,
+                                                          'anonymous_usage_statistics': {'enabled': False,
+                                                                                         'data_context_id': '0ccac18e-7631-4bdd-8a42-3c35cce574c6',
+                                                                                         'usage_statistics_url':
+                                                                                             'https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics/complete/version/1' if not global_usage_statistics_url else global_usage_statistics_url
+                                                                                         },
+                                                          'expectations_store_name': 'default_expectations_store',
+                                                          'plugins_directory': '/Users/foo/bar/my/plugins/directory/complete/version/1',
+                                                          'evaluation_parameter_store_name': 'default_evaluation_parameter_store'}
+    assert context.ge_cloud_config.to_json_dict() == expected_ge_cloud_config
+    assert (
+            context.project_config_with_variables_substituted.to_json_dict()
+            == expected_project_config_with_variables_substituted
+    )
+
+
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error(
     data_context_with_incomplete_global_config_in_dot_dir_only,
 ):
