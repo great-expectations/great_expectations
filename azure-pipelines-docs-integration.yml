@@ -119,5 +119,5 @@ stages:
             GCP_PROJECT: $(GCP_PROJECT)
             GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
             # Azure credentials
-            AZURE_ACCOUNT_URL: $(AZURE_ACCOUNT_URL)
             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+            AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
