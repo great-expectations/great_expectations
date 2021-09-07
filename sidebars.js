@@ -185,7 +185,7 @@ module.exports = {
               label: 'Creating Custom Expectations',
               items: [
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             },
@@ -234,7 +234,7 @@ module.exports = {
               type: 'category',
               label: 'Validation Actions',
               items: [
-                'guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action',
+                // 'guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
@@ -336,14 +336,14 @@ module.exports = {
             { type: 'doc', id: 'reference/supporting_resources' }
           ]
         },
-        //{
-          //type: 'category',
-          //label: 'Spare Parts',
-          //collapsed: true,
-          //items: [
-            //{ type: 'doc', id: 'reference/spare_parts' }
-          //]
-        //},
+        // {
+          // type: 'category',
+          // label: 'Spare Parts',
+          // collapsed: true,
+          // items: [
+            // { type: 'doc', id: 'reference/spare_parts' }
+          // ]
+        // },
         {
           type: 'category',
           label: 'API Reference',
