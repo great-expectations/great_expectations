@@ -268,12 +268,7 @@ class Checkpoint:
 
         async_executor = AsyncExecutor(
             self.data_context.concurrency,
-            ###
-            # NOTE: 20210906 - jdimatteo: With the V3 API this executor is used with concurrency. A max of 5 is set
-            # here to prevent http://sqlalche.me/e/14/3o7r. To safely enable more than 5 works, it is necessary to
-            # increase the pool_size and max_overflow, which is done for the V2 API with
-            # ConcurrencyConfig.add_sqlalchemy_create_engine_parameters (but not done with the V3 API).
-            max_workers_if_concurrency_enabled=max(5, len(validations)),
+            max_workers_if_concurrency_enabled=len(validations),
         )
         async_val_op_run_results: List[AsyncResult[ValidationOperatorResult]] = []
         for idx, validation_dict in enumerate(validations):

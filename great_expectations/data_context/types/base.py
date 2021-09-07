@@ -1081,10 +1081,6 @@ class ConcurrencyConfig(DictDot):
         self._enabled = enabled
 
     def add_sqlalchemy_create_engine_parameters(self, parameters):
-        ###
-        # NOTE: 20210906 - jdimatteo: This method is only called with the V2 API at the time of this writing, and is not
-        # hooked up with the V3 API. This logic may need to be refactored in order to work with the V3 API.
-
         if not self._enabled:
             return
 

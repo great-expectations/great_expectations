@@ -23,6 +23,7 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
     ExecutionEngineError,
@@ -162,6 +163,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         url=None,
         batch_data_dict=None,
         create_temp_table=True,
+        concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
@@ -188,6 +190,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     If neither the engines, the credentials, nor the connection_string have been provided,
                     a url can be used to access the data. This will be overridden by all other configuration
                     options if any are provided.
+                concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
         """
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
@@ -204,17 +207,23 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Ignoring credentials."
                 )
             self.engine = engine
-        elif credentials is not None:
-            self.engine = self._build_engine(credentials=credentials, **kwargs)
-        elif connection_string is not None:
-            self.engine = sa.create_engine(connection_string, **kwargs)
-        elif url is not None:
-            self.drivername = urlparse(url).scheme
-            self.engine = sa.create_engine(url, **kwargs)
         else:
-            raise InvalidConfigError(
-                "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
+            concurrency = (
+                concurrency if concurrency is not None else ConcurrencyConfig()
             )
+            concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
+
+            if credentials is not None:
+                self.engine = self._build_engine(credentials=credentials, **kwargs)
+            elif connection_string is not None:
+                self.engine = sa.create_engine(connection_string, **kwargs)
+            elif url is not None:
+                self.drivername = urlparse(url).scheme
+                self.engine = sa.create_engine(url, **kwargs)
+            else:
+                raise InvalidConfigError(
+                    "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
+                )
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
