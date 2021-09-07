@@ -1,0 +1,1151 @@
+{
+  "machine_info": {
+    "processor": "",
+    "machine": "x86_64",
+    "python_compiler": "GCC 10.2.1 20210110",
+    "python_implementation": "CPython",
+    "python_implementation_version": "3.9.2",
+    "python_version": "3.9.2",
+    "python_build": [
+      "default",
+      "Feb 28 2021 17:03:44"
+    ],
+    "system": "Linux",
+    "cpu": {
+      "python_version": "3.9.2.final.0 (64 bit)",
+      "cpuinfo_version": [
+        8,
+        0,
+        0
+      ],
+      "cpuinfo_version_string": "8.0.0",
+      "arch": "X86_64",
+      "bits": 64,
+      "count": 16,
+      "arch_string_raw": "x86_64",
+      "vendor_id_raw": "GenuineIntel",
+      "brand_raw": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+      "hz_advertised_friendly": "2.2000 GHz",
+      "hz_actual_friendly": "2.2000 GHz",
+      "hz_advertised": [
+        2200000000,
+        0
+      ],
+      "hz_actual": [
+        2199998000,
+        0
+      ],
+      "model": 79,
+      "family": 6,
+      "flags": [
+        "3dnowprefetch",
+        "abm",
+        "adx",
+        "aes",
+        "apic",
+        "arat",
+        "arch_capabilities",
+        "avx",
+        "avx2",
+        "bmi1",
+        "bmi2",
+        "clflush",
+        "cmov",
+        "constant_tsc",
+        "cpuid",
+        "cx16",
+        "cx8",
+        "de",
+        "erms",
+        "f16c",
+        "fma",
+        "fpu",
+        "fsgsbase",
+        "fxsr",
+        "hle",
+        "ht",
+        "hypervisor",
+        "ibpb",
+        "ibrs",
+        "invpcid",
+        "invpcid_single",
+        "lahf_lm",
+        "lm",
+        "mca",
+        "mce",
+        "md_clear",
+        "mmx",
+        "movbe",
+        "msr",
+        "mtrr",
+        "nonstop_tsc",
+        "nopl",
+        "nx",
+        "osxsave",
+        "pae",
+        "pat",
+        "pcid",
+        "pclmulqdq",
+        "pdpe1gb",
+        "pge",
+        "pni",
+        "popcnt",
+        "pse",
+        "pse36",
+        "pti",
+        "rdrand",
+        "rdrnd",
+        "rdseed",
+        "rdtscp",
+        "rep_good",
+        "rtm",
+        "sep",
+        "smap",
+        "smep",
+        "ss",
+        "ssbd",
+        "sse",
+        "sse2",
+        "sse4_1",
+        "sse4_2",
+        "ssse3",
+        "stibp",
+        "syscall",
+        "tsc",
+        "tsc_adjust",
+        "tsc_known_freq",
+        "vme",
+        "x2apic",
+        "xsave",
+        "xsaveopt",
+        "xtopology"
+      ],
+      "l3_cache_size": 57671680,
+      "l2_cache_size": "2 MiB",
+      "l1_data_cache_size": "256 KiB",
+      "l1_instruction_cache_size": "256 KiB",
+      "l2_cache_line_size": 256,
+      "l2_cache_associativity": 6
+    }
+  },
+  "commit_info": {
+    "id": "91ef6d5cec5e06dab279f9c670987c04760af255",
+    "time": "2021-09-06T18:43:07-06:00",
+    "author_time": "2021-09-06T18:41:22-06:00",
+    "dirty": false,
+    "project": "great_expectations",
+    "branch": "feature/speedup_checkpoint_running_2"
+  },
+  "benchmarks": [
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[1-False-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[1-False-V2]",
+      "params": {
+        "number_of_tables": 1,
+        "write_data_docs": false,
+        "backend_api": "V2"
+      },
+      "param": "1-False-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 5.6921799960546196,
+        "max": 5.6921799960546196,
+        "mean": 5.6921799960546196,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 5.6921799960546196,
+        "iqr": 0,
+        "q1": 5.6921799960546196,
+        "q3": 5.6921799960546196,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 5.6921799960546196,
+        "hd15iqr": 5.6921799960546196,
+        "ops": 0.1756796167185723,
+        "total": 5.6921799960546196,
+        "data": [
+          5.6921799960546196
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[1-False-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[1-False-V3]",
+      "params": {
+        "number_of_tables": 1,
+        "write_data_docs": false,
+        "backend_api": "V3"
+      },
+      "param": "1-False-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.367512369994074,
+        "max": 4.367512369994074,
+        "mean": 4.367512369994074,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.367512369994074,
+        "iqr": 0,
+        "q1": 4.367512369994074,
+        "q3": 4.367512369994074,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.367512369994074,
+        "hd15iqr": 4.367512369994074,
+        "ops": 0.22896328969100477,
+        "total": 4.367512369994074,
+        "data": [
+          4.367512369994074
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[1-True-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[1-True-V2]",
+      "params": {
+        "number_of_tables": 1,
+        "write_data_docs": true,
+        "backend_api": "V2"
+      },
+      "param": "1-True-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.937674141954631,
+        "max": 4.937674141954631,
+        "mean": 4.937674141954631,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.937674141954631,
+        "iqr": 0,
+        "q1": 4.937674141954631,
+        "q3": 4.937674141954631,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.937674141954631,
+        "hd15iqr": 4.937674141954631,
+        "ops": 0.2025245026809605,
+        "total": 4.937674141954631,
+        "data": [
+          4.937674141954631
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[1-True-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[1-True-V3]",
+      "params": {
+        "number_of_tables": 1,
+        "write_data_docs": true,
+        "backend_api": "V3"
+      },
+      "param": "1-True-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.2118226198945194,
+        "max": 4.2118226198945194,
+        "mean": 4.2118226198945194,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.2118226198945194,
+        "iqr": 0,
+        "q1": 4.2118226198945194,
+        "q3": 4.2118226198945194,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.2118226198945194,
+        "hd15iqr": 4.2118226198945194,
+        "ops": 0.2374269028511566,
+        "total": 4.2118226198945194,
+        "data": [
+          4.2118226198945194
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[2-False-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[2-False-V2]",
+      "params": {
+        "number_of_tables": 2,
+        "write_data_docs": false,
+        "backend_api": "V2"
+      },
+      "param": "2-False-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 5.118467466905713,
+        "max": 5.118467466905713,
+        "mean": 5.118467466905713,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 5.118467466905713,
+        "iqr": 0,
+        "q1": 5.118467466905713,
+        "q3": 5.118467466905713,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 5.118467466905713,
+        "hd15iqr": 5.118467466905713,
+        "ops": 0.1953709790021453,
+        "total": 5.118467466905713,
+        "data": [
+          5.118467466905713
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[2-False-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[2-False-V3]",
+      "params": {
+        "number_of_tables": 2,
+        "write_data_docs": false,
+        "backend_api": "V3"
+      },
+      "param": "2-False-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.350999196060002,
+        "max": 4.350999196060002,
+        "mean": 4.350999196060002,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.350999196060002,
+        "iqr": 0,
+        "q1": 4.350999196060002,
+        "q3": 4.350999196060002,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.350999196060002,
+        "hd15iqr": 4.350999196060002,
+        "ops": 0.22983226494400152,
+        "total": 4.350999196060002,
+        "data": [
+          4.350999196060002
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[2-True-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[2-True-V2]",
+      "params": {
+        "number_of_tables": 2,
+        "write_data_docs": true,
+        "backend_api": "V2"
+      },
+      "param": "2-True-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 5.219943386036903,
+        "max": 5.219943386036903,
+        "mean": 5.219943386036903,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 5.219943386036903,
+        "iqr": 0,
+        "q1": 5.219943386036903,
+        "q3": 5.219943386036903,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 5.219943386036903,
+        "hd15iqr": 5.219943386036903,
+        "ops": 0.1915729589472085,
+        "total": 5.219943386036903,
+        "data": [
+          5.219943386036903
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[2-True-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[2-True-V3]",
+      "params": {
+        "number_of_tables": 2,
+        "write_data_docs": true,
+        "backend_api": "V3"
+      },
+      "param": "2-True-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.1523640169762075,
+        "max": 4.1523640169762075,
+        "mean": 4.1523640169762075,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.1523640169762075,
+        "iqr": 0,
+        "q1": 4.1523640169762075,
+        "q3": 4.1523640169762075,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.1523640169762075,
+        "hd15iqr": 4.1523640169762075,
+        "ops": 0.24082667028027324,
+        "total": 4.1523640169762075,
+        "data": [
+          4.1523640169762075
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[4-False-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[4-False-V2]",
+      "params": {
+        "number_of_tables": 4,
+        "write_data_docs": false,
+        "backend_api": "V2"
+      },
+      "param": "4-False-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 5.886662671808153,
+        "max": 5.886662671808153,
+        "mean": 5.886662671808153,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 5.886662671808153,
+        "iqr": 0,
+        "q1": 5.886662671808153,
+        "q3": 5.886662671808153,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 5.886662671808153,
+        "hd15iqr": 5.886662671808153,
+        "ops": 0.16987553997090835,
+        "total": 5.886662671808153,
+        "data": [
+          5.886662671808153
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[4-False-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[4-False-V3]",
+      "params": {
+        "number_of_tables": 4,
+        "write_data_docs": false,
+        "backend_api": "V3"
+      },
+      "param": "4-False-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.648458038223907,
+        "max": 4.648458038223907,
+        "mean": 4.648458038223907,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.648458038223907,
+        "iqr": 0,
+        "q1": 4.648458038223907,
+        "q3": 4.648458038223907,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.648458038223907,
+        "hd15iqr": 4.648458038223907,
+        "ops": 0.21512509993143492,
+        "total": 4.648458038223907,
+        "data": [
+          4.648458038223907
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[4-True-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[4-True-V2]",
+      "params": {
+        "number_of_tables": 4,
+        "write_data_docs": true,
+        "backend_api": "V2"
+      },
+      "param": "4-True-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 6.2152274190448225,
+        "max": 6.2152274190448225,
+        "mean": 6.2152274190448225,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 6.2152274190448225,
+        "iqr": 0,
+        "q1": 6.2152274190448225,
+        "q3": 6.2152274190448225,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 6.2152274190448225,
+        "hd15iqr": 6.2152274190448225,
+        "ops": 0.1608951583872507,
+        "total": 6.2152274190448225,
+        "data": [
+          6.2152274190448225
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[4-True-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[4-True-V3]",
+      "params": {
+        "number_of_tables": 4,
+        "write_data_docs": true,
+        "backend_api": "V3"
+      },
+      "param": "4-True-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.8989045498892665,
+        "max": 4.8989045498892665,
+        "mean": 4.8989045498892665,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.8989045498892665,
+        "iqr": 0,
+        "q1": 4.8989045498892665,
+        "q3": 4.8989045498892665,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.8989045498892665,
+        "hd15iqr": 4.8989045498892665,
+        "ops": 0.20412726759957053,
+        "total": 4.8989045498892665,
+        "data": [
+          4.8989045498892665
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[8-False-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[8-False-V2]",
+      "params": {
+        "number_of_tables": 8,
+        "write_data_docs": false,
+        "backend_api": "V2"
+      },
+      "param": "8-False-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 6.247292269021273,
+        "max": 6.247292269021273,
+        "mean": 6.247292269021273,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 6.247292269021273,
+        "iqr": 0,
+        "q1": 6.247292269021273,
+        "q3": 6.247292269021273,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 6.247292269021273,
+        "hd15iqr": 6.247292269021273,
+        "ops": 0.16006934795715333,
+        "total": 6.247292269021273,
+        "data": [
+          6.247292269021273
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[8-False-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[8-False-V3]",
+      "params": {
+        "number_of_tables": 8,
+        "write_data_docs": false,
+        "backend_api": "V3"
+      },
+      "param": "8-False-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 4.139945476781577,
+        "max": 4.139945476781577,
+        "mean": 4.139945476781577,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 4.139945476781577,
+        "iqr": 0,
+        "q1": 4.139945476781577,
+        "q3": 4.139945476781577,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 4.139945476781577,
+        "hd15iqr": 4.139945476781577,
+        "ops": 0.24154907488719082,
+        "total": 4.139945476781577,
+        "data": [
+          4.139945476781577
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[8-True-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[8-True-V2]",
+      "params": {
+        "number_of_tables": 8,
+        "write_data_docs": true,
+        "backend_api": "V2"
+      },
+      "param": "8-True-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 7.2847483640071005,
+        "max": 7.2847483640071005,
+        "mean": 7.2847483640071005,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 7.2847483640071005,
+        "iqr": 0,
+        "q1": 7.2847483640071005,
+        "q3": 7.2847483640071005,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 7.2847483640071005,
+        "hd15iqr": 7.2847483640071005,
+        "ops": 0.13727310128389017,
+        "total": 7.2847483640071005,
+        "data": [
+          7.2847483640071005
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[8-True-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[8-True-V3]",
+      "params": {
+        "number_of_tables": 8,
+        "write_data_docs": true,
+        "backend_api": "V3"
+      },
+      "param": "8-True-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 6.79977521719411,
+        "max": 6.79977521719411,
+        "mean": 6.79977521719411,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 6.79977521719411,
+        "iqr": 0,
+        "q1": 6.79977521719411,
+        "q3": 6.79977521719411,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 6.79977521719411,
+        "hd15iqr": 6.79977521719411,
+        "ops": 0.14706368490996155,
+        "total": 6.79977521719411,
+        "data": [
+          6.79977521719411
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[16-False-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[16-False-V2]",
+      "params": {
+        "number_of_tables": 16,
+        "write_data_docs": false,
+        "backend_api": "V2"
+      },
+      "param": "16-False-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 6.371996399946511,
+        "max": 6.371996399946511,
+        "mean": 6.371996399946511,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 6.371996399946511,
+        "iqr": 0,
+        "q1": 6.371996399946511,
+        "q3": 6.371996399946511,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 6.371996399946511,
+        "hd15iqr": 6.371996399946511,
+        "ops": 0.1569366862806756,
+        "total": 6.371996399946511,
+        "data": [
+          6.371996399946511
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[16-False-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[16-False-V3]",
+      "params": {
+        "number_of_tables": 16,
+        "write_data_docs": false,
+        "backend_api": "V3"
+      },
+      "param": "16-False-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 5.5992150681559,
+        "max": 5.5992150681559,
+        "mean": 5.5992150681559,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 5.5992150681559,
+        "iqr": 0,
+        "q1": 5.5992150681559,
+        "q3": 5.5992150681559,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 5.5992150681559,
+        "hd15iqr": 5.5992150681559,
+        "ops": 0.17859646179466185,
+        "total": 5.5992150681559,
+        "data": [
+          5.5992150681559
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[16-True-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[16-True-V2]",
+      "params": {
+        "number_of_tables": 16,
+        "write_data_docs": true,
+        "backend_api": "V2"
+      },
+      "param": "16-True-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 10.113488104892895,
+        "max": 10.113488104892895,
+        "mean": 10.113488104892895,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 10.113488104892895,
+        "iqr": 0,
+        "q1": 10.113488104892895,
+        "q3": 10.113488104892895,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 10.113488104892895,
+        "hd15iqr": 10.113488104892895,
+        "ops": 0.09887785397366523,
+        "total": 10.113488104892895,
+        "data": [
+          10.113488104892895
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[16-True-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[16-True-V3]",
+      "params": {
+        "number_of_tables": 16,
+        "write_data_docs": true,
+        "backend_api": "V3"
+      },
+      "param": "16-True-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 10.82347371103242,
+        "max": 10.82347371103242,
+        "mean": 10.82347371103242,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 10.82347371103242,
+        "iqr": 0,
+        "q1": 10.82347371103242,
+        "q3": 10.82347371103242,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 10.82347371103242,
+        "hd15iqr": 10.82347371103242,
+        "ops": 0.09239177982025262,
+        "total": 10.82347371103242,
+        "data": [
+          10.82347371103242
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[100-False-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[100-False-V2]",
+      "params": {
+        "number_of_tables": 100,
+        "write_data_docs": false,
+        "backend_api": "V2"
+      },
+      "param": "100-False-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 23.334651264129207,
+        "max": 23.334651264129207,
+        "mean": 23.334651264129207,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 23.334651264129207,
+        "iqr": 0,
+        "q1": 23.334651264129207,
+        "q3": 23.334651264129207,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 23.334651264129207,
+        "hd15iqr": 23.334651264129207,
+        "ops": 0.042854722304645404,
+        "total": 23.334651264129207,
+        "data": [
+          23.334651264129207
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[100-False-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[100-False-V3]",
+      "params": {
+        "number_of_tables": 100,
+        "write_data_docs": false,
+        "backend_api": "V3"
+      },
+      "param": "100-False-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 24.84509929502383,
+        "max": 24.84509929502383,
+        "mean": 24.84509929502383,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 24.84509929502383,
+        "iqr": 0,
+        "q1": 24.84509929502383,
+        "q3": 24.84509929502383,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 24.84509929502383,
+        "hd15iqr": 24.84509929502383,
+        "ops": 0.040249386332711815,
+        "total": 24.84509929502383,
+        "data": [
+          24.84509929502383
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[100-True-V2]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[100-True-V2]",
+      "params": {
+        "number_of_tables": 100,
+        "write_data_docs": true,
+        "backend_api": "V2"
+      },
+      "param": "100-True-V2",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 61.45384825998917,
+        "max": 61.45384825998917,
+        "mean": 61.45384825998917,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 61.45384825998917,
+        "iqr": 0,
+        "q1": 61.45384825998917,
+        "q3": 61.45384825998917,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 61.45384825998917,
+        "hd15iqr": 61.45384825998917,
+        "ops": 0.016272373957272112,
+        "total": 61.45384825998917,
+        "data": [
+          61.45384825998917
+        ],
+        "iterations": 1
+      }
+    },
+    {
+      "group": null,
+      "name": "test_taxi_trips_benchmark[100-True-V3]",
+      "fullname": "tests/performance/test_bigquery_benchmarks.py::test_taxi_trips_benchmark[100-True-V3]",
+      "params": {
+        "number_of_tables": 100,
+        "write_data_docs": true,
+        "backend_api": "V3"
+      },
+      "param": "100-True-V3",
+      "extra_info": {},
+      "options": {
+        "disable_gc": false,
+        "timer": "perf_counter",
+        "min_rounds": 5,
+        "max_time": 1,
+        "min_time": 5e-06,
+        "warmup": false
+      },
+      "stats": {
+        "min": 92.4186674230732,
+        "max": 92.4186674230732,
+        "mean": 92.4186674230732,
+        "stddev": 0,
+        "rounds": 1,
+        "median": 92.4186674230732,
+        "iqr": 0,
+        "q1": 92.4186674230732,
+        "q3": 92.4186674230732,
+        "iqr_outliers": 0,
+        "stddev_outliers": 0,
+        "outliers": "0;0",
+        "ld15iqr": 92.4186674230732,
+        "hd15iqr": 92.4186674230732,
+        "ops": 0.0108203248097293,
+        "total": 92.4186674230732,
+        "data": [
+          92.4186674230732
+        ],
+        "iterations": 1
+      }
+    }
+  ],
+  "datetime": "2021-09-07T00:49:22.064164",
+  "version": "3.4.1"
+}
