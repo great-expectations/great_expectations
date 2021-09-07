@@ -1074,10 +1074,16 @@ class ConcurrencyConfig(DictDot):
         return self._enabled
 
     def add_sqlalchemy_create_engine_parameters(self, parameters):
+        """Update SqlAlchemy parameters to prevent concurrency errors (e.g. http://sqlalche.me/e/14/3o7r) and
+        bottlenecks.
+
+        Args:
+            parameters: SqlAlchemy create_engine parameters to add concurrency appropriate parameters to. If the
+                concurrency parameters are already set, those parameters are left unchanged.
+        """
         if not self._enabled:
             return
 
-        # Set pool_size and max_overflow to unlimited prevent a concurrency bottleneck.
         if "pool_size" not in parameters:
             # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.pool_size
             parameters["pool_size"] = 0
