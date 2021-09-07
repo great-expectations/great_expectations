@@ -52,7 +52,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
@@ -60,7 +60,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
@@ -68,7 +68,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
@@ -76,7 +76,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
@@ -84,7 +84,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
@@ -92,7 +92,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
@@ -100,7 +100,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
@@ -108,7 +108,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
@@ -116,7 +116,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
@@ -124,7 +124,7 @@ def expected_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
@@ -144,7 +144,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
@@ -152,7 +152,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
@@ -160,7 +160,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
@@ -168,7 +168,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
@@ -176,7 +176,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
@@ -184,7 +184,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
@@ -192,7 +192,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
@@ -200,7 +200,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
@@ -208,7 +208,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
@@ -216,7 +216,7 @@ def expected_batch_definitions_sorted():
         BatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_azure_data_connector",
-            data_asset_name="TestFiles",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
@@ -510,7 +510,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
         datasource_name: FAKE_DATASOURCE
         name: TEST_DATA_CONNECTOR
         default_regex:
-            pattern: (beta)-(.*)\\.csv
+            pattern: ^beta-(.*)\\.csv$
             group_names:
                 - data_asset_name
                 - index
@@ -840,7 +840,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
-                data_asset_name="TestFiles",
+                data_asset_name="DEFAULT_ASSET_NAME",
             )
         )
     )
@@ -920,7 +920,7 @@ def test_return_all_batch_definitions_basic_sorted(
 
     assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
+    assert self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"] == 10
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
@@ -928,7 +928,7 @@ def test_return_all_batch_definitions_basic_sorted(
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
-                data_asset_name="TestFiles",
+                data_asset_name="DEFAULT_ASSET_NAME",
             )
         )
     )
@@ -1002,15 +1002,16 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
     self_check_report = my_data_connector.self_check()
 
+    print(self_check_report["data_assets"])
     assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
+    assert self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"] == 10
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
         data_connector_name="general_azure_data_connector",
-        data_asset_name="TestFiles",
+        data_asset_name="DEFAULT_ASSET_NAME",
         data_connector_query=IDDict(
             **{
                 "batch_filter_parameters": {
@@ -1033,7 +1034,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
     expected_batch_definition: BatchDefinition = BatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_azure_data_connector",
-        data_asset_name="TestFiles",
+        data_asset_name="DEFAULT_ASSET_NAME",
         batch_identifiers=IDDict(
             **{
                 "name": "james",
@@ -1118,7 +1119,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
     assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
+    assert self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"] == 10
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
@@ -1126,7 +1127,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
-                data_asset_name="TestFiles",
+                data_asset_name="DEFAULT_ASSET_NAME",
             )
         )
     )
@@ -1286,7 +1287,7 @@ class_name: InferredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
 container: my_container
 execution_engine:
-           class_name: PandasExecutionEngine
+   class_name: PandasExecutionEngine
 name_starts_with: my_base_directory/
 default_regex:
    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
@@ -1321,6 +1322,8 @@ azure_options:
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
         runtime_environment={"name": "my_data_connector"},
     )
+
+    print(my_data_connector.execution_engine)
 
     assert (
         my_data_connector._get_full_file_path(
