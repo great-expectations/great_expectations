@@ -23,7 +23,7 @@ context = BaseDataContext(project_config=data_context_config)
 datasource_config = {
     "name": "my_gcs_datasource",
     "class_name": "Datasource",
-    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
+    "execution_engine": {"class_name": "PandasExecutionEngine"},
     "data_connectors": {
         "default_runtime_data_connector_name": {
             "class_name": "RuntimeDataConnector",
@@ -31,7 +31,7 @@ datasource_config = {
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetGCSDataConnector",
-            "bucket": "<YOUR_GCS_BUCKET_HERE>",
+            "bucket_or_name": "<YOUR_GCS_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
             "default_regex": {
                 "group_names": ["data_asset_name"],

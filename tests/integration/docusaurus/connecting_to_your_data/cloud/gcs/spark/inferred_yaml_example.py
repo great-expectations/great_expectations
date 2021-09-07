@@ -24,7 +24,7 @@ datasource_yaml = fr"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:
-    class_name: SparkDFExecutionEngine
+    class_name: PandasExecutionEngine
 data_connectors:
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
@@ -32,7 +32,7 @@ data_connectors:
             - default_identifier_name
     default_inferred_data_connector_name:
         class_name: InferredAssetGCSDataConnector
-        bucket: <YOUR_GCS_BUCKET_HERE>
+        bucket_or_name: <YOUR_GCS_BUCKET_HERE>
         prefix: <BUCKET_PATH_TO_DATA>
         default_regex:
             group_names:

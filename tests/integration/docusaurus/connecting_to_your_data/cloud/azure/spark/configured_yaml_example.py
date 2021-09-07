@@ -16,11 +16,13 @@ class_name: Datasource
 execution_engine:
     class_name: SparkDFExecutionEngine
     azure_options:
+        account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
         credential: <YOUR_CREDENTIAL>
 data_connectors:
     configured_data_connector_name:
         class_name: ConfiguredAssetAzureDataConnector
         azure_options:
+            account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
             credential: <YOUR_CREDENTIAL>
         container: <YOUR_AZURE_CONTAINER_HERE>
         name_starts_with: <CONTAINER_PATH_TO_DATA>
