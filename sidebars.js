@@ -169,6 +169,7 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
+                'guides/expectations/how_to_create_a_new_expectation_suite_without_the_cli',
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
                 'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
