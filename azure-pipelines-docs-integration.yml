@@ -90,6 +90,10 @@ stages:
               retryCount: '2'
 
         - script: |
+            # Create MSSQL test_ci database in container for docs tests
+            sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+
+        - script: |
             pip install pytest pytest-azurepipelines
             # TODO enable spark tests
             # TODO enable sqlalchemy once cloud resources are working again
