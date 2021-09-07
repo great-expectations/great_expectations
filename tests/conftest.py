@@ -117,6 +117,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run integration tests for docs",
     )
+    parser.addoption(
+        "--performance-tests",
+        action="store_true",
+        help="If set, run performance tests (which might also require additional arguments like --bigquery)",
+    )
 
 
 def build_test_backends_list(metafunc):
