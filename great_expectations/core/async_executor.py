@@ -42,12 +42,11 @@ class AsyncExecutor:
     def __init__(
         self,
         concurrency_config: ConcurrencyConfig,
-        max_workers_if_concurrency_enabled: int,
+        max_workers: int,
     ):
-        # Only enable concurrency if it is enabled in the config AND there is more than 1 max worker specified.
-        self._concurrency_enabled = (
-            concurrency_config.enabled and max_workers_if_concurrency_enabled > 1
-        )
+        # todo(jdimatteo): add docstrings here and elsewhere
+        # Only enable concurrent execution if it is enabled in the config AND there is more than 1 max worker specified.
+        self._execute_concurrently = concurrency_config.enabled and max_workers > 1
 
         self._thread_pool_executor = (
             ThreadPoolExecutor(
@@ -56,27 +55,28 @@ class AsyncExecutor:
                     # queries (e.g. see the BigQuery concurrent rate limit of 100 documented at
                     # https://cloud.google.com/bigquery/quotas#query_jobs).
                     100,
-                    max_workers_if_concurrency_enabled,
+                    max_workers,
                 )
             )
-            if self._concurrency_enabled
+            if self._execute_concurrently
             else None
         )
 
     @property
-    def concurrency_enabled(self) -> bool:
-        return self._concurrency_enabled
+    def execute_concurrently(self) -> bool:
+        return self._execute_concurrently
 
     def submit(self, fn, *args, **kwargs) -> AsyncResult:
         return (
             AsyncResult(future=self._thread_pool_executor.submit(fn, *args, **kwargs))
-            if self._concurrency_enabled
+            if self._execute_concurrently
             else AsyncResult(value=fn(*args, **kwargs))
         )
 
 
 def patch_https_connection_pool():
     # Note: To have any effect, this method must be called before any database connections are made.
+    #
     # WARNING: This function is experimental.
 
     ###

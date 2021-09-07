@@ -268,7 +268,7 @@ class Checkpoint:
 
         async_executor = AsyncExecutor(
             self.data_context.concurrency,
-            max_workers_if_concurrency_enabled=len(validations),
+            max_workers=len(validations),
         )
         async_val_op_run_results: List[AsyncResult[ValidationOperatorResult]] = []
         for idx, validation_dict in enumerate(validations):
