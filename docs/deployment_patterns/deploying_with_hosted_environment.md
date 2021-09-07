@@ -34,9 +34,9 @@ The following guides will contain examples for each environment we have tested o
 Step 2: Create Expectation Suites and add Expectations
 -------------------------------------------------------
 
-If you want to create an Expectation Suite in your environment without using the CLI, you can simply follow this guide: [How to Create a New Expectation Suite Without the CLI](./).
+If you want to create an Expectation Suite in your environment without using the CLI, you can simply follow this guide: [How to Create a New Expectation Suite Without the CLI](../guides/expectations/how_to_create_a_new_expectation_suite_without_the_cli).
 
-In order to store your Expectation Suites so you can load them for validation at a later point, you will need to ensure that you have an Expectation Store configured: [Configuring Metadata Stores](./).
+In order to store your Expectation Suites, so you can load them for validation at a later point, you will need to ensure that you have an Expectation Store configured: [Configuring Metadata Stores](../guides/setup/configuring_metadata_stores).
 
 Step 3: Run validation
 --------------------------------
