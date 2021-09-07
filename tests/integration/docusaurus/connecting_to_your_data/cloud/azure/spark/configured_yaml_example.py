@@ -44,7 +44,7 @@ datasource_yaml = datasource_yaml.replace(
     "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
 )
 datasource_yaml = datasource_yaml.replace(
-    "<YOUR_ACCOUNT_URL>", "superconductivetests.blob.core.windows.net"
+    "<YOUR_ACCOUNT_URL>", "alextest0.blob.core.windows.net"
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 

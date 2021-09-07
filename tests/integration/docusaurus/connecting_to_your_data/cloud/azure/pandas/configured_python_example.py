@@ -42,11 +42,11 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
+] = "alextest0.blob.core.windows.net"
 datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
+] = "alextest0.blob.core.windows.net"
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "credential"
 ] = CREDENTIAL
