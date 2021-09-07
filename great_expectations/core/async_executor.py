@@ -8,6 +8,8 @@ WARNING: This module is experimental.
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Any
 
+from urllib3 import connectionpool, poolmanager
+
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
 
@@ -37,6 +39,8 @@ class AsyncExecutor:
     WARNING: This class is experimental.
     """
 
+    _patched_https_connection_pool = False
+
     def __init__(
         self,
         concurrency_config: ConcurrencyConfig,
@@ -60,6 +64,31 @@ class AsyncExecutor:
             if self._concurrency_enabled
             else None
         )
+
+        self.patch_https_connection_pool()
+
+    def patch_https_connection_pool(self):
+        if (
+            not self._concurrency_enabled
+            or AsyncExecutor._patched_https_connection_pool
+        ):
+            return
+
+        ###
+        # NOTE: 20210907 - jdimatteo: The python requests pool size can bottle neck concurrency and result in errors
+        # like "WARNING  urllib3.connectionpool:connectionpool.py:304 Connection pool is full, discarding connection:
+        # bigquery.googleapis.com". To remove this bottleneck, patch the https connection pool as described at
+        # https://stackoverflow.com/a/22253656/1007353. After upgrading from the deprecated packages pybigquery and
+        # google-cloud-python to python-bigquery-sqlalchemy and python-bigquery, remove this patching code and instead
+        # follow the instructions at https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
+        #
+        class MyHTTPSConnectionPool(connectionpool.HTTPSConnectionPool):
+            def __init__(self, *args, **kwargs):
+                kwargs.update(maxsize=100)
+                super().__init__(*args, **kwargs)
+
+        poolmanager.pool_classes_by_scheme["https"] = MyHTTPSConnectionPool
+        AsyncExecutor._patched_https_connection_pool = True
 
     @property
     def concurrency_enabled(self):
