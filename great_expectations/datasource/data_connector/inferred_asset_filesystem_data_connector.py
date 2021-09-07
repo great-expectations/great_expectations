@@ -81,6 +81,8 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
+        # data_asset_name isn't used in this method.
+        # It's only kept for compatibility with parent methods.
         return str(Path(self.base_directory).joinpath(path))
 
     @property

@@ -52,7 +52,34 @@ class TableHead(TableMetricProvider):
         )
         df = None
         table_name = getattr(selectable, "name", None)
-        if table_name is not None:
+        if table_name is None:
+            # if a custom query was passed
+            try:
+                if metric_value_kwargs["fetch_all"]:
+                    df = pd.read_sql_query(
+                        sql=selectable,
+                        con=execution_engine.engine,
+                    )
+                else:
+                    df = next(
+                        pd.read_sql_query(
+                            sql=selectable,
+                            con=execution_engine.engine,
+                            chunksize=metric_value_kwargs["n_rows"],
+                        )
+                    )
+            except (ValueError, NotImplementedError):
+                # it looks like MetaData that is used by pd.read_sql_query
+                # cannot work on a temp table.
+                # If it fails, we are trying to get the data using read_sql
+                df = None
+            except StopIteration:
+                validator = Validator(execution_engine=execution_engine)
+                columns = validator.get_metric(
+                    MetricConfiguration("table.columns", metric_domain_kwargs)
+                )
+                df = pd.DataFrame(columns=columns)
+        else:
             try:
                 if metric_value_kwargs["fetch_all"]:
                     df = pd.read_sql_table(
@@ -80,6 +107,7 @@ class TableHead(TableMetricProvider):
                     MetricConfiguration("table.columns", metric_domain_kwargs)
                 )
                 df = pd.DataFrame(columns=columns)
+
         if df is None:
             # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
