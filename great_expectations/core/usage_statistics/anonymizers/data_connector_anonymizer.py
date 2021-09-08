@@ -17,7 +17,6 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,  # isort:skip
 )
-from great_expectations.datasource.data_connector import DataConnector  # isort:skip
 from great_expectations.datasource.data_connector import (
     FilePathDataConnector,  # isort:skip
 )
@@ -42,6 +41,8 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.datasource.data_connector import (
     RuntimeDataConnector,  # isort:skip
 )
+
+from great_expectations.datasource.data_connector import DataConnector  # isort:skip
 
 
 class DataConnectorAnonymizer(Anonymizer):

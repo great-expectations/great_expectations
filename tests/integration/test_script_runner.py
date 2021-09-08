@@ -56,27 +56,22 @@ docs_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    # TODO: <Alex>ALEX</Alex>
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
     # GCS
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
