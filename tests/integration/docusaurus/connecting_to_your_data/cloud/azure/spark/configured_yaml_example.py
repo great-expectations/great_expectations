@@ -37,12 +37,14 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace("<YOUR_AZURE_CONTAINER_HERE>", "taxidataset")
+datasource_yaml = datasource_yaml.replace(
+    "<YOUR_AZURE_CONTAINER_HERE>", "superconductive-public"
+)
 datasource_yaml = datasource_yaml.replace(
     "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
 )
 datasource_yaml = datasource_yaml.replace(
-    "<YOUR_ACCOUNT_URL>", "alextest0.blob.core.windows.net"
+    "<YOUR_ACCOUNT_URL>", "superconductivetesting.blob.core.windows.net"
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
