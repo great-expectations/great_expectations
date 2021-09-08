@@ -1042,7 +1042,7 @@ def test_GeCloudStoreBackend():
         "access_token": "1234",
         "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = "checkpoint"
+    ge_cloud_resource_type = "contract"
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -1061,14 +1061,12 @@ def test_GeCloudStoreBackend():
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=ge_cloud_resource_type,
         )
-        my_store_backend.set(
-            ("my_checkpoint_name",), my_simple_checkpoint_config_serialized
-        )
+        my_store_backend.set(("contract", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
             json={
                 "data": {
-                    "type": "checkpoint",
+                    "type": "contract",
                     "attributes": {
                         "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "checkpoint_config": OrderedDict(
@@ -1105,9 +1103,15 @@ def test_GeCloudStoreBackend():
                 ge_cloud_credentials=ge_cloud_credentials,
                 ge_cloud_resource_type=ge_cloud_resource_type,
             )
-            my_store_backend.get(("0ccac18e-7631-4bdd-8a42-3c35cce574c6",))
+            my_store_backend.get(
+                (
+                    "contract",
+                    "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                )
+            )
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+                "-4bdd-8a42-3c35cce574c6",
                 headers={
                     "Content-Type": "application/vnd.api+json",
                     "Authorization": "Bearer 1234",
@@ -1123,7 +1127,7 @@ def test_GeCloudStoreBackend():
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
                 headers={
                     "Content-Type": "application/vnd.api+json",
                     "Authorization": "Bearer 1234",
@@ -1140,12 +1144,19 @@ def test_GeCloudStoreBackend():
                 ge_cloud_credentials=ge_cloud_credentials,
                 ge_cloud_resource_type=ge_cloud_resource_type,
             )
-            my_store_backend.remove_key(("0ccac18e-7631-4bdd-8a42-3c35cce574c6",))
+            my_store_backend.remove_key(
+                (
+                    "contract",
+                    "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                )
+            )
             mock_patch.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+                "-4bdd"
+                "-8a42-3c35cce574c6",
                 json={
                     "data": {
-                        "type": "checkpoint",
+                        "type": "contract",
                         "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                         "attributes": {"deleted": True},
                     }
