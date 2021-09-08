@@ -2162,7 +2162,7 @@ class BaseDataContext:
         expectation_suite_name: str,
         overwrite_existing: Optional[bool] = False,
         ge_cloud_id: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2282,7 +2282,7 @@ class BaseDataContext:
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: Optional[bool] = True,
         ge_cloud_id: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """Save the provided expectation suite into the DataContext.
 
@@ -3957,15 +3957,18 @@ class DataContext(BaseDataContext):
             ge_cloud_access_token=ge_cloud_access_token,
         )
 
-
         missing_keys = []
         for key, val in ge_cloud_config_dict.items():
             if not val:
                 missing_keys.append(key)
         if len(missing_keys) > 0:
+            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            global_config_path_str = [
+                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+            ]
             raise DataContextError(
-                f"Arg(s) {missing_keys} required for ge_cloud_mode but neither provided nor found in "
-                f"environment or in global configs ({super().GLOBAL_CONFIG_PATHS})."
+                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({(', ').join(global_config_path_str)})."
             )
 
         return GeCloudConfig(**ge_cloud_config_dict)
@@ -4085,7 +4088,9 @@ class DataContext(BaseDataContext):
     def _save_project_config(self):
         """Save the current project to disk."""
         if self.ge_cloud_mode:
-            logger.debug("ge_cloud_mode detected - skipping DataContect._save_project_config")
+            logger.debug(
+                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+            )
             return
         logger.debug("Starting DataContext._save_project_config")
 

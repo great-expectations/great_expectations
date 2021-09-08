@@ -6,6 +6,7 @@ from collections import OrderedDict
 import great_expectations.exceptions as exceptions
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
+    GeCloudIdentifier,
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
@@ -14,8 +15,8 @@ from great_expectations.data_context.store.json_site_store import JsonSiteStore
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     ValidationResultIdentifier,
-    GeCloudIdentifier
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter

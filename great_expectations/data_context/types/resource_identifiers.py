@@ -311,10 +311,12 @@ class SiteSectionIdentifier(DataContextKey):
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
+
 class RenderedSectionIdentifier(DataContextKey):
     """
     A RenderedSectionIdentifier identifies a docs artifact that has been processed by a renderer using its
     """
+
     def __init__(self, rendered_section_name, resource_identifier):
         self._rendered_section_name = rendered_section_name
         if rendered_section_name in ["validations", "profiling"]:

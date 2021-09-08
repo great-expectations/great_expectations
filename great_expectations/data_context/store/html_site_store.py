@@ -5,9 +5,9 @@ from mimetypes import guess_type
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
-    GeCloudIdentifier
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -21,8 +21,8 @@ from great_expectations.util import (
 )
 
 from ...core.data_context_key import DataContextKey
-from .tuple_store_backend import TupleStoreBackend
 from .ge_cloud_store_backend import GeCloudStoreBackend
+from .tuple_store_backend import TupleStoreBackend
 
 logger = logging.getLogger(__name__)
 
@@ -316,7 +316,7 @@ class HtmlSiteStore:
                 return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
-        if not isinstance(key, (SiteSectionIdentifier,GeCloudIdentifier)):
+        if not isinstance(key, (SiteSectionIdentifier, GeCloudIdentifier)):
             raise TypeError(
                 "key: {!r} must be a SiteSectionIdentifier or GeCloudIdentifier, not {!r}".format(
                     key,
@@ -419,7 +419,9 @@ class HtmlSiteStore:
                             )
                             content_type = "text/html; charset=utf8"
 
-                    if not isinstance(self.store_backends["static_assets"], GeCloudStoreBackend):
+                    if not isinstance(
+                        self.store_backends["static_assets"], GeCloudStoreBackend
+                    ):
                         self.store_backends["static_assets"].set(
                             store_key,
                             f.read(),

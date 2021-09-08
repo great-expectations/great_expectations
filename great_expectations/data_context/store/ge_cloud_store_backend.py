@@ -25,7 +25,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "contract": "checkpoint_config",
         "data_context": "data_context_config",
         "expectation_suite": "suite",
-        "rendered_data_doc":"rendered_data_doc"
+        "rendered_data_doc": "rendered_data_doc",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
@@ -146,7 +146,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     @property
     def allowed_set_kwargs(self):
-        return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(self.ge_cloud_resource_type, set())
+        return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(
+            self.ge_cloud_resource_type, set()
+        )
 
     def validate_set_kwargs(self, kwargs):
         kwarg_names = set(kwargs.keys())
@@ -178,7 +180,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "attributes": {
                     "account_id": account_id,
                     attributes_key: value,
-                    **(kwargs if self.validate_set_kwargs(kwargs) else {})
+                    **(kwargs if self.validate_set_kwargs(kwargs) else {}),
                 },
             }
         }
