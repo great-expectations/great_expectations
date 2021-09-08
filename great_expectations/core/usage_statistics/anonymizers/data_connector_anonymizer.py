@@ -1,46 +1,20 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.datasource.data_connector import (
-    ConfiguredAssetAzureDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetFilePathDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetFilesystemDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetGCSDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetS3DataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetSqlDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import DataConnector  # isort:skip
-from great_expectations.datasource.data_connector import (
-    FilePathDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    InferredAssetAzureDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    InferredAssetFilePathDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    InferredAssetFilesystemDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    InferredAssetGCSDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    InferredAssetS3DataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
-    InferredAssetSqlDataConnector,  # isort:skip
-)
-from great_expectations.datasource.data_connector import (
+    DataConnector,  # isort:skip
     RuntimeDataConnector,  # isort:skip
+    FilePathDataConnector,  # isort:skip
+    ConfiguredAssetFilePathDataConnector,  # isort:skip
+    InferredAssetFilePathDataConnector,  # isort:skip
+    ConfiguredAssetFilesystemDataConnector,  # isort:skip
+    InferredAssetFilesystemDataConnector,  # isort:skip
+    ConfiguredAssetS3DataConnector,  # isort:skip
+    InferredAssetS3DataConnector,  # isort:skip
+    ConfiguredAssetAzureDataConnector,  # isort:skip
+    InferredAssetAzureDataConnector,  # isort:skip
+    ConfiguredAssetGCSDataConnector,  # isort:skip
+    InferredAssetGCSDataConnector,  # isort:skip
+    ConfiguredAssetSqlDataConnector,  # isort:skip
+    InferredAssetSqlDataConnector,  # isort:skip
 )
 
 

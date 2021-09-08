@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.execution_engine import ExecutionEngine
 
