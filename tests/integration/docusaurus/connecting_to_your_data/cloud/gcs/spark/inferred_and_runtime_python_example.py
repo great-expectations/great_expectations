@@ -23,7 +23,7 @@ context = BaseDataContext(project_config=data_context_config)
 datasource_config = {
     "name": "my_gcs_datasource",
     "class_name": "Datasource",
-    "execution_engine": {"class_name": "PandasExecutionEngine"},
+    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
     "data_connectors": {
         "default_runtime_data_connector_name": {
             "class_name": "RuntimeDataConnector",

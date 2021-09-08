@@ -24,7 +24,7 @@ datasource_yaml = fr"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:
-    class_name: PandasExecutionEngine
+    class_name: SparkDFExecutionEngine
 data_connectors:
     default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
