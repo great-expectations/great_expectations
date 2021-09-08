@@ -3,7 +3,7 @@ import enum
 import itertools
 import logging
 import uuid
-from copy import deepcopy
+from copy import deepcopy, copy
 from typing import Dict, List, Optional, Union
 
 from ruamel.yaml import YAML
@@ -1873,7 +1873,7 @@ class CheckpointConfigSchema(Schema):
 
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
-        data = deepcopy(data)
+        data = copy(data)
         for key in self.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
