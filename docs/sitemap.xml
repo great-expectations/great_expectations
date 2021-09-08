@@ -277,6 +277,11 @@
   <priority>0.41</priority>
 </url>
 <url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mssql/</loc>
+  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
   <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mysql/</loc>
   <lastmod>2021-08-13T14:40:36+00:00</lastmod>
   <priority>0.41</priority>

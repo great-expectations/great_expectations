@@ -24,6 +24,7 @@ Here’s an overview of the components of a typical Great Expectations deploymen
   * [Connecting to Data](/docs/tutorials/getting_started/customize_your_deployment#connecting-to-data)
   * [Options for hosting Data Docs](/docs/tutorials/getting_started/customize_your_deployment#options-for-hosting-data-docs)
   * [Additional Checkpoints and Actions](/docs/tutorials/getting_started/customize_your_deployment#additional-checkpoints-and-actions)
+* [How to update Data Docs as a Validation Action](/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action)
 
 ## Options for storing Great Expectations configuration
 The simplest way to manage your Great Expectations configuration is usually by committing great_expectations/great_expectations.yml to Git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
@@ -69,6 +70,7 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 
 * [How to connect to a Athena database](/docs/guides/connecting_to_your_data/database/athena)
 * [How to connect to a BigQuery database](/docs/guides/connecting_to_your_data/database/bigquery)
+* [How to connect to a MSSQL database](/docs/guides/connecting_to_your_data/database/mssql)
 * [How to connect to a MySQL database](/docs/guides/connecting_to_your_data/database/mysql)
 * [How to connect to a Postgres database](/docs/guides/connecting_to_your_data/database/postgres)
 * [How to connect to a Redshift database](/docs/guides/connecting_to_your_data/database/redshift)
@@ -76,6 +78,7 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 * [How to connect to a SQLite database](/docs/guides/connecting_to_your_data/database/sqlite)
 * [How to connect to data on a filesystem using Spark](/docs/guides/connecting_to_your_data/filesystem/spark)
 * [How to connect to data on S3 using Spark](/docs/guides/connecting_to_your_data/cloud/s3/spark)
+* [How to connect to data on GCS using Spark](/docs/guides/connecting_to_your_data/cloud/gcs/spark)
 
 ## Options for hosting Data Docs
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website.
