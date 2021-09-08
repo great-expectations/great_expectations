@@ -76,5 +76,4 @@ The ``UpdateDataDocsAction`` generates an HTML file for the latest Validation Re
 Additional resources
 --------------------
 
-- [How to store Validation Results as a Validation Action](./how_to_store_validation_results_as_a_validation_action)
 - [Checkpoints and Actions](../../../reference/checkpoints_and_actions)
