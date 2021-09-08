@@ -318,7 +318,7 @@ class HtmlSiteStore:
     def _validate_key(self, key):
         if not isinstance(key, (SiteSectionIdentifier,GeCloudIdentifier)):
             raise TypeError(
-                "key: {!r} must a SiteSectionIdentifier or RenderedSectionIdentifier, not {!r}".format(
+                "key: {!r} must be a SiteSectionIdentifier or GeCloudIdentifier, not {!r}".format(
                     key,
                     type(key),
                 )
