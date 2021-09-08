@@ -19,7 +19,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.async_executor import patch_https_connection_pool
 from tests.performance import taxi_benchmark_util
 
-patch_https_connection_pool()
+patch_https_connection_pool(taxi_benchmark_util.concurrency_config())
 
 
 @pytest.mark.parametrize(

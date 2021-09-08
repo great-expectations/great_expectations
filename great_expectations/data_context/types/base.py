@@ -1067,11 +1067,25 @@ class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
     def __init__(self, enabled: Optional[bool] = False):
+        """Initialize a concurrency configuration to control multithreaded execution.
+
+        Args:
+            enabled: Whether or not multithreading is enabled.
+        """
         self._enabled = enabled
 
     @property
     def enabled(self):
+        """Whether or not multithreading is enabled."""
         return self._enabled
+
+    @property
+    def max_database_query_concurrency(self) -> int:
+        """Max number of concurrent database queries to execute with mulithreading."""
+        # BigQuery has a limit of 100 for "Concurrent rate limit for interactive queries" as described at
+        # https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
+        # databases and/or be manually user configurable.
+        return 100
 
     def add_sqlalchemy_create_engine_parameters(self, parameters):
         """Update SqlAlchemy parameters to prevent concurrency errors (e.g. http://sqlalche.me/e/14/3o7r) and

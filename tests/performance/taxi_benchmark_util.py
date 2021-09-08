@@ -11,6 +11,7 @@ from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
+    ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
@@ -56,6 +57,10 @@ def create_checkpoint(
         checkpoint_name,
         suite_and_asset_names,
     )
+
+
+def concurrency_config() -> ConcurrencyConfig:
+    return ConcurrencyConfig(enabled=True)
 
 
 def expected_validation_results() -> List[dict]:
@@ -254,7 +259,7 @@ def _create_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
         data_docs_sites=data_docs_sites,
         anonymous_usage_statistics={"enabled": False},
-        concurrency={"enabled": True},
+        concurrency=concurrency_config(),
     )
 
     context = BaseDataContext(project_config=data_context_config)

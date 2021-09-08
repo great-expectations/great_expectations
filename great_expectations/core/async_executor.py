@@ -44,17 +44,23 @@ class AsyncExecutor:
         concurrency_config: ConcurrencyConfig,
         max_workers: int,
     ):
-        """Initializes a new AsyncExecutor instance.
+        """Initializes a new AsyncExecutor instance used to organize code for multithreaded execution.
+
+        If multithreading is disabled, all execution will be done synchronously (e.g. on the main thread) during the
+        call to submit. This is useful for introducing multithreading while still supporting single threaded execution.
+        This allows configuration to determine whether or not multithreading is used, which is useful when there are
+        concerns that some workflows may not benefit from multithreading or may not be safe to multithread.
 
         This class is intended to be used as a context manager using the `with` statement.
 
         Args:
-            concurrency_config: Configuration used to determine whether or not execution is done concurrently. Even if
-                the configuration has concurrency enabled, if max_workers is 1 then all work will be done synchronously
-                (e.g. on the main thread) during the call to submit.
-            max_workers: The maximum number of workers that can be used to execute concurrently. If concurrency is
+            concurrency_config: Configuration used to determine whether or not execution is done concurrently with
+                multiple threads. Even if the configuration has concurrency enabled, if max_workers is 1 then all work
+                will be done synchronously (e.g. on the main thread) during the call to submit.
+            max_workers: The maximum number of threads that can be used to execute concurrently. If concurrency is
                 disabled or max_workers is 1, all work will be done synchronously (e.g. on the main thread) during the
-                call to submit.
+                call to submit. Note that the maximum number of threads is also limited by
+                concurrency_config.max_database_query_concurrency.
         """
         # Only enable concurrent execution if it is enabled in the config AND there is more than 1 max worker specified.
         self._execute_concurrently = concurrency_config.enabled and max_workers > 1
@@ -62,10 +68,7 @@ class AsyncExecutor:
         self._thread_pool_executor = (
             ThreadPoolExecutor(
                 max_workers=min(
-                    # Use no more than 100 threads, because most databases won't benefit from more than 100 concurrent
-                    # queries (e.g. see the BigQuery concurrent rate limit of 100 documented at
-                    # https://cloud.google.com/bigquery/quotas#query_jobs).
-                    100,
+                    concurrency_config.max_database_query_concurrency,
                     max_workers,
                 )
             )
@@ -106,7 +109,7 @@ class AsyncExecutor:
         return self._execute_concurrently
 
 
-def patch_https_connection_pool():
+def patch_https_connection_pool(concurrency_config: ConcurrencyConfig):
     """Patch urllib3 to enable a higher default max pool size to reduce concurrency bottlenecks.
 
     To have any effect, this method must be called before any database connections are made, e.g. by scripts leveraging
@@ -124,7 +127,7 @@ def patch_https_connection_pool():
     # following the instructions at https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
     class HTTPSConnectionPoolWithHigherMaxSize(connectionpool.HTTPSConnectionPool):
         def __init__(self, *args, **kwargs):
-            kwargs.update(maxsize=100)
+            kwargs.update(maxsize=concurrency_config.max_database_query_concurrency)
             super().__init__(*args, **kwargs)
 
     poolmanager.pool_classes_by_scheme["https"] = HTTPSConnectionPoolWithHigherMaxSize
