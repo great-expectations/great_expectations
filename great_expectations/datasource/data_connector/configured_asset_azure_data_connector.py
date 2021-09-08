@@ -161,7 +161,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        # Pandas and Spark execution engines require separate paths for compatibility with Azure's API.
+        # Pandas and Spark execution engines utilize separate path formats for accessing Azure Blob Storage service.
         full_path: str
         if isinstance(self.execution_engine, PandasExecutionEngine):
             full_path = os.path.join(

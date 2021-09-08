@@ -276,6 +276,31 @@ def data_context_with_complete_global_config_in_dot_dir_only(mocked_global_confi
 
 
 @pytest.fixture
+def data_context_with_complete_global_config_with_usage_stats_section_in_dot_dir_only(
+    mocked_global_config_dirs,
+):
+    with patch(
+        "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
+        new_callable=PropertyMock,
+    ) as mock:
+        (
+            mock_global_config_dot_dir,
+            mock_global_config_etc_dir,
+            mock_global_config_paths,
+        ) = mocked_global_config_dirs
+        mock.return_value = mock_global_config_paths
+
+        shutil.copy(
+            file_relative_path(
+                __file__,
+                "fixtures/conf/great_expectations_cloud_config_complete_with_usage_stats_section.conf",
+            ),
+            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
+        )
+        yield
+
+
+@pytest.fixture
 def data_context_with_complete_global_config_in_etc_dir_only(mocked_global_config_dirs):
     with patch(
         "great_expectations.data_context.data_context.BaseDataContext.GLOBAL_CONFIG_PATHS",
