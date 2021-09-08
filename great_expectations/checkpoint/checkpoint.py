@@ -1,9 +1,8 @@
-import copy
 import datetime
 import json
 import logging
 import os
-from copy import deepcopy
+from copy import copy
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
@@ -144,14 +143,14 @@ class Checkpoint:
             and not runtime_kwargs.get("template_name")
             and not config.template_name
         ):
-            substituted_config = deepcopy(self._substituted_config)
+            substituted_config = copy(self._substituted_config)
             if any(runtime_kwargs.values()):
                 substituted_config.update(runtime_kwargs=runtime_kwargs)
         else:
             template_name = runtime_kwargs.get("template_name") or config.template_name
 
             if not template_name:
-                substituted_config = copy.deepcopy(config)
+                substituted_config = copy(config)
                 if any(runtime_kwargs.values()):
                     substituted_config.update(runtime_kwargs=runtime_kwargs)
 
