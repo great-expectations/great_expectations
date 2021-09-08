@@ -66,6 +66,7 @@ stages:
       services:
         postgres: postgres
         mysql: mysql
+        mssql: mssql
 
       steps:
         - task: UsePythonVersion@0
@@ -89,10 +90,13 @@ stages:
               retryCount: '2'
 
         - script: |
+            sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+          displayName: 'Create MSSQL database test_ci'
+
+        - script: |
             pip install pytest pytest-azurepipelines
             # TODO enable spark tests
-            # TODO enable sqlalchemy once cloud resources are working again
-            pytest -v --docs-tests -m docs --no-spark --mysql tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m docs --no-spark --mysql --mssql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials

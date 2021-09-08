@@ -258,6 +258,20 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mssql_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MSSQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MSSQL,
+    },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -440,7 +454,7 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
     ):
         pytest.skip("Skipping mysql tests")
     elif dependencies == BackendDependencies.MSSQL and (
-        pytest_args.no_mssql or pytest_args.no_sqlalchemy
+        not pytest_args.mssql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mssql tests")
     elif dependencies == BackendDependencies.BIGQUERY and pytest_args.no_sqlalchemy:
