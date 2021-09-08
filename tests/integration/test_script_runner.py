@@ -113,6 +113,7 @@ docs_test_matrix = [
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     # },
     # S3
+    # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once S3 Configured YAML Example is implemented.</Alex>
     # {
@@ -125,14 +126,15 @@ docs_test_matrix = [
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     # },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
+    # TODO: <Alex>ALEX -- uncomment next two (2) tests once S3 testing in Azure Pipelines is re-enabled.</Alex>
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured YAML Example is implemented.</Alex>
     # {
