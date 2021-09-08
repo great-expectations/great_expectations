@@ -44,12 +44,12 @@ datasource_config["execution_engine"]["azure_options"][
     "account_url"
 ] = "superconductivetesting.blob.core.windows.net"
 datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
-datasource_config["data_connectors"]["default_inferred_data_connector_name"]["azure_options"][
-    "account_url"
-] = "superconductivetesting.blob.core.windows.net"
-datasource_config["data_connectors"]["default_inferred_data_connector_name"]["azure_options"][
-    "credential"
-] = CREDENTIAL
+datasource_config["data_connectors"]["default_inferred_data_connector_name"][
+    "azure_options"
+]["account_url"] = "superconductivetesting.blob.core.windows.net"
+datasource_config["data_connectors"]["default_inferred_data_connector_name"][
+    "azure_options"
+]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "container"
 ] = "superconductive-public"

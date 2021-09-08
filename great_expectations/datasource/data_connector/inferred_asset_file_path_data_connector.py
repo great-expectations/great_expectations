@@ -4,7 +4,9 @@ from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.file_path_data_connector import FilePathDataConnector
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
