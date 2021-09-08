@@ -336,14 +336,6 @@ module.exports = {
             { type: 'doc', id: 'reference/supporting_resources' }
           ]
         },
-        // {
-          // type: 'category',
-          // label: 'Spare Parts',
-          // collapsed: true,
-          // items: [
-            // { type: 'doc', id: 'reference/spare_parts' }
-          // ]
-        // },
         {
           type: 'category',
           label: 'API Reference',
