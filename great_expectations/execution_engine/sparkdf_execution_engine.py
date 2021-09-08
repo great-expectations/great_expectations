@@ -2,7 +2,6 @@ import copy
 import datetime
 import hashlib
 import logging
-import os
 import uuid
 import warnings
 from functools import reduce
@@ -220,6 +219,14 @@ class SparkDFExecutionEngine(ExecutionEngine):
             }
         )
 
+        """
+        As documented in Azure DataConnector implementations, Pandas and Spark execution engines utilize separate path
+        formats for accessing Azure Blob Storage service.  However, Pandas and Spark execution engines utilize identical
+        path formats for accessing all other supported cloud storage services (AWS S3 and Google Cloud Storage).
+        Moreover, these formats (encapsulated in S3BatchSpec and GCSBatchSpec) extend PathBatchSpec (common to them).
+        Therefore, at the present time, all cases with the exception of Azure Blob Storage , are handled generically.
+        """
+
         batch_data: Any
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
@@ -260,9 +267,6 @@ Please check your config."""
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
                 )
-
-        elif isinstance(batch_spec, GCSBatchSpec):
-            raise NotImplementedError("Currently unsupported.")
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
