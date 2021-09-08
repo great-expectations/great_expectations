@@ -81,7 +81,6 @@ class AsyncExecutor(AbstractContextManager):
         self.shutdown()
         # Do not do use the context manager exception arguments, in order to get the desired default behavior where any
         # exceptions are raised here. More info at https://docs.python.org/3.9/reference/datamodel.html#object.__exit__.
-        AbstractContextManager.__exit__(self, exc_type, exc_value, traceback)
 
     def submit(self, fn, *args, **kwargs) -> AsyncResult:
         """Submits a callable to be executed with the given arguments.
