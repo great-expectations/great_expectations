@@ -248,7 +248,10 @@ class ExpectationValidationResultSchema(Schema):
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
         data = deepcopy(data)
-        data.result = convert_to_json_serializable(data.result)
+        if isinstance(data, ExpectationValidationResult):
+            data.result = convert_to_json_serializable(data.result)
+        elif isinstance(data, dict):
+            data["result"] = convert_to_json_serializable(data.get("result"))
         return data
 
     # # noinspection PyUnusedLocal
@@ -381,7 +384,10 @@ class ExpectationSuiteValidationResultSchema(Schema):
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        data.meta = convert_to_json_serializable(data.meta)
+        if isinstance(data, ExpectationSuiteValidationResult):
+            data.meta = convert_to_json_serializable(data.meta)
+        elif isinstance(data, dict):
+            data["meta"] = convert_to_json_serializable(data.get("meta"))
         return data
 
     # noinspection PyUnusedLocal
