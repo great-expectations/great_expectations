@@ -1,19 +1,46 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.datasource.data_connector import (
-    ConfiguredAssetAzureDataConnector,
-    ConfiguredAssetFilePathDataConnector,
-    ConfiguredAssetFilesystemDataConnector,
-    ConfiguredAssetGCSDataConnector,
-    ConfiguredAssetS3DataConnector,
-    ConfiguredAssetSqlDataConnector,
-    DataConnector,
-    FilePathDataConnector,
-    InferredAssetFilePathDataConnector,
-    InferredAssetFilesystemDataConnector,
-    InferredAssetGCSDataConnector,
-    InferredAssetS3DataConnector,
-    InferredAssetSqlDataConnector,
-    RuntimeDataConnector,
+    ConfiguredAssetAzureDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetFilePathDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetFilesystemDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetGCSDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetS3DataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetSqlDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import DataConnector  # isort:skip
+from great_expectations.datasource.data_connector import (
+    FilePathDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    InferredAssetAzureDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    InferredAssetFilePathDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    InferredAssetFilesystemDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    InferredAssetGCSDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    InferredAssetS3DataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    InferredAssetSqlDataConnector,  # isort:skip
+)
+from great_expectations.datasource.data_connector import (
+    RuntimeDataConnector,  # isort:skip
 )
 
 
@@ -24,19 +51,20 @@ class DataConnectorAnonymizer(Anonymizer):
         # This list should contain all DataConnector types. When new DataConnector types
         # are created, please make sure to add ordered bottom up in terms of inheritance order
         self._ge_classes = [
-            InferredAssetGCSDataConnector,
-            InferredAssetS3DataConnector,
-            InferredAssetFilesystemDataConnector,
-            InferredAssetFilePathDataConnector,
+            ConfiguredAssetSqlDataConnector,
             InferredAssetSqlDataConnector,
             ConfiguredAssetGCSDataConnector,
-            ConfiguredAssetS3DataConnector,
+            InferredAssetGCSDataConnector,
             ConfiguredAssetAzureDataConnector,
+            InferredAssetAzureDataConnector,
+            ConfiguredAssetS3DataConnector,
+            InferredAssetS3DataConnector,
             ConfiguredAssetFilesystemDataConnector,
+            InferredAssetFilesystemDataConnector,
             ConfiguredAssetFilePathDataConnector,
-            ConfiguredAssetSqlDataConnector,
-            RuntimeDataConnector,
+            InferredAssetFilePathDataConnector,
             FilePathDataConnector,
+            RuntimeDataConnector,
             DataConnector,
         ]
 
