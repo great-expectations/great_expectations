@@ -125,17 +125,23 @@ class HtmlSiteStore:
         # One thing to watch for is reversibility of keys.
         # If several types are being written to overlapping directories, we could get collisions.
         module_name = "great_expectations.data_context.store"
-        filepath_prefix = "expectations"
         filepath_suffix = ".html"
+        is_ge_cloud_store = store_backend["class_name"] == "GeCloudStoreBackend"
+        expectation_config_defaults = {
+                "module_name": module_name,
+                "filepath_prefix": "expectations",
+                "filepath_suffix": filepath_suffix,
+                "suppress_store_backend_id": True,
+            }
+        if is_ge_cloud_store:
+            expectation_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
         expectation_suite_identifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_prefix": filepath_prefix,
-                "filepath_suffix": filepath_suffix,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=expectation_config_defaults,
         )
         if not expectation_suite_identifier_obj:
             raise ClassInstantiationError(
@@ -144,16 +150,22 @@ class HtmlSiteStore:
                 class_name=store_backend["class_name"],
             )
 
-        filepath_prefix = "validations"
+        validation_result_config_defaults = {
+            "module_name": module_name,
+            "filepath_prefix": "validations",
+            "filepath_suffix": filepath_suffix,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            validation_result_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
+
         validation_result_idendifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_prefix": filepath_prefix,
-                "filepath_suffix": filepath_suffix,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=validation_result_config_defaults,
         )
         if not validation_result_idendifier_obj:
             raise ClassInstantiationError(
@@ -163,14 +175,21 @@ class HtmlSiteStore:
             )
 
         filepath_template = "index.html"
-        index_page_obj = instantiate_class_from_config(
-            config=store_backend,
-            runtime_environment=runtime_environment,
-            config_defaults={
+        index_page_config_defaults = {
                 "module_name": module_name,
                 "filepath_template": filepath_template,
                 "suppress_store_backend_id": True,
-            },
+            }
+        if is_ge_cloud_store:
+            index_page_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
+
+        index_page_obj = instantiate_class_from_config(
+            config=store_backend,
+            runtime_environment=runtime_environment,
+            config_defaults=index_page_config_defaults,
         )
         if not index_page_obj:
             raise ClassInstantiationError(
@@ -179,15 +198,20 @@ class HtmlSiteStore:
                 class_name=store_backend["class_name"],
             )
 
-        filepath_template = None
+        static_assets_config_defaults = {
+            "module_name": module_name,
+            "filepath_template": None,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            static_assets_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
         static_assets_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_template": filepath_template,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=static_assets_config_defaults,
         )
         if not static_assets_obj:
             raise ClassInstantiationError(

@@ -29,7 +29,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
-        "expectation_suite": {"clause_id"}
+        "expectation_suite": {"clause_id"},
+        "rendered_data_doc": {"source_type","source_id"}
     }
 
     def __init__(
