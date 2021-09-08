@@ -3,7 +3,7 @@ import enum
 import itertools
 import logging
 import uuid
-from copy import deepcopy, copy
+from copy import copy, deepcopy
 from typing import Dict, List, Optional, Union
 
 from ruamel.yaml import YAML
