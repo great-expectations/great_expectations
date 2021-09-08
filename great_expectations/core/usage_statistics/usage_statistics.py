@@ -14,6 +14,7 @@ import jsonschema
 import requests
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
     BatchAnonymizer,
@@ -330,7 +331,11 @@ def run_validation_operator_usage_statistics(
 
 
 def save_expectation_suite_usage_statistics(
-    data_context, expectation_suite, expectation_suite_name=None  # self
+    data_context,
+    expectation_suite,
+    expectation_suite_name=None,
+    ge_cloud_id=None,  # self
+    **kwargs
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -343,7 +348,10 @@ def save_expectation_suite_usage_statistics(
     payload = {}
 
     if expectation_suite_name is None:
-        expectation_suite_name = expectation_suite.expectation_suite_name
+        if isinstance(expectation_suite, ExpectationSuite):
+            expectation_suite_name = expectation_suite.expectation_suite_name
+        elif isinstance(expectation_suite, dict):
+            expectation_suite_name = expectation_suite.get("expectation_suite_name")
 
     try:
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
