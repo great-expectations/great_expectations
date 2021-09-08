@@ -6,6 +6,7 @@ WARNING: This module is experimental.
 """
 
 from concurrent.futures import Future, ThreadPoolExecutor
+from contextlib import AbstractContextManager
 from typing import Any
 
 from urllib3 import connectionpool, poolmanager
@@ -32,7 +33,7 @@ class AsyncResult:
         return self._future.result() if self._future is not None else self._value
 
 
-class AsyncExecutor:
+class AsyncExecutor(AbstractContextManager):
     """Wrapper around ThreadPoolExecutor to facilitate single code path
     for both when concurrency is enabled and disabled.
 
@@ -76,11 +77,11 @@ class AsyncExecutor:
             else None
         )
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, ext, exv, trb):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.shutdown()
+        # Do not do use the context manager exception arguments, in order to get the desired default behavior where any
+        # exceptions are raised here. More info at https://docs.python.org/3.9/reference/datamodel.html#object.__exit__.
+        AbstractContextManager.__exit__(self, exc_type, exc_value, traceback)
 
     def submit(self, fn, *args, **kwargs) -> AsyncResult:
         """Submits a callable to be executed with the given arguments.
@@ -95,7 +96,7 @@ class AsyncExecutor:
         )
 
     def shutdown(self):
-        """Clean-up the resources associated with the Executor and blocks until all running async results finish
+        """Clean-up the resources associated with the AsyncExecutor and blocks until all running async results finish
         executing.
 
         It is preferable to not call this method explicitly, and instead use the `with` statement to ensure shutdown is
