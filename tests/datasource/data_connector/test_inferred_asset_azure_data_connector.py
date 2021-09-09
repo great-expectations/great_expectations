@@ -12,7 +12,11 @@ from great_expectations.core.batch import (
     BatchRequestBase,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import ConfiguredAssetGCSDataConnector
+from great_expectations.datasource.data_connector import InferredAssetAzureDataConnector
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 
 yaml = YAML()
 
@@ -21,7 +25,7 @@ yaml = YAML()
 def expected_config_dict():
     """Used to validate `self_check()` and `test_yaml_config()` outputs."""
     config = {
-        "class_name": "ConfiguredAssetGCSDataConnector",
+        "class_name": "InferredAssetAzureDataConnector",
         "data_asset_count": 1,
         "example_data_asset_names": [
             "alpha",
@@ -51,80 +55,80 @@ def expected_batch_definitions_unsorted():
     expected = [
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
@@ -143,80 +147,80 @@ def expected_batch_definitions_sorted():
     expected = [
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
         BatchDefinition(
             datasource_name="test_environment",
-            data_connector_name="general_gcs_data_connector",
-            data_asset_name="TestFiles",
+            data_connector_name="general_azure_data_connector",
+            data_asset_name="DEFAULT_ASSET_NAME",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
@@ -226,25 +230,28 @@ def expected_batch_definitions_sorted():
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
-def test_instantiation_without_args(
-    mock_gcs_conn, mock_list_keys, expected_config_dict
+def test_instantiation_with_account_url_and_credential(
+    mock_azure_conn, mock_list_keys, expected_config_dict
 ):
-    my_data_connector = ConfiguredAssetGCSDataConnector(
+    my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
+            "pattern": r"(alpha)-(.*)\.csv",
+            "group_names": ["data_asset_name", "index"],
         },
-        bucket_or_name="my_bucket",
-        prefix="",
-        assets={"alpha": {}},
+        container="my_container",
+        name_starts_with="",
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": "my_credential",
+        },
     )
     assert my_data_connector.self_check() == expected_config_dict
 
@@ -254,31 +261,28 @@ def test_instantiation_without_args(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.service_account.Credentials.from_service_account_file"
-)
-def test_instantiation_with_filename_arg(
-    mock_auth_method, mock_gcs_conn, mock_list_keys, expected_config_dict
+def test_instantiation_with_conn_str_and_credential(
+    mock_azure_conn, mock_list_keys, expected_config_dict
 ):
-    my_data_connector = ConfiguredAssetGCSDataConnector(
+    my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
-        gcs_options={
-            "filename": "my_filename.json",
-        },
         default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
+            "pattern": "(alpha)-(.*)\.csv",
+            "group_names": ["data_asset_name", "index"],
         },
-        bucket_or_name="my_bucket",
-        prefix="",
-        assets={"alpha": {}},
+        container="my_container",
+        name_starts_with="",
+        azure_options={  # Representative of format noted in official docs
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "credential": "my_credential",
+        },
     )
 
     assert my_data_connector.self_check() == expected_config_dict
@@ -289,52 +293,121 @@ def test_instantiation_with_filename_arg(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-    return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.service_account.Credentials.from_service_account_info"
-)
-def test_instantiation_with_info_arg(
-    mock_auth_method, mock_gcs_conn, mock_list_keys, expected_config_dict
-):
-    my_data_connector = ConfiguredAssetGCSDataConnector(
+def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_conn):
+    my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
-        gcs_options={
-            "info": "{ my_json: my_content }",
-        },
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket_or_name="my_bucket",
-        prefix="",
-        assets={"alpha": {}},
+        container="my_container",
+        name_starts_with="",
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": "my_credential",
+        },
     )
+    assert my_data_connector._account_name == "my_account_url"
 
-    assert my_data_connector.self_check() == expected_config_dict
 
-    my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
-    assert my_data_connector.get_unmatched_data_references() == []
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn):
+    my_data_connector = InferredAssetAzureDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        container="my_container",
+        name_starts_with="",
+        azure_options={  # Representative of format noted in official docs
+            "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+            "credential": "my_credential",
+        },
+    )
+    assert my_data_connector._account_name == "storagesample"
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_multiple_auth_methods_raises_error(
+    mock_azure_conn,
+):
+    # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
+    with pytest.raises(AssertionError):
+        InferredAssetAzureDataConnector(
+            name="my_data_connector",
+            datasource_name="FAKE_DATASOURCE_NAME",
+            default_regex={
+                "pattern": "alpha-(.*)\\.csv",
+                "group_names": ["index"],
+            },
+            container="my_container",
+            name_starts_with="",
+            azure_options={
+                "account_url": "account.blob.core.windows.net",
+                "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
+                "credential": "my_credential",
+            },
+        )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+)
+def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
+    mock_azure_conn,
+):
+    # Raises error in InferredAssetAzureDataConnector's constructor due to `account_url` not conforming to the expected format
+    # Format: <ACCOUNT>.blob.core.windows.net
+    with pytest.raises(ImportError):
+        InferredAssetAzureDataConnector(
+            name="my_data_connector",
+            datasource_name="FAKE_DATASOURCE_NAME",
+            default_regex={
+                "pattern": "alpha-(.*)\\.csv",
+                "group_names": ["index"],
+            },
+            container="my_container",
+            name_starts_with="",
+            azure_options={"account_url": "not_a_valid_url"},
+        )
+
+    # Raises error in InferredAssetAzureDataConnector's constructor due to `conn_str` not conforming to the expected format
+    # Format: Must be a variable length, semicolon-delimited string containing "AccountName=<ACCOUNT>"
+    with pytest.raises(ImportError):
+        InferredAssetAzureDataConnector(
+            name="my_data_connector",
+            datasource_name="FAKE_DATASOURCE_NAME",
+            default_regex={
+                "pattern": "alpha-(.*)\\.csv",
+                "group_names": ["index"],
+            },
+            container="my_container",
+            name_starts_with="",
+            azure_options={"conn_str": "not_a_valid_conn_str"},
+        )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config(
-    mock_gcs_conn,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -345,17 +418,19 @@ def test_instantiation_with_test_yaml_config(
     report_object = context.test_yaml_config(
         f"""
         module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
+        class_name: InferredAssetAzureDataConnector
         datasource_name: FAKE_DATASOURCE
         name: TEST_DATA_CONNECTOR
         default_regex:
-            pattern: alpha-(.*)\\.csv
+            pattern: (alpha)-(.*)\\.csv
             group_names:
+                - data_asset_name
                 - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
+        container: my_container
+        name_starts_with: ""
+        azure_options:
+            account_url: my_account_url.blob.core.windows.net
+            credential: my_credential
     """,
         return_mode="report_object",
     )
@@ -367,31 +442,33 @@ def test_instantiation_with_test_yaml_config(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    context.test_yaml_config(
+    report_object = context.test_yaml_config(
         f"""
         module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
+        class_name: InferredAssetAzureDataConnector
         datasource_name: FAKE_DATASOURCE
         name: TEST_DATA_CONNECTOR
         default_regex:
-            pattern: alpha-(.*)\\.csv
+            pattern: (alpha)-(.*)\\.csv
             group_names:
+                - data_asset_name
                 - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
+        container: my_container
+        name_starts_with: ""
+        azure_options:
+            account_url: my_account_url.blob.core.windows.net
+            credential: my_credential
     """,
         return_mode="report_object",
     )
@@ -406,7 +483,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
                 "event": "data_context.test_yaml_config",
                 "event_payload": {
                     "anonymized_name": anonymized_name,
-                    "parent_class": "ConfiguredAssetGCSDataConnector",
+                    "parent_class": "InferredAssetAzureDataConnector",
                 },
                 "success": True,
             }
@@ -419,44 +496,42 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
         f"""
         module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetGCSDataConnector
+        class_name: InferredAssetAzureDataConnector
         datasource_name: FAKE_DATASOURCE
         name: TEST_DATA_CONNECTOR
         default_regex:
-            pattern: beta-(.*)\\.csv
+            pattern: ^beta-(.*)\\.csv$
             group_names:
+                - data_asset_name
                 - index
-        bucket_or_name: my_bucket
-        prefix: ""
-        assets:
-            alpha:
+        container: my_container
+        name_starts_with: ""
+        azure_options:
+            account_url: my_account_url.blob.core.windows.net
+            credential: my_credential
     """,
         return_mode="report_object",
     )
 
     assert report_object == {
-        "class_name": "ConfiguredAssetGCSDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": [
-            "alpha",
-        ],
-        "data_assets": {
-            "alpha": {"example_data_references": [], "batch_definition_count": 0},
-        },
+        "class_name": "InferredAssetAzureDataConnector",
+        "data_asset_count": 0,
+        "example_data_asset_names": [],
+        "data_assets": {},
         "example_unmatched_data_references": [
             "alpha-1.csv",
             "alpha-2.csv",
@@ -470,25 +545,28 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    my_data_connector = ConfiguredAssetGCSDataConnector(
+    my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket_or_name="my_bucket",
-        prefix="",
-        assets={"alpha": {}},
+        container="my_container",
+        name_starts_with="",
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": "my_credential",
+        },
     )
 
     # Raises error in `DataConnector._validate_batch_request()` due to `datasource_name` in BatchRequest not matching DataConnector `datasource_name`
@@ -506,30 +584,31 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-           class_name: ConfiguredAssetGCSDataConnector
+           class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
-           prefix: ""
-           assets:
-               TestFiles:
+           container: my_container
+           name_starts_with: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
@@ -548,10 +627,10 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         ],
     )
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "general_gcs_data_connector",
+            "name": "general_azure_data_connector",
             "datasource_name": "test_environment",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
@@ -566,37 +645,38 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-           class_name: ConfiguredAssetGCSDataConnector
+           class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
-           prefix: ""
-           assets:
-               TestFiles:
+           container: my_container
+           name_starts_with: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "general_gcs_data_connector",
+            "name": "general_azure_data_connector",
             "datasource_name": "test_environment",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
@@ -607,7 +687,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
+                data_connector_name="general_azure_data_connector",
                 data_asset_name="",
             )
         )
@@ -617,13 +697,13 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
-    mock_gcs_conn,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -631,20 +711,21 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-           class_name: ConfiguredAssetGCSDataConnector
+           class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
-           prefix: ""
-           assets:
-               TestFiles:
+           container: my_container
+           name_starts_with: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
@@ -661,28 +742,28 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "general_gcs_data_connector",
+            "name": "general_azure_data_connector",
             "datasource_name": "test_environment",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
-    # Source: https://cloud.google.com/storage/docs/listing-objects
+    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
-    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
+    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
     # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
     unsorted_batch_definition_list = (
         my_data_connector._get_batch_definition_list_from_batch_request(
             BatchRequestBase(
                 datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
-                data_asset_name=None,
+                data_connector_name="general_azure_data_connector",
+                data_asset_name="",
             )
         )
     )
@@ -693,13 +774,13 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
-    mock_gcs_conn,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -707,20 +788,21 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-           class_name: ConfiguredAssetGCSDataConnector
+           class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           bucket_or_name: my_bucket
-           prefix: ""
-           assets:
-               TestFiles:
+           container: my_container
+           name_starts_with: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
                    - name
                    - timestamp
                    - price
+           azure_options:
+               account_url: my_account_url.blob.core.windows.net
+               credential: my_credential
        """,
     )
 
@@ -737,28 +819,28 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "general_gcs_data_connector",
+            "name": "general_azure_data_connector",
             "datasource_name": "test_environment",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    # In an actual production environment, GCS will automatically sort these blobs by path (alphabetic order).
-    # Source: https://cloud.google.com/storage/docs/listing-objects
+    # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).
+    # Source: https://docs.microsoft.com/en-us/rest/api/storageservices/List-Blobs?redirectedfrom=MSDN
     #
-    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_gcs_keys()` (hence "unsorted").
-    # When using an actual `Client` (and not a mock), the output of `list_gcs_keys` would be pre-sorted by nature of how the system orders blobs.
+    # The expected behavior is that our `unsorted_batch_definition_list` will maintain the same order it parses through `list_azure_keys()` (hence "unsorted").
+    # When using an actual `BlobServiceClient` (and not a mock), the output of `list_azure_keys` would be pre-sorted by nature of how the system orders blobs.
     # It is important to note that although this is a minor deviation, it is deemed to be immaterial as we still end up testing our desired behavior.
 
     unsorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
-                data_asset_name="TestFiles",
+                data_connector_name="general_azure_data_connector",
+                data_asset_name="DEFAULT_ASSET_NAME",
             )
         )
     )
@@ -769,13 +851,13 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_basic_sorted(
-    mock_gcs_conn,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -783,14 +865,12 @@ def test_return_all_batch_definitions_basic_sorted(
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-       class_name: ConfiguredAssetGCSDataConnector
+       class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
-       prefix: ""
-       assets:
-           TestFiles:
+       container: my_container
+       name_starts_with: ""
        default_regex:
            pattern: (.+)_(.+)_(.+)\\.csv
            group_names:
@@ -808,6 +888,9 @@ def test_return_all_batch_definitions_basic_sorted(
            - orderby: desc
              class_name: NumericSorter
              name: price
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
      """,
     )
 
@@ -824,10 +907,10 @@ def test_return_all_batch_definitions_basic_sorted(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "general_gcs_data_connector",
+            "name": "general_azure_data_connector",
             "datasource_name": "test_environment",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
@@ -835,17 +918,20 @@ def test_return_all_batch_definitions_basic_sorted(
 
     self_check_report = my_data_connector.self_check()
 
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
+    assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
+    assert (
+        self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"]
+        == 10
+    )
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
-                data_asset_name="TestFiles",
+                data_connector_name="general_azure_data_connector",
+                data_asset_name="DEFAULT_ASSET_NAME",
             )
         )
     )
@@ -856,24 +942,22 @@ def test_return_all_batch_definitions_basic_sorted(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 def test_return_all_batch_definitions_returns_specified_partition(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-       class_name: ConfiguredAssetGCSDataConnector
+       class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
-       prefix: ""
-       assets:
-           TestFiles:
+       container: my_container
+       name_starts_with: ""
        default_regex:
            pattern: (.+)_(.+)_(.+)\\.csv
            group_names:
@@ -891,6 +975,9 @@ def test_return_all_batch_definitions_returns_specified_partition(
            - orderby: desc
              class_name: NumericSorter
              name: price
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
      """,
     )
 
@@ -907,10 +994,10 @@ def test_return_all_batch_definitions_returns_specified_partition(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "general_gcs_data_connector",
+            "name": "general_azure_data_connector",
             "datasource_name": "test_environment",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
@@ -918,15 +1005,18 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
     self_check_report = my_data_connector.self_check()
 
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
+    assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
+    assert (
+        self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"]
+        == 10
+    )
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
-        data_connector_name="general_gcs_data_connector",
-        data_asset_name="TestFiles",
+        data_connector_name="general_azure_data_connector",
+        data_asset_name="DEFAULT_ASSET_NAME",
         data_connector_query=IDDict(
             **{
                 "batch_filter_parameters": {
@@ -948,8 +1038,8 @@ def test_return_all_batch_definitions_returns_specified_partition(
     my_batch_definition = my_batch_definition_list[0]
     expected_batch_definition: BatchDefinition = BatchDefinition(
         datasource_name="test_environment",
-        data_connector_name="general_gcs_data_connector",
-        data_asset_name="TestFiles",
+        data_connector_name="general_azure_data_connector",
+        data_asset_name="DEFAULT_ASSET_NAME",
         batch_identifiers=IDDict(
             **{
                 "name": "james",
@@ -962,16 +1052,16 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_return_all_batch_definitions_sorted_without_data_connector_query(
-    mock_gcs_conn,
+    mock_azure_conn,
     mock_list_keys,
     mock_emit,
     empty_data_context_stats_enabled,
@@ -979,14 +1069,12 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-       class_name: ConfiguredAssetGCSDataConnector
+       class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
-       prefix: ""
-       assets:
-           TestFiles:
+       container: my_container
+       name_starts_with: ""
        default_regex:
            pattern: (.+)_(.+)_(.+)\\.csv
            group_names:
@@ -1004,6 +1092,9 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
            - orderby: desc
              class_name: NumericSorter
              name: price
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
      """,
     )
 
@@ -1020,10 +1111,10 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         "alex_20200819_1300.csv",
     ]
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config=my_data_connector_yaml,
         runtime_environment={
-            "name": "general_gcs_data_connector",
+            "name": "general_azure_data_connector",
             "datasource_name": "test_environment",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
@@ -1031,17 +1122,20 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
     self_check_report = my_data_connector.self_check()
 
-    assert self_check_report["class_name"] == "ConfiguredAssetGCSDataConnector"
+    assert self_check_report["class_name"] == "InferredAssetAzureDataConnector"
     assert self_check_report["data_asset_count"] == 1
-    assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
+    assert (
+        self_check_report["data_assets"]["DEFAULT_ASSET_NAME"]["batch_definition_count"]
+        == 10
+    )
     assert self_check_report["unmatched_data_reference_count"] == 0
 
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
-                data_connector_name="general_gcs_data_connector",
-                data_asset_name="TestFiles",
+                data_connector_name="general_azure_data_connector",
+                data_asset_name="DEFAULT_ASSET_NAME",
             )
         )
     )
@@ -1049,31 +1143,24 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_match_group(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-       class_name: ConfiguredAssetGCSDataConnector
+       class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
-       assets:
-           TestFiles:
-               pattern: (.+)_(.+)_(.+)\\.csv
-               group_names:
-                   - name
-                   - timestamp
-                   - price
+       container: my_container
        default_regex:
            pattern: (.+)_.+_.+\\.csv
            group_names:
@@ -1089,6 +1176,10 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
            - orderby: desc
              class_name: NumericSorter
              name: for_me_Me_Me
+
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
    """,
     )
 
@@ -1110,7 +1201,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
-                "name": "general_gcs_data_connector",
+                "name": "general_azure_data_connector",
                 "datasource_name": "test_environment",
             },
             config_defaults={
@@ -1120,27 +1211,25 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_return_all_batch_definitions_too_many_sorters(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
         f"""
-       class_name: ConfiguredAssetGCSDataConnector
+       class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       bucket_or_name: my_bucket
-       prefix: ""
-       assets:
-           TestFiles:
+       container: my_container
+       name_starts_with: ""
        default_regex:
            pattern: (.+)_.+_.+\\.csv
            group_names:
@@ -1156,6 +1245,10 @@ def test_return_all_batch_definitions_too_many_sorters(
            - orderby: desc
              class_name: NumericSorter
              name: price
+
+       azure_options:
+           account_url: my_account_url.blob.core.windows.net
+           credential: my_credential
    """,
     )
 
@@ -1177,7 +1270,7 @@ def test_return_all_batch_definitions_too_many_sorters(
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
-                "name": "general_gcs_data_connector",
+                "name": "general_azure_data_connector",
                 "datasource_name": "test_environment",
             },
             config_defaults={
@@ -1187,167 +1280,43 @@ def test_return_all_batch_definitions_too_many_sorters(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_example_with_explicit_data_asset_names(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
+def test_get_full_file_path_pandas(
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     yaml_string = f"""
-class_name: ConfiguredAssetGCSDataConnector
+class_name: InferredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-bucket_or_name: my_bucket
-prefix: my_base_directory/
+container: my_container
+name_starts_with: my_base_directory/
 default_regex:
-   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
-   group_names:
-       - data_asset_name
-       - year_dir
-       - month_dir
-assets:
-   alpha:
-       prefix: my_base_directory/alpha/files/go/here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
-   beta:
-       prefix: my_base_directory/beta_here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
-   gamma:
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
-   """
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+    group_names:
+        - data_asset_name
+        - year_dir
+        - month_dir
+azure_options:
+    account_url: my_account_url.blob.core.windows.net
+    credential: my_credential
+    """
     config = yaml.load(yaml_string)
 
-    mock_list_keys.return_value = [  # Initial return value during instantiation
-        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-        "my_base_directory/beta_here/beta-202001.txt",
-        "my_base_directory/beta_here/beta-202002.txt",
-        "my_base_directory/beta_here/beta-202003.txt",
-        "my_base_directory/beta_here/beta-202004.txt",
-        "my_base_directory/gamma-202001.csv",
-        "my_base_directory/gamma-202002.csv",
-        "my_base_directory/gamma-202003.csv",
-        "my_base_directory/gamma-202004.csv",
-        "my_base_directory/gamma-202005.csv",
-    ]
-
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
         config,
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-        runtime_environment={"name": "my_data_connector"},
     )
-
-    # Since we are using mocks, we need to redefine the output of subsequent calls to `list_gcs_keys()`
-    # Our patched object provides the ability to define a "side_effect", an iterable containing return
-    # values for subsequent calls. Since `_refresh_data_references_cache()` makes multiple calls to
-    # this method (once per asset), we define our expected behavior below.
-    #
-    # Source: https://stackoverflow.com/questions/24897145/python-mock-multiple-return-values
-
-    mock_list_keys.side_effect = [
-        [  # Asset alpha
-            "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-            "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-            "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-        ],
-        [  # Asset beta
-            "my_base_directory/beta_here/beta-202001.txt",
-            "my_base_directory/beta_here/beta-202002.txt",
-            "my_base_directory/beta_here/beta-202003.txt",
-            "my_base_directory/beta_here/beta-202004.txt",
-        ],
-        [  # Asset gamma
-            "my_base_directory/gamma-202001.csv",
-            "my_base_directory/gamma-202002.csv",
-            "my_base_directory/gamma-202003.csv",
-            "my_base_directory/gamma-202004.csv",
-            "my_base_directory/gamma-202005.csv",
-        ],
-    ]
-
-    my_data_connector._refresh_data_references_cache()
-
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
-
-    assert (
-        len(
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    datasource_name="FAKE_DATASOURCE_NAME",
-                    data_connector_name="my_data_connector",
-                    data_asset_name="alpha",
-                )
-            )
-        )
-        == 3
-    )
-
-    assert (
-        len(
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    datasource_name="FAKE_DATASOURCE_NAME",
-                    data_connector_name="my_data_connector",
-                    data_asset_name="beta",
-                )
-            )
-        )
-        == 4
-    )
-
-    assert (
-        len(
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    datasource_name="FAKE_DATASOURCE_NAME",
-                    data_connector_name="my_data_connector",
-                    data_asset_name="gamma",
-                )
-            )
-        )
-        == 5
-    )
-
-
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
-)
-@mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_get_full_file_path(
-    mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
-):
-    yaml_string = f"""
-class_name: ConfiguredAssetGCSDataConnector
-datasource_name: FAKE_DATASOURCE_NAME
-bucket_or_name: my_bucket
-prefix: my_base_directory/
-default_regex:
-   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
-   group_names:
-       - data_asset_name
-       - year_dir
-       - month_dir
-assets:
-   alpha:
-       prefix: my_base_directory/alpha/files/go/here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
-   beta:
-       prefix: my_base_directory/beta_here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
-   gamma:
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
-   """
-    config = yaml.load(yaml_string)
 
     mock_list_keys.return_value = [
         "my_base_directory/alpha/files/go/here/alpha-202001.csv",
@@ -1364,27 +1333,193 @@ assets:
         "my_base_directory/gamma-202005.csv",
     ]
 
-    my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
-        config,
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-        runtime_environment={"name": "my_data_connector"},
+    assert (
+        my_data_connector._get_full_file_path(
+            path="my_base_directory/alpha/files/go/here/alpha-202001.csv",
+            data_asset_name="alpha",
+        )
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
+    assert (
+        my_data_connector._get_full_file_path(
+            path="my_base_directory/beta_here/beta-202002.txt", data_asset_name="beta"
+        )
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
+    )
+    assert (
+        my_data_connector._get_full_file_path(
+            path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
+        )
+        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
+    )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
+def test_get_full_file_path_spark(
+    mock_azure_conn,
+    mock_list_keys,
+    mock_emit,
+    empty_data_context_stats_enabled,
+    spark_session,
+):
+    yaml_string = f"""
+class_name: InferredAssetAzureDataConnector
+datasource_name: FAKE_DATASOURCE_NAME
+container: my_container
+name_starts_with: my_base_directory/
+default_regex:
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+    group_names:
+        - data_asset_name
+        - year_dir
+        - month_dir
+azure_options:
+    account_url: my_account_url.blob.core.windows.net
+    credential: my_credential
+    """
+    config = yaml.load(yaml_string)
+
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
+        config,
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": SparkDFExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    mock_list_keys.return_value = [
+        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+        "my_base_directory/beta_here/beta-202001.txt",
+        "my_base_directory/beta_here/beta-202002.txt",
+        "my_base_directory/beta_here/beta-202003.txt",
+        "my_base_directory/beta_here/beta-202004.txt",
+        "my_base_directory/gamma-202001.csv",
+        "my_base_directory/gamma-202002.csv",
+        "my_base_directory/gamma-202003.csv",
+        "my_base_directory/gamma-202004.csv",
+        "my_base_directory/gamma-202005.csv",
+    ]
 
     assert (
         my_data_connector._get_full_file_path(
-            "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
+            path="my_base_directory/alpha/files/go/here/alpha-202001.csv",
+            data_asset_name="alpha",
         )
-        == "gs://my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
         my_data_connector._get_full_file_path(
-            "my_base_directory/beta_here/beta-202002.txt", "beta"
+            path="my_base_directory/beta_here/beta-202002.txt", data_asset_name="beta"
         )
-        == "gs://my_bucket/my_base_directory/beta_here/beta-202002.txt"
+        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
         my_data_connector._get_full_file_path(
-            "my_base_directory/gamma-202005.csv", "gamma"
+            path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
         )
-        == "gs://my_bucket/my_base_directory/gamma-202005.csv"
+        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/gamma-202005.csv"
     )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
+def test_get_full_file_path_bad_execution_engine(
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    yaml_string = f"""
+class_name: InferredAssetAzureDataConnector
+datasource_name: FAKE_DATASOURCE_NAME
+container: my_container
+name_starts_with: my_base_directory/
+default_regex:
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+    group_names:
+        - data_asset_name
+        - year_dir
+        - month_dir
+azure_options:
+    account_url: my_account_url.blob.core.windows.net
+    credential: my_credential
+    """
+    config = yaml.load(yaml_string)
+
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
+        config,
+        runtime_environment={
+            "name": "my_data_connector",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    # Raises error due to a non-existent/unknown ExecutionEngine instance.  (Per note above, this test is temporary.)
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        _ = my_data_connector._get_full_file_path(
+            path="some/path/to/file.csv", data_asset_name="some_asset_name"
+        )
+        # instantiate_class_from_config(
+        #     config=my_data_connector_yaml,
+        #     runtime_environment={
+        #         "name": "general_azure_data_connector",
+        #         "datasource_name": "test_environment",
+        #     },
+        #     config_defaults={
+        #         "module_name": "great_expectations.datasource.data_connector"
+        #     },
+        # )
+    # TODO: <Alex>ALEX</Alex>
+    # mock_list_keys.return_value = [
+    #     "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+    #     "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+    #     "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+    #     "my_base_directory/beta_here/beta-202001.txt",
+    #     "my_base_directory/beta_here/beta-202002.txt",
+    #     "my_base_directory/beta_here/beta-202003.txt",
+    #     "my_base_directory/beta_here/beta-202004.txt",
+    #     "my_base_directory/gamma-202001.csv",
+    #     "my_base_directory/gamma-202002.csv",
+    #     "my_base_directory/gamma-202003.csv",
+    #     "my_base_directory/gamma-202004.csv",
+    #     "my_base_directory/gamma-202005.csv",
+    # ]
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
+    # assert (
+    #         my_data_connector._get_full_file_path(
+    #             "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
+    #         )
+    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+    # )
+    # assert (
+    #         my_data_connector._get_full_file_path(
+    #             "my_base_directory/beta_here/beta-202002.txt", "beta"
+    #         )
+    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
+    # )
+    # assert (
+    #         my_data_connector._get_full_file_path(
+    #             "my_base_directory/gamma-202005.csv", "gamma"
+    #         )
+    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
+    # )
+    # TODO: <Alex>ALEX</Alex>

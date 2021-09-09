@@ -34,8 +34,8 @@ datasource_config = {
             "bucket": "<YOUR_S3_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
             "default_regex": {
-                "group_names": ["data_asset_name"],
                 "pattern": "(.*)\\.csv",
+                "group_names": ["data_asset_name"],
             },
         },
     },
