@@ -14,8 +14,9 @@ datasource_config = {
     "name": "my_azure_datasource",
     "class_name": "Datasource",
     "execution_engine": {
-        "class_name": "PandasExecutionEngine",
+        "class_name": "SparkDFExecutionEngine",
         "azure_options": {
+            "account_url": "<YOUR_ACCOUNT_URL>",
             "credential": "<YOUR_CREDENTIAL>",
         },
     },
@@ -23,6 +24,7 @@ datasource_config = {
         "configured_data_connector_name": {
             "class_name": "ConfiguredAssetAzureDataConnector",
             "azure_options": {
+                "account_url": "<YOUR_ACCOUNT_URL>",
                 "credential": "<YOUR_CREDENTIAL>",
             },
             "container": "<YOUR_CONTAINER>",
@@ -40,11 +42,11 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
+] = "superconductivetesting.blob.core.windows.net"
 datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
+] = "superconductivetesting.blob.core.windows.net"
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "credential"
 ] = CREDENTIAL
@@ -64,6 +66,7 @@ batch_request = BatchRequest(
     datasource_name="my_azure_datasource",
     data_connector_name="configured_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
+    batch_spec_passthrough={"reader_method": "csv", "reader_options": {"header": True}},
 )
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -91,4 +94,4 @@ batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 3
 
 batch: Batch = batch_list[0]
-assert batch.data.dataframe.shape[0] == 10000
+assert batch.data.dataframe.count() == 10000

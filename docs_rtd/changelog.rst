@@ -7,8 +7,10 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] added casting of numeric value to fix redshift issue (#3293)
 * [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335)
 * [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable for datetimes (#3349)
+* [DOCS] "How to connect to an MSSQL database" (#3353)
 
 0.13.32
 -----------------
@@ -28,6 +30,7 @@ develop
 * [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
 * [MAINTENANCE] Various doc patches (#3326)
 * [MAINTENANCE] clean up imports and method signatures (#3337)
+>>>>>>> 9208de453238af6d673aa9184c865b8422165172
 
 0.13.31
 -----------------

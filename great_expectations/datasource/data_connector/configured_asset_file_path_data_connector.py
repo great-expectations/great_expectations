@@ -26,8 +26,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     This allows more fine-tuning, but also requires more setup.
 
     *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    ConfiguredAssetFilesystemDataConnector and ConfiguredAssetS3DataConnector are subclasses of
-    ConfiguredAssetFilePathDataConnector.
+    ConfiguredAssetFilesystemDataConnector, ConfiguredAssetS3DataConnector, ConfiguredAssetAzureDataConnector, and
+    ConfiguredAssetGCSDataConnector are subclasses of ConfiguredAssetFilePathDataConnector.
 
     """
 
