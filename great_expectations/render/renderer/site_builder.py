@@ -10,9 +10,7 @@ from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
-
 from great_expectations.data_context.store.json_site_store import JsonSiteStore
-
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
@@ -165,7 +163,6 @@ class SiteBuilder:
         # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-
         if ge_cloud_mode:
             self.target_store = JsonSiteStore(
                 store_backend=store_backend, runtime_environment=runtime_environment
@@ -174,8 +171,6 @@ class SiteBuilder:
             self.target_store = HtmlSiteStore(
                 store_backend=store_backend, runtime_environment=runtime_environment
             )
-
-
 
         default_site_section_builders_config = {
             "expectations": {
@@ -236,7 +231,7 @@ class SiteBuilder:
                     "custom_views_directory": custom_views_directory,
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
-                    "ge_cloud_mode": self.ge_cloud_mode
+                    "ge_cloud_mode": self.ge_cloud_mode,
                 },
                 config_defaults={"name": site_section_name, "module_name": module_name},
             )
@@ -268,7 +263,7 @@ class SiteBuilder:
                     if section_config not in FALSEY_YAML_STRINGS
                 },
                 "site_section_builders_config": site_section_builders,
-                "ge_cloud_mode": self.ge_cloud_mode
+                "ge_cloud_mode": self.ge_cloud_mode,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -424,7 +419,9 @@ class DefaultSiteSectionBuilder:
                 continue
 
             if self.run_name_filter and not isinstance(resource_key, GeCloudIdentifier):
-                if not resource_key_passes_run_name_filter(resource_key, self.run_name_filter):
+                if not resource_key_passes_run_name_filter(
+                    resource_key, self.run_name_filter
+                ):
                     continue
             try:
                 resource = self.source_store.get(resource_key)
@@ -475,7 +472,7 @@ class DefaultSiteSectionBuilder:
                         ),
                         rendered_content,
                         source_type=resource_key.resource_type,
-                        source_id=resource_key.ge_cloud_id
+                        source_id=resource_key.ge_cloud_id,
                     )
                 else:
                     viewable_content = self.view_class.render(

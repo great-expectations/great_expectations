@@ -128,11 +128,11 @@ class HtmlSiteStore:
         filepath_suffix = ".html"
         is_ge_cloud_store = store_backend["class_name"] == "GeCloudStoreBackend"
         expectation_config_defaults = {
-                "module_name": module_name,
-                "filepath_prefix": "expectations",
-                "filepath_suffix": filepath_suffix,
-                "suppress_store_backend_id": True,
-            }
+            "module_name": module_name,
+            "filepath_prefix": "expectations",
+            "filepath_suffix": filepath_suffix,
+            "suppress_store_backend_id": True,
+        }
         if is_ge_cloud_store:
             expectation_config_defaults = {
                 "module_name": module_name,
@@ -176,10 +176,10 @@ class HtmlSiteStore:
 
         filepath_template = "index.html"
         index_page_config_defaults = {
-                "module_name": module_name,
-                "filepath_template": filepath_template,
-                "suppress_store_backend_id": True,
-            }
+            "module_name": module_name,
+            "filepath_template": filepath_template,
+            "suppress_store_backend_id": True,
+        }
         if is_ge_cloud_store:
             index_page_config_defaults = {
                 "module_name": module_name,
