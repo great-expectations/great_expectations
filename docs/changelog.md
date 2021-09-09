@@ -4,6 +4,7 @@ title: Changelog
 
 ### Develop
 * [FEATURE] Add optional ge_cloud_mode flag to DataContext to enable use with Great Expectations Cloud.
+* [FEATURE] Rendered Data Doc JSONs can be uploaded and retrieved from GE Cloud
 
 
 ### 0.13.32
