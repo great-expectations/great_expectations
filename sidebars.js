@@ -271,7 +271,7 @@ module.exports = {
       type: 'category',
       label: 'Deployment Patterns',
       items: [
-        'deployment_patterns/how_to_instantiate_a_data_context_hosted_environment',
+        'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
