@@ -21,8 +21,8 @@ datasource_config = {
             "bucket_or_name": "<YOUR_GCS_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
             "default_regex": {
-                "group_names": ["data_asset_name"],
                 "pattern": "(.*)\\.csv",
+                "group_names": ["data_asset_name"],
             },
         },
     },

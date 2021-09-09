@@ -29,10 +29,9 @@ datasource_config = {
             },
             "container": "<YOUR_CONTAINER>",
             "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
-            "assets": {"taxi_data": None},
             "default_regex": {
-                "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
-                "group_names": ["year", "month"],
+                "pattern": "(.*)\\.csv",
+                "group_names": ["data_asset_name"],
             },
         },
     },
@@ -70,7 +69,9 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "taxi_data"
+batch_request.data_asset_name = (
+    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01"
+)
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -87,10 +88,14 @@ assert set(
     context.get_available_data_asset_names()["my_azure_datasource"][
         "default_inferred_data_connector_name"
     ]
-) == {"taxi_data"}
+) == {
+    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01",
+    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-02",
+    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
+}
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
-assert len(batch_list) == 3
+assert len(batch_list) == 1
 
 batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000

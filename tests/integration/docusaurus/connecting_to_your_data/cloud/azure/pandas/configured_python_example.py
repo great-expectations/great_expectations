@@ -29,11 +29,11 @@ datasource_config = {
             },
             "container": "<YOUR_CONTAINER>",
             "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
-            "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
                 "group_names": ["year", "month"],
             },
+            "assets": {"taxi_data": None},
         },
     },
 }
