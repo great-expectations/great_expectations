@@ -6,6 +6,8 @@ title: Changelog
 
 
 ### 0.13.33
+* [FEATURE] Add optional ge_cloud_mode flag to DataContext to enable use with Great Expectations Cloud.
+* [FEATURE] Rendered Data Doc JSONs can be uploaded and retrieved from GE Cloud
 * [FEATURE] Implement InferredAssetAzureDataConnector with Support for Pandas and Spark Execution Engines (#3372)
 * [FEATURE] Spark connecting to Google Cloud Storage (#3365)
 * [FEATURE] SparkDFExecutionEngine can load data accessed by ConfiguredAssetAzureDataConnector (integration tests are included). (#3345)
