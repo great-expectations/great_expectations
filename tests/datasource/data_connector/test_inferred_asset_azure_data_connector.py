@@ -13,7 +13,10 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetAzureDataConnector
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 
 yaml = YAML()
 
@@ -1285,7 +1288,8 @@ def test_return_all_batch_definitions_too_many_sorters(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_get_full_file_path(
+# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
+def test_get_full_file_path_pandas(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     yaml_string = f"""
@@ -1331,19 +1335,187 @@ azure_options:
 
     assert (
         my_data_connector._get_full_file_path(
-            "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
+            path="my_base_directory/alpha/files/go/here/alpha-202001.csv",
+            data_asset_name="alpha",
         )
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
         my_data_connector._get_full_file_path(
-            "my_base_directory/beta_here/beta-202002.txt", "beta"
+            path="my_base_directory/beta_here/beta-202002.txt", data_asset_name="beta"
         )
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
         my_data_connector._get_full_file_path(
-            "my_base_directory/gamma-202005.csv", "gamma"
+            path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
         )
         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
     )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
+def test_get_full_file_path_spark(
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    yaml_string = f"""
+class_name: InferredAssetAzureDataConnector
+datasource_name: FAKE_DATASOURCE_NAME
+container: my_container
+name_starts_with: my_base_directory/
+default_regex:
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+    group_names:
+        - data_asset_name
+        - year_dir
+        - month_dir
+azure_options:
+    account_url: my_account_url.blob.core.windows.net
+    credential: my_credential
+    """
+    config = yaml.load(yaml_string)
+
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
+        config,
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": SparkDFExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    mock_list_keys.return_value = [
+        "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+        "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+        "my_base_directory/beta_here/beta-202001.txt",
+        "my_base_directory/beta_here/beta-202002.txt",
+        "my_base_directory/beta_here/beta-202003.txt",
+        "my_base_directory/beta_here/beta-202004.txt",
+        "my_base_directory/gamma-202001.csv",
+        "my_base_directory/gamma-202002.csv",
+        "my_base_directory/gamma-202003.csv",
+        "my_base_directory/gamma-202004.csv",
+        "my_base_directory/gamma-202005.csv",
+    ]
+
+    assert (
+        my_data_connector._get_full_file_path(
+            path="my_base_directory/alpha/files/go/here/alpha-202001.csv",
+            data_asset_name="alpha",
+        )
+        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+    )
+    assert (
+        my_data_connector._get_full_file_path(
+            path="my_base_directory/beta_here/beta-202002.txt", data_asset_name="beta"
+        )
+        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/beta_here/beta-202002.txt"
+    )
+    assert (
+        my_data_connector._get_full_file_path(
+            path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
+        )
+        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/gamma-202005.csv"
+    )
+
+
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+)
+@mock.patch(
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
+def test_get_full_file_path_bad_execution_engine(
+    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+):
+    yaml_string = f"""
+class_name: InferredAssetAzureDataConnector
+datasource_name: FAKE_DATASOURCE_NAME
+container: my_container
+name_starts_with: my_base_directory/
+default_regex:
+    pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+    group_names:
+        - data_asset_name
+        - year_dir
+        - month_dir
+azure_options:
+    account_url: my_account_url.blob.core.windows.net
+    credential: my_credential
+    """
+    config = yaml.load(yaml_string)
+
+    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
+        config,
+        runtime_environment={
+            "name": "my_data_connector",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    # Raises error due to a non-existent/unknown ExecutionEngine instance.  (Per note above, this test is temporary.)
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        _ = my_data_connector._get_full_file_path(
+            path="some/path/to/file.csv", data_asset_name="some_asset_name"
+        )
+        # instantiate_class_from_config(
+        #     config=my_data_connector_yaml,
+        #     runtime_environment={
+        #         "name": "general_azure_data_connector",
+        #         "datasource_name": "test_environment",
+        #     },
+        #     config_defaults={
+        #         "module_name": "great_expectations.datasource.data_connector"
+        #     },
+        # )
+    # TODO: <Alex>ALEX</Alex>
+    # mock_list_keys.return_value = [
+    #     "my_base_directory/alpha/files/go/here/alpha-202001.csv",
+    #     "my_base_directory/alpha/files/go/here/alpha-202002.csv",
+    #     "my_base_directory/alpha/files/go/here/alpha-202003.csv",
+    #     "my_base_directory/beta_here/beta-202001.txt",
+    #     "my_base_directory/beta_here/beta-202002.txt",
+    #     "my_base_directory/beta_here/beta-202003.txt",
+    #     "my_base_directory/beta_here/beta-202004.txt",
+    #     "my_base_directory/gamma-202001.csv",
+    #     "my_base_directory/gamma-202002.csv",
+    #     "my_base_directory/gamma-202003.csv",
+    #     "my_base_directory/gamma-202004.csv",
+    #     "my_base_directory/gamma-202005.csv",
+    # ]
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
+    # assert (
+    #         my_data_connector._get_full_file_path(
+    #             "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
+    #         )
+    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+    # )
+    # assert (
+    #         my_data_connector._get_full_file_path(
+    #             "my_base_directory/beta_here/beta-202002.txt", "beta"
+    #         )
+    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
+    # )
+    # assert (
+    #         my_data_connector._get_full_file_path(
+    #             "my_base_directory/gamma-202005.csv", "gamma"
+    #         )
+    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
+    # )
+    # TODO: <Alex>ALEX</Alex>
