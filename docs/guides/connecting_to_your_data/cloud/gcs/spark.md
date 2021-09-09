@@ -54,6 +54,16 @@ Using this example configuration, add in your GCS bucket and path to a directory
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L23-L42
 ```
 
+:::info Authentication
+
+It is also important to note that GCS `DataConnector` for Spark supports the method of authentication that requires running the `gcloud` command line tool in order to obtain the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+For more details regarding authentication, please visit the following:
+* [gcloud CLI Tutorial](https://cloud.google.com/storage/docs/reference/libraries)
+* [GCS Python API Docs](https://googleapis.dev/python/storage/latest/index.html)
+
+:::
+
 Run this code to test your configuration.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L52
