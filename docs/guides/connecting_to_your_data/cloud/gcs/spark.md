@@ -114,7 +114,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   ]}>
   <TabItem value="runtime_batch_request">
 
-Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
+Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py#L57-L63
 ```
@@ -145,8 +145,8 @@ Then load data into the `Validator`.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [spark_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py)
-- [spark_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py)
+- [spark_gcs_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py)
+- [spark_gcs_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py)
 
 ## Next Steps
 
