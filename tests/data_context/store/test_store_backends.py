@@ -1172,13 +1172,11 @@ def test_GeCloudStoreBackend():
         my_store_backend = GeCloudStoreBackend(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
+            ge_cloud_resource_type="rendered_data_doc",
         )
-        my_store_backend.set(
-            ("rendered_data_doc", ""), my_simple_checkpoint_config_serialized
-        )
+        my_store_backend.set(("rendered_data_doc", ""), OrderedDict())
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered_data_doc",
+            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
             json={
                 "data": {
                     "type": "rendered_data_doc",
@@ -1199,7 +1197,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=ge_cloud_resource_type,
+                ge_cloud_resource_type="rendered_data_doc",
             )
             my_store_backend.get(
                 (
@@ -1208,7 +1206,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered_data_doc/1ccac18e-7631"
+                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
                 "-4bdd-8a42-3c35cce574c6",
                 headers={
                     "Content-Type": "application/vnd.api+json",
@@ -1221,11 +1219,11 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=ge_cloud_resource_type,
+                ge_cloud_resource_type="rendered_data_doc",
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered_data_docs",
+                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
                 headers={
                     "Content-Type": "application/vnd.api+json",
                     "Authorization": "Bearer 1234",
@@ -1240,7 +1238,7 @@ def test_GeCloudStoreBackend():
             my_store_backend = GeCloudStoreBackend(
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_credentials=ge_cloud_credentials,
-                ge_cloud_resource_type=ge_cloud_resource_type,
+                ge_cloud_resource_type="rendered_data_doc",
             )
             my_store_backend.remove_key(
                 (
@@ -1249,7 +1247,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_patch.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered_data_doc/1ccac18e-7631"
+                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
                 "-4bdd"
                 "-8a42-3c35cce574c6",
                 json={
