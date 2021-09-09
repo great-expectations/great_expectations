@@ -32,7 +32,6 @@ class JsonSiteStore(Store):
 
     """
 
-    _key_class = ValidationResultIdentifier
 
     def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
 
