@@ -112,13 +112,26 @@ class TableHead(TableMetricProvider):
             # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
             if metric_value_kwargs["fetch_all"]:
-                pass
+                sql = stmt.compile(
+                    dialect=execution_engine.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+            elif execution_engine.engine.dialect.name.lower() == "mssql":
+                # limit doesn't compile properly for mssql
+                sql = str(
+                    stmt.compile(
+                        dialect=execution_engine.engine.dialect,
+                        compile_kwargs={"literal_binds": True},
+                    )
+                )
+                sql = f"SELECT TOP {metric_value_kwargs['n_rows']}" + sql[6:]
             else:
                 stmt = stmt.limit(metric_value_kwargs["n_rows"])
-            sql = stmt.compile(
-                dialect=execution_engine.engine.dialect,
-                compile_kwargs={"literal_binds": True},
-            )
+                sql = stmt.compile(
+                    dialect=execution_engine.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+
             df = pd.read_sql(sql, con=execution_engine.engine)
 
         return df
