@@ -1365,7 +1365,11 @@ azure_options:
 )
 # TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
 def test_get_full_file_path_spark(
-    mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
+    mock_azure_conn,
+    mock_list_keys,
+    mock_emit,
+    empty_data_context_stats_enabled,
+    spark_session,
 ):
     yaml_string = f"""
 class_name: InferredAssetAzureDataConnector
