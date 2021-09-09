@@ -4,6 +4,7 @@ title: Changelog
 
 ### Develop
 * [BUGFIX] Addresses issue #2993 (#3054) by using configuration over list keys when possible.
+* [FEATURE] Add optional ge_cloud_mode flag to DataContext to enable use with Great Expectations Cloud.
 
 ### 0.13.32
 * [FEATURE] Add Performance Benchmarks Using BigQuery. (Thanks @jdimatteo)

@@ -4,26 +4,13 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    InMemoryStoreBackendDefaults,
-)
 
-# NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
-# may experience data loss as it persists nothing. It is used here for testing.
-# Please refer to docs to learn how to instantiate your DataContext.
-store_backend_defaults = InMemoryStoreBackendDefaults()
-data_context_config = DataContextConfig(
-    store_backend_defaults=store_backend_defaults,
-    checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
-)
-context = BaseDataContext(project_config=data_context_config)
+context = ge.get_context()
 
 datasource_config = {
     "name": "my_s3_datasource",
     "class_name": "Datasource",
-    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
+    "execution_engine": {"class_name": "PandasExecutionEngine"},
     "data_connectors": {
         "default_runtime_data_connector_name": {
             "class_name": "RuntimeDataConnector",
@@ -34,8 +21,8 @@ datasource_config = {
             "bucket": "<YOUR_S3_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
             "default_regex": {
-                "group_names": ["data_asset_name"],
                 "pattern": "(.*)\\.csv",
+                "group_names": ["data_asset_name"],
             },
         },
     },
@@ -80,6 +67,12 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 1
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000
+
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
     datasource_name="my_s3_datasource",
@@ -113,7 +106,6 @@ assert set(
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-02",
     "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
 }
-
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
