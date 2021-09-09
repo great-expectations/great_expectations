@@ -165,7 +165,9 @@ class ValidationsStore(Store):
     def serialize(self, key, value):
         if self.ge_cloud_mode:
             return self._expectationSuiteValidationResultSchema.dump(value)
-        return self._expectationSuiteValidationResultSchema.dumps(value, indent=2, sort_keys=True)
+        return self._expectationSuiteValidationResultSchema.dumps(
+            value, indent=2, sort_keys=True
+        )
 
     def deserialize(self, key, value):
         if isinstance(value, dict):
