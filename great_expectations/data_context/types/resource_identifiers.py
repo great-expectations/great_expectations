@@ -254,9 +254,7 @@ class SiteSectionIdentifier(DataContextKey):
     def __init__(self, site_section_name, resource_identifier):
         self._site_section_name = site_section_name
         if site_section_name in ["validations", "profiling"]:
-            if isinstance(
-                resource_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
-            ):
+            if isinstance(resource_identifier, ValidationResultIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):
                 self._resource_identifier = ValidationResultIdentifier(
@@ -267,9 +265,7 @@ class SiteSectionIdentifier(DataContextKey):
                     **resource_identifier
                 )
         elif site_section_name == "expectations":
-            if isinstance(
-                resource_identifier, (ExpectationSuiteIdentifier, GeCloudIdentifier)
-            ):
+            if isinstance(resource_identifier, ExpectationSuiteIdentifier):
                 self._resource_identifier = resource_identifier
             elif isinstance(resource_identifier, (tuple, list)):
                 self._resource_identifier = ExpectationSuiteIdentifier(
