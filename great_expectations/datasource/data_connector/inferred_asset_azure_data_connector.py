@@ -6,9 +6,8 @@ from typing import List, Optional
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
-    ConfiguredAssetFilePathDataConnector,
+from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
+    InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_azure_keys
 from great_expectations.execution_engine import (
@@ -28,21 +27,13 @@ except ImportError:
     )
 
 
-class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
+class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
     """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure
+    Extension of InferredAssetFilePathDataConnector used to connect to Azure Blob Storage
 
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
-    can use to get individual batches of data. They add flexibility in how to obtain data
-    such as with time-based partitioning, splitting and sampling, or other techniques appropriate
-    for obtaining batches of data.
-
-    The ConfiguredAssetAzureDataConnector is one of two classes (InferredAssetAzureDataConnector being the
-    other one) designed for connecting to data on Azure.
-
-    A ConfiguredAssetAzureDataConnector requires an explicit specification of each DataAsset you want to connect to.
-    This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
-    with Azure's official SDK, we utilize terms like "container" and "name_starts_with".
+    The InferredAssetAzureDataConnector is one of two classes (ConfiguredAssetAzureDataConnector being the
+    other one) designed for connecting to filesystem-like data, more specifically files on Azure Blob Storage. It
+    connects to assets inferred from container, name_starts_with, and file name by default_regex.
 
     As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
     docs if a greater understanding of the supported authentication methods and general functionality is desired.
@@ -54,7 +45,6 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         name: str,
         datasource_name: str,
         container: str,
-        assets: dict,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
@@ -64,13 +54,12 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
     ):
         """
-        ConfiguredAssetDataConnector for connecting to Azure.
+        InferredAssetAzureDataConnector for connecting to Azure Blob Storage.
 
         Args:
-            name (str): required name for DataConnector
+            name (str): required name for data_connector
             datasource_name (str): required name for datasource
-            container (str): container name for Azure Blob Storage
-            assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
+            container (str): container for Azure Blob Storage
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
             sorters (list): optional list of sorters for sorting data_references
@@ -79,17 +68,17 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             azure_options (dict): wrapper object for **kwargs
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
-        logger.debug(f'Constructing ConfiguredAssetAzureDataConnector "{name}".')
+        logger.debug(f'Constructing InferredAssetAzureDataConnector "{name}".')
 
         super().__init__(
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
-            assets=assets,
             default_regex=default_regex,
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
+
         self._container = container
         self._name_starts_with = os.path.join(name_starts_with, "")
         self._delimiter = delimiter
@@ -119,7 +108,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
             raise ImportError(
-                "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector). \
+                "Unable to load Azure BlobServiceClient (it is required for InferredAssetAzureDataConnector). \
                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
             )
 
@@ -138,31 +127,33 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return AzureBatchSpec(batch_spec)
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list(
+        self, data_asset_name: Optional[str] = None
+    ) -> List[str]:
+        """
+        List objects in the underlying data store to create a list of data_references.
+
+        This method is used to refresh the cache.
+        """
         query_options: dict = {
             "container": self._container,
             "name_starts_with": self._name_starts_with,
             "delimiter": self._delimiter,
         }
-        if asset is not None:
-            if asset.container:
-                query_options["container"] = asset.container
-            if asset.name_starts_with:
-                query_options["name_starts_with"] = asset.name_starts_with
-            if asset.delimiter:
-                query_options["delimiter"] = asset.delimiter
 
         path_list: List[str] = list_azure_keys(
             azure=self._azure,
             query_options=query_options,
-            recursive=False,
+            recursive=True,
         )
         return path_list
 
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
+    def _get_full_file_path(
+        self,
+        path: str,
+        data_asset_name: Optional[str] = None,
     ) -> str:
-        # asset isn't used in this method.
+        # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         # Pandas and Spark execution engines utilize separate path formats for accessing Azure Blob Storage service.
         full_path: str

@@ -26,13 +26,13 @@ data_connectors:
             credential: <YOUR_CREDENTIAL>   # if using a protected container
         container: <YOUR_AZURE_CONTAINER_HERE>
         name_starts_with: <CONTAINER_PATH_TO_DATA>
-        assets:
-            taxi_data:
         default_regex:
             pattern: data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:
                 - year
                 - month
+        assets:
+            taxi_data:
 """
 
 # Please note this override is only to provide good UX for docs and tests.
