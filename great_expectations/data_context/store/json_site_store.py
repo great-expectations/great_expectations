@@ -32,7 +32,6 @@ class JsonSiteStore(Store):
 
     """
 
-
     def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
 
         if store_backend is not None:
