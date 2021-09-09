@@ -59,6 +59,16 @@ except ImportError:
     Select = None
 
 try:
+    from pyspark.sql.functions import mean as pyspark_mean_
+    from pyspark.sql.functions import stddev as pyspark_std_
+except ImportError:
+    logger.debug(
+        "Unable to load PySpark functions; install optional PySpark dependency for support"
+    )
+    pyspark_mean_ = None
+    pyspark_std_ = None
+
+try:
     from sqlalchemy.engine.row import Row
 except ImportError:
     try:
@@ -142,6 +152,39 @@ class ColumnSkew(ColumnMetricProvider):
         else:
             return column_skew
 
+    @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(
+        cls,
+        execution_engine: "SparkDFExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
+        )
+        abs_flag = metric_value_kwargs.get("abs", False)
+        column = accessor_domain_kwargs["column"]
+
+        column_avg = df.select(pyspark_mean_(column)).collect()[0][0]
+        column_std = df.select(pyspark_std_(column)).collect()[0][0]
+
+        count = df.count()
+
+        # udf is possibly preferred here
+        column_third_moment = df.rdd.map(lambda x: (x[column] - column_avg) ** 3).sum()
+
+        column_skew = column_third_moment / (column_std ** 3) / (count - 1)
+        if abs_flag:
+            return np.abs(column_skew)
+        else:
+            return column_skew
+
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
     simple_query: Select = sa.select(func).select_from(selectable)
@@ -158,30 +201,6 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
         logger.error(exception_message)
         raise pe()
 
-        #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
     #
     # @classmethod
     # def _get_evaluation_dependencies(
@@ -360,6 +379,10 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                 {
                     "backend": "sqlalchemy",
                     "dialects": ["mysql", "postgresql"],
+                },
+                {
+                    "backend": "spark",
+                    "dialects": None,
                 },
             ],
         }
