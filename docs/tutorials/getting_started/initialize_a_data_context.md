@@ -2,8 +2,6 @@
 title: Initialize a Data Context
 ---
 
-![minimap](../../images/minimap.png)
-
 :::note Prerequisites
 - You need a Python environment where you can install Great Expectations and other dependencies, e.g. a virtual environment.
 :::
@@ -44,7 +42,7 @@ The repository you cloned contains several directories with final versions for o
 
 ### Install Great Expectations and dependencies
 
-If you haven’t already, install Great Expectations. This tutorial will be easiest if you [install Great Expectations locally](/docs/guides/setup/installation/local), but there are also guides on how to [install Great Expectations in Spark EMR Cluster](/docs/guides/setup/installation/spark_emr) and how to [install Great Expectations in Databricks](/docs/guides/setup/installation/databricks).
+If you haven’t already, install Great Expectations. This tutorial will be easiest if you [install Great Expectations locally](/docs/guides/setup/installation/local), but there are also guides on how to [install Great Expectations in Spark EMR Cluster](/docs/guides/setup/installation/spark_emr) and others are being ported.
 
 ### Create a Data Context
 

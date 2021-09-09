@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations with instant feedback from a sample Batch of data
+title: How to create and edit Expectations with instant feedback from a sample Batch of data
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'

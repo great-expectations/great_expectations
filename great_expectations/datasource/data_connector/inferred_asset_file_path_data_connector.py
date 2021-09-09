@@ -4,7 +4,9 @@ from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import FilePathDataConnector
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -20,8 +22,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
     the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
 
     *Note*: InferredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    InferredAssetFilesystemDataConnector and InferredAssetS3DataConnector are subclasses of
-    InferredAssetFilePathDataConnector.
+    InferredAssetFilesystemDataConnector, InferredAssetS3DataConnector, InferredAssetAzureDataConnector, and
+    InferredAssetGCSDataConnector are subclasses of InferredAssetFilePathDataConnector.
     """
 
     def __init__(
@@ -104,7 +106,9 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             BatchDefinition
         ] = self._get_batch_definition_list_from_batch_request(
             batch_request=BatchRequestBase(
-                datasource_name=self.datasource_name, data_connector_name=self.name
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
+                data_asset_name="",
             )
         )
 

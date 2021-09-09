@@ -540,7 +540,7 @@ continue.
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
                     f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
-                    You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
+                    You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
                     """
                 )
         if (
@@ -1061,6 +1061,20 @@ class NotebooksConfigSchema(Schema):
     @post_load
     def make_notebooks_config(self, data, **kwargs):
         return NotebooksConfig(**data)
+
+
+class GeCloudConfig(DictDot):
+    def __init__(self, base_url: str, account_id: str, access_token: str):
+        self.base_url = base_url
+        self.account_id = account_id
+        self.access_token = access_token
+
+    def to_json_dict(self):
+        return {
+            "base_url": self.base_url,
+            "account_id": self.account_id,
+            "access_token": self.access_token,
+        }
 
 
 class DataContextConfigSchema(Schema):

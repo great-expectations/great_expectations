@@ -204,9 +204,10 @@ Please check your config."""
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            s3_url = S3Url(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            path: str = batch_spec.path
+            s3_url = S3Url(path)
             if "compression" not in reader_options.keys():
                 inferred_compression_param = sniff_s3_compression(s3_url)
                 if inferred_compression_param is not None:
@@ -229,9 +230,10 @@ Please check your config."""
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
             azure_engine = self._azure
-            azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            path: str = batch_spec.path
+            azure_url = AzureUrl(path)
             blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
             )
@@ -322,7 +324,7 @@ Please check your config."""
 
         """
         if reader_method is None and path is None:
-            raise ge_exceptions.BatchSpecError(
+            raise ge_exceptions.ExecutionEngineError(
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
@@ -340,7 +342,7 @@ Please check your config."""
                 reader_fn = partial(reader_fn, **reader_options)
             return reader_fn
         except AttributeError:
-            raise ge_exceptions.BatchSpecError(
+            raise ge_exceptions.ExecutionEngineError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
@@ -374,7 +376,7 @@ Please check your config."""
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise ge_exceptions.BatchSpecError(
+        raise ge_exceptions.ExecutionEngineError(
             f'Unable to determine reader method from path: "{path}".'
         )
 

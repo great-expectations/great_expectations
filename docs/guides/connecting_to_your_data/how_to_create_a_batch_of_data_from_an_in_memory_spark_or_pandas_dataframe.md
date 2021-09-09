@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create a Batch of data from an in-memory Spark or Pandas dataframe
+title: How to create a Batch of data from an in-memory Spark or Pandas dataframe
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'

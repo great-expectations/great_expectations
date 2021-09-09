@@ -609,7 +609,7 @@ def test_get_batch_data(test_df):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
-def test_get_batch_with_split_on_whole_table(test_df):
+def test_get_batch_with_split_on_whole_table_runtime(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df, splitter_method="_split_on_whole_table"

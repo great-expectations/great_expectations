@@ -5,7 +5,7 @@ import pytest
 from packaging.version import parse as parse_version
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
@@ -572,8 +572,10 @@ def test_sampling_method__limit(
             }
         )
     )
-    execution_engine.load_batch_data("__", batch_data)
-    validator = Validator(execution_engine)
+
+    batch = Batch(data=batch_data)
+
+    validator = Validator(execution_engine, batches=[batch])
     assert len(validator.head(fetch_all=True)) == 20
 
     assert (
