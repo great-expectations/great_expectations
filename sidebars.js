@@ -169,7 +169,6 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
-                'guides/expectations/how_to_create_a_new_expectation_suite_without_the_cli',
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
                 'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
@@ -279,11 +278,9 @@ module.exports = {
       type: 'category',
       label: 'Deployment Patterns',
       items: [
-        'deployment_patterns/deploying_with_hosted_environment',
+        'deployment_patterns/how_to_instantiate_a_data_context_hosted_environment',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster',
-        'deployment_patterns/deploying_with_google_cloud_composer',
-        'deployment_patterns/deploying_with_astronomer',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
         //{
           //type: 'category',
