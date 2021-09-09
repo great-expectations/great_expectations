@@ -133,7 +133,7 @@ Using these example configurations, add in your GCS bucket and path to a directo
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L10-L27
   ```
 
-  Run this code to test your configuration.
+  Run this code to test your configuration. 
 
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L37
   ```
