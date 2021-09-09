@@ -316,9 +316,9 @@ class HtmlSiteStore:
                 return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
-        if not isinstance(key, (SiteSectionIdentifier, GeCloudIdentifier)):
+        if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(
-                "key: {!r} must be a SiteSectionIdentifier or GeCloudIdentifier, not {!r}".format(
+                "key: {!r} must be a SiteSectionIdentifier, not {!r}".format(
                     key,
                     type(key),
                 )
