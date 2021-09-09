@@ -43,9 +43,7 @@ To load a `Batch`, the steps you will take are the same regardless of the type o
     # Here is an example `data_connector_query` filtering based on an `index` which can be 
     # any valid python slice. The example here is retrieving the latest batch using `-1`:
     data_connector_query = {
-        "batch_filter_parameters": {
-            "index": -1,
-        }
+        "index": -1,
     }
       
     limit = 1000 # Number of rows to return per batch
