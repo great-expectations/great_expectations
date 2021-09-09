@@ -166,7 +166,10 @@ class ValidationsStore(Store):
         return self._expectationSuiteValidationResultSchema.dumps(value)
 
     def deserialize(self, key, value):
-        return self._expectationSuiteValidationResultSchema.loads(value)
+        if isinstance(value, dict):
+            return self._expectationSuiteValidationResultSchema.load(value)
+        else:
+            return self._expectationSuiteValidationResultSchema.loads(value)
 
     def self_check(self, pretty_print):
         return_obj = {}
