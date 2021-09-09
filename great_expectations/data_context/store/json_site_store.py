@@ -70,14 +70,13 @@ class JsonSiteStore(Store):
         This method takes full json response from GE cloud and outputs a dict appropriate for
         deserialization into a GE object
         """
-        # TODO Update for our GE Cloud Response
-        ge_cloud_suite_validation_result_id = response_json["data"]["id"]
-        suite_validation_result_dict = response_json["data"]["attributes"]["result"]
-        suite_validation_result_dict[
+        ge_cloud_json_site_id = response_json["data"]["id"]
+        json_site_dict = response_json["data"]["attributes"]["rendered_data_doc"]
+        json_site_dict[
             "ge_cloud_id"
-        ] = ge_cloud_suite_validation_result_id
+        ] = ge_cloud_json_site_id
 
-        return suite_validation_result_dict
+        return json_site_dict
 
     def serialize(self, key, value):
         return value.to_json_dict()
