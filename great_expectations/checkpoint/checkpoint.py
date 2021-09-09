@@ -234,8 +234,6 @@ class Checkpoint:
         result_format: Optional[dict] = result_format or runtime_configuration.get(
             "result_format"
         )
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
 
         runtime_kwargs = {
             "template_name": template_name,
@@ -278,12 +276,27 @@ class Checkpoint:
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
-                action_list: list = substituted_validation_dict.get("action_list")
 
                 validator: Validator = self.data_context.get_validator(
                     batch_request=batch_request,
                     expectation_suite_name=expectation_suite_name,
                 )
+
+                action_list: list = substituted_validation_dict.get("action_list")
+                runtime_configuration_validation = substituted_validation_dict.get(
+                    "runtime_configuration", {}
+                )
+                catch_exceptions_validation = runtime_configuration_validation.get(
+                    "catch_exceptions"
+                )
+                result_format_validation = runtime_configuration_validation.get(
+                    "result_format"
+                )
+                result_format = result_format or result_format_validation
+
+                if result_format is None:
+                    result_format = {"result_format": "SUMMARY"}
+
                 action_list_validation_operator: ActionListValidationOperator = (
                     ActionListValidationOperator(
                         data_context=self.data_context,
@@ -292,6 +305,16 @@ class Checkpoint:
                         name=f"{self.name}-checkpoint-validation[{idx}]",
                     )
                 )
+
+                operator_run_kwargs = {
+                    "result_format": result_format,
+                }
+
+                if catch_exceptions_validation is not None:
+                    operator_run_kwargs[
+                        "catch_exceptions"
+                    ] = catch_exceptions_validation
+
                 val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
@@ -299,7 +322,7 @@ class Checkpoint:
                         evaluation_parameters=substituted_validation_dict.get(
                             "evaluation_parameters"
                         ),
-                        result_format=result_format,
+                        **operator_run_kwargs,
                     )
                 )
                 run_results.update(val_op_run_result.run_results)
