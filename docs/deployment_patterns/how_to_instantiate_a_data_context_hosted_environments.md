@@ -32,7 +32,15 @@ The following guides will contain examples for each environment we have tested o
 Step 2: Create Expectation Suites and add Expectations
 -------------------------------------------------------
 
-Create your Expectation Suites and save the state to a validator. In order to load the Suite at a later point, you will need to ensure that you have an Expectation Store configured.
+Create your Expectation Suites and save the state to a validator.
+
+In order to load the Suite at a later time, you will need to ensure that you have an Expectation store configured:
+
+- [How to configure an Expectation store to use Amazon S3](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.md)
+- [How to configure an Expectation store to use Azure Blob Storage](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md)
+- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
+- [How to configure an Expectation store to use a filesystem](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
+- [How to configure an Expectation store to use PostgreSQL](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md)
 
 Step 3: Run validation
 --------------------------------
