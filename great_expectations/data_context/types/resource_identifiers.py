@@ -96,7 +96,7 @@ class BatchIdentifierSchema(Schema):
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifer
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
     and run_id.
     """
 
