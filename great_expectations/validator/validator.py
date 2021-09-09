@@ -469,7 +469,30 @@ class Validator:
         if metrics is None:
             metrics = {}
 
-        metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
+        # Since metrics can serve multiple expectations in a suite and are resolved together through validation graph,
+        # an exception occurring as part of resolving the combined validation graph impacts all expectations in suite.
+        try:
+            metrics = self.resolve_validation_graph(
+                graph, metrics, runtime_configuration
+            )
+        except Exception as err:
+            if catch_exceptions:
+                raised_exception = True
+                exception_traceback = traceback.format_exc()
+                for configuration in processed_configurations:
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info={
+                            "raised_exception": raised_exception,
+                            "exception_traceback": exception_traceback,
+                            "exception_message": str(err),
+                        },
+                        expectation_config=configuration,
+                    )
+                    evrs.append(result)
+                return evrs
+            else:
+                raise err
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
@@ -1113,8 +1136,10 @@ set as active.
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
             self._active_validation = True
+
             if result_format is None:
                 result_format = {"result_format": "BASIC"}
+
             # If a different validation data context was provided, override
             validate__data_context = self._data_context
             if data_context is None and self._data_context is not None:
@@ -1156,6 +1181,7 @@ set as active.
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
+
             # Evaluation parameter priority is
             # 1. from provided parameters
             # 2. from expectation configuration
