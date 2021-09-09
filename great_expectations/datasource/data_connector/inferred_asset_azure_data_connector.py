@@ -3,11 +3,6 @@ import os
 import re
 from typing import List, Optional
 
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
@@ -22,6 +17,14 @@ from great_expectations.execution_engine import (
 )
 
 logger = logging.getLogger(__name__)
+
+try:
+    from azure.storage.blob import BlobServiceClient
+except ImportError:
+    BlobServiceClient = None
+    logger.debug(
+        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
+    )
 
 
 class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):

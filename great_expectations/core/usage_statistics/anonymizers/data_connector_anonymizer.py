@@ -1,6 +1,8 @@
+# isort:skip_file
+
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 
-from great_expectations.datasource.data_connector import (  # isort:skip
+from great_expectations.datasource.data_connector import (
     DataConnector,
     RuntimeDataConnector,
     FilePathDataConnector,
