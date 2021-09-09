@@ -1925,7 +1925,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             [
                 (
                     unexpected_condition,
-                    1,
+                    sa.sql.expression.cast(1, sa.Numeric),
                 )
             ],
             else_=0,
