@@ -27,16 +27,12 @@ The following guides will contain examples for each environment we have tested o
 
 - [How to instantiate a Data Context on an EMR Spark cluster](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
 - [How to instantiate a Data Context on Databricks Spark cluster](./how_to_instantiate_a_data_context_on_databricks_spark_cluster)
-- [Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)](./deploying_with_google_cloud_composer)
-- [Deploying Great Expectations with Astronomer](./deploying_with_astronomer)
 
 
 Step 2: Create Expectation Suites and add Expectations
 -------------------------------------------------------
 
-If you want to create an Expectation Suite in your environment without using the CLI, you can simply follow this guide: [How to Create a New Expectation Suite Without the CLI](../guides/expectations/how_to_create_a_new_expectation_suite_without_the_cli).
-
-In order to store your Expectation Suites, so you can load them for validation at a later point, you will need to ensure that you have an Expectation Store configured: [Configuring Metadata Stores](../guides/setup/configuring_metadata_stores).
+Create your Expectation Suites and save the state to a validator. In order to load the Suite at a later point, you will need to ensure that you have an Expectation Store configured.
 
 Step 3: Run validation
 --------------------------------
