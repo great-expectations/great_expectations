@@ -238,6 +238,8 @@ data_docs_sites:
       suppress_store_backend_id: True
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+    site_section_builders:
+      profiling: None
 
 anonymous_usage_statistics:
   enabled: true

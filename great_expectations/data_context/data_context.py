@@ -2587,6 +2587,7 @@ class BaseDataContext:
                             "data_context": self,
                             "root_directory": self.root_directory,
                             "site_name": site_name,
+                            "ge_cloud_mode": self.ge_cloud_mode,
                         },
                         config_defaults={"module_name": module_name},
                     )
@@ -2602,7 +2603,8 @@ class BaseDataContext:
                         ] = site_builder.get_resource_url(only_if_exists=False)
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
-                            resource_identifiers, build_index=build_index
+                            resource_identifiers,
+                            build_index=(build_index and not self.ge_cloud_mode),
                         )
                         if index_page_resource_identifier_tuple:
                             index_page_locator_infos[
