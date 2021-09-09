@@ -6,7 +6,6 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
 context = ge.get_context()
