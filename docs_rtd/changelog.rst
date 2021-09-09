@@ -4,8 +4,12 @@
 Changelog
 #########
 
-
 develop
+-----------------
+* [DOCS] "Deploying Great Expectations in a hosted environment without file system or CLI (#3361)
+
+
+0.13.33
 -----------------
 * [BUGFIX] added casting of numeric value to fix redshift issue (#3293)
 * [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335)
