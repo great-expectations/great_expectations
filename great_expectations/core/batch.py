@@ -289,6 +289,7 @@ class BatchRequestBase(DictDot):
 class BatchRequest(BatchRequestBase):
     """
     This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
+    limit: refers to the number of batches requested (not rows per batch)
     """
 
     def __init__(
