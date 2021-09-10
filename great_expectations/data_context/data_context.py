@@ -1799,7 +1799,7 @@ class BaseDataContext:
                     expectation_suite is not None,
                     expectation_suite_name is not None,
                     create_expectation_suite_with_name is not None,
-                    expectation_suite_ge_cloud_id is not None
+                    expectation_suite_ge_cloud_id is not None,
                 ]
             )
             != 1

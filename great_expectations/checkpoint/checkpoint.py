@@ -307,8 +307,9 @@ class Checkpoint:
                 )
                 checkpoint_identifier = None
                 if self.data_context.ge_cloud_mode:
-                    checkpoint_identifier = GeCloudIdentifier(resource_type="contract", ge_cloud_id=str(
-                        self.ge_cloud_id))
+                    checkpoint_identifier = GeCloudIdentifier(
+                        resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
+                    )
                 val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
@@ -317,7 +318,7 @@ class Checkpoint:
                             "evaluation_parameters"
                         ),
                         result_format=result_format,
-                        checkpoint_identifier=checkpoint_identifier
+                        checkpoint_identifier=checkpoint_identifier,
                     )
                 )
                 run_results.update(val_op_run_result.run_results)
@@ -728,7 +729,7 @@ class SimpleCheckpoint(Checkpoint):
             validations=checkpoint_config.validations,
             profilers=checkpoint_config.profilers,
             ge_cloud_id=checkpoint_config.ge_cloud_id,
-            expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id
+            expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id,
         )
 
     def run(

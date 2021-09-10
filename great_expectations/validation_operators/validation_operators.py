@@ -282,7 +282,7 @@ class ActionListValidationOperator(ValidationOperator):
         run_name=None,
         run_time=None,
         result_format=None,
-        checkpoint_identifier=None
+        checkpoint_identifier=None,
     ):
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -346,7 +346,7 @@ class ActionListValidationOperator(ValidationOperator):
                 batch_validation_result=batch_validation_result,
                 run_id=run_id,
                 validation_result_id=validation_result_id,
-                checkpoint_identifier=checkpoint_identifier
+                checkpoint_identifier=checkpoint_identifier,
             )
 
             run_result_obj["actions_results"] = batch_actions_results
@@ -367,7 +367,7 @@ class ActionListValidationOperator(ValidationOperator):
         batch_validation_result,
         run_id,
         validation_result_id=None,
-        checkpoint_identifier=None
+        checkpoint_identifier=None,
     ):
         """
         Runs all actions configured for this operator on the result of validating one
@@ -406,7 +406,7 @@ class ActionListValidationOperator(ValidationOperator):
                     data_asset=batch,
                     payload=batch_actions_results,
                     expectation_suite_identifier=expectation_suite_identifier,
-                    checkpoint_identifier=checkpoint_identifier
+                    checkpoint_identifier=checkpoint_identifier,
                 )
 
                 # add action_result
