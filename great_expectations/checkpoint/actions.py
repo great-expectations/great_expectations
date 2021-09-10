@@ -7,6 +7,8 @@ The only requirement from an action is for it to have a take_action method.
 import logging
 import warnings
 
+from great_expectations.data_context.types.refs import GeCloudResourceRef
+
 try:
     import pypd
 except ImportError:
@@ -21,7 +23,7 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
+    ValidationResultIdentifier, GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
@@ -45,6 +47,7 @@ class ValidationAction:
         validation_result_suite,
         validation_result_suite_identifier,
         data_asset,
+        expectation_suite_identifier=None,
         **kwargs,
     ):
         """
@@ -56,14 +59,15 @@ class ValidationAction:
         :return:
         """
         return self._run(
-            validation_result_suite,
-            validation_result_suite_identifier,
-            data_asset,
+            validation_result_suite=validation_result_suite,
+            validation_result_suite_identifier=validation_result_suite_identifier,
+            data_asset=data_asset,
+            expectation_suite_identifier=expectation_suite_identifier,
             **kwargs,
         )
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self, validation_result_suite, validation_result_suite_identifier, data_asset, expectation_suite_identifier=None
     ):
         return NotImplementedError
 
@@ -76,7 +80,7 @@ class NoOpAction(ValidationAction):
         super().__init__(data_context)
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset
+        self, validation_result_suite, validation_result_suite_identifier, data_asset, expectation_suite_identifier=None
     ):
         print("Happily doing nothing")
 
@@ -151,6 +155,7 @@ class SlackNotificationAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -243,6 +248,7 @@ class PagerdutyAlertAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("PagerdutyAlertAction.run")
 
@@ -357,6 +363,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("MicrosoftTeamsNotificationAction.run")
 
@@ -465,6 +472,7 @@ class OpsgenieAlertAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("OpsgenieAlertAction.run")
 
@@ -616,6 +624,7 @@ class EmailAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("EmailAction.run")
 
@@ -709,6 +718,7 @@ class StoreValidationResultAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -716,17 +726,21 @@ class StoreValidationResultAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
 
-        self.target_store.set(
+        return_val = self.target_store.set(
             validation_result_suite_identifier, validation_result_suite
         )
+        if self.data_context.ge_cloud_mode:
+            return_val: GeCloudResourceRef
+            new_ge_cloud_id = return_val.ge_cloud_id
+            validation_result_suite_identifier.ge_cloud_id = new_ge_cloud_id
 
 
 class StoreEvaluationParametersAction(ValidationAction):
@@ -771,6 +785,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("StoreEvaluationParametersAction.run")
 
@@ -778,10 +793,10 @@ class StoreEvaluationParametersAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -846,6 +861,7 @@ class StoreMetricsAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("StoreMetricsAction.run")
 
@@ -916,6 +932,7 @@ class UpdateDataDocsAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
+        expectation_suite_identifier=None
     ):
         logger.debug("UpdateDataDocsAction.run")
 
@@ -923,10 +940,10 @@ class UpdateDataDocsAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -937,9 +954,13 @@ class UpdateDataDocsAction(ValidationAction):
             site_names=self._site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
-                validation_result_suite_identifier.expectation_suite_identifier,
+                expectation_suite_identifier,
             ],
         )
+
+        data_docs_validation_results = {}
+        if self.data_context.ge_cloud_mode:
+            return data_docs_validation_results
 
         # get the URL for the validation result
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
@@ -947,7 +968,6 @@ class UpdateDataDocsAction(ValidationAction):
             site_names=self._site_names,
         )
         # process payload
-        data_docs_validation_results = {}
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
 
