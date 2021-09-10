@@ -236,7 +236,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
             credentials = {}
 
         try:
-            # if an engine was provided, use that
+            # If an engine was provided, use that.
             if "engine" in kwargs:
                 self.engine = kwargs.pop("engine")
 
@@ -248,7 +248,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
                 )
                 concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
 
-                # if a connection string or url was provided, use that
+                # If a connection string or url was provided, use that.
                 if "connection_string" in kwargs:
                     connection_string = kwargs.pop("connection_string")
                     self.engine = create_engine(connection_string, **kwargs)
@@ -261,7 +261,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     connection = self.engine.connect()
                     connection.close()
 
-                # Otherwise, connect using remaining kwargs
+                # Otherwise, connect using remaining kwargs.
                 else:
                     (
                         options,

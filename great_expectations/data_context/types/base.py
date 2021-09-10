@@ -4,7 +4,7 @@ import itertools
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -1087,7 +1087,9 @@ class ConcurrencyConfig(DictDot):
         # databases and/or be manually user configurable.
         return 100
 
-    def add_sqlalchemy_create_engine_parameters(self, parameters):
+    def add_sqlalchemy_create_engine_parameters(
+        self, parameters: MutableMapping[str, Any]
+    ):
         """Update SqlAlchemy parameters to prevent concurrency errors (e.g. http://sqlalche.me/e/14/3o7r) and
         bottlenecks.
 
