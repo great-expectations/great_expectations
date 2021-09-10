@@ -49,6 +49,7 @@ yaml = YAML()
 
 parameterized_expectation_suite_name = "my_dag_node.default"
 
+
 @pytest.fixture()
 def parameterized_expectation_suite():
     fixture_path = file_relative_path(
@@ -160,7 +161,9 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
 
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
     assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
-        ExpectationSuiteIdentifier(expectation_suite_name=parameterized_expectation_suite_name)
+        ExpectationSuiteIdentifier(
+            expectation_suite_name=parameterized_expectation_suite_name
+        )
     ]
 
 
@@ -170,7 +173,9 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
             parameterized_expectation_suite_name
         )
     )
-    assert expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
+    assert (
+        expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
+    )
     assert len(expectation_suite.expectations) == 2
 
 
@@ -216,8 +221,14 @@ def test_compile_evaluation_parameter_dependencies(
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {}
     )
-    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(parameterized_expectation_suite_name)
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies(expectation_suite)
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            parameterized_expectation_suite_name
+        )
+    )
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies(
+        expectation_suite
+    )
     assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
         "source_diabetes_data.default": [
             {

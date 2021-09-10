@@ -2443,13 +2443,13 @@ class BaseDataContext:
         self._evaluation_parameter_dependencies = {}
 
         # only if we don't have an expectation suite do we do a key scan
-        if(expectation_suite is None):
+        if expectation_suite is None:
             for key in self.expectations_store.list_keys():
                 expectation_suite = self.expectations_store.get(key)
                 if not expectation_suite:
                     continue
 
-        if(expectation_suite):
+        if expectation_suite:
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
