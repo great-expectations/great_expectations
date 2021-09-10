@@ -1043,6 +1043,7 @@ class TableExpectation(Expectation, ABC):
         "table",
         "row_condition",
         "condition_parser",
+        "unexpected_rows_index_columns",
     )
     metric_dependencies = tuple()
 
@@ -1168,7 +1169,14 @@ class TableExpectation(Expectation, ABC):
 
 
 class ColumnExpectation(TableExpectation, ABC):
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+        "unexpected_rows_index_columns",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         # Ensuring basic configuration parameters are properly set
@@ -1183,7 +1191,14 @@ class ColumnExpectation(TableExpectation, ABC):
 
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+        "unexpected_rows_index_columns",
+    )
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -1192,6 +1207,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
+        "unexpected_rows_index_columns": None,
     }
 
     @classmethod
@@ -1380,6 +1396,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "column_B",
         "row_condition",
         "condition_parser",
+        "unexpected_rows_index_columns",
     )
     success_keys = ("mostly",)
     default_kwarg_values = {
@@ -1389,6 +1406,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
+        "unexpected_rows_index_columns": None,
     }
 
     @classmethod
@@ -1582,6 +1600,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "row_condition",
         "condition_parser",
         "ignore_row_if",
+        "unexpected_rows_index_columns",
     )
     success_keys = tuple()
     default_kwarg_values = {
@@ -1591,6 +1610,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
+        "unexpected_rows_index_columns": None,
     }
 
     @classmethod
@@ -1865,11 +1885,19 @@ def _format_map_output(
         {
             "unexpected_list": unexpected_list,
             "unexpected_index_list": unexpected_index_list,
-            "unexpected_row_list": unexpected_row_list,
         }
     )
 
     if result_format["result_format"] == "COMPLETE":
+        return return_obj
+
+    return_obj["result"].update(
+        {
+            "unexpected_row_list": unexpected_row_list,
+        }
+    )
+
+    if result_format["result_format"] == "INCLUDE_UNEXPECTED_ROWS":
         return return_obj
 
     raise ValueError("Unknown result_format {}.".format(result_format["result_format"]))
