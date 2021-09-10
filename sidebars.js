@@ -138,8 +138,8 @@ module.exports = {
                 'guides/connecting_to_your_data/cloud/s3/spark',
                 'guides/connecting_to_your_data/cloud/gcs/pandas',
                 'guides/connecting_to_your_data/cloud/gcs/spark',
-                //'guides/connecting_to_your_data/cloud/azure/pandas',
-                //'guides/connecting_to_your_data/cloud/azure/spark'
+                'guides/connecting_to_your_data/cloud/azure/pandas',
+                'guides/connecting_to_your_data/cloud/azure/spark'
               ]
             },
             //{
