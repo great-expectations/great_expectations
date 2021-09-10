@@ -305,7 +305,13 @@ def test_graph_validate_with_bad_config(basic_datasource):
         # noinspection PyUnusedLocal
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
-        ).graph_validate(configurations=[expectation_configuration])
+        ).graph_validate(
+            configurations=[expectation_configuration],
+            runtime_configuration={
+                "catch_exceptions": False,
+                "result_format": {"result_format": "BASIC"},
+            },
+        )
     assert (
         str(eee.value)
         == 'Error: The column "not_in_table" in BatchData does not exist.'
@@ -704,7 +710,7 @@ def test_validator_load_additional_batch_to_validator(
     )
 
     new_batch = context.get_batch_list(batch_request=feb_batch_request)
-    validator.load_batch(batch_list=new_batch)
+    validator.load_batch_list(batch_list=new_batch)
 
     updated_batch_markers: BatchMarkers = validator.active_batch_markers
     assert (

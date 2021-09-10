@@ -3,8 +3,43 @@ title: Changelog
 ---
 
 ### Develop
-* [FEATURE] Add "test_backends" key to Expectation.examples for specifying test backends and dialects (#3257) 
 
+
+### 0.13.33
+* [FEATURE] Add optional ge_cloud_mode flag to DataContext to enable use with Great Expectations Cloud.
+* [FEATURE] Rendered Data Doc JSONs can be uploaded and retrieved from GE Cloud
+* [FEATURE] Implement InferredAssetAzureDataConnector with Support for Pandas and Spark Execution Engines (#3372)
+* [FEATURE] Spark connecting to Google Cloud Storage (#3365)
+* [FEATURE] SparkDFExecutionEngine can load data accessed by ConfiguredAssetAzureDataConnector (integration tests are included). (#3345)
+* [FEATURE] [MER-293] GE Cloud Mode for DataContext (#3262) (Thanks @roblim)
+* [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335) (Thanks @NathanFarmer)
+* [BUGFIX] Fix issue where multiple validators reused the same execution engine, causing a conflict in active batch (GE-3168) (#3222) (Thanks @jcampbell)
+* [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable (#3349) (Thanks @NathanFarmer)
+* [BUGFIX] added casting of numeric value to fix redshift issue #3293 (#3338) (Thanks @sariabod)
+* [DOCS] Docusaurus - How to connect to an MSSQL database (#3353) (Thanks @NathanFarmer)
+* [DOCS] GREAT-195 Docs remove all stubs and links to them (#3363)
+* [MAINTENANCE] Update azure-pipelines-docs-integration.yml for Azure Pipelines
+* [MAINTENANCE] Update implemented_expectations.md (#3351) (Thanks @spencerhardwick)
+* [MAINTENANCE] Updating to reflect current Expectation dev state (#3348) (Thanks @spencerhardwick)
+* [MAINTENANCE] docs: Clean up Docusaurus refs (#3371)
+
+### 0.13.32
+* [FEATURE] Add Performance Benchmarks Using BigQuery. (Thanks @jdimatteo)
+* [WIP] [FEATURE] add backend args to run_diagnostics (#3257) (Thanks @edjoesu)
+* [BUGFIX] Addresses Issue 2937. (#3236) (Thanks @BenGale93)
+* [BUGFIX] SQL dialect doesn't register for BigQuery for V2 (#3324)
+* [DOCS] "How to connect to data on GCS using Pandas" (#3311)
+* [MAINTENANCE] Add CODEOWNERS with a single check for sidebars.js (#3332)
+* [MAINTENANCE] Fix incorrect DataConnector usage of _get_full_file_path() API method. (#3336)
+* [MAINTENANCE] Make Pandas against S3 and GCS integration tests more robust by asserting on number of batches returned and row counts (#3341)
+* [MAINTENANCE] Make integration tests of Pandas against Azure more robust. (#3339)
+* [MAINTENANCE] Prepare AzureUrl to handle WASBS format (for Spark) (#3340)
+* [MAINTENANCE] Renaming default_batch_identifier in examples #3334
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (#3304)
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (Spark and Pandas) (#3325)
+* [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
+* [MAINTENANCE] Various doc patches (#3326)
+* [MAINTENANCE] clean up imports and method signatures (#3337)
 
 ### 0.13.31
 * [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)

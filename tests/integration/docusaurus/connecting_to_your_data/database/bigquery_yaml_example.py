@@ -47,7 +47,7 @@ batch_request = RuntimeBatchRequest(
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
     batch_spec_passthrough={
         "bigquery_temp_table": "ge_temp"
     },  # this is the name of the table you would like to use a 'temp_table'

@@ -1,7 +1,9 @@
+from typing import List
+
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 
 context = ge.get_context()
 
@@ -14,11 +16,11 @@ datasource_config = {
             "class_name": "ConfiguredAssetGCSDataConnector",
             "bucket_or_name": "<YOUR_GCS_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
-            "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
                 "group_names": ["year", "month"],
             },
+            "assets": {"taxi_data": None},
         }
     },
 }
@@ -64,3 +66,10 @@ assert set(
         "configured_data_connector_name"
     ]
 ) == {"taxi_data"}
+
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000

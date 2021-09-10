@@ -1,9 +1,10 @@
 import os
+from typing import List
 
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
@@ -25,13 +26,13 @@ data_connectors:
             credential: <YOUR_CREDENTIAL>   # if using a protected container
         container: <YOUR_AZURE_CONTAINER_HERE>
         name_starts_with: <CONTAINER_PATH_TO_DATA>
-        assets:
-            taxi_data:
         default_regex:
             pattern: data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:
                 - year
                 - month
+        assets:
+            taxi_data:
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -43,7 +44,7 @@ datasource_yaml = datasource_yaml.replace(
     "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
 )
 datasource_yaml = datasource_yaml.replace(
-    "<YOUR_ACCOUNT_URL>", "superconductivetests.blob.core.windows.net"
+    "<YOUR_ACCOUNT_URL>", "superconductivetesting.blob.core.windows.net"
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
@@ -79,3 +80,9 @@ assert set(
         "configured_data_connector_name"
     ]
 ) == {"taxi_data"}
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000

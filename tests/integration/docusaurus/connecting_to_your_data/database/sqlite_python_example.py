@@ -42,7 +42,7 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={
         "query": "SELECT * from yellow_tripdata_sample_2019_01 LIMIT 10"
     },
-    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True

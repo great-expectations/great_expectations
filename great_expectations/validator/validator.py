@@ -92,16 +92,10 @@ class Validator:
             batches = tuple()
 
         self._batches = {}
-
-        for batch in batches:
-            assert isinstance(
-                batch, Batch
-            ), "batches provided to Validator must be Great Expectations Batch objects"
-            self._execution_engine.load_batch_data(batch.id, batch.data)
-            self._batches[batch.id] = batch
+        self.load_batch_list(batches)
 
         if len(batches) > 1:
-            logger.warning(
+            logger.debug(
                 f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
                 f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
             )
@@ -214,11 +208,22 @@ class Validator:
                         )
 
                 # this is used so that exceptions are caught appropriately when they occur in expectation config
-                basic_runtime_configuration = {
-                    k: v
-                    for k, v in kwargs.items()
-                    if k in ("result_format", "include_config", "catch_exceptions")
+                basic_configuration_keys = {
+                    "result_format",
+                    "include_config",
+                    "catch_exceptions",
                 }
+                basic_default_expectation_args = {
+                    k: v
+                    for k, v in self.default_expectation_args.items()
+                    if k in basic_configuration_keys
+                }
+                basic_runtime_configuration = copy.deepcopy(
+                    basic_default_expectation_args
+                )
+                basic_runtime_configuration.update(
+                    {k: v for k, v in kwargs.items() if k in basic_configuration_keys}
+                )
 
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
@@ -437,9 +442,12 @@ class Validator:
             except AssertionError as e:
                 raise InvalidExpectationConfigurationError(str(e))
 
-            expectation_impl = get_expectation_impl(configuration.expectation_type)
+            evaluated_config = copy.deepcopy(configuration)
+            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies = expectation_impl().get_validation_dependencies(
-                configuration, self._execution_engine, runtime_configuration
+                evaluated_config, self._execution_engine, runtime_configuration
             )["metrics"]
 
             try:
@@ -447,11 +455,11 @@ class Validator:
                     self.build_metric_dependency_graph(
                         graph,
                         metric,
-                        configuration,
+                        evaluated_config,
                         self._execution_engine,
                         runtime_configuration=runtime_configuration,
                     )
-                processed_configurations.append(configuration)
+                processed_configurations.append(evaluated_config)
             except Exception as err:
                 if catch_exceptions:
                     raised_exception = True
@@ -463,7 +471,7 @@ class Validator:
                             "exception_traceback": exception_traceback,
                             "exception_message": str(err),
                         },
-                        expectation_config=configuration,
+                        expectation_config=evaluated_config,
                     )
                     evrs.append(result)
                 else:
@@ -472,7 +480,30 @@ class Validator:
         if metrics is None:
             metrics = {}
 
-        metrics = self.resolve_validation_graph(graph, metrics, runtime_configuration)
+        # Since metrics can serve multiple expectations in a suite and are resolved together through validation graph,
+        # an exception occurring as part of resolving the combined validation graph impacts all expectations in suite.
+        try:
+            metrics = self.resolve_validation_graph(
+                graph, metrics, runtime_configuration
+            )
+        except Exception as err:
+            if catch_exceptions:
+                raised_exception = True
+                exception_traceback = traceback.format_exc()
+                for configuration in processed_configurations:
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info={
+                            "raised_exception": raised_exception,
+                            "exception_traceback": exception_traceback,
+                            "exception_message": str(err),
+                        },
+                        expectation_config=configuration,
+                    )
+                    evrs.append(result)
+                return evrs
+            else:
+                raise err
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
@@ -692,8 +723,14 @@ class Validator:
         """Getter for config value"""
         return self._validator_config.get(key)
 
-    def load_batch(self, batch_list: List[Batch]):
+    def load_batch_list(self, batch_list: List[Batch]):
         for batch in batch_list:
+            try:
+                assert isinstance(
+                    batch, Batch
+                ), "batches provided to Validator must be Great Expectations Batch objects"
+            except AssertionError as e:
+                logger.warning(str(e))
             self._execution_engine.load_batch_data(batch.id, batch.data)
             self._batches[batch.id] = batch
             # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
@@ -714,7 +751,7 @@ class Validator:
     @property
     def active_batch(self) -> Batch:
         """Getter for active batch"""
-        active_batch_id: str = self.execution_engine.active_batch_data_id
+        active_batch_id: str = self.active_batch_id
         batch: Batch = self.batches.get(active_batch_id) if active_batch_id else None
         return batch
 
@@ -729,10 +766,15 @@ class Validator:
     @property
     def active_batch_id(self) -> str:
         """Getter for active batch id"""
-        return self.execution_engine.active_batch_data_id
+        active_engine_batch_id = self._execution_engine.active_batch_data_id
+        if active_engine_batch_id != self._active_batch_id:
+            logger.debug(
+                "This validator has a different active batch id than its Execution Engine."
+            )
+        return self._active_batch_id
 
     @active_batch_id.setter
-    def active_batch_id(self, batch_id: str):
+    def active_batch_id(self, batch_id):
         assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
         available_batch_ids: Set[str] = set(self.batches.keys()).union(
             set(self.loaded_batch_ids)
@@ -744,7 +786,7 @@ set as active.
 """
             )
         else:
-            self.execution_engine._active_batch_data_id = batch_id
+            self._active_batch_id = batch_id
 
     @property
     def active_batch_markers(self):
@@ -1105,8 +1147,7 @@ set as active.
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
             self._active_validation = True
-            if result_format is None:
-                result_format = {"result_format": "BASIC"}
+
             # If a different validation data context was provided, override
             validate__data_context = self._data_context
             if data_context is None and self._data_context is not None:
@@ -1148,6 +1189,7 @@ set as active.
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
+
             # Evaluation parameter priority is
             # 1. from provided parameters
             # 2. from expectation configuration
@@ -1203,12 +1245,17 @@ set as active.
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
 
+            runtime_configuration = copy.deepcopy(self.default_expectation_args)
+
+            if catch_exceptions is not None:
+                runtime_configuration.update({"catch_exceptions": catch_exceptions})
+
+            if result_format is not None:
+                runtime_configuration.update({"result_format": result_format})
+
             results = self.graph_validate(
                 expectations_to_evaluate,
-                runtime_configuration={
-                    "catch_exceptions": catch_exceptions,
-                    "result_format": result_format,
-                },
+                runtime_configuration=runtime_configuration,
             )
             statistics = _calc_validation_statistics(results)
 

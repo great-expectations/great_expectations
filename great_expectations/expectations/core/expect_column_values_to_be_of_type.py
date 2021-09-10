@@ -1,3 +1,4 @@
+import inspect
 import logging
 from typing import Dict, Optional
 
@@ -285,7 +286,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             types = []
             type_module = _get_dialect_type_module(execution_engine=execution_engine)
             try:
-                type_class = getattr(type_module, expected_type)
+                potential_type = getattr(type_module, expected_type)
+                # In the case of the PyAthena dialect we need to verify that
+                # the type returned is indeed a type and not an instance.
+                if not inspect.isclass(potential_type):
+                    type_class = type(potential_type)
+                else:
+                    type_class = potential_type
                 types.append(type_class)
             except AttributeError:
                 logger.debug("Unrecognized type: %s" % expected_type)
