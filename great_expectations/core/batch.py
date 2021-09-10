@@ -373,7 +373,9 @@ is illegal.
                 The type given is "{str(type(runtime_parameters))}", which is illegal."""
             )
 
-        if not (batch_identifiers and isinstance(batch_identifiers, (dict, IDDict))):
+        # TODO: (Rob) Fix validation
+        # if not (batch_identifiers and isinstance(batch_identifiers, (dict, IDDict))):
+        if not (batch_identifiers is not None and isinstance(batch_identifiers, (dict, IDDict))):
             raise TypeError(
                 f"""The type for batch_identifiers must be a dict or IDDict, with keys being identifiers defined in the
                 data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""

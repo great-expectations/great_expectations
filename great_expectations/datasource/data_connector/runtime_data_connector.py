@@ -276,6 +276,7 @@ class RuntimeDataConnector(DataConnector):
 
         runtime_parameters = batch_request.runtime_parameters
         batch_identifiers = batch_request.batch_identifiers
+        # TODO: (Rob) - fix validation
         # if not (
         #     (not runtime_parameters and not batch_identifiers)
         #     or (runtime_parameters and batch_identifiers)
