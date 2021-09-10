@@ -680,6 +680,7 @@ class SimpleCheckpoint(Checkpoint):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
         checkpoint_config: CheckpointConfig = self._configurator_class(
@@ -702,6 +703,7 @@ class SimpleCheckpoint(Checkpoint):
             notify_on=notify_on,
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         ).build()
 
         super().__init__(
@@ -720,6 +722,7 @@ class SimpleCheckpoint(Checkpoint):
             validations=checkpoint_config.validations,
             profilers=checkpoint_config.profilers,
             ge_cloud_id=checkpoint_config.ge_cloud_id,
+            expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id
         )
 
     def run(
@@ -742,6 +745,7 @@ class SimpleCheckpoint(Checkpoint):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         new_baseline_config = None
@@ -776,5 +780,6 @@ class SimpleCheckpoint(Checkpoint):
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             **kwargs,
         )
