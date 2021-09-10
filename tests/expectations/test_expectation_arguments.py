@@ -324,3 +324,140 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
+
+
+def test_result_format_configured_no_set_default_override(
+    in_memory_runtime_context, test_spark_df
+):
+    catch_exceptions: bool = False  # expect exceptions to be raised
+    result_format: str = "SUMMARY"
+    runtime_environment_arguments = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    expectation_arguments: dict = {
+        "include_config": True,
+        "column": "Name",  # use correct column to avoid error
+    }
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict = dict(
+        **runtime_environment_arguments, **expectation_arguments
+    )
+
+    expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    runtime_batch_request = RuntimeBatchRequest(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="insert_your_data_asset_name_here",
+        runtime_parameters={"batch_data": test_spark_df},
+        batch_identifiers={
+            "id_key_0": "id_value_0",
+            "id_key_1": "id_value_1",
+        },
+    )
+
+    validator: Validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    # Test calling "validator.validate()" explicitly.
+
+    validator_validation: ExpectationSuiteValidationResult = validator.validate(
+        **runtime_environment_arguments
+    )
+    results: List[ExpectationValidationResult] = validator_validation.results
+    assert len(results) == 1
+
+    result: ExpectationValidationResult = results[0]
+    assert len(result.result.keys()) > 0
+
+    # Test calling "validator.expect_*" through "validator.validate_expectation()".
+
+    expectation_parameters: dict = dict(
+        **expectation_arguments_without_meta, **expectation_meta
+    )
+
+    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+        **expectation_parameters
+    )
+    assert len(result.result.keys()) > 0
+
+
+def test_result_format_configured_with_set_default_override(
+    in_memory_runtime_context, test_spark_df
+):
+    catch_exceptions: bool = False  # expect exceptions to be raised
+    result_format: str = "SUMMARY"
+    runtime_environment_arguments = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    expectation_arguments: dict = {
+        "include_config": True,
+        "column": "Name",  # use correct column to avoid error
+    }
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict = dict(
+        **runtime_environment_arguments, **expectation_arguments
+    )
+
+    expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    runtime_batch_request = RuntimeBatchRequest(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="insert_your_data_asset_name_here",
+        runtime_parameters={"batch_data": test_spark_df},
+        batch_identifiers={
+            "id_key_0": "id_value_0",
+            "id_key_1": "id_value_1",
+        },
+    )
+
+    validator: Validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    validator.set_default_expectation_argument("result_format", "BOOLEAN_ONLY")
+
+    # Test calling "validator.validate()" explicitly.
+    validator_validation: ExpectationSuiteValidationResult = validator.validate()
+    results: List[ExpectationValidationResult] = validator_validation.results
+    assert len(results) == 1
+
+    result: ExpectationValidationResult = results[0]
+    assert len(result.result.keys()) == 0
+
+    # Test calling "validator.expect_*" through "validator.validate_expectation()".
+
+    expectation_parameters: dict = dict(**expectation_arguments, **expectation_meta)
+
+    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
+        **expectation_parameters
+    )
+    assert len(result.result.keys()) == 0
