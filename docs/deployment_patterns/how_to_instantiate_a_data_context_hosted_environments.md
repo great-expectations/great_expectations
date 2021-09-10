@@ -32,27 +32,34 @@ The following guides will contain examples for each environment we have tested o
 Step 2: Create Expectation Suites and add Expectations
 -------------------------------------------------------
 
-Create your Expectation Suites and save the state to a validator.
+If you want to create an Expectation Suite in your environment without using the CLI, you can follow this guide from step 5 onward to add a Datasource and an Expectation Suite: [How to connect to a PostgreSQL database](../guides/connecting_to_your_data/database/postgres/#5-configure-your-datasource)
+
+You can then add Expectations to your Suite one at a time like this example:
+
+```
+validator.expect_column_values_to_not_be_null("my_column")
+validator.save_expectation_suite(discard_failed_expectations=False)
+```
 
 In order to load the Suite at a later time, you will need to ensure that you have an Expectation store configured:
 
-- [How to configure an Expectation store to use Amazon S3](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.md)
-- [How to configure an Expectation store to use Azure Blob Storage](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md)
-- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
-- [How to configure an Expectation store to use a filesystem](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
-- [How to configure an Expectation store to use PostgreSQL](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md)
+- [How to configure an Expectation store to use Amazon S3](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3)
+- [How to configure an Expectation store to use Azure Blob Storage](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage)
+- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs)
+- [How to configure an Expectation store to use a filesystem](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem)
+- [How to configure an Expectation store to use PostgreSQL](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql)
 
 Step 3: Run validation
 --------------------------------
 
-In order to use an Expectation Suite you've created to validate data, follow this guide: [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint).
+In order to use an Expectation Suite you've created to validate data, follow this guide: [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint)
 
 Step 4: Use Data Docs
 ----------------------
 
-Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../tutorials/getting_started/customize_your_deployment#options-for-hosting-data-docs).
+Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../tutorials/getting_started/customize_your_deployment#options-for-hosting-data-docs)
 
 Additional notes
 ----------------
 
-If you have successfully deployed Great Expectations in a hosted environment other than the ones listed above, we would love to hear from you. Please reach out to us on [Slack](https://greatexpectations.io/slack).
+If you have successfully deployed Great Expectations in a hosted environment other than the ones listed above, we would love to hear from you. Please reach out to us on [Slack](https://greatexpectations.io/slack)
