@@ -14,7 +14,7 @@ This will allow you to validate and explore your data.
 
 <Prerequisites>
 
-- Have access to data on an ABS bucket
+- Have access to data on an ABS container
 
 </Prerequisites>
 
