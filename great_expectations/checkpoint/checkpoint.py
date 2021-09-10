@@ -16,6 +16,7 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -304,6 +305,10 @@ class Checkpoint:
                         name=f"{self.name}-checkpoint-validation[{idx}]",
                     )
                 )
+                checkpoint_identifier = None
+                if self.data_context.ge_cloud_mode:
+                    checkpoint_identifier = GeCloudIdentifier(resource_type="contract", ge_cloud_id=str(
+                        self.ge_cloud_id))
                 val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
@@ -312,6 +317,7 @@ class Checkpoint:
                             "evaluation_parameters"
                         ),
                         result_format=result_format,
+                        checkpoint_identifier=checkpoint_identifier
                     )
                 )
                 run_results.update(val_op_run_result.run_results)

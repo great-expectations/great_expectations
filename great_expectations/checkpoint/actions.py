@@ -49,6 +49,7 @@ class ValidationAction:
         validation_result_suite_identifier,
         data_asset,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
         **kwargs,
     ):
         """
@@ -64,6 +65,7 @@ class ValidationAction:
             validation_result_suite_identifier=validation_result_suite_identifier,
             data_asset=data_asset,
             expectation_suite_identifier=expectation_suite_identifier,
+            checkpoint_identifier=checkpoint_identifier,
             **kwargs,
         )
 
@@ -73,6 +75,7 @@ class ValidationAction:
         validation_result_suite_identifier,
         data_asset,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         return NotImplementedError
 
@@ -90,6 +93,7 @@ class NoOpAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         print("Happily doing nothing")
 
@@ -165,6 +169,7 @@ class SlackNotificationAction(ValidationAction):
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -258,6 +263,7 @@ class PagerdutyAlertAction(ValidationAction):
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("PagerdutyAlertAction.run")
 
@@ -373,6 +379,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("MicrosoftTeamsNotificationAction.run")
 
@@ -482,6 +489,7 @@ class OpsgenieAlertAction(ValidationAction):
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("OpsgenieAlertAction.run")
 
@@ -634,6 +642,7 @@ class EmailAction(ValidationAction):
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("EmailAction.run")
 
@@ -728,6 +737,7 @@ class StoreValidationResultAction(ValidationAction):
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -744,8 +754,12 @@ class StoreValidationResultAction(ValidationAction):
                 )
             )
 
+        contract_ge_cloud_id = None
+        if self.data_context.ge_cloud_mode and checkpoint_identifier:
+            contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
+
         return_val = self.target_store.set(
-            validation_result_suite_identifier, validation_result_suite
+            validation_result_suite_identifier, validation_result_suite, contract_id=contract_ge_cloud_id
         )
         if self.data_context.ge_cloud_mode:
             return_val: GeCloudResourceRef
@@ -796,6 +810,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("StoreEvaluationParametersAction.run")
 
@@ -873,6 +888,7 @@ class StoreMetricsAction(ValidationAction):
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("StoreMetricsAction.run")
 
@@ -944,6 +960,7 @@ class UpdateDataDocsAction(ValidationAction):
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
+        checkpoint_identifier=None,
     ):
         logger.debug("UpdateDataDocsAction.run")
 
