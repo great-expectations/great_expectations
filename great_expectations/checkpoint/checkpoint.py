@@ -264,6 +264,10 @@ class Checkpoint:
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
+        # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
+        # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
+        # AsyncExecutor and the corresponding AsyncExecutor docstring for more details on when multiple threads are
+        # used.
         with AsyncExecutor(
             self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:

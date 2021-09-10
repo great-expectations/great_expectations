@@ -132,8 +132,26 @@ def test_taxi_trips_benchmark(
 def _recursively_assert_actual_result_matches_expected_result_keys(
     expected, actual, description_for_error_reporting
 ):
-    """Only assert on keys that exist in the expected result, so that test is less fragile and doesn't incorrectly fail
-    when new keys are added."""
+    """Assert that actual equals expected while ignoring key order and extra keys not present in expected.
+
+    Expected mappings may be a subset of actual mappings -- this can be useful to make tests less fragile so that they
+    don't incorrectly fail when new keys are added.
+
+    Args:
+        expected: The expected result. For mappings, every key in expected must be present in actual with the same value
+            (while recursively ignoring nested key order and extra nested keys in any nested values).
+        actual: The actual result for comparison with expected result.
+        description_for_error_reporting: Description to provide context during error reporting. For each recursive call,
+            the description is updated to also include the key. For example, if the initial description is
+            "expect_table_columns_to_match_set result" and the assertion fails with the "raised_exception" key nested in
+            the "exception_info" key then pytest will report with a description as shown in the following:
+
+            >           assert expected == actual, description_for_error_reporting
+            E           AssertionError: expect_table_columns_to_match_set result["exception_info"]["raised_exception"]
+            E           assert True == False
+            E             +True
+            E             -False
+    """
     if isinstance(expected, Mapping):
         for expected_key in expected.keys():
             assert expected_key in actual.keys(), description_for_error_reporting

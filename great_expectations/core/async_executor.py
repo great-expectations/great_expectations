@@ -7,7 +7,7 @@ WARNING: This module is experimental.
 
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractContextManager
-from typing import Any
+from typing import Any, Optional
 
 from urllib3 import connectionpool, poolmanager
 
@@ -21,7 +21,7 @@ class AsyncResult:
     WARNING: This class is experimental.
     """
 
-    def __init__(self, future: Future = None, value: Any = None):
+    def __init__(self, future: Optional[Future] = None, value: Optional[Any] = None):
         """AsyncResult instances are created by AsyncExecutor.submit() and should not otherwise be created directly."""
         self._future = future
         self._value = value
@@ -79,8 +79,9 @@ class AsyncExecutor(AbstractContextManager):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.shutdown()
-        # Do not do use the context manager exception arguments, in order to get the desired default behavior where any
-        # exceptions are raised here. More info at https://docs.python.org/3.9/reference/datamodel.html#object.__exit__.
+        # Do NOT use the context manager exception arguments in order to get the desired default behavior (i.e. any
+        # exception is NOT suppressed and the exception is propagated normally upon exit from this method). For more
+        # info, see https://docs.python.org/3.9/reference/datamodel.html#object.__exit__.
 
     def submit(self, fn, *args, **kwargs) -> AsyncResult:
         """Submits a callable to be executed with the given arguments.
@@ -88,11 +89,12 @@ class AsyncExecutor(AbstractContextManager):
         Execution occurs either concurrently on a different thread or synchronously (e.g. on the main thread) depending
         on how the AsyncExecutor instance was initialized.
         """
-        return (
-            AsyncResult(future=self._thread_pool_executor.submit(fn, *args, **kwargs))
-            if self._execute_concurrently
-            else AsyncResult(value=fn(*args, **kwargs))
-        )
+        if self._execute_concurrently:
+            return AsyncResult(
+                future=self._thread_pool_executor.submit(fn, *args, **kwargs)
+            )
+        else:
+            return AsyncResult(value=fn(*args, **kwargs))
 
     def shutdown(self):
         """Clean-up the resources associated with the AsyncExecutor and blocks until all running async results finish
