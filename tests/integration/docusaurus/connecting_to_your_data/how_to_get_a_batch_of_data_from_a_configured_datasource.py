@@ -36,7 +36,7 @@ context.test_yaml_config(datasource_yaml)
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
-# Here is a BatchRequest for all batches associated with the specified DataAsset
+# Here is an example BatchRequest for all batches associated with the specified DataAsset
 batch_request = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
     data_connector_name="insert_your_data_connector_name_here",
@@ -58,7 +58,7 @@ batch_request_2020 = BatchRequest(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert len(context.get_batch_list(batch_request=batch_request_2020)) == 12
 
-# This BatchRequest adds a query to retrieve only the first 5 batches from 2020
+# This BatchRequest adds a query and limit to retrieve only the first 5 batches from 2020
 data_connector_query_2020 = {
     "batch_filter_parameters": {"param_1_from_your_data_connector_eg_year": "2020"}
 }
@@ -114,11 +114,11 @@ batch_list_all_a = context.get_batch_list(
 )
 assert len(batch_list_all_a) == 36
 
-# Alternatively you can use the previously created batch_request
+# Alternatively you can use the previously created batch_request to achieve the same thing
 batch_list_all_b = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list_all_b) == 36
 
-# Or use a query to filter the batch_list
+# You can use a query to filter the batch_list
 batch_list_202001_query = context.get_batch_list(
     datasource_name="insert_your_datasource_name_here",
     data_connector_name="insert_your_data_connector_name_here",
@@ -143,17 +143,22 @@ batch_list_all_limit_10 = context.get_batch_list(
 assert len(batch_list_all_limit_10) == 10
 
 # Now we can review a sample of data using a Validator
+
+# First create an expectation suite to use with our validator
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
+# Now create our validator
 validator = context.get_validator(
     batch_request=last_index_batch_request, expectation_suite_name="test_suite"
 )
+# View the first few lines of the loaded Batch
 print(validator.head())
 
 
 # NOTE: The following assertions are only for testing and can be ignored by users.
 assert validator.active_batch_id == batch_list_last_index_batch_request[0].id
+assert len(validator.batches) == 1
 
 row_count = validator.get_metric(
     MetricConfiguration(

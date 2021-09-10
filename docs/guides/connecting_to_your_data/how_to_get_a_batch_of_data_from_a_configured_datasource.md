@@ -20,89 +20,43 @@ To load a `Batch`, the steps you will take are the same regardless of the type o
 
 1. **Construct a BatchRequest**
 
-    ```python
-    batch_request = BatchRequest(
-        datasource_name="insert_your_datasource_name_here",
-        data_connector_name="insert_your_data_connector_name_here",
-        data_asset_name="insert_your_data_asset_name_here",
-    )
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L39-L44
     ```
    
-    Optionally, you can provide additional parameters to filter the retrieved `Batch(es)`. See [Datasources Core Concepts Guide](../../reference/datasources.md) for more info on filtering besides `batch_filter_parameters` and `limit` including custom filter functions and sampling. The example BatchRequest below shows several non-exhaustive possibilities. 
+    Since a `BatchRequest` can return multiple `Batch(es)`, you can optionally provide additional parameters to filter the retrieved `Batch(es)`. See [Datasources Core Concepts Guide](../../reference/datasources.md) for more info on filtering besides `batch_filter_parameters` and `limit` including custom filter functions and sampling. The example `BatchRequest`s below shows several non-exhaustive possibilities. 
 
-    ```python
-    # Here is an example `data_connector_query` filtering based on parameters from `group_names` 
-    # previously defined in a regex pattern in your Data Connector:
-    data_connector_query = {
-        "batch_filter_parameters": {
-            "param_1_from_your_data_connector_eg_year": "2021",
-            "param_2_from_your_data_connector_eg_month": "01",
-        }
-    }
-   
-    # Here is an example `data_connector_query` filtering based on an `index` which can be 
-    # any valid python slice. The example here is retrieving the latest batch using `-1`:
-    data_connector_query = {
-        "index": -1,
-    }
-      
-    limit = 1000 # Number of rows to return per batch
-   
-    batch_request = BatchRequest(
-        datasource_name="insert_your_datasource_name_here",
-        data_connector_name="insert_your_data_connector_name_here",
-        data_asset_name="insert_your_data_asset_name_here",
-        data_connector_query=data_connector_query,   
-        limit=limit,
-    )
-    ```
-   
-    You may also wish to list available batches to verify that your `BatchRequest` is retrieving the correct `Batch(es)`, or to see which are available. You can use `context.get_batch_list()` for this purpose, which can take a variety of flexible input types. Some examples are shown below:
-
-    ```python
-    context.get_batch_list(
-        datasource_name="insert_your_datasource_name_here",
-        data_connector_name="insert_your_data_connector_name_here",
-        data_asset_name="insert_your_data_asset_name_here",
-    )
-    ```
-   
-    ```python
-    context.get_batch_list(
-        batch_request=batch_request
-    )
-    ```
-   
-    ```python
-    context.get_batch_list(
-        datasource_name="insert_your_datasource_name_here",
-        data_connector_name="insert_your_data_connector_name_here",
-        data_asset_name="insert_your_data_asset_name_here",
-        data_connector_query=data_connector_query,   
-        limit=limit,
-    )
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L61-L71
     ```
 
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L75-L89
+    ```
+   
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L94-L104
+    ```
+   
+    You may also wish to list available batches to verify that your `BatchRequest` is retrieving the correct `Batch(es)`, or to see which are available. You can use `context.get_batch_list()` for this purpose, which can take a variety of flexible input types similar to a `BatchRequest`. Some examples are shown below:
+
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L109-L114
+    ```
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L117-L118
+    ```
+   
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L121-L127
+    ```
+   
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L136-L142
+    ```
 
 2. **Get access to your Batch via a Validator**
 
-    ```python
-    # First create an expectation suite to use with our validator
-    context.create_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True,
-    )
-    # Now create our validator
-    my_validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="test_suite",
-    )
-    ``` 
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L147-L154
+    ```
 
 3. **Check your data**
 
     You can check that the first few lines of the `Batch` you loaded into your `Validator` are what you expect by running:
 
-    ```python
-    my_validator.head()
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L156
     ```
 
     Now that you have a `Validator`, you can use it to create `Expectations` or validate the data.
