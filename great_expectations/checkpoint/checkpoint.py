@@ -66,6 +66,7 @@ class Checkpoint:
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
+        expectation_suite_ge_cloud_id: Optional[UUID] = None,
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
@@ -82,6 +83,7 @@ class Checkpoint:
                 "class_name": class_name,
                 "run_name_template": run_name_template,
                 "expectation_suite_name": expectation_suite_name,
+                "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
                 "batch_request": batch_request,
                 "action_list": action_list,
                 "evaluation_parameters": evaluation_parameters,
@@ -223,6 +225,7 @@ class Checkpoint:
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
@@ -241,6 +244,7 @@ class Checkpoint:
             "template_name": template_name,
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "batch_request": batch_request,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
@@ -278,11 +282,14 @@ class Checkpoint:
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
+                expectation_suite_ge_cloud_id: str = substituted_validation_dict.get("expectation_suite_ge_cloud_id")
                 action_list: list = substituted_validation_dict.get("action_list")
 
                 validator: Validator = self.data_context.get_validator(
                     batch_request=batch_request,
-                    expectation_suite_name=expectation_suite_name,
+                    expectation_suite_name=expectation_suite_name if not self.data_context.ge_cloud_mode else None,
+                    expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id if self.data_context.ge_cloud_mode else
+                    None,
                 )
                 action_list_validation_operator: ActionListValidationOperator = (
                     ActionListValidationOperator(
