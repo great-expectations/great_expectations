@@ -208,11 +208,22 @@ class Validator:
                         )
 
                 # this is used so that exceptions are caught appropriately when they occur in expectation config
-                basic_runtime_configuration = {
-                    k: v
-                    for k, v in kwargs.items()
-                    if k in ("result_format", "include_config", "catch_exceptions")
+                basic_configuration_keys = {
+                    "result_format",
+                    "include_config",
+                    "catch_exceptions",
                 }
+                basic_default_expectation_args = {
+                    k: v
+                    for k, v in self.default_expectation_args.items()
+                    if k in basic_configuration_keys
+                }
+                basic_runtime_configuration = copy.deepcopy(
+                    basic_default_expectation_args
+                )
+                basic_runtime_configuration.update(
+                    {k: v for k, v in kwargs.items() if k in basic_configuration_keys}
+                )
 
                 configuration = ExpectationConfiguration(
                     expectation_type=name, kwargs=expectation_kwargs, meta=meta
@@ -1137,9 +1148,6 @@ set as active.
 
             self._active_validation = True
 
-            if result_format is None:
-                result_format = {"result_format": "BASIC"}
-
             # If a different validation data context was provided, override
             validate__data_context = self._data_context
             if data_context is None and self._data_context is not None:
@@ -1237,12 +1245,17 @@ set as active.
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
 
+            runtime_configuration = copy.deepcopy(self.default_expectation_args)
+
+            if catch_exceptions is not None:
+                runtime_configuration.update({"catch_exceptions": catch_exceptions})
+
+            if result_format is not None:
+                runtime_configuration.update({"result_format": result_format})
+
             results = self.graph_validate(
                 expectations_to_evaluate,
-                runtime_configuration={
-                    "catch_exceptions": catch_exceptions,
-                    "result_format": result_format,
-                },
+                runtime_configuration=runtime_configuration,
             )
             statistics = _calc_validation_statistics(results)
 
