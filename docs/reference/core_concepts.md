@@ -54,7 +54,6 @@ of the main concepts and classes you will encounter while using Great Expectatio
 * [Expectation Suite operations](./expectation_suite_operations)
 * [Metrics](./metrics)
 * [Profilers](./profilers)
-* [Stores](./stores)
 * [Validation](./validation)
 
 

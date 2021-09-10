@@ -4709,6 +4709,7 @@
   ],
   "data_asset_name": null,
   "full_data_asset_identifier": null,
+  "ge_cloud_id": null,
   "renderer_type": "ValidationResultsPageRenderer",
   "page_title": "Validations / default / 2020-03-22T17:02:47.671855Z",
   "utm_medium": "validation-results-page",
