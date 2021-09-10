@@ -114,7 +114,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   ]}>
   <TabItem value="runtime_batch_request">
 
-Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
+Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L57-L63
 ```
