@@ -196,12 +196,6 @@ class BatchRequestBase(DictDot):
         self._data_asset_name = data_asset_name
         self._data_connector_query = data_connector_query
         self._limit = limit
-        # Add `limit` to `data_connector_query` if it is not already present and passed to constructor
-        if limit is not None:
-            if self._data_connector_query is None:
-                self._data_connector_query = {"limit": limit}
-            if self._data_connector_query.get("limit") is None:
-                self._data_connector_query["limit"] = limit
 
         self._batch_spec_passthrough = batch_spec_passthrough
         self._runtime_parameters = runtime_parameters
