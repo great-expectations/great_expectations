@@ -1808,7 +1808,9 @@ class BaseDataContext:
             )
 
         if expectation_suite_ge_cloud_id is not None:
-            expectation_suite = self.get_expectation_suite(ge_cloud_id=expectation_suite_ge_cloud_id)
+            expectation_suite = self.get_expectation_suite(
+                ge_cloud_id=expectation_suite_ge_cloud_id
+            )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
         if create_expectation_suite_with_name is not None:

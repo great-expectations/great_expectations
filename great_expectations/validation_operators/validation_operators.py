@@ -10,7 +10,8 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier, GeCloudIdentifier,
+    GeCloudIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -318,9 +319,11 @@ class ActionListValidationOperator(ValidationOperator):
             if self.data_context.ge_cloud_mode:
                 expectation_suite_identifier = GeCloudIdentifier(
                     resource_type="expectation_suite",
-                    ge_cloud_id=batch._expectation_suite.ge_cloud_id
+                    ge_cloud_id=batch._expectation_suite.ge_cloud_id,
                 )
-                validation_result_id = GeCloudIdentifier(resource_type="suite_validation_result")
+                validation_result_id = GeCloudIdentifier(
+                    resource_type="suite_validation_result"
+                )
             else:
                 expectation_suite_identifier = ExpectationSuiteIdentifier(
                     expectation_suite_name=batch._expectation_suite.expectation_suite_name
@@ -342,7 +345,7 @@ class ActionListValidationOperator(ValidationOperator):
                 expectation_suite=batch._expectation_suite,
                 batch_validation_result=batch_validation_result,
                 run_id=run_id,
-                validation_result_id=validation_result_id
+                validation_result_id=validation_result_id,
             )
 
             run_result_obj["actions_results"] = batch_actions_results
@@ -362,7 +365,7 @@ class ActionListValidationOperator(ValidationOperator):
         expectation_suite,
         batch_validation_result,
         run_id,
-        validation_result_id=None
+        validation_result_id=None,
     ):
         """
         Runs all actions configured for this operator on the result of validating one
@@ -400,7 +403,7 @@ class ActionListValidationOperator(ValidationOperator):
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
                     payload=batch_actions_results,
-                    expectation_suite_identifier=expectation_suite_identifier
+                    expectation_suite_identifier=expectation_suite_identifier,
                 )
 
                 # add action_result

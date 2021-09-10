@@ -23,7 +23,8 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier, GeCloudIdentifier,
+    GeCloudIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
@@ -67,7 +68,11 @@ class ValidationAction:
         )
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset, expectation_suite_identifier=None
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        expectation_suite_identifier=None,
     ):
         return NotImplementedError
 
@@ -80,7 +85,11 @@ class NoOpAction(ValidationAction):
         super().__init__(data_context)
 
     def _run(
-        self, validation_result_suite, validation_result_suite_identifier, data_asset, expectation_suite_identifier=None
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset,
+        expectation_suite_identifier=None,
     ):
         print("Happily doing nothing")
 
@@ -155,7 +164,7 @@ class SlackNotificationAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("SlackNotificationAction.run")
 
@@ -248,7 +257,7 @@ class PagerdutyAlertAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("PagerdutyAlertAction.run")
 
@@ -363,7 +372,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("MicrosoftTeamsNotificationAction.run")
 
@@ -472,7 +481,7 @@ class OpsgenieAlertAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("OpsgenieAlertAction.run")
 
@@ -624,7 +633,7 @@ class EmailAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset=None,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("EmailAction.run")
 
@@ -718,7 +727,7 @@ class StoreValidationResultAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -726,7 +735,8 @@ class StoreValidationResultAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
+            validation_result_suite_identifier,
+            (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
                 "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
@@ -785,7 +795,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("StoreEvaluationParametersAction.run")
 
@@ -793,7 +803,8 @@ class StoreEvaluationParametersAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
+            validation_result_suite_identifier,
+            (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
                 "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
@@ -861,7 +872,7 @@ class StoreMetricsAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("StoreMetricsAction.run")
 
@@ -932,7 +943,7 @@ class UpdateDataDocsAction(ValidationAction):
         validation_result_suite_identifier,
         data_asset,
         payload=None,
-        expectation_suite_identifier=None
+        expectation_suite_identifier=None,
     ):
         logger.debug("UpdateDataDocsAction.run")
 
@@ -940,7 +951,8 @@ class UpdateDataDocsAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
+            validation_result_suite_identifier,
+            (ValidationResultIdentifier, GeCloudIdentifier),
         ):
             raise TypeError(
                 "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(

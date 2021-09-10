@@ -282,14 +282,19 @@ class Checkpoint:
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
-                expectation_suite_ge_cloud_id: str = substituted_validation_dict.get("expectation_suite_ge_cloud_id")
+                expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
+                    "expectation_suite_ge_cloud_id"
+                )
                 action_list: list = substituted_validation_dict.get("action_list")
 
                 validator: Validator = self.data_context.get_validator(
                     batch_request=batch_request,
-                    expectation_suite_name=expectation_suite_name if not self.data_context.ge_cloud_mode else None,
-                    expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id if self.data_context.ge_cloud_mode else
-                    None,
+                    expectation_suite_name=expectation_suite_name
+                    if not self.data_context.ge_cloud_mode
+                    else None,
+                    expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id
+                    if self.data_context.ge_cloud_mode
+                    else None,
                 )
                 action_list_validation_operator: ActionListValidationOperator = (
                     ActionListValidationOperator(

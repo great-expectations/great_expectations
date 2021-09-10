@@ -1797,7 +1797,7 @@ class CheckpointConfigSchema(Schema):
             "notify_on",
             "notify_with",
             "ge_cloud_id",
-            "expectation_suite_ge_cloud_id"
+            "expectation_suite_ge_cloud_id",
         )
         ordered = True
 
@@ -1910,7 +1910,7 @@ class CheckpointConfig(BaseYamlConfig):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -1965,7 +1965,9 @@ class CheckpointConfig(BaseYamlConfig):
             if other_config.expectation_suite_name is not None:
                 self.expectation_suite_name = other_config.expectation_suite_name
             if other_config.expectation_suite_ge_cloud_id is not None:
-                self.expectation_suite_ge_cloud_id = other_config.expectation_suite_ge_cloud_id
+                self.expectation_suite_ge_cloud_id = (
+                    other_config.expectation_suite_ge_cloud_id
+                )
             # update
             if other_config.batch_request is not None:
                 if self.batch_request is None:
@@ -2012,7 +2014,9 @@ class CheckpointConfig(BaseYamlConfig):
                     "expectation_suite_name"
                 )
             if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
-                self.expectation_suite_ge_cloud_id = runtime_kwargs.get("expectation_suite_ge_cloud_id")
+                self.expectation_suite_ge_cloud_id = runtime_kwargs.get(
+                    "expectation_suite_ge_cloud_id"
+                )
             # update
             if runtime_kwargs.get("batch_request") is not None:
                 batch_request = self.batch_request
