@@ -353,7 +353,7 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
     assert return_obj_2.success
 
 
-def test_passing_run_name_as_a_parameter_to_warning_and_failure_vo(
+def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
     # this tests whether the run_name passed to WarningAndFailureExpectationSuitesValidationOperator is saved in the validation result.
@@ -366,8 +366,23 @@ def test_passing_run_name_as_a_parameter_to_warning_and_failure_vo(
         name="test",
     )
 
-    # pass run name
+    # pass run id
     user_run_name = "test_run_name"
+    run_dt = dateutil.parser.parse('2021-09-11 1:47:03+00:00')
+
+    return_obj = vo.run(
+        assets_to_validate=[assets_to_validate[3]],
+        run_id={'run_name': user_run_name, 'run_time': run_dt},
+        base_expectation_suite_name="f1",
+    )
+    run_results = list(return_obj.run_results.values())
+
+    assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
+    assert run_results[0]['validation_result']['meta']['run_id'].run_time == run_dt
+    assert run_results[1]['validation_result']['meta']['run_id'].run_name == user_run_name
+    assert run_results[1]['validation_result']['meta']['run_id'].run_time == run_dt
+
+    # pass run name
     return_obj = vo.run(
         assets_to_validate=[assets_to_validate[3]],
         run_name=user_run_name,
@@ -378,13 +393,16 @@ def test_passing_run_name_as_a_parameter_to_warning_and_failure_vo(
     assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
     assert run_results[1]['validation_result']['meta']['run_id'].run_name == user_run_name
 
-    run_dt = dateutil.parser.parse('2021-09-11 1:47:03+00:00')
+    # pass run time
     return_obj = vo.run(
         assets_to_validate=[assets_to_validate[3]],
-        run_id={'run_name': user_run_name, 'run_time': run_dt},
+        run_time=run_dt,
         base_expectation_suite_name="f1",
     )
     run_results = list(return_obj.run_results.values())
-
-    assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
+    
     assert run_results[0]['validation_result']['meta']['run_id'].run_time == run_dt
+    assert run_results[1]['validation_result']['meta']['run_id'].run_time == run_dt
+
+    
+    
