@@ -356,7 +356,7 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
 def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
-    # this tests whether the run_name passed to WarningAndFailureExpectationSuitesValidationOperator is saved in the validation result.
+    # this tests whether the run_id, run_name and run_time passed to WarningAndFailureExpectationSuitesValidationOperator is saved in the validation result.
 
     data_context = warning_failure_validation_operator_data_context
 
