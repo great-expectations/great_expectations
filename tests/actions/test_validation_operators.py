@@ -376,12 +376,13 @@ def test_passing_run_name_as_a_parameter_to_warning_and_failure_vo(
     run_results = list(return_obj.run_results.values())
     
     assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
+    assert run_results[1]['validation_result']['meta']['run_id'].run_name == user_run_name
 
 
 def test_passing_run_time_as_a_parameter_to_warning_and_failure_vo(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
-    # this tests whether the run_name passed to WarningAndFailureExpectationSuitesValidationOperator is saved in the validation result.
+    # this tests whether the run_time passed to WarningAndFailureExpectationSuitesValidationOperator is saved in the validation result.
 
     data_context = warning_failure_validation_operator_data_context
 
