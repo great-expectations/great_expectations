@@ -378,29 +378,13 @@ def test_passing_run_name_as_a_parameter_to_warning_and_failure_vo(
     assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
     assert run_results[1]['validation_result']['meta']['run_id'].run_name == user_run_name
 
-
-def test_passing_run_time_as_a_parameter_to_warning_and_failure_vo(
-    warning_failure_validation_operator_data_context, assets_to_validate
-):
-    # this tests whether the run_time passed to WarningAndFailureExpectationSuitesValidationOperator is saved in the validation result.
-
-    data_context = warning_failure_validation_operator_data_context
-
-    vo = WarningAndFailureExpectationSuitesValidationOperator(
-        data_context=data_context,
-        action_list=[],
-        name="test",
-    )
-
-    # pass run_time
     run_dt = dateutil.parser.parse('2021-09-11 1:47:03+00:00')
     return_obj = vo.run(
         assets_to_validate=[assets_to_validate[3]],
-        run_time=run_dt,
+        run_id={'run_name': user_run_name, 'run_time': run_dt},
         base_expectation_suite_name="f1",
     )
     run_results = list(return_obj.run_results.values())
-    
+
+    assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
     assert run_results[0]['validation_result']['meta']['run_id'].run_time == run_dt
-    assert run_results[0]['validation_result']['meta']['run_id'].run_name == None
-    
