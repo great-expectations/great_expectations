@@ -1,9 +1,9 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
 
+import dateutil.parser
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-import dateutil.parser
 
 import great_expectations as ge
 from great_expectations.data_context import BaseDataContext
@@ -368,19 +368,23 @@ def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
 
     # pass run id
     user_run_name = "test_run_name"
-    run_dt = dateutil.parser.parse('2021-09-11 1:47:03+00:00')
+    run_dt = dateutil.parser.parse("2021-09-11 1:47:03+00:00")
 
     return_obj = vo.run(
         assets_to_validate=[assets_to_validate[3]],
-        run_id={'run_name': user_run_name, 'run_time': run_dt},
+        run_id={"run_name": user_run_name, "run_time": run_dt},
         base_expectation_suite_name="f1",
     )
     run_results = list(return_obj.run_results.values())
 
-    assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
-    assert run_results[0]['validation_result']['meta']['run_id'].run_time == run_dt
-    assert run_results[1]['validation_result']['meta']['run_id'].run_name == user_run_name
-    assert run_results[1]['validation_result']['meta']['run_id'].run_time == run_dt
+    assert (
+        run_results[0]["validation_result"]["meta"]["run_id"].run_name == user_run_name
+    )
+    assert run_results[0]["validation_result"]["meta"]["run_id"].run_time == run_dt
+    assert (
+        run_results[1]["validation_result"]["meta"]["run_id"].run_name == user_run_name
+    )
+    assert run_results[1]["validation_result"]["meta"]["run_id"].run_time == run_dt
 
     # pass run name
     return_obj = vo.run(
@@ -389,9 +393,13 @@ def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
         base_expectation_suite_name="f1",
     )
     run_results = list(return_obj.run_results.values())
-    
-    assert run_results[0]['validation_result']['meta']['run_id'].run_name == user_run_name
-    assert run_results[1]['validation_result']['meta']['run_id'].run_name == user_run_name
+
+    assert (
+        run_results[0]["validation_result"]["meta"]["run_id"].run_name == user_run_name
+    )
+    assert (
+        run_results[1]["validation_result"]["meta"]["run_id"].run_name == user_run_name
+    )
 
     # pass run time
     return_obj = vo.run(
@@ -400,9 +408,6 @@ def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
         base_expectation_suite_name="f1",
     )
     run_results = list(return_obj.run_results.values())
-    
-    assert run_results[0]['validation_result']['meta']['run_id'].run_time == run_dt
-    assert run_results[1]['validation_result']['meta']['run_id'].run_time == run_dt
 
-    
-    
+    assert run_results[0]["validation_result"]["meta"]["run_id"].run_time == run_dt
+    assert run_results[1]["validation_result"]["meta"]["run_id"].run_time == run_dt
