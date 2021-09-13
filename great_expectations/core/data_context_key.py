@@ -1,8 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from functools import total_ordering
 
 
-@total_ordering
 class DataContextKey(metaclass=ABCMeta):
     """DataContextKey objects are used to uniquely identify resources used by the DataContext.
 
@@ -31,10 +29,13 @@ class DataContextKey(metaclass=ABCMeta):
             return NotImplemented
         return self.to_tuple() == other.to_tuple()
 
-    def __gt__(self, other):
+    def __ne__(self, other):
+        return not self == other
+
+    def __lt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.to_tuple() > other.to_tuple()
+        return self.to_tuple() < other.to_tuple()
 
     def __hash__(self):
         return hash(self.to_tuple())
