@@ -325,14 +325,13 @@ class Checkpoint:
                         resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
                     )
 
-                operator_run_kwargs = {
-                    "result_format": result_format,
-                }
+                operator_run_kwargs = {}
 
                 if catch_exceptions_validation is not None:
                     operator_run_kwargs[
                         "catch_exceptions"
                     ] = catch_exceptions_validation
+
 
                 val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
