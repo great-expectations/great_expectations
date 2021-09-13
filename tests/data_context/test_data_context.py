@@ -397,7 +397,7 @@ def test_data_context_get_latest_validation_result(titanic_data_context):
     """
     for _ in range(2):
         titanic_data_context.profile_datasource("mydatasource")
-    assert len(titanic_data_context.validations_store.list_keys()) > 1
+    assert len(titanic_data_context.validations_store.list_keys()) == 2
 
     validation_results = [
         titanic_data_context.validations_store.get(val_key)
