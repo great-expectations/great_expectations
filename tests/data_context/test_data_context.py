@@ -1838,6 +1838,7 @@ validations:
     expectation_suite_name: newsuite
 profilers: []
 ge_cloud_id:
+expectation_suite_ge_cloud_id:
 """
 
     checkpoint_dir = os.path.join(
@@ -1905,6 +1906,7 @@ ge_cloud_id:
             },
         ],
         "evaluation_parameters": {},
+        "expectation_suite_ge_cloud_id": None,
         "runtime_configuration": {},
         "validations": [
             {
