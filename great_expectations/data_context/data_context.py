@@ -2587,6 +2587,7 @@ class BaseDataContext:
                             "data_context": self,
                             "root_directory": self.root_directory,
                             "site_name": site_name,
+                            "ge_cloud_mode": self.ge_cloud_mode,
                         },
                         config_defaults={"module_name": module_name},
                     )
@@ -2602,7 +2603,8 @@ class BaseDataContext:
                         ] = site_builder.get_resource_url(only_if_exists=False)
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
-                            resource_identifiers, build_index=build_index
+                            resource_identifiers,
+                            build_index=(build_index and not self.ge_cloud_mode),
                         )
                         if index_page_resource_identifier_tuple:
                             index_page_locator_infos[
@@ -3293,29 +3295,52 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """
         # TODO mark experimental
 
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
-
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name, ge_cloud_id=ge_cloud_id
         )
 
-        return checkpoint.run(
-            template_name=template_name,
-            run_name_template=run_name_template,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            profilers=profilers,
-            run_id=run_id,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
+        checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
+
+        if (
+            "runtime_configuration" in checkpoint_config_from_store
+            and "result_format" in checkpoint_config_from_store["runtime_configuration"]
+        ):
+            result_format = result_format or checkpoint_config_from_store[
+                "runtime_configuration"
+            ].pop("result_format")
+
+        if result_format is None:
+            result_format = {"result_format": "SUMMARY"}
+
+        checkpoint_config_from_call_args: dict = {
+            "template_name": template_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            "run_id": run_id,
+            "run_name": run_name,
+            "run_time": run_time,
+            "result_format": result_format,
+        }
+
+        checkpoint_config = {
+            key: value
+            for key, value in checkpoint_config_from_store.items()
+            if key in checkpoint_config_from_call_args
+        }
+        checkpoint_config.update(checkpoint_config_from_call_args)
+        checkpoint_config = filter_properties_dict(
+            properties=checkpoint_config, clean_falsy=True
         )
+
+        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
+
+        return checkpoint.run(**checkpoint_run_arguments)
 
     def test_yaml_config(
         self,

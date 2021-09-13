@@ -305,7 +305,13 @@ def test_graph_validate_with_bad_config(basic_datasource):
         # noinspection PyUnusedLocal
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
-        ).graph_validate(configurations=[expectation_configuration])
+        ).graph_validate(
+            configurations=[expectation_configuration],
+            runtime_configuration={
+                "catch_exceptions": False,
+                "result_format": {"result_format": "BASIC"},
+            },
+        )
     assert (
         str(eee.value)
         == 'Error: The column "not_in_table" in BatchData does not exist.'
@@ -613,6 +619,29 @@ def test_validator_batch_filter(
         v.batch_identifiers["month"] for v in jan_march_batch_definition_list
     }
     assert batch_definitions_months_set == {"01", "03"}
+
+    # Filter using limit param
+    limit_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={"limit": 2}
+    )
+
+    limit_batch_filter_definition_list: List[
+        BatchDefinition
+    ] = limit_batch_filter.select_from_data_connector_query(
+        batch_definition_list=total_batch_definition_list
+    )
+
+    assert len(limit_batch_filter_definition_list) == 2
+    assert limit_batch_filter_definition_list[0]["batch_identifiers"]["month"] == "01"
+    assert (
+        limit_batch_filter_definition_list[0]["id"]
+        == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+    )
+    assert limit_batch_filter_definition_list[1]["batch_identifiers"]["month"] == "02"
+    assert (
+        limit_batch_filter_definition_list[1]["id"]
+        == "92bcffc67c34a1c9a67e0062ed4a9529"
+    )
 
 
 def test_custom_filter_function(

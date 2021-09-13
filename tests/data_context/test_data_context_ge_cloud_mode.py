@@ -50,6 +50,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
                 "class_name": "SiteBuilder",
                 "show_how_to_buttons": True,
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
                 "store_backend": {
                     "class_name": "GeCloudStoreBackend",
                     "ge_cloud_base_url": "https://api.dev.greatexpectations.io/runtime",
@@ -272,6 +273,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                         "suppress_store_backend_id": True,
                     },
                     "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                    "site_section_builders": {"profiling": "None"},
                 }
             },
             "checkpoint_store_name": "default_checkpoint_store",
@@ -393,6 +395,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
                     "suppress_store_backend_id": True,
                 },
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
             }
         },
         "anonymous_usage_statistics": {
@@ -498,6 +501,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
                     "suppress_store_backend_id": True,
                 },
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
             }
         },
         "validations_store_name": "default_validations_store",
@@ -582,6 +586,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                         "suppress_store_backend_id": True,
                     },
                     "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                    "site_section_builders": {"profiling": "None"},
                 }
             },
             "expectations_store_name": "default_expectations_store",
@@ -743,6 +748,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
                     "suppress_store_backend_id": True,
                 },
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
             }
         },
         "config_version": 3.0,
