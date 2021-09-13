@@ -129,14 +129,14 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
-        # Necessary when using RuntimeDataConnector with SimpleCheckpoint
-        if isinstance(config.batch_request, BatchRequest):
-            config.batch_request = config.batch_request.get_json_dict()
-        runtime_kwargs_batch_request = runtime_kwargs.get("batch_request")
-        if isinstance(runtime_kwargs_batch_request, BatchRequest):
-            runtime_kwargs[
-                "batch_request"
-            ] = runtime_kwargs_batch_request.get_json_dict()
+        # # Necessary when using RuntimeDataConnector with SimpleCheckpoint
+        # if isinstance(config.batch_request, BatchRequest):
+        #     config.batch_request = config.batch_request.get_json_dict()
+        # runtime_kwargs_batch_request = runtime_kwargs.get("batch_request")
+        # if isinstance(runtime_kwargs_batch_request, BatchRequest):
+        #     runtime_kwargs[
+        #         "batch_request"
+        #     ] = runtime_kwargs_batch_request.get_json_dict()
 
         substituted_config: Union[CheckpointConfig, dict]
         if (

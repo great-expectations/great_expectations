@@ -198,6 +198,12 @@ def get_runtime_batch_request(
     validation_batch_request: Optional[dict] = None,
 ) -> Union[BatchRequest, RuntimeBatchRequest]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
+    batch_data = None
+    if isinstance(runtime_config_batch_request, RuntimeBatchRequest):
+        runtime_parameters = runtime_config_batch_request.runtime_parameters
+        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
+            batch_data = runtime_parameters["batch_data"]
+            runtime_config_batch_request = runtime_config_batch_request.get_json_dict()
 
     if (
         runtime_config_batch_request is not None
@@ -210,15 +216,14 @@ def get_runtime_batch_request(
     else:
         batch_request_class = BatchRequest
 
+    if runtime_config_batch_request is None and validation_batch_request is None:
+        return None
+
     if runtime_config_batch_request is None:
-        return (
-            validation_batch_request
-            if validation_batch_request is None
-            else batch_request_class(**validation_batch_request)
-        )
+        runtime_config_batch_request = {}
 
     if validation_batch_request is None:
-        return batch_request_class(**runtime_config_batch_request)
+        validation_batch_request = {}
 
     runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
     for key, val in runtime_batch_request_dict.items():
@@ -227,6 +232,10 @@ def get_runtime_batch_request(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
     runtime_batch_request_dict.update(runtime_config_batch_request)
+    if batch_data is not None:
+        if "runtime_parameters" not in runtime_batch_request_dict:
+            runtime_batch_request_dict["runtime_parameters"] = dict()
+        runtime_batch_request_dict["runtime_parameters"]["batch_data"] = batch_data
     return batch_request_class(**runtime_batch_request_dict)
 
 
