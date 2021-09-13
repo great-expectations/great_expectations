@@ -3,7 +3,7 @@ title: Changelog
 ---
 
 ### Develop
-
+* [DOCS] Added How to Get a Batch of Data From a Configured Datasource & fix BatchRequest limit param (#3382)
 
 ### 0.13.33
 * [FEATURE] Add optional ge_cloud_mode flag to DataContext to enable use with Great Expectations Cloud.

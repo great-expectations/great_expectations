@@ -71,6 +71,16 @@ class ExpectationConfiguration(SerializableDictDot):
                 "catch_exceptions": False,
             },
         },
+        "expect_table_columns_to_match_set": {
+            "domain_kwargs": [],
+            "success_kwargs": ["column_set", "exact_match"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "exact_match": True,
+            },
+        },
         "expect_table_column_count_to_be_between": {
             "domain_kwargs": [],
             "success_kwargs": ["min_value", "max_value"],
