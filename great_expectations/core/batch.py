@@ -196,6 +196,7 @@ class BatchRequestBase(DictDot):
         self._data_asset_name = data_asset_name
         self._data_connector_query = data_connector_query
         self._limit = limit
+
         self._batch_spec_passthrough = batch_spec_passthrough
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
@@ -289,6 +290,7 @@ class BatchRequestBase(DictDot):
 class BatchRequest(BatchRequestBase):
     """
     This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
+    limit: refers to the number of batches requested (not rows per batch)
     """
 
     def __init__(

@@ -281,6 +281,7 @@ class ActionListValidationOperator(ValidationOperator):
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        catch_exceptions=None,
         result_format=None,
         checkpoint_identifier=None,
     ):
@@ -333,11 +334,20 @@ class ActionListValidationOperator(ValidationOperator):
                     expectation_suite_identifier=expectation_suite_identifier,
                     run_id=run_id,
                 )
-            batch_validation_result = batch.validate(
-                run_id=run_id,
-                result_format=result_format if result_format else self.result_format,
-                evaluation_parameters=evaluation_parameters,
-            )
+
+            if result_format is None:
+                result_format = self.result_format
+
+            batch_validate_arguments = {
+                "run_id": run_id,
+                "result_format": result_format,
+                "evaluation_parameters": evaluation_parameters,
+            }
+
+            if catch_exceptions is not None:
+                batch_validate_arguments["catch_exceptions"] = catch_exceptions
+
+            batch_validation_result = batch.validate(**batch_validate_arguments)
             run_result_obj["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(
                 batch=batch,

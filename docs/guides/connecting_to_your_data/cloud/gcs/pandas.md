@@ -183,7 +183,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   ]}>
   <TabItem value="runtime_batch_request">
 
-Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
+Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
 Please note we support the following format for GCS URL's: `gs://<BUCKET_OR_NAME>/<BLOB>`.
 
