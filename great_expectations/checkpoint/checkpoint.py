@@ -332,7 +332,6 @@ class Checkpoint:
                         "catch_exceptions"
                     ] = catch_exceptions_validation
 
-
                 val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],

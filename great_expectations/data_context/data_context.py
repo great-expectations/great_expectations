@@ -3120,6 +3120,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
         checkpoint_config: Union[CheckpointConfig, dict]
@@ -3147,6 +3148,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_on": notify_on,
             "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
         checkpoint_config = filter_properties_dict(
@@ -3301,6 +3303,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             CheckpointResult
         """
         # TODO mark experimental
+        batch_request = batch_request or {}
+        batch_identifiers = batch_request.get("batch_identifiers", {})
+        if self.ge_cloud_mode:
+            if len(batch_identifiers.keys()) == 0:
+                batch_identifiers["timestamp"] = str(datetime.datetime.now())
+                batch_request["batch_identifiers"] = batch_identifiers
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name, ge_cloud_id=ge_cloud_id
