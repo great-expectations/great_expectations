@@ -1094,7 +1094,7 @@ class ConcurrencyConfig(DictDot):
         bottlenecks.
 
         Args:
-            parameters: SqlAlchemy create_engine parameters to add concurrency appropriate parameters to. If the
+            parameters: SqlAlchemy create_engine parameters to which we add concurrency appropriate parameters. If the
                 concurrency parameters are already set, those parameters are left unchanged.
         """
         if not self._enabled:
