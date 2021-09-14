@@ -249,6 +249,10 @@ def get_substituted_validation_dict(
         ),
         "expectation_suite_name": validation_dict.get("expectation_suite_name")
         or substituted_runtime_config.expectation_suite_name,
+        "expectation_suite_ge_cloud_id": validation_dict.get(
+            "expectation_suite_ge_cloud_id"
+        )
+        or substituted_runtime_config.expectation_suite_ge_cloud_id,
         "action_list": CheckpointConfig.get_updated_action_list(
             base_action_list=substituted_runtime_config.action_list,
             other_action_list=validation_dict.get("action_list", {}),
