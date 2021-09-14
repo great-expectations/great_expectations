@@ -2,7 +2,7 @@ import copy
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Dict, Iterable, Tuple, Union
+from typing import Any, Dict, Iterable, Optional, Tuple, Union
 
 import pandas as pd
 from ruamel.yaml import YAML
@@ -203,8 +203,8 @@ class ExecutionEngine(ABC):
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple, MetricConfiguration],
-        runtime_configuration: dict = None,
+        metrics: Optional[Dict[Tuple, MetricConfiguration]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> dict:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
