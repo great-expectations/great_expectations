@@ -61,7 +61,10 @@ def test_parse_validation_graph():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph, metric_configuration, configuration, execution_engine=engine
+                graph=graph,
+                execution_engine=engine,
+                child_node=metric_configuration,
+                configuration=configuration,
             )
     ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
         validation_graph=graph, metrics=dict()
@@ -97,7 +100,10 @@ def test_parse_validation_graph_with_bad_metrics_args():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             validator.build_metric_dependency_graph(
-                graph, metric_configuration, configuration, execution_engine=engine
+                graph=graph,
+                execution_engine=engine,
+                child_node=metric_configuration,
+                configuration=configuration,
             )
     ready_metrics, needed_metrics = validator._parse_validation_graph(
         validation_graph=graph, metrics=("nonexistent", "NONE")
@@ -135,7 +141,10 @@ def test_populate_dependencies():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph, metric_configuration, configuration, execution_engine=engine
+                graph=graph,
+                execution_engine=engine,
+                child_node=metric_configuration,
+                configuration=configuration,
             )
     assert len(graph.edges) == 17
 
@@ -170,10 +179,10 @@ def test_populate_dependencies_with_incorrect_metric_name():
 
         try:
             Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph,
-                MetricConfiguration("column_values.not_a_metric", IDDict()),
-                configuration,
+                graph=graph,
                 execution_engine=engine,
+                child_node=MetricConfiguration("column_values.not_a_metric", IDDict()),
+                configuration=configuration,
             )
         except ge_exceptions.MetricProviderError as e:
             graph = e
