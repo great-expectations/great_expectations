@@ -410,12 +410,8 @@ class Validator:
         to fulfill current metric requirements, and validate these metrics.
 
                 Args:
-                    batches (Dict[str, Batch]): A Dictionary of batches and their corresponding names that will be used
-                    for Expectation Validation.
                     configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will
                     be used to supply domain and values for metrics.
-                    execution_engine (ExecutionEngine): An Execution Engine that will be used for extraction of metrics
-                    from the registry.
                     metrics (dict): A list of currently registered metrics in the registry
                     runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics
                     such as the result_format.
@@ -537,7 +533,7 @@ class Validator:
     def resolve_validation_graph(
         self,
         graph: ValidationGraph,
-        metrics: Dict[str, MetricConfiguration],
+        metrics: Dict[Tuple, MetricConfiguration],
         runtime_configuration: Optional[dict] = None,
     ):
         done: bool = False
@@ -568,8 +564,10 @@ class Validator:
 
         return metrics
 
+    @staticmethod
     def _parse_validation_graph(
-        self, validation_graph: ValidationGraph, metrics: Dict[str, MetricConfiguration]
+        validation_graph: ValidationGraph,
+        metrics: Dict[Tuple, MetricConfiguration],
     ):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -601,7 +599,9 @@ class Validator:
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(
-            metrics_to_resolve, metrics, runtime_configuration
+            metrics_to_resolve=metrics_to_resolve,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
         )
 
     def _initialize_expectations(
@@ -1547,7 +1547,8 @@ class BridgeValidator:
                 if isinstance(batch.data, pyspark.sql.DataFrame):
                     self.expectation_engine = SparkDFDataset
             except ImportError:
-                pass
+                # noinspection PyUnusedLocal
+                pyspark = None
 
         if self.expectation_engine is None:
             raise ValueError(

@@ -203,7 +203,7 @@ class ExecutionEngine(ABC):
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple, Any] = None,
+        metrics: Dict[Tuple, MetricConfiguration],
         runtime_configuration: dict = None,
     ) -> dict:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
