@@ -162,8 +162,6 @@ class ExpectationsStore(Store):
         """
         ge_cloud_expectation_suite_id = response_json["data"]["id"]
         expectation_suite_dict = response_json["data"]["attributes"]["suite"]
-        if isinstance(expectation_suite_dict, str):
-            expectation_suite_dict = json.loads(expectation_suite_dict)
         expectation_suite_dict["ge_cloud_id"] = ge_cloud_expectation_suite_id
 
         return expectation_suite_dict
