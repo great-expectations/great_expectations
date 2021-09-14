@@ -7,7 +7,7 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 from dateutil.parser import parse
@@ -591,11 +591,11 @@ class Validator:
 
         return maybe_ready - unmet_dependency, unmet_dependency
 
+    @staticmethod
     def _resolve_metrics(
-        self,
-        execution_engine: "ExecutionEngine",
+        execution_engine: ExecutionEngine,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict,
+        metrics: Dict[Tuple, Any] = None,
         runtime_configuration: dict = None,
     ):
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
