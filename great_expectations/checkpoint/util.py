@@ -234,7 +234,7 @@ def get_runtime_batch_request(
     runtime_batch_request_dict.update(runtime_config_batch_request)
     if batch_data is not None:
         if "runtime_parameters" not in runtime_batch_request_dict:
-            runtime_batch_request_dict["runtime_parameters"] = dict()
+            runtime_batch_request_dict["runtime_parameters"] = {}
         runtime_batch_request_dict["runtime_parameters"]["batch_data"] = batch_data
     return batch_request_class(**runtime_batch_request_dict)
 
