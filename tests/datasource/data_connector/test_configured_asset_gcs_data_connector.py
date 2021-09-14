@@ -608,7 +608,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_gcs_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
 

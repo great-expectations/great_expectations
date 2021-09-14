@@ -10,6 +10,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -280,9 +281,10 @@ class ActionListValidationOperator(ValidationOperator):
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        catch_exceptions=None,
         result_format=None,
+        checkpoint_identifier=None,
     ):
-
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
@@ -315,26 +317,46 @@ class ActionListValidationOperator(ValidationOperator):
             else:
                 batch_identifier = batch.batch_id
 
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=batch._expectation_suite.expectation_suite_name
-            )
-            validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch_identifier,
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-            )
-            batch_validation_result = batch.validate(
-                run_id=run_id,
-                result_format=result_format if result_format else self.result_format,
-                evaluation_parameters=evaluation_parameters,
-            )
+            if self.data_context.ge_cloud_mode:
+                expectation_suite_identifier = GeCloudIdentifier(
+                    resource_type="expectation_suite",
+                    ge_cloud_id=batch._expectation_suite.ge_cloud_id,
+                )
+                validation_result_id = GeCloudIdentifier(
+                    resource_type="suite_validation_result"
+                )
+            else:
+                expectation_suite_identifier = ExpectationSuiteIdentifier(
+                    expectation_suite_name=batch._expectation_suite.expectation_suite_name
+                )
+                validation_result_id = ValidationResultIdentifier(
+                    batch_identifier=batch_identifier,
+                    expectation_suite_identifier=expectation_suite_identifier,
+                    run_id=run_id,
+                )
+
+            if result_format is None:
+                result_format = self.result_format
+
+            batch_validate_arguments = {
+                "run_id": run_id,
+                "result_format": result_format,
+                "evaluation_parameters": evaluation_parameters,
+            }
+
+            if catch_exceptions is not None:
+                batch_validate_arguments["catch_exceptions"] = catch_exceptions
+
+            batch_validation_result = batch.validate(**batch_validate_arguments)
             run_result_obj["validation_result"] = batch_validation_result
             batch_actions_results = self._run_actions(
-                batch,
-                expectation_suite_identifier,
-                batch._expectation_suite,
-                batch_validation_result,
-                run_id,
+                batch=batch,
+                expectation_suite_identifier=expectation_suite_identifier,
+                expectation_suite=batch._expectation_suite,
+                batch_validation_result=batch_validation_result,
+                run_id=run_id,
+                validation_result_id=validation_result_id,
+                checkpoint_identifier=checkpoint_identifier,
             )
 
             run_result_obj["actions_results"] = batch_actions_results
@@ -354,6 +376,8 @@ class ActionListValidationOperator(ValidationOperator):
         expectation_suite,
         batch_validation_result,
         run_id,
+        validation_result_id=None,
+        checkpoint_identifier=None,
     ):
         """
         Runs all actions configured for this operator on the result of validating one
@@ -379,17 +403,20 @@ class ActionListValidationOperator(ValidationOperator):
             else:
                 batch_identifier = batch.batch_id
 
-            validation_result_id = ValidationResultIdentifier(
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-                batch_identifier=batch_identifier,
-            )
+            if validation_result_id is None:
+                validation_result_id = ValidationResultIdentifier(
+                    expectation_suite_identifier=expectation_suite_identifier,
+                    run_id=run_id,
+                    batch_identifier=batch_identifier,
+                )
             try:
                 action_result = self.actions[action["name"]].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
                     payload=batch_actions_results,
+                    expectation_suite_identifier=expectation_suite_identifier,
+                    checkpoint_identifier=checkpoint_identifier,
                 )
 
                 # add action_result

@@ -16,6 +16,7 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -66,6 +67,7 @@ class Checkpoint:
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
+        expectation_suite_ge_cloud_id: Optional[UUID] = None,
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
@@ -82,6 +84,7 @@ class Checkpoint:
                 "class_name": class_name,
                 "run_name_template": run_name_template,
                 "expectation_suite_name": expectation_suite_name,
+                "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
                 "batch_request": batch_request,
                 "action_list": action_list,
                 "evaluation_parameters": evaluation_parameters,
@@ -128,15 +131,6 @@ class Checkpoint:
             config = self.config
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
-
-        # Necessary when using RuntimeDataConnector with SimpleCheckpoint
-        if isinstance(config.batch_request, BatchRequest):
-            config.batch_request = config.batch_request.get_json_dict()
-        runtime_kwargs_batch_request = runtime_kwargs.get("batch_request")
-        if isinstance(runtime_kwargs_batch_request, BatchRequest):
-            runtime_kwargs[
-                "batch_request"
-            ] = runtime_kwargs_batch_request.get_json_dict()
 
         substituted_config: Union[CheckpointConfig, dict]
         if (
@@ -223,6 +217,7 @@ class Checkpoint:
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
@@ -234,13 +229,12 @@ class Checkpoint:
         result_format: Optional[dict] = result_format or runtime_configuration.get(
             "result_format"
         )
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
 
         runtime_kwargs = {
             "template_name": template_name,
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "batch_request": batch_request,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
@@ -278,12 +272,36 @@ class Checkpoint:
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
+                expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
+                    "expectation_suite_ge_cloud_id"
+                )
                 action_list: list = substituted_validation_dict.get("action_list")
 
                 validator: Validator = self.data_context.get_validator(
                     batch_request=batch_request,
-                    expectation_suite_name=expectation_suite_name,
+                    expectation_suite_name=expectation_suite_name
+                    if not self.data_context.ge_cloud_mode
+                    else None,
+                    expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id
+                    if self.data_context.ge_cloud_mode
+                    else None,
                 )
+
+                action_list: list = substituted_validation_dict.get("action_list")
+                runtime_configuration_validation = substituted_validation_dict.get(
+                    "runtime_configuration", {}
+                )
+                catch_exceptions_validation = runtime_configuration_validation.get(
+                    "catch_exceptions"
+                )
+                result_format_validation = runtime_configuration_validation.get(
+                    "result_format"
+                )
+                result_format = result_format or result_format_validation
+
+                if result_format is None:
+                    result_format = {"result_format": "SUMMARY"}
+
                 action_list_validation_operator: ActionListValidationOperator = (
                     ActionListValidationOperator(
                         data_context=self.data_context,
@@ -292,6 +310,19 @@ class Checkpoint:
                         name=f"{self.name}-checkpoint-validation[{idx}]",
                     )
                 )
+                checkpoint_identifier = None
+                if self.data_context.ge_cloud_mode:
+                    checkpoint_identifier = GeCloudIdentifier(
+                        resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
+                    )
+
+                operator_run_kwargs = {}
+
+                if catch_exceptions_validation is not None:
+                    operator_run_kwargs[
+                        "catch_exceptions"
+                    ] = catch_exceptions_validation
+
                 val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
@@ -300,6 +331,8 @@ class Checkpoint:
                             "evaluation_parameters"
                         ),
                         result_format=result_format,
+                        checkpoint_identifier=checkpoint_identifier,
+                        **operator_run_kwargs,
                     )
                 )
                 run_results.update(val_op_run_result.run_results)
@@ -668,6 +701,7 @@ class SimpleCheckpoint(Checkpoint):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
         checkpoint_config: CheckpointConfig = self._configurator_class(
@@ -690,6 +724,7 @@ class SimpleCheckpoint(Checkpoint):
             notify_on=notify_on,
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         ).build()
 
         super().__init__(
@@ -708,6 +743,7 @@ class SimpleCheckpoint(Checkpoint):
             validations=checkpoint_config.validations,
             profilers=checkpoint_config.profilers,
             ge_cloud_id=checkpoint_config.ge_cloud_id,
+            expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id,
         )
 
     def run(
@@ -730,6 +766,7 @@ class SimpleCheckpoint(Checkpoint):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         new_baseline_config = None
@@ -764,5 +801,6 @@ class SimpleCheckpoint(Checkpoint):
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             **kwargs,
         )

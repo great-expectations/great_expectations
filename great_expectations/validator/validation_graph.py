@@ -73,7 +73,9 @@ class MetricConfiguration:
 
 
 class MetricEdge:
-    def __init__(self, left: MetricConfiguration, right: Optional[MetricConfiguration]):
+    def __init__(
+        self, left: MetricConfiguration, right: Optional[MetricConfiguration] = None
+    ):
         self._left = left
         self._right = right
 

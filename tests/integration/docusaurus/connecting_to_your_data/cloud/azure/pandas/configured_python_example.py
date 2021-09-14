@@ -29,11 +29,11 @@ datasource_config = {
             },
             "container": "<YOUR_CONTAINER>",
             "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
-            "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
                 "group_names": ["year", "month"],
             },
+            "assets": {"taxi_data": None},
         },
     },
 }
@@ -42,11 +42,11 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
+] = "superconductivetesting.blob.core.windows.net"
 datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
+] = "superconductivetesting.blob.core.windows.net"
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "credential"
 ] = CREDENTIAL

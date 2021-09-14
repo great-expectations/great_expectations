@@ -22,9 +22,9 @@ data_connectors:
         bucket: <YOUR_S3_BUCKET_HERE>
         prefix: <BUCKET_PATH_TO_DATA>
         default_regex:
+            pattern: (.*)\.csv
             group_names:
                 - data_asset_name
-            pattern: (.*)\.csv
 """
 
 # Please note this override is only to provide good UX for docs and tests.

@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 import pandas as pd
@@ -6,6 +7,7 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
+    Batch,
     BatchDefinition,
     BatchRequest,
     BatchSpec,
@@ -673,3 +675,46 @@ def test__get_data_reference_name(basic_datasource):
         test_runtime_data_connector._get_data_reference_name(batch_identifiers)
         == "1234567890-1111111111"
     )
+
+
+def test_batch_identifiers_datetime(
+    basic_datasource,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    batch_identifiers: dict
+
+    batch_identifiers = {
+        "pipeline_stage_name": "core_processing",
+        "airflow_run_id": 1234567890,
+        "custom_key_0": datetime.datetime.utcnow(),
+    }
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "runtime_parameters": {"batch_data": test_df},
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    batch_definition = (
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )[0]
+    )
+
+    batch = Batch(
+        data=test_df, batch_request=batch_request, batch_definition=batch_definition
+    )
+
+    try:
+        batch.id
+    except TypeError:
+        pytest.fail()

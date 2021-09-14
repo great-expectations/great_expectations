@@ -775,6 +775,7 @@ validations:
     expectation_suite_name: Titanic.warning
 profilers: []
 ge_cloud_id:
+expectation_suite_ge_cloud_id:
 """
     assert checkpoint_config == expected_checkpoint_config
 
@@ -2129,6 +2130,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
@@ -2258,6 +2260,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
@@ -2397,6 +2400,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
@@ -2956,6 +2960,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
