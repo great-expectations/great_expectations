@@ -43,7 +43,7 @@ def test_StoreAction():
     stores = {"fake_in_memory_store": fake_in_memory_store}
 
     class Object:
-        pass
+        ge_cloud_mode = False
 
     data_context = Object()
     data_context.stores = stores
