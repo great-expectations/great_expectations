@@ -151,6 +151,11 @@ def test_RuntimeDataBatchSpec():
 
 
 def test_runtime_batch_request_deepcopy():
+    """
+    Python's built-in id() function returns the memory location of a given object.
+    It is used here to ascertain "sameness" and the lack thereof
+    of different objects.
+    """
     df = pd.DataFrame({"a": [1, 2, 3]})
     id_1 = id(df)
     batch_request = RuntimeBatchRequest(
