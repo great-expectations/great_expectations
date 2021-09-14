@@ -57,20 +57,27 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store import (
+    GeCloudStoreBackend,
+    Store,
+    TupleStoreBackend,
+)
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
+    DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
+    DEFAULT_USAGE_STATISTICS_URL,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
+    GeCloudConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
@@ -79,6 +86,7 @@ from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
@@ -95,6 +103,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -300,7 +309,14 @@ class BaseDataContext:
     @usage_statistics_enabled_method(
         event_name="data_context.__init__",
     )
-    def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
+    def __init__(
+        self,
+        project_config,
+        context_root_dir=None,
+        runtime_environment=None,
+        ge_cloud_mode=False,
+        ge_cloud_config=None,
+    ):
         """DataContext constructor
 
         Args:
@@ -316,6 +332,8 @@ class BaseDataContext:
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
+        self._ge_cloud_mode = ge_cloud_mode
+        self._ge_cloud_config = ge_cloud_config
         self._project_config = project_config
         self._apply_global_config_overrides()
 
@@ -348,7 +366,7 @@ class BaseDataContext:
             self._data_context_id
         )
         self._initialize_usage_statistics(
-            self._project_config.anonymous_usage_statistics
+            self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
 
         # Store cached datasources but don't init them
@@ -378,6 +396,14 @@ class BaseDataContext:
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+    @property
+    def ge_cloud_config(self):
+        return self._ge_cloud_config
+
+    @property
+    def ge_cloud_mode(self):
+        return self._ge_cloud_mode
 
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
@@ -494,8 +520,9 @@ class BaseDataContext:
                 )
             )
 
+    @classmethod
     def _get_global_config_value(
-        self, environment_variable=None, conf_file_section=None, conf_file_option=None
+        cls, environment_variable=None, conf_file_section=None, conf_file_option=None
     ):
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
@@ -549,6 +576,9 @@ class BaseDataContext:
             UUID to use as the data_context_id
         """
 
+        # if in ge_cloud_mode, use ge_cloud_account_id
+        if self.ge_cloud_mode:
+            return self.ge_cloud_config.account_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
@@ -881,7 +911,18 @@ class BaseDataContext:
     #####
 
     def _load_config_variables_file(self):
-        """Get all config variables from the default location."""
+        """
+        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables are
+        loaded from a global great_expectations.conf file, located at one of the paths defined in
+        self.GLOBAL_CONFIG_PATHS (in order of search precedence).
+        """
+        if self.ge_cloud_mode:
+            for config_path in self.GLOBAL_CONFIG_PATHS:
+                if os.path.isfile(config_path):
+                    config = configparser.ConfigParser()
+                    config.read(config_path)
+                    return dict(config.items(section="ge_cloud_config"))
+            return {}
         config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
             try:
@@ -907,7 +948,12 @@ class BaseDataContext:
             return {}
 
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
-
+        """
+        Substitute vars in config of form ${var} or $(var) with values found in the following places,
+        in order of precedence: ge_cloud_config (for Data Contexts in GE Cloud mode), runtime_environment,
+        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        be optional in GE Cloud mode).
+        """
         if not config:
             config = self._project_config
 
@@ -917,11 +963,34 @@ class BaseDataContext:
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
+        # for ge_cloud_mode: in most cases, self.ge_cloud_config will be a subset of substituted_config_variables,
+        # but if one or more ge_cloud_config values are passed in at runtime, they will be reflected in
+        # self.ge_cloud_config and will take precedence
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
+            **(self.ge_cloud_config.to_json_dict() if self.ge_cloud_mode else {}),
         }
+
+        if self.ge_cloud_mode:
+            ge_cloud_config_variable_defaults = {
+                "plugins_directory": self._normalize_absolute_or_relative_path(
+                    DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
+                ),
+                "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
+            }
+            for config_variable, value in ge_cloud_config_variable_defaults.items():
+                if substitutions.get(config_variable) is None:
+                    logger.info(
+                        f'Config variable "{config_variable}" was not found in environment or global config ('
+                        f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
+                        f"like to "
+                        f"use a different value, please specify it in an environment variable or in a "
+                        f"great_expectations.conf file located at one of the above paths, in a section named "
+                        f'"ge_cloud_config".'
+                    )
+                    substitutions[config_variable] = value
 
         return DataContextConfig(
             **substitute_all_config_variables(
@@ -1716,6 +1785,7 @@ class BaseDataContext:
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1729,21 +1799,26 @@ class BaseDataContext:
                     expectation_suite is not None,
                     expectation_suite_name is not None,
                     create_expectation_suite_with_name is not None,
+                    expectation_suite_ge_cloud_id is not None,
                 ]
             )
             != 1
         ):
             raise ValueError(
-                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+                f"Exactly one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name must be specified"
             )
 
+        if expectation_suite_ge_cloud_id is not None:
+            expectation_suite = self.get_expectation_suite(
+                ge_cloud_id=expectation_suite_ge_cloud_id
+            )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
-
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.create_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name
             )
+
         if (
             sum(
                 bool(x)
@@ -2047,8 +2122,9 @@ class BaseDataContext:
             name,
             value,
         ) in self.project_config_with_variables_substituted.stores.items():
-            value["name"] = name
-            stores.append(value)
+            store_config = copy.deepcopy(value)
+            store_config["name"] = name
+            stores.append(store_config)
         return stores
 
     def list_active_stores(self):
@@ -2088,7 +2164,11 @@ class BaseDataContext:
         return validation_operators
 
     def create_expectation_suite(
-        self, expectation_suite_name: str, overwrite_existing: Optional[bool] = False
+        self,
+        expectation_suite_name: str,
+        overwrite_existing: Optional[bool] = False,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2106,23 +2186,37 @@ class BaseDataContext:
         expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name
         )
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name
-        )
-
-        if self.expectations_store.has_key(key) and not overwrite_existing:
-            raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+        if self.ge_cloud_mode:
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
+            if self.expectations_store.has_key(key) and not overwrite_existing:
+                raise ge_exceptions.DataContextError(
+                    "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
+                    "expectation_suite, set overwrite_existing=True.".format(
+                        ge_cloud_id
+                    )
+                )
         else:
-            self.expectations_store.set(key, expectation_suite)
+            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+            if self.expectations_store.has_key(key) and not overwrite_existing:
+                raise ge_exceptions.DataContextError(
+                    "expectation_suite with name {} already exists. If you would like to overwrite this "
+                    "expectation_suite, set overwrite_existing=True.".format(
+                        expectation_suite_name
+                    )
+                )
 
+        self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
 
-    def delete_expectation_suite(self, expectation_suite_name):
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ):
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
@@ -2131,7 +2225,14 @@ class BaseDataContext:
         Returns:
             True for Success and False for Failure.
         """
-        key = ExpectationSuiteIdentifier(expectation_suite_name)
+        if self.ge_cloud_mode:
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                expectation_suite_name
+            )
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -2140,18 +2241,27 @@ class BaseDataContext:
             self.expectations_store.remove_key(key)
             return True
 
-    def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
-        """Get a named expectation suite for the provided data_asset_name.
-
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        """Get an Expectation Suite by name or GE Cloud ID
         Args:
-            expectation_suite_name (str): the name for the expectation suite
+            expectation_suite_name (str): the name for the Expectation Suite
+            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
 
         Returns:
             expectation_suite
         """
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name
-        )
+        if self.ge_cloud_mode:
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
 
         if self.expectations_store.has_key(key):
             return self.expectations_store.get(key)
@@ -2172,7 +2282,14 @@ class BaseDataContext:
         event_name="data_context.save_expectation_suite",
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
-    def save_expectation_suite(self, expectation_suite, expectation_suite_name=None):
+    def save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: Optional[bool] = True,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ):
         """Save the provided expectation suite into the DataContext.
 
         Args:
@@ -2183,18 +2300,37 @@ class BaseDataContext:
         Returns:
             None
         """
-        if expectation_suite_name is None:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite.expectation_suite_name
+        if self.ge_cloud_mode:
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
+            if self.expectations_store.has_key(key) and not overwrite_existing:
+                raise ge_exceptions.DataContextError(
+                    "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
+                    "expectation_suite, set overwrite_existing=True.".format(
+                        ge_cloud_id
+                    )
+                )
         else:
-            expectation_suite.expectation_suite_name = expectation_suite_name
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
+            if expectation_suite_name is None:
+                key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                    expectation_suite_name=expectation_suite.expectation_suite_name
+                )
+            else:
+                expectation_suite.expectation_suite_name = expectation_suite_name
+                key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+                    expectation_suite_name=expectation_suite_name
+                )
+            if self.expectations_store.has_key(key) and not overwrite_existing:
+                raise ge_exceptions.DataContextError(
+                    "expectation_suite with name {} already exists. If you would like to overwrite this "
+                    "expectation_suite, set overwrite_existing=True.".format(
+                        expectation_suite_name
+                    )
+                )
 
-        self.expectations_store.set(key, expectation_suite)
         self._evaluation_parameter_dependencies_compiled = False
+        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
         """
@@ -2457,6 +2593,7 @@ class BaseDataContext:
                             "data_context": self,
                             "root_directory": self.root_directory,
                             "site_name": site_name,
+                            "ge_cloud_mode": self.ge_cloud_mode,
                         },
                         config_defaults={"module_name": module_name},
                     )
@@ -2472,7 +2609,8 @@ class BaseDataContext:
                         ] = site_builder.get_resource_url(only_if_exists=False)
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
-                            resource_identifiers, build_index=build_index
+                            resource_identifiers,
+                            build_index=(build_index and not self.ge_cloud_mode),
                         )
                         if index_page_resource_identifier_tuple:
                             index_page_locator_infos[
@@ -2982,6 +3120,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
         checkpoint_config: Union[CheckpointConfig, dict]
@@ -3009,6 +3148,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_on": notify_on,
             "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
         checkpoint_config = filter_properties_dict(
@@ -3025,9 +3165,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name,
-        )
+        if self.ge_cloud_mode:
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="contract", ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key: ConfigurationIdentifier = ConfigurationIdentifier(
+                configuration_key=name,
+            )
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
@@ -3038,9 +3183,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def get_checkpoint(
         self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name or ge_cloud_id,
-        )
+        if ge_cloud_id:
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="contract", ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key: ConfigurationIdentifier = ConfigurationIdentifier(
+                configuration_key=name,
+            )
         try:
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
@@ -3099,9 +3249,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name or ge_cloud_id,
-        )
+
+        if ge_cloud_id:
+            key: GeCloudIdentifier = GeCloudIdentifier(
+                resource_type="contract", ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key: ConfigurationIdentifier = ConfigurationIdentifier(
+                configuration_key=name
+            )
+
         try:
             self.checkpoint_store.remove_key(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
@@ -3110,11 +3267,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
 
     def list_checkpoints(self) -> List[str]:
-        return [x.configuration_key for x in self.checkpoint_store.list_keys()]
+        if self.ge_cloud_mode:
+            return self.checkpoint_store.list_keys()
+        else:
+            return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
     def run_checkpoint(
         self,
-        checkpoint_name: str,
+        checkpoint_name: Optional[str] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -3128,6 +3288,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
         result_format: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         """
@@ -3141,30 +3303,59 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             CheckpointResult
         """
         # TODO mark experimental
+        batch_request = batch_request or {}
+        batch_identifiers = batch_request.get("batch_identifiers", {})
+        if self.ge_cloud_mode:
+            if len(batch_identifiers.keys()) == 0:
+                batch_identifiers["timestamp"] = str(datetime.datetime.now())
+                batch_request["batch_identifiers"] = batch_identifiers
+
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
+            name=checkpoint_name, ge_cloud_id=ge_cloud_id
+        )
+        checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
+
+        if (
+            "runtime_configuration" in checkpoint_config_from_store
+            and "result_format" in checkpoint_config_from_store["runtime_configuration"]
+        ):
+            result_format = result_format or checkpoint_config_from_store[
+                "runtime_configuration"
+            ].pop("result_format")
 
         if result_format is None:
             result_format = {"result_format": "SUMMARY"}
 
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
-            name=checkpoint_name,
+        checkpoint_config_from_call_args: dict = {
+            "template_name": template_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            "run_id": run_id,
+            "run_name": run_name,
+            "run_time": run_time,
+            "result_format": result_format,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+        }
+
+        checkpoint_config = {
+            key: value
+            for key, value in checkpoint_config_from_store.items()
+            if key in checkpoint_config_from_call_args
+        }
+        checkpoint_config.update(checkpoint_config_from_call_args)
+        checkpoint_config = filter_properties_dict(
+            properties=checkpoint_config, clean_falsy=True
         )
 
-        return checkpoint.run(
-            template_name=template_name,
-            run_name_template=run_name_template,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            profilers=profilers,
-            run_id=run_id,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
-        )
+        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
+
+        return checkpoint.run(**checkpoint_run_arguments)
 
     def test_yaml_config(
         self,
@@ -3754,16 +3945,119 @@ class DataContext(BaseDataContext):
                 destination_path = os.path.join(subdir_path, notebook_name)
                 shutil.copyfile(notebook, destination_path)
 
-    def __init__(self, context_root_dir=None, runtime_environment=None):
+    @classmethod
+    def _get_ge_cloud_config_dict(
+        cls,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+    ):
+        ge_cloud_base_url = (
+            ge_cloud_base_url
+            or super()._get_global_config_value(
+                environment_variable="GE_CLOUD_BASE_URL",
+                conf_file_section="ge_cloud_config",
+                conf_file_option="base_url",
+            )
+            or "https://app.greatexpectations.io/"
+        )
+        ge_cloud_account_id = ge_cloud_account_id or super()._get_global_config_value(
+            environment_variable="GE_CLOUD_ACCOUNT_ID",
+            conf_file_section="ge_cloud_config",
+            conf_file_option="account_id",
+        )
+        ge_cloud_access_token = (
+            ge_cloud_access_token
+            or super()._get_global_config_value(
+                environment_variable="GE_CLOUD_ACCESS_TOKEN",
+                conf_file_section="ge_cloud_config",
+                conf_file_option="access_token",
+            )
+        )
+        return {
+            "base_url": ge_cloud_base_url,
+            "account_id": ge_cloud_account_id,
+            "access_token": ge_cloud_access_token,
+        }
 
-        # Determine the "context root directory" - this is the parent of "great_expectations" dir
-        if context_root_dir is None:
-            context_root_dir = self.find_context_root_dir()
+    def get_ge_cloud_config(
+        self,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+    ):
+        """
+        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        """
+        ge_cloud_config_dict = self._get_ge_cloud_config_dict(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_account_id=ge_cloud_account_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+        )
+
+        missing_keys = []
+        for key, val in ge_cloud_config_dict.items():
+            if not val:
+                missing_keys.append(key)
+        if len(missing_keys) > 0:
+            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            global_config_path_str = [
+                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+            ]
+            raise DataContextError(
+                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({(', ').join(global_config_path_str)})."
+            )
+
+        return GeCloudConfig(**ge_cloud_config_dict)
+
+    def __init__(
+        self,
+        context_root_dir: Optional[str] = None,
+        runtime_environment: Optional[dict] = None,
+        ge_cloud_mode: bool = False,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+    ):
+        self._ge_cloud_mode = ge_cloud_mode
+        self._ge_cloud_config = None
+        ge_cloud_config = None
+
+        if ge_cloud_mode:
+            ge_cloud_config = self.get_ge_cloud_config(
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_account_id=ge_cloud_account_id,
+                ge_cloud_access_token=ge_cloud_access_token,
+            )
+            self._ge_cloud_config = ge_cloud_config
+            # in ge_cloud_mode, if not provided, set context_root_dir to cwd
+            if context_root_dir is None:
+                context_root_dir = os.getcwd()
+                logger.info(
+                    f'context_root_dir was not provided - defaulting to current working directory "'
+                    f'{context_root_dir}".'
+                )
+        else:
+            # Determine the "context root directory" - this is the parent of "great_expectations" dir
+            context_root_dir = (
+                self.find_context_root_dir()
+                if context_root_dir is None
+                else context_root_dir
+            )
+
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-        super().__init__(project_config, context_root_directory, runtime_environment)
+        super().__init__(
+            project_config,
+            context_root_directory,
+            runtime_environment,
+            ge_cloud_mode=ge_cloud_mode,
+            ge_cloud_config=ge_cloud_config,
+        )
 
         # save project config if data_context_id auto-generated or global config values applied
         project_config_dict = dataContextConfigSchema.dump(project_config)
@@ -3773,14 +4067,37 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
+    @property
+    def default_ge_cloud_data_context_config_template(self):
+        config_commented_map_from_yaml = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
+        try:
+            return (
+                DataContextConfig(**config_commented_map_from_yaml)
+                if self.ge_cloud_mode
+                else DataContextConfig.from_commented_map(
+                    commented_map=config_commented_map_from_yaml
+                )
+            )
+        except ge_exceptions.InvalidDataContextConfigError:
+            # Just to be explicit about what we intended to catch
+            raise
+
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        :return: the configuration object read from the file
+        For Data Contexts in GE Cloud mode, a default configuration template with pre-defined ${
+        SOME_VARIABLE} variables is returned. (see
+        great_expectations.data_context.templates.DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG). These variables are
+        substituted later using the same process referenced above.
+
+        :return: the configuration object read from the file or template
         """
+        if self.ge_cloud_mode:
+            return self.default_ge_cloud_data_context_config_template
+
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
@@ -3809,6 +4126,11 @@ class DataContext(BaseDataContext):
 
     def _save_project_config(self):
         """Save the current project to disk."""
+        if self.ge_cloud_mode:
+            logger.debug(
+                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+            )
+            return
         logger.debug("Starting DataContext._save_project_config")
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)

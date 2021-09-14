@@ -53,8 +53,10 @@ class ExpectationSuite(SerializableDictDot):
         data_asset_type=None,
         execution_engine_type=None,
         meta=None,
+        ge_cloud_id=None,
     ):
         self.expectation_suite_name = expectation_suite_name
+        self.ge_cloud_id = ge_cloud_id
         if expectations is None:
             expectations = []
         self.expectations = [
@@ -461,6 +463,7 @@ class ExpectationSuite(SerializableDictDot):
 
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectations = fields.List(fields.Nested(ExpectationConfigurationSchema))
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
@@ -469,24 +472,40 @@ class ExpectationSuiteSchema(Schema):
     # NOTE: 20191107 - JPC - we may want to remove clean_empty and update tests to require the other fields;
     # doing so could also allow us not to have to make a copy of data in the pre_dump method.
     def clean_empty(self, data):
-        if not hasattr(data, "evaluation_parameters"):
-            pass
-        elif len(data.evaluation_parameters) == 0:
-            del data.evaluation_parameters
+        if isinstance(data, ExpectationSuite):
+            if not hasattr(data, "evaluation_parameters"):
+                pass
+            elif len(data.evaluation_parameters) == 0:
+                del data.evaluation_parameters
 
-        if not hasattr(data, "meta"):
-            pass
-        elif data.meta is None or data.meta == []:
-            pass
-        elif len(data.meta) == 0:
-            del data.meta
+            if not hasattr(data, "meta"):
+                pass
+            elif data.meta is None or data.meta == []:
+                pass
+            elif len(data.meta) == 0:
+                del data.meta
+        elif isinstance(data, dict):
+            if not data.get("evaluation_parameters"):
+                pass
+            elif len(data.get("evaluation_parameters")) == 0:
+                data.pop("evaluation_parameters")
+
+            if not data.get("meta"):
+                pass
+            elif data.get("meta") is None or data.get("meta") == []:
+                pass
+            elif len(data.get("meta")) == 0:
+                data.pop("meta")
         return data
 
     # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        data.meta = convert_to_json_serializable(data.meta)
+        if isinstance(data, ExpectationSuite):
+            data.meta = convert_to_json_serializable(data.meta)
+        elif isinstance(data, dict):
+            data["meta"] = convert_to_json_serializable(data.get("meta"))
         data = self.clean_empty(data)
         return data
 

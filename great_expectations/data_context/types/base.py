@@ -1063,6 +1063,20 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class GeCloudConfig(DictDot):
+    def __init__(self, base_url: str, account_id: str, access_token: str):
+        self.base_url = base_url
+        self.account_id = account_id
+        self.access_token = access_token
+
+    def to_json_dict(self):
+        return {
+            "base_url": self.base_url,
+            "account_id": self.account_id,
+            "access_token": self.access_token,
+        }
+
+
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
@@ -1783,6 +1797,7 @@ class CheckpointConfigSchema(Schema):
             "notify_on",
             "notify_with",
             "ge_cloud_id",
+            "expectation_suite_ge_cloud_id",
         )
         ordered = True
 
@@ -1807,6 +1822,7 @@ class CheckpointConfigSchema(Schema):
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
+    expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
     action_list = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
@@ -1889,11 +1905,12 @@ class CheckpointConfig(BaseYamlConfig):
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
-        # the following fous args are used by SimpleCheckpoint
+        # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -1907,6 +1924,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._template_name = template_name
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
+            self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
             self._batch_request = batch_request
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
@@ -1946,6 +1964,10 @@ class CheckpointConfig(BaseYamlConfig):
                 self.run_name_template = other_config.run_name_template
             if other_config.expectation_suite_name is not None:
                 self.expectation_suite_name = other_config.expectation_suite_name
+            if other_config.expectation_suite_ge_cloud_id is not None:
+                self.expectation_suite_ge_cloud_id = (
+                    other_config.expectation_suite_ge_cloud_id
+                )
             # update
             if other_config.batch_request is not None:
                 if self.batch_request is None:
@@ -1990,6 +2012,10 @@ class CheckpointConfig(BaseYamlConfig):
             if runtime_kwargs.get("expectation_suite_name") is not None:
                 self.expectation_suite_name = runtime_kwargs.get(
                     "expectation_suite_name"
+                )
+            if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
+                self.expectation_suite_ge_cloud_id = runtime_kwargs.get(
+                    "expectation_suite_ge_cloud_id"
                 )
             # update
             if runtime_kwargs.get("batch_request") is not None:
@@ -2039,6 +2065,14 @@ class CheckpointConfig(BaseYamlConfig):
     @ge_cloud_id.setter
     def ge_cloud_id(self, value: str):
         self._ge_cloud_id = value
+
+    @property
+    def expectation_suite_ge_cloud_id(self):
+        return self._expectation_suite_ge_cloud_id
+
+    @expectation_suite_ge_cloud_id.setter
+    def expectation_suite_ge_cloud_id(self, value: str):
+        self._expectation_suite_ge_cloud_id = value
 
     @property
     def name(self):

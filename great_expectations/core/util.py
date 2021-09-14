@@ -159,6 +159,12 @@ def convert_to_json_serializable(data):
         # to the number of digits for which the string representation will equal the float representation
         return [convert_to_json_serializable(x) for x in data.tolist()]
 
+    if isinstance(data, np.int64):
+        return int(data)
+
+    if isinstance(data, np.float64):
+        return float(data)
+
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 

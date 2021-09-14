@@ -16,11 +16,11 @@ datasource_config = {
             "class_name": "ConfiguredAssetGCSDataConnector",
             "bucket_or_name": "<YOUR_GCS_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
-            "assets": {"taxi_data": None},
             "default_regex": {
                 "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
                 "group_names": ["year", "month"],
             },
+            "assets": {"taxi_data": None},
         }
     },
 }

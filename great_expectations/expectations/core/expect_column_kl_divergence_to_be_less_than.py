@@ -221,9 +221,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 graph = ValidationGraph()
                 validator.build_metric_dependency_graph(
                     graph=graph,
+                    execution_engine=execution_engine,
                     child_node=partition_metric_configuration,
                     configuration=configuration,
-                    execution_engine=execution_engine,
                 )
                 bins = validator.resolve_validation_graph(graph, metrics=dict())[
                     partition_metric_configuration.id

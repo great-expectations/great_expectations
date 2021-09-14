@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
