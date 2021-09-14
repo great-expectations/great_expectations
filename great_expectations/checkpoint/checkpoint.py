@@ -175,6 +175,8 @@ class Checkpoint:
                 # don't replace _substituted_config if already exists
                 if self._substituted_config is None:
                     self._substituted_config = substituted_config
+        if self.data_context.ge_cloud_mode:
+            return substituted_config
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(
