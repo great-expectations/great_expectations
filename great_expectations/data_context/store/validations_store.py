@@ -164,7 +164,7 @@ class ValidationsStore(Store):
 
     def serialize(self, key, value):
         if self.ge_cloud_mode:
-            return self._expectationSuiteValidationResultSchema.dump(value)
+            return value.to_json_dict()
         return self._expectationSuiteValidationResultSchema.dumps(
             value, indent=2, sort_keys=True
         )
