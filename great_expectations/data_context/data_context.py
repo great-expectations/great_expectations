@@ -3349,9 +3349,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             if key in checkpoint_config_from_call_args
         }
         checkpoint_config.update(checkpoint_config_from_call_args)
-        checkpoint_config = filter_properties_dict(
-            properties=checkpoint_config, clean_falsy=True
-        )
+        if not self.ge_cloud_mode:
+            checkpoint_config = filter_properties_dict(
+                properties=checkpoint_config, clean_falsy=True
+            )
 
         checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
 
