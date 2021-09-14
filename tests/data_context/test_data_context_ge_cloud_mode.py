@@ -68,7 +68,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
                 "class_name": "Datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
@@ -82,7 +82,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
                 "class_name": "Datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
@@ -177,7 +177,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                 "default_spark_datasource": {
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -191,7 +191,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                 "default_pandas_datasource": {
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -315,7 +315,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
             },
@@ -329,7 +329,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
             },
@@ -513,7 +513,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
                 "execution_engine": {
@@ -527,7 +527,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
                 "execution_engine": {
@@ -610,7 +610,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                     "class_name": "Datasource",
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -624,7 +624,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                     "class_name": "Datasource",
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -708,7 +708,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
                 "module_name": "great_expectations.datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
@@ -722,7 +722,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
                 "module_name": "great_expectations.datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
