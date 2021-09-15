@@ -7,7 +7,7 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 from dateutil.parser import parse
@@ -326,13 +326,14 @@ class Validator:
                         key
                     ] = provider_cls.default_kwarg_values[key]
             self.build_metric_dependency_graph(
-                graph,
-                child_node=metric_configuration,
-                configuration=None,
+                graph=graph,
                 execution_engine=self._execution_engine,
-                runtime_configuration=None,
+                child_node=metric_configuration,
             )
-        self.resolve_validation_graph(graph, resolved_metrics)
+        self.resolve_validation_graph(
+            graph=graph,
+            metrics=resolved_metrics,
+        )
         return {
             metric_name: resolved_metrics[metric_configuration.id]
             for (metric_name, metric_configuration) in metrics.items()
@@ -345,10 +346,10 @@ class Validator:
     def build_metric_dependency_graph(
         self,
         graph: ValidationGraph,
+        execution_engine: ExecutionEngine,
         child_node: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration],
-        execution_engine: "ExecutionEngine",
         parent_node: Optional[MetricConfiguration] = None,
+        configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
         """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
@@ -369,52 +370,48 @@ class Validator:
         if parent_node:
             graph.add(
                 MetricEdge(
-                    parent_node,
-                    child_node,
+                    left=parent_node,
+                    right=child_node,
                 )
             )
 
         if len(metric_dependencies) == 0:
             graph.add(
                 MetricEdge(
-                    child_node,
-                    None,
+                    left=child_node,
                 )
             )
 
         else:
             for metric_dependency in metric_dependencies.values():
+                # TODO: <Alex>ALEX -- In the future, provide a more robust cycle detection.</Alex>
                 if metric_dependency.id == child_node.id:
                     logger.warning(
                         f"Metric {str(child_node.id)} has created a circular dependency"
                     )
                     continue
                 self.build_metric_dependency_graph(
-                    graph,
-                    metric_dependency,
-                    configuration,
-                    execution_engine,
-                    child_node,
+                    graph=graph,
+                    execution_engine=execution_engine,
+                    child_node=metric_dependency,
+                    parent_node=child_node,
+                    configuration=configuration,
                     runtime_configuration=runtime_configuration,
                 )
 
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: dict = None,
-        runtime_configuration: dict = None,
+        metrics: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
         then proceeds to add these dependencies to the validation graph, supply readily available metric implementations
         to fulfill current metric requirements, and validate these metrics.
 
                 Args:
-                    batches (Dict[str, Batch]): A Dictionary of batches and their corresponding names that will be used
-                    for Expectation Validation.
                     configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will
                     be used to supply domain and values for metrics.
-                    execution_engine (ExecutionEngine): An Execution Engine that will be used for extraction of metrics
-                    from the registry.
                     metrics (dict): A list of currently registered metrics in the registry
                     runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics
                     such as the result_format.
@@ -453,10 +450,10 @@ class Validator:
             try:
                 for metric in validation_dependencies.values():
                     self.build_metric_dependency_graph(
-                        graph,
-                        metric,
-                        evaluated_config,
-                        self._execution_engine,
+                        graph=graph,
+                        execution_engine=self._execution_engine,
+                        child_node=metric,
+                        configuration=evaluated_config,
                         runtime_configuration=runtime_configuration,
                     )
                 processed_configurations.append(evaluated_config)
@@ -484,7 +481,9 @@ class Validator:
         # an exception occurring as part of resolving the combined validation graph impacts all expectations in suite.
         try:
             metrics = self.resolve_validation_graph(
-                graph, metrics, runtime_configuration
+                graph=graph,
+                metrics=metrics,
+                runtime_configuration=runtime_configuration,
             )
         except Exception as err:
             if catch_exceptions:
@@ -531,11 +530,18 @@ class Validator:
                     raise err
         return evrs
 
-    def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
+    def resolve_validation_graph(
+        self,
+        graph: ValidationGraph,
+        metrics: Dict[Tuple, MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
+    ):
         done: bool = False
         pbar = None
         while not done:
-            ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
+            ready_metrics, needed_metrics = self._parse_validation_graph(
+                validation_graph=graph, metrics=metrics
+            )
             if pbar is None:
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
@@ -558,7 +564,11 @@ class Validator:
 
         return metrics
 
-    def _parse_validation_graph(self, validation_graph, metrics):
+    @staticmethod
+    def _parse_validation_graph(
+        validation_graph: ValidationGraph,
+        metrics: Dict[Tuple, MetricConfiguration],
+    ):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
         unmet_dependency_ids = set()
@@ -579,17 +589,19 @@ class Validator:
 
         return maybe_ready - unmet_dependency, unmet_dependency
 
+    @staticmethod
     def _resolve_metrics(
-        self,
-        execution_engine: "ExecutionEngine",
+        execution_engine: ExecutionEngine,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict,
+        metrics: Dict[Tuple, Any] = None,
         runtime_configuration: dict = None,
     ):
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(
-            metrics_to_resolve, metrics, runtime_configuration
+            metrics_to_resolve=metrics_to_resolve,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
         )
 
     def _initialize_expectations(
@@ -1254,7 +1266,7 @@ set as active.
                 runtime_configuration.update({"result_format": result_format})
 
             results = self.graph_validate(
-                expectations_to_evaluate,
+                configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
             statistics = _calc_validation_statistics(results)
@@ -1535,7 +1547,8 @@ class BridgeValidator:
                 if isinstance(batch.data, pyspark.sql.DataFrame):
                     self.expectation_engine = SparkDFDataset
             except ImportError:
-                pass
+                # noinspection PyUnusedLocal
+                pyspark = None
 
         if self.expectation_engine is None:
             raise ValueError(

@@ -1785,6 +1785,7 @@ class BaseDataContext:
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1798,21 +1799,26 @@ class BaseDataContext:
                     expectation_suite is not None,
                     expectation_suite_name is not None,
                     create_expectation_suite_with_name is not None,
+                    expectation_suite_ge_cloud_id is not None,
                 ]
             )
             != 1
         ):
             raise ValueError(
-                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+                f"Exactly one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name must be specified"
             )
 
+        if expectation_suite_ge_cloud_id is not None:
+            expectation_suite = self.get_expectation_suite(
+                ge_cloud_id=expectation_suite_ge_cloud_id
+            )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
-
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.create_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name
             )
+
         if (
             sum(
                 bool(x)
@@ -3114,6 +3120,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
         checkpoint_config: Union[CheckpointConfig, dict]
@@ -3141,6 +3148,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_on": notify_on,
             "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
         checkpoint_config = filter_properties_dict(
@@ -3266,7 +3274,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
     def run_checkpoint(
         self,
-        checkpoint_name: str,
+        checkpoint_name: Optional[str] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -3281,6 +3289,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         run_time: Optional[datetime.datetime] = None,
         result_format: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         """
@@ -3294,11 +3303,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             CheckpointResult
         """
         # TODO mark experimental
+        batch_request = batch_request or {}
+        batch_identifiers = batch_request.get("batch_identifiers", {})
+        if self.ge_cloud_mode:
+            if len(batch_identifiers.keys()) == 0:
+                batch_identifiers["timestamp"] = str(datetime.datetime.now())
+                batch_request["batch_identifiers"] = batch_identifiers
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name, ge_cloud_id=ge_cloud_id
         )
-
         checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
 
         if (
@@ -3326,6 +3340,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "run_name": run_name,
             "run_time": run_time,
             "result_format": result_format,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
         checkpoint_config = {
@@ -3334,9 +3349,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             if key in checkpoint_config_from_call_args
         }
         checkpoint_config.update(checkpoint_config_from_call_args)
-        checkpoint_config = filter_properties_dict(
-            properties=checkpoint_config, clean_falsy=True
-        )
+        if not self.ge_cloud_mode:
+            checkpoint_config = filter_properties_dict(
+                properties=checkpoint_config, clean_falsy=True
+            )
 
         checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
 

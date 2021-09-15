@@ -209,7 +209,7 @@ What does Great Expectations _not_ do?
 
 **Great Expectations is _not_ a pipeline execution framework.**
 
-We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), etc. We DON'T execute your pipelines for you.
+We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. We DON'T execute your pipelines for you.
 
 **Great Expectations is _not_ a data versioning tool.**
 
