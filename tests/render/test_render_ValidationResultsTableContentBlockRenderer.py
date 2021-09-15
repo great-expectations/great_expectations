@@ -491,6 +491,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
     ]
     assert content_block_fn_output == content_block_fn_expected_output
 
+
 def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_success):
     evr_no_result_key = ExpectationValidationResult(
         success=True,
