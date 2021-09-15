@@ -328,7 +328,7 @@ class Validator:
             self.build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=self._execution_engine,
-                child_node=metric_configuration,
+                metric_configuration=metric_configuration,
             )
 
         resolved_metrics: Dict[Tuple, Any] = {}
@@ -349,8 +349,7 @@ class Validator:
         self,
         graph: ValidationGraph,
         execution_engine: ExecutionEngine,
-        child_node: MetricConfiguration,
-        parent_node: Optional[MetricConfiguration] = None,
+        metric_configuration: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
     ):
@@ -358,10 +357,10 @@ class Validator:
         until all metrics have been added."""
 
         metric_impl = get_metric_provider(
-            child_node.metric_name, execution_engine=execution_engine
+            metric_configuration.metric_name, execution_engine=execution_engine
         )[0]
         metric_dependencies = metric_impl.get_evaluation_dependencies(
-            metric=child_node,
+            metric=metric_configuration,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
@@ -370,34 +369,31 @@ class Validator:
         if len(metric_dependencies) == 0:
             graph.add(
                 MetricEdge(
-                    left=child_node,
+                    left=metric_configuration,
                 )
             )
         else:
-            child_node.metric_dependencies = metric_dependencies
+            metric_configuration.metric_dependencies = metric_dependencies
             for metric_dependency in metric_dependencies.values():
                 # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
-                if metric_dependency.id == child_node.id:
+                if metric_dependency.id == metric_configuration.id:
                     logger.warning(
-                        f"Metric {str(child_node.id)} has created a circular dependency"
+                        f"Metric {str(metric_configuration.id)} has created a circular dependency"
                     )
                     continue
+                graph.add(
+                    MetricEdge(
+                        left=metric_configuration,
+                        right=metric_dependency,
+                    )
+                )
                 self.build_metric_dependency_graph(
                     graph=graph,
                     execution_engine=execution_engine,
-                    child_node=metric_dependency,
-                    parent_node=child_node,
+                    metric_configuration=metric_dependency,
                     configuration=configuration,
                     runtime_configuration=runtime_configuration,
                 )
-
-        if parent_node:
-            graph.add(
-                MetricEdge(
-                    left=parent_node,
-                    right=child_node,
-                )
-            )
 
     def graph_validate(
         self,
@@ -452,7 +448,7 @@ class Validator:
                     self.build_metric_dependency_graph(
                         graph=graph,
                         execution_engine=self._execution_engine,
-                        child_node=metric_configuration,
+                        metric_configuration=metric_configuration,
                         configuration=evaluated_config,
                         runtime_configuration=runtime_configuration,
                     )

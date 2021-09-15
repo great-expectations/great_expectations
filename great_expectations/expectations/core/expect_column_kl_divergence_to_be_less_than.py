@@ -222,7 +222,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 validator.build_metric_dependency_graph(
                     graph=graph,
                     execution_engine=execution_engine,
-                    child_node=partition_metric_configuration,
+                    metric_configuration=partition_metric_configuration,
                     configuration=configuration,
                 )
                 resolved_metrics: Dict[Tuple, Any] = {}
