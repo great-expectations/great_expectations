@@ -59,9 +59,6 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-MAX_METRIC_COMPUTATION_RETRIES = 3
-
-
 class Validator:
     def __init__(
         self,
