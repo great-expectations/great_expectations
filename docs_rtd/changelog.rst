@@ -7,7 +7,7 @@ Changelog
 
 develop
 -----------------
-* [FEATURE] Experimental multithreaded checkpoint speedup (#3362)
+* [FEATURE] Configurable multi-threaded checkpoint speedup (#3362)
 * [DOCS] "Deploying Great Expectations in a hosted environment without file system or CLI" (#3361)
 
 0.13.33
