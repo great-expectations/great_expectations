@@ -565,17 +565,12 @@ class Validator:
 
             if pbar is None:
                 # noinspection PyProtectedMember
-                # TODO: <Alex>ALEX</Alex>
-                # pbar = tqdm(
-                #     total=len(ready_metrics) + len(needed_metrics),
-                #     desc="Calculating Metrics",
-                #     disable=len(graph.edges) < 3,
-                # )
-                # pbar.update(0)
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                pass
-                # TODO: <Alex>ALEX</Alex>
+                pbar = tqdm(
+                    total=len(ready_metrics) + len(needed_metrics),
+                    desc="Calculating Metrics",
+                    disable=len(graph.edges) < 3,
+                )
+                pbar.update(0)
 
             # TODO: <Alex>ALEX</Alex>
             # computable_metrics = set()
@@ -613,9 +608,7 @@ class Validator:
                         runtime_configuration=runtime_configuration,
                     )
                 )
-                # TODO: <Alex>ALEX</Alex>
-                # pbar.update(len(ready_metrics))
-                # TODO: <Alex>ALEX</Alex>
+                pbar.update(len(ready_metrics))
                 # TODO: <Alex>ALEX</Alex>
             except MetricResolutionError as err:
                 # TODO: <Alex>ALEX</Alex>
@@ -653,9 +646,7 @@ class Validator:
                 done = True
             # TODO: <Alex>ALEX</Alex>
 
-        # TODO: <Alex>ALEX</Alex>
-        # pbar.close()
-        # TODO: <Alex>ALEX</Alex>
+        pbar.close()
 
     @staticmethod
     def _parse_validation_graph(
