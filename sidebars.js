@@ -167,7 +167,7 @@ module.exports = {
           items: [
             {
               type: 'category',
-              label: 'Advanced',
+              label: 'Core skills',
               items: [
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',

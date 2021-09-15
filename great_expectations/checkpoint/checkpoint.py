@@ -132,15 +132,6 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
-        # Necessary when using RuntimeDataConnector with SimpleCheckpoint
-        if isinstance(config.batch_request, BatchRequest):
-            config.batch_request = config.batch_request.get_json_dict()
-        runtime_kwargs_batch_request = runtime_kwargs.get("batch_request")
-        if isinstance(runtime_kwargs_batch_request, BatchRequest):
-            runtime_kwargs[
-                "batch_request"
-            ] = runtime_kwargs_batch_request.get_json_dict()
-
         substituted_config: Union[CheckpointConfig, dict]
         if (
             self._substituted_config is not None
@@ -184,6 +175,8 @@ class Checkpoint:
                 # don't replace _substituted_config if already exists
                 if self._substituted_config is None:
                     self._substituted_config = substituted_config
+        if self.data_context.ge_cloud_mode:
+            return substituted_config
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(
