@@ -197,6 +197,39 @@ class Expectation(metaclass=MetaExpectation):
         ]
 
     @classmethod
+    @renderer(renderer_type="renderer.diagnostic.meta_properties")
+    def _diagnostic_meta_properties_renderer(cls, result=None, **kwargs):
+        if result is None:
+            return []
+        custom_property_values = []
+        meta_properties_to_render = result.expectation_config.kwargs.get(
+            "meta_properties_to_render", None
+        )
+        if meta_properties_to_render is not None:
+            for key in sorted(meta_properties_to_render.keys()):
+                meta_property = meta_properties_to_render[key]
+                if meta_property is not None:
+                    try:
+                        # Allow complex structure with . usage
+                        obj = result.expectation_config.meta["attributes"]
+                        keys = meta_property.split(".")
+                        for i in range(0, len(keys)):
+                            # Allow for keys with a . in the string like {"item.key": "1"}
+                            remaining_key = "".join(keys[i:])
+                            if remaining_key in obj:
+                                obj = obj[remaining_key]
+                                break
+                            else:
+                                obj = obj[keys[i]]
+
+                        custom_property_values.append([obj])
+                    except KeyError:
+                        custom_property_values.append(["N/A"])
+                else:
+                    custom_property_values.append(["N/A"])
+        return custom_property_values
+
+    @classmethod
     @renderer(renderer_type="renderer.diagnostic.status_icon")
     def _diagnostic_status_icon_renderer(
         cls,

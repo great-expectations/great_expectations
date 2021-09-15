@@ -163,7 +163,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     result = runner.invoke(
         cli,
         ["init"],
-        input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\n\nn\n",
+        input="\n\n2\n6\nmy_db\nsqlite:////subfolder_thats_not_real/not_a_real.db\n\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -206,7 +206,9 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )
     config = yaml.load(open(config_path))
-    assert config["my_db"] == {"url": "sqlite:////not_a_real.db"}
+    assert config["my_db"] == {
+        "url": "sqlite:////subfolder_thats_not_real/not_a_real.db"
+    }
 
     obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
     assert (
