@@ -32,6 +32,7 @@ from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReferen
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
+    MetricResolutionError,
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -56,6 +57,9 @@ from great_expectations.validator.validation_graph import (
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
+
+
+MAX_METRIC_COMPUTATION_RETRIES = 3
 
 
 class Validator:
@@ -303,8 +307,7 @@ class Validator:
 
     def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
         """Return a dictionary with the requested metrics"""
-        graph = ValidationGraph()
-        resolved_metrics = {}
+        graph: ValidationGraph = ValidationGraph()
         for metric_name, metric_configuration in metrics.items():
             provider_cls, _ = get_metric_provider(
                 metric_configuration.metric_name, self.execution_engine
@@ -330,6 +333,8 @@ class Validator:
                 execution_engine=self._execution_engine,
                 child_node=metric_configuration,
             )
+
+        resolved_metrics: Dict[Tuple, Any] = {}
         self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
@@ -351,11 +356,10 @@ class Validator:
         parent_node: Optional[MetricConfiguration] = None,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> None:
+    ):
         """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
         until all metrics have been added."""
 
-        # metric_kwargs = get_metric_kwargs(metric_name)
         metric_impl = get_metric_provider(
             child_node.metric_name, execution_engine=execution_engine
         )[0]
@@ -365,15 +369,6 @@ class Validator:
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        child_node.metric_dependencies = metric_dependencies
-
-        if parent_node:
-            graph.add(
-                MetricEdge(
-                    left=parent_node,
-                    right=child_node,
-                )
-            )
 
         if len(metric_dependencies) == 0:
             graph.add(
@@ -381,10 +376,10 @@ class Validator:
                     left=child_node,
                 )
             )
-
         else:
+            child_node.metric_dependencies = metric_dependencies
             for metric_dependency in metric_dependencies.values():
-                # TODO: <Alex>ALEX -- In the future, provide a more robust cycle detection.</Alex>
+                # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
                 if metric_dependency.id == child_node.id:
                     logger.warning(
                         f"Metric {str(child_node.id)} has created a circular dependency"
@@ -399,10 +394,18 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
 
+        if parent_node:
+            graph.add(
+                MetricEdge(
+                    left=parent_node,
+                    right=child_node,
+                )
+            )
+
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: Optional[dict] = None,
+        metrics: Optional[Dict[Tuple, Any]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
@@ -448,11 +451,11 @@ class Validator:
             )["metrics"]
 
             try:
-                for metric in validation_dependencies.values():
+                for metric_configuration in validation_dependencies.values():
                     self.build_metric_dependency_graph(
                         graph=graph,
                         execution_engine=self._execution_engine,
-                        child_node=metric,
+                        child_node=metric_configuration,
                         configuration=evaluated_config,
                         runtime_configuration=runtime_configuration,
                     )
@@ -480,7 +483,7 @@ class Validator:
         # Since metrics can serve multiple expectations in a suite and are resolved together through validation graph,
         # an exception occurring as part of resolving the combined validation graph impacts all expectations in suite.
         try:
-            metrics = self.resolve_validation_graph(
+            self.resolve_validation_graph(
                 graph=graph,
                 metrics=metrics,
                 runtime_configuration=runtime_configuration,
@@ -503,6 +506,7 @@ class Validator:
                 return evrs
             else:
                 raise err
+
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
@@ -533,41 +537,130 @@ class Validator:
     def resolve_validation_graph(
         self,
         graph: ValidationGraph,
-        metrics: Dict[Tuple, MetricConfiguration],
+        metrics: Dict[Tuple, Any],
         runtime_configuration: Optional[dict] = None,
     ):
-        done: bool = False
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
+        # TODO: <Alex>ALEX</Alex>
+        # if runtime_configuration.get("catch_exceptions", True):
+        #     catch_exceptions = True
+        # else:
+        #     catch_exceptions = False
+        # TODO: <Alex>ALEX</Alex>
+
         pbar = None
+
+        # TODO: <Alex>ALEX</Alex>
+        # failed_metric_counts: Dict[Tuple, int] = {}
+        # aborted_metrics = set()
+        # TODO: <Alex>ALEX</Alex>
+
+        done: bool = False
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(
                 validation_graph=graph, metrics=metrics
             )
+
             if pbar is None:
-                pbar = tqdm(
-                    total=len(ready_metrics) + len(needed_metrics),
-                    desc="Calculating Metrics",
-                    disable=len(graph._edges) < 3,
+                # noinspection PyProtectedMember
+                # TODO: <Alex>ALEX</Alex>
+                # pbar = tqdm(
+                #     total=len(ready_metrics) + len(needed_metrics),
+                #     desc="Calculating Metrics",
+                #     disable=len(graph.edges) < 3,
+                # )
+                # pbar.update(0)
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                pass
+                # TODO: <Alex>ALEX</Alex>
+
+            # TODO: <Alex>ALEX</Alex>
+            # computable_metrics = set()
+            # TODO: <Alex>ALEX</Alex>
+
+            # TODO: <Alex>ALEX</Alex>
+            # for metric in ready_metrics:
+            #     if (
+            #         metric.id in failed_metric_counts
+            #         and failed_metric_counts[metric.id] >= MAX_METRIC_COMPUTATION_RETRIES
+            #     ):
+            #         aborted_metrics.add(metric.id)
+            #
+            #     if metric.id not in aborted_metrics:
+            #         computable_metrics.add(metric)
+            # TODO: <Alex>ALEX</Alex>
+
+            try:
+                # TODO: <Alex>ALEX</Alex>
+                # metrics.update(
+                #     self._resolve_metrics(
+                #         execution_engine=self._execution_engine,
+                #         metrics_to_resolve=computable_metrics,
+                #         metrics=metrics,
+                #         runtime_configuration=runtime_configuration,
+                #     )
+                # )
+                # pbar.update(len(ready_metrics))
+                # TODO: <Alex>ALEX</Alex>
+                metrics.update(
+                    self._resolve_metrics(
+                        execution_engine=self._execution_engine,
+                        metrics_to_resolve=ready_metrics,
+                        metrics=metrics,
+                        runtime_configuration=runtime_configuration,
+                    )
                 )
-                pbar.update(0)
-            metrics.update(
-                self._resolve_metrics(
-                    execution_engine=self._execution_engine,
-                    metrics_to_resolve=ready_metrics,
-                    metrics=metrics,
-                    runtime_configuration=runtime_configuration,
-                )
-            )
-            pbar.update(len(ready_metrics))
+                # TODO: <Alex>ALEX</Alex>
+                # pbar.update(len(ready_metrics))
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+            except MetricResolutionError as err:
+                # TODO: <Alex>ALEX</Alex>
+                # if catch_exceptions:
+                #     for failed_metric in err.failed_metrics:
+                #         if failed_metric.id in failed_metric_counts:
+                #             failed_metric_counts[failed_metric.id] += 1
+                #         else:
+                #             failed_metric_counts[failed_metric.id] = 1
+                # else:
+                #     raise err
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                raise err
+                # TODO: <Alex>ALEX</Alex>
+            except Exception as e:
+                # TODO: <Alex>ALEX</Alex>
+                # if catch_exceptions:
+                #     logger.error(
+                #         f"Caught exception {str(e)} while trying to resolve a batch of {len(ready_metrics)} metrics; aborting graph resolution."
+                #     )
+                #     done = True
+                # else:
+                #     raise e
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                raise e
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # if (len(ready_metrics) + len(needed_metrics) == 0) or (len(ready_metrics) == len(aborted_metrics)):
+            #     done = True
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
-        pbar.close()
+            # TODO: <Alex>ALEX</Alex>
 
-        return metrics
+        # TODO: <Alex>ALEX</Alex>
+        # pbar.close()
+        # TODO: <Alex>ALEX</Alex>
 
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple, MetricConfiguration],
+        metrics: Dict[Tuple, Any],
     ):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -595,7 +688,7 @@ class Validator:
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Dict[Tuple, Any] = None,
         runtime_configuration: dict = None,
-    ):
+    ) -> Dict[Tuple, MetricConfiguration]:
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(

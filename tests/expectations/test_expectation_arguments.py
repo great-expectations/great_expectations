@@ -149,7 +149,9 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 1
 
-    result: ExpectationValidationResult = results[0]
+    result: ExpectationValidationResult
+
+    result = results[0]
     assert (
         "exception_traceback" not in result.exception_info
     ) or not result.exception_info["exception_traceback"]
@@ -163,9 +165,7 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
         **expectation_arguments_without_meta, **expectation_meta
     )
 
-    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
-        **expectation_parameters
-    )
+    result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert (
         "exception_traceback" not in result.exception_info
     ) or not result.exception_info["exception_traceback"]
@@ -227,7 +227,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 
     # Test calling "validator.validate()" explicitly.
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as e:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
         validator_validation: ExpectationSuiteValidationResult = validator.validate(
             **runtime_environment_arguments
@@ -240,7 +240,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         **expectation_arguments_without_meta, **expectation_meta
     )
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as e:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
         result: ExpectationValidationResult = (
             validator.expect_column_values_to_not_be_null(**expectation_parameters)
@@ -307,7 +307,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 1
 
-    result: ExpectationValidationResult = results[0]
+    result: ExpectationValidationResult
+
+    result = results[0]
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
@@ -318,9 +320,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         **expectation_arguments_without_meta, **expectation_meta
     )
 
-    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
-        **expectation_parameters
-    )
+    result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
@@ -381,7 +381,9 @@ def test_result_format_configured_no_set_default_override(
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 1
 
-    result: ExpectationValidationResult = results[0]
+    result: ExpectationValidationResult
+
+    result = results[0]
     assert len(result.result.keys()) > 0
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
@@ -390,9 +392,7 @@ def test_result_format_configured_no_set_default_override(
         **expectation_arguments_without_meta, **expectation_meta
     )
 
-    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
-        **expectation_parameters
-    )
+    result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert len(result.result.keys()) > 0
 
 
@@ -450,14 +450,14 @@ def test_result_format_configured_with_set_default_override(
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 1
 
-    result: ExpectationValidationResult = results[0]
+    result: ExpectationValidationResult
+
+    result = results[0]
     assert len(result.result.keys()) == 0
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
     expectation_parameters: dict = dict(**expectation_arguments, **expectation_meta)
 
-    result: ExpectationValidationResult = validator.expect_column_values_to_not_be_null(
-        **expectation_parameters
-    )
+    result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert len(result.result.keys()) == 0

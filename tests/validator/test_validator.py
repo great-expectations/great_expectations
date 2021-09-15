@@ -310,7 +310,7 @@ def test_graph_validate_with_bad_config(basic_datasource):
         expectation_type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
