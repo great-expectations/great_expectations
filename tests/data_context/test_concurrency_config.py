@@ -1,3 +1,5 @@
+import yaml
+
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
@@ -14,6 +16,18 @@ def test_concurrency_disabled_by_default():
 def test_concurrency_enabled_with_dict():
     data_context_config = DataContextConfig(concurrency={"enabled": True})
     assert data_context_config.concurrency.enabled
+
+
+def test_concurrency_enabled_with_yaml():
+    yaml_config = """
+    concurrency:
+      enabled: true
+    """
+    data_context_config = DataContextConfig(**yaml.load(yaml_config))
+    assert data_context_config.concurrency.enabled
+    assert (
+        yaml.load(data_context_config.to_yaml_str())["concurrency"]["enabled"] is True
+    )
 
 
 def test_concurrency_enabled_with_config():
