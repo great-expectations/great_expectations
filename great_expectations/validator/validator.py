@@ -543,19 +543,7 @@ class Validator:
         if runtime_configuration is None:
             runtime_configuration = {}
 
-        # TODO: <Alex>ALEX</Alex>
-        # if runtime_configuration.get("catch_exceptions", True):
-        #     catch_exceptions = True
-        # else:
-        #     catch_exceptions = False
-        # TODO: <Alex>ALEX</Alex>
-
         pbar = None
-
-        # TODO: <Alex>ALEX</Alex>
-        # failed_metric_counts: Dict[Tuple, int] = {}
-        # aborted_metrics = set()
-        # TODO: <Alex>ALEX</Alex>
 
         done: bool = False
         while not done:
@@ -572,79 +560,18 @@ class Validator:
                 )
                 pbar.update(0)
 
-            # TODO: <Alex>ALEX</Alex>
-            # computable_metrics = set()
-            # TODO: <Alex>ALEX</Alex>
-
-            # TODO: <Alex>ALEX</Alex>
-            # for metric in ready_metrics:
-            #     if (
-            #         metric.id in failed_metric_counts
-            #         and failed_metric_counts[metric.id] >= MAX_METRIC_COMPUTATION_RETRIES
-            #     ):
-            #         aborted_metrics.add(metric.id)
-            #
-            #     if metric.id not in aborted_metrics:
-            #         computable_metrics.add(metric)
-            # TODO: <Alex>ALEX</Alex>
-
-            try:
-                # TODO: <Alex>ALEX</Alex>
-                # metrics.update(
-                #     self._resolve_metrics(
-                #         execution_engine=self._execution_engine,
-                #         metrics_to_resolve=computable_metrics,
-                #         metrics=metrics,
-                #         runtime_configuration=runtime_configuration,
-                #     )
-                # )
-                # pbar.update(len(ready_metrics))
-                # TODO: <Alex>ALEX</Alex>
-                metrics.update(
-                    self._resolve_metrics(
-                        execution_engine=self._execution_engine,
-                        metrics_to_resolve=ready_metrics,
-                        metrics=metrics,
-                        runtime_configuration=runtime_configuration,
-                    )
+            metrics.update(
+                self._resolve_metrics(
+                    execution_engine=self._execution_engine,
+                    metrics_to_resolve=ready_metrics,
+                    metrics=metrics,
+                    runtime_configuration=runtime_configuration,
                 )
-                pbar.update(len(ready_metrics))
-                # TODO: <Alex>ALEX</Alex>
-            except MetricResolutionError as err:
-                # TODO: <Alex>ALEX</Alex>
-                # if catch_exceptions:
-                #     for failed_metric in err.failed_metrics:
-                #         if failed_metric.id in failed_metric_counts:
-                #             failed_metric_counts[failed_metric.id] += 1
-                #         else:
-                #             failed_metric_counts[failed_metric.id] = 1
-                # else:
-                #     raise err
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                raise err
-                # TODO: <Alex>ALEX</Alex>
-            except Exception as e:
-                # TODO: <Alex>ALEX</Alex>
-                # if catch_exceptions:
-                #     logger.error(
-                #         f"Caught exception {str(e)} while trying to resolve a batch of {len(ready_metrics)} metrics; aborting graph resolution."
-                #     )
-                #     done = True
-                # else:
-                #     raise e
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                raise e
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # if (len(ready_metrics) + len(needed_metrics) == 0) or (len(ready_metrics) == len(aborted_metrics)):
-            #     done = True
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
+            )
+            pbar.update(len(ready_metrics))
+
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
-            # TODO: <Alex>ALEX</Alex>
 
         pbar.close()
 
