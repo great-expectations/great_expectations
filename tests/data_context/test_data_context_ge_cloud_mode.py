@@ -42,6 +42,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
             if not global_usage_statistics_url
             else global_usage_statistics_url,
         },
+        "concurrency": {"enabled": False},
         "checkpoint_store_name": "default_checkpoint_store",
         "config_variables_file_path": None,
         "config_version": 3.0,
@@ -211,6 +212,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                 if not global_usage_statistics_url
                 else global_usage_statistics_url,
             },
+            "concurrency": {"enabled": False},
             "stores": {
                 "default_evaluation_parameter_store": {
                     "class_name": "EvaluationParameterStore"
@@ -406,6 +408,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
             if not global_usage_statistics_url
             else global_usage_statistics_url,
         },
+        "concurrency": {"enabled": False},
         "expectations_store_name": "default_expectations_store",
         "config_version": 3.0,
         "checkpoint_store_name": "default_checkpoint_store",
@@ -441,6 +444,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
             else global_usage_statistics_url,
             "data_context_id": "31c84fc9-6659-4411-a911-4276bb464583",
         },
+        "concurrency": {"enabled": False},
         "stores": {
             "default_evaluation_parameter_store": {
                 "class_name": "EvaluationParameterStore"
@@ -600,6 +604,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                 "data_context_id": "c865b794-5d61-4f7e-8c9c-a60ef5bef785",
                 "enabled": False,
             },
+            "concurrency": {"enabled": False},
             "validations_store_name": "default_validations_store",
             "datasources": {
                 "default_spark_datasource": {
@@ -805,6 +810,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
             if not global_usage_statistics_url
             else global_usage_statistics_url,
         },
+        "concurrency": {"enabled": False},
         "expectations_store_name": "default_expectations_store",
         "plugins_directory": "/Users/foo/bar/my/plugins/directory/complete/version/1",
         "evaluation_parameter_store_name": "default_evaluation_parameter_store",

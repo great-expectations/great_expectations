@@ -74,6 +74,7 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
+    ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
@@ -817,6 +818,10 @@ class BaseDataContext:
     @property
     def anonymous_usage_statistics(self):
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
+
+    @property
+    def concurrency(self) -> ConcurrencyConfig:
+        return self.project_config_with_variables_substituted.concurrency
 
     @property
     def notebooks(self):
@@ -2032,7 +2037,7 @@ class BaseDataContext:
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
-            runtime_environment={"data_context": self},
+            runtime_environment={"data_context": self, "concurrency": self.concurrency},
             config_defaults={"module_name": module_name},
         )
         if not datasource:
