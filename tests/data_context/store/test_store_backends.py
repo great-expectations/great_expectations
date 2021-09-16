@@ -35,8 +35,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
-from great_expectations.util import gen_directory_tree_str
 from great_expectations.self_check.util import expectationSuiteSchema
+from great_expectations.util import gen_directory_tree_str
+
 
 @pytest.fixture()
 def basic_data_context_config_for_validation_operator():
@@ -611,7 +612,8 @@ def test_TupleS3StoreBackend_with_prefix():
 @mock_s3
 def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_prefix(
     validation_operators_data_context: DataContext,
-    parameterized_expectation_suite: ExpectationSuite):
+    parameterized_expectation_suite: ExpectationSuite,
+):
     """
     What does this test test and why?
 
@@ -660,7 +662,9 @@ def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_
     )
 
     # ensure the suite is in the context
-    assert validation_operators_data_context.expectations_store.has_key(ExpectationSuiteIdentifier("param_suite"))
+    assert validation_operators_data_context.expectations_store.has_key(
+        ExpectationSuiteIdentifier("param_suite")
+    )
 
     res = validation_operators_data_context.run_validation_operator(
         "store_val_res_and_extract_eval_params",
@@ -678,7 +682,9 @@ def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_
         },
     )
 
-    assert res["success"] is True, "No exception thrown, validation operators ran successfully"
+    assert (
+        res["success"] is True
+    ), "No exception thrown, validation operators ran successfully"
 
 
 @mock_s3
