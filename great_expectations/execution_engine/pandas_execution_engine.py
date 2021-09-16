@@ -1,4 +1,5 @@
 import copy
+import json
 import datetime
 import hashlib
 import logging
@@ -128,6 +129,8 @@ Notes:
         else:
             try:
                 credentials = None  # If configured with gcloud CLI / env vars
+                if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") and gcs_options == {}:
+                    gcs_options = json.load(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
                 if "filename" in gcs_options:
                     credentials = service_account.Credentials.from_service_account_file(
                         **gcs_options
