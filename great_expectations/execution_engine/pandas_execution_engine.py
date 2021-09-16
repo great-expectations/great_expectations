@@ -129,12 +129,12 @@ Notes:
             try:
                 credentials = None  # If configured with gcloud CLI / env vars
                 if "filename" in gcs_options:
-                    filename=gcs_options.pop('filename')
+                    filename = gcs_options.pop('filename')
                     credentials = service_account.Credentials.from_service_account_file(
                         filename=filename
                     )
                 elif "info" in gcs_options:
-                    info=gcs_options.pop('info')
+                    info = gcs_options.pop('info')
                     credentials = service_account.Credentials.from_service_account_info(
                         info=info
                     )
