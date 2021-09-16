@@ -172,19 +172,19 @@ Run the performance tests with pytest, e.g.
 ```
 pytest tests/performance/test_bigquery_benchmarks.py \
   --bigquery --performance-tests \
-  -k 'test_taxi_trips_benchmark[1-True]'  \
+  -k 'test_taxi_trips_benchmark[1-True-V3]'  \
   --benchmark-json=tests/performance/results/`date "+%H%M"`_${USER}.json \
   --no-spark --no-postgresql -rP -vv
 ```
 
-Some benchmarks take a long time to complete. In this example, only the relatively fast `test_taxi_trips_benchmark[1-True]` benchmark is run and the output should include runtime like the following:
+Some benchmarks take a long time to complete. In this example, only the relatively fast `test_taxi_trips_benchmark[1-True-V3]` benchmark is run and the output should include runtime like the following:
 
 ```
---------------------------------------------------- benchmark: 1 tests ---------------------------------------------------
+--------------------------------------------------- benchmark: 1 tests ------------------------------------------------------
 Name (time in s)                         Min     Max    Mean  StdDev  Median     IQR  Outliers     OPS  Rounds  Iterations
---------------------------------------------------------------------------------------------------------------------------
-test_taxi_trips_benchmark[1-True]     5.0488  5.0488  5.0488  0.0000  5.0488  0.0000       0;0  0.1981       1           1
---------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------
+test_taxi_trips_benchmark[1-True-V3]     5.0488  5.0488  5.0488  0.0000  5.0488  0.0000       0;0  0.1981       1           1
+-----------------------------------------------------------------------------------------------------------------------------
 ```
 
 The result is saved for comparisons as described below.
@@ -194,17 +194,25 @@ The result is saved for comparisons as described below.
 Compare test results in this directory with `py.test-benchmark compare`, e.g.
 
 ```
-$  py.test-benchmark compare --group-by name tests/performance/results/initial_baseline.json tests/performance/results/*${USER}.json                                                                   
+$ py.test-benchmark compare --group-by name tests/performance/results/initial_baseline.json tests/performance/results/*${USER}.json                                                                   
 
----------------------------------------------------------------------------- benchmark 'test_taxi_trips_benchmark[1-True]': 2 tests ---------------------------------------------------------------------------
+---------------------------------------------------------------------------- benchmark 'test_taxi_trips_benchmark[1-True-V3]': 2 tests ---------------------------------------------------------------------------
 Name (time in s)                                        Min               Max              Mean            StdDev            Median               IQR            Outliers     OPS            Rounds  Iterations
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_taxi_trips_benchmark[1-True] (initial_base)     5.0488 (1.0)      5.0488 (1.0)      5.0488 (1.0)      0.0000 (1.0)      5.0488 (1.0)      0.0000 (1.0)           0;0  0.1981 (1.0)           1           1
-test_taxi_trips_benchmark[1-True] (2114_work)        6.4675 (1.28)     6.4675 (1.28)     6.4675 (1.28)     0.0000 (1.0)      6.4675 (1.28)     0.0000 (1.0)           0;0  0.1546 (0.78)          1           1
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_taxi_trips_benchmark[1-True-V3] (initial_base)     5.0488 (1.0)      5.0488 (1.0)      5.0488 (1.0)      0.0000 (1.0)      5.0488 (1.0)      0.0000 (1.0)           0;0  0.1981 (1.0)           1           1
+test_taxi_trips_benchmark[1-True-V3] (2114_work)        6.4675 (1.28)     6.4675 (1.28)     6.4675 (1.28)     0.0000 (1.0)      6.4675 (1.28)     0.0000 (1.0)           0;0  0.1546 (0.78)          1           1
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ```
 
 Please refer to [pytest-benchmark documentation](https://pytest-benchmark.readthedocs.io/en/latest/comparing.html) for more info.
+
+#### Checking in new benchmark results
+
+When creating a pull request that is intended to improve performance, please include in the pull request benchmark results showing improvements.  Please use the script `run_benchmark_multiple_times.sh` to run the benchmark multiple times.  Name the tests with the first argument provided to that script. For example, the `tests/performance/results/minimal_multithreading_*.json` files were created with the following command:
+
+```
+$ tests/performance/run_benchmark_multiple_times.sh minimal_multithreading
+```
 
 ### Manual testing
 

@@ -75,7 +75,7 @@ Run this code in Python.
 </TabItem>
 </Tabs>
 
-🚀🚀 Congratulations! 🚀🚀
+Congratulations!
 You successfully {did the thing this guide is about}.
 
 ## Additional Notes

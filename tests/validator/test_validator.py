@@ -61,7 +61,10 @@ def test_parse_validation_graph():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph, metric_configuration, configuration, execution_engine=engine
+                graph=graph,
+                execution_engine=engine,
+                metric_configuration=metric_configuration,
+                configuration=configuration,
             )
     ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
         validation_graph=graph, metrics=dict()
@@ -97,7 +100,10 @@ def test_parse_validation_graph_with_bad_metrics_args():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             validator.build_metric_dependency_graph(
-                graph, metric_configuration, configuration, execution_engine=engine
+                graph=graph,
+                execution_engine=engine,
+                metric_configuration=metric_configuration,
+                configuration=configuration,
             )
     ready_metrics, needed_metrics = validator._parse_validation_graph(
         validation_graph=graph, metrics=("nonexistent", "NONE")
@@ -135,7 +141,10 @@ def test_populate_dependencies():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph, metric_configuration, configuration, execution_engine=engine
+                graph=graph,
+                execution_engine=engine,
+                metric_configuration=metric_configuration,
+                configuration=configuration,
             )
     assert len(graph.edges) == 17
 
@@ -170,10 +179,12 @@ def test_populate_dependencies_with_incorrect_metric_name():
 
         try:
             Validator(execution_engine=engine).build_metric_dependency_graph(
-                graph,
-                MetricConfiguration("column_values.not_a_metric", IDDict()),
-                configuration,
+                graph=graph,
                 execution_engine=engine,
+                metric_configuration=MetricConfiguration(
+                    "column_values.not_a_metric", IDDict()
+                ),
+                configuration=configuration,
             )
         except ge_exceptions.MetricProviderError as e:
             graph = e
@@ -301,11 +312,17 @@ def test_graph_validate_with_bad_config(basic_datasource):
         expectation_type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
-        ).graph_validate(configurations=[expectation_configuration])
+        ).graph_validate(
+            configurations=[expectation_configuration],
+            runtime_configuration={
+                "catch_exceptions": False,
+                "result_format": {"result_format": "BASIC"},
+            },
+        )
     assert (
         str(eee.value)
         == 'Error: The column "not_in_table" in BatchData does not exist.'
@@ -613,6 +630,29 @@ def test_validator_batch_filter(
         v.batch_identifiers["month"] for v in jan_march_batch_definition_list
     }
     assert batch_definitions_months_set == {"01", "03"}
+
+    # Filter using limit param
+    limit_batch_filter: BatchFilter = build_batch_filter(
+        data_connector_query_dict={"limit": 2}
+    )
+
+    limit_batch_filter_definition_list: List[
+        BatchDefinition
+    ] = limit_batch_filter.select_from_data_connector_query(
+        batch_definition_list=total_batch_definition_list
+    )
+
+    assert len(limit_batch_filter_definition_list) == 2
+    assert limit_batch_filter_definition_list[0]["batch_identifiers"]["month"] == "01"
+    assert (
+        limit_batch_filter_definition_list[0]["id"]
+        == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+    )
+    assert limit_batch_filter_definition_list[1]["batch_identifiers"]["month"] == "02"
+    assert (
+        limit_batch_filter_definition_list[1]["id"]
+        == "92bcffc67c34a1c9a67e0062ed4a9529"
+    )
 
 
 def test_custom_filter_function(

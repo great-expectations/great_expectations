@@ -2,6 +2,7 @@ import copy
 import datetime
 import hashlib
 import json
+import types
 from typing import Dict, Optional, Union
 
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -196,6 +197,7 @@ class BatchRequestBase(DictDot):
         self._data_asset_name = data_asset_name
         self._data_connector_query = data_connector_query
         self._limit = limit
+
         self._batch_spec_passthrough = batch_spec_passthrough
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
@@ -289,6 +291,7 @@ class BatchRequestBase(DictDot):
 class BatchRequest(BatchRequestBase):
     """
     This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
+    limit: refers to the number of batches requested (not rows per batch)
     """
 
     def __init__(
@@ -409,6 +412,30 @@ class RuntimeBatchRequest(BatchRequest):
         )
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
+
+    def __deepcopy__(self, memo):
+        runtime_parameters = getattr(self, "_runtime_parameters", None)
+        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
+            batch_data = runtime_parameters.pop("batch_data")
+            deepcopy_method = self.__deepcopy__
+            self.__deepcopy__ = None
+            cp = copy.deepcopy(self, memo)
+            self.__deepcopy__ = deepcopy_method
+            # Copy the function object
+            func = types.FunctionType(
+                deepcopy_method.__code__,
+                deepcopy_method.__globals__,
+                deepcopy_method.__name__,
+                deepcopy_method.__defaults__,
+                deepcopy_method.__closure__,
+            )
+            # Bind to cp and set
+            bound_method = func.__get__(cp, cp.__class__)
+            cp.__deepcopy__ = bound_method
+            cp._runtime_parameters["batch_data"] = batch_data
+            self._runtime_parameters["batch_data"] = batch_data
+            return cp
+        return copy.deepcopy(self, memo)
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>

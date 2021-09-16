@@ -42,6 +42,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
             if not global_usage_statistics_url
             else global_usage_statistics_url,
         },
+        "concurrency": {"enabled": False},
         "checkpoint_store_name": "default_checkpoint_store",
         "config_variables_file_path": None,
         "config_version": 3.0,
@@ -50,6 +51,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
                 "class_name": "SiteBuilder",
                 "show_how_to_buttons": True,
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
                 "store_backend": {
                     "class_name": "GeCloudStoreBackend",
                     "ge_cloud_base_url": "https://api.dev.greatexpectations.io/runtime",
@@ -67,7 +69,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
                 "class_name": "Datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
@@ -81,7 +83,7 @@ def test_data_context_ge_cloud_mode_with_runtime_cloud_config(
                 "class_name": "Datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
@@ -176,7 +178,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                 "default_spark_datasource": {
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -190,7 +192,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                 "default_pandas_datasource": {
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -210,6 +212,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                 if not global_usage_statistics_url
                 else global_usage_statistics_url,
             },
+            "concurrency": {"enabled": False},
             "stores": {
                 "default_evaluation_parameter_store": {
                     "class_name": "EvaluationParameterStore"
@@ -272,6 +275,7 @@ def test_data_context_ge_cloud_mode_with_env_var_cloud_config(
                         "suppress_store_backend_id": True,
                     },
                     "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                    "site_section_builders": {"profiling": "None"},
                 }
             },
             "checkpoint_store_name": "default_checkpoint_store",
@@ -313,7 +317,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
             },
@@ -327,7 +331,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
             },
@@ -393,6 +397,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
                     "suppress_store_backend_id": True,
                 },
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
             }
         },
         "anonymous_usage_statistics": {
@@ -403,6 +408,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_dot_dir(
             if not global_usage_statistics_url
             else global_usage_statistics_url,
         },
+        "concurrency": {"enabled": False},
         "expectations_store_name": "default_expectations_store",
         "config_version": 3.0,
         "checkpoint_store_name": "default_checkpoint_store",
@@ -438,6 +444,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
             else global_usage_statistics_url,
             "data_context_id": "31c84fc9-6659-4411-a911-4276bb464583",
         },
+        "concurrency": {"enabled": False},
         "stores": {
             "default_evaluation_parameter_store": {
                 "class_name": "EvaluationParameterStore"
@@ -498,6 +505,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
                     "suppress_store_backend_id": True,
                 },
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
             }
         },
         "validations_store_name": "default_validations_store",
@@ -509,7 +517,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
                 "execution_engine": {
@@ -523,7 +531,7 @@ def test_data_context_ge_cloud_mode_with_global_config_in_etc_dir(
                 "data_connectors": {
                     "default_runtime_data_connector": {
                         "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                     }
                 },
                 "execution_engine": {
@@ -582,6 +590,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                         "suppress_store_backend_id": True,
                     },
                     "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                    "site_section_builders": {"profiling": "None"},
                 }
             },
             "expectations_store_name": "default_expectations_store",
@@ -595,6 +604,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                 "data_context_id": "c865b794-5d61-4f7e-8c9c-a60ef5bef785",
                 "enabled": False,
             },
+            "concurrency": {"enabled": False},
             "validations_store_name": "default_validations_store",
             "datasources": {
                 "default_spark_datasource": {
@@ -605,7 +615,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                     "class_name": "Datasource",
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -619,7 +629,7 @@ def test_data_context_ge_cloud_mode_mixed_cloud_config_precedence(
                     "class_name": "Datasource",
                     "data_connectors": {
                         "default_runtime_data_connector": {
-                            "batch_identifiers": None,
+                            "batch_identifiers": ["timestamp"],
                             "class_name": "RuntimeDataConnector",
                         }
                     },
@@ -703,7 +713,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
                 "module_name": "great_expectations.datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
@@ -717,7 +727,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
                 "module_name": "great_expectations.datasource",
                 "data_connectors": {
                     "default_runtime_data_connector": {
-                        "batch_identifiers": None,
+                        "batch_identifiers": ["timestamp"],
                         "class_name": "RuntimeDataConnector",
                     }
                 },
@@ -743,6 +753,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
                     "suppress_store_backend_id": True,
                 },
                 "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                "site_section_builders": {"profiling": "None"},
             }
         },
         "config_version": 3.0,
@@ -799,6 +810,7 @@ def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
             if not global_usage_statistics_url
             else global_usage_statistics_url,
         },
+        "concurrency": {"enabled": False},
         "expectations_store_name": "default_expectations_store",
         "plugins_directory": "/Users/foo/bar/my/plugins/directory/complete/version/1",
         "evaluation_parameter_store_name": "default_evaluation_parameter_store",

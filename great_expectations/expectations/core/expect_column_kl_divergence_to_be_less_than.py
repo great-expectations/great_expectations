@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -221,13 +221,15 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 graph = ValidationGraph()
                 validator.build_metric_dependency_graph(
                     graph=graph,
-                    child_node=partition_metric_configuration,
-                    configuration=configuration,
                     execution_engine=execution_engine,
+                    metric_configuration=partition_metric_configuration,
+                    configuration=configuration,
                 )
-                bins = validator.resolve_validation_graph(graph, metrics=dict())[
-                    partition_metric_configuration.id
-                ]
+                resolved_metrics: Dict[Tuple, Any] = {}
+                validator.resolve_validation_graph(
+                    graph=graph, metrics=resolved_metrics
+                )
+                bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
                     "column.histogram",
                     metric_domain_kwargs=domain_kwargs,
