@@ -7,8 +7,8 @@ from dateutil.parser import parse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
-from great_expectations.core.batch import Batch
 from great_expectations.core.async_executor import AsyncExecutor
+from great_expectations.core.batch import Batch
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
