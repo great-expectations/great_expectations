@@ -74,8 +74,8 @@ the YAML configuration and any kwargs passed in at runtime:
 
 1. `class_name`: the class of the Checkpoint to be instantiated, defaults to `Checkpoint`
 1. `template_name`: the name of another Checkpoint to use as a base template
-1. `run_name_template`: a template to create run names, using environment variables and datetime-template syntax (e.g. "
-   %Y-%M-staging-$MY_ENV_VAR")
+1. `run_name_template`: a template to create run names, using environment variables and Python's datetime-template syntax (e.g. "
+   %Y-%m-staging-$MY_ENV_VAR")
 
 ### Configuration defaults and parameter override behavior
 
@@ -175,7 +175,7 @@ values={[
   name: my_fancy_checkpoint
   config_version: 1
   class_name: Checkpoint
-  run_name_template: %Y-%M-foo-bar-template-$VAR
+  run_name_template: %Y-%m-foo-bar-template-$VAR
   validations:
     - batch_request:
         datasource_name: my_datasource
@@ -221,7 +221,7 @@ values={[
   name: my_fancy_checkpoint
   config_version: 1
   class_name: Checkpoint
-  run_name_template: %Y-%M-foo-bar-template-$VAR
+  run_name_template: %Y-%m-foo-bar-template-$VAR
   validations:
     - batch_request:
         datasource_name: my_datasource
@@ -273,7 +273,7 @@ This configuration omits the `validations` key from the YAML, which means a `val
   name: my_base_checkpoint
   config_version: 1
   class_name: Checkpoint
-  run_name_template: %Y-%M-foo-bar-template-$VAR
+  run_name_template: %Y-%m-foo-bar-template-$VAR
   action_list:
     - name: store_validation_result
       action:
