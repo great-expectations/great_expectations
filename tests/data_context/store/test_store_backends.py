@@ -36,7 +36,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import gen_directory_tree_str
-
+from great_expectations.self_check.util import expectationSuiteSchema
 
 @pytest.fixture()
 def basic_data_context_config_for_validation_operator():
@@ -141,12 +141,12 @@ def validation_operators_data_context(
 def parameterized_expectation_suite():
     fixture_path = file_relative_path(
         __file__,
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
+        "../../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
     )
     with open(
         fixture_path,
     ) as suite:
-        return json.load(suite)
+        return expectationSuiteSchema.load(json.load(suite))
 
 
 def test_StoreBackendValidation():
@@ -610,8 +610,8 @@ def test_TupleS3StoreBackend_with_prefix():
 
 @mock_s3
 def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_prefix(
-    validation_operators_data_context: DataContext, parameterized_expectation_suite
-):
+    validation_operators_data_context: DataContext,
+    parameterized_expectation_suite: ExpectationSuite):
     """
     What does this test test and why?
 
@@ -641,7 +641,7 @@ def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_
     conn = boto3.resource("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
 
-    # replace store backends with the mock
+    # replace store backends with the mock, both with the same prefix (per issue #3054)
     validation_operators_data_context.validations_store._store_backend = (
         TupleS3StoreBackend(
             bucket=bucket,
@@ -658,6 +658,10 @@ def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_
     validation_operators_data_context.save_expectation_suite(
         parameterized_expectation_suite, "param_suite"
     )
+
+    # ensure the suite is in the context
+    assert validation_operators_data_context.expectations_store.has_key(ExpectationSuiteIdentifier("param_suite"))
+
     res = validation_operators_data_context.run_validation_operator(
         "store_val_res_and_extract_eval_params",
         assets_to_validate=[
@@ -674,8 +678,7 @@ def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_
         },
     )
 
-    assert True
-    assert res["success"] is True, "Success when success was expected!"
+    assert res["success"] is True, "No exception thrown, validation operators ran successfully"
 
 
 @mock_s3
