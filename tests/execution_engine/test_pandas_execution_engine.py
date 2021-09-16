@@ -1031,6 +1031,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     assert (
         engine.config.get("gcs_options")["filename"] == "a/b/c/my_gcs_credentials.json"
     )
+    assert engine._gcs is not None
 
 
 @mock.patch(
