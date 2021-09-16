@@ -403,6 +403,25 @@ def test_data_context_get_validation_result(titanic_data_context):
     assert len(failed_validation_result.results) == 8
 
 
+def test_data_context_get_latest_validation_result(titanic_data_context):
+    """
+    Test that the latest validation result can be correctly fetched from the configured results
+    store
+    """
+    for _ in range(2):
+        titanic_data_context.profile_datasource("mydatasource")
+    assert len(titanic_data_context.validations_store.list_keys()) == 2
+
+    validation_results = [
+        titanic_data_context.validations_store.get(val_key)
+        for val_key in titanic_data_context.validations_store.list_keys()
+    ]
+    latest_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler"
+    )
+    assert latest_validation_result in validation_results
+
+
 def test_data_context_get_datasource(titanic_data_context):
     isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
@@ -1851,6 +1870,7 @@ validations:
     expectation_suite_name: newsuite
 profilers: []
 ge_cloud_id:
+expectation_suite_ge_cloud_id:
 """
 
     checkpoint_dir = os.path.join(
@@ -1918,6 +1938,7 @@ ge_cloud_id:
             },
         ],
         "evaluation_parameters": {},
+        "expectation_suite_ge_cloud_id": None,
         "runtime_configuration": {},
         "validations": [
             {

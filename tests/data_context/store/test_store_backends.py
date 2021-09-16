@@ -1284,6 +1284,7 @@ def test_GeCloudStoreBackend():
                                 ("validations", []),
                                 ("profilers", []),
                                 ("ge_cloud_id", None),
+                                ("expectation_suite_ge_cloud_id", None),
                             ]
                         ),
                     },
