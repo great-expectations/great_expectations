@@ -7,8 +7,25 @@ Changelog
 
 develop
 -----------------
-* [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335)
-* [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable for datetimes (#3349)
+* [FEATURE] Configurable multi-threaded checkpoint speedup (#3362)
+* [DOCS] "Deploying Great Expectations in a hosted environment without file system or CLI" (#3361)
+
+0.13.33
+-----------------
+* [FEATURE] Implement InferredAssetAzureDataConnector with Support for Pandas and Spark Execution Engines (#3372)
+* [FEATURE] Spark connecting to Google Cloud Storage (#3365)
+* [FEATURE] SparkDFExecutionEngine can load data accessed by ConfiguredAssetAzureDataConnector (integration tests are included). (#3345)
+* [FEATURE] [MER-293] GE Cloud Mode for DataContext (#3262) (Thanks @roblim)
+* [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335) (Thanks @NathanFarmer)
+* [BUGFIX] Fix issue where multiple validators reused the same execution engine, causing a conflict in active batch (GE-3168) (#3222) (Thanks @jcampbell)
+* [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable (#3349) (Thanks @NathanFarmer)
+* [BUGFIX] added casting of numeric value to fix redshift issue #3293 (#3338) (Thanks @sariabod)
+* [DOCS] Docusaurus - How to connect to an MSSQL database (#3353) (Thanks @NathanFarmer)
+* [DOCS] GREAT-195 Docs remove all stubs and links to them (#3363)
+* [MAINTENANCE] Update azure-pipelines-docs-integration.yml for Azure Pipelines
+* [MAINTENANCE] Update implemented_expectations.md (#3351) (Thanks @spencerhardwick)
+* [MAINTENANCE] Updating to reflect current Expectation dev state (#3348) (Thanks @spencerhardwick)
+* [MAINTENANCE] docs: Clean up Docusaurus refs (#3371)
 
 0.13.32
 -----------------
@@ -28,6 +45,7 @@ develop
 * [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
 * [MAINTENANCE] Various doc patches (#3326)
 * [MAINTENANCE] clean up imports and method signatures (#3337)
+>>>>>>> 9208de453238af6d673aa9184c865b8422165172
 
 0.13.31
 -----------------

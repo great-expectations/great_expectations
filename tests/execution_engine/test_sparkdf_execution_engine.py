@@ -10,6 +10,7 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
+    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -681,6 +682,18 @@ def test_get_batch_empty_splitter_parquet(
     assert len(test_sparkdf.columns) == 2
 
 
+def test_get_batch_with_split_on_whole_table_runtime(
+    test_sparkdf, basic_spark_df_execution_engine
+):
+    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+        )
+    ).dataframe
+    assert test_sparkdf.count() == 120
+    assert len(test_sparkdf.columns) == 10
+
+
 def test_get_batch_with_split_on_whole_table_filesystem(
     test_folder_connection_path_csv, basic_spark_df_execution_engine
 ):
@@ -732,16 +745,78 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_split_on_whole_table_runtime(
-    test_sparkdf, basic_spark_df_execution_engine
+def test_get_batch_with_split_on_whole_table_azure(
+    spark_session, basic_spark_df_execution_engine
 ):
-    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+    # noinspection PyUnusedLocal
+    def mocked_get_reader_function(*args, **kwargs):
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def mocked_reader_function(*args, **kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+
+        return mocked_reader_function
+
+    spark_engine = basic_spark_df_execution_engine
+    spark_engine._get_reader_fn = mocked_get_reader_function
+
+    test_sparkdf = spark_engine.get_batch_data(
+        AzureBatchSpec(
+            path="wasbs://test_container@test_account.blob.core.windows.net/test_dir/test_file.csv",
+            reader_method="csv",
+            reader_options={"header": True},
+            splitter_method="_split_on_whole_table",
         )
     ).dataframe
-    assert test_sparkdf.count() == 120
-    assert len(test_sparkdf.columns) == 10
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
+
+
+def test_get_batch_with_split_on_whole_table_gcs(
+    spark_session, basic_spark_df_execution_engine
+):
+    # noinspection PyUnusedLocal
+    def mocked_get_reader_function(*args, **kwargs):
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def mocked_reader_function(*args, **kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+
+        return mocked_reader_function
+
+    spark_engine = basic_spark_df_execution_engine
+    spark_engine._get_reader_fn = mocked_get_reader_function
+
+    test_sparkdf = spark_engine.get_batch_data(
+        GCSBatchSpec(
+            path="gcs://bucket/test/test.csv",
+            reader_method="csv",
+            reader_options={"header": True},
+            splitter_method="_split_on_whole_table",
+        )
+    ).dataframe
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_column_value(
@@ -1561,40 +1636,3 @@ def test_dataframe_property_given_loaded_batch(spark_session):
 
     # Ensuring Data not distorted
     assert engine.dataframe == df
-
-
-def test_get_batch_with_split_on_whole_table_azure(
-    spark_session, basic_spark_df_execution_engine
-):
-    # noinspection PyUnusedLocal
-    def mocked_get_reader_function(*args, **kwargs):
-        # noinspection PyUnusedLocal,PyShadowingNames
-        def mocked_reader_function(*args, **kwargs):
-            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-            df = spark_session.createDataFrame(
-                [
-                    tuple(
-                        None if isinstance(x, (float, int)) and np.isnan(x) else x
-                        for x in record.tolist()
-                    )
-                    for record in pd_df.to_records(index=False)
-                ],
-                pd_df.columns.tolist(),
-            )
-            return df
-
-        return mocked_reader_function
-
-    spark_engine = basic_spark_df_execution_engine
-    spark_engine._get_reader_fn = mocked_get_reader_function
-
-    test_sparkdf = spark_engine.get_batch_data(
-        AzureBatchSpec(
-            path="wasbs://test_container@test_account.blob.core.windows.net/test_dir/test_file.csv",
-            reader_method="csv",
-            reader_options={"header": True},
-            splitter_method="_split_on_whole_table",
-        )
-    ).dataframe
-    assert test_sparkdf.count() == 4
-    assert len(test_sparkdf.columns) == 2

@@ -96,7 +96,7 @@ class BatchIdentifierSchema(Schema):
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifer
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
     and run_id.
     """
 
@@ -205,9 +205,17 @@ class GeCloudIdentifier(DataContextKey):
     def resource_type(self):
         return self._resource_type
 
+    @resource_type.setter
+    def resource_type(self, value):
+        self._resource_type = value
+
     @property
     def ge_cloud_id(self):
         return self._ge_cloud_id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value):
+        self._ge_cloud_id = value
 
     def to_tuple(self):
         return (self.resource_type, self.ge_cloud_id)

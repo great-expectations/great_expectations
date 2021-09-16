@@ -169,6 +169,7 @@ datasources:
       default_runtime_data_connector:
         class_name: RuntimeDataConnector
         batch_identifiers:
+            - timestamp
   default_pandas_datasource:
       execution_engine:
         module_name: great_expectations.execution_engine
@@ -179,6 +180,7 @@ datasources:
         default_runtime_data_connector:
           class_name: RuntimeDataConnector
           batch_identifiers:
+            - timestamp
 
 plugins_directory: ${plugins_directory}
 
@@ -238,6 +240,8 @@ data_docs_sites:
       suppress_store_backend_id: True
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+    site_section_builders:
+      profiling: None
 
 anonymous_usage_statistics:
   enabled: true

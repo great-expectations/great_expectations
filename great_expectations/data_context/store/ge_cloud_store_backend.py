@@ -25,9 +25,14 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         "contract": "checkpoint_config",
         "data_context": "data_context_config",
         "expectation_suite": "suite",
+        "rendered_data_doc": "rendered_data_doc",
     }
 
-    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {"expectation_suite": {"clause_id"}}
+    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
+        "expectation_suite": {"clause_id"},
+        "rendered_data_doc": {"source_type", "source_id"},
+        "suite_validation_result": {"contract_id"},
+    }
 
     def __init__(
         self,
