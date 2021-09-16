@@ -2369,7 +2369,10 @@ def _spark_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    filtered = df.filter(unexpected_condition)
+    # withColumn is required to transform windowFunctions returned by some metrics to boolean mask
+    # e.g. increasing, decreasing, unique
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
