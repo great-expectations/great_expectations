@@ -213,7 +213,7 @@
     },{
       "title": "unexpected_values_exact_match_out_without_unexpected_index_list",
       "exact_match_out" : true,
-      "suppress_test_for": ["pandas"],
+      "only_for": ["sqlalchemy"],
       "in": {
         "column_list": ["a", "b"]
       },
