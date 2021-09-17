@@ -8,7 +8,6 @@ import string
 import tempfile
 import threading
 from functools import wraps
-from operator import itemgetter
 from types import ModuleType
 from typing import Dict, List, Optional, Union
 
@@ -1934,10 +1933,10 @@ def check_json_test_result(test, result, data_asset=None):
                     # __lt__ is not implemented for python dictionaries making sorting trickier
                     # in our case, we will sort on the values for each key sequentially
                     if isinstance(value[0], dict):
-                        value = sorted(value, key=itemgetter(*list(value[0].keys())))
+                        value = sorted(value, key=lambda x: tuple(x[key] for key in list(value[0].keys())))
                         result["result"]["unexpected_list"] = sorted(
                             result["result"]["unexpected_list"],
-                            key=itemgetter(*list(value[0].keys())),
+                            key=lambda x: tuple(x[key] for key in list(value[0].keys())),
                         )
                     # if python built-in class has __lt__ then sorting can always work this way
                     elif type(value[0].__lt__(value[0])) != type(NotImplemented):
