@@ -758,10 +758,15 @@ class StoreValidationResultAction(ValidationAction):
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
             contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
 
+        expectation_suite_ge_cloud_id = None
+        if self.data_context.ge_cloud_mode and expectation_suite_identifier:
+            expectation_suite_ge_cloud_id = str(expectation_suite_identifier.ge_cloud_id)
+
         return_val = self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
             contract_id=contract_ge_cloud_id,
+            expectation_suite_id=expectation_suite_ge_cloud_id
         )
         if self.data_context.ge_cloud_mode:
             return_val: GeCloudResourceRef
