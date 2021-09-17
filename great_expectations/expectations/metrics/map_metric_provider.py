@@ -2338,9 +2338,11 @@ def _spark_map_condition_unexpected_count_value(
     df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
+
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
     return filtered.count()
 
 
@@ -2405,10 +2407,6 @@ def _spark_column_map_condition_value_counts(
         domain_kwargs=compute_domain_kwargs,
     )
 
-    # withColumn is required to transform window functions returned by some metrics to boolean mask
-    data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -2422,6 +2420,10 @@ def _spark_column_map_condition_value_counts(
         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
+
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
 

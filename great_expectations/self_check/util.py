@@ -1939,7 +1939,7 @@ def check_json_test_result(test, result, data_asset=None):
                             result["result"]["unexpected_list"],
                             key=itemgetter(*list(value[0].keys())),
                         )
-                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
+                    elif type(value[0].__lt__(value[0])) != type(NotImplemented):
                         value = sorted(value, key=lambda x: str(x))
                         result["result"]["unexpected_list"] = sorted(
                             result["result"]["unexpected_list"], key=lambda x: str(x)
