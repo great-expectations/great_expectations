@@ -10,6 +10,7 @@ import threading
 from functools import wraps
 from types import ModuleType
 from typing import Dict, List, Optional, Union
+from operator import itemgetter
 
 import numpy as np
 import pandas as pd
@@ -1930,6 +1931,13 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "unexpected_list":
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
                 if (isinstance(value, list)) & (len(value) >= 1):
+                    # dictionary handling isn't implemented in great_expectations.core.data_context_key.__lt__
+                    # but values still need to be sorted since spark metrics return unordered
+                    if isinstance(value[0], dict):
+                        value = sorted(value, key=itemgetter(*list(value[0].keys())))
+                        result["result"]["unexpected_list"] = sorted(
+                            result["result"]["unexpected_list"], key=itemgetter(*list(value[0].keys()))
+                        )
                     if type(value[0].__lt__(value[0])) != type(NotImplemented):
                         value = sorted(value, key=lambda x: str(x))
                         result["result"]["unexpected_list"] = sorted(
