@@ -355,6 +355,7 @@ class Checkpoint:
                 except (
                     ge_exceptions.CheckpointError,
                     ge_exceptions.ExecutionEngineError,
+                    ge_exceptions.MetricError,
                 ) as e:
                     raise ge_exceptions.CheckpointError(
                         f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."

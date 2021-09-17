@@ -24,7 +24,7 @@ class MetricConfiguration:
         self._metric_value_kwargs = metric_value_kwargs
         if metric_dependencies is None:
             metric_dependencies = {}
-        self.metric_dependencies = metric_dependencies
+        self._metric_dependencies = metric_dependencies
 
     def __repr__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -51,6 +51,14 @@ class MetricConfiguration:
     @property
     def metric_value_kwargs_id(self):
         return self.metric_value_kwargs.to_id()
+
+    @property
+    def metric_dependencies(self):
+        return self._metric_dependencies
+
+    @metric_dependencies.setter
+    def metric_dependencies(self, metric_dependencies):
+        self._metric_dependencies = metric_dependencies
 
     @property
     def id(self) -> Tuple[str, str, str]:
