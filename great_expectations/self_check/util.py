@@ -1931,7 +1931,7 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "unexpected_list":
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
                 if (isinstance(value, list)) & (len(value) >= 1):
-                    # dictionary handling isn't implemented in great_expectations.core.data_context_key.__lt__
+                    # __lt__ is not implemented for python dictionaries making sorting trickier
                     # but values still need to be sorted since spark metrics return unordered
                     if isinstance(value[0], dict):
                         value = sorted(value, key=itemgetter(*list(value[0].keys())))
