@@ -1932,13 +1932,14 @@ def check_json_test_result(test, result, data_asset=None):
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
                 if (isinstance(value, list)) & (len(value) >= 1):
                     # __lt__ is not implemented for python dictionaries making sorting trickier
-                    # but values still need to be sorted since spark metrics return unordered
+                    # in our case, we will sort on the values for each key sequentially
                     if isinstance(value[0], dict):
                         value = sorted(value, key=itemgetter(*list(value[0].keys())))
                         result["result"]["unexpected_list"] = sorted(
                             result["result"]["unexpected_list"],
                             key=itemgetter(*list(value[0].keys())),
                         )
+                    # if python built-in class has __lt__ then sorting can always work this way
                     elif type(value[0].__lt__(value[0])) != type(NotImplemented):
                         value = sorted(value, key=lambda x: str(x))
                         result["result"]["unexpected_list"] = sorted(
