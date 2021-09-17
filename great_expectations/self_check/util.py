@@ -8,9 +8,9 @@ import string
 import tempfile
 import threading
 from functools import wraps
+from operator import itemgetter
 from types import ModuleType
 from typing import Dict, List, Optional, Union
-from operator import itemgetter
 
 import numpy as np
 import pandas as pd
@@ -1936,7 +1936,8 @@ def check_json_test_result(test, result, data_asset=None):
                     if isinstance(value[0], dict):
                         value = sorted(value, key=itemgetter(*list(value[0].keys())))
                         result["result"]["unexpected_list"] = sorted(
-                            result["result"]["unexpected_list"], key=itemgetter(*list(value[0].keys()))
+                            result["result"]["unexpected_list"],
+                            key=itemgetter(*list(value[0].keys())),
                         )
                     if type(value[0].__lt__(value[0])) != type(NotImplemented):
                         value = sorted(value, key=lambda x: str(x))
