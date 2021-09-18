@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import uuid
 from collections import OrderedDict
@@ -10,7 +11,11 @@ import pytest
 from moto import mock_s3
 
 import tests.test_utils as test_utils
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context import DataContext
+from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.store import (
     GeCloudStoreBackend,
     InMemoryStoreBackend,
@@ -20,13 +25,129 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
+from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import gen_directory_tree_str
+
+
+@pytest.fixture()
+def basic_data_context_config_for_validation_operator():
+    return DataContextConfig(
+        config_version=2,
+        plugins_directory=None,
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        expectations_store_name="expectations_store",
+        datasources={},
+        stores={
+            "expectations_store": {"class_name": "ExpectationsStore"},
+            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "validation_result_store": {"class_name": "ValidationsStore"},
+            "metrics_store": {"class_name": "MetricStore"},
+        },
+        validations_store_name="validation_result_store",
+        data_docs_sites={},
+        validation_operators={
+            "store_val_res_and_extract_eval_params": {
+                "class_name": "ActionListValidationOperator",
+                "action_list": [
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                            "target_store_name": "validation_result_store",
+                        },
+                    },
+                    {
+                        "name": "extract_and_store_eval_parameters",
+                        "action": {
+                            "class_name": "StoreEvaluationParametersAction",
+                            "target_store_name": "evaluation_parameter_store",
+                        },
+                    },
+                ],
+            },
+            "errors_and_warnings_validation_operator": {
+                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
+                "action_list": [
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                            "target_store_name": "validation_result_store",
+                        },
+                    },
+                    {
+                        "name": "extract_and_store_eval_parameters",
+                        "action": {
+                            "class_name": "StoreEvaluationParametersAction",
+                            "target_store_name": "evaluation_parameter_store",
+                        },
+                    },
+                ],
+            },
+        },
+    )
+
+
+@pytest.fixture
+def validation_operators_data_context(
+    basic_data_context_config_for_validation_operator, filesystem_csv_4
+):
+    data_context = BaseDataContext(basic_data_context_config_for_validation_operator)
+
+    data_context.add_datasource(
+        "my_datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_4),
+            }
+        },
+    )
+    data_context.create_expectation_suite("f1.foo")
+
+    df = data_context.get_batch(
+        batch_kwargs=data_context.build_batch_kwargs(
+            "my_datasource", "subdir_reader", "f1"
+        ),
+        expectation_suite_name="f1.foo",
+    )
+    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
+    failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
+
+    df.expect_column_values_to_not_be_null(column="y")
+    warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
+
+    data_context.save_expectation_suite(
+        failure_expectations, expectation_suite_name="f1.failure"
+    )
+    data_context.save_expectation_suite(
+        warning_expectations, expectation_suite_name="f1.warning"
+    )
+
+    return data_context
+
+
+@pytest.fixture()
+def parameterized_expectation_suite():
+    fixture_path = file_relative_path(
+        __file__,
+        "../../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
+    )
+    with open(
+        fixture_path,
+    ) as suite:
+        return expectationSuiteSchema.load(json.load(suite))
 
 
 def test_StoreBackendValidation():
@@ -486,6 +607,84 @@ def test_TupleS3StoreBackend_with_prefix():
         my_new_store.get_public_url_for_key(("BBB",))
         == "http://www.test.com/my_file_BBB"
     )
+
+
+@mock_s3
+def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_prefix(
+    validation_operators_data_context: DataContext,
+    parameterized_expectation_suite: ExpectationSuite,
+):
+    """
+    What does this test test and why?
+
+    In cases where an s3 store is used with the same prefix for both validations
+    and expectations, the list_keys() operation picks up files ending in .json
+    from both validations and expectations stores.
+
+    To avoid this issue, the expectation suite configuration, if available, is used
+    to locate the specific key for the suite in place of calling list_keys().
+
+    NOTE: It is an issue with _all stores_ when the result of list_keys() contain paths
+    with a period (.) and are passed to ExpectationSuiteIdentifier.from_tuple() method,
+    as happens in the DataContext.store_evaluation_parameters() method. The best fix is
+    to choose a different delimiter for generating expectation suite identifiers (or
+    perhaps escape the period in path names).
+
+    For now, the fix is to avoid the call to list_keys() in
+    DataContext.store_evaluation_parameters() if the expectation suite is known (from config).
+    This approach should also improve performance.
+
+    This test confirms the fix for GitHub issue #3054.
+    """
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    # replace store backends with the mock, both with the same prefix (per issue #3054)
+    validation_operators_data_context.validations_store._store_backend = (
+        TupleS3StoreBackend(
+            bucket=bucket,
+            prefix=prefix,
+        )
+    )
+    validation_operators_data_context.expectations_store._store_backend = (
+        TupleS3StoreBackend(
+            bucket=bucket,
+            prefix=prefix,
+        )
+    )
+
+    validation_operators_data_context.save_expectation_suite(
+        parameterized_expectation_suite, "param_suite"
+    )
+
+    # ensure the suite is in the context
+    assert validation_operators_data_context.expectations_store.has_key(
+        ExpectationSuiteIdentifier("param_suite")
+    )
+
+    res = validation_operators_data_context.run_validation_operator(
+        "store_val_res_and_extract_eval_params",
+        assets_to_validate=[
+            (
+                validation_operators_data_context.build_batch_kwargs(
+                    "my_datasource", "subdir_reader", "f1"
+                ),
+                "param_suite",
+            )
+        ],
+        evaluation_parameters={
+            "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
+            ".observed_value": 3
+        },
+    )
+
+    assert (
+        res["success"] is True
+    ), "No exception thrown, validation operators ran successfully"
 
 
 @mock_s3
