@@ -32,6 +32,7 @@ from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReferen
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
+    MetricResolutionError,
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -303,8 +304,7 @@ class Validator:
 
     def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
         """Return a dictionary with the requested metrics"""
-        graph = ValidationGraph()
-        resolved_metrics = {}
+        graph: ValidationGraph = ValidationGraph()
         for metric_name, metric_configuration in metrics.items():
             provider_cls, _ = get_metric_provider(
                 metric_configuration.metric_name, self.execution_engine
@@ -328,8 +328,10 @@ class Validator:
             self.build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=self._execution_engine,
-                child_node=metric_configuration,
+                metric_configuration=metric_configuration,
             )
+
+        resolved_metrics: Dict[Tuple, Any] = {}
         self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
@@ -347,54 +349,48 @@ class Validator:
         self,
         graph: ValidationGraph,
         execution_engine: ExecutionEngine,
-        child_node: MetricConfiguration,
-        parent_node: Optional[MetricConfiguration] = None,
+        metric_configuration: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> None:
+    ):
         """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
         until all metrics have been added."""
 
-        # metric_kwargs = get_metric_kwargs(metric_name)
         metric_impl = get_metric_provider(
-            child_node.metric_name, execution_engine=execution_engine
+            metric_configuration.metric_name, execution_engine=execution_engine
         )[0]
         metric_dependencies = metric_impl.get_evaluation_dependencies(
-            metric=child_node,
+            metric=metric_configuration,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        child_node.metric_dependencies = metric_dependencies
-
-        if parent_node:
-            graph.add(
-                MetricEdge(
-                    left=parent_node,
-                    right=child_node,
-                )
-            )
 
         if len(metric_dependencies) == 0:
             graph.add(
                 MetricEdge(
-                    left=child_node,
+                    left=metric_configuration,
                 )
             )
-
         else:
+            metric_configuration.metric_dependencies = metric_dependencies
             for metric_dependency in metric_dependencies.values():
-                # TODO: <Alex>ALEX -- In the future, provide a more robust cycle detection.</Alex>
-                if metric_dependency.id == child_node.id:
+                # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
+                if metric_dependency.id == metric_configuration.id:
                     logger.warning(
-                        f"Metric {str(child_node.id)} has created a circular dependency"
+                        f"Metric {str(metric_configuration.id)} has created a circular dependency"
                     )
                     continue
+                graph.add(
+                    MetricEdge(
+                        left=metric_configuration,
+                        right=metric_dependency,
+                    )
+                )
                 self.build_metric_dependency_graph(
                     graph=graph,
                     execution_engine=execution_engine,
-                    child_node=metric_dependency,
-                    parent_node=child_node,
+                    metric_configuration=metric_dependency,
                     configuration=configuration,
                     runtime_configuration=runtime_configuration,
                 )
@@ -402,7 +398,7 @@ class Validator:
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: Optional[dict] = None,
+        metrics: Optional[Dict[Tuple, Any]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
@@ -448,11 +444,11 @@ class Validator:
             )["metrics"]
 
             try:
-                for metric in validation_dependencies.values():
+                for metric_configuration in validation_dependencies.values():
                     self.build_metric_dependency_graph(
                         graph=graph,
                         execution_engine=self._execution_engine,
-                        child_node=metric,
+                        metric_configuration=metric_configuration,
                         configuration=evaluated_config,
                         runtime_configuration=runtime_configuration,
                     )
@@ -480,7 +476,7 @@ class Validator:
         # Since metrics can serve multiple expectations in a suite and are resolved together through validation graph,
         # an exception occurring as part of resolving the combined validation graph impacts all expectations in suite.
         try:
-            metrics = self.resolve_validation_graph(
+            self.resolve_validation_graph(
                 graph=graph,
                 metrics=metrics,
                 runtime_configuration=runtime_configuration,
@@ -503,6 +499,7 @@ class Validator:
                 return evrs
             else:
                 raise err
+
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
@@ -533,22 +530,29 @@ class Validator:
     def resolve_validation_graph(
         self,
         graph: ValidationGraph,
-        metrics: Dict[Tuple, MetricConfiguration],
+        metrics: Dict[Tuple, Any],
         runtime_configuration: Optional[dict] = None,
     ):
-        done: bool = False
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
         pbar = None
+
+        done: bool = False
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(
                 validation_graph=graph, metrics=metrics
             )
+
             if pbar is None:
+                # noinspection PyProtectedMember
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
-                    disable=len(graph._edges) < 3,
+                    disable=len(graph.edges) < 3,
                 )
                 pbar.update(0)
+
             metrics.update(
                 self._resolve_metrics(
                     execution_engine=self._execution_engine,
@@ -558,16 +562,16 @@ class Validator:
                 )
             )
             pbar.update(len(ready_metrics))
+
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
-        pbar.close()
 
-        return metrics
+        pbar.close()
 
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple, MetricConfiguration],
+        metrics: Dict[Tuple, Any],
     ):
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -595,7 +599,7 @@ class Validator:
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Dict[Tuple, Any] = None,
         runtime_configuration: dict = None,
-    ):
+    ) -> Dict[Tuple, MetricConfiguration]:
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(

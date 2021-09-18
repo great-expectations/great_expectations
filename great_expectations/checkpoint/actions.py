@@ -46,7 +46,7 @@ class ValidationAction:
     def run(
         self,
         validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -813,7 +813,7 @@ class StoreEvaluationParametersAction(ValidationAction):
     def _run(
         self,
         validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
