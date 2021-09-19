@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -21,26 +20,21 @@ from great_expectations.expectations.expectation import (
     ColumnExpectation,
     Expectation,
     ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
-    num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +119,11 @@ class ColumnSkew(ColumnAggregateMetricProvider):
             sqlalchemy_engine=sqlalchemy_engine,
         )
 
-        standard_deviation = sa.func.stdev(column)
+        if dialect.name.lower() == "mssql":
+            standard_deviation = sa.func.stdev(column)
+        else:
+            standard_deviation = sa.func.stddev_samp(column)
+
         column_std = _get_query_result(
             func=standard_deviation,
             selectable=selectable,
@@ -193,52 +191,56 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
         logger.error(exception_message)
         raise pe()
 
-    #
-    # @classmethod
-    # def _get_evaluation_dependencies(
-    #     cls,
-    #     metric: MetricConfiguration,
-    #     configuration: Optional[ExpectationConfiguration] = None,
-    #     execution_engine: Optional[ExecutionEngine] = None,
-    #     runtime_configuration: Optional[dict] = None,
-    # ):
-    #     """This should return a dictionary:
-    #
-    #     {
-    #       "dependency_name": MetricConfiguration,
-    #       ...
-    #     }
-    #     """
-    #
-    #     dependencies = super()._get_evaluation_dependencies(
-    #         metric=metric,
-    #         configuration=configuration,
-    #         execution_engine=execution_engine,
-    #         runtime_configuration=runtime_configuration,
-    #     )
-    #
-    #     table_domain_kwargs = {
-    #         k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-    #     }
-    #
-    #     dependencies.update(
-    #         {
-    #             "table.row_count": MetricConfiguration(
-    #                 "table.row_count", table_domain_kwargs
-    #             )
-    #         }
-    #     )
-    #
-    #     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-    #         dependencies["column_values.nonnull.count"] = MetricConfiguration(
-    #             "column_values.nonnull.count", metric.metric_domain_kwargs
-    #         )
-    #
-    #     return dependencies
-
 
 class ExpectColumnSkewToBeBetween(ColumnExpectation):
-    """Expect column skew to be between. Currently tests against Gamma and Beta distributions"""
+    """Expect the column skew to be between a minimum value and a maximum value (inclusive). \
+
+            The skewness is a measure of the asymmetry of a probability distribution about its mean. A distribution with negative skewness has a tail to the left (negative) side, and a distribution with positive skewness has a tail to the right (positive) side. The column skew is defined as \\Sum(X - \\mu)^3) / ((N-1) * \\sigma^3), where \\mu and \\sigma are the column mean and standard deviation. \
+
+            expect_column_skew_to_be_between is a \
+            :func:`column_aggregate_expectation \
+            <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+            Args:
+                column (str): \
+                    The column name.
+                min_value (float or None): \
+                    The minimum value for the column skew.
+                max_value (float or None): \
+                    The maximum value for the column skew.
+                strict_min (boolean):
+                    If True, the column skew must be strictly larger than min_value, default=False
+                strict_max (boolean):
+                    If True, the column skew must be strictly smaller than max_value, default=False
+                abs (boolean):
+                    If True, expectations will be applied to the absolute value of the column skew.
+            Other Parameters:
+                result_format (str or None): \
+                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                    For more detail, see :ref:`result_format <result_format>`.
+                include_config (boolean): \
+                    If True, then include the expectation config as part of the result object. \
+                    For more detail, see :ref:`include_config`.
+                catch_exceptions (boolean or None): \
+                    If True, then catch exceptions and include them as part of the result object. \
+                    For more detail, see :ref:`catch_exceptions`.
+                meta (dict or None): \
+                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                    modification. For more detail, see :ref:`meta`.
+            Returns:
+                An ExpectationSuiteValidationResult
+                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+            Notes:
+                These fields in the result object are customized for this expectation:
+                ::
+                    {
+                        "observed_value": (float) The true mean for the column
+                    }
+                * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+                * If min_value is None, then max_value is treated as an upper bound.
+                * If max_value is None, then min_value is treated as a lower bound.
+                * Test values are drawn from various distributions (gamma, beta)
+            """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -488,6 +490,28 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     },
                 }
             )
+        ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.descriptive.stats_table.skew_row")
+    def _descriptive_stats_table_skew_row_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        assert result, "Must pass in result."
+        return [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "template": "Skew",
+                    "tooltip": {"content": "expect_column_skew_to_be_between"},
+                },
+            },
+            "{:.2f}".format(result.result["observed_value"]),
         ]
 
     def _validate(
