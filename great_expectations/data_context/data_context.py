@@ -74,6 +74,7 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
+    ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
@@ -817,6 +818,10 @@ class BaseDataContext:
     @property
     def anonymous_usage_statistics(self):
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
+
+    @property
+    def concurrency(self) -> ConcurrencyConfig:
+        return self.project_config_with_variables_substituted.concurrency
 
     @property
     def notebooks(self):
@@ -1785,6 +1790,7 @@ class BaseDataContext:
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1798,21 +1804,26 @@ class BaseDataContext:
                     expectation_suite is not None,
                     expectation_suite_name is not None,
                     create_expectation_suite_with_name is not None,
+                    expectation_suite_ge_cloud_id is not None,
                 ]
             )
             != 1
         ):
             raise ValueError(
-                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+                f"Exactly one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name must be specified"
             )
 
+        if expectation_suite_ge_cloud_id is not None:
+            expectation_suite = self.get_expectation_suite(
+                ge_cloud_id=expectation_suite_ge_cloud_id
+            )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
-
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.create_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name
             )
+
         if (
             sum(
                 bool(x)
@@ -2026,7 +2037,7 @@ class BaseDataContext:
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
-            runtime_environment={"data_context": self},
+            runtime_environment={"data_context": self, "concurrency": self.concurrency},
             config_defaults={"module_name": module_name},
         )
         if not datasource:
@@ -2264,7 +2275,7 @@ class BaseDataContext:
                 "expectation_suite %s not found" % expectation_suite_name
             )
 
-    def list_expectation_suite_names(self):
+    def list_expectation_suite_names(self) -> List[str]:
         """Lists the available expectation suite names"""
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()
@@ -2403,7 +2414,14 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
+            # get the expectation suite if it exists, otherwise None
+            expectation_suite_name = validation_results.meta["expectation_suite_name"]
+            if expectation_suite_name in self.list_expectation_suite_names():
+                expectation_suite = self.get_expectation_suite(expectation_suite_name)
+            else:
+                expectation_suite = None
+
+            self._compile_evaluation_parameter_dependencies(expectation_suite)
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -2432,13 +2450,17 @@ class BaseDataContext:
     def validations_store(self):
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self):
+    def _compile_evaluation_parameter_dependencies(self, expectation_suite):
         self._evaluation_parameter_dependencies = {}
-        for key in self.expectations_store.list_keys():
-            expectation_suite = self.expectations_store.get(key)
-            if not expectation_suite:
-                continue
 
+        # only if we don't have an expectation suite do we do a key scan
+        if expectation_suite is None:
+            for key in self.expectations_store.list_keys():
+                expectation_suite = self.expectations_store.get(key)
+                if not expectation_suite:
+                    continue
+
+        if expectation_suite:
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
@@ -2581,7 +2603,7 @@ class BaseDataContext:
                 if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder = instantiate_class_from_config(
+                    site_builder: SiteBuilder = instantiate_class_from_config(
                         config=complete_site_config,
                         runtime_environment={
                             "data_context": self,
@@ -3114,6 +3136,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
         checkpoint_config: Union[CheckpointConfig, dict]
@@ -3141,6 +3164,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_on": notify_on,
             "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
         checkpoint_config = filter_properties_dict(
@@ -3266,7 +3290,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
     def run_checkpoint(
         self,
-        checkpoint_name: str,
+        checkpoint_name: Optional[str] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -3281,6 +3305,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         run_time: Optional[datetime.datetime] = None,
         result_format: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         """
@@ -3294,30 +3319,60 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             CheckpointResult
         """
         # TODO mark experimental
-
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
+        batch_request = batch_request or {}
+        batch_identifiers = batch_request.get("batch_identifiers", {})
+        if self.ge_cloud_mode:
+            if len(batch_identifiers.keys()) == 0:
+                batch_identifiers["timestamp"] = str(datetime.datetime.now())
+                batch_request["batch_identifiers"] = batch_identifiers
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name, ge_cloud_id=ge_cloud_id
         )
+        checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
 
-        return checkpoint.run(
-            template_name=template_name,
-            run_name_template=run_name_template,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            profilers=profilers,
-            run_id=run_id,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
-        )
+        if (
+            "runtime_configuration" in checkpoint_config_from_store
+            and "result_format" in checkpoint_config_from_store["runtime_configuration"]
+        ):
+            result_format = result_format or checkpoint_config_from_store[
+                "runtime_configuration"
+            ].pop("result_format")
+
+        if result_format is None:
+            result_format = {"result_format": "SUMMARY"}
+
+        checkpoint_config_from_call_args: dict = {
+            "template_name": template_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            "run_id": run_id,
+            "run_name": run_name,
+            "run_time": run_time,
+            "result_format": result_format,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+        }
+
+        checkpoint_config = {
+            key: value
+            for key, value in checkpoint_config_from_store.items()
+            if key in checkpoint_config_from_call_args
+        }
+        checkpoint_config.update(checkpoint_config_from_call_args)
+        if not self.ge_cloud_mode:
+            checkpoint_config = filter_properties_dict(
+                properties=checkpoint_config, clean_falsy=True
+            )
+
+        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
+
+        return checkpoint.run(**checkpoint_run_arguments)
 
     def test_yaml_config(
         self,

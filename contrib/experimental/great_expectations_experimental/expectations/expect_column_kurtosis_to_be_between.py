@@ -1,4 +1,6 @@
 import json
+import logging
+import traceback
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -22,15 +24,13 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
+    column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -42,8 +42,44 @@ from great_expectations.render.util import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
+logger = logging.getLogger(__name__)
 
-class ColumnKurtosis(ColumnMetricProvider):
+try:
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    ProgrammingError = None
+    Select = None
+
+try:
+    from pyspark.sql.functions import mean as pyspark_mean_
+    from pyspark.sql.functions import stddev as pyspark_std_
+except ImportError:
+    logger.debug(
+        "Unable to load PySpark functions; install optional PySpark dependency for support"
+    )
+    pyspark_mean_ = None
+    pyspark_std_ = None
+
+try:
+    from sqlalchemy.engine.row import Row
+except ImportError:
+    try:
+        from sqlalchemy.engine.row import RowProxy
+
+        Row = RowProxy
+    except ImportError:
+        logger.debug(
+            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
+        )
+        RowProxy = None
+        Row = None
+
+
+class ColumnKurtosis(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.kurtosis"
@@ -52,98 +88,119 @@ class ColumnKurtosis(ColumnMetricProvider):
     def _pandas(cls, column, **kwargs):
         return stats.kurtosis(column)
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
-    # def _sqlalchemy(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         selectable,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column_name = accessor_domain_kwargs["column"]
-    #     column = sa.column(column_name)
-    #     sqlalchemy_engine = execution_engine.engine
-    #     dialect = sqlalchemy_engine.dialect
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
-    # @classmethod
-    # def _get_evaluation_dependencies(
-    #     cls,
-    #     metric: MetricConfiguration,
-    #     configuration: Optional[ExpectationConfiguration] = None,
-    #     execution_engine: Optional[ExecutionEngine] = None,
-    #     runtime_configuration: Optional[dict] = None,
-    # ):
-    #     """This should return a dictionary:
-    #
-    #     {
-    #       "dependency_name": MetricConfiguration,
-    #       ...
-    #     }
-    #     """
-    #
-    #     dependencies = super()._get_evaluation_dependencies(
-    #         metric=metric,
-    #         configuration=configuration,
-    #         execution_engine=execution_engine,
-    #         runtime_configuration=runtime_configuration,
-    #     )
-    #
-    #     table_domain_kwargs = {
-    #         k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-    #     }
-    #
-    #     dependencies.update(
-    #         {
-    #             "table.row_count": MetricConfiguration(
-    #                 "table.row_count", table_domain_kwargs
-    #             )
-    #         }
-    #     )
-    #
-    #     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-    #         dependencies["column_values.nonnull.count"] = MetricConfiguration(
-    #             "column_values.nonnull.count", metric.metric_domain_kwargs
-    #         )
-    #
-    #     return dependencies
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            selectable,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+
+        column_name = accessor_domain_kwargs["column"]
+        column = sa.column(column_name)
+        sqlalchemy_engine = execution_engine.engine
+        dialect = sqlalchemy_engine.dialect
+
+        column_mean = _get_query_result(
+            func=sa.func.avg(column * 1.0),
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        column_count = _get_query_result(
+            func=sa.func.count(column),
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        # sql dialects are inconsistent about stddev vs stddev_samp
+        # try to use stddev_samp and correct by multipying by (N-1)/N
+        if dialect.name.lower() == "mssql":
+            standard_deviation = sa.func.stdev(column)
+        else:
+            standard_deviation = sa.func.stddev_samp(column)
+
+        column_std = _get_query_result(
+            func=standard_deviation,
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        column_fourth_moment = _get_query_result(
+            func=sa.func.sum(sa.func.pow(column - column_mean, 4)),
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        column_kurtosis = (
+            column_fourth_moment
+            / (column_std ** 4)
+            / column_count
+            * (column_count) ** 2
+            / ((column_count - 1) ** 2)
+        )
+        return column_kurtosis - 3
+
+    @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(
+        cls,
+        execution_engine: "SparkDFExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
+        )
+        abs_flag = metric_value_kwargs.get("abs", False)
+        column = accessor_domain_kwargs["column"]
+
+        column_avg = df.select(pyspark_mean_(column)).collect()[0][0]
+        column_std = df.select(pyspark_std_(column)).collect()[0][0]
+        count = df.count()
+
+        # udf is possibly preferred here
+        column_fourth_moment = df.rdd.map(lambda x: (x[column] - column_avg) ** 4).sum()
+
+        column_kurtosis = (
+            column_fourth_moment
+            / (column_std ** 4)
+            / count
+            * (count ** 2)
+            / ((count - 1) ** 2)
+        )
+        print(column_kurtosis - 3)
+        return column_kurtosis - 3
+
+
+def _get_query_result(func, selectable, sqlalchemy_engine):
+    simple_query: Select = sa.select(func).select_from(selectable)
+
+    try:
+        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        return result
+    except ProgrammingError as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe()
 
 
 class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
@@ -247,6 +304,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
                     "title": "positive_test_neg_kurtosis",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {"column": "a", "min_value": -1000, "max_value": 0},
                     "out": {"success": True, "observed_value": -1.3313434082203324},
                 },
@@ -254,6 +312,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
                     "title": "negative_test_no_kurtosis",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {"column": "b", "min_value": 1, "max_value": None},
                     "out": {"success": False, "observed_value": -0.09728207073685091},
                 },
@@ -261,6 +320,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
                     "title": "positive_test_small_kurtosis",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {"column": "c", "min_value": -1, "max_value": 1},
                     "out": {"success": True, "observed_value": 0.6023057552879445},
                 },
@@ -268,8 +328,23 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
                     "title": "negative_test_large_kurtosis",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {"column": "d", "min_value": -1, "max_value": 1},
                     "out": {"success": False, "observed_value": 10.0205745719473},
+                },
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["mysql", "postgresql"],
+                },
+                {
+                    "backend": "spark",
+                    "dialects": None,
                 },
             ],
         },

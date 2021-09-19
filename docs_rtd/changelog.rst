@@ -8,6 +8,27 @@ Changelog
 develop
 -----------------
 
+0.13.34
+-----------------
+* [FEATURE] Configurable multi-threaded checkpoint speedup (#3362) (Thanks @jdimatteo)
+* [BUGFIX] Insure that the "result_format" Expectation Argument is Processed Properly (#3364)
+* [BUGFIX] fix error getting validation result from DataContext (#3359) (Thanks @zachzIAM)
+* [BUGFIX] fixed typo and added CLA links (#3347)
+* [DOCS] Azure Data Connector Documentation for Pandas and Spark. (#3378)
+* [DOCS] Connecting to GCS using Spark (#3375)
+* [DOCS] Docusaurus - Deploying Great Expectations in a hosted environment without file system or CLI (#3361)
+* [DOCS] How to get a batch from configured datasource (#3382)
+* [MAINTENANCE] Add Flyte to README (#3387) (Thanks @samhita-alla)
+* [MAINTENANCE] Adds expect_table_columns_to_match_set (#3329) (Thanks @viniciusdsmello)
+* [MAINTENANCE] Bugfix/skip substitute config variables in ge cloud mode (#3393)
+* [MAINTENANCE] Clean Up ValidationGraph API Usage, Improve Exception Handling for Metrics, Clean Up Type Hints (#3399)
+* [MAINTENANCE] Clean up ValidationGraph API and add Type Hints (#3392)
+* [MAINTENANCE] Enhancement/update _set methods with kwargs (#3391) (Thanks @roblim)
+* [MAINTENANCE] Fix incorrect ToC section name (#3395)
+* [MAINTENANCE] Insure Correct Processing of the catch_exception Flag in Metrics Resolution (#3360)
+* [MAINTENANCE] exempt batch_data from a deep_copy operation on RuntimeBatchRequest (#3388)
+* [MAINTENANCE] [WIP] Enhancement/cloud 169/update checkpoint.run for ge cloud (#3381)
+
 0.13.33
 -----------------
 * [FEATURE] Implement InferredAssetAzureDataConnector with Support for Pandas and Spark Execution Engines (#3372)

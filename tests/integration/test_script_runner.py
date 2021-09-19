@@ -177,6 +177,12 @@ docs_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
     },
     {
+        "name": "how_to_get_a_batch_of_data_from_a_configured_datasource",
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py",
+        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    },
+    {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",

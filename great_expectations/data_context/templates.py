@@ -169,6 +169,7 @@ datasources:
       default_runtime_data_connector:
         class_name: RuntimeDataConnector
         batch_identifiers:
+            - timestamp
   default_pandas_datasource:
       execution_engine:
         module_name: great_expectations.execution_engine
@@ -179,6 +180,7 @@ datasources:
         default_runtime_data_connector:
           class_name: RuntimeDataConnector
           batch_identifiers:
+            - timestamp
 
 plugins_directory: ${plugins_directory}
 

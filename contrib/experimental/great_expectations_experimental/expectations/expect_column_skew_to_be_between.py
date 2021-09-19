@@ -24,10 +24,6 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
-    column_aggregate_value,
-)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_partial,
@@ -83,7 +79,7 @@ except ImportError:
         Row = None
 
 
-class ColumnSkew(ColumnMetricProvider):
+class ColumnSkew(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.skew"
@@ -129,11 +125,7 @@ class ColumnSkew(ColumnMetricProvider):
             sqlalchemy_engine=sqlalchemy_engine,
         )
 
-        if dialect.name.lower() == "mssql":
-            standard_deviation = sa.func.stdev(column)
-        else:
-            standard_deviation = sa.func.stddev_samp(column)
-
+        standard_deviation = sa.func.stdev(column)
         column_std = _get_query_result(
             func=standard_deviation,
             selectable=selectable,
@@ -398,6 +390,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
             "@lodeous",
             "@rexboyce",
             "@bragleg",
+            "@edjoesu",
         ],
         "package": "experimental_expectations",
     }
@@ -418,84 +411,84 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-    #     """
-    #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-    #     necessary configuration arguments have been provided for the validation of the expectation.
-    #
-    #     Args:
-    #         configuration (OPTIONAL[ExpectationConfiguration]): \
-    #             An optional Expectation Configuration entry that will be used to configure the expectation
-    #     Returns:
-    #         True if the configuration has been validated successfully. Otherwise, raises an exception
-    #     """
-    #     super().validate_configuration(configuration)
-    #     self.validate_metric_value_between_configuration(configuration=configuration)
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            True if the configuration has been validated successfully. Otherwise, raises an exception
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
-    # @classmethod
-    # @renderer(renderer_type="renderer.prescriptive")
-    # @render_evaluation_parameter_string
-    # def _prescriptive_renderer(
-    #     cls,
-    #     configuration=None,
-    #     result=None,
-    #     language=None,
-    #     runtime_configuration=None,
-    #     **kwargs,
-    # ):
-    #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
-    #     styling = runtime_configuration.get("styling")
-    #     params = substitute_none_for_missing(
-    #         configuration.kwargs,
-    #         [
-    #             "column",
-    #             "min_value",
-    #             "max_value",
-    #             "row_condition",
-    #             "condition_parser",
-    #             "strict_min",
-    #             "strict_max",
-    #         ],
-    #     )
-    #
-    #     if (params["min_value"] is None) and (params["max_value"] is None):
-    #         template_str = "median may have any numerical value."
-    #     else:
-    #         at_least_str, at_most_str = handle_strict_min_max(params)
-    #         if params["min_value"] is not None and params["max_value"] is not None:
-    #             template_str = f"median must be {at_least_str} $min_value and {at_most_str} $max_value."
-    #         elif params["min_value"] is None:
-    #             template_str = f"median must be {at_most_str} $max_value."
-    #         elif params["max_value"] is None:
-    #             template_str = f"median must be {at_least_str} $min_value."
-    #
-    #     if include_column_name:
-    #         template_str = "$column " + template_str
-    #
-    #     if params["row_condition"] is not None:
-    #         (
-    #             conditional_template_str,
-    #             conditional_params,
-    #         ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-    #         template_str = conditional_template_str + ", then " + template_str
-    #         params.update(conditional_params)
-    #
-    #     return [
-    #         RenderedStringTemplateContent(
-    #             **{
-    #                 "content_block_type": "string_template",
-    #                 "string_template": {
-    #                     "template": template_str,
-    #                     "params": params,
-    #                     "styling": styling,
-    #                 },
-    #             }
-    #         )
-    #     ]
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "skew may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"skew must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"skew must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"skew must be {at_least_str} $min_value."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     def _validate(
         self,

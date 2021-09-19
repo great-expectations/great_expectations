@@ -96,7 +96,7 @@ def column_function_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -161,7 +161,7 @@ def column_function_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -231,7 +231,7 @@ def column_function_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -318,7 +318,7 @@ def column_condition_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -384,7 +384,7 @@ def column_condition_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -461,7 +461,7 @@ def column_condition_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -561,7 +561,7 @@ def column_pair_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -620,7 +620,7 @@ def column_pair_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -683,7 +683,7 @@ def column_pair_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -772,7 +772,7 @@ def column_pair_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -838,7 +838,7 @@ def column_pair_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -912,7 +912,7 @@ def column_pair_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -992,7 +992,7 @@ def multicolumn_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -1045,7 +1045,7 @@ def multicolumn_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -1108,7 +1108,7 @@ def multicolumn_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -1191,7 +1191,7 @@ def multicolumn_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -1251,7 +1251,7 @@ def multicolumn_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -1322,7 +1322,7 @@ def multicolumn_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -1395,7 +1395,7 @@ def _pandas_column_map_condition_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -1453,7 +1453,7 @@ def _pandas_column_pair_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1510,7 +1510,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1551,7 +1551,7 @@ def _pandas_multicolumn_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1599,7 +1599,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1654,7 +1654,7 @@ def _pandas_column_map_series_and_domain_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -1715,7 +1715,7 @@ def _pandas_map_condition_index(
         column_name = accessor_domain_kwargs["column"]
 
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1727,7 +1727,7 @@ def _pandas_map_condition_index(
 
         for column_name in column_list:
             if column_name not in metrics["table.columns"]:
-                raise ge_exceptions.ExecutionEngineError(
+                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
@@ -1778,7 +1778,7 @@ def _pandas_column_map_condition_value_counts(
         )
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -1802,7 +1802,7 @@ def _pandas_column_map_condition_value_counts(
             pass
 
     if not value_counts:
-        raise ge_exceptions.MetricError("Unable to compute value counts")
+        raise ge_exceptions.MetricComputationError("Unable to compute value counts")
 
     if result_format["result_format"] == "COMPLETE":
         return value_counts
@@ -1846,7 +1846,7 @@ def _pandas_map_condition_rows(
         column_name = accessor_domain_kwargs["column"]
 
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1858,7 +1858,7 @@ def _pandas_map_condition_rows(
 
         for column_name in column_list:
             if column_name not in metrics["table.columns"]:
-                raise ge_exceptions.ExecutionEngineError(
+                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
@@ -1978,7 +1978,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         ).scalar()
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.ExecutionEngineError(message=exception_message)
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=exception_message
+        )
 
     return convert_to_json_serializable(unexpected_count)
 
@@ -2012,7 +2014,7 @@ def _sqlalchemy_column_map_condition_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -2064,7 +2066,7 @@ def _sqlalchemy_column_pair_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2116,7 +2118,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2159,7 +2161,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2207,7 +2209,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2245,7 +2247,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -2293,7 +2295,9 @@ def _sqlalchemy_map_condition_rows(
         return execution_engine.engine.execute(query).fetchall()
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.ExecutionEngineError(message=exception_message)
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=exception_message
+        )
 
 
 def _spark_map_condition_unexpected_count_aggregate_fn(
@@ -2365,7 +2369,7 @@ def _spark_column_map_condition_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -2419,7 +2423,7 @@ def _spark_column_map_condition_value_counts(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -2506,7 +2510,7 @@ def _spark_column_pair_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2564,7 +2568,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2605,7 +2609,7 @@ def _spark_multicolumn_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2671,7 +2675,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 

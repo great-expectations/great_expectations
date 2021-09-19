@@ -97,7 +97,7 @@ module.exports = {
                 //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
                 //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
                 'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-                //'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
+                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
               ]
             },
             {
@@ -138,8 +138,8 @@ module.exports = {
                 'guides/connecting_to_your_data/cloud/s3/spark',
                 'guides/connecting_to_your_data/cloud/gcs/pandas',
                 'guides/connecting_to_your_data/cloud/gcs/spark',
-                //'guides/connecting_to_your_data/cloud/azure/pandas',
-                //'guides/connecting_to_your_data/cloud/azure/spark'
+                'guides/connecting_to_your_data/cloud/azure/pandas',
+                'guides/connecting_to_your_data/cloud/azure/spark'
               ]
             },
             //{
@@ -167,7 +167,7 @@ module.exports = {
           items: [
             {
               type: 'category',
-              label: 'Advanced',
+              label: 'Core skills',
               items: [
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
