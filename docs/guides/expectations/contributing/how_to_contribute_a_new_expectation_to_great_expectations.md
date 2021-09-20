@@ -170,7 +170,7 @@ Run `run_diagnostics` again. The newly added examples will appear in the output.
 
 When you define data in your examples, we will mostly guess the type of the columns. Sometimes you need to specify the precise type of the columns for each backend. Then you use schema attribute (on the same level as data and tests in the dictionary):
 
-````console
+````python
 "schemas": {
   "spark": {
     "mostly_threes": "IntegerType",
