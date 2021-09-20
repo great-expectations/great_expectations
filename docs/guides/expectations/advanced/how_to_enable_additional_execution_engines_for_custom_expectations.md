@@ -22,7 +22,35 @@ This guide will help you implement additional execution engines for your custom 
 Steps
 -----
 
-1. **First, decide which execution engines and dialects you need to implement.**
+1. **Decide which execution engines and dialects you want to implement and enable tests for them**
+
+While SQLAlchemy is able to provide a common interface to a variety of SQL dialects, some functions may not work in a particular dialect, or in some cases they may return different values. To avoid surprises, it's helpful to determine beforehand what backends and dialects you plan to support, and test them along the way. 
+
+Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. (If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.) Add entries corresponding to the functionality you want to add: 
+    
+```python
+examples = [
+        {
+            "data": {
+            ....
+            },
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["mysql", "postgresql"],
+                },
+                {
+                    "backend": "spark",
+                    "dialects": None,
+                },
+            ],
+        },
+    ]
+```
 
 2. **Implement the SQLAlchemy logic for your Expectation.**
 
@@ -80,7 +108,7 @@ def _sqlalchemy(
     dialect = sqlalchemy_engine.dialect
 ```
     
-Here `sqlalchey_engine` is a SQLAlchemy `Engine` object, whose `execute` method executes arbitrary SQL. To define the `ColumnValuesEqualThree` metric we could 
+Here `sqlalchemy_engine` is a SQLAlchemy `Engine` object, whose `execute` method executes arbitrary SQL. To define the `ColumnValuesEqualThree` metric we could 
 ```
     query = sa.select(column.in_([3])).select_from(selectable)
     result = sqlalchemy_engine.execute(simple_query).fetchall()
@@ -141,29 +169,3 @@ Then within the _sqlchemy function, we would add:
     
 3. **Implement the PySpark logic for your Expectation.**
 
-4. **Define the test backends for your Expectation.**
-Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. (If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.) Add entries corresponding to the functionality you just added: 
-    
-```python
-examples = [
-        {
-            "data": {
-            ....
-            },
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["mysql", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-            ],
-        },
-    ]
-```
