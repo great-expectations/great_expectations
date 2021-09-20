@@ -2276,7 +2276,10 @@ class BaseDataContext:
             )
 
     def list_expectation_suite_names(self) -> List[str]:
-        """Lists the available expectation suite names"""
+        """
+        Lists the available expectation suite names. If in ge_cloud_mode, a list of
+        GE Cloud ids is returned instead.
+        """
         if self.ge_cloud_mode:
             return [
                 suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()
