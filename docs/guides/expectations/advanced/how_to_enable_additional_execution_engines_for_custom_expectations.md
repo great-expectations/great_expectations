@@ -30,6 +30,7 @@ Great Expectations provides a variety of ways to implement an Expectation in SQL
 1.  Computing the value of your metric directly from SQLAlchemy objects
 2.  Defining a partial function that takes a SQLAlchemy column as input
 3.  Using an existing metric that is already defined for SQLAlchemy. 
+
 <Tabs
   groupId="-type"
   defaultValue='columnmap'
@@ -46,5 +47,55 @@ Great Expectations provides a variety of ways to implement an Expectation in SQL
 <TabItem value="partialfunction">
 </TabItem> 
   
-<TabItem value="existingmetric">
+<TabItem value="existingmetric">\
+When using the value of an existing metric, the method signature is the same as when defining a metric value. 
+```python
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            selectable,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+```    
+    
+The `metrics` argument that the method is called with will be populated with your metric's dependencies, resolved by calling the `_get_evaluation_dependencies` class method. Suppose we wanted to implement the `ColumnValuesEqualThree` expectation by using the `column.value_counts' metric. We would then modify `_get_evaluation_dependencies`: 
+    
+```python 
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        table_domain_kwargs = {
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+        }
+
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            dependencies["column.value_counts"] = MetricConfiguration(
+                metric_name="column.value_counts",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+        return dependencies    
+```
 </TabItem>
