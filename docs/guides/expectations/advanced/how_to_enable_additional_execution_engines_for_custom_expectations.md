@@ -45,6 +45,17 @@ Great Expectations provides a variety of ways to implement an Expectation in SQL
   
 
 <TabItem value="partialfunction">
+Great Expectations allows for much of the SQLAlchemy logic for executing queries be abstracted away by specifying metric behavior as a partial function. To do this, use one of the decorators `@column_aggregate_partial` (for column aggregate expectation) , `@column_condition_partial` (for column map expectations), ` `@column_pair_condition_partial` (for column pair map metrics), or `@multicolumn_condition_partial` for multicolumn map metrics`. The decorated method will either return a `sqlalchemy.sql.functions.Function` or a `ColumnOperator` that can be passed into a select query. 
+    
+For example, the `ColumnValuesEqualThree` metric can be defined as: 
+
+```python
+@column_condition_partial(engine=SqlAlchemyExecutionEngine)
+def _sqlalchemy(cls, column, value_set, **kwargs):
+    return column.in_([3])
+
+```
+    
 </TabItem> 
   
 <TabItem value="existingmetric">\
