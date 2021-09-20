@@ -48,11 +48,8 @@ from great_expectations.expectations.registry import (
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
-from great_expectations.validator.validation_graph import (
-    MetricConfiguration,
-    MetricEdge,
-    ValidationGraph,
-)
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validation_graph import MetricEdge, ValidationGraph
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)

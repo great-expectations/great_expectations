@@ -18,7 +18,7 @@ from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
 from great_expectations.self_check.util import generate_test_table_name
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
