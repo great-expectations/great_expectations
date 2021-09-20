@@ -11,7 +11,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
