@@ -68,7 +68,7 @@ When using the value of an existing metric, the method signature is the same as 
         )
 ```    
     
-The `metrics` argument that the method is called with will be populated with your metric's dependencies, resolved by calling the `_get_evaluation_dependencies` class method. Suppose we wanted to implement the `ColumnValuesEqualThree` expectation by using the `column.value_counts' metric. We would then modify `_get_evaluation_dependencies`: 
+The `metrics` argument that the method is called with will be populated with your metric's dependencies, resolved by calling the `_get_evaluation_dependencies` class method. Suppose we wanted to implement a version of the `ColumnValuesEqualThree` expectation using the `column.value_counts` metric. We would then modify `_get_evaluation_dependencies`: 
     
 ```python 
     @classmethod
@@ -97,5 +97,11 @@ The `metrics` argument that the method is called with will be populated with you
                 metric_domain_kwargs=metric.metric_domain_kwargs,
             )
         return dependencies    
+```
+Then within the _sqlchemy function, we would add: 
+
+```python
+    column_value_counts = metrics.get("column.value_counts")
+    return(all(column_value_counts.index==3))
 ```
 </TabItem>
