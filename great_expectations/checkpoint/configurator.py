@@ -139,7 +139,7 @@ class SimpleCheckpointConfigurator:
             )
             # Necessary when using RuntimeDataConnector with SimpleCheckpoint
             if isinstance(other_config.batch_request, BatchRequest):
-                other_config.batch_request = other_config.batch_request.get_json_dict()
+                other_config.batch_request = other_config.batch_request.to_json_dict()
             checkpoint_config.update(other_config=other_config)
 
         logger.debug(
