@@ -398,7 +398,7 @@ class Validator:
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: Optional[Dict[Tuple, Any]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], Any]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
@@ -530,7 +530,7 @@ class Validator:
     def resolve_validation_graph(
         self,
         graph: ValidationGraph,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[Tuple[str, str, str], Any],
         runtime_configuration: Optional[dict] = None,
     ):
         if runtime_configuration is None:
@@ -571,8 +571,8 @@ class Validator:
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple, Any],
-    ):
+        metrics: Dict[Tuple[str, str, str], Any],
+    ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
         unmet_dependency_ids = set()
@@ -599,7 +599,7 @@ class Validator:
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Dict[Tuple, Any] = None,
         runtime_configuration: dict = None,
-    ) -> Dict[Tuple, MetricConfiguration]:
+    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(
