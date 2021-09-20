@@ -108,7 +108,7 @@ def _sqlalchemy(
     dialect = sqlalchemy_engine.dialect
 ```
     
-Here `sqlalchemy_engine` is a SQLAlchemy `Engine` object, whose `execute` method executes arbitrary SQL. To define the `ColumnValuesEqualThree` metric we could 
+Here `sqlalchemy_engine` is a SQLAlchemy `Engine` object, whose `execute` method executes arbitrary SQL. The keyword arguments To define the `ColumnValuesEqualThree` metric we could 
 ```
     query = sa.select(column.in_([3])).select_from(selectable)
     result = sqlalchemy_engine.execute(simple_query).fetchall()
@@ -129,7 +129,7 @@ When using the value of an existing metric, the method signature is the same as 
     ):
 ```    
     
-The `metrics` argument that the method is called with will be populated with your metric's dependencies, resolved by calling the `_get_evaluation_dependencies` class method. Suppose we wanted to implement a version of the `ColumnValuesEqualThree` expectation using the `column.value_counts` metric. We would then modify `_get_evaluation_dependencies`: 
+The `metrics` argument that the method is called with will be populated with your metric's dependencies, resolved by calling the `_get_evaluation_dependencies` class method. Suppose we wanted to implement a version of the `ColumnValuesEqualThree` expectation using the `column.value_counts` metric, which is already implemented for the SQLAlchemy execution engine. We would then modify `_get_evaluation_dependencies`: 
     
 ```python 
     @classmethod
@@ -165,3 +165,143 @@ Then within the _sqlchemy function, we would add:
     
 3. **Implement the PySpark logic for your Expectation.**
 
+Similarly to the SQLAlchemy case, there are several ways we can implement our Expectation's logic in PySpark, such as: 
+1.  Defining a partial function that takes a PySpark DataFrame column as input
+2.  Directly executing queries on PySpark DataFrames to determine the value of your Expectation's metric directly 
+3.  Using an existing metric that is already defined for PySpark. 
+
+<Tabs
+  groupId="-type"
+  defaultValue='columnmap'
+  values={[
+  {label: 'Partial Function', value:'partialfunction'},
+  {label: 'Query Execution', value:'queryexecution'},
+  {label: 'Existing Metric', value:'existingmetric'},
+  ]}>
+
+<TabItem value="partialfunction">
+Great Expectations allows for much of the PySpark DataFrame logic to be abstracted away by specifying metric behavior as a partial function. To do this, use one of the decorators `@column_aggregate_partial` (for column aggregate expectation) , `@column_condition_partial` (for column map expectations), ` `@column_pair_condition_partial` (for column pair map metrics), or `@multicolumn_condition_partial` for multicolumn map metrics`. The decorated method takes in an SQLAlchemy `Column` object and will either return a `sqlalchemy.sql.functions.Function` or a `ColumnOperator` that Great Expectations will use to generate the appropriate SQL queries. 
+
+
+For example, the `ColumnValuesEqualThree` metric can be defined as: 
+
+```python
+def _spark(cls, column, **kwargs):
+    return column.isin([3])
+```
+    
+If we need a builtin function from `pyspark.sql.functions`, usually aliased to F, the import logic in 
+`from great_expectations.expectations.metrics.import_manager import F`
+handles the case when PySpark is not installed. 
+
+`F.udf` also allows us to apply a Python function as a Spark UDF, so another way of expressing the above is as: 
+@column_condition_partial(engine=SparkDFExecutionEngine)
+def _spark(cls, column, strftime_format, **kwargs):
+    # Below is a simple validation that the provided format can both format and parse a datetime object.
+    # %D is an example of a format that can format but not parse, e.g.
+    def is_equal_to_three(val):
+        return (val == 3)
+
+    success_udf = F.udf(is_equal_to_three, sparktypes.BooleanType())
+    return success_udf(column)
+    
+Or, for example, a column aggregate metric that returns the maximum value could be written as: 
+```python
+@column_aggregate_partial(engine=SparkDFExecutionEngine)
+def _spark(cls, column, **kwargs):
+    return F.max(column)
+```    
+   
+</TabItem> 
+    
+<TabItem value="queryexecution">
+The most direct way of implementing a metric is by computing its value from provided PySpark objects. 
+    
+```python
+ @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            df,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
+        )
+        allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
+        quantiles = metric_value_kwargs["quantiles"]
+        column = accessor_domain_kwargs["column"]
+        if allow_relative_error is False:
+            allow_relative_error = 0.0
+        if (
+            not isinstance(allow_relative_error, float)
+            or allow_relative_error < 0
+            or allow_relative_error > 1
+        ):
+            raise ValueError(
+                "SparkDFDataset requires relative error to be False or to be a float between 0 and 1."
+            )
+        return df.approxQuantile(column, list(quantiles), allow_relative_error)
+
+```
+    
+Here `sqlalchemy_engine` is a SQLAlchemy `Engine` object, whose `execute` method executes arbitrary SQL. To define the `ColumnValuesEqualThree` metric we could 
+```
+    query = sa.select(column.in_([3])).select_from(selectable)
+    result = sqlalchemy_engine.execute(simple_query).fetchall()
+```
+</TabItem> 
+    
+<TabItem value="existingmetric">\
+When using the value of an existing metric, the method signature is the same as when defining a metric value. 
+```python
+    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    def _spark(
+        cls,
+        execution_engine: "SparkDFExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+```    
+    
+The `metrics` argument that the method is called with will be populated with your metric's dependencies, resolved by calling the `_get_evaluation_dependencies` class method. Suppose we wanted to implement a version of the `ColumnValuesEqualThree` expectation using the `column.value_counts` metric, which is already implemented for the PySpark execution engine. We would then modify `_get_evaluation_dependencies` as follows: 
+    
+```python 
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        if isinstance(execution_engine, SparkExecutionEngine):
+            dependencies["column.value_counts"] = MetricConfiguration(
+                metric_name="column.value_counts",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+        return dependencies    
+```
+Then within the _sqlchemy function, we would add: 
+
+```python
+    column_value_counts = metrics.get("column.value_counts")
+    return(all(column_value_counts.index==3))
+```
+</TabItem>
