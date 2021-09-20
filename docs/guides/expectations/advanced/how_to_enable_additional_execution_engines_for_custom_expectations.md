@@ -148,10 +148,6 @@ The `metrics` argument that the method is called with will be populated with you
             runtime_configuration=runtime_configuration,
         )
 
-        table_domain_kwargs = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
-
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             dependencies["column.value_counts"] = MetricConfiguration(
                 metric_name="column.value_counts",
