@@ -32,7 +32,6 @@ from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReferen
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
-    MetricResolutionError,
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -331,7 +330,7 @@ class Validator:
                 metric_configuration=metric_configuration,
             )
 
-        resolved_metrics: Dict[Tuple, Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
         self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
@@ -398,7 +397,7 @@ class Validator:
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
-        metrics: Optional[Dict[Tuple, Any]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], Any]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
@@ -530,7 +529,7 @@ class Validator:
     def resolve_validation_graph(
         self,
         graph: ValidationGraph,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[Tuple[str, str, str], Any],
         runtime_configuration: Optional[dict] = None,
     ):
         if runtime_configuration is None:
@@ -545,7 +544,7 @@ class Validator:
             )
 
             if pbar is None:
-                # noinspection PyProtectedMember
+                # noinspection PyProtectedMember,SpellCheckingInspection
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
@@ -571,8 +570,8 @@ class Validator:
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple, Any],
-    ):
+        metrics: Dict[Tuple[str, str, str], Any],
+    ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
         unmet_dependency_ids = set()
@@ -597,9 +596,9 @@ class Validator:
     def _resolve_metrics(
         execution_engine: ExecutionEngine,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple, Any] = None,
+        metrics: Dict[Tuple[str, str, str], Any] = None,
         runtime_configuration: dict = None,
-    ) -> Dict[Tuple, MetricConfiguration]:
+    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
         resolved"""
         return execution_engine.resolve_metrics(
