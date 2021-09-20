@@ -216,7 +216,7 @@ def _spark(cls, column, **kwargs):
     
 <TabItem value="queryexecution">
 The most direct way of implementing a metric is by computing its value from provided PySpark objects. 
-    
+        
 ```python
  @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -234,27 +234,17 @@ The most direct way of implementing a metric is by computing its value from prov
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
-        quantiles = metric_value_kwargs["quantiles"]
         column = accessor_domain_kwargs["column"]
-        if allow_relative_error is False:
-            allow_relative_error = 0.0
-        if (
-            not isinstance(allow_relative_error, float)
-            or allow_relative_error < 0
-            or allow_relative_error > 1
-        ):
-            raise ValueError(
-                "SparkDFDataset requires relative error to be False or to be a float between 0 and 1."
-            )
-        return df.approxQuantile(column, list(quantiles), allow_relative_error)
 
+        return df.where(F.col(column) % 3 == 0).count()
 ```
     
-Here `sqlalchemy_engine` is a SQLAlchemy `Engine` object, whose `execute` method executes arbitrary SQL. To define the `ColumnValuesEqualThree` metric we could 
-```
-    query = sa.select(column.in_([3])).select_from(selectable)
-    result = sqlalchemy_engine.execute(simple_query).fetchall()
+Here df is a PySpark DataFrame, for which we want to compute the metric value for the column `column`.
+    
+For example, to count the number of values in the column divisible by 3, 
+    
+```python
+    return df.where(F.col(column) % 3 == 0).count()
 ```
 </TabItem> 
     
