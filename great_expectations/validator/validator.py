@@ -32,7 +32,6 @@ from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReferen
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
-    MetricResolutionError,
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -331,7 +330,7 @@ class Validator:
                 metric_configuration=metric_configuration,
             )
 
-        resolved_metrics: Dict[Tuple, Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
         self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
@@ -545,7 +544,7 @@ class Validator:
             )
 
             if pbar is None:
-                # noinspection PyProtectedMember
+                # noinspection PyProtectedMember,SpellCheckingInspection
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
@@ -597,7 +596,7 @@ class Validator:
     def _resolve_metrics(
         execution_engine: ExecutionEngine,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple, Any] = None,
+        metrics: Dict[Tuple[str, str, str], Any] = None,
         runtime_configuration: dict = None,
     ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
         """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
