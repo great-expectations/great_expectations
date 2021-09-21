@@ -8,6 +8,7 @@ Changelog
 develop
 -----------------
 * [MAINTENANCE] Spark performance improvement for metrics that return unexpected values (#3368)
+* [BUGFIX] Display data asset name in notifications following checkpoint run. (#3431)
 
 0.13.34
 -----------------
