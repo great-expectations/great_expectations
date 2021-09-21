@@ -65,9 +65,5 @@ class ExceptionInfo(SerializableDotDict):
 
     def __hash__(self) -> int:
         """Overrides the default implementation"""
-        _result_hash: int = (
-            hash(self.exception_traceback)
-            ^ hash(self.exception_message)
-            ^ hash(self.raised_exception)
-        )
+        _result_hash: int = hash(self.id)
         return _result_hash
