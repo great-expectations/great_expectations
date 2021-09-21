@@ -46,6 +46,8 @@ class SlackRenderer(Renderer):
                 data_asset_name = validation_result.meta["batch_kwargs"].get(
                     "data_asset_name", "__no_data_asset_name__"
                 )
+            elif "active_batch_definition" in validation_result.meta:
+                data_asset_name = validation_result.meta["active_batch_definition"].data_asset_name
             else:
                 data_asset_name = "__no_data_asset_name__"
 
