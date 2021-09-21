@@ -418,7 +418,7 @@ class Validator:
                         configuration=evaluated_config,
                         runtime_configuration=runtime_configuration,
                     )
-                    expectation_validation_graph.incorporate_edges(graph=graph)
+                    expectation_validation_graph.update(graph=graph)
                 expectation_validation_graphs.append(expectation_validation_graph)
                 processed_configurations.append(evaluated_config)
             except Exception as err:
@@ -469,15 +469,15 @@ class Validator:
             # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
             rejected_configurations: List[ExpectationConfiguration] = []
             for expectation_validation_graph in expectation_validation_graphs:
-                metric_exception_infos: Set[
+                metric_exception_info: Set[
                     ExceptionInfo
-                ] = expectation_validation_graph.get_exception_infos(
+                ] = expectation_validation_graph.get_exception_info(
                     metric_infos=aborted_metrics_infos
                 )
                 # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
-                if len(metric_exception_infos) > 0:
+                if len(metric_exception_info) > 0:
                     configuration = expectation_validation_graph.configuration
-                    for exception_info in metric_exception_infos:
+                    for exception_info in metric_exception_info:
                         result = ExpectationValidationResult(
                             success=False,
                             exception_info=exception_info,
@@ -674,16 +674,16 @@ class Validator:
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_infos:
                             failed_metric_infos[failed_metric.id]["num_failures"] += 1
-                            failed_metric_infos[failed_metric.id][
-                                "exception_infos"
-                            ].add(exception_info)
+                            failed_metric_infos[failed_metric.id]["exception_info"].add(
+                                exception_info
+                            )
                         else:
                             failed_metric_infos[failed_metric.id] = {}
                             failed_metric_infos[failed_metric.id][
                                 "metric_configuration"
                             ] = failed_metric
                             failed_metric_infos[failed_metric.id]["num_failures"] = 1
-                            failed_metric_infos[failed_metric.id]["exception_infos"] = {
+                            failed_metric_infos[failed_metric.id]["exception_info"] = {
                                 exception_info
                             }
                 else:
