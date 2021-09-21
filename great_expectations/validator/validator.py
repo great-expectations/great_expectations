@@ -48,6 +48,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import MetricEdge, ValidationGraph
 
@@ -264,21 +265,19 @@ class Validator:
 
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
-                    raised_exception = True
                     exception_traceback = traceback.format_exc()
                     exception_message = f"{type(err).__name__}: {str(err)}"
-
-                    validation_result = ExpectationValidationResult(
-                        expectation_config=configuration,
-                        success=False,
+                    exception_info = ExceptionInfo(
+                        **{
+                            "exception_traceback": exception_traceback,
+                            "exception_message": exception_message,
+                        }
                     )
-
-                    validation_result.exception_info = {
-                        "raised_exception": raised_exception,
-                        "exception_message": exception_message,
-                        "exception_traceback": exception_traceback,
-                    }
-
+                    validation_result = ExpectationValidationResult(
+                        success=False,
+                        exception_info=exception_info,
+                        expectation_config=configuration,
+                    )
                 else:
                     raise err
             return validation_result
@@ -451,15 +450,17 @@ class Validator:
                 processed_configurations.append(evaluated_config)
             except Exception as err:
                 if catch_exceptions:
-                    raised_exception = True
                     exception_traceback = traceback.format_exc()
+                    exception_message = str(err)
+                    exception_info = ExceptionInfo(
+                        **{
+                            "exception_traceback": exception_traceback,
+                            "exception_message": exception_message,
+                        }
+                    )
                     result = ExpectationValidationResult(
                         success=False,
-                        exception_info={
-                            "raised_exception": raised_exception,
-                            "exception_traceback": exception_traceback,
-                            "exception_message": str(err),
-                        },
+                        exception_info=exception_info,
                         expectation_config=evaluated_config,
                     )
                     evrs.append(result)
@@ -479,16 +480,18 @@ class Validator:
             )
         except Exception as err:
             if catch_exceptions:
-                raised_exception = True
                 exception_traceback = traceback.format_exc()
+                exception_message = str(err)
+                exception_info = ExceptionInfo(
+                    **{
+                        "exception_traceback": exception_traceback,
+                        "exception_message": exception_message,
+                    }
+                )
                 for configuration in processed_configurations:
                     result = ExpectationValidationResult(
                         success=False,
-                        exception_info={
-                            "raised_exception": raised_exception,
-                            "exception_traceback": exception_traceback,
-                            "exception_message": str(err),
-                        },
+                        exception_info=exception_info,
                         expectation_config=configuration,
                     )
                     evrs.append(result)
@@ -506,16 +509,17 @@ class Validator:
                 evrs.append(result)
             except Exception as err:
                 if catch_exceptions:
-                    raised_exception = True
                     exception_traceback = traceback.format_exc()
-
+                    exception_message = str(err)
+                    exception_info = ExceptionInfo(
+                        **{
+                            "exception_traceback": exception_traceback,
+                            "exception_message": exception_message,
+                        }
+                    )
                     result = ExpectationValidationResult(
                         success=False,
-                        exception_info={
-                            "raised_exception": raised_exception,
-                            "exception_traceback": exception_traceback,
-                            "exception_message": str(err),
-                        },
+                        exception_info=exception_info,
                         expectation_config=configuration,
                     )
                     evrs.append(result)
