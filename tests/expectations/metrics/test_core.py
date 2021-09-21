@@ -21,7 +21,7 @@ from great_expectations.self_check.util import (
     build_sa_engine,
     build_spark_engine,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -160,7 +160,7 @@ def test_max_metric_column_does_not_exist_pd():
         },
     )
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -234,7 +234,7 @@ def test_max_metric_column_does_not_exist_sa(sa):
         },
     )
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -316,7 +316,7 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
         },
     )
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -605,7 +605,7 @@ def test_map_unique_column_does_not_exist_pd():
         },
     )
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -746,7 +746,7 @@ def test_map_unique_column_does_not_exist_sa(sa):
             "table.columns": table_columns_metric,
         },
     )
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics
@@ -884,7 +884,7 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
         },
     )
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics
