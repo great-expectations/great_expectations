@@ -70,12 +70,11 @@ class ExpectationValidationGraph:
     ) -> Set[ExceptionInfo]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
         metric_exception_info: Set[ExceptionInfo] = set()
-        metric_id: str
-        metric_info: Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]
-        exception_info: ExceptionInfo
-        for metric_id, metric_info in metric_info.items():
+        metric_id: Tuple[str, str, str]
+        metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
+        for metric_id, metric_info_item in metric_info.items():
             metric_exception_info.update(
-                cast(Set[ExceptionInfo], metric_info["exception_info"])
+                cast(Set[ExceptionInfo], metric_info_item["exception_info"])
             )
 
         return metric_exception_info
