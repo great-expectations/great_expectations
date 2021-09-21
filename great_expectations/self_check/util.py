@@ -1902,33 +1902,45 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 
 
 def check_json_test_result(test, result, data_asset=None):
+    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+    if "unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and ("unexpected_list" in test["out"]["result"]):
+            (
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+        elif "unexpected_list" in test["out"]:
+            (
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+
+    if "partial_unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and ("partial_unexpected_list" in test["out"]["result"]):
+            (
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+        elif "partial_unexpected_list" in test["out"]:
+            (
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+
     # Check results
-    # For Spark we cannot guarantee the order in which values are returned, so we sort for testing purposes
-    if (test["exact_match_out"] is True) and isinstance(
-        data_asset, (SparkDFDataset, SparkDFBatchData)
-    ):
-        if ("unexpected_list" in result["result"]) and (
-            "unexpected_list" in test["out"]["result"]
-        ):
-            (
-                test["out"]["result"]["unexpected_list"],
-                result["result"]["unexpected_list"],
-            ) = sort_unexpected_values(
-                test["out"]["result"]["unexpected_list"],
-                result["result"]["unexpected_list"],
-            )
-        if ("partial_unexpected_list" in result["result"]) and (
-            "partial_unexpected_list" in test["out"]["result"]
-        ):
-            (
-                test["out"]["result"]["partial_unexpected_list"],
-                result["result"]["partial_unexpected_list"],
-            ) = sort_unexpected_values(
-                test["out"]["result"]["partial_unexpected_list"],
-                result["result"]["partial_unexpected_list"],
-            )
-        assert result == expectationValidationResultSchema.load(test["out"])
-    elif test["exact_match_out"] is True:
+    if test["exact_match_out"] is True:
         assert result == expectationValidationResultSchema.load(test["out"])
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
@@ -1977,10 +1989,6 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                value, result["result"]["unexpected_list"] = sort_unexpected_values(
-                    value, result["result"]["unexpected_list"]
-                )
-
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "
                     + str(value)
@@ -1989,13 +1997,6 @@ def check_json_test_result(test, result, data_asset=None):
                 )
 
             elif key == "partial_unexpected_list":
-                (
-                    value,
-                    result["result"]["partial_unexpected_list"],
-                ) = sort_unexpected_values(
-                    value, result["result"]["partial_unexpected_list"]
-                )
-
                 assert result["result"]["partial_unexpected_list"] == value, (
                     "expected "
                     + str(value)
