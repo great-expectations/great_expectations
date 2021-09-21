@@ -1922,7 +1922,9 @@ def check_json_test_result(test, result, data_asset=None):
             )
 
     if "partial_unexpected_list" in result["result"]:
-        if ("result" in test["out"]) and ("partial_unexpected_list" in test["out"]["result"]):
+        if ("result" in test["out"]) and (
+            "partial_unexpected_list" in test["out"]["result"]
+        ):
             (
                 test["out"]["result"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
