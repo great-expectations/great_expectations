@@ -208,7 +208,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 object_name=expectation_type,
                 renderer_type="renderer.diagnostic.meta_properties",
             )
-            output_row[0] += meta_properties_renderer[1](result=result)
+            if meta_properties_renderer:
+                output_row[0] += meta_properties_renderer[1](result=result)
 
             return output_row
 
