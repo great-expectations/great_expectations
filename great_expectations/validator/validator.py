@@ -337,7 +337,7 @@ class Validator:
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
         # noinspection PyUnusedLocal
-        aborted_metrics_infos: Dict[
+        aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, List[Exception], int]],
         ] = self.resolve_validation_graph(
@@ -457,7 +457,7 @@ class Validator:
 
         try:
             # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
-            aborted_metrics_infos: Dict[
+            aborted_metrics_info: Dict[
                 Tuple[str, str, str],
                 Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
             ] = self.resolve_validation_graph(
@@ -472,7 +472,7 @@ class Validator:
                 metric_exception_info: Set[
                     ExceptionInfo
                 ] = expectation_validation_graph.get_exception_info(
-                    metric_infos=aborted_metrics_infos
+                    metric_info=aborted_metrics_info
                 )
                 # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
                 if len(metric_exception_info) > 0:
@@ -610,11 +610,11 @@ class Validator:
         else:
             catch_exceptions = False
 
-        failed_metric_infos: Dict[
+        failed_metric_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = {}
-        aborted_metrics_infos: Dict[
+        aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = {}
@@ -643,11 +643,11 @@ class Validator:
 
             for metric in ready_metrics:
                 if (
-                    metric.id in failed_metric_infos
-                    and failed_metric_infos[metric.id]["num_failures"]
+                    metric.id in failed_metric_info
+                    and failed_metric_info[metric.id]["num_failures"]
                     >= MAX_METRIC_COMPUTATION_RETRIES
                 ):
-                    aborted_metrics_infos[metric.id] = failed_metric_infos[metric.id]
+                    aborted_metrics_info[metric.id] = failed_metric_info[metric.id]
                 else:
                     computable_metrics.add(metric)
 
@@ -672,18 +672,18 @@ class Validator:
                         }
                     )
                     for failed_metric in err.failed_metrics:
-                        if failed_metric.id in failed_metric_infos:
-                            failed_metric_infos[failed_metric.id]["num_failures"] += 1
-                            failed_metric_infos[failed_metric.id]["exception_info"].add(
+                        if failed_metric.id in failed_metric_info:
+                            failed_metric_info[failed_metric.id]["num_failures"] += 1
+                            failed_metric_info[failed_metric.id]["exception_info"].add(
                                 exception_info
                             )
                         else:
-                            failed_metric_infos[failed_metric.id] = {}
-                            failed_metric_infos[failed_metric.id][
+                            failed_metric_info[failed_metric.id] = {}
+                            failed_metric_info[failed_metric.id][
                                 "metric_configuration"
                             ] = failed_metric
-                            failed_metric_infos[failed_metric.id]["num_failures"] = 1
-                            failed_metric_infos[failed_metric.id]["exception_info"] = {
+                            failed_metric_info[failed_metric.id]["num_failures"] = 1
+                            failed_metric_info[failed_metric.id]["exception_info"] = {
                                 exception_info
                             }
                 else:
@@ -700,13 +700,13 @@ aborting graph resolution.
                     raise e
 
             if (len(ready_metrics) + len(needed_metrics) == 0) or (
-                len(ready_metrics) == len(aborted_metrics_infos)
+                len(ready_metrics) == len(aborted_metrics_info)
             ):
                 done = True
 
         pbar.close()
 
-        return aborted_metrics_infos
+        return aborted_metrics_info
 
     @staticmethod
     def _parse_validation_graph(
