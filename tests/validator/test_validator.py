@@ -363,8 +363,11 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
         "catch_exceptions": True,
         "result_format": {"result_format": "BASIC"},
     }
+
     execution_engine = PandasExecutionEngine()
+
     validator = Validator(execution_engine=execution_engine, batches=[batch])
+
     expectation_impl = get_expectation_impl(expectation_configuration.expectation_type)
     validation_dependencies = expectation_impl().get_validation_dependencies(
         expectation_configuration, execution_engine, runtime_configuration
