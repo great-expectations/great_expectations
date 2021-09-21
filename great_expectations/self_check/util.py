@@ -1766,6 +1766,30 @@ def generate_expectation_tests(
     return parametrized_tests
 
 
+def sort_unexpected_values(test_value_list, result_value_list):
+    # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
+    if (isinstance(test_value_list, list)) & (len(test_value_list) >= 1):
+        # __lt__ is not implemented for python dictionaries making sorting trickier
+        # in our case, we will sort on the values for each key sequentially
+        if isinstance(test_value_list[0], dict):
+            test_value_list = sorted(
+                test_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+            result_value_list = sorted(
+                result_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+        # if python built-in class has __lt__ then sorting can always work this way
+        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+            NotImplemented
+        ):
+            test_value_list = sorted(test_value_list, key=lambda x: str(x))
+            result_value_list = sorted(result_value_list, key=lambda x: str(x))
+
+    return test_value_list, result_value_list
+
+
 def evaluate_json_test(data_asset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
