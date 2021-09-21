@@ -11,22 +11,25 @@ from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
+    ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
 
 
 def create_checkpoint(
-    number_of_tables: int, html_dir: Optional[str] = None
+    number_of_tables: int, backend_api: str = "V3", html_dir: Optional[str] = None
 ) -> SimpleCheckpoint:
     """Create a checkpoint from scratch, including setting up data sources/etc.
 
     Args:
         number_of_tables: Number of tables validated in the checkpoint. The tables are assumed to be created by
           "setup_bigquery_tables_for_performance_test.sh", which creates 100 tables, so this number must be <= 100.
+        backend_api: Either "V3" or "V2".
         html_dir: Directory path to write the HTML Data Docs to. If not specified, Data Docs are not written.
 
     Returns:
+        Configured checkpoint ready to be run.
     """
     checkpoint_name = "my_checkpoint"
     datasource_name = "my_datasource"
@@ -37,18 +40,27 @@ def create_checkpoint(
     suite_and_asset_names = [f"taxi_trips_{i}" for i in range(1, number_of_tables + 1)]
 
     context = _create_context(
-        datasource_name, data_connector_name, suite_and_asset_names, html_dir
+        backend_api,
+        datasource_name,
+        data_connector_name,
+        suite_and_asset_names,
+        html_dir,
     )
     for suite_name in suite_and_asset_names:
         _add_expectation_configuration(context=context, suite_name=suite_name)
 
     return _add_checkpoint(
         context,
+        backend_api,
         datasource_name,
         data_connector_name,
         checkpoint_name,
         suite_and_asset_names,
     )
+
+
+def concurrency_config() -> ConcurrencyConfig:
+    return ConcurrencyConfig(enabled=True)
 
 
 def expected_validation_results() -> List[dict]:
@@ -122,8 +134,6 @@ def expected_validation_results() -> List[dict]:
                 "unexpected_count": 0,
                 "unexpected_percent": 0.0,
                 "partial_unexpected_list": [],
-                "partial_unexpected_index_list": None,
-                "partial_unexpected_counts": [],
             },
             "exception_info": {
                 "raised_exception": False,
@@ -179,10 +189,7 @@ def expected_validation_results() -> List[dict]:
                 "partial_unexpected_list": [],
                 "missing_count": 0,
                 "missing_percent": 0.0,
-                "unexpected_percent_total": 0.0,
                 "unexpected_percent_nonmissing": 0.0,
-                "partial_unexpected_index_list": None,
-                "partial_unexpected_counts": [],
             },
             "exception_info": {
                 "raised_exception": False,
@@ -209,10 +216,7 @@ def expected_validation_results() -> List[dict]:
                 "partial_unexpected_list": [],
                 "missing_count": 0,
                 "missing_percent": 0.0,
-                "unexpected_percent_total": 0.0,
                 "unexpected_percent_nonmissing": 0.0,
-                "partial_unexpected_index_list": None,
-                "partial_unexpected_counts": [],
             },
             "exception_info": {
                 "raised_exception": False,
@@ -225,6 +229,7 @@ def expected_validation_results() -> List[dict]:
 
 
 def _create_context(
+    backend_api: str,
     datasource_name: str,
     data_connector_name: str,
     asset_names: List[str],
@@ -254,54 +259,95 @@ def _create_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
         data_docs_sites=data_docs_sites,
         anonymous_usage_statistics={"enabled": False},
+        concurrency=concurrency_config(),
     )
 
     context = BaseDataContext(project_config=data_context_config)
 
-    datasource_config = {
-        "name": datasource_name,
-        "class_name": "Datasource",
-        "execution_engine": {
-            "class_name": "SqlAlchemyExecutionEngine",
-            "connection_string": f"bigquery://{bigquery_project}/{bigquery_dataset}",
-        },
-        "data_connectors": {
-            data_connector_name: {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "name": "whole_table",
-                "assets": {asset_name: {} for asset_name in asset_names},
+    if backend_api == "V3":
+        datasource_config = {
+            "name": datasource_name,
+            "class_name": "Datasource",
+            "execution_engine": {
+                "class_name": "SqlAlchemyExecutionEngine",
+                "connection_string": f"bigquery://{bigquery_project}/{bigquery_dataset}",
             },
-        },
-    }
+            "data_connectors": {
+                data_connector_name: {
+                    "class_name": "ConfiguredAssetSqlDataConnector",
+                    "name": "whole_table",
+                    "assets": {asset_name: {} for asset_name in asset_names},
+                },
+            },
+        }
+    elif backend_api == "V2":
+        datasource_config = {
+            "name": datasource_name,
+            "credentials": {
+                "url": f"bigquery://{bigquery_project}/{bigquery_dataset}",
+            },
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+            "batch_kwargs_generators": {},
+            "data_asset_type": {
+                "module_name": "great_expectations.dataset",
+                "class_name": "SqlAlchemyDataset",
+            },
+        }
+    else:
+        raise ValueError(f"Unsupported backend_api {backend_api}")
+
     context.add_datasource(**datasource_config)
     return context
 
 
 def _add_checkpoint(
     context: BaseDataContext,
+    backend_api: str,
     datasource_name: str,
     data_connector_name: str,
     checkpoint_name: str,
     suite_and_asset_names=[],
 ) -> SimpleCheckpoint:
-    validations = [
-        {
-            "expectation_suite_name": suite_and_asset_name,
-            "batch_request": {
-                "datasource_name": datasource_name,
-                "data_connector_name": data_connector_name,
-                "data_asset_name": suite_and_asset_name,
-                "batch_spec_passthrough": {"create_temp_table": False},
-            },
-        }
-        for suite_and_asset_name in suite_and_asset_names
-    ]
-    return context.add_checkpoint(
-        name=checkpoint_name,
-        class_name="SimpleCheckpoint",
-        validations=validations,
-        run_name_template="my_run_name",
-    )
+    if backend_api == "V3":
+        validations = [
+            {
+                "expectation_suite_name": suite_and_asset_name,
+                "batch_request": {
+                    "datasource_name": datasource_name,
+                    "data_connector_name": data_connector_name,
+                    "data_asset_name": suite_and_asset_name,
+                    "batch_spec_passthrough": {"create_temp_table": False},
+                },
+            }
+            for suite_and_asset_name in suite_and_asset_names
+        ]
+        return context.add_checkpoint(
+            name=checkpoint_name,
+            class_name="SimpleCheckpoint",
+            validations=validations,
+            run_name_template="my_run_name",
+        )
+    elif backend_api == "V2":
+        batches = [
+            {
+                "expectation_suite_names": [suite_and_asset_name],
+                "batch_kwargs": {
+                    "datasource": datasource_name,
+                    "data_asset_name": suite_and_asset_name,
+                    "table": suite_and_asset_name,
+                    "batch_spec_passthrough": {"create_temp_table": False},
+                },
+            }
+            for suite_and_asset_name in suite_and_asset_names
+        ]
+        return context.add_checkpoint(
+            name=checkpoint_name,
+            class_name="LegacyCheckpoint",
+            batches=batches,
+        )
+    else:
+        raise ValueError(f"Unsupported backend_api {backend_api}")
 
 
 def _add_expectation_configuration(context: BaseDataContext, suite_name: str):

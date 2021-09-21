@@ -7,11 +7,11 @@ from typing import Any, Dict, Iterable, Optional, Tuple, Union
 import pandas as pd
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
-from great_expectations.exceptions import ExecutionEngineError, GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -137,7 +137,7 @@ class ExecutionEngine(ABC):
         if batch_id in self.loaded_batch_data_dict.keys():
             self._active_batch_data_id = batch_id
         else:
-            raise ExecutionEngineError(
+            raise ge_exceptions.ExecutionEngineError(
                 f"Unable to set active_batch_data_id to {batch_id}. The may data may not be loaded."
             )
 
@@ -203,9 +203,9 @@ class ExecutionEngine(ABC):
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple, MetricConfiguration]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> dict:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
 
@@ -220,20 +220,24 @@ class ExecutionEngine(ABC):
         if metrics is None:
             metrics = {}
 
-        resolved_metrics = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
         metric_fn_bundle = []
         for metric_to_resolve in metrics_to_resolve:
+            metric_dependencies = {}
+            for k, v in metric_to_resolve.metric_dependencies.items():
+                if v.id in metrics:
+                    metric_dependencies[k] = metrics[v.id]
+                elif self._caching and v.id in self._metric_cache:
+                    metric_dependencies[k] = self._metric_cache[v.id]
+                else:
+                    raise ge_exceptions.MetricError(
+                        message=f'Missing metric dependency: {str(k)} for metric "{metric_to_resolve.metric_name}".'
+                    )
+
             metric_class, metric_fn = get_metric_provider(
                 metric_name=metric_to_resolve.metric_name, execution_engine=self
             )
-            try:
-                metric_dependencies = {
-                    k: metrics[v.id]
-                    for k, v in metric_to_resolve.metric_dependencies.items()
-                }
-            except KeyError as e:
-                raise GreatExpectationsError(f"Missing metric dependency: {str(e)}")
             metric_provider_kwargs = {
                 "cls": metric_class,
                 "execution_engine": self,
@@ -250,8 +254,8 @@ class ExecutionEngine(ABC):
                         accessor_domain_kwargs,
                     ) = metric_dependencies.pop("metric_partial_fn")
                 except KeyError as e:
-                    raise GreatExpectationsError(
-                        f"Missing metric dependency: {str(e)} for metric {metric_to_resolve.metric_name}"
+                    raise ge_exceptions.MetricError(
+                        message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
                     )
                 metric_fn_bundle.append(
                     (
@@ -277,22 +281,45 @@ class ExecutionEngine(ABC):
             ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except Exception as e:
+                    raise ge_exceptions.MetricResolutionError(
+                        message=str(e), failed_metrics=(metric_to_resolve,)
+                    )
             elif metric_fn_type == MetricFunctionTypes.VALUE:
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except Exception as e:
+                    raise ge_exceptions.MetricResolutionError(
+                        message=str(e), failed_metrics=(metric_to_resolve,)
+                    )
             else:
                 logger.warning(
                     f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
                 )
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except Exception as e:
+                    raise ge_exceptions.MetricResolutionError(
+                        message=str(e), failed_metrics=(metric_to_resolve,)
+                    )
         if len(metric_fn_bundle) > 0:
-            resolved_metrics.update(self.resolve_metric_bundle(metric_fn_bundle))
+            try:
+                new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
+                resolved_metrics.update(new_resolved)
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e), failed_metrics=[x[0] for x in metric_fn_bundle]
+                )
+        if self._caching:
+            self._metric_cache.update(resolved_metrics)
 
         return resolved_metrics
 
@@ -356,12 +383,12 @@ class ExecutionEngine(ABC):
             return domain_kwargs
 
         if filter_nan:
-            raise GreatExpectationsError(
+            raise ge_exceptions.GreatExpectationsError(
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
         if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise GreatExpectationsError(
+            raise ge_exceptions.GreatExpectationsError(
                 "ExecutionEngine does not support updating existing row_conditions."
             )
 

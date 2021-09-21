@@ -6,7 +6,7 @@ from great_expectations.expectations.metrics import ColumnMax, ColumnValuesNonNu
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
