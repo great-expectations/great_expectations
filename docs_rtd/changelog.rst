@@ -7,6 +7,8 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Display data asset name in notifications following checkpoint run.
+
 
 0.13.34
 -----------------
