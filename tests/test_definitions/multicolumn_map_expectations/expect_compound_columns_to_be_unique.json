@@ -308,6 +308,125 @@
           ]
         }
       }
+    },{
+      "title": "unexpected_values_exact_match_out_with_unexpected_index_list",
+      "exact_match_out" : true,
+      "only_for": ["spark"],
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "exception_info": {
+          "raised_exception": false,
+          "exception_traceback": null,
+          "exception_message": null
+        },
+        "expectation_config": {
+          "kwargs": {
+            "result_format": "COMPLETE",
+            "include_config": false,
+            "column_list": [
+              "a",
+              "b"
+            ],
+            "batch_id": []
+          },
+          "meta": {},
+          "expectation_type": "expect_compound_columns_to_be_unique"
+        },
+        "result": {
+          "element_count": 10,
+          "unexpected_count": 9,
+          "unexpected_percent": 100.0,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "missing_count": 1,
+          "missing_percent": 10.0,
+          "unexpected_percent_total": 90.0,
+          "unexpected_percent_nonmissing": 100.0,
+          "partial_unexpected_index_list": null,
+          "partial_unexpected_counts": [
+            "partial_exception_counts requires a hashable type"
+          ],
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "unexpected_index_list": null
+        },
+        "meta": {},
+        "success": false
+      }
     }]
   }]
 }

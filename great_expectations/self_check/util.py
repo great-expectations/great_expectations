@@ -1903,7 +1903,34 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 
 def check_json_test_result(test, result, data_asset=None):
     # Check results
-    if test["exact_match_out"] is True:
+    # For Spark we cannot guarantee the order in which values are returned, so we sort for testing purposes
+    if (test["exact_match_out"] is True) and isinstance(
+        data_asset, (SparkDFDataset, SparkDFBatchData)
+    ):
+        if ("unexpected_list" in result["result"]) and (
+            "unexpected_list" in test["out"]["result"]
+        ):
+            (
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+        if ("partial_unexpected_list" in result["result"]) and (
+            "partial_unexpected_list" in test["out"]["result"]
+        ):
+            (
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+        print(f"RESULT: {result}")
+        print(f"TEST: {expectationValidationResultSchema.load(test['out'])}")
+        assert result == expectationValidationResultSchema.load(test["out"])
+    elif test["exact_match_out"] is True:
         assert result == expectationValidationResultSchema.load(test["out"])
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
