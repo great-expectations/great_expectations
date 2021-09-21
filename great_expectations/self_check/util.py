@@ -1989,7 +1989,10 @@ def check_json_test_result(test, result, data_asset=None):
                 )
 
             elif key == "partial_unexpected_list":
-                value, result["result"]["partial_unexpected_list"] = sort_unexpected_values(
+                (
+                    value,
+                    result["result"]["partial_unexpected_list"],
+                ) = sort_unexpected_values(
                     value, result["result"]["partial_unexpected_list"]
                 )
 
