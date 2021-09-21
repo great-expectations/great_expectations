@@ -31,7 +31,7 @@ from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 

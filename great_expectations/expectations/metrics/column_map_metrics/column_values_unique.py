@@ -21,7 +21,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.expectations.metrics.map_metric_provider import sa as sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnValuesUnique(ColumnMapMetricProvider):
