@@ -1927,8 +1927,6 @@ def check_json_test_result(test, result, data_asset=None):
                 test["out"]["result"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             )
-        print(f"RESULT: {result}")
-        print(f"TEST: {expectationValidationResultSchema.load(test['out'])}")
         assert result == expectationValidationResultSchema.load(test["out"])
     elif test["exact_match_out"] is True:
         assert result == expectationValidationResultSchema.load(test["out"])
