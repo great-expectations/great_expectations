@@ -461,7 +461,7 @@ class Validator:
                     result = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,
-                        expectation_config=configuration,
+                        expectation_config=evaluated_config,
                     )
                     evrs.append(result)
                 else:

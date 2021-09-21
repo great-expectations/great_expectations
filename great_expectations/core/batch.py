@@ -139,14 +139,7 @@ class BatchDefinition(SerializableDictDot):
 
     def __hash__(self) -> int:
         """Overrides the default implementation"""
-        _result_hash: int = (
-            hash(self.datasource_name)
-            ^ hash(self.data_connector_name)
-            ^ hash(self.data_asset_name)
-        )
-        if self.batch_identifiers is not None:
-            for key, value in self.batch_identifiers.items():
-                _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
+        _result_hash: int = hash(self.id)
         return _result_hash
 
 
