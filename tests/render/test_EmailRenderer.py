@@ -1,9 +1,8 @@
+from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.render.renderer import EmailRenderer
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core import IDDict
 
 
 def test_EmailRenderer_validation_results_with_datadocs():
