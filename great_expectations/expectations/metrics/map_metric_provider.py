@@ -2477,7 +2477,7 @@ def _spark_column_pair_map_condition_values(
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     (
-        boolean_mapped_unexpected_values,
+        unexpected_condition,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
@@ -2503,7 +2503,9 @@ def _spark_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    filtered = df.filter(boolean_mapped_unexpected_values)
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
