@@ -1979,25 +1979,9 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
-                if (isinstance(value, list)) & (len(value) >= 1):
-                    # __lt__ is not implemented for python dictionaries making sorting trickier
-                    # in our case, we will sort on the values for each key sequentially
-                    if isinstance(value[0], dict):
-                        value = sorted(
-                            value,
-                            key=lambda x: tuple(x[k] for k in list(value[0].keys())),
-                        )
-                        result["result"]["unexpected_list"] = sorted(
-                            result["result"]["unexpected_list"],
-                            key=lambda x: tuple(x[k] for k in list(value[0].keys())),
-                        )
-                    # if python built-in class has __lt__ then sorting can always work this way
-                    elif type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = sorted(value, key=lambda x: str(x))
-                        result["result"]["unexpected_list"] = sorted(
-                            result["result"]["unexpected_list"], key=lambda x: str(x)
-                        )
+                value, result["result"]["unexpected_list"] = sort_unexpected_values(
+                    value, result["result"]["unexpected_list"]
+                )
 
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "
