@@ -6,7 +6,6 @@ from great_expectations.core.batch import BatchDefinition
 from great_expectations.core import IDDict
 
 
-
 def test_EmailRenderer_validation_results_with_datadocs():
 
     validation_result_suite = ExpectationSuiteValidationResult(
@@ -64,11 +63,12 @@ def test_EmailRenderer_validation_results_with_datadocs():
 
     assert rendered_output == expected_output
 
+
 def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
     batch_definition = BatchDefinition(
         datasource_name="test_datasource",
         data_connector_name="test_dataconnector",
-        data_asset_name = "test_data_asset",
+        data_asset_name="test_data_asset",
         batch_identifiers=IDDict({"id": "my_id"}),
     )
 
@@ -83,7 +83,7 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
         },
         meta={
             "great_expectations_version": "v0.8.0__develop",
-            "active_batch_definition":batch_definition,
+            "active_batch_definition": batch_definition,
             "expectation_suite_name": "default",
             "run_id": "2019-09-25T060538.829112Z",
         },
@@ -121,7 +121,6 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
     )
 
     assert rendered_output == expected_output
-
 
 
 def test_EmailRenderer_get_report_element():

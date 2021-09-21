@@ -133,12 +133,13 @@ def test_SlackRenderer_validation_results_with_datadocs():
 
     assert rendered_output == expected_output
 
+
 def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
 
     batch_definition = BatchDefinition(
         datasource_name="test_datasource",
         data_connector_name="test_dataconnector",
-        data_asset_name = "test_data_asset",
+        data_asset_name="test_data_asset",
         batch_identifiers=IDDict({"id": "my_id"}),
     )
     validation_result_suite = ExpectationSuiteValidationResult(
