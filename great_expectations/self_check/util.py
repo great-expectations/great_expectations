@@ -1988,6 +1988,18 @@ def check_json_test_result(test, result, data_asset=None):
                     + str(result["result"]["unexpected_list"])
                 )
 
+            elif key == "partial_unexpected_list":
+                value, result["result"]["partial_unexpected_list"] = sort_unexpected_values(
+                    value, result["result"]["partial_unexpected_list"]
+                )
+
+                assert result["result"]["partial_unexpected_list"] == value, (
+                    "expected "
+                    + str(value)
+                    + " but got "
+                    + str(result["result"]["partial_unexpected_list"])
+                )
+
             elif key == "details":
                 assert result["result"]["details"] == value
 
