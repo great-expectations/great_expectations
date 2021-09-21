@@ -218,7 +218,7 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
-                // 'guides/validation/how_to_validate_data_by_running_a_checkpoint',
+                'guides/validation/how_to_validate_data_by_running_a_checkpoint',
               ]
             },
             {
