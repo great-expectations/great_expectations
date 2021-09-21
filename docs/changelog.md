@@ -4,7 +4,6 @@ title: Changelog
 
 ### Develop
 * [BUGFIX] Addresses issue #2993 (#3054) by using configuration over list keys when possible.
-* [BUGFIX] Display data asset name in notifications following checkpoint run.
 
 
 ### 0.13.34
