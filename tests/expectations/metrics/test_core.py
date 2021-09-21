@@ -21,7 +21,7 @@ from great_expectations.self_check.util import (
     build_sa_engine,
     build_spark_engine,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 

@@ -6,7 +6,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 context = DataContext()
 suite = context.get_expectation_suite("yellow_trip_data_validations")

@@ -17,7 +17,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 
 # Function to test for spark dataframe equality
 from great_expectations.self_check.util import build_sa_engine
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 

@@ -9,7 +9,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
