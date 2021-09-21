@@ -10,7 +10,6 @@ from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-import pandas as pd
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
@@ -25,7 +24,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.id_dict import BatchSpec, IDDict
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
@@ -61,11 +60,20 @@ from great_expectations.validator.validation_graph import (
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
 
 MAX_METRIC_COMPUTATION_RETRIES = 3
 
 
 class Validator:
+    # noinspection PyUnusedLocal
     def __init__(
         self,
         execution_engine,
@@ -100,6 +108,8 @@ class Validator:
 
         self._batches = {}
         self.load_batch_list(batches)
+
+        self._active_batch_id = None
 
         if len(batches) > 1:
             logger.debug(
@@ -181,8 +191,8 @@ class Validator:
 
     def validate_expectation(self, name):
         """
-        Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the expectation's
-                validate method to obtain a validation result. Also adds in the runtime configuration
+        Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
+                expectation's validate method to obtain a validation result. Also adds in the runtime configuration
 
                         Args:
                             name (str): The name of the Expectation being validated
@@ -192,50 +202,53 @@ class Validator:
         """
 
         def inst_expectation(*args, **kwargs):
+            # this is used so that exceptions are caught appropriately when they occur in expectation config
+            basic_configuration_keys = {
+                "result_format",
+                "include_config",
+                "catch_exceptions",
+            }
+            basic_default_expectation_args = {
+                k: v
+                for k, v in self.default_expectation_args.items()
+                if k in basic_configuration_keys
+            }
+            basic_runtime_configuration = copy.deepcopy(basic_default_expectation_args)
+            basic_runtime_configuration.update(
+                {k: v for k, v in kwargs.items() if k in basic_configuration_keys}
+            )
+
+            expectation_impl = get_expectation_impl(name)
+            allowed_config_keys = expectation_impl.get_allowed_config_keys()
+
+            expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
+
+            meta = None
+
+            # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
+            # positional arguments to expectation methods
+            legacy_arg_names = expectation_impl.legacy_method_parameters.get(
+                name, tuple()
+            )
+            for idx, arg in enumerate(args):
+                try:
+                    arg_name = legacy_arg_names[idx]
+                    if arg_name in allowed_config_keys:
+                        expectation_kwargs[arg_name] = arg
+                    if arg_name == "meta":
+                        meta = arg
+                except IndexError:
+                    raise InvalidExpectationConfigurationError(
+                        f"Invalid positional argument: {arg}"
+                    )
+
+            configuration = ExpectationConfiguration(
+                expectation_type=name, kwargs=expectation_kwargs, meta=meta
+            )
+
+            exception_info: ExceptionInfo
+
             try:
-                expectation_impl = get_expectation_impl(name)
-                allowed_config_keys = expectation_impl.get_allowed_config_keys()
-                expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
-                meta = None
-                # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
-                # positional arguments to expectation methods
-                legacy_arg_names = expectation_impl.legacy_method_parameters.get(
-                    name, tuple()
-                )
-                for idx, arg in enumerate(args):
-                    try:
-                        arg_name = legacy_arg_names[idx]
-                        if arg_name in allowed_config_keys:
-                            expectation_kwargs[arg_name] = arg
-                        if arg_name == "meta":
-                            meta = arg
-                    except IndexError:
-                        raise InvalidExpectationConfigurationError(
-                            f"Invalid positional argument: {arg}"
-                        )
-
-                # this is used so that exceptions are caught appropriately when they occur in expectation config
-                basic_configuration_keys = {
-                    "result_format",
-                    "include_config",
-                    "catch_exceptions",
-                }
-                basic_default_expectation_args = {
-                    k: v
-                    for k, v in self.default_expectation_args.items()
-                    if k in basic_configuration_keys
-                }
-                basic_runtime_configuration = copy.deepcopy(
-                    basic_default_expectation_args
-                )
-                basic_runtime_configuration.update(
-                    {k: v for k, v in kwargs.items() if k in basic_configuration_keys}
-                )
-
-                configuration = ExpectationConfiguration(
-                    expectation_type=name, kwargs=expectation_kwargs, meta=meta
-                )
-
                 # runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
@@ -271,7 +284,6 @@ class Validator:
                     validation_result = self._data_context.update_return_obj(
                         self, validation_result
                     )
-
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     exception_traceback = traceback.format_exc()
@@ -364,8 +376,8 @@ class Validator:
         to fulfill current metric requirements, and validate these metrics.
 
                 Args:
-                    configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will
-                    be used to supply domain and values for metrics.
+                    configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that
+                    will be used to supply domain and values for metrics.
                     metrics (dict): A list of currently registered metrics in the registry
                     runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics
                     such as the result_format.
@@ -387,6 +399,7 @@ class Validator:
         expectation_validation_graphs: List[ExpectationValidationGraph] = []
         exception_info: ExceptionInfo
         processed_configurations = []
+        # noinspection SpellCheckingInspection
         evrs = []
         for configuration in configurations:
             # Validating
@@ -619,10 +632,13 @@ class Validator:
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = {}
 
-        pbar = None
-
         ready_metrics: Set[MetricConfiguration]
         needed_metrics: Set[MetricConfiguration]
+
+        exception_info: ExceptionInfo
+
+        # noinspection SpellCheckingInspection
+        pbar = None
 
         done: bool = False
         while not done:
@@ -1212,6 +1228,7 @@ set as active.
         run_name=None,
         run_time=None,
     ):
+        # noinspection SpellCheckingInspection
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
         Use the default expectation_suite=None to validate the expectations config associated with the DataAsset.
@@ -1220,7 +1237,13 @@ set as active.
             expectation_suite (json or None): \
                 If None, uses the expectations config generated with the DataAsset during the current session. \
                 If a JSON file, validates those expectations.
+            run_id (str): \
+                Used to identify this validation result as part of a collection of validations. \
+                See DataContext for more information.
             run_name (str): \
+                Used to identify this validation result as part of a collection of validations. \
+                See DataContext for more information.
+            run_time (str): \
                 Used to identify this validation result as part of a collection of validations. \
                 See DataContext for more information.
             data_context (DataContext): \
@@ -1277,6 +1300,7 @@ set as active.
         Raises:
            AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
         """
+        # noinspection PyUnusedLocal
         try:
             validation_time = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -1336,7 +1360,9 @@ set as active.
                     "loaded from a dictionary?"
                 )
                 if getattr(data_context, "_usage_statistics_handler", None):
+                    # noinspection PyProtectedMember
                     handler = data_context._usage_statistics_handler
+                    # noinspection PyProtectedMember
                     handler.send_usage_message(
                         event="data_asset.validate",
                         event_payload=handler._batch_anonymizer.anonymize_batch_info(
@@ -1374,6 +1400,7 @@ set as active.
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
+            # noinspection PyUnusedLocal
             suite_ge_version = expectation_suite.meta.get(
                 "great_expectations_version"
             ) or expectation_suite.meta.get("great_expectations.__version__")
@@ -1392,6 +1419,7 @@ set as active.
                 ):
                     column = expectation.kwargs["column"]
                 else:
+                    # noinspection SpellCheckingInspection
                     column = "_nocolumn"
                 if column not in columns:
                     columns[column] = []
@@ -1448,7 +1476,9 @@ set as active.
             self._data_context = validate__data_context
         except Exception as e:
             if getattr(data_context, "_usage_statistics_handler", None):
+                # noinspection PyProtectedMember
                 handler = data_context._usage_statistics_handler
+                # noinspection PyProtectedMember
                 handler.send_usage_message(
                     event="data_asset.validate",
                     event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
@@ -1459,7 +1489,9 @@ set as active.
             self._active_validation = False
 
         if getattr(data_context, "_usage_statistics_handler", None):
+            # noinspection PyProtectedMember
             handler = data_context._usage_statistics_handler
+            # noinspection PyProtectedMember
             handler.send_usage_message(
                 event="data_asset.validate",
                 event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
@@ -1545,9 +1577,11 @@ set as active.
             define custom classes, etc. To use developed expectations from the command-line tool, you will still need \
             to define custom classes, etc.
 
-            Check out :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations` for more information.
+            Check out :ref:`how_to_guides__creating_and_editing_expectations__how_to_create_custom_expectations` for
+            more information.
         """
 
+        # noinspection SpellCheckingInspection
         argspec = inspect.getfullargspec(function)[0][1:]
 
         new_function = self.expectation(argspec)(function)
@@ -1652,8 +1686,8 @@ class BridgeValidator:
 
         Args:
             batch (Batch): A Batch in Pandas, Spark, or SQL format
-            expectation_suite (ExpectationSuite): The Expectation Suite available to the validator within the current Data
-            Context
+            expectation_suite (ExpectationSuite): The Expectation Suite available to the validator within the current
+            Data Context
             expectation_engine (ExecutionEngine): The current Execution Engine being utilized. If this is not set, it is
             determined by the type of data within the given batch
         """
@@ -1671,15 +1705,13 @@ class BridgeValidator:
             )
 
         self.expectation_engine = expectation_engine
+
         if self.expectation_engine is None:
             # Guess the engine
-            try:
-                import pandas as pd
-
+            if pd is not None:
                 if isinstance(batch.data, pd.DataFrame):
                     self.expectation_engine = PandasDataset
-            except ImportError:
-                pass
+
         if self.expectation_engine is None:
             if isinstance(batch.data, SqlAlchemyBatchReference):
                 self.expectation_engine = SqlAlchemyDataset
@@ -1707,8 +1739,6 @@ class BridgeValidator:
         contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)
         """
         if issubclass(self.expectation_engine, PandasDataset):
-            import pandas as pd
-
             if not isinstance(self.batch["data"], pd.DataFrame):
                 raise ValueError(
                     "PandasDataset expectation_engine requires a Pandas Dataframe for its batch"

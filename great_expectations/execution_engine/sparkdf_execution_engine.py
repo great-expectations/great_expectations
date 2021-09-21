@@ -11,7 +11,6 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
-    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
