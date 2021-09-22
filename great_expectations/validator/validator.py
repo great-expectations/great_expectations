@@ -107,9 +107,8 @@ class Validator:
             batches = tuple()
 
         self._batches = {}
-        self.load_batch_list(batches)
-
         self._active_batch_id = None
+        self.load_batch_list(batches)
 
         if len(batches) > 1:
             logger.debug(
@@ -249,7 +248,6 @@ class Validator:
             exception_info: ExceptionInfo
 
             try:
-                # runtime_configuration = configuration.get_runtime_kwargs()
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
