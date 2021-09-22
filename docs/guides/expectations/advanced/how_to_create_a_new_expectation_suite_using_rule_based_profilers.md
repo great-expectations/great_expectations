@@ -9,7 +9,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 
 - Have a basic understanding of [Metrics in Great Expectations](https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html)
 - Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys)
-- Have read the sections in Core Concepts on [Profilers](../../../reference/profilers) and [Rule-Based Profilers](../../../reference/profilers#rule-based-profilers)
+- Have read the sections in Core Concepts on [Profilers](../../../../reference/profilers) and [Rule-Based Profilers](../../../../reference/profilers#rule-based-profilers)
 
 </Prerequisites>
 

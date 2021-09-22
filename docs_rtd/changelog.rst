@@ -18,6 +18,7 @@ develop
 * [BUGFIX] fixed typo and added CLA links (#3347)
 * [DOCS] Azure Data Connector Documentation for Pandas and Spark. (#3378)
 * [DOCS] Connecting to GCS using Spark (#3375)
+* [DOCS] Fixed broken links in how_to_create_a_new_expectation_suite_using_rule_based_profilers 
 * [DOCS] Docusaurus - Deploying Great Expectations in a hosted environment without file system or CLI (#3361)
 * [DOCS] How to get a batch from configured datasource (#3382)
 * [MAINTENANCE] Add Flyte to README (#3387) (Thanks @samhita-alla)
