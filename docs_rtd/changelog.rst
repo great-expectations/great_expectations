@@ -7,6 +7,8 @@ Changelog
 
 develop
 -----------------
+* [MAINTENANCE] Spark performance improvement for metrics that return unexpected values (#3368)
+* [BUGFIX] Display data asset name in notifications following checkpoint run. (#3431)
 
 0.13.34
 -----------------
@@ -64,7 +66,6 @@ develop
 * [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
 * [MAINTENANCE] Various doc patches (#3326)
 * [MAINTENANCE] clean up imports and method signatures (#3337)
->>>>>>> 9208de453238af6d673aa9184c865b8422165172
 
 0.13.31
 -----------------
