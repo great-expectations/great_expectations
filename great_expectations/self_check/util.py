@@ -1766,6 +1766,30 @@ def generate_expectation_tests(
     return parametrized_tests
 
 
+def sort_unexpected_values(test_value_list, result_value_list):
+    # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
+    if (isinstance(test_value_list, list)) & (len(test_value_list) >= 1):
+        # __lt__ is not implemented for python dictionaries making sorting trickier
+        # in our case, we will sort on the values for each key sequentially
+        if isinstance(test_value_list[0], dict):
+            test_value_list = sorted(
+                test_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+            result_value_list = sorted(
+                result_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+        # if python built-in class has __lt__ then sorting can always work this way
+        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+            NotImplemented
+        ):
+            test_value_list = sorted(test_value_list, key=lambda x: str(x))
+            result_value_list = sorted(result_value_list, key=lambda x: str(x))
+
+    return test_value_list, result_value_list
+
+
 def evaluate_json_test(data_asset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -1878,6 +1902,45 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 
 
 def check_json_test_result(test, result, data_asset=None):
+    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+    if "unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and ("unexpected_list" in test["out"]["result"]):
+            (
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+        elif "unexpected_list" in test["out"]:
+            (
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+
+    if "partial_unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and (
+            "partial_unexpected_list" in test["out"]["result"]
+        ):
+            (
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+        elif "partial_unexpected_list" in test["out"]:
+            (
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+
     # Check results
     if test["exact_match_out"] is True:
         assert result == expectationValidationResultSchema.load(test["out"])
@@ -1928,19 +1991,19 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
-                if (isinstance(value, list)) & (len(value) >= 1):
-                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = sorted(value, key=lambda x: str(x))
-                        result["result"]["unexpected_list"] = sorted(
-                            result["result"]["unexpected_list"], key=lambda x: str(x)
-                        )
-
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "
                     + str(value)
                     + " but got "
                     + str(result["result"]["unexpected_list"])
+                )
+
+            elif key == "partial_unexpected_list":
+                assert result["result"]["partial_unexpected_list"] == value, (
+                    "expected "
+                    + str(value)
+                    + " but got "
+                    + str(result["result"]["partial_unexpected_list"])
                 )
 
             elif key == "details":
