@@ -3,7 +3,7 @@ import pytest
 
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # Testing ordinary process of adding column row condition
 from tests.expectations.test_util import get_table_columns_metric

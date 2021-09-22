@@ -21,7 +21,7 @@ from great_expectations.profile.base import (
     profiler_data_types_with_mapping,
     profiler_semantic_types,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)

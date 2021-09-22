@@ -11,7 +11,6 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
-    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
@@ -20,6 +19,7 @@ from great_expectations.core.util import AzureUrl, get_or_create_spark_applicati
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 from ..exceptions import (
     BatchSpecError,
@@ -28,7 +28,6 @@ from ..exceptions import (
     ValidationError,
 )
 from ..expectations.row_conditions import parse_condition_to_spark
-from ..validator.validation_graph import MetricConfiguration
 from .sparkdf_batch_data import SparkDFBatchData
 
 logger = logging.getLogger(__name__)
@@ -638,7 +637,6 @@ Please check your config."""
 
                 Args:
                     metric_fn_bundle - A batch containing MetricEdgeKeys and their corresponding functions
-                    metrics (dict) - A dictionary containing metrics and corresponding parameters
 
                 Returns:
                     A dictionary of the collected metrics over their respective domains
