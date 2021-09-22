@@ -2084,7 +2084,7 @@ class BaseDataContext:
         return datasource
 
     def list_expectation_suites(self):
-        """Return a list of available expectation suite names."""
+        """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
         except KeyError as e:
@@ -2276,7 +2276,15 @@ class BaseDataContext:
             )
 
     def list_expectation_suite_names(self) -> List[str]:
-        """Lists the available expectation suite names"""
+        """
+        Lists the available expectation suite names. If in ge_cloud_mode, a list of
+        GE Cloud ids is returned instead.
+        """
+        if self.ge_cloud_mode:
+            return [
+                suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()
+            ]
+
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()
         ]

@@ -11,7 +11,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -203,9 +203,9 @@ class ExecutionEngine(ABC):
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple, MetricConfiguration]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple, Any]:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
 
@@ -220,7 +220,7 @@ class ExecutionEngine(ABC):
         if metrics is None:
             metrics = {}
 
-        resolved_metrics: Dict[Tuple, MetricConfiguration] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
         metric_fn_bundle = []
         for metric_to_resolve in metrics_to_resolve:
@@ -285,10 +285,7 @@ class ExecutionEngine(ABC):
                     resolved_metrics[metric_to_resolve.id] = metric_fn(
                         **metric_provider_kwargs
                     )
-                except (
-                    ge_exceptions.MetricComputationError,
-                    ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-                ) as e:
+                except Exception as e:
                     raise ge_exceptions.MetricResolutionError(
                         message=str(e), failed_metrics=(metric_to_resolve,)
                     )
@@ -297,10 +294,7 @@ class ExecutionEngine(ABC):
                     resolved_metrics[metric_to_resolve.id] = metric_fn(
                         **metric_provider_kwargs
                     )
-                except (
-                    ge_exceptions.MetricComputationError,
-                    ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-                ) as e:
+                except Exception as e:
                     raise ge_exceptions.MetricResolutionError(
                         message=str(e), failed_metrics=(metric_to_resolve,)
                     )
@@ -312,10 +306,7 @@ class ExecutionEngine(ABC):
                     resolved_metrics[metric_to_resolve.id] = metric_fn(
                         **metric_provider_kwargs
                     )
-                except (
-                    ge_exceptions.MetricComputationError,
-                    ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-                ) as e:
+                except Exception as e:
                     raise ge_exceptions.MetricResolutionError(
                         message=str(e), failed_metrics=(metric_to_resolve,)
                     )
@@ -323,10 +314,7 @@ class ExecutionEngine(ABC):
             try:
                 new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
-            except (
-                ge_exceptions.MetricComputationError,
-                ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-            ) as e:
+            except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
                     message=str(e), failed_metrics=[x[0] for x in metric_fn_bundle]
                 )

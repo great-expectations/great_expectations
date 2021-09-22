@@ -203,7 +203,7 @@ def get_runtime_batch_request(
         runtime_parameters = runtime_config_batch_request.runtime_parameters
         if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
             batch_data = runtime_parameters["batch_data"]
-            runtime_config_batch_request = runtime_config_batch_request.get_json_dict()
+            runtime_config_batch_request = runtime_config_batch_request.to_json_dict()
 
     if (
         runtime_config_batch_request is not None
