@@ -18,7 +18,7 @@ This guide will help you validate your data by running a Checkpoint.
 Steps
 -----
 
-1. You can update your existing checkpoint either using a text editor or by executing the following command:
+1. You can update your existing Checkpoint either using a text editor or by executing the following command:
 
    ```console
    great_expectations --v3-api checkpoint edit my_checkpoint
