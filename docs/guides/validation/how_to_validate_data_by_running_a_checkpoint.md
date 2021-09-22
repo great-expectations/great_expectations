@@ -78,7 +78,7 @@ Steps
    ```
 
    The details of Checkpoint configuration can be found in [How to add validations data or suites to a Checkpoint](./checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint).
-   In addition, please see [How to configure a new Checkpoint using test_yaml_config](./checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md) for more Checkpoint configuration examples (including the convenient templating mechanism).
+   In addition, please see [How to configure a new Checkpoint using test_yaml_config](./checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for more Checkpoint configuration examples (including the convenient templating mechanism).
 
 3. Run Checkpoint validations on your data.
    You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](./checkpoints/how_to_run_a_checkpoint_in_terminal) or from Python, as explained in [How to run a Checkpoint in Python](./checkpoints/how_to_run_a_checkpoint_in_python).
