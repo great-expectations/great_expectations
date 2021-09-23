@@ -20,6 +20,7 @@ from great_expectations.checkpoint.util import (
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
     send_slack_notification,
+    send_slack_app_notification,
 )
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -127,7 +128,9 @@ class SlackNotificationAction(ValidationAction):
         self,
         data_context,
         renderer,
-        slack_webhook,
+        slack_webhook=None,
+        slack_token=None,
+        slack_channel=None,
         notify_on="all",
         notify_with=None,
     ):
@@ -158,7 +161,9 @@ class SlackNotificationAction(ValidationAction):
                 class_name=renderer["class_name"],
             )
         self.slack_webhook = slack_webhook
-        assert slack_webhook, "No Slack webhook found in action config."
+        self.slack_token = slack_token
+        self.slack_channel = slack_channel
+        # assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
         self.notify_with = notify_with
 
@@ -204,15 +209,24 @@ class SlackNotificationAction(ValidationAction):
             query = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
-            # this will actually sent the POST request to the Slack webapp server
-            slack_notif_result = send_slack_notification(
-                query, slack_webhook=self.slack_webhook
-            )
 
+            # this will actually sent the POST request to the Slack webapp server
+            if self.slack_webhook and not (self.slack_token and self.slack_channel):
+                slack_notif_result = send_slack_notification(
+                    query, slack_webhook=self.slack_webhook
+                )
+                return {"slack_notification_result": slack_notif_result}
+            elif (self.slack_token and self.slack_channel) and not self.slack_webhook:
+                slack_notif_result = send_slack_app_notification(
+                    query,
+                    slack_channel=self.slack_channel,
+                    slack_token=self.slack_token,
+                )
+                return {"slack_notification_result": slack_notif_result}
             # sending payload back as dictionary
-            return {"slack_notification_result": slack_notif_result}
+
         else:
-            return {"slack_notification_result": ""}
+            return {"slack_notification_result": "none sent"}
 
 
 class PagerdutyAlertAction(ValidationAction):

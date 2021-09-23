@@ -1,12 +1,13 @@
 import copy
+import json
 import logging
 import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Optional, Union
-
 import requests
+
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -37,6 +38,41 @@ def send_slack_notification(query, slack_webhook):
                     status_code=response.status_code,
                     text=response.text,
                 )
+            )
+
+        else:
+            return "Slack notification succeeded."
+
+
+def send_slack_app_notification(query, slack_channel, slack_token):
+    url = "https://slack.com/api/chat.postMessage"
+    header = {"Authorization": f"Bearer {slack_token}"}
+    query["channel"] = slack_channel
+    session = requests.Session()
+
+    try:
+        response = session.post(url=url, json=query, headers=header)
+    except requests.ConnectionError:
+        logger.warning(
+            "Failed to connect to Slack webhook at {url} "
+            "after {max_retries} retries.".format(url=url, max_retries=10)
+        )
+    except Exception as e:
+        logger.error(str(e))
+    else:
+        content = json.loads(response.content)
+        if response.status_code != 200:
+            logger.warning(
+                "Request to Slack webhook at {url} "
+                "returned error {status_code}: {text}".format(
+                    url=url,
+                    status_code=response.status_code,
+                    text=response.text,
+                )
+            )
+        elif not content["ok"]:
+            logger.warning(
+                "postMessage failed with error: {error}".format(error=content["error"])
             )
         else:
             return "Slack notification succeeded."
