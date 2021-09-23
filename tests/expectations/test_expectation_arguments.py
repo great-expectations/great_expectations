@@ -31,8 +31,7 @@ except ImportError:
     )
 
 
-@pytest.fixture
-def in_memory_runtime_context():
+def build_in_memory_runtime_context():
     data_context_config: DataContextConfig = DataContextConfig(
         datasources={
             "pandas_datasource": {
@@ -80,6 +79,11 @@ def in_memory_runtime_context():
     context: BaseDataContext = BaseDataContext(project_config=data_context_config)
 
     return context
+
+
+@pytest.fixture
+def in_memory_runtime_context():
+    return build_in_memory_runtime_context()
 
 
 @pytest.fixture
@@ -169,6 +173,7 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     result: ExpectationValidationResult
 
     for result in results:
+        assert result.success
         assert (
             "exception_traceback" not in result.exception_info
         ) or not result.exception_info["exception_traceback"]
@@ -397,6 +402,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         result.expectation_config["expectation_type"]
         == "expect_column_values_to_not_be_null"
     )
+    assert not result.success
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
@@ -406,6 +412,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         result.expectation_config["expectation_type"]
         == "expect_table_row_count_to_equal"
     )
+    assert result.success
     assert (
         "exception_traceback" not in result.exception_info
     ) or not result.exception_info["exception_traceback"]
@@ -424,6 +431,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         **expectation_arguments_without_meta, **expectation_meta
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
+    assert not result.success
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
