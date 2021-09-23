@@ -19,8 +19,8 @@ from great_expectations.checkpoint.util import (
     send_email,
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
-    send_slack_notification,
     send_slack_app_notification,
+    send_slack_notification,
 )
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
