@@ -227,10 +227,14 @@ class SlackNotificationAction(ValidationAction):
                     slack_token=self.slack_token,
                 )
                 return {"slack_notification_result": slack_notif_result}
+            else:
+                return {
+                    "slack_notification_result": "missing or extra slack_ parameter"
+                }
             # sending payload back as dictionary
 
         else:
-            return {"slack_notification_result": "none sent"}
+            return {"slack_notification_result": "none required"}
 
 
 class PagerdutyAlertAction(ValidationAction):

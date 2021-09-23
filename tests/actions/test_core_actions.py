@@ -1,3 +1,4 @@
+import json
 import logging
 from unittest import mock
 
@@ -31,6 +32,13 @@ class MockTeamsResponse:
     def __init__(self, status_code):
         self.status_code = status_code
         self.text = "test_text"
+
+
+class MockSlackResponse:
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = "test_text"
+        self.content = json.dumps({"ok": "True"})
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -95,6 +103,7 @@ def test_StoreAction():
     )
 
 
+@mock.patch.object(Session, "post", return_value=MockSlackResponse(200))
 def test_SlackNotificationAction(
     data_context_parameterized_expectation_suite,
     validation_result_suite,
@@ -105,8 +114,11 @@ def test_SlackNotificationAction(
         "class_name": "SlackRenderer",
     }
     slack_webhook = "https://hooks.slack.com/services/test/slack/webhook"
+    slack_token = "test"
+    slack_channel = "test"
     notify_on = "all"
 
+    # test with just web_hook set; expect pass
     slack_action = SlackNotificationAction(
         data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
@@ -114,14 +126,135 @@ def test_SlackNotificationAction(
         notify_on=notify_on,
     )
 
-    # TODO: improve this test - currently it is verifying a failed call to Slack. It returns a "empty" payload
     assert (
         slack_action.run(
             validation_result_suite_identifier=validation_result_suite_id,
             validation_result_suite=validation_result_suite,
             data_asset=None,
         )
-        == {"slack_notification_result": None}
+        == {"slack_notification_result": "Slack notification succeeded."}
+    )
+
+    # Test with slack_token and slack_channel set; expect pass
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_token=slack_token,
+        slack_channel=slack_channel,
+        notify_on=notify_on,
+    )
+
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"slack_notification_result": "Slack notification succeeded."}
+    )
+
+    # Test with just slack_token set; expect fail
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_token=slack_token,
+        notify_on=notify_on,
+    )
+
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"slack_notification_result": "missing or extra slack_ parameter"}
+    )
+
+    # Test with just slack_channel set; expect fail
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_channel=slack_channel,
+        notify_on=notify_on,
+    )
+
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"slack_notification_result": "missing or extra slack_ parameter"}
+    )
+
+    # Test with slack_channel, slack_token, and slack_webhook set; expect fail
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_channel=slack_channel,
+        slack_token=slack_token,
+        slack_webhook=slack_webhook,
+        notify_on=notify_on,
+    )
+
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"slack_notification_result": "missing or extra slack_ parameter"}
+    )
+
+    # test notify on with failed run; expect pass
+    notify_on = "failure"
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_webhook=slack_webhook,
+        notify_on=notify_on,
+    )
+
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=ExpectationSuiteValidationResult(
+                success=False,
+                results=[],
+                statistics={
+                    "successful_expectations": [],
+                    "evaluated_expectations": [],
+                },
+            ),
+            data_asset=None,
+        )
+        == {"slack_notification_result": "Slack notification succeeded."}
+    )
+
+    # test notify on with successful run; expect pass
+    notify_on = "failure"
+    validation_result_suite.success = False
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_webhook=slack_webhook,
+        notify_on=notify_on,
+    )
+
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=ExpectationSuiteValidationResult(
+                success=True,
+                results=[],
+                statistics={
+                    "successful_expectations": [],
+                    "evaluated_expectations": [],
+                },
+            ),
+            data_asset=None,
+        )
+        == {"slack_notification_result": "none required"}
     )
 
 
