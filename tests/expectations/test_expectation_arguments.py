@@ -104,24 +104,41 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
         "result_format": result_format,
     }
 
-    expectation_arguments: dict = {
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_configuration: ExpectationConfiguration
+
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict
+
+    expectation_arguments_column: dict = {
         "include_config": True,
         "column": "Name",  # use correct column to avoid error
     }
-    expectation_meta: dict = {"Notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict = dict(
-        **runtime_environment_arguments, **expectation_arguments
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
     )
-
-    expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    expectation_arguments_table: dict = {
+        "include_config": True,
+        "value": 4,
+    }
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_table
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_equal",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
     )
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
@@ -147,31 +164,39 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
         **runtime_environment_arguments
     )
     results: List[ExpectationValidationResult] = validator_validation.results
-    assert len(results) == 1
+    assert len(results) == 2
 
     result: ExpectationValidationResult
 
-    result = results[0]
-    assert (
-        "exception_traceback" not in result.exception_info
-    ) or not result.exception_info["exception_traceback"]
-    assert (
-        "exception_message" not in result.exception_info
-    ) or not result.exception_info["exception_message"]
+    for result in results:
+        assert (
+            "exception_traceback" not in result.exception_info
+        ) or not result.exception_info["exception_traceback"]
+        assert (
+            "exception_message" not in result.exception_info
+        ) or not result.exception_info["exception_message"]
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(
+    expectation_parameters: dict
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_parameters = dict(
         **expectation_arguments_without_meta, **expectation_meta
     )
-
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
-    assert (
-        "exception_traceback" not in result.exception_info
-    ) or not result.exception_info["exception_traceback"]
-    assert (
-        "exception_message" not in result.exception_info
-    ) or not result.exception_info["exception_message"]
+    assert result.success
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_table
+    )
+    expectation_parameters = dict(
+        **expectation_arguments_without_meta, **expectation_meta
+    )
+    result = validator.expect_table_row_count_to_equal(**expectation_parameters)
+    assert result.success
 
 
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
@@ -184,24 +209,41 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         "result_format": result_format,
     }
 
-    expectation_arguments: dict = {
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_configuration: ExpectationConfiguration
+
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict
+
+    expectation_arguments_column: dict = {
         "include_config": True,
         "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
     }
-    expectation_meta: dict = {"Notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict = dict(
-        **runtime_environment_arguments, **expectation_arguments
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
     )
-
-    expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    expectation_arguments_table: dict = {
+        "include_config": True,
+        "value": 4,
+    }
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_table
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_equal",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
     )
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
@@ -236,7 +278,12 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(
+    expectation_parameters: dict
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_parameters = dict(
         **expectation_arguments_without_meta, **expectation_meta
     )
 
@@ -246,6 +293,19 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
             validator.expect_column_values_to_not_be_null(**expectation_parameters)
         )
     assert e.value.message == expected_exception_message
+
+    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_table
+    )
+    expectation_parameters = dict(
+        **expectation_arguments_without_meta, **expectation_meta
+    )
+    result: ExpectationValidationResult = validator.expect_table_row_count_to_equal(
+        **expectation_parameters
+    )
+    assert result.success
 
 
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
@@ -258,24 +318,41 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "result_format": result_format,
     }
 
-    expectation_arguments: dict = {
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_configuration: ExpectationConfiguration
+
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict
+
+    expectation_arguments_column: dict = {
         "include_config": True,
         "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
     }
-    expectation_meta: dict = {"Notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict = dict(
-        **runtime_environment_arguments, **expectation_arguments
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
     )
-
-    expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
     )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    expectation_arguments_table: dict = {
+        "include_config": True,
+        "value": 4,
+    }
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_table
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_table_row_count_to_equal",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
     )
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
@@ -305,25 +382,68 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         **runtime_environment_arguments
     )
     results: List[ExpectationValidationResult] = validator_validation.results
-    assert len(results) == 1
+    assert len(results) == 2
+
+    # Confirm that even though an exception occurred in one expectation, the other expectation is validated properly.
+
+    results = sorted(
+        results, key=lambda element: element.expectation_config["expectation_type"]
+    )
 
     result: ExpectationValidationResult
 
     result = results[0]
+    assert (
+        result.expectation_config["expectation_type"]
+        == "expect_column_values_to_not_be_null"
+    )
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
 
+    result = results[1]
+    assert (
+        result.expectation_config["expectation_type"]
+        == "expect_table_row_count_to_equal"
+    )
+    assert (
+        "exception_traceback" not in result.exception_info
+    ) or not result.exception_info["exception_traceback"]
+    assert (
+        "exception_message" not in result.exception_info
+    ) or not result.exception_info["exception_message"]
+
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(
+    expectation_parameters: dict
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_parameters = dict(
         **expectation_arguments_without_meta, **expectation_meta
     )
-
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert "exception_traceback" in result.exception_info
     assert "exception_message" in result.exception_info
     assert result.exception_info["exception_message"] == expected_exception_message
+
+    # Confirm that even though exceptions may occur in some expectations, other expectations can be validated properly.
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_table
+    )
+    expectation_parameters = dict(
+        **expectation_arguments_without_meta, **expectation_meta
+    )
+    result = validator.expect_table_row_count_to_equal(**expectation_parameters)
+    assert result.success
+    assert (
+        "exception_traceback" not in result.exception_info
+    ) or not result.exception_info["exception_traceback"]
+    assert (
+        "exception_message" not in result.exception_info
+    ) or not result.exception_info["exception_message"]
 
 
 def test_result_format_configured_no_set_default_override(
@@ -336,24 +456,27 @@ def test_result_format_configured_no_set_default_override(
         "result_format": result_format,
     }
 
-    expectation_arguments: dict = {
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_configuration: ExpectationConfiguration
+
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict
+
+    expectation_arguments_column: dict = {
         "include_config": True,
         "column": "Name",  # use correct column to avoid error
     }
-    expectation_meta: dict = {"Notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict = dict(
-        **runtime_environment_arguments, **expectation_arguments
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
     )
-
-    expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
-    )
-
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
     )
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
@@ -388,10 +511,11 @@ def test_result_format_configured_no_set_default_override(
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(
+    expectation_parameters: dict
+
+    expectation_parameters = dict(
         **expectation_arguments_without_meta, **expectation_meta
     )
-
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert len(result.result.keys()) > 0
 
@@ -406,24 +530,27 @@ def test_result_format_configured_with_set_default_override(
         "result_format": result_format,
     }
 
-    expectation_arguments: dict = {
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_configuration: ExpectationConfiguration
+
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict
+
+    expectation_arguments_column: dict = {
         "include_config": True,
         "column": "Name",  # use correct column to avoid error
     }
-    expectation_meta: dict = {"Notes": "Some notes"}
-
-    expectation_arguments_without_meta: dict = dict(
-        **runtime_environment_arguments, **expectation_arguments
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
     )
-
-    expectation_configuration: ExpectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_null",
         kwargs=expectation_arguments_without_meta,
         meta=expectation_meta,
-    )
-
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
     )
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
@@ -446,6 +573,7 @@ def test_result_format_configured_with_set_default_override(
     validator.set_default_expectation_argument("result_format", "BOOLEAN_ONLY")
 
     # Test calling "validator.validate()" explicitly.
+
     validator_validation: ExpectationSuiteValidationResult = validator.validate()
     results: List[ExpectationValidationResult] = validator_validation.results
     assert len(results) == 1
@@ -457,7 +585,8 @@ def test_result_format_configured_with_set_default_override(
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
-    expectation_parameters: dict = dict(**expectation_arguments, **expectation_meta)
+    expectation_parameters: dict
 
+    expectation_parameters = dict(**expectation_arguments_column, **expectation_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert len(result.result.keys()) == 0
