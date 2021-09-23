@@ -1655,7 +1655,7 @@ class BaseDataContext:
             raise ge_exceptions.GreatExpectationsTypeError(
                 f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
             )
-        datasource: Datasource = self.datasources[datasource_name]
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
             raise ValueError("Must provide only one of batch_data, query, or path.")
@@ -3491,7 +3491,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             raise e
 
-        instantiated_class: Any
+        instantiated_class: Any = None
 
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
