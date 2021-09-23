@@ -278,6 +278,7 @@ Please check your config."""
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, not {batch_spec.__class__.__name__}"
             )
 
+        print(f'\n[ALEX_TEST] [PANDAS.GET_BATCH_DATA_AND_MARKERS] BATCH_SPEC: {batch_spec} ; TYPE: {str(type(batch_spec))}')
         df = self._apply_splitting_and_sampling_methods(batch_spec, df)
         if df.memory_usage().sum() < HASH_THRESHOLD:
             batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
@@ -288,6 +289,7 @@ Please check your config."""
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
+            print(f'\n[ALEX_TEST] [PANDAS._APPLY_SPLITTING_AND_SAMPLING_METHODS] SPLITTER_METHOD: {batch_spec.get("splitter_method")} ; SPLITTER_KWARGS: {batch_spec.get("splitter_kwargs")}')
             splitter_fn = getattr(self, batch_spec.get("splitter_method"))
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
@@ -623,6 +625,7 @@ Please check your config."""
     def _split_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
+        print(f'\n[ALEX_TEST] [PANDAS.SPLIT_ON_COLUMN_VALUE] COLUMN_NAME: {column_name} ; BATCH_IDENTIFIERS: {batch_identifiers}')
 
         return df[df[column_name] == batch_identifiers[column_name]]
 

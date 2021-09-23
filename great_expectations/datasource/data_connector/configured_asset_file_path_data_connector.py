@@ -89,6 +89,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         runtime_environment: dict = {"data_connector": self}
         config = assetConfigSchema.load(config)
         config = assetConfigSchema.dump(config)
+        print(f'\n[ALEX_TEST] [ConfiguredAssetFilePathDataConnector._build_asset_from_config] ASSET_CONFIG: {config} ; TYPE: {str(type(config))}')
         asset: Asset = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,

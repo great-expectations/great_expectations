@@ -31,8 +31,7 @@ except ImportError:
     )
 
 
-@pytest.fixture
-def in_memory_runtime_context():
+def build_in_memory_runtime_context():
     data_context_config: DataContextConfig = DataContextConfig(
         datasources={
             "pandas_datasource": {
@@ -80,6 +79,11 @@ def in_memory_runtime_context():
     context: BaseDataContext = BaseDataContext(project_config=data_context_config)
 
     return context
+
+
+@pytest.fixture
+def in_memory_runtime_context():
+    return build_in_memory_runtime_context()
 
 
 @pytest.fixture
