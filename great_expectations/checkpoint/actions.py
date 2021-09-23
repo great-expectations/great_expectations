@@ -112,7 +112,11 @@ class SlackNotificationAction(ValidationAction):
           class_name: SlackNotificationAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
           # or pass in as environment variable
+          # use slack_webhook when not using slack bot token
           slack_webhook: ${validation_notification_slack_webhook}
+          # pass slack token and slack channel when not using slack_webhook
+          slack_token: # token from slack app
+          slack_channel: # slack channel that messages should go to
           notify_on: all # possible values: "all", "failure", "success"
           notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
           renderer:

@@ -45,6 +45,7 @@ def send_slack_notification(query, slack_webhook):
 
 
 def send_slack_app_notification(query, slack_channel, slack_token):
+    """Creates slack app notification"""
     url = "https://slack.com/api/chat.postMessage"
     header = {"Authorization": f"Bearer {slack_token}"}
     query["channel"] = slack_channel
