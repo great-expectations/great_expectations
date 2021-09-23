@@ -938,6 +938,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     )
 
     with pytest.raises(ge_exceptions.DataConnectorError):
+        # noinspection PyUnusedLocal
         my_data_connector: InferredAssetFilesystemDataConnector = (
             instantiate_class_from_config(
                 config=my_data_connector_yaml,

@@ -638,6 +638,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 
     # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
 
@@ -1476,50 +1477,3 @@ azure_options:
         _ = my_data_connector._get_full_file_path(
             path="some/path/to/file.csv", data_asset_name="some_asset_name"
         )
-        # instantiate_class_from_config(
-        #     config=my_data_connector_yaml,
-        #     runtime_environment={
-        #         "name": "general_azure_data_connector",
-        #         "datasource_name": "test_environment",
-        #     },
-        #     config_defaults={
-        #         "module_name": "great_expectations.datasource.data_connector"
-        #     },
-        # )
-    # TODO: <Alex>ALEX</Alex>
-    # mock_list_keys.return_value = [
-    #     "my_base_directory/alpha/files/go/here/alpha-202001.csv",
-    #     "my_base_directory/alpha/files/go/here/alpha-202002.csv",
-    #     "my_base_directory/alpha/files/go/here/alpha-202003.csv",
-    #     "my_base_directory/beta_here/beta-202001.txt",
-    #     "my_base_directory/beta_here/beta-202002.txt",
-    #     "my_base_directory/beta_here/beta-202003.txt",
-    #     "my_base_directory/beta_here/beta-202004.txt",
-    #     "my_base_directory/gamma-202001.csv",
-    #     "my_base_directory/gamma-202002.csv",
-    #     "my_base_directory/gamma-202003.csv",
-    #     "my_base_directory/gamma-202004.csv",
-    #     "my_base_directory/gamma-202005.csv",
-    # ]
-    # TODO: <Alex>ALEX</Alex>
-
-    # TODO: <Alex>ALEX</Alex>
-    # assert (
-    #         my_data_connector._get_full_file_path(
-    #             "my_base_directory/alpha/files/go/here/alpha-202001.csv", "alpha"
-    #         )
-    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
-    # )
-    # assert (
-    #         my_data_connector._get_full_file_path(
-    #             "my_base_directory/beta_here/beta-202002.txt", "beta"
-    #         )
-    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
-    # )
-    # assert (
-    #         my_data_connector._get_full_file_path(
-    #             "my_base_directory/gamma-202005.csv", "gamma"
-    #         )
-    #         == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
-    # )
-    # TODO: <Alex>ALEX</Alex>
