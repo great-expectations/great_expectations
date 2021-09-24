@@ -422,8 +422,8 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 "batch_definition_count": 49,
                 # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
-                    {"session_id": 3},
                     {"session_id": 2},
+                    {"session_id": 3},
                     {"session_id": 4},
                 ],
             }
