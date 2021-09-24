@@ -2,7 +2,6 @@ import json
 import random
 
 import pytest
-from packaging.version import parse as parse_version
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest
@@ -153,6 +152,7 @@ def test_get_batch_definition_list_from_batch_request(
     assert len(batch_definition_list) == 30
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
@@ -161,11 +161,13 @@ def test_get_batch_definition_list_from_batch_request(
         )
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME")
         )
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest()
         )
@@ -578,12 +580,9 @@ def test_sampling_method__limit(
     validator = Validator(execution_engine, batches=[batch])
     assert len(validator.head(fetch_all=True)) == 20
 
-    assert (
-        validator.expect_column_values_to_be_in_set(
-            "date", value_set=["2020-01-02"]
-        ).success
-        == False
-    )
+    assert not validator.expect_column_values_to_be_in_set(
+        "date", value_set=["2020-01-02"]
+    ).success
 
 
 def test_sampling_method__random(
@@ -591,6 +590,7 @@ def test_sampling_method__random(
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
+    # noinspection PyUnusedLocal
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
@@ -663,6 +663,7 @@ def test_sampling_method__a_list(
 def test_sampling_method__md5(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
+    # noinspection PyUnusedLocal
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     # SQlite doesn't support MD5
