@@ -96,13 +96,9 @@ class Checkpoint:
                         ].to_json_dict()
 
         if batch_request and isinstance(batch_request, RuntimeBatchRequest):
-            batch_data = batch_request[
-                "runtime_parameters"
-            ]["batch_data"]
+            batch_data = batch_request["runtime_parameters"]["batch_data"]
             batch_request = batch_request.to_json_dict()
-            batch_request["runtime_parameters"][
-                "batch_data"
-            ] = batch_data
+            batch_request["runtime_parameters"]["batch_data"] = batch_data
         elif batch_request and isinstance(batch_request, BatchRequest):
             batch_request = batch_request.to_json_dict()
 
