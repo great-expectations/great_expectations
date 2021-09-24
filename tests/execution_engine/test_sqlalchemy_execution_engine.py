@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import List
 
 import pandas as pd
 import pytest
@@ -11,6 +12,9 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -732,3 +736,46 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
 
     validate_tmp_tables()
+
+
+def test_sample_using_random(sqlite_view_engine, test_df):
+    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+    test_df.to_sql("test_table_0", con=my_execution_engine.engine)
+
+    p: float = 2.0e-1
+    batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test_table_0",
+        schema_name="main",
+        sampling_method="_sample_using_random",
+        sampling_kwargs={"p": p},
+    )
+
+    batch_data: SqlAlchemyBatchData
+    num_rows: int
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).one()[0]
+    assert num_rows == round(p * test_df.shape[0])
+
+    rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).one()[0]
+    assert num_rows == round(p * test_df.shape[0])
+
+    rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    assert len(rows_0) == len(rows_1)
+
+    idx: int
+    assert not all([rows_0[idx] == rows_1[idx] for idx in range(num_rows)])
