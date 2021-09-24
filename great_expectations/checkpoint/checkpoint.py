@@ -59,7 +59,7 @@ class Checkpoint:
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -75,6 +75,20 @@ class Checkpoint:
         if "DataContext" not in str(type(data_context)):
             raise TypeError("A Checkpoint requires a valid DataContext")
         self._data_context = data_context
+
+        # if checkpoint was created without yml
+        if validations:
+            for idx, val in enumerate(validations):
+                if "batch_request" in val:
+                    if isinstance(val["batch_request"], RuntimeBatchRequest):
+                        batch_data = validations[idx]["batch_request"]["runtime_parameters"]["batch_data"]
+                        validations[idx]["batch_request"] = val["batch_request"].to_json_dict()
+                        validations[idx]["batch_request"]["runtime_parameters"]["batch_data"] = batch_data
+                    elif isinstance(val["batch_request"], BatchRequest):
+                        validations[idx]["batch_request"] = val["batch_request"].to_json_dict()
+
+        if batch_request and isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+            batch_request = batch_request.to_json_dict()
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
             **{
@@ -210,7 +224,7 @@ class Checkpoint:
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
