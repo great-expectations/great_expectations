@@ -977,7 +977,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             else:
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
-
                 return (
                     sa.select("*")
                     .select_from(
