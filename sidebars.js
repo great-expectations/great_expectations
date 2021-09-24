@@ -182,7 +182,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Creating custom Expectations',
+              label: 'Creating Custom Expectations',
               items: [
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
@@ -191,28 +191,9 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Adding features to custom Expectations',
+              label: 'Contributing',
               items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations',
-                {
-                  type: 'doc',
-                  label: 'This is a test',
-                  id: 'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
-                },
-                {
-                  type: 'doc',
-                  label: 'This is a test 2',
-                  id: 'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
-                }
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Contributing Expectations',
-              items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations',
-                {type: 'doc', label: 'This is a test', id: 'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'},
-                {type: 'doc', label: 'This is a test 2', id: 'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'}
+                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
               ]
             },
             {
