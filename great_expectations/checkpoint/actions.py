@@ -19,7 +19,6 @@ from great_expectations.checkpoint.util import (
     send_email,
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
-    send_slack_app_notification,
     send_slack_notification,
 )
 from great_expectations.data_context.store.metric_store import MetricStore
@@ -164,10 +163,15 @@ class SlackNotificationAction(ValidationAction):
                 package_name=None,
                 class_name=renderer["class_name"],
             )
+        if not slack_token and slack_channel:
+            assert slack_webhook
+        if not slack_webhook:
+            assert slack_token and slack_channel
+        assert not (slack_webhook and slack_channel and slack_token)
+
         self.slack_webhook = slack_webhook
         self.slack_token = slack_token
         self.slack_channel = slack_channel
-        # assert slack_webhook, "No Slack webhook found in action config."
         self.notify_on = notify_on
         self.notify_with = notify_with
 
@@ -214,24 +218,11 @@ class SlackNotificationAction(ValidationAction):
                 validation_result_suite, data_docs_pages, self.notify_with
             )
 
-            # this will actually sent the POST request to the Slack webapp server
-            if self.slack_webhook and not (self.slack_token and self.slack_channel):
-                slack_notif_result = send_slack_notification(
-                    query, slack_webhook=self.slack_webhook
-                )
-                return {"slack_notification_result": slack_notif_result}
-            elif (self.slack_token and self.slack_channel) and not self.slack_webhook:
-                slack_notif_result = send_slack_app_notification(
-                    query,
-                    slack_channel=self.slack_channel,
-                    slack_token=self.slack_token,
-                )
-                return {"slack_notification_result": slack_notif_result}
-            else:
-                return {
-                    "slack_notification_result": "missing or extra slack_ parameter"
-                }
-            # sending payload back as dictionary
+            # this will actually send the POST request to the Slack webapp server
+            slack_notif_result = send_slack_notification(
+                query, slack_webhook=self.slack_webhook
+            )
+            return {"slack_notification_result": slack_notif_result}
 
         else:
             return {"slack_notification_result": "none required"}

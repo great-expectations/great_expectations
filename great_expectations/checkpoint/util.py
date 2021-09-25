@@ -17,11 +17,21 @@ from great_expectations.data_context.types.base import CheckpointConfig
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(query, slack_webhook):
+def send_slack_notification(
+    query, slack_webhook=None, slack_channel=None, slack_token=None
+):
     session = requests.Session()
+    url = slack_webhook
+    query = query
+    headers = None
+
+    if not slack_webhook:
+        url = "https://slack.com/api/chat.postMessage"
+        headers = {"Authorization": f"Bearer {slack_token}"}
+        query["channel"] = slack_channel
 
     try:
-        response = session.post(url=slack_webhook, json=query)
+        response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
         logger.warning(
             "Failed to connect to Slack webhook at {url} "
@@ -40,41 +50,6 @@ def send_slack_notification(query, slack_webhook):
                 )
             )
 
-        else:
-            return "Slack notification succeeded."
-
-
-def send_slack_app_notification(query, slack_channel, slack_token):
-    """Creates slack app notification"""
-    url = "https://slack.com/api/chat.postMessage"
-    header = {"Authorization": f"Bearer {slack_token}"}
-    query["channel"] = slack_channel
-    session = requests.Session()
-
-    try:
-        response = session.post(url=url, json=query, headers=header)
-    except requests.ConnectionError:
-        logger.warning(
-            "Failed to connect to Slack webhook at {url} "
-            "after {max_retries} retries.".format(url=url, max_retries=10)
-        )
-    except Exception as e:
-        logger.error(str(e))
-    else:
-        content = json.loads(response.content)
-        if response.status_code != 200:
-            logger.warning(
-                "Request to Slack webhook at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=url,
-                    status_code=response.status_code,
-                    text=response.text,
-                )
-            )
-        elif not content["ok"]:
-            logger.warning(
-                "postMessage failed with error: {error}".format(error=content["error"])
-            )
         else:
             return "Slack notification succeeded."
 

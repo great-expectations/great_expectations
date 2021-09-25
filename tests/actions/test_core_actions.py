@@ -154,57 +154,33 @@ def test_SlackNotificationAction(
     )
 
     # Test with just slack_token set; expect fail
-    slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
-        renderer=renderer,
-        slack_token=slack_token,
-        notify_on=notify_on,
-    )
-
-    assert (
-        slack_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
+    with pytest.raises(AssertionError):
+        SlackNotificationAction(
+            data_context=data_context_parameterized_expectation_suite,
+            renderer=renderer,
+            slack_token=slack_token,
+            notify_on=notify_on,
         )
-        == {"slack_notification_result": "missing or extra slack_ parameter"}
-    )
 
     # Test with just slack_channel set; expect fail
-    slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
-        renderer=renderer,
-        slack_channel=slack_channel,
-        notify_on=notify_on,
-    )
-
-    assert (
-        slack_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
+    with pytest.raises(AssertionError):
+        slack_action = SlackNotificationAction(
+            data_context=data_context_parameterized_expectation_suite,
+            renderer=renderer,
+            slack_channel=slack_channel,
+            notify_on=notify_on,
         )
-        == {"slack_notification_result": "missing or extra slack_ parameter"}
-    )
 
     # Test with slack_channel, slack_token, and slack_webhook set; expect fail
-    slack_action = SlackNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
-        renderer=renderer,
-        slack_channel=slack_channel,
-        slack_token=slack_token,
-        slack_webhook=slack_webhook,
-        notify_on=notify_on,
-    )
-
-    assert (
-        slack_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
+    with pytest.raises(AssertionError):
+        SlackNotificationAction(
+            data_context=data_context_parameterized_expectation_suite,
+            renderer=renderer,
+            slack_channel=slack_channel,
+            slack_token=slack_token,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
         )
-        == {"slack_notification_result": "missing or extra slack_ parameter"}
-    )
 
     # test notify on with failed run; expect pass
     notify_on = "failure"
