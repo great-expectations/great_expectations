@@ -35,7 +35,7 @@ def test_checkpoint_raises_typeerror_on_incorrect_data_context():
 def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
     checkpoint = Checkpoint("foo", empty_data_context, config_version=None)
     with pytest.raises(AttributeError):
-        checkpoint.action_list
+        _ = checkpoint.action_list
 
 
 def test_checkpoint_with_config_version_has_action_list(empty_data_context):
