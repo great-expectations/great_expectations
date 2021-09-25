@@ -134,6 +134,7 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_not_be_null": {
+            "domain": "column",
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
             "default_kwarg_values": {
@@ -1030,6 +1031,12 @@ class ExpectationConfiguration(SerializableDictDot):
             "default_kwarg_values": {},
         }
 
+    def get_domain(self):
+        # calls the loads up
+        # and hten we are can load it. up
+        # it will
+        pass
+
     def get_domain_kwargs(self):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
@@ -1208,6 +1215,7 @@ class ExpectationConfiguration(SerializableDictDot):
         myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
         return myself
 
+    # <WILL>
     def get_evaluation_parameter_dependencies(self):
         parsed_dependencies = {}
         for key, value in self.kwargs.items():

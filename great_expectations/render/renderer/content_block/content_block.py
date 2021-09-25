@@ -58,6 +58,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 else None
             )
             for obj_ in render_object:
+
+                # <WILL> Hello hello hello
                 expectation_type = cls._get_expectation_type(obj_)
 
                 content_block_fn = cls._get_content_block_fn(expectation_type)
@@ -67,6 +69,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
                 if content_block_fn is not None and not exception_list_content_block:
                     try:
+                        # EVR
                         if isinstance(obj_, ExpectationValidationResult):
                             expectation_config = obj_.expectation_config
                             result = content_block_fn(
@@ -75,6 +78,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                 runtime_configuration=runtime_configuration,
                                 **kwargs,
                             )
+                        # single expectation
                         else:
                             result = content_block_fn(
                                 configuration=obj_,
@@ -355,6 +359,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         if header != "":
             content_block.header = header
 
+    # <WILL> Here is where we return the renderer impl implementation
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
         content_block_fn = get_renderer_impl(

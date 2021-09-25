@@ -279,6 +279,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
+    # Marker This might help us. Use as back up if we run out of time :)
     def to_json_dict(self):
         d = super().to_json_dict()
         d["string_template"] = self.string_template

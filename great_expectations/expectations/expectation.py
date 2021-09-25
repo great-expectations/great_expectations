@@ -454,6 +454,11 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
+    @renderer(renderer_type="renderer.prescriptive_summary")
+    def _prescriptive_summary(cls):
+        raise NotImplementedError
+
+    @classmethod
     @renderer(renderer_type="renderer.diagnostic.observed_value")
     def _diagnostic_observed_value_renderer(
         cls,
