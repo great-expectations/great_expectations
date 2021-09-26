@@ -232,13 +232,11 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
-    # TODO: <Alex>ALEX</Alex>
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/",
     },
-    # TODO: <Alex>ALEX</Alex>
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
