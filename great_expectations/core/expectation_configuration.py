@@ -987,6 +987,10 @@ class ExpectationConfiguration(SerializableDictDot):
     def ge_cloud_id(self):
         return self._ge_cloud_id
 
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value):
+        self._ge_cloud_id = value
+
     @property
     def expectation_type(self):
         return self._expectation_type
