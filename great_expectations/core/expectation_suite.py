@@ -347,7 +347,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError("Must provide either expectation_configuration or ge_cloud_id")
-        if not isinstance(expectation_configuration, ExpectationConfiguration):
+        if expectation_configuration and not isinstance(expectation_configuration, ExpectationConfiguration):
             raise InvalidExpectationConfigurationError(
                 "Ensure that expectation configuration is valid."
             )
