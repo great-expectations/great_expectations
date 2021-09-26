@@ -354,7 +354,7 @@ class ExpectationSuite(SerializableDictDot):
         match_indexes = []
         for idx, expectation in enumerate(self.expectations):
             if ge_cloud_id is not None:
-                if expectation.ge_cloud_id == ge_cloud_id:
+                if str(expectation.ge_cloud_id) == str(ge_cloud_id):
                     match_indexes.append(idx)
             else:
                 if expectation.isEquivalentTo(expectation_configuration, match_type):
