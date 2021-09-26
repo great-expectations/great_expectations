@@ -49,16 +49,19 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<PATH_TO_YOUR_DATA_HERE>", data_dir_path
-)
+datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
 context.test_yaml_config(datasource_yaml)
 
 context.add_datasource(**yaml.load(datasource_yaml))
-available_data_asset_names = context.datasources["taxi_datasource"].get_available_data_asset_names(data_connector_names="default_inferred_data_connector_name")["default_inferred_data_connector_name"]
+available_data_asset_names = context.datasources[
+    "taxi_datasource"
+].get_available_data_asset_names(
+    data_connector_names="default_inferred_data_connector_name"
+)[
+    "default_inferred_data_connector_name"
+]
 assert len(available_data_asset_names) == 36
-print(f'\n[ALEX_TEST] WOUTPUT-ASSETS-TAXI:\n{available_data_asset_names}')
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -94,11 +97,8 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_flat"
 
-batch_list = context.get_batch_list(
-    batch_request=batch_request
-)
+batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 12
-print(f'\n[ALEX_TEST] NUM_BATCHES-FLAT: {len(batch_list)}')
 
 # Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.
 # This BatchRequest specifies multiple batches, which is useful for dataset exploration.
@@ -106,23 +106,20 @@ batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="configured_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
-    data_connector_query={
-        "custom_filter_function": "<YOUR_CUSTOM_FILTER_FUNCTION>"
-    },
+    data_connector_query={"custom_filter_function": "<YOUR_CUSTOM_FILTER_FUNCTION>"},
 )
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
-batch_request.data_connector_query["custom_filter_function"] = lambda batch_identifiers: batch_identifiers["name"] == "yellow" and 1 < int(batch_identifiers["month"]) < 11
-
-batch_list = context.get_batch_list(
-    batch_request=batch_request
+batch_request.data_connector_query["custom_filter_function"] = (
+    lambda batch_identifiers: batch_identifiers["name"] == "yellow"
+    and 1 < int(batch_identifiers["month"]) < 11
 )
+
+batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 9
-print(f'\n[ALEX_TEST] NUM_BATCHES-YEAR-MONTH-PARTITION-SELECT_MONTHS: {len(batch_list)}')
 assert batch_list[0].data.dataframe.shape[0] == 10000
-print(f'\n[ALEX_TEST] NUM_ROWS-YEAR-MONTH-PARTITION: {batch_list[0].data.dataframe.shape[0]}')
 
 # Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.
 # This BatchRequest specifies one batch, which is useful for data analysis.
@@ -140,15 +137,13 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
-batch_request.data_connector_query["batch_filter_parameters"] = {"month": "01",}
+batch_request.data_connector_query["batch_filter_parameters"] = {
+    "month": "01",
+}
 
-batch_list = context.get_batch_list(
-    batch_request=batch_request
-)
+batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
-print(f'\n[ALEX_TEST] NUM_BATCHES-YEAR-MONTH-PARTITION-JANUARY: {len(batch_list)}')
 assert batch_list[0].data.dataframe.shape[0] == 10000
-print(f'\n[ALEX_TEST] NUM_ROWS-YEAR-MONTH-PARTITION-JANUARY: {batch_list[0].data.dataframe.shape[0]}')
 
 # Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.
 # This BatchRequest specifies one batch, which is useful for data analysis.
@@ -187,24 +182,20 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
-batch_request.data_connector_query["batch_filter_parameters"] = {"month": "01",}
+batch_request.data_connector_query["batch_filter_parameters"] = {
+    "month": "01",
+}
 batch_request.batch_spec_passthrough["splitter_method"] = "_split_on_column_value"
 batch_request.batch_spec_passthrough["splitter_kwargs"] = {
     "column_name": "passenger_count",
     "batch_identifiers": {"passenger_count": 2},
 }
 batch_request.batch_spec_passthrough["sampling_method"] = "_sample_using_random"
-batch_request.batch_spec_passthrough["sampling_kwargs"] = {
-    "p": 1.0e-1
-}
+batch_request.batch_spec_passthrough["sampling_kwargs"] = {"p": 1.0e-1}
 
-batch_list = context.get_batch_list(
-    batch_request=batch_request
-)
+batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
-print(f'\n[ALEX_TEST] NUM_BATCHES-YEAR-MONTH-PARTITION-SPLIT-ON-COLUMN-VALUE-RANDOM_SAMPLE: {len(batch_list)}')
 assert batch_list[0].data.dataframe.shape[0] < 200
-print(f'\n[ALEX_TEST] NUM_ROWS-YEAR-MONTH-PARTITION-SPLIT-ON-COLUMN-VALUE-RANDOM_SAMPLE: {batch_list[0].data.dataframe.shape[0]}')
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
