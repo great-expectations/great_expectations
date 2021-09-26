@@ -78,22 +78,18 @@ class Checkpoint:
 
         # if checkpoint was created without yml
         if validations:
-            for idx, val in enumerate(validations):
+            for val in validations:
                 if "batch_request" in val:
                     if isinstance(val["batch_request"], RuntimeBatchRequest):
-                        batch_data = validations[idx]["batch_request"][
-                            "runtime_parameters"
-                        ]["batch_data"]
-                        validations[idx]["batch_request"] = val[
-                            "batch_request"
-                        ].to_json_dict()
-                        validations[idx]["batch_request"]["runtime_parameters"][
+                        batch_data = val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ]
+                        val["batch_request"] = val["batch_request"].to_json_dict()
+                        val["batch_request"]["runtime_parameters"][
                             "batch_data"
                         ] = batch_data
                     elif isinstance(val["batch_request"], BatchRequest):
-                        validations[idx]["batch_request"] = val[
-                            "batch_request"
-                        ].to_json_dict()
+                        val["batch_request"] = val["batch_request"].to_json_dict()
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
             **{
