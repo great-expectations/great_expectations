@@ -18,6 +18,7 @@ from great_expectations.validator.validator import Validator
 yaml = YAML()
 
 
+# TODO: <Alex>ALEX -- Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -421,8 +422,8 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 "batch_definition_count": 49,
                 # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
-                    {"session_id": 3},
                     {"session_id": 2},
+                    {"session_id": 3},
                     {"session_id": 4},
                 ],
             }
