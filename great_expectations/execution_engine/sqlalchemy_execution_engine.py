@@ -879,16 +879,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     # _sample_using_a_list
     # _sample_using_md5
 
-    def _sample_using_random(
-        self,
-        p: float = 0.1,
-    ):
-        """Take a random sample of rows, retaining proportion p
-
-        Note: the Random function behaves differently on different dialects of SQL
-        """
-        return sa.func.random() < p
-
     def _sample_using_mod(
         self,
         column_name,
@@ -966,6 +956,25 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         .where(split_clause)
                         .limit(batch_spec["sampling_kwargs"]["n"])
                     )
+            elif batch_spec["sampling_method"] == "_sample_using_random":
+                num_rows: int = self.engine.execute(
+                    sa.select([sa.func.count()])
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
+                    .where(split_clause)
+                ).one()[0]
+                p: Optional[float] = batch_spec["sampling_kwargs"]["p"] or 1.0
+                sample_size: int = round(p * num_rows)
+                return (
+                    sa.select("*")
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
+                    .where(split_clause)
+                    .order_by(sa.func.random())
+                    .limit(sample_size)
+                )
             else:
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
