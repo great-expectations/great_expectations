@@ -27,29 +27,31 @@ Steps
 The snippet below shows a portion of your ``great_expectations.yml`` configuration after you perform the following steps. The steps will explain each line in this snippet.
 
 **yaml:**
+
     ```yaml
-        validation_operators:
-         action_list_operator:
-           class_name: ActionListValidationOperator
-           action_list:
-           - name: store_validation_result
-             action:
-               class_name: StoreValidationResultAction
-           - name: store_evaluation_params
-             action:
-               class_name: StoreEvaluationParametersAction
-           - name: update_data_docs
-             action:
-               class_name: UpdateDataDocsAction
-
-
+    validation_operators:
+      action_list_operator:
+        class_name: ActionListValidationOperator
+        action_list:
+        - name: store_validation_result
+          action:
+            class_name: StoreValidationResultAction
+        - name: store_evaluation_params
+          action:
+            class_name: StoreEvaluationParametersAction
+        - name: update_data_docs
+          action:
+            class_name: UpdateDataDocsAction
+    ```
  # Next Validation Operator was added manually
- my_second_validation_operator:
-   class_name: ActionListValidationOperator
-   action_list:
-   - name: store_validation_result
-     action:
-       class_name: StoreValidationResultAction
+
+    ```yaml
+    my_second_validation_operator:
+      class_name: ActionListValidationOperator
+      action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
     ```
 
 
