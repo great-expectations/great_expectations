@@ -6,7 +6,6 @@ import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
 
 context = ge.get_context()
-data_dir_path = os.path.join("..", "data")
 
 datasource_yaml = f"""
 name: taxi_datasource
@@ -49,6 +48,8 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
+data_dir_path = os.path.join("..", "data")
+
 datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
 context.test_yaml_config(datasource_yaml)
@@ -78,13 +79,13 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_trip_data_sample_2019-01.csv"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+
+batch_list = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 1
 
 # Here is a BatchRequest naming a configured data_asset representing an un-partitioned (flat) filename structure.
 batch_request = BatchRequest(
