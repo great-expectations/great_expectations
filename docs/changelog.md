@@ -3,7 +3,7 @@ title: Changelog
 ---
 
 ### Develop
-
+* [BUGFIX]  Handle RuntimeBatchRequest passed programatically (without yml) (#3448)
 
 ### 0.13.35
 * [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
