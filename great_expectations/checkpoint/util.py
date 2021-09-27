@@ -225,7 +225,11 @@ def get_runtime_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
-    runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
+    if isinstance(validation_batch_request, BatchRequest):
+        runtime_batch_request_dict: dict = validation_batch_request.to_json_dict()
+    else:
+        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
+
     for key, val in runtime_batch_request_dict.items():
         if val is not None and runtime_config_batch_request.get(key) is not None:
             raise ge_exceptions.CheckpointError(

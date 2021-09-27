@@ -658,6 +658,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 
     # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
 
