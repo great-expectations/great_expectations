@@ -12,7 +12,8 @@ from great_expectations.core.evaluation_parameters import (
 )
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
-    ExpectationConfigurationSchema, expectationConfigurationSchema,
+    ExpectationConfigurationSchema,
+    expectationConfigurationSchema,
 )
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -267,7 +268,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-        ge_cloud_id: Optional[Union[str, uuid.UUID]] = None
+        ge_cloud_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[ExpectationConfiguration]:
         """
 
@@ -286,12 +287,14 @@ class ExpectationSuite(SerializableDictDot):
             More than 1 match, if remove_multiple_matches = False
         """
         if expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError("Must provide either expectation_configuration or ge_cloud_id")
+            raise TypeError(
+                "Must provide either expectation_configuration or ge_cloud_id"
+            )
 
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
-            ge_cloud_id=ge_cloud_id
+            ge_cloud_id=ge_cloud_id,
         )
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
@@ -333,7 +336,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: str = None
+        ge_cloud_id: str = None,
     ) -> List[int]:
         """
         Find indexes of Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -356,8 +359,12 @@ class ExpectationSuite(SerializableDictDot):
 
         """
         if expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError("Must provide either expectation_configuration or ge_cloud_id")
-        if expectation_configuration and not isinstance(expectation_configuration, ExpectationConfiguration):
+            raise TypeError(
+                "Must provide either expectation_configuration or ge_cloud_id"
+            )
+        if expectation_configuration and not isinstance(
+            expectation_configuration, ExpectationConfiguration
+        ):
             raise InvalidExpectationConfigurationError(
                 "Ensure that expectation configuration is valid."
             )
@@ -376,7 +383,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None
+        ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """
         Find Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -396,7 +403,9 @@ class ExpectationSuite(SerializableDictDot):
         """
 
         if expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError("Must provide either expectation_configuration or ge_cloud_id")
+            raise TypeError(
+                "Must provide either expectation_configuration or ge_cloud_id"
+            )
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type, ge_cloud_id
         )
@@ -410,7 +419,7 @@ class ExpectationSuite(SerializableDictDot):
         new_expectation_configuration: Union[ExpectationConfiguration, dict],
         existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None
+        ge_cloud_id: Optional[str] = None,
     ):
         """
         Find Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -429,10 +438,14 @@ class ExpectationSuite(SerializableDictDot):
         Returns: A list of matching ExpectationConfigurations
         """
         if existing_expectation_configuration is None and ge_cloud_id is None:
-            raise TypeError("Must provide either existing_expectation_configuration or ge_cloud_id")
+            raise TypeError(
+                "Must provide either existing_expectation_configuration or ge_cloud_id"
+            )
 
         if isinstance(new_expectation_configuration, dict):
-            new_expectation_configuration = expectationConfigurationSchema.load(new_expectation_configuration)
+            new_expectation_configuration = expectationConfigurationSchema.load(
+                new_expectation_configuration
+            )
 
         found_expectation_indexes = self.find_expectation_indexes(
             existing_expectation_configuration, match_type, ge_cloud_id

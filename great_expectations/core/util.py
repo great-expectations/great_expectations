@@ -69,7 +69,10 @@ _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
 
 def nested_update(
-    d: Union[Iterable, dict], u: Union[Iterable, dict], dedup: bool = False, concat_lists: bool = True
+    d: Union[Iterable, dict],
+    u: Union[Iterable, dict],
+    dedup: bool = False,
+    concat_lists: bool = True,
 ):
     """
     Epdate d with items from u, recursively and joining elements. By default, list values are

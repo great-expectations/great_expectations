@@ -903,7 +903,14 @@ class ExpectationConfiguration(SerializableDictDot):
 
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
 
-    def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None, ge_cloud_id=None):
+    def __init__(
+        self,
+        expectation_type,
+        kwargs,
+        meta=None,
+        success_on_last_run=None,
+        ge_cloud_id=None,
+    ):
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
                 "expectation_type must be a string"
