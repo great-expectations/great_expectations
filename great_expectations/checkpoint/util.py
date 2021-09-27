@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import smtplib
 import ssl
@@ -16,11 +17,21 @@ from great_expectations.data_context.types.base import CheckpointConfig
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(query, slack_webhook):
+def send_slack_notification(
+    query, slack_webhook=None, slack_channel=None, slack_token=None
+):
     session = requests.Session()
+    url = slack_webhook
+    query = query
+    headers = None
+
+    if not slack_webhook:
+        url = "https://slack.com/api/chat.postMessage"
+        headers = {"Authorization": f"Bearer {slack_token}"}
+        query["channel"] = slack_channel
 
     try:
-        response = session.post(url=slack_webhook, json=query)
+        response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
         logger.warning(
             "Failed to connect to Slack webhook at {url} "
@@ -38,6 +49,7 @@ def send_slack_notification(query, slack_webhook):
                     text=response.text,
                 )
             )
+
         else:
             return "Slack notification succeeded."
 
@@ -225,10 +237,7 @@ def get_runtime_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
-    if isinstance(validation_batch_request, BatchRequest):
-        runtime_batch_request_dict: dict = validation_batch_request.to_json_dict()
-    else:
-        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
+    runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
 
     for key, val in runtime_batch_request_dict.items():
         if val is not None and runtime_config_batch_request.get(key) is not None:
