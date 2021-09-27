@@ -714,10 +714,7 @@ Please check your config."""
         df,
         p: float = 0.1,
     ):
-        """Take a random sample of rows, retaining proportion p
-
-        Note: the Random function behaves differently on different dialects of SQL
-        """
+        """Take a random sample of rows, retaining proportion p"""
         return df[df.index.map(lambda x: random.random() < p)]
 
     @staticmethod

@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [DOCS] Fix checkpoint name so it matches the rest of the docs (#3434)
 
 0.13.35
 -----------------
