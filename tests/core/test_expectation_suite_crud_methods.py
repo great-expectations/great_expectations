@@ -215,6 +215,24 @@ def suite_with_column_pair_and_table_expectations(
     return suite
 
 
+@pytest.fixture
+def ge_cloud_id():
+    # Fake id but adheres to the format required of a UUID
+    return "731ee1bd-604a-4851-9ee8-bca8ffb32bce"
+
+
+@pytest.fixture
+def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3):
+    for exp in (exp1, exp2, exp3):
+        exp.ge_cloud_id = ge_cloud_id
+    return ExpectationSuite(
+        expectation_suite_name="warning",
+        expectations=[exp1, exp2, exp3],
+        meta={"notes": "This is an expectation suite."},
+        ge_cloud_id=ge_cloud_id,
+    )
+
+
 def test_find_expectation_indexes_on_empty_suite(exp1, empty_suite):
     assert empty_suite.find_expectation_indexes(exp1, "domain") == []
 
@@ -247,6 +265,34 @@ def test_find_expectation_indexes(
         )
 
 
+def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_id):
+    # All expectations in `ge_cloud_suite` have our desired id
+    res = ge_cloud_suite.find_expectation_indexes(ge_cloud_id=ge_cloud_id)
+    assert res == [0, 1, 2]
+
+    # Wrong `ge_cloud_id` will fail to match with any expectations
+    res = ge_cloud_suite.find_expectation_indexes(ge_cloud_id="my_fake_id")
+    assert res == []
+
+
+def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
+    with pytest.raises(TypeError) as err:
+        ge_cloud_suite.find_expectation_indexes(
+            expectation_configuration=None, ge_cloud_id=None
+        )
+    assert (
+        str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
+    )
+
+
+def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
+    with pytest.raises(InvalidExpectationConfigurationError) as err:
+        ge_cloud_suite.find_expectation_indexes(
+            expectation_configuration={"foo": "bar"}
+        )
+    assert str(err.value) == "Ensure that expectation configuration is valid."
+
+
 def test_find_expectations(
     exp1, exp2, exp3, exp4, exp5, domain_success_runtime_suite, single_expectation_suite
 ):
@@ -275,6 +321,16 @@ def test_find_expectations(
     assert (
         domain_success_runtime_suite.find_expectations(expectation_to_find1, "runtime")
         == []
+    )
+
+
+def test_find_expectations_without_necessary_args(ge_cloud_suite):
+    with pytest.raises(TypeError) as err:
+        ge_cloud_suite.find_expectations(
+            expectation_configuration=None, ge_cloud_id=None
+        )
+    assert (
+        str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
     )
 
 
@@ -313,6 +369,16 @@ def test_remove_expectation(
         exp1, match_type="domain"
     ) == [0]
     assert domain_success_runtime_suite.isEquivalentTo(single_expectation_suite)
+
+
+def test_remove_expectation_without_necessary_args(single_expectation_suite):
+    with pytest.raises(TypeError) as err:
+        single_expectation_suite.remove_expectation(
+            expectation_configuration=None, ge_cloud_id=None
+        )
+    assert (
+        str(err.value) == "Must provide either expectation_configuration or ge_cloud_id"
+    )
 
 
 def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
@@ -427,4 +493,75 @@ def test_remove_all_expectations_of_type(
 
     assert suite_with_table_and_column_expectations.isEquivalentTo(
         suite_with_column_pair_and_table_expectations
+    )
+
+
+def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, exp1):
+    # The state of the first expectation before update
+    expectation_before_update = ge_cloud_suite.expectations[0]
+    assert expectation_before_update["kwargs"]["column"] == "a"
+    assert expectation_before_update["kwargs"]["value_set"] == [1, 2, 3]
+    assert expectation_before_update["meta"]["notes"] == "This is an expectation."
+
+    new_expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "b", "value_set": [4, 5, 6], "result_format": "BASIC"},
+        meta={"notes": "This is an updated expectation."},
+        ge_cloud_id=ge_cloud_id,
+    )
+    ge_cloud_suite.replace_expectation(
+        new_expectation_configuration=new_expectation_configuration,
+        existing_expectation_configuration=exp1,
+    )
+
+    # The state of the first expectation after update
+    expectation_after_update = ge_cloud_suite.expectations[0]
+    assert expectation_after_update["kwargs"]["column"] == "b"
+    assert expectation_after_update["kwargs"]["value_set"] == [4, 5, 6]
+    assert (
+        expectation_after_update["meta"]["notes"] == "This is an updated expectation."
+    )
+
+
+def test_replace_expectation_without_necessary_args(ge_cloud_suite):
+    with pytest.raises(TypeError) as err:
+        ge_cloud_suite.replace_expectation(
+            new_expectation_configuration={},
+            existing_expectation_configuration=None,
+            ge_cloud_id=None,
+        )
+    assert (
+        str(err.value)
+        == "Must provide either existing_expectation_configuration or ge_cloud_id"
+    )
+
+
+def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, exp1, ge_cloud_id):
+    new_expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "b", "value_set": [4, 5, 6], "result_format": "BASIC"},
+        meta={"notes": "This is a new expectation."},
+    )
+    with pytest.raises(ValueError) as err:
+        ge_cloud_suite.replace_expectation(
+            new_expectation_configuration=new_expectation_configuration,
+            existing_expectation_configuration=None,
+            ge_cloud_id=ge_cloud_id,
+        )
+    assert (
+        str(err.value)
+        == "More than one matching expectation was found. Please be more specific with your search criteria"
+    )
+
+
+def test_replace_expectation_finds_no_matches(ge_cloud_suite, ge_cloud_id, exp4):
+    with pytest.raises(ValueError) as err:
+        ge_cloud_suite.replace_expectation(
+            new_expectation_configuration=exp4,
+            existing_expectation_configuration=None,
+            ge_cloud_id=ge_cloud_id,
+        )
+    assert (
+        str(err.value)
+        == "More than one matching expectation was found. Please be more specific with your search criteria"
     )
