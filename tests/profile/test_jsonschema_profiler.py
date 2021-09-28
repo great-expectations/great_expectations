@@ -289,6 +289,7 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
             "kwargs": {"column": "first_name"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -297,16 +298,19 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "first_name"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "age"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -315,11 +319,13 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "age"},
             "meta": {},
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
@@ -336,6 +342,7 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
             "meta": {},
             "kwargs": {"column": "active"},
             "expectation_type": "expect_column_to_exist",
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -344,21 +351,25 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
                 "type_list": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "kwargs": {"column": "active", "value_set": [True, False]},
             "expectation_type": "expect_column_values_to_be_in_set",
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "active"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "kwargs": {"column": "optional"},
             "expectation_type": "expect_column_to_exist",
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -367,11 +378,13 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
                 "type_list": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "kwargs": {"column": "optional", "value_set": [True, False]},
             "expectation_type": "expect_column_values_to_be_in_set",
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
@@ -388,6 +401,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "shirt-size"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -396,16 +410,19 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
                 "column": "shirt-size",
                 "value_set": ["XS", "S", "M", "XL", "XXL"],
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "shirt-size"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-color"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -414,11 +431,13 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
                 "column": "optional-color",
                 "value_set": ["red", "green", "blue"],
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-hat"},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -427,6 +446,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -435,11 +455,13 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
                 "column": "optional-hat",
                 "value_set": ["red", "green", "blue"],
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-answer"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -448,6 +470,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
                 "column": "optional-answer",
                 "value_set": ["yes", "no"],
             },
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
@@ -464,6 +487,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "kwargs": {"column": "comments-no-constraints"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -472,16 +496,19 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "comments-no-constraints"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "state-abbreviation-equal-min-max"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -490,21 +517,25 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "state-abbreviation-equal-min-max", "value": 2},
             "expectation_type": "expect_column_value_lengths_to_equal",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "state-abbreviation-equal-min-max"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "ICD10-code-3-7"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -513,21 +544,25 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "ICD10-code-3-7", "min_value": 3, "max_value": 7},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "ICD10-code-3-7"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "name-no-max"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -536,21 +571,25 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "name-no-max", "min_value": 1},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "name-no-max"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "password-max-33"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -559,21 +598,25 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "password-max-33", "max_value": 33},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "password-max-33"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "optional-min-1"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -582,11 +625,13 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "optional-min-1", "min_value": 1},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
@@ -603,6 +648,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "favorite-number"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -611,16 +657,19 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "column": "favorite-number",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "favorite-number"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "age-0-130"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -629,21 +678,25 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "column": "age-0-130",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "age-0-130", "min_value": 0, "max_value": 130},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "age-0-130"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "wheel-count-0-plus"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -652,21 +705,25 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "column": "wheel-count-0-plus",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "wheel-count-0-plus", "min_value": 0},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "wheel-count-0-plus"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "rpm-max-7000"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -675,21 +732,25 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "column": "rpm-max-7000",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "rpm-max-7000", "max_value": 7000},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "rpm-max-7000"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "lake-depth-max-minus-100"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -698,21 +759,25 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "column": "lake-depth-max-minus-100",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "lake-depth-max-minus-100", "max_value": -100},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "lake-depth-max-minus-100"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-min-0"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -721,6 +786,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "column": "floor-exclusive-min-0",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -730,16 +796,19 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "min_value": 0,
                 "strict_min": True,
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-min-0"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-max-100"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -748,6 +817,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "column": "floor-exclusive-max-100",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -757,16 +827,19 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                 "max_value": 100,
                 "strict_max": True,
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-max-100"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "gear-exclusive-0-6"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -775,6 +848,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -786,16 +860,19 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
             "expectation_type": "expect_column_values_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "gear-exclusive-0-6"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "optional-min-1"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -804,6 +881,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -812,6 +890,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             },
             "expectation_type": "expect_column_values_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
@@ -828,6 +907,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "favorite-number"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -836,16 +916,19 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "favorite-number",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "favorite-number"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "age-0-130"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -854,21 +937,25 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "age-0-130",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "age-0-130", "min_value": 0.5, "max_value": 130.5},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "age-0-130"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "wheel-count-0-plus"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -877,21 +964,25 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "wheel-count-0-plus",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "wheel-count-0-plus", "min_value": 0.5},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "wheel-count-0-plus"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "rpm-max-7000"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -900,21 +991,25 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "rpm-max-7000",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "rpm-max-7000", "max_value": 7000.5},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "rpm-max-7000"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "lake-depth-max-minus-100"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -923,21 +1018,25 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "lake-depth-max-minus-100",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "lake-depth-max-minus-100", "max_value": -100.5},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "lake-depth-max-minus-100"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-min-0"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -946,6 +1045,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "floor-exclusive-min-0",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -955,16 +1055,19 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "min_value": 0.5,
                 "strict_min": True,
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-min-0"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-max-100"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -973,6 +1076,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "column": "floor-exclusive-max-100",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -982,16 +1086,19 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                 "max_value": 100.5,
                 "strict_max": True,
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-max-100"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "gear-exclusive-0-6"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -1000,6 +1107,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -1011,16 +1119,19 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             },
             "expectation_type": "expect_column_values_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "gear-exclusive-0-6"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {"column": "optional-min-half"},
             "expectation_type": "expect_column_to_exist",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -1029,6 +1140,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "kwargs": {
@@ -1037,6 +1149,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             },
             "expectation_type": "expect_column_values_to_be_between",
             "meta": {},
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
@@ -1060,6 +1173,7 @@ def test_has_profile_create_expectations_from_complex_schema(
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "post-office-box"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1068,16 +1182,19 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "post-office-box"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "street-name"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1086,11 +1203,13 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "street-name"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_to_exist",
@@ -1101,6 +1220,7 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "content": ["### Description:\nOnly the address number."],
                 }
             },
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1109,16 +1229,19 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "street-number"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "locality"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1127,16 +1250,19 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "locality"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "region"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1145,16 +1271,19 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "region"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "postal-code"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1163,16 +1292,19 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "postal-code"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "country-name"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1181,11 +1313,13 @@ def test_has_profile_create_expectations_from_complex_schema(
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "country-name"},
             "meta": {},
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
@@ -1202,16 +1336,19 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "null"},
+            "ge_cloud_id": None,
         },
         {
             "expectation_type": "expect_column_values_to_be_null",
             "kwargs": {"column": "null"},
             "meta": {},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "string-or-null"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -1220,11 +1357,13 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                 "column": "string-or-null",
                 "type_list": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "int-or-null"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -1233,11 +1372,13 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                 "column": "int-or-null",
                 "type_list": list(ProfilerTypeMapping.INT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "number-or-null"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -1246,11 +1387,13 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                 "column": "number-or-null",
                 "type_list": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
             },
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "enum-or-null"},
+            "ge_cloud_id": None,
         },
         {
             "meta": {},
@@ -1259,6 +1402,7 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                 "column": "enum-or-null",
                 "value_set": ["a", "b", "c"],
             },
+            "ge_cloud_id": None,
         },
     ]
     context = empty_data_context
