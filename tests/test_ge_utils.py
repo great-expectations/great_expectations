@@ -229,10 +229,6 @@ def test_nested_update_lists():
         "suite.failure": {"metric.blarg": [""]},
     }
 
-def test_nested_update_without_concat_lists():
-    # TODO(cdkini): Open to implement!
-    pass
-
 
 def test_linter_raises_error_on_non_string_input():
     with pytest.raises(TypeError):
