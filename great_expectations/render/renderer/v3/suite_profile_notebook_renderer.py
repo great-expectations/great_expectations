@@ -72,7 +72,7 @@ validator.head(n_rows=5, fetch_all=False)
         column_names: List[str]
         column_name: str
         column_names = [
-            f'    "{column_name}"\n,' for column_name in self.validator.columns()
+            f'    "{column_name}",\n' for column_name in self.validator.columns()
         ]
         code: str = f'ignored_columns = [\n{"".join(column_names)}]'
         self.add_code_cell(code=code, lint=True)
