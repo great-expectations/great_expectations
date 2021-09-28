@@ -4,6 +4,8 @@ import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+
+# noinspection PyProtectedMember
 from great_expectations.datasource.data_connector.util import (
     _invert_regex_to_data_reference_template,
     batch_definition_matches_batch_request,
@@ -254,6 +256,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     group_names = ["i", "wont", "match"]
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     with pytest.raises(KeyError):
+        # noinspection PyUnusedLocal
         my_data_reference = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=my_batch_definition,
             regex_pattern=regex_pattern,
@@ -370,7 +373,7 @@ def test__invert_regex_to_data_reference_template():
     returned = _invert_regex_to_data_reference_template(
         regex_pattern=r"(.*)-[A|B|C]\.csv", group_names=["name"]
     )
-    returned == "{name}-*.csv"
+    assert returned == "{name}-*.csv"
 
     # From https://github.com/madisonmay/CommonRegex/blob/master/commonregex.py
     date = r"(?:(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?\s+(?:of\s+)?(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)|(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)\s+(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?)(?:\,)?\s*(?:\d{4})?|[0-3]?\d[-\./][0-3]?\d[-\./]\d{2,4}"
@@ -436,7 +439,7 @@ def test_build_sorters_from_config_good_config():
     )
     # no sorters by name of i_dont_exist
     with pytest.raises(KeyError):
-        sorters["i_dont_exist"]
+        _ = sorters["i_dont_exist"]
 
 
 def test_build_sorters_from_config_bad_config():
