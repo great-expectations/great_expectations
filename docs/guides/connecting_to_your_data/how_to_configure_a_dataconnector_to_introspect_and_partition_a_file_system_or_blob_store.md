@@ -158,7 +158,7 @@ Now, perform the relevant checks, such as confirm the expected number of batches
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L151-L153
 ```
 
-### 2. Splitting and Sampling
+### 3. Splitting and Sampling
 
 Additional `Partitioning` mechanisms provided by Great Expectations include `Splitting` and `Sampling`.
 
@@ -197,84 +197,42 @@ be done using `batch_spec_passthrough` as illustrated above.
 
 ## Additional Notes
 
-To view the full scripts used in this page, see them on GitHub:
+Available `Splitting` methods and their configuration parameters:
+
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | **Method**                      	| **Parameters**                                                                                                                        | **Returned Batch Data**                                                                                                                                                                   |
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _split_on_whole_table             | N/A                                                                                                                                   | identical to original                                                                                                                                                                    	|
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _split_on_column_value            | column_name='col', batch_identifiers={    'col': value }                                                                              | rows where value of column_name are equal to value specified                                                                                                                             	|
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _split_on_converted_datetime      | column_name='col', date_format_string=<'%Y-%m-%d'>, batch_identifiers={    'col': matching_string }                                   | rows where value of column_name converted to datetime using the given date_format_string are equal to matching string provided for the column_name specified                             	|
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _split_on_divided_integer         | column_name='col', divisor=<int>, batch_identifiers={    'col': matching_divisor }                                                    | rows where value of column_name divided (using integral division) by the given divisor are equal to matching_divisor provided for the column_name specified                              	|
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _split_on_mod_integer             | column_name='col', mod=<int>, batch_identifiers={    'col': matching_mod_value }                                                      | rows where value of column_name divided (using modular division) by the given mod are equal to matching_mod_value provided for the column_name specified                                 	|
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _split_on_multi_column_values     | column_names='<list[col]>', batch_identifiers={    'col_0': value_0,    'col_1': value_1,    'col_2': value_2,               ... }    | rows where values of column_names are equal to values corresponding to each column name as specified                                                                                     	|
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _split_on_hashed_column           | column_name='col', hash_digits=<int>, hash_function_name=<'md5'> batch_identifiers={    'hash_value': value }                         | rows where value of column_name hashed (using specified has_function_name) and retaining the stated number of hash_digits are equal to hash_value provided for the column_name specified 	|
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+
+
+Available `Sampling` methods and their configuration parameters:
+
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | **Method**                      	| **Parameters**                                                                                                                        | **Returned Batch Data**                                                                                                                                                                   |
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _sample_using_random              | p=fraction                                                                                                                            | rows selected at random, whose number amounts to selected fraction of total number of rows in batch                                                                                       |
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _sample_using_mod                 | column_name='col', mod=<int>                                                                                                          | take the mod of named column, and only keep rows that match the given value                                                                                                               |
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _sample_using_a_list              | column_name='col', value_list=<list[val]>                                                                                             | match the values in the named column against value_list, and only keep the matches                                                                                                        |
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+    | _sample_using_hash                | column_name='col', hash_digits=<int>, hash_value=<str>, hash_function_name=<'md5'>                                                    | hash the values in the named column (using specified has_function_name), and only keep rows that match the given hash_value                                                               |
+    +-----------------------------------+---------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	+
+
+
+To view the full script used in this page, see it on GitHub:
 
 - [yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py)
-
-# ALEX
-
-
-### 2.  Examine a few rows of a file
-
-Pick a `data_asset_name` from the previous step and specify it in the `BatchRequest`:
-
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L68-L77
-```
-
-Then load data into the `Validator` and print a brief excerpt of the file's contents (`n_rows = 5` is the default):
-
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L83-L86
-```
-
-At this point, you can also perform additional checks, such as confirm the number of batches and the size of a batch.
-For example (be sure to adjust this code to match the specifics of your data and configuration):
-
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L88-L90
-```
-
-
-#ALEX
-
-
-Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
-
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L62-L66
-```
-Then load data into the `Validator`.
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L72-L78
-```
-
-#ALEX
-
-1. **Construct a BatchRequest**
-
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L39-L44
-    ```
-   
-    Since a `BatchRequest` can return multiple `Batch(es)`, you can optionally provide additional parameters to filter the retrieved `Batch(es)`. See [Datasources Core Concepts Guide](../../reference/datasources.md) for more info on filtering besides `batch_filter_parameters` and `limit` including custom filter functions and sampling. The example `BatchRequest`s below shows several non-exhaustive possibilities. 
-
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L61-L71
-    ```
-
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L75-L89
-    ```
-   
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L94-L104
-    ```
-   
-    You may also wish to list available batches to verify that your `BatchRequest` is retrieving the correct `Batch(es)`, or to see which are available. You can use `context.get_batch_list()` for this purpose, which can take a variety of flexible input types similar to a `BatchRequest`. Some examples are shown below:
-
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L109-L114
-    ```
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L117-L118
-    ```
-   
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L121-L127
-    ```
-   
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L136-L142
-    ```
-
-2. **Get access to your Batch via a Validator**
-
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L147-L154
-    ```
-
-3. **Check your data**
-
-    You can check that the first few lines of the `Batch` you loaded into your `Validator` are what you expect by running:
-
-    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L156
-    ```
-
-    Now that you have a `Validator`, you can use it to create `Expectations` or validate the data.
