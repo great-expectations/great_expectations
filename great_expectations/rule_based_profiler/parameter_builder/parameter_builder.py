@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.util import (
     get_validator as get_validator_from_batch_request,
 )
 from great_expectations.util import is_numeric
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 

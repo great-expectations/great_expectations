@@ -1,3 +1,4 @@
+# noinspection PyPep8Naming
 from contextlib import ExitStack as does_not_raise
 from typing import List
 from unittest import mock
@@ -13,6 +14,8 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
+
+# noinspection PyProtectedMember
 from great_expectations.datasource.data_connector.inferred_asset_s3_data_connector import (
     INVALID_S3_CHARS,
     _check_valid_s3_path,
@@ -1029,6 +1032,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
         )
 
 
+# noinspection PyTypeChecker
 @pytest.mark.parametrize(
     "path,expectation",
     [("BUCKET/DIR/FILE.CSV", does_not_raise())]

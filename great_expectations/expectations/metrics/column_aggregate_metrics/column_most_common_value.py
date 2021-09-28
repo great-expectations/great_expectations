@@ -19,7 +19,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnMostCommonValue(ColumnAggregateMetricProvider):

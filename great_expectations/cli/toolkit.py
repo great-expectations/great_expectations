@@ -880,7 +880,7 @@ def get_batch_request_from_json_file(
         usage_event=usage_event,
     )
     try:
-        batch_request = BatchRequest(**batch_request).get_json_dict()
+        batch_request = BatchRequest(**batch_request).to_json_dict()
     except TypeError as e:
         cli_message(
             string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"

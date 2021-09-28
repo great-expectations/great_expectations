@@ -12,6 +12,7 @@ except ImportError:
     sa = None
     quoted_name = None
     DefaultDialect = None
+    DatabaseError = None
 
 logger = logging.getLogger(__name__)
 
