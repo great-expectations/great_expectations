@@ -75,9 +75,9 @@ def nested_update(
     concat_lists: bool = True,
 ):
     """
-    Epdate d with items from u, recursively and joining elements. By default, list values are
-    concatenated without de-duplication. If concat_lists is set to False, lists in new dict
-    will replace those in new dict.
+    Update d with items from u, recursively and joining elements. By default, list values are
+    concatenated without de-duplication. If concat_lists is set to False, lists in u (new dict)
+    will replace those in d (base dict).
     """
     for k, v in u.items():
         if isinstance(v, Mapping):
