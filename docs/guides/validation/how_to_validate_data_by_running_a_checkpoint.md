@@ -3,9 +3,22 @@ title: How to validate your data using a Checkpoint
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 This guide will help you validate your data by running a Checkpoint.
 
+As stated in [Validate your data using a Checkpoint](../../tutorials/getting_started/validate_your_data.md), the best way
+to validate data in production with Great Expectations is using a [Checkpoint](../../reference/checkpoints_and_actions).
+The advantages of a [Checkpoint](../../reference/checkpoints_and_actions) are ease of use, while combining the existing
+- [Expectation Suites](../../reference/expectations/expectations),
+- [DataConnectors](../../tutorials/getting_started/connect_to_data.md),
+- [BatchRequests](../../reference/datasources#Batches), and
+- [Validation Actions](../../reference/checkpoints_and_actions.md)
+in order to set up and perform the validation.  Otherwise, configuring these validation parameters would have to be done
+via the API.  A [Checkpoint](../../reference/checkpoints_and_actions) encapsulates this "boilerplate" and ensures that
+all components work in harmony together.  Finally, running a configured
+[Checkpoint](../../reference/checkpoints_and_actions) is a one-liner, as described below.
 
 <Prerequisites>
 
@@ -15,70 +28,120 @@ This guide will help you validate your data by running a Checkpoint.
 
 </Prerequisites>
 
+You can run the Checkpoint from the CLI in a Terminal shell or using Python.
+
+<Tabs
+  groupId="terminal-or-python"
+  defaultValue='terminal'
+  values={[
+  {label: 'Terminal', value:'terminal'},
+  {label: 'Python', value:'python'},
+  ]}>
+  <TabItem value="terminal">
+
 Steps
 -----
 
-1. You can update your existing Checkpoint either using a text editor or by executing the following command:
+1. Checkpoints can be run like applications from the command line by running:
 
-   ```console
-   great_expectations --v3-api checkpoint edit my_checkpoint
-   ```
+```bash
+great_expectations --v3-api checkpoint run my_checkpoint
+Validation failed!
+```
 
-   This will open a **Jupyter Notebook** that will allow you to modify the configuration of your Checkpoint.
+2. Next, observe the output which will tell you if all validations passed or failed.
 
-   For example, for the Taxi dataset, the end result will look similar to this:
- 
-   ```yaml
-    name: my_checkpoint
-    config_version: 1.0
-    class_name: SimpleCheckpoint
-    run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
-    validations:
-      - batch_request:
-          datasource_name: taxi_data
-          data_connector_name: taxi_data_example_data_connector
-          data_asset_name: yellow_tripdata_sample_2019-02.csv
-          data_connector_query:
-            index: -1
-        expectation_suite_name: taxi.demo
-   ```
+Additional notes
+----------------
 
-2. You may wish to utilize the powerful fully-featured Checkpoint (instead of SimpleCheckpoint).  To do this, open your existing Checkpoint configuration in a text editor and make the necessary changes (such as in the following):
+This command will return posix status codes and print messages as follows:
 
-   ```yaml
-   name: my_checkpoint
-   config_version: 1
-   class_name: Checkpoint
-   run_name_template: "%Y-%m-foo-bar-template-$VAR"
-   validations:
-     - batch_request:
-         datasource_name: taxi_data
-         data_connector_name: taxi_data_example_data_connector
-         data_asset_name: yellow_tripdata_sample_2019-02.csv
-         data_connector_query:
-           index: -1
-       expectation_suite_name: taxi.demo
-       action_list:
-           - name: store_validation_result
-             action:
-               class_name: StoreValidationResultAction
-           - name: store_evaluation_params
-             action:
-               class_name: StoreEvaluationParametersAction
-           - name: update_data_docs
-             action:
-               class_name: UpdateDataDocsAction
-       evaluation_parameters:
-         param1: "$MY_PARAM"
-         param2: 1 + "$OLD_PARAM"
-       runtime_configuration:
-         result_format:
-           result_format: BASIC
-           partial_unexpected_count: 20
-   ```
+    +-------------------------------+-----------------+-----------------------+
+    | **Situation**                 | **Return code** | **Message**           |
+    +-------------------------------+-----------------+-----------------------+
+    | all validations passed        | 0               | Validation succeeded! |
+    +-------------------------------+-----------------+-----------------------+
+    | one or more validation failed | 1               | Validation failed!    |
+    +-------------------------------+-----------------+-----------------------+
 
-   The details of Checkpoint configuration can be found in [How to add validations data or suites to a Checkpoint](./checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint).
-   In addition, please see [How to configure a new Checkpoint using test_yaml_config](./checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for more Checkpoint configuration examples (including the convenient templating mechanism).
 
-3. Run Checkpoint validations on your data.
-   You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](./checkpoints/how_to_run_a_checkpoint_in_terminal) or from Python, as explained in [How to run a Checkpoint in Python](./checkpoints/how_to_run_a_checkpoint_in_python).
+</TabItem>
+<TabItem value="python">
+
+Steps
+-----
+
+1. First, generate the Python script with the command:
+
+```bash
+great_expectations --v3-api checkpoint script my_checkpoint
+```
+
+2. Next, you will see a message about where the Python script was created like:
+
+```bash
+A Python script was created that runs the checkpoint named: `my_checkpoint`
+  - The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`
+  - The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`
+```
+
+3. Next, open the script -- it should look like this:
+
+```python
+"""
+This is a basic generated Great Expectations script that runs a Checkpoint.
+
+Checkpoints are the primary method for validating batches of data in production and triggering any followup actions.
+
+A Checkpoint facilitates running a validation as well as configurable Actions such as updating Data Docs, sending a
+notification to team members about Validation Results, or storing a result in a shared cloud storage.
+
+Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
+is provided for those who wish to run Checkpoints in Python.
+
+Usage:
+- Run this file: `python great_expectations/uncommitted/run_my_checkpoint.py`.
+- This can be run manually or via a scheduler such, as cron.
+- If your pipeline runner supports Python snippets, then you can paste this into your pipeline.
+"""
+import sys
+
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.data_context import DataContext
+
+data_context: DataContext = DataContext(
+    context_root_dir="/path/to/great_expectations"
+)
+
+result: CheckpointResult = data_context.run_checkpoint(
+    checkpoint_name="my_checkpoint",
+    batch_request=None,
+    run_name=None,
+)
+
+if not result["success"]:
+    print("Validation failed!")
+    sys.exit(1)
+
+print("Validation succeeded!")
+sys.exit(0)
+```
+
+4. This Python script can then be invoked directly using Python:
+```python
+python great_expectations/uncommitted/run_my_checkpoint.py
+```
+Alternatively, the above Python code can be embedded in your pipeline.
+
+## Additional Notes
+
+- Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of
+the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.
+- The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()`
+must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently
+configured Checkpoint with the given `name`.
+- Please see [How to configure a new Checkpoint using test_yaml_config](./checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for more Checkpoint configuration examples (including the convenient templating mechanism) and `DataContext.run_checkpoint()` invocation options.
+
+</TabItem>
+</Tabs>
+
