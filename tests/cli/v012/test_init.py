@@ -218,13 +218,6 @@ great_expectations/
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/

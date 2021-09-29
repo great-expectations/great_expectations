@@ -130,13 +130,6 @@ great_expectations/
     expectations/
         .ge_store_backend_id
         warning.json
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
