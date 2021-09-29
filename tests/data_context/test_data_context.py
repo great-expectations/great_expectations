@@ -1187,9 +1187,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 
 
 def test_scaffold_directories(tmp_path_factory):
-    empty_directory = str(
-        tmp_path_factory.mktemp("test_scaffold_directories")
-    )
+    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
     DataContext.scaffold_directories(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
