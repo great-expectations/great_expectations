@@ -17,7 +17,6 @@ Great Expectations will create a new directory with the following structure:
     |-- great_expectations.yml
     |-- expectations
     |-- checkpoints
-    |-- notebooks
     |-- plugins
     |-- .gitignore
     |-- uncommitted
@@ -37,7 +36,6 @@ COMPLETE_ONBOARDING_PROMPT = """
 It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the following missing files (existing files will not be modified)?
 
    great_expectations
-    |-- notebooks
     |-- plugins
     |-- uncommitted
 """
