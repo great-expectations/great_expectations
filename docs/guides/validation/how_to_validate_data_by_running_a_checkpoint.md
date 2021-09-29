@@ -8,15 +8,18 @@ import TabItem from '@theme/TabItem';
 
 This guide will help you validate your data by running a Checkpoint.
 
-As stated in [Validate your data using a Checkpoint](../../tutorials/getting_started/validate_your_data.md), the best way
+As stated in the Getting Started Tutorial
+[Validate your data using a Checkpoint](../../tutorials/getting_started/validate_your_data.md), the best way
 to validate data in production with Great Expectations is using a [Checkpoint](../../reference/checkpoints_and_actions).
-The advantages of a [Checkpoint](../../reference/checkpoints_and_actions) are ease of use, while combining the existing
-- [Expectation Suites](../../reference/expectations/expectations),
-- [DataConnectors](../../tutorials/getting_started/connect_to_data.md),
-- [BatchRequests](../../reference/datasources#Batches), and
+The advantage of using a [Checkpoint](../../reference/checkpoints_and_actions) is ease of use, due to its principal
+capability of combining the existing configuration in order to set up and perform the validation:
+- [Expectation Suites](../../reference/expectations/expectations)
+- [DataConnectors](../../tutorials/getting_started/connect_to_data.md)
+- [BatchRequests](../../reference/datasources#Batches)
 - [Validation Actions](../../reference/checkpoints_and_actions.md)
-in order to set up and perform the validation.  Otherwise, configuring these validation parameters would have to be done
-via the API.  A [Checkpoint](../../reference/checkpoints_and_actions) encapsulates this "boilerplate" and ensures that
+ 
+Otherwise, configuring these validation parameters would have to be done via the API.  A
+[Checkpoint](../../reference/checkpoints_and_actions) encapsulates this "boilerplate" and ensures that
 all components work in harmony together.  Finally, running a configured
 [Checkpoint](../../reference/checkpoints_and_actions) is a one-liner, as described below.
 

@@ -5,8 +5,8 @@ import WhereToRunCode from './components/where_to_run_code.md'
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 
 This guide will help you introspect and partition any files type data store (e.g., filesystem, cloud blob storage) using
-the different types of the active `Data Connector`.  For background, please see the `Datasource` specific guides in the
-"Connecting to your data" section.
+the different types of the active `Data Connector`.  For background on connecting to different backends, please see the
+`Datasource` specific guides in the "Connecting to your data" section.
 
 The file based data introspection and partitioning mechanisms in Great Expectations are useful for:
 - Exploring the types, subdirectory location, and filepath naming structures of the files in your dataset, and
