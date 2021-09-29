@@ -79,18 +79,18 @@ naming structures of files in your filesystem or blob storage:
 
 Pick a `data_asset_name` from the previous step and specify it in the `BatchRequest`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L68-L77
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L69-L73
 ```
 
 Then load data into the `Validator` and print a brief excerpt of the file's contents (`n_rows = 5` is the default):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L83-L86
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L79-L85
 ```
 
 At this point, you can also perform additional checks, such as confirm the number of batches and the size of a batch.
 For example (be sure to adjust this code to match the specifics of your data and configuration):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L88-L90
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L87-L89
 ```
 
 ## Partitioning
@@ -104,7 +104,7 @@ You can employ a data asset that reflects a relatively general file structure (e
 configuration) to represent files in a directory, which contain a certain prefix (e.g., `yellow_trip_data_sample_`) and
 whose contents are of the desired type (e.g., CSV).
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L93-L97
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L92-L96
 ```
 
 For the present example, set `data_asset_name` to `taxi_data_flat` in the above `BatchRequest` specification.
@@ -113,7 +113,7 @@ For the present example, set `data_asset_name` to `taxi_data_flat` in the above 
 Perform the relevant checks, such as confirm the number of batches and the size of a batch.
 For example (be sure to adjust this code to match the specifics of your data and configuration):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L103-L105
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L102-L104
 ```
 
 ### 2. Partition by year and month
@@ -126,36 +126,36 @@ exact values of the file name structure's components to allowing Python function
 To illustrate (using the present configuration example), set `data_asset_name` to `taxi_data_year_month` in the
 following `BatchRequest` specification (customize for your own data set, as appropriate):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L109-L114
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L108-L113
 ```
 
 To obtain the data for the nine months of February through October, apply the following custom filter:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L119-L122
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L118-L121
 ```
 
 Now, perform the relevant checks, such as confirm the expected number of batches was retrieved, and the size of a batch:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L124-L126
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L123-L125
 ```
 
 You can then identify a particular batch (e.g., corresponding to the year and month of interest) and retrieve it for
 data analysis as follows:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L130-L141
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L129-L140
 ```
 
 Note that in the present example, there can be up to three `BATCH_FILTER_PARAMETER` key-value pairs, because the regular
 expression for the data asset `taxi_data_year_month` defines three groups: `name`, `year`, and `month`.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L146-L149
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L145-L148
 ```
 
 (Be sure to adjust the above code snippets to match the specifics of your data and configuration.)
 
 Now, perform the relevant checks, such as confirm the expected number of batches was retrieved, and the size of a batch:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L151-L153
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L150-L152
 ```
 
 ### 3. Splitting and Sampling
@@ -170,24 +170,24 @@ parameters to be used by the specified splitting method.
 To configure `Sampling`, specify a dimension (i.e., `column_name` or the entire `table`), the method of sampling, and
 parameters to be used by the specified sampling method.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L159-L187
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L158-L186
 ```
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L192-L195
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L191-L194
 ```
 
 For the present example, we can split according to the "passenger_count" column with the focus on two-passenger rides:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L196-L200
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L195-L199
 ```
 
 We can then obtain a random `10%` of the rows in the batch:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L201-L202
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L200-L201
 ```
 
 Finally, confirm the expected number of batches was retrieved and the reduced size of a batch (due to sampling):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L204-L206
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L203-L205
 ```
 
 :::info
