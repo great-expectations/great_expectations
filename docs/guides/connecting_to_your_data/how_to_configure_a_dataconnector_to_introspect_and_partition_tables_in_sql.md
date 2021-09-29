@@ -82,7 +82,8 @@ Pick a `data_asset_name` from the previous step and specify it in the `BatchRequ
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L84-L88
 ```
 
-Then load data into the `Validator` and print a few rows of the table (`n_rows = 5` is the default):
+Then load data into the `Validator` and print a few rows of the table (`n_rows = 5` is the default, but you may look at
+more rows e.g. `validator.head(n_rows=100)`):
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L94-L99
 ```
