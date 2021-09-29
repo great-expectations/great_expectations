@@ -103,7 +103,7 @@ batches, centered around a common aspect of the data.
 To configure `Splitting`, specify a dimension (i.e., `column_name` or `column_names`), the method of splitting, and
 parameters to be used by the specified splitting method.
 
-For the present example, we can split according to the "pickup_datetime" column parsed to the date level precision and
+For the present example, we can split according to the `pickup_datetime` column parsed to the date level precision and
 thus obtain batches containing the taxi rides data for each day found in the available data:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L112-L116
@@ -115,7 +115,7 @@ the specifics of your data and configuration):
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L122-L123
 ```
 
-As an additional example, we can split according to the "pickup_datetime" column parsed to the hour level precision and
+As an additional example, we can split according to the `pickup_datetime` column parsed to the hour level precision and
 thus obtain batches containing the taxi rides data for all hours of each day found in the available data:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L127-L131
