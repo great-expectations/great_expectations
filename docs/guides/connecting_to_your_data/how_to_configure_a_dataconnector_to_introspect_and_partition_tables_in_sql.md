@@ -88,7 +88,7 @@ more rows e.g. `validator.head(n_rows=100)`):
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L94-L99
 ```
 
-At this point, you can also perform additional checks, such as confirm the number of batches and the size of a batch.
+At this point, you can also perform additional checks, such as confirming the number of batches and the size of a batch.
 For example (be sure to adjust this code to match the specifics of your data and configuration):
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L102-L108
