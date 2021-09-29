@@ -133,6 +133,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "catch_exceptions": False,
             },
         },
+        # <WILL> updated
         "expect_column_values_to_not_be_null": {
             "domain": "column",
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
@@ -1032,16 +1033,17 @@ class ExpectationConfiguration(SerializableDictDot):
         }
 
     def get_domain(self):
-        # calls the loads up
-        # and hten we are can load it. up
-        # it will
-        pass
+        # this is the new function from CLOUD-250
+        domain_kwargs = self.get_domain_kwargs()
+        print(domain_kwargs)
 
     def get_domain_kwargs(self):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
         if expectation_kwargs_dict is None:
+            # THIS IS SHOULD BE THE DEFAULT
+            #
             impl = get_expectation_impl(self.expectation_type)
             if impl is not None:
                 domain_keys = impl.domain_keys
