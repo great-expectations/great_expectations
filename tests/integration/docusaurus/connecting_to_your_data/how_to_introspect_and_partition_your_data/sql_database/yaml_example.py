@@ -11,20 +11,20 @@ name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite://<PATH_TO_DB_FILE>
 
-introspection:
+introspection: # Each key in the "introspection" section is an InferredAssetSqlDataConnector
     whole_table:
         introspection_directives:
             include_views: true
-        skip_inapplicable_tables: true
-        excluded_tables:
-            - main.yellow_tripdata_sample_2019_03
+        skip_inapplicable_tables: true # skip and continue upon encountering introspection errors
+        excluded_tables: # a list of tables to ignore when inferring data asset_names
+            - main.yellow_tripdata_sample_2019_03 # format: schema_name.table_name
 
     daily:
         introspection_directives:
             include_views: true
-        skip_inapplicable_tables: true
-        included_tables:
-            - main.yellow_tripdata_sample_2019_01
+        skip_inapplicable_tables: true # skip and continue upon encountering introspection errors
+        included_tables: # only include tables in this list when inferring data asset_names
+            - main.yellow_tripdata_sample_2019_01 # format: schema_name.table_name
         splitter_method: _split_on_converted_datetime
         splitter_kwargs:
             column_name: pickup_datetime
@@ -34,16 +34,17 @@ introspection:
         introspection_directives:
             include_views: true
         skip_inapplicable_tables: true
-        included_tables:
-            - main.yellow_tripdata_sample_2019_01
+        included_tables: # only include tables in this list when inferring data asset_names
+            - main.yellow_tripdata_sample_2019_01 # format: schema_name.table_name
         splitter_method: _split_on_converted_datetime
         splitter_kwargs:
             column_name: pickup_datetime
             date_format_string: "%Y-%m-%d %H"
 
-tables:
+tables: # Each key in the "tables" section is a table_name
+    # data_asset_name is: concatenate(data_asset_name_prefix, table_name, data_asset_name_suffix)
     yellow_tripdata_sample_2019_01:
-        partitioners:
+        partitioners: # Each key in the "partitioners" section is a ConfiguredAssetSqlDataConnector
             by_num_riders:
                 include_schema_name: True
                 data_asset_name_prefix: taxi__
@@ -51,7 +52,8 @@ tables:
                 splitter_method: _split_on_column_value
                 splitter_kwargs:
                     column_name: passenger_count
-            random_sample:
+
+            by_num_riders_random_sample:
                 include_schema_name: True
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
@@ -154,7 +156,7 @@ assert len(batch_list) == 6
 # This BatchRequest specifies multiple batches, which is useful for dataset exploration and data analysis.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
-    data_connector_name="random_sample",
+    data_connector_name="by_num_riders_random_sample",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
 
@@ -178,5 +180,7 @@ assert "yellow_tripdata_sample_2019_01" in set(
     context.get_available_data_asset_names()["taxi_datasource"]["whole_table"]
 )
 assert "taxi__yellow_tripdata_sample_2019_01__asset" in set(
-    context.get_available_data_asset_names()["taxi_datasource"]["random_sample"]
+    context.get_available_data_asset_names()["taxi_datasource"][
+        "by_num_riders_random_sample"
+    ]
 )
