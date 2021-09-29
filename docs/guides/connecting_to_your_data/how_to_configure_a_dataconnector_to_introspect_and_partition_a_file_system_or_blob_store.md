@@ -159,6 +159,11 @@ Now, perform the relevant checks, such as confirm the expected number of batches
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L150-L152
 ```
 
+:::note
+Omitting the `batch_filter_parameters` key from the `data_connector_query` will be interpreted in the least restrictive
+(most broad) query, resulting in the largest number of `Batch` objects to be returned.
+:::
+
 ### 3. Splitting and Sampling
 
 Additional `Partitioning` mechanisms provided by Great Expectations include `Splitting` and `Sampling`.
