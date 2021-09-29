@@ -100,7 +100,7 @@ batch_request.data_asset_name = "yellow_tripdata_sample_2019_01"
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
-print(validator.head())
+print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
