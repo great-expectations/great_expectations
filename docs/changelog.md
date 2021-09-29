@@ -5,6 +5,7 @@ title: Changelog
 ### Develop
 * [FEATURE] Extended SlackNotificationAction to accept slack_token and slack_channel for slack messaging without a webhook. (#3440)
 * [BUGFIX]  Handle RuntimeBatchRequest passed programatically (without yml) (#3448)
+* [MAINTENANCE] Remove notebooks directory from data context and alter associated tests and documentation (#3467)
 
 ### 0.13.35
 * [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
