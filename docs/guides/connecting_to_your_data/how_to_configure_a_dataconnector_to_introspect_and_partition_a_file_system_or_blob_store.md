@@ -1,5 +1,5 @@
 ---
-title: How to configure a Data Connector to introspect and partition a file system or blob store
+title: How to configure a DataConnector to introspect and partition a file system or blob store
 ---
 import WhereToRunCode from './components/where_to_run_code.md'
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
