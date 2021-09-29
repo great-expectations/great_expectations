@@ -121,7 +121,7 @@ For example (be sure to adjust this code to match the specifics of your data and
 
 Next, in recognition of a finer observed file path structure, you can refine the partitioning strategy.  For instance,
 the `taxi_data_year_month` in our example configuration identifies three parts of a file path: `name` (as in "company
-name"), `year`, and `month`.  This partitioning affords a rich set of filtering capabilities randing from specifying the
+name"), `year`, and `month`.  This partitioning affords a rich set of filtering capabilities ranging from specifying the
 exact values of the file name structure's components to allowing Python functions for implementing custom criteria.
 
 To illustrate (using the present configuration example), set `data_asset_name` to `taxi_data_year_month` in the
