@@ -3,7 +3,7 @@ title: How to implement custom notifications
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-If you would like to implement custom notifications that include a link to Data Docs, you can access the Data Docs URL for the respective validation results page from your Data Context after a validation run following the steps below. This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or local setup.
+If you would like to implement custom notifications that include a link to Data Docs, you can access the Data Docs URL for the respective Validation Results page from your Data Context after a validation run following the steps below. This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or local setup.
 
 <Prerequisites>
 
@@ -32,7 +32,7 @@ If you would like to implement custom notifications that include a link to Data 
         run_id='my_run_id')
     ```
 
-2. Next, get the list of IDs of the validation results. ``results`` is a list that might have multiple elements if you validate multiple Batches, so we'll have to iterate over it. In this example, we'll just grab the only element:
+2. Next, get the list of IDs of the Validation Results. ``results`` is a list that might have multiple elements if you validate multiple Batches, so we'll have to iterate over it. In this example, we'll just grab the only element:
 
     ```python
     validation_ids = [res for res in results['run_results']]
@@ -52,5 +52,5 @@ If you would like to implement custom notifications that include a link to Data 
     validation_site_url = url_dicts[0]['site_url']
     ```
 
-4. You can now include ``validation_site_url`` as a link in your custom notifications, e.g. in an email,  which will allow users to jump straight to the relevant validation results page.
+4. You can now include ``validation_site_url`` as a link in your custom notifications, e.g. in an email,  which will allow users to jump straight to the relevant Validation Results page.
 

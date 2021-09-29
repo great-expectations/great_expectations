@@ -8,7 +8,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 context = DataContext()
@@ -38,7 +38,7 @@ feb_batch_request: BatchRequest = BatchRequest(
 
 feb_batch_list: List[Batch] = context.get_batch_list(batch_request=feb_batch_request)
 
-validator.load_batch(batch_list=feb_batch_list)
+validator.load_batch_list(batch_list=feb_batch_list)
 assert validator.active_batch_definition.batch_identifiers["month"] == "02"
 assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 
@@ -54,7 +54,7 @@ march_batch_list: List[Batch] = context.get_batch_list(
     batch_request=march_batch_request
 )
 
-validator.load_batch(batch_list=march_batch_list)
+validator.load_batch_list(batch_list=march_batch_list)
 assert validator.active_batch_definition.batch_identifiers["month"] == "03"
 assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 

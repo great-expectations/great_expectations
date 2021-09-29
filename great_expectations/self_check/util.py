@@ -1231,7 +1231,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
+            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
             "expect_column_values_to_match_strftime_format",
@@ -1247,9 +1247,9 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_sum_to_be_between",
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
+            # "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
+            # "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
@@ -1276,7 +1276,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- https://github.com/great-expectations/great_expectations/issues/3260
             "expect_column_quantile_values_to_be_between",  # TODO: takes over 15 minutes to "collect" (haven't actually seen it complete yet) -- https://github.com/great-expectations/great_expectations/issues/3260
             "expect_column_mean_to_be_between",  # TODO: "400 No matching signature for operator *" -- https://github.com/great-expectations/great_expectations/issues/3260
-            "expect_select_column_values_to_be_unique_within_record",
+            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
             "expect_column_values_to_match_strftime_format",
@@ -1286,9 +1286,9 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_stdev_to_be_between",
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
+            # "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
+            # "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
@@ -1297,7 +1297,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         ]
     if context == "spark":
         return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
+            # "expect_select_column_values_to_be_unique_within_record",
             "expect_table_row_count_to_equal_other_table",
             "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
@@ -1307,16 +1307,16 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_match_like_pattern_list",
             "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_be_dateutil_parseable",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
+            # "expect_column_pair_values_A_to_be_greater_than_B",
+            # "expect_column_pair_values_to_be_equal",
+            # "expect_column_pair_values_to_be_in_set",
+            # "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
+            # "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
         ]
     if context == "pandas":
         return expectation_type in [
@@ -1345,6 +1345,8 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_equal",
             # "expect_column_pair_values_to_be_in_set",
+            # "expect_select_column_values_to_be_unique_within_record",
+            # "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
@@ -1359,6 +1361,7 @@ def build_test_backends_list(
     include_pandas=True,
     include_spark=True,
     include_sqlalchemy=True,
+    include_sqlite=True,
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
@@ -1386,7 +1389,8 @@ def build_test_backends_list(
                 "sqlalchemy tests are requested, but sqlalchemy in not installed"
             )
 
-        test_backends += ["sqlite"]
+        if include_sqlite:
+            test_backends += ["sqlite"]
 
         if include_postgresql:
             ###
@@ -1469,28 +1473,56 @@ def generate_expectation_tests(
     """
     parametrized_tests = []
 
-    # use the expectation_execution_engines_dict (if provided) to request only the appropriate backends
-    if expectation_execution_engines_dict is not None:
-        backends = build_test_backends_list(
-            include_pandas=expectation_execution_engines_dict.get(
-                "PandasExecutionEngine"
+    # If Expectation.examples defines "test_backends", use that to determine backends and dialects to use.
+    # Otherwise, use the introspected expectation_execution_engines_dict.
+    for d in examples_config:
+        d = copy.deepcopy(d)
+        if expectation_execution_engines_dict is not None:
+            example_backends_is_defined = "test_backends" in d
+            example_backends = [
+                backend_dict.get("backend")
+                for backend_dict in d.get("test_backends", [])
+            ]
+            example_sqlalchemy_dialects = [
+                dialect
+                for backend_dict in d.get("test_backends", {})
+                if (backend_dict.get("backend") == "sqlalchemy")
+                for dialect in backend_dict.get("dialects", [])
+            ]
+            include_sqlalchemy = (
+                ("sqlalchemy" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine")
+                    == True
+                )
             )
-            == True,
-            include_spark=expectation_execution_engines_dict.get(
-                "SparkDFExecutionEngine"
+            backends = build_test_backends_list(
+                include_pandas=("pandas" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("PandasExecutionEngine")
+                    == True
+                ),
+                include_spark=("spark" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
+                    == True
+                ),
+                include_sqlalchemy=include_sqlalchemy,
+                include_sqlite=("sqlite" in example_sqlalchemy_dialects)
+                if example_backends_is_defined
+                else include_sqlalchemy,
+                include_postgresql=("postgresql" in example_sqlalchemy_dialects),
+                include_mysql=("mysql" in example_sqlalchemy_dialects),
+                include_mssql=("mssql" in example_sqlalchemy_dialects),
             )
-            == True,
-            include_sqlalchemy=expectation_execution_engines_dict.get(
-                "SqlAlchemyExecutionEngine"
-            )
-            == True,
-        )
-    else:
-        backends = build_test_backends_list()
+        else:
+            backends = build_test_backends_list()
 
-    for c in backends:
-        for d in examples_config:
-            d = copy.deepcopy(d)
+        for c in backends:
+
             datasets = []
             if candidate_test_is_on_temporary_notimplemented_list_cfe(
                 c, expectation_type
@@ -1734,6 +1766,30 @@ def generate_expectation_tests(
     return parametrized_tests
 
 
+def sort_unexpected_values(test_value_list, result_value_list):
+    # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
+    if (isinstance(test_value_list, list)) & (len(test_value_list) >= 1):
+        # __lt__ is not implemented for python dictionaries making sorting trickier
+        # in our case, we will sort on the values for each key sequentially
+        if isinstance(test_value_list[0], dict):
+            test_value_list = sorted(
+                test_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+            result_value_list = sorted(
+                result_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+        # if python built-in class has __lt__ then sorting can always work this way
+        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+            NotImplemented
+        ):
+            test_value_list = sorted(test_value_list, key=lambda x: str(x))
+            result_value_list = sorted(result_value_list, key=lambda x: str(x))
+
+    return test_value_list, result_value_list
+
+
 def evaluate_json_test(data_asset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -1846,6 +1902,45 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 
 
 def check_json_test_result(test, result, data_asset=None):
+    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+    if "unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and ("unexpected_list" in test["out"]["result"]):
+            (
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+        elif "unexpected_list" in test["out"]:
+            (
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+
+    if "partial_unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and (
+            "partial_unexpected_list" in test["out"]["result"]
+        ):
+            (
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+        elif "partial_unexpected_list" in test["out"]:
+            (
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+
     # Check results
     if test["exact_match_out"] is True:
         assert result == expectationValidationResultSchema.load(test["out"])
@@ -1854,6 +1949,7 @@ def check_json_test_result(test, result, data_asset=None):
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
+        print(result)
         for key, value in test["out"].items():
             # Apply our great expectations-specific test logic
 
@@ -1895,19 +1991,19 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
-                if (isinstance(value, list)) & (len(value) >= 1):
-                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = sorted(value, key=lambda x: str(x))
-                        result["result"]["unexpected_list"] = sorted(
-                            result["result"]["unexpected_list"], key=lambda x: str(x)
-                        )
-
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "
                     + str(value)
                     + " but got "
                     + str(result["result"]["unexpected_list"])
+                )
+
+            elif key == "partial_unexpected_list":
+                assert result["result"]["partial_unexpected_list"] == value, (
+                    "expected "
+                    + str(value)
+                    + " but got "
+                    + str(result["result"]["partial_unexpected_list"])
                 )
 
             elif key == "details":

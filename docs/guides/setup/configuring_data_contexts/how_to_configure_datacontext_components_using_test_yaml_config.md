@@ -27,7 +27,7 @@ Steps
 
 2. **Create or copy a yaml config**
 
-    You can create your own, or copy an example. For this example, we'll demonstrate using a Datasource that connects to postgresql.
+    You can create your own, or copy an example. For this example, we'll demonstrate using a Datasource that connects to PostgreSQL.
 
     ```python
     config = """

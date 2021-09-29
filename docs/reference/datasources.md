@@ -221,7 +221,7 @@ BatchDefinition
   information about headers, or other configuration required to ensure the data is loaded properly for validation.
 
 4. During initialization of the Batch, `BatchMarkers`, calculated by the `ExecutionEngine`, are also added. They are
-   metadata that can be used to calculate performance characteristics, ensure reproducibility of validation results, and
+   metadata that can be used to calculate performance characteristics, ensure reproducibility of Validation Results, and
    provide indicators of the state of the underlying data system.
 
 

@@ -152,7 +152,7 @@ my_df.expect_column_values_to_be_in_set(
 ## Behavior for `BASIC`
 
 A `result` is generated with a basic justification for why an expectation was met or not. The format is intended 
-for quick, at-a-glance feedback. For example, it tends to work well in jupyter notebooks.
+for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
 
 Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
 `column_aggregate_expectation` expectations.

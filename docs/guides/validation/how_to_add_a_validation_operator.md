@@ -79,7 +79,7 @@ validation_operators:
    Test that your new Validation Operator is configured correctly:
 
       1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the value from Step 2 above. The details of Checkpoint configuration can be found in [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint).
-      2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../guides/validation/checkpoints/how_to_run_a_checkpoint_in_terminal) or from Python, as explained in [How to run a Checkpoint in Python](./checkpoints/how_to_run_a_checkpoint_in_python).
+      2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI or using Python as explained in [How to validate your data using a Checkpoint](./how_to_validate_data_by_running_a_checkpoint.md).
 
 
 Additional notes
@@ -87,6 +87,6 @@ Additional notes
 
 Two Validation Operator classes are currently shipped with Great Expectations:
 
-* :py:class:`~great_expectations.validation_operators.ActionListValidationOperator` invokes a configurable list of actions on every Validation Result validation result. Firing a Slack notification and updating Data Docs are examples of these actions.
+* :py:class:`~great_expectations.validation_operators.ActionListValidationOperator` invokes a configurable list of actions on every Validation Result Validation Result. Firing a Slack notification and updating Data Docs are examples of these actions.
 
 * :py:class:`WarningAndFailureExpectationSuitesValidationOperator<great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator>` extends the class above and allows to group Expectation Suites into two groups - critical and warning.

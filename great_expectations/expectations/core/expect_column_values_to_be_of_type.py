@@ -1,3 +1,4 @@
+import inspect
 import logging
 from typing import Dict, Optional
 
@@ -25,7 +26,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -285,7 +286,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             types = []
             type_module = _get_dialect_type_module(execution_engine=execution_engine)
             try:
-                type_class = getattr(type_module, expected_type)
+                potential_type = getattr(type_module, expected_type)
+                # In the case of the PyAthena dialect we need to verify that
+                # the type returned is indeed a type and not an instance.
+                if not inspect.isclass(potential_type):
+                    type_class = type(potential_type)
+                else:
+                    type_class = potential_type
                 types.append(type_class)
             except AttributeError:
                 logger.debug("Unrecognized type: %s" % expected_type)

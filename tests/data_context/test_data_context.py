@@ -47,6 +47,8 @@ except ImportError:
 
 yaml = YAML()
 
+parameterized_expectation_suite_name = "my_dag_node.default"
+
 
 @pytest.fixture()
 def parameterized_expectation_suite():
@@ -159,17 +161,21 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
 
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
     assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
-        ExpectationSuiteIdentifier(expectation_suite_name="my_dag_node.default")
+        ExpectationSuiteIdentifier(
+            expectation_suite_name=parameterized_expectation_suite_name
+        )
     ]
 
 
 def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
         data_context_parameterized_expectation_suite.get_expectation_suite(
-            "my_dag_node.default"
+            parameterized_expectation_suite_name
         )
     )
-    assert expectation_suite.expectation_suite_name == "my_dag_node.default"
+    assert (
+        expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
+    )
     assert len(expectation_suite.expectations) == 2
 
 
@@ -209,13 +215,20 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
 
 
 def test_compile_evaluation_parameter_dependencies(
-    data_context_parameterized_expectation_suite,
+    data_context_parameterized_expectation_suite: DataContext,
 ):
     assert (
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {}
     )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            parameterized_expectation_suite_name
+        )
+    )
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies(
+        expectation_suite
+    )
     assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
         "source_diabetes_data.default": [
             {
@@ -388,6 +401,25 @@ def test_data_context_get_validation_result(titanic_data_context):
         failed_only=True,
     )
     assert len(failed_validation_result.results) == 8
+
+
+def test_data_context_get_latest_validation_result(titanic_data_context):
+    """
+    Test that the latest validation result can be correctly fetched from the configured results
+    store
+    """
+    for _ in range(2):
+        titanic_data_context.profile_datasource("mydatasource")
+    assert len(titanic_data_context.validations_store.list_keys()) == 2
+
+    validation_results = [
+        titanic_data_context.validations_store.get(val_key)
+        for val_key in titanic_data_context.validations_store.list_keys()
+    ]
+    latest_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler"
+    )
+    assert latest_validation_result in validation_results
 
 
 def test_data_context_get_datasource(titanic_data_context):
@@ -1838,6 +1870,7 @@ validations:
     expectation_suite_name: newsuite
 profilers: []
 ge_cloud_id:
+expectation_suite_ge_cloud_id:
 """
 
     checkpoint_dir = os.path.join(
@@ -1905,6 +1938,7 @@ ge_cloud_id:
             },
         ],
         "evaluation_parameters": {},
+        "expectation_suite_ge_cloud_id": None,
         "runtime_configuration": {},
         "validations": [
             {

@@ -15,6 +15,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetAzureDataConnector,
 )
+from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
 
@@ -657,6 +658,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 
     # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
 
@@ -713,7 +715,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
 
@@ -794,7 +796,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_azure_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
     )
@@ -1530,7 +1532,10 @@ azure_options:
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
             },
-            runtime_environment={"name": "my_data_connector"},
+            runtime_environment={
+                "name": "my_data_connector",
+                "execution_engine": PandasExecutionEngine(),
+            },
         )
     )
 

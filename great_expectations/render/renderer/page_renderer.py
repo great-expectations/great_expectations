@@ -90,7 +90,10 @@ class ValidationResultsPageRenderer(Renderer):
             run_name = run_id
         elif isinstance(run_id, dict):
             run_name = run_id.get("run_name") or "__none__"
-            run_time = run_id.get("run_time") or "__none__"
+            try:
+                run_time = parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ")
+            except (ValueError, TypeError):
+                run_time = "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -343,16 +346,21 @@ class ValidationResultsPageRenderer(Renderer):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
-                run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%SZ")
             except (ValueError, TypeError):
                 run_time = "__none__"
             run_name = run_id
         elif isinstance(run_id, dict):
             run_name = run_id.get("run_name") or "__none__"
-            run_time = run_id.get("run_time") or "__none__"
+            try:
+                run_time = str(
+                    parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ")
+                )
+            except (ValueError, TypeError):
+                run_time = "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%SZ")
         # TODO: Deprecate "great_expectations.__version__"
         ge_version = validation_results.meta.get(
             "great_expectations_version"

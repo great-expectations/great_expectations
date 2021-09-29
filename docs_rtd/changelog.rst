@@ -7,11 +7,135 @@ Changelog
 
 develop
 -----------------
-* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for SQL Alchemy execution engine (#3267)
-* [FEATURE] Implement V3 expect_column_pair_values_to_be_equal expectation for Pandas execution engine (#3252)
+* [DOCS] Fix checkpoint name so it matches the rest of the docs (#3434)
+
+0.13.35
+-----------------
+* [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
+* [BUGFIX] Addresses issue #2993 (#3054) by using configuration when it is available instead of discovering keys (listing keys) in existing sources. (#3377)
+* [BUGFIX] Fix Data asset name rendering (#3431) (Thanks @shpolina)
+* [DOCS] minor fix to syntax highlighting in how_to_contribute_a_new_expectation… (#3413) (Thanks @edjoesu)
+* [DOCS] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profile… (#3410) (Thanks @edjoesu)
+* [ENHANCEMENT] update list_expectation_suite_names and ExpectationSuiteValidationResult payload (#3419)
+* [MAINTENANCE] Clean up Type Hints, JSON-Serialization, ID Generation and Logging in Objects in batch.py Module and its Usage (#3422)
+* [MAINTENANCE] Fix Granularity of Exception Handling in ExecutionEngine.resolve_metrics() and Clean Up Type Hints (#3423)
+* [MAINTENANCE] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profiler (#3441)
+* [MAINTENANCE] Fix issue where BatchRequest object in configuration could cause Checkpoint to fail (#3438)
+* [MAINTENANCE] Insure consistency between implementation of overriding Python __hash__() and internal ID property value (#3432)
+* [MAINTENANCE] Performance improvement refactor for Spark unexpected values (#3368)
+* [MAINTENANCE] Refactor MetricConfiguration out of validation_graph.py to Avoid Future Circular Dependencies in Python (#3425)
+* [MAINTENANCE] Use ExceptionInfo to encapsulate common expectation validation result error information. (#3427)
+
+0.13.34
+-----------------
+* [FEATURE] Configurable multi-threaded checkpoint speedup (#3362) (Thanks @jdimatteo)
+* [BUGFIX] Insure that the "result_format" Expectation Argument is Processed Properly (#3364)
+* [BUGFIX] fix error getting validation result from DataContext (#3359) (Thanks @zachzIAM)
+* [BUGFIX] fixed typo and added CLA links (#3347)
+* [DOCS] Azure Data Connector Documentation for Pandas and Spark. (#3378)
+* [DOCS] Connecting to GCS using Spark (#3375)
+* [DOCS] Docusaurus - Deploying Great Expectations in a hosted environment without file system or CLI (#3361)
+* [DOCS] How to get a batch from configured datasource (#3382)
+* [MAINTENANCE] Add Flyte to README (#3387) (Thanks @samhita-alla)
+* [MAINTENANCE] Adds expect_table_columns_to_match_set (#3329) (Thanks @viniciusdsmello)
+* [MAINTENANCE] Bugfix/skip substitute config variables in ge cloud mode (#3393)
+* [MAINTENANCE] Clean Up ValidationGraph API Usage, Improve Exception Handling for Metrics, Clean Up Type Hints (#3399)
+* [MAINTENANCE] Clean up ValidationGraph API and add Type Hints (#3392)
+* [MAINTENANCE] Enhancement/update _set methods with kwargs (#3391) (Thanks @roblim)
+* [MAINTENANCE] Fix incorrect ToC section name (#3395)
+* [MAINTENANCE] Insure Correct Processing of the catch_exception Flag in Metrics Resolution (#3360)
+* [MAINTENANCE] exempt batch_data from a deep_copy operation on RuntimeBatchRequest (#3388)
+* [MAINTENANCE] [WIP] Enhancement/cloud 169/update checkpoint.run for ge cloud (#3381)
+
+0.13.33
+-----------------
+* [FEATURE] Implement InferredAssetAzureDataConnector with Support for Pandas and Spark Execution Engines (#3372)
+* [FEATURE] Spark connecting to Google Cloud Storage (#3365)
+* [FEATURE] SparkDFExecutionEngine can load data accessed by ConfiguredAssetAzureDataConnector (integration tests are included). (#3345)
+* [FEATURE] [MER-293] GE Cloud Mode for DataContext (#3262) (Thanks @roblim)
+* [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335) (Thanks @NathanFarmer)
+* [BUGFIX] Fix issue where multiple validators reused the same execution engine, causing a conflict in active batch (GE-3168) (#3222) (Thanks @jcampbell)
+* [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable (#3349) (Thanks @NathanFarmer)
+* [BUGFIX] added casting of numeric value to fix redshift issue #3293 (#3338) (Thanks @sariabod)
+* [DOCS] Docusaurus - How to connect to an MSSQL database (#3353) (Thanks @NathanFarmer)
+* [DOCS] GREAT-195 Docs remove all stubs and links to them (#3363)
+* [MAINTENANCE] Update azure-pipelines-docs-integration.yml for Azure Pipelines
+* [MAINTENANCE] Update implemented_expectations.md (#3351) (Thanks @spencerhardwick)
+* [MAINTENANCE] Updating to reflect current Expectation dev state (#3348) (Thanks @spencerhardwick)
+* [MAINTENANCE] docs: Clean up Docusaurus refs (#3371)
+
+0.13.32
+-----------------
+* [FEATURE] Add Performance Benchmarks Using BigQuery. (Thanks @jdimatteo)
+* [WIP] [FEATURE] add backend args to run_diagnostics (#3257) (Thanks @edjoesu)
+* [BUGFIX] Addresses Issue 2937. (#3236) (Thanks @BenGale93)
+* [BUGFIX] SQL dialect doesn't register for BigQuery for V2 (#3324)
+* [DOCS] "How to connect to data on GCS using Pandas" (#3311)
+* [MAINTENANCE] Add CODEOWNERS with a single check for sidebars.js (#3332)
+* [MAINTENANCE] Fix incorrect DataConnector usage of _get_full_file_path() API method. (#3336)
+* [MAINTENANCE] Make Pandas against S3 and GCS integration tests more robust by asserting on number of batches returned and row counts (#3341)
+* [MAINTENANCE] Make integration tests of Pandas against Azure more robust. (#3339)
+* [MAINTENANCE] Prepare AzureUrl to handle WASBS format (for Spark) (#3340)
+* [MAINTENANCE] Renaming default_batch_identifier in examples #3334
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (#3304)
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (Spark and Pandas) (#3325)
+* [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
+* [MAINTENANCE] Various doc patches (#3326)
+* [MAINTENANCE] clean up imports and method signatures (#3337)
+
+0.13.31
+-----------------
+* [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)
+* [FEATURE] Enable column_pair expectations and tests for Spark (#3294)
+* [FEATURE] Implement `InferredAssetGCSDataConnector` (#3284)
+* [FEATURE]/CHANGE run time format (#3272) (Thanks @serialbandicoot)
+* [DOCS] Fix misc errors in "How to create renderers for Custom Expectations" (#3315)
+* [DOCS] GDOC-217 remove stub links (#3314)
+* [DOCS] Remove misc TODOs to tidy up docs (#3313)
+* [DOCS] Standardize capitalization of various technologies in `docs` (#3312)
+* [DOCS] Fix broken link to Contributor docs (#3295) (Thanks @discdiver)
+* [MAINTENANCE] Additional tests for RuntimeDataConnector at Datasource-level (query) (#3288)
+* [MAINTENANCE] Update GCSStoreBackend + tests (#2630) (Thanks @hmandsager)
+* [MAINTENANCE] Write integration/E2E tests for `ConfiguredAssetAzureDataConnector` (#3204)
+* [MAINTENANCE] Write integration/E2E tests for both `GCSDataConnectors` (#3301)
+
+0.13.30
+-----------------
+* [FEATURE] Implement Spark Decorators and Helpers; Demonstrate on MulticolumnSumEqual Metric (#3289)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_in_set for SQL Alchemy execution engine (#3281)
+* [FEATURE] Implement `ConfiguredAssetGCSDataConnector` (#3247)
+* [BUGFIX] Fix import issues around cloud providers (GCS/Azure/S3) (#3292)
+* [MAINTENANCE] Add force_reuse_spark_context to DatasourceConfigSchema (#3126) (thanks @gipaetusb and @mbakunze)
+
+0.13.29
+-----------------
+* [FEATURE] Implementation of the Metric "select_column_values.unique.within_record" for SQLAlchemyExecutionEngine (#3279)
+* [FEATURE] V3 implement ColumnPairValuesInSet for SQL Alchemy execution engine (#3278)
+* [FEATURE] Edtf with support levels (#2594) (thanks @mielvds)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine (#3267)
+* [FEATURE] add expectation for discrete column entropy  (#3049) (thanks @edjoesu)
+* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b (#3268)
 * [FEATURE] Expectations tests for BigQuery backend (#3219) (Thanks @jdimatteo)
-* [BUGFIX] Fix deprecation warning for importing from collections (#3228)
+* [FEATURE] Add schema validation for different GCS auth methods (#3258)
+* [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine (#3256)
+* [FEATURE] V3 implement expect_column_pair_values_to_be_equal expectation for PandasExecutionEngine (#3252)
+* [FEATURE] GCS DataConnector schema validation (#3253)
+* [FEATURE] Implementation of the "expect_select_column_values_to_be_unique_within_record" Expectation (#3251)
+* [FEATURE] Implement the SelectColumnValuesUniqueWithinRecord metric (for PandasExecutionEngine) (#3250)
+* [FEATURE] V3 - Implement ColumnPairValuesEqual for PandasExecutionEngine (#3243)
+* [FEATURE] Set foundation for GCS DataConnectors (#3220)
+* [FEATURE] Implement "expect_column_pair_values_to_be_in_set" expectation (support for PandasExecutionEngine) (#3242)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3228) (thanks @ismaildawoodjee)
 * [DOCS] Document BigQuery test dataset configuration (#3273) (Thanks @jdimatteo)
+* [DOCS] Syntax and Link (#3266)
+* [DOCS] API Links and Supporting Docs (#3265)
+* [DOCS] redir and search (#3249)
+* [MAINTENANCE] Update azure-pipelines-docs-integration.yml to include env vars for Azure docs integration tests
+* [MAINTENANCE] Allow Wrong ignore_row_if Directive from V2 with Deprecation Warning (#3274)
+* [MAINTENANCE] Refactor test structure for "Connecting to your data" cloud provider integration tests (#3277)
+* [MAINTENANCE] Make test method names consistent for Metrics tests (#3254)
+* [MAINTENANCE] Allow `PandasExecutionEngine` to accept `Azure DataConnectors` (#3214)
+* [MAINTENANCE] Standardize Arguments to MetricConfiguration Constructor; Use {} instead of dict(). (#3246)
 
 0.13.28
 -----------------

@@ -30,6 +30,3 @@ context.list_datasources()
 
 <Congratulations />
 
-## Next Steps
-
-<NextSteps />

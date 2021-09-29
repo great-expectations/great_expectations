@@ -1,7 +1,6 @@
 ---
 title: Create your first Expectations
 ---
-![minimap](../../images/minimap.png)
 
 [Expectations](/docs/reference/expectations/expectations) are the key concept in Great Expectations.
 
@@ -33,7 +32,7 @@ Select data_connector
     2. default_runtime_data_connector_name
 : 1
 
-Which data asset (accessible by data connector "taxi_data_example_data_connector") would you like to use?
+Which data asset (accessible by Data Connector "taxi_data_example_data_connector") would you like to use?
     1. yellow_tripdata_sample_2019-01.csv
     2. yellow_tripdata_sample_2019-02.csv
 : 1
@@ -47,7 +46,7 @@ When you run this notebook, Great Expectations will store these expectations in 
 Would you like to proceed? [Y/n]: <press Enter>
 ```
 
-This will open up a **Jupyter notebook** that helps you create the new suite. Before diving into the notebook, let’s first explain what we just did.
+This will open up a **Jupyter Notebook** that helps you create the new suite. Before diving into the notebook, let’s first explain what we just did.
 
 **What just happened?**
 
@@ -58,15 +57,15 @@ You may now wonder why we chose the first file in this step. Here’s an explana
 
 Makes sense, right?
 
-After selecting the table, Great Expectations will open a Jupyter notebook which will take you through the next part of this workflow.
+After selecting the table, Great Expectations will open a Jupyter Notebook which will take you through the next part of this workflow.
 
 :::caution
 
-Don’t execute the Jupyter notebook cells just yet!
+Don’t execute the Jupyter Notebook cells just yet!
 
 :::
 
-## Creating Expectations in Jupyter notebooks
+## Creating Expectations in Jupyter Notebooks
 
 Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 
@@ -84,6 +83,6 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite. You can leave these defaults as-is for now - [learn more about the available parameters here](/docs/reference/profilers).
 
-4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the validation results. *We will explain the validation step later in the “Validate your data” section.*
+4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the “Validate your data” section.*
 
 **Let’s execute all the cells** and wait for Great Expectations to open a browser window with Data Docs. **Go to the next step in the tutorial** for an explanation of what you see in Data Docs!

@@ -11,7 +11,7 @@ If you are developing interactively in a Notebook, this is the quickest way to g
 but you run the risk of exposing your credentials.
 
 A Datasource with the following configuration:
- 1. connection to postgresql database
+ 1. connection to PostgreSQL database
  2. username : `postgres`
  3. password : ``
  4. server: `localhost`

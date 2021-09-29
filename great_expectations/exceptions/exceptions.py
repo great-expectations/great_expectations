@@ -1,6 +1,7 @@
 import importlib
 import itertools
 import json
+from collections import Iterable
 
 from great_expectations.marshmallow__shade import ValidationError
 
@@ -43,10 +44,6 @@ class CheckpointNotFoundError(CheckpointError):
 
 
 class StoreBackendError(DataContextError):
-    pass
-
-
-class UnavailableMetricError(GreatExpectationsError):
     pass
 
 
@@ -379,5 +376,25 @@ class MetricError(GreatExpectationsError):
     pass
 
 
+class UnavailableMetricError(MetricError):
+    pass
+
+
 class MetricProviderError(MetricError):
     pass
+
+
+class MetricComputationError(MetricError):
+    pass
+
+
+class InvalidMetricAccessorDomainKwargsKeyError(MetricError):
+    pass
+
+
+class MetricResolutionError(MetricError):
+    def __init__(self, message, failed_metrics):
+        super().__init__(message)
+        if not isinstance(failed_metrics, Iterable):
+            failed_metrics = (failed_metrics,)
+        self.failed_metrics = failed_metrics

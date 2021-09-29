@@ -274,7 +274,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
         "table": [
             ["Great Expectations Version", "0.9.7+17.g02805059.dirty"],
             ["Run Name", "20200322T170247.671855Z"],
-            ["Run Time", "2020-03-22T17:02:47.671855Z"],
+            ["Run Time", "2020-03-22T17:02:47Z"],
         ],
     }
 

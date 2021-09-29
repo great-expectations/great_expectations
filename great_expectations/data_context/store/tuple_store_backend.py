@@ -543,7 +543,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         )
 
     def _set(
-        self, key, value, content_encoding="utf-8", content_type="application/json"
+        self,
+        key,
+        value,
+        content_encoding="utf-8",
+        content_type="application/json",
+        **kwargs,
     ):
         s3_object_key = self._build_s3_object_key(key)
 
@@ -814,16 +819,13 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_key = self._convert_key_to_filepath(key)
         return gcs_object_key
 
-    def _move(self, source_key, dest_key, **kwargs):
-        pass
-
     def _get(self, key):
         gcs_object_key = self._build_gcs_object_key(key)
 
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
@@ -833,14 +835,19 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             return gcs_response_object.download_as_string().decode("utf-8")
 
     def _set(
-        self, key, value, content_encoding="utf-8", content_type="application/json"
+        self,
+        key,
+        value,
+        content_encoding="utf-8",
+        content_type="application/json",
+        **kwargs,
     ):
         gcs_object_key = self._build_gcs_object_key(key)
 
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
 
         if isinstance(value, str):
@@ -856,7 +863,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
 
         source_filepath = self._convert_key_to_filepath(source_key)
         if not source_filepath.startswith(self.prefix):
@@ -936,7 +943,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud.exceptions import NotFound
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=list(bucket.list_blobs(prefix=self.prefix)))
         except NotFound:

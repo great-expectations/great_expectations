@@ -32,7 +32,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
     Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md) using the FilesystemStoreBackendDefaults or configuring stores as in the code block below.
 
     :::note
-       If you are using DBFS for your stores, make sure to set the ``root_directory`` of FilesystemStoreBackendDefaults to ``/dbfs/`` or ``/dbfs/FileStore/`` to make sure you are writing to DBFS and not the Spark driver node filesystem. If you have mounted another file store (e.g. s3 bucket) to use instead of DBFS, you can use that path here instead.
+       If you are using DBFS for your stores, make sure to set the ``root_directory`` of FilesystemStoreBackendDefaults to ``/dbfs/`` or ``/dbfs/FileStore/`` to make sure you are writing to DBFS and not the Spark driver node filesystem. If you have mounted another file store (e.g. S3 bucket) to use instead of DBFS, you can use that path here instead.
     :::
 
     ```python
@@ -203,6 +203,6 @@ Additional notes
 
 Additional resources
 --------------------
-- How to create a Data Source in [Databricks AWS](../intro.md)  **TODO(cdkini): Currently missing stub in new docs so ref is broken**
-- How to create a Data Source in [Databricks Azure](../intro.md) **TODO(cdkini): Currently missing stub in new docs so ref is broken**
+- How to create a Data Source in [Databricks AWS](../intro.md) 
+- How to create a Data Source in [Databricks Azure](../intro.md)
 

@@ -4,7 +4,7 @@ import itertools
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -504,7 +504,7 @@ S3/GCS type of the data connector (your data connector is "{data['class_name']}"
 continue.
                 """
             )
-        if ("bucket" in data or "prefix" in data or "max_keys" in data) and not (
+        if ("bucket" in data or "max_keys" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
@@ -540,7 +540,7 @@ continue.
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
                     f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
-                    You must only select one between `conn_str` and `account_url`. Please update your configuration to continue.
+                    You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
                     """
                 )
         if (
@@ -788,7 +788,10 @@ class DatasourceConfigSchema(Schema):
 
     class_name = fields.String(missing="Datasource")
     module_name = fields.String(missing="great_expectations.datasource")
-
+    force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
+    spark_config = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
     )
@@ -1060,6 +1063,71 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class ConcurrencyConfig(DictDot):
+    """WARNING: This class is experimental."""
+
+    def __init__(self, enabled: Optional[bool] = False):
+        """Initialize a concurrency configuration to control multithreaded execution.
+
+        Args:
+            enabled: Whether or not multithreading is enabled.
+        """
+        self._enabled = enabled
+
+    @property
+    def enabled(self):
+        """Whether or not multithreading is enabled."""
+        return self._enabled
+
+    @property
+    def max_database_query_concurrency(self) -> int:
+        """Max number of concurrent database queries to execute with mulithreading."""
+        # BigQuery has a limit of 100 for "Concurrent rate limit for interactive queries" as described at
+        # https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
+        # databases and/or be manually user configurable.
+        return 100
+
+    def add_sqlalchemy_create_engine_parameters(
+        self, parameters: MutableMapping[str, Any]
+    ):
+        """Update SqlAlchemy parameters to prevent concurrency errors (e.g. http://sqlalche.me/e/14/3o7r) and
+        bottlenecks.
+
+        Args:
+            parameters: SqlAlchemy create_engine parameters to which we add concurrency appropriate parameters. If the
+                concurrency parameters are already set, those parameters are left unchanged.
+        """
+        if not self._enabled:
+            return
+
+        if "pool_size" not in parameters:
+            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.pool_size
+            parameters["pool_size"] = 0
+        if "max_overflow" not in parameters:
+            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.max_overflow
+            parameters["max_overflow"] = -1
+
+
+class ConcurrencyConfigSchema(Schema):
+    """WARNING: This class is experimental."""
+
+    enabled = fields.Boolean(default=False)
+
+
+class GeCloudConfig(DictDot):
+    def __init__(self, base_url: str, account_id: str, access_token: str):
+        self.base_url = base_url
+        self.account_id = account_id
+        self.access_token = access_token
+
+    def to_json_dict(self):
+        return {
+            "base_url": self.base_url,
+            "account_id": self.account_id,
+            "access_token": self.access_token,
+        }
+
+
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,
@@ -1086,6 +1154,7 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    concurrency = fields.Nested(ConcurrencyConfigSchema)
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
@@ -1691,6 +1760,7 @@ class DataContextConfig(BaseYamlConfig):
         anonymous_usage_statistics=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
+        concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1737,6 +1807,11 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
+        if concurrency is None:
+            concurrency = ConcurrencyConfig()
+        elif isinstance(concurrency, dict):
+            concurrency = ConcurrencyConfig(**concurrency)
+        self.concurrency: ConcurrencyConfig = concurrency
 
         super().__init__(commented_map=commented_map)
 
@@ -1780,6 +1855,7 @@ class CheckpointConfigSchema(Schema):
             "notify_on",
             "notify_with",
             "ge_cloud_id",
+            "expectation_suite_ge_cloud_id",
         )
         ordered = True
 
@@ -1804,6 +1880,7 @@ class CheckpointConfigSchema(Schema):
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
+    expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
     action_list = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
@@ -1886,11 +1963,12 @@ class CheckpointConfig(BaseYamlConfig):
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
-        # the following fous args are used by SimpleCheckpoint
+        # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -1904,6 +1982,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._template_name = template_name
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
+            self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
             self._batch_request = batch_request
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
@@ -1943,6 +2022,10 @@ class CheckpointConfig(BaseYamlConfig):
                 self.run_name_template = other_config.run_name_template
             if other_config.expectation_suite_name is not None:
                 self.expectation_suite_name = other_config.expectation_suite_name
+            if other_config.expectation_suite_ge_cloud_id is not None:
+                self.expectation_suite_ge_cloud_id = (
+                    other_config.expectation_suite_ge_cloud_id
+                )
             # update
             if other_config.batch_request is not None:
                 if self.batch_request is None:
@@ -1987,6 +2070,10 @@ class CheckpointConfig(BaseYamlConfig):
             if runtime_kwargs.get("expectation_suite_name") is not None:
                 self.expectation_suite_name = runtime_kwargs.get(
                     "expectation_suite_name"
+                )
+            if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
+                self.expectation_suite_ge_cloud_id = runtime_kwargs.get(
+                    "expectation_suite_ge_cloud_id"
                 )
             # update
             if runtime_kwargs.get("batch_request") is not None:
@@ -2036,6 +2123,14 @@ class CheckpointConfig(BaseYamlConfig):
     @ge_cloud_id.setter
     def ge_cloud_id(self, value: str):
         self._ge_cloud_id = value
+
+    @property
+    def expectation_suite_ge_cloud_id(self):
+        return self._expectation_suite_ge_cloud_id
+
+    @expectation_suite_ge_cloud_id.setter
+    def expectation_suite_ge_cloud_id(self, value: str):
+        self._expectation_suite_ge_cloud_id = value
 
     @property
     def name(self):
@@ -2176,3 +2271,4 @@ sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
+concurrencyConfigSchema = ConcurrencyConfigSchema()

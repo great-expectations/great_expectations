@@ -4,7 +4,7 @@ title: How to update Data Docs as a Validation Action
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
-This guide will explain how to use a Validation Action to update Data Docs sites with new validation results from Validation Operator runs.
+This guide will explain how to use a Validation Action to update Data Docs sites with new Validation Results from Validation Operator runs.
 
 <Prerequisites>
 
@@ -24,7 +24,7 @@ Steps
    Add the ``UpdateDataDocsAction`` action to the ``action_list`` key of the ``ActionListValidationOperator`` or ``WarningAndFailureExpectationSuitesValidationOperator`` config in your ``great_expectations.yml``. This action will update all configured Data Docs sites with the new validation from the Validation Operator run.
 
    :::note Note:
-   The ``StoreValidationResultAction`` action must appear before this action, since Data Docs are rendered from validation results from the store.
+   The ``StoreValidationResultAction`` action must appear before this action, since Data Docs are rendered from Validation Results from the store.
    :::
 
    ```yaml
@@ -64,17 +64,16 @@ Steps
    Test that your new Validation Operator Action is configured correctly:
 
    1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint).
-   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI as explained in [How to run a Checkpoint in terminal](../checkpoints/how_to_run_a_checkpoint_in_terminal) or from Python, as explained in [How to run a Checkpoint in Python](../checkpoints/how_to_run_a_checkpoint_in_python).
+   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI or using Python as explained in [How to validate your data using a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md).
    3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
 
 Additional notes
 ----------------
 
-The ``UpdateDataDocsAction`` generates an HTML file for the latest validation result and updates the index page to link to the new file, and re-renders pages for the suite used for that validation. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
+The ``UpdateDataDocsAction`` generates an HTML file for the latest Validation Result and updates the index page to link to the new file, and re-renders pages for the suite used for that validation. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
 
 
 Additional resources
 --------------------
 
-- [How to store Validation Results as a Validation Action](./how_to_store_validation_results_as_a_validation_action)
 - [Checkpoints and Actions](../../../reference/checkpoints_and_actions)

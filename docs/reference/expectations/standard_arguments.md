@@ -5,7 +5,7 @@ title: Standard arguments for Expectations
 
 All Expectations return a JSON-serializable dictionary when evaluated, and share four standard (optional) arguments:
 * [result_format](#result_format): Controls what information is returned from the evaluation of the Expectation.
-* [include_config](#include_config): If true, then the expectation suite itself is returned as part of the result
+* [include_config](#include_config): If true, then the Expectation Suite itself is returned as part of the result
   object.
 * [catch_exceptions](#catch_exceptions): If true, execution will not fail if the Expectation encounters an error.
   Instead, it will return success = False and provide an informative error message.
@@ -16,7 +16,7 @@ See [Result format](./result_format) for more information.
 
 ## `include_config`
 
-All Expectations accept a boolean `include_config` parameter. If true, then the expectation suite itself is returned as
+All Expectations accept a boolean `include_config` parameter. If true, then the Expectation Suite itself is returned as
 part of the result object
 
 ```python

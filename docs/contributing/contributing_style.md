@@ -95,7 +95,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Tutorials** help users and contributors get started quickly. Along the way they orient new users to concepts that will be important to know later.
 
-* **How-to guides** help users accomplish specific goals that go beyond the generic tutorials. Article titles within this section always start with “How to”: “How to create custom Expectations”. They often reference specific tools or infrastructure: “How to validate Expectations from within a notebook”, “How to build data docs in S3.”
+* **How-to guides** help users accomplish specific goals that go beyond the generic tutorials. Article titles within this section always start with “How to”: “How to create custom Expectations”. They often reference specific tools or infrastructure: “How to validate Expectations from within a notebook”, “How to build Data Docs in S3.”
 
 * **Reference** articles explain the architecture of Great Expectations. These articles explain core concepts, discuss alternatives and options, and provide context, history, and direction for the project. Reference articles avoid giving specific technical advice. They also avoid implementation details that can be captured in docstrings instead.
 

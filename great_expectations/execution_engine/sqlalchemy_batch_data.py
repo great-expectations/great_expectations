@@ -12,6 +12,7 @@ except ImportError:
     sa = None
     quoted_name = None
     DefaultDialect = None
+    DatabaseError = None
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +222,9 @@ class SqlAlchemyBatchData(BatchData):
             # Split is case sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
-            query = query.string  # extracting string from MSSQLCompiler object
+            if isinstance(query, sa.dialects.mssql.base.MSSQLCompiler):
+                query = query.string  # extracting string from MSSQLCompiler object
+
             if "from" in query:
                 strsep = "from"
             else:

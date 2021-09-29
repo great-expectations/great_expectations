@@ -31,6 +31,3 @@ To configure your Data Context, please look at [How to configure a new data cont
 
 <Congratulations />
 
-## Next Steps
-
-<NextSteps />

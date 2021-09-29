@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import (
@@ -235,34 +236,42 @@ class SqlAlchemyDatasource(LegacyDatasource):
             credentials = {}
 
         try:
-            # if an engine was provided, use that
+            # If an engine was provided, use that.
             if "engine" in kwargs:
                 self.engine = kwargs.pop("engine")
 
-            # if a connection string or url was provided, use that
-            elif "connection_string" in kwargs:
-                connection_string = kwargs.pop("connection_string")
-                self.engine = create_engine(connection_string, **kwargs)
-                connection = self.engine.connect()
-                connection.close()
-            elif "url" in credentials:
-                url = credentials.pop("url")
-                self.drivername = urlparse(url).scheme
-                self.engine = create_engine(url, **kwargs)
-                connection = self.engine.connect()
-                connection.close()
-
-            # Otherwise, connect using remaining kwargs
             else:
-                (
-                    options,
-                    create_engine_kwargs,
-                    drivername,
-                ) = self._get_sqlalchemy_connection_options(**kwargs)
-                self.drivername = drivername
-                self.engine = create_engine(options, **create_engine_kwargs)
-                connection = self.engine.connect()
-                connection.close()
+                concurrency = (
+                    data_context.concurrency
+                    if data_context is not None
+                    else ConcurrencyConfig()
+                )
+                concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
+
+                # If a connection string or url was provided, use that.
+                if "connection_string" in kwargs:
+                    connection_string = kwargs.pop("connection_string")
+                    self.engine = create_engine(connection_string, **kwargs)
+                    connection = self.engine.connect()
+                    connection.close()
+                elif "url" in credentials:
+                    url = credentials.pop("url")
+                    self.drivername = urlparse(url).scheme
+                    self.engine = create_engine(url, **kwargs)
+                    connection = self.engine.connect()
+                    connection.close()
+
+                # Otherwise, connect using remaining kwargs.
+                else:
+                    (
+                        options,
+                        create_engine_kwargs,
+                        drivername,
+                    ) = self._get_sqlalchemy_connection_options(**kwargs)
+                    self.drivername = drivername
+                    self.engine = create_engine(options, **create_engine_kwargs)
+                    connection = self.engine.connect()
+                    connection.close()
 
             # since we switched to lazy loading of Datasources when we initialise a DataContext,
             # the dialect of SQLAlchemy Datasources cannot be obtained reliably when we send

@@ -12,7 +12,7 @@ capability to evolve rapidly.
 ### Adding a MetricsStore
 
 A MetricStore is a special store that can store Metrics computed during Validation. A Metric store tracks the run_id
-of the validation and the expectation suite name in addition to the metric name and metric kwargs.
+of the validation and the Expectation Suite name in addition to the metric name and metric kwargs.
 
 In most cases, a MetricStore will be configured as a SQL database. To add a MetricStore to your DataContext, add the
 following yaml block to the "stores" section:
@@ -53,7 +53,7 @@ validation_operators:
           target_store_name: metrics_store  # Keep the space before this hash so it's not read as the name. This should match the name of the store configured above
           # Note that the syntax for selecting requested metrics will change in a future release
           requested_metrics:
-            "*":  # The asterisk here matches *any* expectation suite name
+            "*":  # The asterisk here matches *any* Expectation Suite name
               # use the 'kwargs' key to request metrics that are defined by kwargs,
               # for example because they are defined only for a particular column
               # - column:
@@ -67,7 +67,6 @@ The `StoreMetricsValidationAction` processes an `ExpectationValidationResult` an
 Now, when your operator is executed, the requested metrics will be available in your database!
 
 
-<TODO: Replace below with example using v3 API (checkpoints to take place of validation operators).>
 ```python
 context.run_validation_operator('action_list_operator', (batch_kwargs, expectation_suite_name))
 ```

@@ -16,10 +16,7 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -169,16 +166,24 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequestBase(datasource_name="A")
+        batch_definition=A,
+        batch_request=BatchRequestBase(
+            datasource_name="A", data_connector_name="", data_asset_name=""
+        ),
     )
 
     assert not batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequestBase(datasource_name="B")
+        batch_definition=A,
+        batch_request=BatchRequestBase(
+            datasource_name="B", data_connector_name="", data_asset_name=""
+        ),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="a"),
+        batch_request=BatchRequestBase(
+            datasource_name="A", data_connector_name="a", data_asset_name=""
+        ),
     )
 
     assert batch_definition_matches_batch_request(
@@ -210,9 +215,12 @@ def test__batch_definition_matches_batch_request():
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
+            datasource_name="",
+            data_connector_name="",
+            data_asset_name="",
             data_connector_query={
                 "batch_filter_parameters": {"id": "A"},
-            }
+            },
         ),
     )
 

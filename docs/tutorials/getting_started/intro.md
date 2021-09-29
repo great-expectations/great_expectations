@@ -12,12 +12,10 @@ For a tutorial for older versions of Great Expectations, please see older versio
 
 The tutorial will walk you through the following steps:
 
-![minimap](../../images/minimap.png)
-
 1. First, we will introduce you to the data and help you initialize a **Data Context**.
 1. Then you will learn how to configure a **Datasource** to connect to your data.
 1. You will then create your first **Expectation Suite** using the built-in **automated profiler**.
-1. We'll also give you a tour of **Data Docs** to view your validation results.
+1. We'll also give you a tour of **Data Docs** to view your Validation Results.
 1. We will show you how to use this Expectation Suite to **validate** a new batch of data.
 1. Finally, in the optional section, you will learn how to **customize** your deployment.
 

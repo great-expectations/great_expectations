@@ -171,8 +171,16 @@ class FilePathDataConnector(DataConnector):
             )
 
         if batch_request.data_connector_query is not None:
+
+            data_connector_query_dict = batch_request.data_connector_query.copy()
+            if (
+                batch_request.limit is not None
+                and data_connector_query_dict.get("limit") is None
+            ):
+                data_connector_query_dict["limit"] = batch_request.limit
+
             batch_filter_obj: BatchFilter = build_batch_filter(
-                data_connector_query_dict=batch_request.data_connector_query
+                data_connector_query_dict=data_connector_query_dict
             )
             batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
@@ -253,7 +261,7 @@ class FilePathDataConnector(DataConnector):
             raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-                """
+"""
             )
         path = self._get_full_file_path(
             path=path, data_asset_name=batch_definition.data_asset_name
