@@ -9,7 +9,7 @@ context = ge.get_context()
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
-connection_string: sqlite://<PATH_TO_DB_FILE>
+connection_string: <CONNECTION_STRING>
 
 introspection: # Each key in the "introspection" section is an InferredAssetSqlDataConnector
     whole_table:
@@ -70,9 +70,7 @@ tables: # Each key in the "tables" section is a table_name
 data_dir_path = "data"
 CONNECTION_STRING = f"sqlite:///{data_dir_path}/yellow_tripdata.db"
 
-datasource_yaml = datasource_yaml.replace(
-    "sqlite://<PATH_TO_DB_FILE>", CONNECTION_STRING
-)
+datasource_yaml = datasource_yaml.replace("CONNECTION_STRING", CONNECTION_STRING)
 
 context.test_yaml_config(datasource_yaml)
 
@@ -82,11 +80,7 @@ available_data_asset_names = context.datasources[
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
 assert len(available_data_asset_names) == 2
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
-
-# Here is a BatchRequest naming an un-partitioned inferred data_asset.
+# Here is a BatchRequest referring to an un-partitioned inferred data_asset.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="whole_table",
@@ -97,6 +91,9 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_tripdata_sample_2019_01"
 
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -104,6 +101,11 @@ print(validator.head())
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
+batch_data = batch_list[0].data
+num_rows = batch_data.execution_engine.engine.execute(
+    sa.select([sa.func.count()]).select_from(batch_data.selectable)
+).one()[0]
+assert num_rows == 10000
 
 # Here is a BatchRequest naming an inferred data_asset partitioned by day.
 # This BatchRequest specifies multiple batches, which is useful for dataset exploration.
@@ -118,7 +120,7 @@ batch_request = BatchRequest(
 batch_request.data_asset_name = "yellow_tripdata_sample_2019_01"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
-assert len(batch_list) == 31
+assert len(batch_list) == 31  # number of days in January
 
 # Here is a BatchRequest naming an inferred data_asset partitioned by hour.
 # This BatchRequest specifies multiple batches, which is useful for dataset exploration.
