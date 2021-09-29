@@ -1,5 +1,5 @@
 ---
-title: How to validate your data using a Checkpoint
+title: How to validate data by running a Checkpoint
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx';
