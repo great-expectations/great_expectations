@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 
 import pandas as pd
 import pytest
@@ -27,11 +27,13 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
     ExpectColumnValueZScoresToBeLessThan,
 )
 from great_expectations.expectations.registry import get_expectation_impl
-from great_expectations.validator.validation_graph import (
-    MetricConfiguration,
-    ValidationGraph,
+from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validation_graph import ValidationGraph
+from great_expectations.validator.validator import (
+    MAX_METRIC_COMPUTATION_RETRIES,
+    Validator,
 )
-from great_expectations.validator.validator import Validator
 
 
 def test_parse_validation_graph():
@@ -63,7 +65,7 @@ def test_parse_validation_graph():
             Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=engine,
-                child_node=metric_configuration,
+                metric_configuration=metric_configuration,
                 configuration=configuration,
             )
     ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
@@ -102,7 +104,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
             validator.build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=engine,
-                child_node=metric_configuration,
+                metric_configuration=metric_configuration,
                 configuration=configuration,
             )
     ready_metrics, needed_metrics = validator._parse_validation_graph(
@@ -143,7 +145,7 @@ def test_populate_dependencies():
             Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=engine,
-                child_node=metric_configuration,
+                metric_configuration=metric_configuration,
                 configuration=configuration,
             )
     assert len(graph.edges) == 17
@@ -181,7 +183,9 @@ def test_populate_dependencies_with_incorrect_metric_name():
             Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=engine,
-                child_node=MetricConfiguration("column_values.not_a_metric", IDDict()),
+                metric_configuration=MetricConfiguration(
+                    "column_values.not_a_metric", IDDict()
+                ),
                 configuration=configuration,
             )
         except ge_exceptions.MetricProviderError as e:
@@ -285,7 +289,7 @@ def test_graph_validate_with_exception(basic_datasource):
     assert result[0].expectation_config is not None
 
 
-def test_graph_validate_with_bad_config(basic_datasource):
+def test_graph_validate_with_bad_config_catch_exceptions_false(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
@@ -310,7 +314,7 @@ def test_graph_validate_with_bad_config(basic_datasource):
         expectation_type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
-    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
@@ -323,6 +327,83 @@ def test_graph_validate_with_bad_config(basic_datasource):
         )
     assert (
         str(eee.value)
+        == 'Error: The column "not_in_table" in BatchData does not exist.'
+    )
+
+
+def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
+    basic_datasource,
+):
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
+    )
+
+    runtime_configuration = {
+        "catch_exceptions": True,
+        "result_format": {"result_format": "BASIC"},
+    }
+
+    execution_engine = PandasExecutionEngine()
+
+    validator = Validator(execution_engine=execution_engine, batches=[batch])
+
+    expectation_impl = get_expectation_impl(expectation_configuration.expectation_type)
+    validation_dependencies = expectation_impl().get_validation_dependencies(
+        expectation_configuration, execution_engine, runtime_configuration
+    )["metrics"]
+
+    graph = ValidationGraph()
+
+    for metric_configuration in validation_dependencies.values():
+        validator.build_metric_dependency_graph(
+            graph=graph,
+            execution_engine=execution_engine,
+            metric_configuration=metric_configuration,
+            configuration=expectation_configuration,
+            runtime_configuration=runtime_configuration,
+        )
+
+    metrics: Dict[Tuple[str, str, str], Any] = {}
+    aborted_metrics_info: Dict[
+        Tuple[str, str, str],
+        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+    ] = validator.resolve_validation_graph(
+        graph=graph,
+        metrics=metrics,
+        runtime_configuration=runtime_configuration,
+    )
+
+    assert len(aborted_metrics_info) == 1
+
+    aborted_metric_info_item = list(aborted_metrics_info.values())[0]
+    assert aborted_metric_info_item["num_failures"] == MAX_METRIC_COMPUTATION_RETRIES
+
+    assert len(aborted_metric_info_item["exception_info"]) == 1
+
+    exception_info = next(iter(aborted_metric_info_item["exception_info"]))
+    assert (
+        exception_info["exception_message"]
         == 'Error: The column "not_in_table" in BatchData does not exist.'
     )
 

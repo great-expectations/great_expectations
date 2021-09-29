@@ -7,7 +7,45 @@ Changelog
 
 develop
 -----------------
-* [DOCS] "Deploying Great Expectations in a hosted environment without file system or CLI" (#3361)
+* [DOCS] Fix checkpoint name so it matches the rest of the docs (#3434)
+
+0.13.35
+-----------------
+* [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
+* [BUGFIX] Addresses issue #2993 (#3054) by using configuration when it is available instead of discovering keys (listing keys) in existing sources. (#3377)
+* [BUGFIX] Fix Data asset name rendering (#3431) (Thanks @shpolina)
+* [DOCS] minor fix to syntax highlighting in how_to_contribute_a_new_expectation… (#3413) (Thanks @edjoesu)
+* [DOCS] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profile… (#3410) (Thanks @edjoesu)
+* [ENHANCEMENT] update list_expectation_suite_names and ExpectationSuiteValidationResult payload (#3419)
+* [MAINTENANCE] Clean up Type Hints, JSON-Serialization, ID Generation and Logging in Objects in batch.py Module and its Usage (#3422)
+* [MAINTENANCE] Fix Granularity of Exception Handling in ExecutionEngine.resolve_metrics() and Clean Up Type Hints (#3423)
+* [MAINTENANCE] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profiler (#3441)
+* [MAINTENANCE] Fix issue where BatchRequest object in configuration could cause Checkpoint to fail (#3438)
+* [MAINTENANCE] Insure consistency between implementation of overriding Python __hash__() and internal ID property value (#3432)
+* [MAINTENANCE] Performance improvement refactor for Spark unexpected values (#3368)
+* [MAINTENANCE] Refactor MetricConfiguration out of validation_graph.py to Avoid Future Circular Dependencies in Python (#3425)
+* [MAINTENANCE] Use ExceptionInfo to encapsulate common expectation validation result error information. (#3427)
+
+0.13.34
+-----------------
+* [FEATURE] Configurable multi-threaded checkpoint speedup (#3362) (Thanks @jdimatteo)
+* [BUGFIX] Insure that the "result_format" Expectation Argument is Processed Properly (#3364)
+* [BUGFIX] fix error getting validation result from DataContext (#3359) (Thanks @zachzIAM)
+* [BUGFIX] fixed typo and added CLA links (#3347)
+* [DOCS] Azure Data Connector Documentation for Pandas and Spark. (#3378)
+* [DOCS] Connecting to GCS using Spark (#3375)
+* [DOCS] Docusaurus - Deploying Great Expectations in a hosted environment without file system or CLI (#3361)
+* [DOCS] How to get a batch from configured datasource (#3382)
+* [MAINTENANCE] Add Flyte to README (#3387) (Thanks @samhita-alla)
+* [MAINTENANCE] Adds expect_table_columns_to_match_set (#3329) (Thanks @viniciusdsmello)
+* [MAINTENANCE] Bugfix/skip substitute config variables in ge cloud mode (#3393)
+* [MAINTENANCE] Clean Up ValidationGraph API Usage, Improve Exception Handling for Metrics, Clean Up Type Hints (#3399)
+* [MAINTENANCE] Clean up ValidationGraph API and add Type Hints (#3392)
+* [MAINTENANCE] Enhancement/update _set methods with kwargs (#3391) (Thanks @roblim)
+* [MAINTENANCE] Fix incorrect ToC section name (#3395)
+* [MAINTENANCE] Insure Correct Processing of the catch_exception Flag in Metrics Resolution (#3360)
+* [MAINTENANCE] exempt batch_data from a deep_copy operation on RuntimeBatchRequest (#3388)
+* [MAINTENANCE] [WIP] Enhancement/cloud 169/update checkpoint.run for ge cloud (#3381)
 
 0.13.33
 -----------------
@@ -44,7 +82,6 @@ develop
 * [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
 * [MAINTENANCE] Various doc patches (#3326)
 * [MAINTENANCE] clean up imports and method signatures (#3337)
->>>>>>> 9208de453238af6d673aa9184c865b8422165172
 
 0.13.31
 -----------------

@@ -3009,7 +3009,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
     assert (
-        'ExecutionEngineError: Error: The column "Name" in BatchData does not exist.'
+        'MetricResolutionError: Error: The column "Name" in BatchData does not exist.'
         in output
     )
 

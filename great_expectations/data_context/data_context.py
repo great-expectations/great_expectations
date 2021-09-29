@@ -74,6 +74,7 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
+    ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
@@ -817,6 +818,10 @@ class BaseDataContext:
     @property
     def anonymous_usage_statistics(self):
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
+
+    @property
+    def concurrency(self) -> ConcurrencyConfig:
+        return self.project_config_with_variables_substituted.concurrency
 
     @property
     def notebooks(self):
@@ -1650,7 +1655,7 @@ class BaseDataContext:
             raise ge_exceptions.GreatExpectationsTypeError(
                 f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
             )
-        datasource: Datasource = self.datasources[datasource_name]
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
             raise ValueError("Must provide only one of batch_data, query, or path.")
@@ -2032,7 +2037,7 @@ class BaseDataContext:
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
-            runtime_environment={"data_context": self},
+            runtime_environment={"data_context": self, "concurrency": self.concurrency},
             config_defaults={"module_name": module_name},
         )
         if not datasource:
@@ -2079,7 +2084,7 @@ class BaseDataContext:
         return datasource
 
     def list_expectation_suites(self):
-        """Return a list of available expectation suite names."""
+        """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
         except KeyError as e:
@@ -2270,8 +2275,16 @@ class BaseDataContext:
                 "expectation_suite %s not found" % expectation_suite_name
             )
 
-    def list_expectation_suite_names(self):
-        """Lists the available expectation suite names"""
+    def list_expectation_suite_names(self) -> List[str]:
+        """
+        Lists the available expectation suite names. If in ge_cloud_mode, a list of
+        GE Cloud ids is returned instead.
+        """
+        if self.ge_cloud_mode:
+            return [
+                suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()
+            ]
+
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()
         ]
@@ -2409,7 +2422,14 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
+            # get the expectation suite if it exists, otherwise None
+            expectation_suite_name = validation_results.meta["expectation_suite_name"]
+            if expectation_suite_name in self.list_expectation_suite_names():
+                expectation_suite = self.get_expectation_suite(expectation_suite_name)
+            else:
+                expectation_suite = None
+
+            self._compile_evaluation_parameter_dependencies(expectation_suite)
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -2438,13 +2458,17 @@ class BaseDataContext:
     def validations_store(self):
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self):
+    def _compile_evaluation_parameter_dependencies(self, expectation_suite):
         self._evaluation_parameter_dependencies = {}
-        for key in self.expectations_store.list_keys():
-            expectation_suite = self.expectations_store.get(key)
-            if not expectation_suite:
-                continue
 
+        # only if we don't have an expectation suite do we do a key scan
+        if expectation_suite is None:
+            for key in self.expectations_store.list_keys():
+                expectation_suite = self.expectations_store.get(key)
+                if not expectation_suite:
+                    continue
+
+        if expectation_suite:
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
@@ -2587,7 +2611,7 @@ class BaseDataContext:
                 if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder = instantiate_class_from_config(
+                    site_builder: SiteBuilder = instantiate_class_from_config(
                         config=complete_site_config,
                         runtime_environment={
                             "data_context": self,
@@ -3467,7 +3491,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             raise e
 
-        instantiated_class: Any
+        instantiated_class: Any = None
 
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:

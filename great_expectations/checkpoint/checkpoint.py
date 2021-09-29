@@ -12,6 +12,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
+from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
@@ -74,6 +75,21 @@ class Checkpoint:
         if "DataContext" not in str(type(data_context)):
             raise TypeError("A Checkpoint requires a valid DataContext")
         self._data_context = data_context
+
+        # if checkpoint was created without yml
+        if validations:
+            for val in validations:
+                if "batch_request" in val:
+                    if isinstance(val["batch_request"], RuntimeBatchRequest):
+                        batch_data = val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ]
+                        val["batch_request"] = val["batch_request"].to_json_dict()
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data
+                    elif isinstance(val["batch_request"], BatchRequest):
+                        val["batch_request"] = val["batch_request"].to_json_dict()
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
             **{
@@ -209,7 +225,7 @@ class Checkpoint:
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -253,7 +269,6 @@ class Checkpoint:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" does not contain any validations.'
             )
-        run_results = {}
 
         if run_name is None and run_name_template is not None:
             run_name: str = get_datetime_string_from_strftime_format(
@@ -262,89 +277,111 @@ class Checkpoint:
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
-        for idx, validation_dict in enumerate(validations):
-            try:
-                substituted_validation_dict: dict = get_substituted_validation_dict(
-                    substituted_runtime_config=substituted_runtime_config,
-                    validation_dict=validation_dict,
-                )
-                batch_request: Union[
-                    BatchRequest, RuntimeBatchRequest
-                ] = substituted_validation_dict.get("batch_request")
-                expectation_suite_name: str = substituted_validation_dict.get(
-                    "expectation_suite_name"
-                )
-                expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
-                    "expectation_suite_ge_cloud_id"
-                )
-                action_list: list = substituted_validation_dict.get("action_list")
-
-                validator: Validator = self.data_context.get_validator(
-                    batch_request=batch_request,
-                    expectation_suite_name=expectation_suite_name
-                    if not self.data_context.ge_cloud_mode
-                    else None,
-                    expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id
-                    if self.data_context.ge_cloud_mode
-                    else None,
-                )
-
-                action_list: list = substituted_validation_dict.get("action_list")
-                runtime_configuration_validation = substituted_validation_dict.get(
-                    "runtime_configuration", {}
-                )
-                catch_exceptions_validation = runtime_configuration_validation.get(
-                    "catch_exceptions"
-                )
-                result_format_validation = runtime_configuration_validation.get(
-                    "result_format"
-                )
-                result_format = result_format or result_format_validation
-
-                if result_format is None:
-                    result_format = {"result_format": "SUMMARY"}
-
-                action_list_validation_operator: ActionListValidationOperator = (
-                    ActionListValidationOperator(
-                        data_context=self.data_context,
-                        action_list=action_list,
-                        result_format=result_format,
-                        name=f"{self.name}-checkpoint-validation[{idx}]",
+        # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
+        # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
+        # AsyncExecutor and the corresponding AsyncExecutor docstring for more details on when multiple threads are
+        # used.
+        with AsyncExecutor(
+            self.data_context.concurrency, max_workers=len(validations)
+        ) as async_executor:
+            async_validation_operator_results: List[
+                AsyncResult[ValidationOperatorResult]
+            ] = []
+            for idx, validation_dict in enumerate(validations):
+                try:
+                    substituted_validation_dict: dict = get_substituted_validation_dict(
+                        substituted_runtime_config=substituted_runtime_config,
+                        validation_dict=validation_dict,
                     )
-                )
-                checkpoint_identifier = None
-                if self.data_context.ge_cloud_mode:
-                    checkpoint_identifier = GeCloudIdentifier(
-                        resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
+                    batch_request: Union[
+                        BatchRequest, RuntimeBatchRequest
+                    ] = substituted_validation_dict.get("batch_request")
+                    expectation_suite_name: str = substituted_validation_dict.get(
+                        "expectation_suite_name"
                     )
+                    expectation_suite_ge_cloud_id: str = (
+                        substituted_validation_dict.get("expectation_suite_ge_cloud_id")
+                    )
+                    action_list: list = substituted_validation_dict.get("action_list")
 
-                operator_run_kwargs = {}
-
-                if catch_exceptions_validation is not None:
-                    operator_run_kwargs[
-                        "catch_exceptions"
-                    ] = catch_exceptions_validation
-
-                val_op_run_result: ValidationOperatorResult = (
-                    action_list_validation_operator.run(
-                        assets_to_validate=[validator],
-                        run_id=run_id,
-                        evaluation_parameters=substituted_validation_dict.get(
-                            "evaluation_parameters"
+                    validator: Validator = self.data_context.get_validator(
+                        batch_request=batch_request,
+                        expectation_suite_name=(
+                            expectation_suite_name
+                            if not self.data_context.ge_cloud_mode
+                            else None
                         ),
-                        result_format=result_format,
-                        checkpoint_identifier=checkpoint_identifier,
-                        **operator_run_kwargs,
+                        expectation_suite_ge_cloud_id=(
+                            expectation_suite_ge_cloud_id
+                            if self.data_context.ge_cloud_mode
+                            else None
+                        ),
                     )
+
+                    action_list: list = substituted_validation_dict.get("action_list")
+                    runtime_configuration_validation = substituted_validation_dict.get(
+                        "runtime_configuration", {}
+                    )
+                    catch_exceptions_validation = runtime_configuration_validation.get(
+                        "catch_exceptions"
+                    )
+                    result_format_validation = runtime_configuration_validation.get(
+                        "result_format"
+                    )
+                    result_format = result_format or result_format_validation
+
+                    if result_format is None:
+                        result_format = {"result_format": "SUMMARY"}
+
+                    action_list_validation_operator: ActionListValidationOperator = (
+                        ActionListValidationOperator(
+                            data_context=self.data_context,
+                            action_list=action_list,
+                            result_format=result_format,
+                            name=f"{self.name}-checkpoint-validation[{idx}]",
+                        )
+                    )
+                    checkpoint_identifier = None
+                    if self.data_context.ge_cloud_mode:
+                        checkpoint_identifier = GeCloudIdentifier(
+                            resource_type="contract", ge_cloud_id=str(self.ge_cloud_id)
+                        )
+
+                    operator_run_kwargs = {}
+
+                    if catch_exceptions_validation is not None:
+                        operator_run_kwargs[
+                            "catch_exceptions"
+                        ] = catch_exceptions_validation
+
+                    async_validation_operator_results.append(
+                        async_executor.submit(
+                            action_list_validation_operator.run,
+                            assets_to_validate=[validator],
+                            run_id=run_id,
+                            evaluation_parameters=substituted_validation_dict.get(
+                                "evaluation_parameters"
+                            ),
+                            result_format=result_format,
+                            checkpoint_identifier=checkpoint_identifier,
+                            **operator_run_kwargs,
+                        )
+                    )
+                except (
+                    ge_exceptions.CheckpointError,
+                    ge_exceptions.ExecutionEngineError,
+                    ge_exceptions.MetricError,
+                ) as e:
+                    raise ge_exceptions.CheckpointError(
+                        f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
+                    )
+
+            run_results = {}
+            for async_validation_operator_result in async_validation_operator_results:
+                run_results.update(
+                    async_validation_operator_result.result().run_results
                 )
-                run_results.update(val_op_run_result.run_results)
-            except (
-                ge_exceptions.CheckpointError,
-                ge_exceptions.ExecutionEngineError,
-            ) as e:
-                raise ge_exceptions.CheckpointError(
-                    f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
-                )
+
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
         )
