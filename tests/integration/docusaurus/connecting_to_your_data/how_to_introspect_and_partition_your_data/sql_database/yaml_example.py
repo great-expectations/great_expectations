@@ -70,7 +70,7 @@ tables: # Each key in the "tables" section is a table_name
 data_dir_path = "data"
 CONNECTION_STRING = f"sqlite:///{data_dir_path}/yellow_tripdata.db"
 
-datasource_yaml = datasource_yaml.replace("CONNECTION_STRING", CONNECTION_STRING)
+datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
 context.test_yaml_config(datasource_yaml)
 
