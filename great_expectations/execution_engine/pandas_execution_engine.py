@@ -623,7 +623,6 @@ Please check your config."""
     def _split_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
-
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
@@ -711,10 +710,7 @@ Please check your config."""
         df,
         p: float = 0.1,
     ):
-        """Take a random sample of rows, retaining proportion p
-
-        Note: the Random function behaves differently on different dialects of SQL
-        """
+        """Take a random sample of rows, retaining proportion p"""
         return df[df.index.map(lambda x: random.random() < p)]
 
     @staticmethod

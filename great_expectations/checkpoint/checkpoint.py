@@ -76,6 +76,21 @@ class Checkpoint:
             raise TypeError("A Checkpoint requires a valid DataContext")
         self._data_context = data_context
 
+        # if checkpoint was created without yml
+        if validations:
+            for val in validations:
+                if "batch_request" in val:
+                    if isinstance(val["batch_request"], RuntimeBatchRequest):
+                        batch_data = val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ]
+                        val["batch_request"] = val["batch_request"].to_json_dict()
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data
+                    elif isinstance(val["batch_request"], BatchRequest):
+                        val["batch_request"] = val["batch_request"].to_json_dict()
+
         checkpoint_config: CheckpointConfig = CheckpointConfig(
             **{
                 "name": name,
@@ -210,7 +225,7 @@ class Checkpoint:
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
