@@ -1275,7 +1275,6 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
-    NOTEBOOKS_BASE_DIRECTORY = "notebooks"
     DEFAULT_VALIDATION_OPERATORS = {
         "action_list_operator": {
             "class_name": "ActionListValidationOperator",
