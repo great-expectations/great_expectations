@@ -67,6 +67,19 @@ class RenderedComponentContent(RenderedContent):
         return d
 
 
+# <Will> this will have a corresponding model in GraphQL
+class RenderedAtomicStringValueContent(RenderedContent):
+    def __init__(
+        self,
+        string: str = None,
+        parameters: dict = None,
+        schema: dict = None,
+    ):
+        self.string = string
+        self.parameters = parameters
+        self.schema = schema  # what does this schema look like?
+
+
 class RenderedHeaderContent(RenderedComponentContent):
     def __init__(
         self,

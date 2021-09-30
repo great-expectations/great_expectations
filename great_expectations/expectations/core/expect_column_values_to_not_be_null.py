@@ -9,7 +9,10 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.types import (
+    RenderedAtomicStringValueContent,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -118,24 +121,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     #                     "styling": styling,)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive_summary")
+    @renderer(renderer_type="atomic.prescriptive.summary")
     def _prescriptive_summary(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs
-    ):
-        res = cls._prescriptive_renderer(
-            configuration, result, language, runtime_configuration, kwargs
-        )
-        return res.to_json_dict()
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -148,6 +135,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         include_column_name = (
             include_column_name if include_column_name is not None else True
         )
+        # not needed in this
+
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -179,13 +168,66 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
+        # <Will> this will have a corresponding model in GraphQL
+        return RenderedAtomicStringValueContent(string=template_str, parameters=params)
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        runtime_configuration = runtime_configuration or {}
+        # include_column_name = runtime_configuration.get("include_column_name", True)
+        # include_column_name = (
+        #     include_column_name if include_column_name is not None else True
+        # )
+        styling = runtime_configuration.get("styling")
+        # params = substitute_none_for_missing(
+        #     configuration.kwargs,
+        #     ["column", "mostly", "row_condition", "condition_parser"],
+        # )
+        #
+        # if params["mostly"] is not None:
+        #     params["mostly_pct"] = num_to_str(
+        #         params["mostly"] * 100, precision=15, no_scientific=True
+        #     )
+        #     # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+        #     if include_column_name:
+        #         template_str = "$column values must not be null, at least $mostly_pct % of the time."
+        #     else:
+        #         template_str = (
+        #             "values must not be null, at least $mostly_pct % of the time."
+        #         )
+        # else:
+        #     if include_column_name:
+        #         template_str = "$column values must never be null."
+        #     else:
+        #         template_str = "values must never be null."
+        #
+        # if params["row_condition"] is not None:
+        #     (
+        #         conditional_template_str,
+        #         conditional_params,
+        #     ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+        #     template_str = conditional_template_str + ", then " + template_str
+        #     params.update(conditional_params)
+        # may need to simplify
+        atomic_result = cls._prescriptive_summary(
+            configuration, result, language, runtime_configuration
+        )
         return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": template_str,
-                        "params": params,
+                        "template": atomic_result.template_str,
+                        "params": atomic_result.params,
                         "styling": styling,
                     },
                 }
