@@ -84,6 +84,11 @@ a.pagination-nav__link:hover {
     padding: 0 var(--ifm-pre-padding);
 }
 
+/* navbar tweaks */
+.navbar--fixed-top {
+    opacity: .95;
+}
+
 .navbar__link {
     font-weight: 700;
     text-transform: uppercase;
