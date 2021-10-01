@@ -38,7 +38,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     _default_element_styling = {
         "classes": [
             "list-group-item"
-        ],  # ["d-flex", "justify-content-between", "align-items-center"],
+        ],  # "d-flex", "justify-content-between", "align-items-center"],
         "params": {
             "column": {"classes": ["badge", "badge-primary"]},
             "expectation_type": {"classes": ["text-monospace"]},
