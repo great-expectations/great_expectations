@@ -8,6 +8,7 @@ import os
 import pstats
 import re
 import time
+import uuid
 from collections import OrderedDict
 from datetime import datetime
 from functools import wraps
@@ -1069,3 +1070,11 @@ def generate_library_json_from_registered_expectations():
 
 def delete_blank_lines(text: str) -> str:
     return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
+
+
+def generate_temporary_table_name(
+    default_table_name_prefix: Optional[str] = "ge_tmp_",
+    num_digits: Optional[int] = 8,
+) -> str:
+    table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
+    return table_name
