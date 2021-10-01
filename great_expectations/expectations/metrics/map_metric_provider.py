@@ -1,5 +1,4 @@
 import logging
-import uuid
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -26,6 +25,12 @@ from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
+)
+from great_expectations.expectations.metrics.util import (
+    Insert,
+    Label,
+    Visitable,
+    is_sql_alchemy_clause_selectable,
 )
 from great_expectations.expectations.registry import (
     get_metric_provider,
@@ -1044,11 +1049,15 @@ def multicolumn_function_partial(
 
                 column_list = accessor_domain_kwargs["column_list"]
 
+                table_columns = metrics["table.columns"]
+
                 for column_name in column_list:
-                    if column_name not in metrics["table.columns"]:
+                    if column_name not in table_columns:
                         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
+
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
                 column_selector = [
                     sa.column(column_name) for column_name in column_list
@@ -1058,8 +1067,11 @@ def multicolumn_function_partial(
                     cls,
                     column_selector,
                     **metric_value_kwargs,
+                    _column_names=column_list,
+                    _table_columns=table_columns,
                     _dialect=dialect,
                     _table=selectable,
+                    _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )
                 return (
@@ -1921,17 +1933,19 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         domain_kwargs=domain_kwargs,
     )
 
-    count_case_statement: List[sa.sql.elements.Label] = [
-        sa.case(
-            [
-                (
-                    unexpected_condition,
-                    sa.sql.expression.cast(1, sa.Numeric),
-                )
-            ],
-            else_=0,
-        ).label("condition")
-    ]
+    count_case_statement: List[Label] = sa.case(
+        [
+            (
+                unexpected_condition,
+                1,
+            )
+        ],
+        else_=0,
+    ).label("condition")
+
+    count_selectable: Visitable = sa.select([count_case_statement])
+    if not is_sql_alchemy_clause_selectable(clause=count_selectable):
+        count_selectable = sa.select([count_case_statement]).select_from(selectable)
 
     try:
         if execution_engine.engine.dialect.name.lower() == "mssql":
@@ -1950,17 +1964,13 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 )
                 temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
-                inner_case_query: sa.sql.dml.Insert = (
-                    temp_table_obj.insert().from_select(
-                        count_case_statement,
-                        sa.select(count_case_statement).select_from(selectable),
-                    )
+                inner_case_query: Insert = temp_table_obj.insert().from_select(
+                    [count_case_statement],
+                    count_selectable,
                 )
                 execution_engine.engine.execute(inner_case_query)
 
-                selectable_count = temp_table_obj
-        else:
-            selectable_count = sa.select(count_case_statement).select_from(selectable)
+                count_selectable = temp_table_obj
 
         unexpected_count_query: sa.Select = (
             sa.select(
@@ -1968,11 +1978,11 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     sa.func.sum(sa.column("condition")).label("unexpected_count"),
                 ]
             )
-            .select_from(selectable_count)
+            .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
 
-        unexpected_count = execution_engine.engine.execute(
+        unexpected_count: int = execution_engine.engine.execute(
             sa.select(
                 [
                     unexpected_count_query.c.unexpected_count,
@@ -2021,11 +2031,15 @@ def _sqlalchemy_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    query = (
-        sa.select([sa.column(column_name).label("unexpected_values")])
-        .select_from(selectable)
-        .where(unexpected_condition)
+    query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
+        unexpected_condition
     )
+    if not is_sql_alchemy_clause_selectable(clause=query):
+        query = (
+            sa.select([sa.column(column_name).label("unexpected_values")])
+            .where(unexpected_condition)
+            .select_from(selectable)
+        )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -2073,14 +2087,19 @@ def _sqlalchemy_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    query = (
-        sa.select(
-            sa.column(column_A_name).label("unexpected_values_A"),
-            sa.column(column_B_name).label("unexpected_values_B"),
+    query = sa.select(
+        sa.column(column_A_name).label("unexpected_values_A"),
+        sa.column(column_B_name).label("unexpected_values_B"),
+    ).where(boolean_mapped_unexpected_values)
+    if not is_sql_alchemy_clause_selectable(clause=query):
+        query = (
+            sa.select(
+                sa.column(column_A_name).label("unexpected_values_A"),
+                sa.column(column_B_name).label("unexpected_values_B"),
+            )
+            .select_from(selectable)
+            .where(boolean_mapped_unexpected_values)
         )
-        .select_from(selectable)
-        .where(boolean_mapped_unexpected_values)
-    )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -2169,11 +2188,14 @@ def _sqlalchemy_multicolumn_map_condition_values(
             )
 
     column_selector = [sa.column(column_name) for column_name in column_list]
-    query = (
-        sa.select(column_selector)
-        .select_from(selectable)
-        .where(boolean_mapped_unexpected_values)
-    )
+
+    query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
+    if not is_sql_alchemy_clause_selectable(clause=query):
+        query = (
+            sa.select(column_selector)
+            .where(boolean_mapped_unexpected_values)
+            .select_from(selectable)
+        )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -2256,12 +2278,20 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column: sa.Column = sa.column(column_name)
 
-    return execution_engine.engine.execute(
+    query = (
         sa.select([column, sa.func.count(column)])
-        .select_from(selectable)
         .where(unexpected_condition)
         .group_by(column)
-    ).fetchall()
+    )
+    if not is_sql_alchemy_clause_selectable(clause=query):
+        query = (
+            sa.select([column, sa.func.count(column)])
+            .where(unexpected_condition)
+            .group_by(column)
+            .select_from(selectable)
+        )
+
+    return execution_engine.engine.execute(query).fetchall()
 
 
 def _sqlalchemy_map_condition_rows(
@@ -2288,9 +2318,16 @@ def _sqlalchemy_map_condition_rows(
         domain_kwargs=domain_kwargs,
     )
 
-    query = (
-        sa.select([sa.text("*")]).select_from(selectable).where(unexpected_condition)
-    )
+    table_columns = metrics.get("table.columns")
+    column_selector = [sa.column(column_name) for column_name in table_columns]
+    query = sa.select(column_selector).where(unexpected_condition)
+    if not is_sql_alchemy_clause_selectable(clause=query):
+        query = (
+            sa.select(column_selector)
+            .where(unexpected_condition)
+            .select_from(selectable)
+        )
+
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
