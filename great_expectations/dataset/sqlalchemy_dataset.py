@@ -373,7 +373,6 @@ class MetaSqlAlchemyDataset(Dataset):
         expected_condition: BinaryExpression,
         ignore_values_condition: BinaryExpression,
     ) -> Select:
-        # mssql expects all temporary table names to have a prefix '#'
         temp_table_name: str = generate_temporary_table_name(
             default_table_name_prefix="#ge_temp_"
         )
@@ -513,9 +512,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
             schema = None
-            table_name = generate_temporary_table_name(
-                default_table_name_prefix="#ge_temp_"
-            )
+            table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
                 table_name = f"#{table_name}"
