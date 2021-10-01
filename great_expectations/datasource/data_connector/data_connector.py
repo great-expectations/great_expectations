@@ -173,6 +173,16 @@ class DataConnector:
         """
         raise NotImplementedError
 
+    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+        """
+        Return the list of asset names and types known by this DataConnector.
+
+        Returns:
+            A list of tuples consisting of available names and types
+        """
+        # TODO: Josh 20211001 only implemented InferredAssetSqlDataConnector
+        raise NotImplementedError
+
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,

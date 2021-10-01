@@ -163,6 +163,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             data_asset_config = {
                 "schema_name": metadata["schema_name"],
                 "table_name": metadata["table_name"],
+                "type": metadata["type"],
             }
             if not splitter_method is None:
                 data_asset_config["splitter_method"] = splitter_method

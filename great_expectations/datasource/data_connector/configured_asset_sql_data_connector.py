@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -128,6 +128,16 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             A list of available names
         """
         return list(self.assets.keys())
+
+
+    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+        """
+        Return the list of asset names and types known by this DataConnector.
+
+        Returns:
+            A list of tuples consisting of available names and types
+        """
+        return [(asset['table_name'], asset['type']) for asset in self.assets.values()]
 
     def get_unmatched_data_references(self) -> List[str]:
         """
