@@ -444,6 +444,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         bucket,
         prefix="",
         boto3_options=None,
+        s3_put_options=None,
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
@@ -480,6 +481,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
         if boto3_options is None:
             boto3_options = {}
         self._boto3_options = boto3_options
+        if s3_put_options is None:
+            s3_put_options = {}
+        self.s3_put_options = s3_put_options
         self.endpoint_url = endpoint_url
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
@@ -491,6 +495,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             "bucket": bucket,
             "prefix": prefix,
             "boto3_options": boto3_options,
+            "s3_put_options": s3_put_options,
             "filepath_template": filepath_template,
             "filepath_prefix": filepath_prefix,
             "filepath_suffix": filepath_suffix,
@@ -561,9 +566,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
                     Body=value.encode(content_encoding),
                     ContentEncoding=content_encoding,
                     ContentType=content_type,
+                    **self.s3_put_options,
                 )
             else:
-                result_s3.put(Body=value, ContentType=content_type)
+                result_s3.put(
+                    Body=value, ContentType=content_type, **self.s3_put_options
+                )
         except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
