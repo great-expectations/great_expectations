@@ -374,7 +374,9 @@ class MetaSqlAlchemyDataset(Dataset):
         ignore_values_condition: BinaryExpression,
     ) -> Select:
         # mssql expects all temporary table names to have a prefix '#'
-        temp_table_name: str = generate_temporary_table_name()
+        temp_table_name: str = generate_temporary_table_name(
+            default_table_name_prefix="#ge_temp_"
+        )
 
         with self.engine.begin():
             metadata: sa.MetaData = sa.MetaData(self.engine)
@@ -511,7 +513,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
             schema = None
-            table_name = generate_temporary_table_name()
+            table_name = generate_temporary_table_name(
+                default_table_name_prefix="#ge_temp_"
+            )
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
                 table_name = f"#{table_name}"
@@ -1894,7 +1898,9 @@ WHERE
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # just the column we will be performing the expectation on, and the query is performed against it.
         if self.sql_engine_dialect.name.lower() == "mysql":
-            temp_table_name = generate_temporary_table_name()
+            temp_table_name = generate_temporary_table_name(
+                default_table_name_prefix="#ge_temp_"
+            )
             temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
                 new_temp_table=temp_table_name,
                 source_table=self._table,
