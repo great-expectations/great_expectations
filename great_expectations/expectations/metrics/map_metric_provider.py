@@ -31,6 +31,7 @@ from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
 )
+from great_expectations.util import generate_temporary_table_name
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -1934,7 +1935,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     try:
         if execution_engine.engine.dialect.name.lower() == "mssql":
-            temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_name: str = generate_temporary_table_name(
+                default_table_name_prefix="#ge_temp_"
+            )
 
             with execution_engine.engine.begin():
                 metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
