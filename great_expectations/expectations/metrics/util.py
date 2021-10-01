@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import numpy as np
 from dateutil.parser import parse
@@ -23,20 +23,32 @@ try:
     from sqlalchemy.engine import Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Select
-    from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
+    from sqlalchemy.sql import Insert, Select, visitors
+    from sqlalchemy.sql.elements import (
+        BinaryExpression,
+        ColumnElement,
+        Label,
+        TextClause,
+        literal,
+    )
     from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.visitors import Visitable
 except ImportError:
     sa = None
     registry = None
-    Select = None
-    BinaryExpression = None
-    TextClause = None
-    literal = None
-    custom_op = None
     Engine = None
     reflection = None
     Dialect = None
+    Insert = None
+    Select = None
+    visitors = None
+    BinaryExpression = None
+    ColumnElement = None
+    Label = None
+    TextClause = None
+    Visitable = None
+    literal = None
+    custom_op = None
     OperationalError = None
 
 try:
@@ -78,6 +90,7 @@ try:
 except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
+    namedtuple = None
 
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
@@ -93,6 +106,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # redshift
+        # noinspection PyUnresolvedReferences
         if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             if positive:
                 return BinaryExpression(column, literal(regex), custom_op("~"))
@@ -158,6 +172,7 @@ def _get_dialect_type_module(dialect=None):
         return sa
     try:
         # Redshift does not (yet) export types to top level; only recognize base SA types
+        # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             return dialect.sa
     except (TypeError, AttributeError):
@@ -180,6 +195,7 @@ def _get_dialect_type_module(dialect=None):
 
 
 def attempt_allowing_relative_error(dialect):
+    # noinspection PyUnresolvedReferences
     detected_redshift: bool = (
         sqlalchemy_redshift is not None
         and check_sql_engine_dialect(
@@ -262,6 +278,7 @@ def column_reflection_fallback(
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
     col_info_dict_list: List[Dict[str, str]]
+    # noinspection PyUnresolvedReferences
     if dialect.name.lower() == "mssql":
         # Get column names and types from the database
         # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
@@ -310,6 +327,34 @@ ORDER BY schema_name,
     return col_info_dict_list
 
 
+def is_sql_alchemy_clause_selectable(clause: Visitable) -> bool:
+    """
+    :param clause: SQL clause, statement, query, etc.
+    :return: boolean indicating whether or not the given clause resolves all columns -- hence the caller must not use
+     "select_from" clause as part of the query; otherwise an unwanted selectable (e.g., table) will be added to "FROM".
+
+     In general, due to the richness of SQL query semantics, it is very difficult -- if not impossible -- to ascertain
+     the validity of an SQL query, without actually executing it.  However, executing an SQL query is an expensive
+     operation, requiring a round-trip network access to the database.  The present mechanism relies on the pre-defined
+     naming convention to maintain the list of SQL statements that are guaranteed to contain a top-level "FROM" clause.
+
+     A more robust mechanism will be desirable in the future.
+    """
+
+    # Traverse the SQL query structure and collect labels.  Then check if a label belongs to the recognized list.
+    labels: Set[Label] = set()
+    # noinspection PyUnresolvedReferences
+    visitors.traverse(obj=clause, opts={}, visitors={"label": labels.add})
+    label: Label
+    for label in labels:
+        if str(label) in [
+            "group_counts._num_rows",  # Applies to: "compound_columns.unique.condition" metric.
+        ]:
+            return True
+
+    return False
+
+
 def parse_value_set(value_set):
     parsed_value_set = [
         parse(value) if isinstance(value, str) else value for value in value_set
@@ -342,6 +387,7 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
         dialect_supported = True
 
     try:
+        # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             dialect_supported = True
     except (AttributeError, TypeError):
