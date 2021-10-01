@@ -4,6 +4,7 @@ title: Changelog
 
 ### Develop
 * [FEATURE] Extended SlackNotificationAction to accept slack_token and slack_channel for slack messaging without a webhook. (#3440)
+* [FEATURE] Add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
 * [BUGFIX]  Handle RuntimeBatchRequest passed programatically (without yml) (#3448)
 
 ### 0.13.35
