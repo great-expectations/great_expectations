@@ -19,7 +19,7 @@ repos:
     rev: 20.8b1
     hooks:
       - id: black
-        exclude: docs/.*|tests/.*.fixture|.*.ge_store_backend_id
+        exclude: docs/.*|tests/.*.fixture|.*.ge_store_backend_id|DO_NOT_COMMIT/.*
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.3
     hooks:
