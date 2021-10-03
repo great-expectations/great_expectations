@@ -3196,8 +3196,10 @@ class MapMetricProvider(MetricProvider):
             hasattr(map_metric_provider, "condition_metric_name")
             and map_metric_provider.condition_metric_name
             in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
-            or hasattr(map_metric_provider, "function_metric_name")
+        ) or (
+            hasattr(map_metric_provider, "function_metric_name")
             and map_metric_provider.function_metric_name
+            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
         )
 
 

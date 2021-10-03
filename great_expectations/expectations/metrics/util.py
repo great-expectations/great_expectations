@@ -23,7 +23,7 @@ try:
     from sqlalchemy.engine import Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Insert, Select, visitors
+    from sqlalchemy.sql import Insert, Select
     from sqlalchemy.sql.elements import (
         BinaryExpression,
         ColumnElement,
@@ -40,7 +40,6 @@ except ImportError:
     Dialect = None
     Insert = None
     Select = None
-    visitors = None
     BinaryExpression = None
     ColumnElement = None
     Label = None
