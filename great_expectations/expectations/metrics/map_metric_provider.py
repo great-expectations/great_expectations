@@ -21,17 +21,13 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
+from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
 )
-from great_expectations.expectations.metrics.util import (
-    Insert,
-    Label,
-    Visitable,
-    is_sql_alchemy_clause_selectable,
-)
+from great_expectations.expectations.metrics.util import Engine, Insert, Label, Select
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
@@ -394,7 +390,7 @@ def column_condition_partial(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -848,7 +844,7 @@ def column_pair_condition_partial(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -1057,7 +1053,7 @@ def multicolumn_function_partial(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 column_selector = [
                     sa.column(column_name) for column_name in column_list
@@ -1268,7 +1264,7 @@ def multicolumn_condition_partial(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 column_selector = [
                     sa.column(column_name) for column_name in column_list
@@ -1943,8 +1939,8 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         else_=0,
     ).label("condition")
 
-    count_selectable: Visitable = sa.select([count_case_statement])
-    if not is_sql_alchemy_clause_selectable(clause=count_selectable):
+    count_selectable: Select = sa.select([count_case_statement])
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         count_selectable = sa.select([count_case_statement]).select_from(selectable)
 
     try:
@@ -1972,7 +1968,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
                 count_selectable = temp_table_obj
 
-        unexpected_count_query: sa.Select = (
+        unexpected_count_query: Select = (
             sa.select(
                 [
                     sa.func.sum(sa.column("condition")).label("unexpected_count"),
@@ -2034,7 +2030,7 @@ def _sqlalchemy_column_map_condition_values(
     query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
         unexpected_condition
     )
-    if not is_sql_alchemy_clause_selectable(clause=query):
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = (
             sa.select([sa.column(column_name).label("unexpected_values")])
             .where(unexpected_condition)
@@ -2091,7 +2087,7 @@ def _sqlalchemy_column_pair_map_condition_values(
         sa.column(column_A_name).label("unexpected_values_A"),
         sa.column(column_B_name).label("unexpected_values_B"),
     ).where(boolean_mapped_unexpected_values)
-    if not is_sql_alchemy_clause_selectable(clause=query):
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = (
             sa.select(
                 sa.column(column_A_name).label("unexpected_values_A"),
@@ -2190,7 +2186,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     column_selector = [sa.column(column_name) for column_name in column_list]
 
     query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
-    if not is_sql_alchemy_clause_selectable(clause=query):
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = (
             sa.select(column_selector)
             .where(boolean_mapped_unexpected_values)
@@ -2283,7 +2279,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         .where(unexpected_condition)
         .group_by(column)
     )
-    if not is_sql_alchemy_clause_selectable(clause=query):
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = (
             sa.select([column, sa.func.count(column)])
             .where(unexpected_condition)
@@ -2321,7 +2317,7 @@ def _sqlalchemy_map_condition_rows(
     table_columns = metrics.get("table.columns")
     column_selector = [sa.column(column_name) for column_name in table_columns]
     query = sa.select(column_selector).where(unexpected_condition)
-    if not is_sql_alchemy_clause_selectable(clause=query):
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = (
             sa.select(column_selector)
             .where(unexpected_condition)
@@ -2712,6 +2708,11 @@ class MapMetricProvider(MetricProvider):
     function_value_keys = tuple()
     filter_column_isnull = True
 
+    SQLALCHEMY_SELECTABLE_METRICS = {
+        "compound_columns.count",
+        "compound_columns.unique",
+    }
+
     @classmethod
     def _register_metric_functions(cls):
         if not hasattr(cls, "function_metric_name") and not hasattr(
@@ -2741,6 +2742,7 @@ class MapMetricProvider(MetricProvider):
                     )
 
                 condition_provider = candidate_metric_fn
+                # noinspection PyUnresolvedReferences
                 metric_name = cls.condition_metric_name
                 metric_domain_keys = cls.condition_domain_keys
                 metric_value_keys = cls.condition_value_keys
@@ -3096,6 +3098,7 @@ class MapMetricProvider(MetricProvider):
                         "A MapMetricProvider must have a function_metric_name to have a decorated column_function_partial method."
                     )
                 map_function_provider = candidate_metric_fn
+                # noinspection PyUnresolvedReferences
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys
@@ -3177,6 +3180,25 @@ class MapMetricProvider(MetricProvider):
             pass
 
         return dependencies
+
+    @staticmethod
+    def is_sqlalchemy_metric_selectable(
+        map_metric_provider: MetaMetricProvider,
+    ) -> bool:
+        """
+        :param map_metric_provider: object of type "MapMetricProvider", whose SQLAlchemy implementation is inspected
+        :return: boolean indicating whether or not the returned value of a method implementing the metric resolves all
+        columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
+        unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
+        """
+        # noinspection PyUnresolvedReferences
+        return (
+            hasattr(map_metric_provider, "condition_metric_name")
+            and map_metric_provider.condition_metric_name
+            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
+            or hasattr(map_metric_provider, "function_metric_name")
+            and map_metric_provider.function_metric_name
+        )
 
 
 class ColumnMapMetricProvider(MapMetricProvider):

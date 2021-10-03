@@ -32,7 +32,6 @@ try:
         literal,
     )
     from sqlalchemy.sql.operators import custom_op
-    from sqlalchemy.sql.visitors import Visitable
 except ImportError:
     sa = None
     registry = None
@@ -46,7 +45,6 @@ except ImportError:
     ColumnElement = None
     Label = None
     TextClause = None
-    Visitable = None
     literal = None
     custom_op = None
     OperationalError = None
@@ -325,34 +323,6 @@ ORDER BY schema_name,
         col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
-
-
-def is_sql_alchemy_clause_selectable(clause: Visitable) -> bool:
-    """
-    :param clause: SQL clause, statement, query, etc.
-    :return: boolean indicating whether or not the given clause resolves all columns -- hence the caller must not use
-     "select_from" clause as part of the query; otherwise an unwanted selectable (e.g., table) will be added to "FROM".
-
-     In general, due to the richness of SQL query semantics, it is very difficult -- if not impossible -- to ascertain
-     the validity of an SQL query, without actually executing it.  However, executing an SQL query is an expensive
-     operation, requiring a round-trip network access to the database.  The present mechanism relies on the pre-defined
-     naming convention to maintain the list of SQL statements that are guaranteed to contain a top-level "FROM" clause.
-
-     A more robust mechanism will be desirable in the future.
-    """
-
-    # Traverse the SQL query structure and collect labels.  Then check if a label belongs to the recognized list.
-    labels: Set[Label] = set()
-    # noinspection PyUnresolvedReferences
-    visitors.traverse(obj=clause, opts={}, visitors={"label": labels.add})
-    label: Label
-    for label in labels:
-        if str(label) in [
-            "group_counts._num_rows",  # Applies to: "compound_columns.unique.condition" metric.
-        ]:
-            return True
-
-    return False
 
 
 def parse_value_set(value_set):
