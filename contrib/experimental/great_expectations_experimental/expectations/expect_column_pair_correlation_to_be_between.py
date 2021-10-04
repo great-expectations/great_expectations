@@ -175,7 +175,7 @@ class ColumnCorrelation(ColumnPairAggregateMetricProvider):
 
 
 class ExpectColumnCorrelationToBeBetween(ColumnPairExpectation):
-    """Test whether column values are normally distributed. NaN values are omitted."""
+    """Test whether pearson correlation of columns is between a minimum and maximum value"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
