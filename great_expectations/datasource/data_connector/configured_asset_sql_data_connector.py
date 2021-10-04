@@ -129,15 +129,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """
         return list(self.assets.keys())
 
-    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
-        """
-        Return the list of asset names and types known by this DataConnector.
-
-        Returns:
-            A list of tuples consisting of available names and types
-        """
-        return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]
-
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
