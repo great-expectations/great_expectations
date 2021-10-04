@@ -1929,6 +1929,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         domain_kwargs=domain_kwargs,
     )
 
+    # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).
     count_case_statement: List[Label] = sa.case(
         [
             (
