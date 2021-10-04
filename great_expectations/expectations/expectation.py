@@ -7,6 +7,7 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
+import ipdb
 import pandas as pd
 
 from great_expectations import __version__ as ge_version
@@ -937,7 +938,6 @@ class Expectation(metaclass=MetaExpectation):
 
     # NOTE: Abe 20201228: This method probably belong elsewhere. Putting it here for now.
     def _get_rendered_result_as_string(self, rendered_result):
-
         if type(rendered_result) == str:
             return rendered_result
 
@@ -971,7 +971,6 @@ class Expectation(metaclass=MetaExpectation):
         ],
     ) -> Dict[str, str]:
         supported_renderers = self._get_supported_renderers(expectation_name)
-
         standard_renderer_dict = {}
 
         for renderer_name in standard_renderers:
@@ -1176,6 +1175,30 @@ class ColumnExpectation(TableExpectation, ABC):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for column expectations"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        return True
+
+
+class ColumnPairExpectation(TableExpectation, ABC):
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column_A",
+        "column_B",
+        "row_condition",
+        "condition_parser",
+    )
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        # Ensuring basic configuration parameters are properly set
+        try:
+            assert (
+                "column_A" in configuration.kwargs
+            ), "'column_A' parameter is required for column pair aggregate expectations"
+            assert (
+                "column_B" in configuration.kwargs
+            ), "'column_B' parameter is required for column pair aggregate expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True

@@ -95,6 +95,81 @@ def column_aggregate_value(
         )
 
 
+def column_pair_aggregate_value(
+    engine: Type[ExecutionEngine],
+    metric_fn_type="value",
+    domain_type=MetricDomainTypes.COLUMN_PAIR,
+    **kwargs,
+):
+    """Return the column pair aggregate metric decorator for the specified engine.
+
+    Args:
+        engine:
+        **kwargs:
+
+    Returns:
+
+    """
+    if issubclass(engine, PandasExecutionEngine):
+
+        def wrapper(metric_fn: Callable):
+            @metric_value(
+                engine=PandasExecutionEngine,
+                metric_fn_type=metric_fn_type,
+                domain_type=domain_type,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PandasExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                # TODO ADD ROW FILTERING
+
+                # filter_column_isnull = kwargs.get(
+                #    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+                # )
+
+                df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_list = [column_A_name, column_B_name]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                # if filter_column_isnull:
+                #    df = df[df[column_name].notnull()]
+
+                return metric_fn(
+                    cls,
+                    df[column_A_name],
+                    df[column_B_name],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+
+            return inner_func
+
+        return wrapper
+    else:
+        raise ValueError(
+            "column_aggregate_value decorator only supports PandasExecutionEngine"
+        )
+
+
 def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
     """Return the column aggregate metric decorator for the specified engine.
 
@@ -257,6 +332,45 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
         )
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+        }
+        dependencies["table.columns"] = MetricConfiguration(
+            metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        return dependencies
+
+
+class ColumnPairAggregateMetricProvider(TableMetricProvider):
+    domain_keys = (
+        "batch_id",
+        "table",
+        "column_A",
+        "column_B",
+        "row_condition",
+        "condition_parser",
+    )
+    # filter_column_isnull = False
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k not in ["column_A", "column_B"]
         }
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
