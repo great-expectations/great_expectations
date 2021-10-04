@@ -31,7 +31,8 @@ from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.util import generate_temporary_table_name
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -1934,7 +1935,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     try:
         if execution_engine.engine.dialect.name.lower() == "mssql":
-            temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_name: str = generate_temporary_table_name(
+                default_table_name_prefix="#ge_temp_"
+            )
 
             with execution_engine.engine.begin():
                 metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
@@ -2338,8 +2341,11 @@ def _spark_map_condition_unexpected_count_value(
     df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
+
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
     return filtered.count()
 
 
@@ -2373,17 +2379,9 @@ def _spark_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    data = (
-        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
-        .withColumn("__unexpected", unexpected_condition)
-        .orderBy(F.col("__row_number"))
-    )
-
-    filtered = (
-        data.filter(F.col("__unexpected") == True)
-        .drop(F.col("__unexpected"))
-        .drop(F.col("__row_number"))
-    )
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -2411,7 +2409,6 @@ def _spark_column_map_condition_value_counts(
     df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
-    data = df.withColumn("__unexpected", unexpected_condition)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2427,9 +2424,12 @@ def _spark_column_map_condition_value_counts(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
     result_format = metric_value_kwargs["result_format"]
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     value_counts = filtered.groupBy(F.col(column_name)).count()
     if result_format["result_format"] == "COMPLETE":
         rows = value_counts.collect()
@@ -2458,17 +2458,9 @@ def _spark_map_condition_rows(
         domain_kwargs=domain_kwargs,
     )
 
-    data = (
-        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
-        .withColumn("__unexpected", unexpected_condition)
-        .orderBy(F.col("__row_number"))
-    )
-
-    filtered = (
-        data.filter(F.col("__unexpected") == True)
-        .drop(F.col("__unexpected"))
-        .drop(F.col("__row_number"))
-    )
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2488,7 +2480,7 @@ def _spark_column_pair_map_condition_values(
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     (
-        boolean_mapped_unexpected_values,
+        unexpected_condition,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
@@ -2514,17 +2506,9 @@ def _spark_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    data = (
-        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
-        .withColumn("__unexpected", boolean_mapped_unexpected_values)
-        .orderBy(F.col("__row_number"))
-    )
-
-    filtered = (
-        data.filter(F.col("__unexpected") == True)
-        .drop(F.col("__unexpected"))
-        .drop(F.col("__row_number"))
-    )
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -2585,7 +2569,7 @@ def _spark_multicolumn_map_condition_values(
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     (
-        boolean_mapped_unexpected_values,
+        unexpected_condition,
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
@@ -2613,17 +2597,9 @@ def _spark_multicolumn_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    data = (
-        df.withColumn("__row_number", F.row_number().over(Window.orderBy(F.lit(1))))
-        .withColumn("__unexpected", boolean_mapped_unexpected_values)
-        .orderBy(F.col("__row_number"))
-    )
-
-    filtered = (
-        data.filter(F.col("__unexpected") == True)
-        .drop(F.col("__unexpected"))
-        .drop(F.col("__row_number"))
-    )
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     column_selector = [F.col(column_name) for column_name in column_list]
 

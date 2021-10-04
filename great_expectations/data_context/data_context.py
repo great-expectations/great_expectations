@@ -241,11 +241,9 @@ class BaseDataContext:
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.NOTEBOOKS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         GE_UNCOMMITTED_DIR,
     ]
-    NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
     GE_DIR = "great_expectations"
     GE_YML = "great_expectations.yml"
     GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
@@ -1655,7 +1653,7 @@ class BaseDataContext:
             raise ge_exceptions.GreatExpectationsTypeError(
                 f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
             )
-        datasource: Datasource = self.datasources[datasource_name]
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
             raise ValueError("Must provide only one of batch_data, query, or path.")
@@ -2084,7 +2082,7 @@ class BaseDataContext:
         return datasource
 
     def list_expectation_suites(self):
-        """Return a list of available expectation suite names."""
+        """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
         except KeyError as e:
@@ -2276,7 +2274,15 @@ class BaseDataContext:
             )
 
     def list_expectation_suite_names(self) -> List[str]:
-        """Lists the available expectation suite names"""
+        """
+        Lists the available expectation suite names. If in ge_cloud_mode, a list of
+        GE Cloud ids is returned instead.
+        """
+        if self.ge_cloud_mode:
+            return [
+                suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()
+            ]
+
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()
         ]
@@ -3483,7 +3489,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             raise e
 
-        instantiated_class: Any
+        instantiated_class: Any = None
 
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
@@ -3840,15 +3846,6 @@ class DataContext(BaseDataContext):
         else:
             cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
 
-        if os.path.isfile(os.path.join(ge_dir, "notebooks")):
-            message = """Warning. An existing `notebooks` directory was found here: {}.
-    - No action was taken.""".format(
-                ge_dir
-            )
-            warnings.warn(message)
-        else:
-            cls.scaffold_notebooks(ge_dir)
-
         uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
@@ -3934,10 +3931,6 @@ class DataContext(BaseDataContext):
             new_directory_path = os.path.join(uncommitted_dir, new_directory)
             os.makedirs(new_directory_path, exist_ok=True)
 
-        notebook_path = os.path.join(base_dir, "notebooks")
-        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            os.makedirs(os.path.join(notebook_path, subdir), exist_ok=True)
-
     @classmethod
     def scaffold_custom_data_docs(cls, plugins_dir):
         """Copy custom data docs templates"""
@@ -3949,18 +3942,6 @@ class DataContext(BaseDataContext):
             plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css"
         )
         shutil.copyfile(styles_template, styles_destination_path)
-
-    @classmethod
-    def scaffold_notebooks(cls, base_dir):
-        """Copy template notebooks into the notebooks directory for a project."""
-        template_dir = file_relative_path(__file__, "../init_notebooks/")
-        notebook_dir = os.path.join(base_dir, "notebooks/")
-        for subdir in cls.NOTEBOOK_SUBDIRECTORIES:
-            subdir_path = os.path.join(notebook_dir, subdir)
-            for notebook in glob.glob(os.path.join(template_dir, subdir, "*.ipynb")):
-                notebook_name = os.path.basename(notebook)
-                destination_path = os.path.join(subdir_path, notebook_name)
-                shutil.copyfile(notebook, destination_path)
 
     @classmethod
     def _get_ge_cloud_config_dict(

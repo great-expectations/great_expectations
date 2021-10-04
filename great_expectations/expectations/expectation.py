@@ -36,6 +36,7 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
@@ -48,7 +49,6 @@ from ..render.types import (
 )
 from ..render.util import num_to_str
 from ..util import is_parseable_date
-from ..validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 

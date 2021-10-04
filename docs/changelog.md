@@ -3,8 +3,38 @@ title: Changelog
 ---
 
 ### Develop
-* [BUGFIX] Addresses issue #2993 (#3054) by using configuration over list keys when possible.
+* [FEATURE] Add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
 
+### 0.13.36
+* [FEATURE] GREAT-3439 extended SlackNotificationsAction for slack app tokens (#3440) (Thanks @psheets)
+* [FEATURE] Implement Integration Test for "Simple SQL Datasource" with Partitioning, Splitting, and Sampling (#3454)
+* [FEATURE] Implement Integration Test for File Path Data Connectors with Partitioning, Splitting, and Sampling (#3452)
+* [BUGFIX] Fix Incorrect Implementation of the "_sample_using_random" Sampling Method in SQLAlchemyExecutionEngine (#3449)
+* [BUGFIX] Handle RuntimeBatchRequest passed to Checkpoint programatically (without yml) (#3448)
+* [DOCS] Fix typo in command to create new checkpoint (#3434) (Thanks @joeltone)
+* [DOCS] How to validate data by running a Checkpoint (#3436)
+* [ENHANCEMENT] cloud-199 - Update Expectation and ExpectationSuite classes for GE Cloud (#3453)
+* [MAINTENANCE] Does not test numpy.float128 when it doesn't exist (#3460)
+* [MAINTENANCE] Remove Unnecessary SQL OR Condition (#3469)
+* [MAINTENANCE] Remove validation playground notebooks (#3467)
+* [MAINTENANCE] clean up type hints, API usage, imports, and coding style (#3444)
+* [MAINTENANCE] comments (#3457)
+
+### 0.13.35
+* [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
+* [BUGFIX] Addresses issue #2993 (#3054) by using configuration when it is available instead of discovering keys (listing keys) in existing sources. (#3377)
+* [BUGFIX] Fix Data asset name rendering (#3431) (Thanks @shpolina)
+* [DOCS] minor fix to syntax highlighting in how_to_contribute_a_new_expectation… (#3413) (Thanks @edjoesu)
+* [DOCS] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profile… (#3410) (Thanks @edjoesu)
+* [ENHANCEMENT] update list_expectation_suite_names and ExpectationSuiteValidationResult payload (#3419)
+* [MAINTENANCE] Clean up Type Hints, JSON-Serialization, ID Generation and Logging in Objects in batch.py Module and its Usage (#3422)
+* [MAINTENANCE] Fix Granularity of Exception Handling in ExecutionEngine.resolve_metrics() and Clean Up Type Hints (#3423)
+* [MAINTENANCE] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profiler (#3441)
+* [MAINTENANCE] Fix issue where BatchRequest object in configuration could cause Checkpoint to fail (#3438)
+* [MAINTENANCE] Insure consistency between implementation of overriding Python __hash__() and internal ID property value (#3432)
+* [MAINTENANCE] Performance improvement refactor for Spark unexpected values (#3368)
+* [MAINTENANCE] Refactor MetricConfiguration out of validation_graph.py to Avoid Future Circular Dependencies in Python (#3425)
+* [MAINTENANCE] Use ExceptionInfo to encapsulate common expectation validation result error information. (#3427)
 
 ### 0.13.34
 * [FEATURE] Configurable multi-threaded checkpoint speedup (#3362) (Thanks @jdimatteo)

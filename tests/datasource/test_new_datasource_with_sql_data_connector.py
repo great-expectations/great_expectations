@@ -6,7 +6,6 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -50,13 +49,13 @@ data_connectors:
     """,
     )
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_source = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource"},
         runtime_environment={"name": "my_sql_datasource"},
     )
 
-    report = my_data_connector.self_check()
+    report = my_data_source.self_check()
     # print(json.dumps(report, indent=4))
 
     report["execution_engine"].pop("connection_string")
@@ -130,12 +129,12 @@ data_connectors:
     """,
     )
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_source = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource"},
         runtime_environment={"name": "my_sql_datasource"},
     )
-    report = my_data_connector.self_check()
+    report = my_data_source.self_check()
 
     connection_string_to_test = f"""sqlite:///{db_file}"""
     assert report == {

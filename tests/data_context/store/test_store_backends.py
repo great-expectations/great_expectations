@@ -932,6 +932,39 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
     )
 
 
+@mock_s3
+def test_TupleS3StoreBackend_with_s3_put_options():
+
+    bucket = "leakybucket"
+    conn = boto3.client("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    my_store = TupleS3StoreBackend(
+        bucket=bucket,
+        # Since not all out options are supported in moto, only Metadata and StorageClass is passed here.
+        s3_put_options={
+            "Metadata": {"test": "testMetadata"},
+            "StorageClass": "REDUCED_REDUNDANCY",
+        },
+    )
+
+    assert my_store.config["s3_put_options"] == {
+        "Metadata": {"test": "testMetadata"},
+        "StorageClass": "REDUCED_REDUNDANCY",
+    }
+
+    my_store.set(("AAA",), "aaa")
+
+    res = conn.get_object(Bucket=bucket, Key="AAA")
+
+    assert res["Metadata"] == {"test": "testMetadata"}
+    assert res["StorageClass"] == "REDUCED_REDUNDANCY"
+
+    assert my_store.get(("AAA",)) == "aaa"
+    assert my_store.has_key(("AAA",))
+    assert my_store.list_keys() == [(".ge_store_backend_id",), ("AAA",)]
+
+
 def test_TupleGCSStoreBackend_base_public_path():
     """
     What does this test and why?

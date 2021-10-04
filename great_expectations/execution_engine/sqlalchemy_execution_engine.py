@@ -7,8 +7,6 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
-from packaging.version import parse as parse_version
-
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
@@ -18,7 +16,6 @@ del get_versions  # isort:skip
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
-    RuntimeDataBatchSpec,
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
@@ -38,7 +35,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import filter_properties_dict, import_library_module
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -471,9 +468,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if self.active_batch_data.use_quoted_name:
                 # Checking if case-sensitive and using appropriate name
                 # noinspection PyPep8Naming
-                column_A_name = quoted_name(domain_kwargs["column_A"])
+                column_A_name = quoted_name(domain_kwargs["column_A"], quote=True)
                 # noinspection PyPep8Naming
-                column_B_name = quoted_name(domain_kwargs["column_B"])
+                column_B_name = quoted_name(domain_kwargs["column_B"], quote=True)
             else:
                 # noinspection PyPep8Naming
                 column_A_name = domain_kwargs["column_A"]
@@ -527,7 +524,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if self.active_batch_data.use_quoted_name:
                 # Checking if case-sensitive and using appropriate name
                 column_list = [
-                    quoted_name(domain_kwargs[column_name])
+                    quoted_name(domain_kwargs[column_name], quote=True)
                     for column_name in domain_kwargs["column_list"]
                 ]
             else:
@@ -644,7 +641,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Checking if case-sensitive and using appropriate name
             if self.active_batch_data.use_quoted_name:
                 accessor_domain_kwargs["column"] = quoted_name(
-                    compute_domain_kwargs.pop("column")
+                    compute_domain_kwargs.pop("column"), quote=True
                 )
             else:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
@@ -663,10 +660,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Checking if case-sensitive and using appropriate name
             if self.active_batch_data.use_quoted_name:
                 accessor_domain_kwargs["column_A"] = quoted_name(
-                    compute_domain_kwargs.pop("column_A")
+                    compute_domain_kwargs.pop("column_A"), quote=True
                 )
                 accessor_domain_kwargs["column_B"] = quoted_name(
-                    compute_domain_kwargs.pop("column_B")
+                    compute_domain_kwargs.pop("column_B"), quote=True
                 )
             else:
                 accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
@@ -694,7 +691,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # Checking if case-sensitive and using appropriate name
             if self.active_batch_data.use_quoted_name:
                 accessor_domain_kwargs["column_list"] = [
-                    quoted_name(column_name) for column_name in column_list
+                    quoted_name(column_name, quote=True) for column_name in column_list
                 ]
             else:
                 accessor_domain_kwargs["column_list"] = column_list
@@ -716,7 +713,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
                     A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function
                     (the function that actually executes the metric), and the arguments to pass to the metric provider function.
-                metrics (Dict[Tuple, Any]): \
                     A dictionary of metrics defined in the registry and corresponding arguments
 
             Returns:
@@ -883,16 +879,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     # _sample_using_a_list
     # _sample_using_md5
 
-    def _sample_using_random(
-        self,
-        p: float = 0.1,
-    ):
-        """Take a random sample of rows, retaining proportion p
-
-        Note: the Random function behaves differently on different dialects of SQL
-        """
-        return sa.func.random() < p
-
     def _sample_using_mod(
         self,
         column_name,
@@ -970,6 +956,25 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         .where(split_clause)
                         .limit(batch_spec["sampling_kwargs"]["n"])
                     )
+            elif batch_spec["sampling_method"] == "_sample_using_random":
+                num_rows: int = self.engine.execute(
+                    sa.select([sa.func.count()])
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
+                    .where(split_clause)
+                ).one()[0]
+                p: Optional[float] = batch_spec["sampling_kwargs"]["p"] or 1.0
+                sample_size: int = round(p * num_rows)
+                return (
+                    sa.select("*")
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
+                    .where(split_clause)
+                    .order_by(sa.func.random())
+                    .limit(sample_size)
+                )
             else:
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
