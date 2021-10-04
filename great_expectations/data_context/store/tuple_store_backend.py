@@ -680,7 +680,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return public_url
 
     def remove_key(self, key):
-        from botocore.exceptions import ClientError
 
         if not isinstance(key, tuple):
             key = key.to_tuple()
@@ -688,27 +687,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3 = self._create_resource()
         s3_object_key = self._build_s3_object_key(key)
         s3.Object(self.bucket, s3_object_key).delete()
-        if s3_object_key:
-            try:
-                #
-                objects_to_delete = s3.meta.client.list_objects_v2(
-                    Bucket=self.bucket, Prefix=self.prefix
-                )
-
-                delete_keys = {
-                    "Objects": [
-                        {"Key": k}
-                        for k in [
-                            obj["Key"] for obj in objects_to_delete.get("Contents", [])
-                        ]
-                    ]
-                }
-                s3.meta.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
-                return True
-            except ClientError as e:
-                return False
-        else:
-            return False
+        return True
 
     def _has_key(self, key):
         all_keys = self.list_keys()
