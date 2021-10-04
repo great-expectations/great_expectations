@@ -1933,14 +1933,15 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         [
             (
                 unexpected_condition,
-                1,
+                sa.sql.expression.cast(1, sa.Numeric),
             )
         ],
-        else_=0,
+        else_=sa.sql.expression.cast(0, sa.Numeric),
     ).label("condition")
 
-    count_selectable: Select = sa.select([count_case_statement])
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        count_selectable: Select = sa.select([count_case_statement])
+    else:
         count_selectable = sa.select([count_case_statement]).select_from(selectable)
 
     try:
@@ -1978,13 +1979,14 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .alias("UnexpectedCountSubquery")
         )
 
-        unexpected_count: int = execution_engine.engine.execute(
+        unexpected_count: Union[float, int] = execution_engine.engine.execute(
             sa.select(
                 [
                     unexpected_count_query.c.unexpected_count,
                 ]
             )
         ).scalar()
+        unexpected_count = int(unexpected_count)
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -2027,10 +2029,11 @@ def _sqlalchemy_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
-        unexpected_condition
-    )
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
+            unexpected_condition
+        )
+    else:
         query = (
             sa.select([sa.column(column_name).label("unexpected_values")])
             .where(unexpected_condition)
@@ -2083,18 +2086,19 @@ def _sqlalchemy_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    query = sa.select(
-        sa.column(column_A_name).label("unexpected_values_A"),
-        sa.column(column_B_name).label("unexpected_values_B"),
-    ).where(boolean_mapped_unexpected_values)
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select(
+            sa.column(column_A_name).label("unexpected_values_A"),
+            sa.column(column_B_name).label("unexpected_values_B"),
+        ).where(boolean_mapped_unexpected_values)
+    else:
         query = (
             sa.select(
                 sa.column(column_A_name).label("unexpected_values_A"),
                 sa.column(column_B_name).label("unexpected_values_B"),
             )
-            .select_from(selectable)
             .where(boolean_mapped_unexpected_values)
+            .select_from(selectable)
         )
 
     result_format = metric_value_kwargs["result_format"]
@@ -2185,8 +2189,9 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     column_selector = [sa.column(column_name) for column_name in column_list]
 
-    query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
+    else:
         query = (
             sa.select(column_selector)
             .where(boolean_mapped_unexpected_values)
@@ -2274,12 +2279,13 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column: sa.Column = sa.column(column_name)
 
-    query = (
-        sa.select([column, sa.func.count(column)])
-        .where(unexpected_condition)
-        .group_by(column)
-    )
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = (
+            sa.select([column, sa.func.count(column)])
+            .where(unexpected_condition)
+            .group_by(column)
+        )
+    else:
         query = (
             sa.select([column, sa.func.count(column)])
             .where(unexpected_condition)
@@ -2316,8 +2322,9 @@ def _sqlalchemy_map_condition_rows(
 
     table_columns = metrics.get("table.columns")
     column_selector = [sa.column(column_name) for column_name in table_columns]
-    query = sa.select(column_selector).where(unexpected_condition)
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select(column_selector).where(unexpected_condition)
+    else:
         query = (
             sa.select(column_selector)
             .where(unexpected_condition)
