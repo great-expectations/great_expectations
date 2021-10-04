@@ -29,7 +29,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
     column_pair_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
@@ -55,8 +55,32 @@ class ColumnCorrelation(ColumnPairAggregateMetricProvider):
     def _pandas(cls, column_A, column_B, **kwargs):
         return column_A.corr(column_B)
 
-    #
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @column_pair_aggregate_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        column_A,
+        column_B,
+        _table=None,
+        _dialect=None,
+        _sqlalchemy_engine=None,
+        **kwargs
+    ):
+        def get_query_result(f):
+            # maybe add this to the engine object for convenience
+            query = sa.select(f).select_from(_table)
+            return _sqlalchemy_engine.execute(query).scalar()
+
+        # add a way to make upstream column metrics dependencies
+        mean_a = get_query_result(sa.func.avg(column_A))
+        mean_b = get_query_result(sa.func.avg(column_B))
+
+        ab = get_query_result(sa.func.avg((column_A - mean_a) * (column_B - mean_b)))
+        aa = get_query_result(sa.func.avg(sa.func.pow(column_A - mean_a, 2)))
+        bb = get_query_result(sa.func.avg(sa.func.pow(column_B - mean_b, 2)))
+
+        corr = ab / (aa ** 0.5) / (bb ** 0.5)
+        return corr
+
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -218,6 +242,16 @@ class ExpectColumnCorrelationToBeBetween(ColumnPairExpectation):
                         "max_value": 1.0,
                     },
                     "out": {"success": False},
+                },
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["mysql", "postgresql"],
                 },
             ],
         },

@@ -164,6 +164,74 @@ def column_pair_aggregate_value(
             return inner_func
 
         return wrapper
+
+    if issubclass(engine, SqlAlchemyExecutionEngine):
+
+        def wrapper(metric_fn: Callable):
+            @metric_value(
+                engine=SqlAlchemyExecutionEngine,
+                metric_fn_type=metric_fn_type,
+                domain_type=domain_type,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SqlAlchemyExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                # TODO add row filtering
+                # filter_column_isnull = kwargs.get(
+                #    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+                # )
+                # if filter_column_isnull:
+                #    compute_domain_kwargs = execution_engine.add_column_row_condition(
+                #       metric_domain_kwargs
+                #    )
+                # else:
+                # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
+                compute_domain_kwargs = metric_domain_kwargs
+                (
+                    selectable,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    compute_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_list = [column_A_name, column_B_name]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+
+                dialect = sqlalchemy_engine.dialect
+
+                return metric_fn(
+                    cls,
+                    sa.column(column_A_name),
+                    sa.column(column_B_name),
+                    **metric_value_kwargs,
+                    _dialect=dialect,
+                    _table=selectable,
+                    _sqlalchemy_engine=sqlalchemy_engine,
+                    _metrics=metrics,
+                )
+
+            return inner_func
+
+        return wrapper
     else:
         raise ValueError(
             "column_aggregate_value decorator only supports PandasExecutionEngine"
