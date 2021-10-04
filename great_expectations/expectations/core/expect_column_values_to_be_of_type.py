@@ -87,6 +87,12 @@ try:
 except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
+    
+try:
+    import teradatasqlalchemy.dialect
+    import teradatasqlalchemy.types as teradatatypes
+except ImportError:
+    teradatasqlalchemy = None    
 
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
@@ -472,6 +478,19 @@ def _get_dialect_type_module(
             return bigquery_types_tuple
     except (TypeError, AttributeError):
         pass
+    
+    # Teradata types module
+    try:
+        if (
+            issubclass(
+                execution_engine.dialect_module,
+                teradatasqlalchemy.dialect.TeradataDialect,
+            )
+            and teradatatypes is not None
+        ):
+            return teradatatypes
+    except (TypeError, AttributeError):
+        pass 
 
     return execution_engine.dialect_module
 
