@@ -262,7 +262,7 @@ class BaseDatasource:
         return available_data_asset_names
 
     def get_available_data_asset_names_and_types(
-            self, data_connector_names: Optional[Union[list, str]] = None
+        self, data_connector_names: Optional[Union[list, str]] = None
     ) -> Dict[str, List[Tuple[str, str]]]:
         """
         Returns a dictionary of data_asset_names that the specified data

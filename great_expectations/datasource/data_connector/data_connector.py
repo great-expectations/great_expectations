@@ -180,7 +180,7 @@ class DataConnector:
         Returns:
             A list of tuples consisting of available names and types
         """
-        # TODO: Josh 20211001 only implemented InferredAssetSqlDataConnector
+        # NOTE: Josh 20211001 only implemented in InferredAssetSqlDataConnector
         raise NotImplementedError
 
     def get_batch_definition_list_from_batch_request(
