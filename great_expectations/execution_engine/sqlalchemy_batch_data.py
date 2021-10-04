@@ -1,7 +1,7 @@
 import logging
-import uuid
 
 from great_expectations.execution_engine.execution_engine import BatchData
+from great_expectations.util import generate_temporary_table_name
 
 try:
     import sqlalchemy as sa
@@ -136,8 +136,7 @@ class SqlAlchemyBatchData(BatchData):
             if temp_table_name:
                 generated_table_name = temp_table_name
             else:
-                # Suggestion: Pull this into a separate "_generate_temporary_table_name" method
-                generated_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+                generated_table_name = generate_temporary_table_name()
                 # mssql expects all temporary table names to have a prefix '#'
                 if engine.dialect.name.lower() == "mssql":
                     generated_table_name = f"#{generated_table_name}"

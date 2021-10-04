@@ -684,12 +684,12 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         temp_tables = [
             name
             for name in get_sqlite_temp_table_names(engine.engine)
-            if name.startswith("ge_tmp_")
+            if name.startswith("ge_temp_")
         ]
         tables = [
             name
             for name in get_sqlite_table_names(engine.engine)
-            if name.startswith("ge_tmp_")
+            if name.startswith("ge_temp_")
         ]
         assert len(temp_tables) == 0
         assert len(tables) == 0
