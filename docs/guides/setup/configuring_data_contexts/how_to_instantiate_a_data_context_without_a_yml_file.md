@@ -5,12 +5,6 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 
 This guide will help you instantiate a Data Context without a yml file, aka configure a Data Context in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
 
-<Prerequisites>
-
-- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../../../tutorials/getting_started/intro.md)
-
-</Prerequisites>
-
 :::note
 - See also our companion video for this guide: [Data Contexts In Code](https://youtu.be/4VMOYpjHNhM).
 :::
