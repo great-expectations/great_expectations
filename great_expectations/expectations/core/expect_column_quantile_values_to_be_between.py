@@ -218,6 +218,12 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         value_ranges = params["quantile_ranges"]["value_ranges"]
 
         table_header_row = ["Quantile", "Min Value", "Max Value"]
+
+        # Table Row ~>              [Q1            1            3]
+        #                           [Q3            5            7]
+        #                           [Median        3]
+        #
+
         table_rows = []
 
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}

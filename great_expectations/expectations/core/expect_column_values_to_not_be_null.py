@@ -171,6 +171,19 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         # <Will> this will have a corresponding model in GraphQL
         return RenderedAtomicStringValueContent(string=template_str, parameters=params)
 
+    # # option 1 :
+    # def _atomic_summary(self:)
+    #     somethign = res = cls._prescriptive_renderer()
+    #     somethign_else = something + unpacking
+    #     return somethign_else
+    #
+    #
+    # # option 2:
+    # generic util
+    # def string_content_block_to_atomic_content_block(self):
+    #     # Expectation specific logic is added later
+    #     #
+
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
