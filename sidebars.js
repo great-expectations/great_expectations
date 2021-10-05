@@ -97,7 +97,14 @@ module.exports = {
                 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
                 // 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
                 'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource'
+                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
+                {
+                  type: 'category',
+                  label: 'Advanced',
+                  items: [
+                    'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
+                  ]
+                }
               ]
             },
             {
