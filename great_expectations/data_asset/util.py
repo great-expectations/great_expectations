@@ -115,7 +115,7 @@ def recursively_convert_to_json_serializable(test_obj):
     try:
         if not isinstance(test_obj, list) and np.isnan(test_obj):
             # np.isnan is functionally vectorized, but we only want to apply this to single objects
-            # Hence, why we test for `not isinstance(list))`
+            # Hence, why we test for `not isinstance(list)`
             return None
     except (TypeError, ValueError):
         pass

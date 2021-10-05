@@ -11,7 +11,6 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
-    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
@@ -638,7 +637,6 @@ Please check your config."""
 
                 Args:
                     metric_fn_bundle - A batch containing MetricEdgeKeys and their corresponding functions
-                    metrics (dict) - A dictionary containing metrics and corresponding parameters
 
                 Returns:
                     A dictionary of the collected metrics over their respective domains

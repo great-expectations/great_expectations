@@ -12,7 +12,7 @@ Once your code is ready, please go through the following checklist before submit
 
 * A Contributor License Agreement helps guarantee that contributions to Great Expectations will always remain free and open.
 
-* Please see [Contributor license agreement](https://docs.greatexpectations.io/en/0.13.8/contributing/miscellaneous.html#contributing-cla) (CLA) for more information and instructions for how to sign the CLA the first time you contribute to Great Expectations.
+* Please see [Contributor license agreement](https://docs.greatexpectations.io/docs/contributing/contributing_misc/) (CLA) for more information and instructions for how to sign the CLA the first time you contribute to Great Expectations.
 
 * If you’ve included your (physical) mailing address in the CLA, we’ll send you a personalized Great Expectations mug once your first PR is merged!
 

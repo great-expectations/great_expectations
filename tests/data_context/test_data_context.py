@@ -567,13 +567,6 @@ project_path/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler.json
-        notebooks/
-            pandas/
-                validation_playground.ipynb
-            spark/
-                validation_playground.ipynb
-            sql/
-                validation_playground.ipynb
         plugins/
             custom_data_docs/
                 renderers/
@@ -1075,13 +1068,6 @@ great_expectations/
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -1107,13 +1093,6 @@ great_expectations/
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -1177,7 +1156,6 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
 
     for directory in [
         "expectations",
-        "notebooks",
         "plugins",
         "checkpoints",
         "uncommitted",
@@ -1208,12 +1186,9 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     assert "# LOOK I WAS MODIFIED" in obs
 
 
-def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = str(
-        tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks")
-    )
+def test_scaffold_directories(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
     DataContext.scaffold_directories(empty_directory)
-    DataContext.scaffold_notebooks(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
         "plugins",
@@ -1221,15 +1196,11 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         "expectations",
         ".gitignore",
         "uncommitted",
-        "notebooks",
     }
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == {
         "data_docs",
         "validations",
     }
-    for subdir in DataContext.NOTEBOOK_SUBDIRECTORIES:
-        subdir_path = os.path.join(empty_directory, "notebooks", subdir)
-        assert set(os.listdir(subdir_path)) == {"validation_playground.ipynb"}
 
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
