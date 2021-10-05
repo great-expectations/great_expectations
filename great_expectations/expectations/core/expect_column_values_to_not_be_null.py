@@ -168,8 +168,14 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        # <Will> this will have a corresponding model in GraphQL
-        return RenderedAtomicStringValueContent(string=template_str, parameters=params)
+        # return RenderedAtomicStringValueContent(string=template_str, parameters=params)
+        rendered = {
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+            },
+        }
 
     # # option 1 :
     # def _atomic_summary(self:)

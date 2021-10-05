@@ -163,6 +163,46 @@ class Expectation(metaclass=MetaExpectation):
     ):
         raise NotImplementedError
 
+    # @renderer(renderer_type="atomic.prescriptive.template")
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        template_str = "$expectation_type(**$kwargs)"
+        params = {
+            "expectation_type": configuration.expectation_type,
+            "kwargs": configuration.kwargs,
+        }
+        return (template_str, params)
+
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (template_str, params) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+        rendered = {
+            "content_block_type": "string_template",
+            "string_template": {
+                "template": template_str,
+                "params": params,
+            },
+        }
+        return rendered
+
+    # TODO : refactor to use atomic.prescriptive.template
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
