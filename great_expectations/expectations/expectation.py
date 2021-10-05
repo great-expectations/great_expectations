@@ -1043,7 +1043,6 @@ class TableExpectation(Expectation, ABC):
         "table",
         "row_condition",
         "condition_parser",
-        "unexpected_rows_index_columns",
     )
     metric_dependencies = tuple()
 
@@ -1175,7 +1174,6 @@ class ColumnExpectation(TableExpectation, ABC):
         "column",
         "row_condition",
         "condition_parser",
-        "unexpected_rows_index_columns",
     )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -1197,7 +1195,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         "column",
         "row_condition",
         "condition_parser",
-        "unexpected_rows_index_columns",
     )
     success_keys = ("mostly",)
     default_kwarg_values = {
@@ -1207,7 +1204,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
-        "unexpected_rows_index_columns": None,
     }
 
     @classmethod
@@ -1396,7 +1392,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "column_B",
         "row_condition",
         "condition_parser",
-        "unexpected_rows_index_columns",
     )
     success_keys = ("mostly",)
     default_kwarg_values = {
@@ -1406,7 +1401,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
-        "unexpected_rows_index_columns": None,
     }
 
     @classmethod
@@ -1600,7 +1594,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "row_condition",
         "condition_parser",
         "ignore_row_if",
-        "unexpected_rows_index_columns",
     )
     success_keys = tuple()
     default_kwarg_values = {
@@ -1610,7 +1603,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
-        "unexpected_rows_index_columns": None,
     }
 
     @classmethod
