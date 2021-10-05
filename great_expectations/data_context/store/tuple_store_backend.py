@@ -680,33 +680,18 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return public_url
 
     def remove_key(self, key):
-        from botocore.exceptions import ClientError
 
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
         s3 = self._create_resource()
         s3_object_key = self._build_s3_object_key(key)
-        s3.Object(self.bucket, s3_object_key).delete()
-        if s3_object_key:
-            try:
-                #
-                objects_to_delete = s3.meta.client.list_objects_v2(
-                    Bucket=self.bucket, Prefix=self.prefix
-                )
 
-                delete_keys = {
-                    "Objects": [
-                        {"Key": k}
-                        for k in [
-                            obj["Key"] for obj in objects_to_delete.get("Contents", [])
-                        ]
-                    ]
-                }
-                s3.meta.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
-                return True
-            except ClientError as e:
-                return False
+        # Check if the object exists
+        if self.has_key(key):
+            # This implementation deletes the object if non-versioned or adds a delete marker if versioned
+            s3.Object(self.bucket, s3_object_key).delete()
+            return True
         else:
             return False
 
