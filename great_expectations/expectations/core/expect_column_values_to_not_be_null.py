@@ -77,58 +77,15 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     map_metric = "column_values.nonnull"
 
-    # @classmethod
-    # # partial function(?)
-    #
-    # def _prescriptive_partial(cls):
-    #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
-    #     params = substitute_none_for_missing(
-    #         configuration.kwargs,
-    #         ["column", "mostly", "row_condition", "condition_parser"],
-    #     )
-    #
-    #     if params["mostly"] is not None:
-    #         params["mostly_pct"] = num_to_str(
-    #             params["mostly"] * 100, precision=15, no_scientific=True
-    #         )
-    #         # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-    #         if include_column_name:
-    #             template_str = "$column values must not be null, at least $mostly_pct % of the time."
-    #         else:
-    #             template_str = (
-    #                 "values must not be null, at least $mostly_pct % of the time."
-    #             )
-    #     else:
-    #         if include_column_name:
-    #             template_str = "$column values must never be null."
-    #         else:
-    #             template_str = "values must never be null."
-    #
-    #     if params["row_condition"] is not None:
-    #         (
-    #             conditional_template_str,
-    #             conditional_params,
-    #         ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-    #         template_str = conditional_template_str + ", then " + template_str
-    #         params.update(conditional_params)
-    #
-    #         return (template_str,
-    #                     "params": params,
-    #                     "styling": styling,)
-
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
-    def _prescriptive_summary(
+    @renderer(renderer_type="atomic.prescriptive.template")
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -168,14 +125,28 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        # return RenderedAtomicStringValueContent(string=template_str, parameters=params)
+        return (template_str, params, styling)
+
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
         rendered = {
-            "content_block_type": "string_template",
-            "string_template": {
-                "template": template_str,
-                "params": params,
-            },
+            "string": template_str,
+            "parameters": params,
+            "schema": {"hi": "rob"},
         }
+        return rendered
 
     # # option 1 :
     # def _atomic_summary(self:)
@@ -199,54 +170,18 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
-        # include_column_name = runtime_configuration.get("include_column_name", True)
-        # include_column_name = (
-        #     include_column_name if include_column_name is not None else True
-        # )
-        styling = runtime_configuration.get("styling")
-        # params = substitute_none_for_missing(
-        #     configuration.kwargs,
-        #     ["column", "mostly", "row_condition", "condition_parser"],
-        # )
-        #
-        # if params["mostly"] is not None:
-        #     params["mostly_pct"] = num_to_str(
-        #         params["mostly"] * 100, precision=15, no_scientific=True
-        #     )
-        #     # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-        #     if include_column_name:
-        #         template_str = "$column values must not be null, at least $mostly_pct % of the time."
-        #     else:
-        #         template_str = (
-        #             "values must not be null, at least $mostly_pct % of the time."
-        #         )
-        # else:
-        #     if include_column_name:
-        #         template_str = "$column values must never be null."
-        #     else:
-        #         template_str = "values must never be null."
-        #
-        # if params["row_condition"] is not None:
-        #     (
-        #         conditional_template_str,
-        #         conditional_params,
-        #     ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-        #     template_str = conditional_template_str + ", then " + template_str
-        #     params.update(conditional_params)
-        # may need to simplify
-        atomic_result = cls._prescriptive_summary(
-            configuration, result, language, runtime_configuration
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, kwargs
         )
         return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": atomic_result.template_str,
-                        "params": atomic_result.params,
+                        "template": template_str,
+                        "params": params,
                         "styling": styling,
                     },
                 }
@@ -261,7 +196,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         result_dict = result.result
 
@@ -287,7 +222,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         return [
@@ -316,7 +251,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         return [
