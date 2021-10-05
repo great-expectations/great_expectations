@@ -263,7 +263,7 @@ develop
 
 0.13.23
 -----------------
-* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
+* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen)
 * [BUGFIX] fix update data docs as validation action (#3031)
 * [DOCS] Port over "How to configure an Expectation Store in Azure" from RTD to Docusaurus
 * [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus (#3018)
