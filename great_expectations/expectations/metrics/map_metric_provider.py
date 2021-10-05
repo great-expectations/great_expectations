@@ -1,5 +1,4 @@
 import logging
-import uuid
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -22,15 +21,18 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
+from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
 )
+from great_expectations.expectations.metrics.util import Engine, Insert, Label, Select
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
 )
+from great_expectations.util import generate_temporary_table_name
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -388,7 +390,7 @@ def column_condition_partial(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -842,7 +844,7 @@ def column_pair_condition_partial(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -1043,11 +1045,15 @@ def multicolumn_function_partial(
 
                 column_list = accessor_domain_kwargs["column_list"]
 
+                table_columns = metrics["table.columns"]
+
                 for column_name in column_list:
-                    if column_name not in metrics["table.columns"]:
+                    if column_name not in table_columns:
                         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
+
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 column_selector = [
                     sa.column(column_name) for column_name in column_list
@@ -1057,8 +1063,11 @@ def multicolumn_function_partial(
                     cls,
                     column_selector,
                     **metric_value_kwargs,
+                    _column_names=column_list,
+                    _table_columns=table_columns,
                     _dialect=dialect,
                     _table=selectable,
+                    _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )
                 return (
@@ -1255,7 +1264,7 @@ def multicolumn_condition_partial(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 column_selector = [
                     sa.column(column_name) for column_name in column_list
@@ -1920,21 +1929,27 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         domain_kwargs=domain_kwargs,
     )
 
-    count_case_statement: List[sa.sql.elements.Label] = [
-        sa.case(
-            [
-                (
-                    unexpected_condition,
-                    sa.sql.expression.cast(1, sa.Numeric),
-                )
-            ],
-            else_=0,
-        ).label("condition")
-    ]
+    # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).
+    count_case_statement: List[Label] = sa.case(
+        [
+            (
+                unexpected_condition,
+                sa.sql.expression.cast(1, sa.Numeric),
+            )
+        ],
+        else_=sa.sql.expression.cast(0, sa.Numeric),
+    ).label("condition")
+
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        count_selectable: Select = sa.select([count_case_statement])
+    else:
+        count_selectable = sa.select([count_case_statement]).select_from(selectable)
 
     try:
         if execution_engine.engine.dialect.name.lower() == "mssql":
-            temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_name: str = generate_temporary_table_name(
+                default_table_name_prefix="#ge_temp_"
+            )
 
             with execution_engine.engine.begin():
                 metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
@@ -1947,35 +1962,32 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 )
                 temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
-                inner_case_query: sa.sql.dml.Insert = (
-                    temp_table_obj.insert().from_select(
-                        count_case_statement,
-                        sa.select(count_case_statement).select_from(selectable),
-                    )
+                inner_case_query: Insert = temp_table_obj.insert().from_select(
+                    [count_case_statement],
+                    count_selectable,
                 )
                 execution_engine.engine.execute(inner_case_query)
 
-                selectable_count = temp_table_obj
-        else:
-            selectable_count = sa.select(count_case_statement).select_from(selectable)
+                count_selectable = temp_table_obj
 
-        unexpected_count_query: sa.Select = (
+        unexpected_count_query: Select = (
             sa.select(
                 [
                     sa.func.sum(sa.column("condition")).label("unexpected_count"),
                 ]
             )
-            .select_from(selectable_count)
+            .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
 
-        unexpected_count = execution_engine.engine.execute(
+        unexpected_count: Union[float, int] = execution_engine.engine.execute(
             sa.select(
                 [
                     unexpected_count_query.c.unexpected_count,
                 ]
             )
         ).scalar()
+        unexpected_count = int(unexpected_count)
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -2018,11 +2030,16 @@ def _sqlalchemy_column_map_condition_values(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    query = (
-        sa.select([sa.column(column_name).label("unexpected_values")])
-        .select_from(selectable)
-        .where(unexpected_condition)
-    )
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
+            unexpected_condition
+        )
+    else:
+        query = (
+            sa.select([sa.column(column_name).label("unexpected_values")])
+            .where(unexpected_condition)
+            .select_from(selectable)
+        )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -2070,14 +2087,20 @@ def _sqlalchemy_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    query = (
-        sa.select(
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select(
             sa.column(column_A_name).label("unexpected_values_A"),
             sa.column(column_B_name).label("unexpected_values_B"),
+        ).where(boolean_mapped_unexpected_values)
+    else:
+        query = (
+            sa.select(
+                sa.column(column_A_name).label("unexpected_values_A"),
+                sa.column(column_B_name).label("unexpected_values_B"),
+            )
+            .where(boolean_mapped_unexpected_values)
+            .select_from(selectable)
         )
-        .select_from(selectable)
-        .where(boolean_mapped_unexpected_values)
-    )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -2166,11 +2189,15 @@ def _sqlalchemy_multicolumn_map_condition_values(
             )
 
     column_selector = [sa.column(column_name) for column_name in column_list]
-    query = (
-        sa.select(column_selector)
-        .select_from(selectable)
-        .where(boolean_mapped_unexpected_values)
-    )
+
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
+    else:
+        query = (
+            sa.select(column_selector)
+            .where(boolean_mapped_unexpected_values)
+            .select_from(selectable)
+        )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -2253,12 +2280,21 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column: sa.Column = sa.column(column_name)
 
-    return execution_engine.engine.execute(
-        sa.select([column, sa.func.count(column)])
-        .select_from(selectable)
-        .where(unexpected_condition)
-        .group_by(column)
-    ).fetchall()
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = (
+            sa.select([column, sa.func.count(column)])
+            .where(unexpected_condition)
+            .group_by(column)
+        )
+    else:
+        query = (
+            sa.select([column, sa.func.count(column)])
+            .where(unexpected_condition)
+            .group_by(column)
+            .select_from(selectable)
+        )
+
+    return execution_engine.engine.execute(query).fetchall()
 
 
 def _sqlalchemy_map_condition_rows(
@@ -2285,9 +2321,17 @@ def _sqlalchemy_map_condition_rows(
         domain_kwargs=domain_kwargs,
     )
 
-    query = (
-        sa.select([sa.text("*")]).select_from(selectable).where(unexpected_condition)
-    )
+    table_columns = metrics.get("table.columns")
+    column_selector = [sa.column(column_name) for column_name in table_columns]
+    if MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = sa.select(column_selector).where(unexpected_condition)
+    else:
+        query = (
+            sa.select(column_selector)
+            .where(unexpected_condition)
+            .select_from(selectable)
+        )
+
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
@@ -2672,6 +2716,11 @@ class MapMetricProvider(MetricProvider):
     function_value_keys = tuple()
     filter_column_isnull = True
 
+    SQLALCHEMY_SELECTABLE_METRICS = {
+        "compound_columns.count",
+        "compound_columns.unique",
+    }
+
     @classmethod
     def _register_metric_functions(cls):
         if not hasattr(cls, "function_metric_name") and not hasattr(
@@ -2701,6 +2750,7 @@ class MapMetricProvider(MetricProvider):
                     )
 
                 condition_provider = candidate_metric_fn
+                # noinspection PyUnresolvedReferences
                 metric_name = cls.condition_metric_name
                 metric_domain_keys = cls.condition_domain_keys
                 metric_value_keys = cls.condition_value_keys
@@ -3056,6 +3106,7 @@ class MapMetricProvider(MetricProvider):
                         "A MapMetricProvider must have a function_metric_name to have a decorated column_function_partial method."
                     )
                 map_function_provider = candidate_metric_fn
+                # noinspection PyUnresolvedReferences
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys
@@ -3137,6 +3188,27 @@ class MapMetricProvider(MetricProvider):
             pass
 
         return dependencies
+
+    @staticmethod
+    def is_sqlalchemy_metric_selectable(
+        map_metric_provider: MetaMetricProvider,
+    ) -> bool:
+        """
+        :param map_metric_provider: object of type "MapMetricProvider", whose SQLAlchemy implementation is inspected
+        :return: boolean indicating whether or not the returned value of a method implementing the metric resolves all
+        columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
+        unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
+        """
+        # noinspection PyUnresolvedReferences
+        return (
+            hasattr(map_metric_provider, "condition_metric_name")
+            and map_metric_provider.condition_metric_name
+            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
+        ) or (
+            hasattr(map_metric_provider, "function_metric_name")
+            and map_metric_provider.function_metric_name
+            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
+        )
 
 
 class ColumnMapMetricProvider(MapMetricProvider):
