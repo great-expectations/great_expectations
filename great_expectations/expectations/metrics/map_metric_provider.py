@@ -2133,7 +2133,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
 
     return execution_engine.engine.execute(
         sa.select([sa.func.count()]).select_from(selectable)
-    ).one()[0]
+    ).scalar()
 
 
 def _sqlalchemy_multicolumn_map_condition_values(
@@ -2223,7 +2223,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 
     return execution_engine.engine.execute(
         sa.select([sa.func.count()]).select_from(selectable)
-    ).one()[0]
+    ).scalar()
 
 
 def _sqlalchemy_column_map_condition_value_counts(
