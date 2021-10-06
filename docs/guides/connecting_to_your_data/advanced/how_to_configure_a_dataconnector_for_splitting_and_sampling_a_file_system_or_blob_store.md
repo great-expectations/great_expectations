@@ -3,9 +3,9 @@ title: How to configure a DataConnector for splitting and sampling a file system
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-This guide will help you configure `Splitting` and `Sampling` for ny files type data store (e.g., filesystem, cloud blob
-storage) using a `Configured Asset Data Connector` (the same `Splitting` and `Sampling` configuration options can be
-readily applied to an `Inferred Asset Data Connector` as well).
+This guide will help you configure `Splitting` and `Sampling` for any files type data store (e.g., filesystem, cloud
+blob storage) using a `Configured Asset Data Connector` (the same `Splitting` and `Sampling` configuration options can
+be readily applied to an `Inferred Asset Data Connector` as well).
 
 The `Splitting` and `Sampling` mechanisms provided by Great Expectations serve as additional tools for `Partitioning`
 your data at various levels of granularity:
