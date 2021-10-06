@@ -35,7 +35,7 @@ Import these necessary packages and modules.
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L1-L6
 ```
 
-Load your DataContext into memory using the `get_context()` method.
+Load your `DataContext` into memory using the `get_context()` method.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L8
 ```

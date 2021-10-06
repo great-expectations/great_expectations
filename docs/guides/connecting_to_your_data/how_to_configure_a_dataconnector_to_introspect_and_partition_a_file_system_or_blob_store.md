@@ -65,7 +65,11 @@ An integral part of the recommended approach, illustrated as part of this exerci
 Great Expectations utility
 
 ```python
-context.test_yaml_config(yaml_string, pretty_print: bool = True, return_mode: str = "instantiated_class", shorten_tracebacks: bool = False)
+context.test_yaml_config(
+    yaml_string, pretty_print: bool = True,
+    return_mode: str = "instantiated_class",
+    shorten_tracebacks: bool = False,
+)
 ```
 
 to ensure the correctness of the proposed `YAML` configuration prior to incorporating it and trying to use it.
@@ -97,7 +101,11 @@ where you would add in the path to a directory that does not exist; then run thi
 You will see that the list of `Data Assets` is empty.  Feel free to experiment with the arguments to
 
 ```python
-context.test_yaml_config(yaml_string, pretty_print: bool = True, return_mode: str = "instantiated_class", shorten_tracebacks: bool = False)
+context.test_yaml_config(
+    yaml_string, pretty_print: bool = True,
+    return_mode: str = "instantiated_class",
+    shorten_tracebacks: bool = False,
+)
 ```
 
 For instance, running
