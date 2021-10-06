@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -242,7 +242,7 @@ class BaseDatasource:
 
                 {
                   data_connector_name: {
-                    names: [ (data_asset_1, data_asset_1_type), (data_asset_2, data_asset_2_type) ... ]
+                    names: [ data_asset_1, data_asset_2 ... ]
                   }
                   ...
                 }
@@ -260,6 +260,45 @@ class BaseDatasource:
             ] = data_connector.get_available_data_asset_names()
 
         return available_data_asset_names
+
+    def get_available_data_asset_names_and_types(
+        self, data_connector_names: Optional[Union[list, str]] = None
+    ) -> Dict[str, List[Tuple[str, str]]]:
+        """
+        Returns a dictionary of data_asset_names that the specified data
+        connector can provide. Note that some data_connectors may not be
+        capable of describing specific named data assets, and some (such as
+        inferred_asset_data_connector) require the user to configure
+        data asset names.
+
+        Returns:
+            dictionary consisting of sets of data assets available for the specified data connectors:
+            For instance, in a SQL Database the data asset name corresponds to the table or
+            view name, and the data asset type is either 'table' or 'view'.
+            ::
+
+                {
+                  data_connector_name: {
+                    names: [ (data_asset_name_1, data_asset_1_type), (data_asset_name_2, data_asset_2_type) ... ]
+                  }
+                  ...
+                }
+        """
+        # NOTE: Josh 20211001 This feature is only implemented for the InferredAssetSqlDataConnector
+
+        available_data_asset_names_and_types: dict = {}
+        if data_connector_names is None:
+            data_connector_names = self.data_connectors.keys()
+        elif isinstance(data_connector_names, str):
+            data_connector_names = [data_connector_names]
+
+        for data_connector_name in data_connector_names:
+            data_connector: DataConnector = self.data_connectors[data_connector_name]
+            available_data_asset_names_and_types[
+                data_connector_name
+            ] = data_connector.get_available_data_asset_names_and_types()
+
+        return available_data_asset_names_and_types
 
     def get_available_batch_definitions(
         self, batch_request: BatchRequest
