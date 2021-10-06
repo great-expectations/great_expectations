@@ -122,8 +122,8 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
-    
-    
+
+
 def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
     with the database/database implementation. Currently checks for RedShift/BigQuery dialects"""
@@ -151,7 +151,7 @@ def _get_dialect_type_module(dialect):
             return bigquery_types_tuple
     except (TypeError, AttributeError):
         pass
-    
+
     # Teradata types module
     try:
         if (
@@ -163,7 +163,7 @@ def _get_dialect_type_module(dialect):
         ):
             return teradatatypes
     except (TypeError, AttributeError):
-        pass 
+        pass
 
     return dialect
 

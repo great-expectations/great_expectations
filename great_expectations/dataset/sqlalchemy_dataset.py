@@ -140,12 +140,12 @@ try:
     import pyathena.sqlalchemy_athena
 except ImportError:
     pyathena = None
-    
+
 try:
     import teradatasqlalchemy.dialect
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
-    teradatasqlalchemy = None     
+    teradatasqlalchemy = None
 
 
 class SqlAlchemyBatchReference:
@@ -590,7 +590,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif dialect_name == "teradatasql":
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
-            )    
+            )
         else:
             self.dialect = None
 
@@ -706,7 +706,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 head_sql_str = "select * from {table} WHERE ROWNUM <= {n}".format(
                     table=self._table.name, n=n
                 )
-            
+
             # Limit is unknown in teradatasql! Use sample instead!
             if self.engine.dialect.name.lower() == "teradatasql":
                 head_sql_str = "select * from {table} sample {n}".format(
@@ -752,7 +752,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                             (
                                 sa.or_(
                                     # first part of OR(IN (NULL)) gives error in teradata
-                                    sa.column(column).in_(ignore_values) if self.engine.dialect.name.lower() != "teradatasql" else False,
+                                    sa.column(column).in_(ignore_values)
+                                    if self.engine.dialect.name.lower() != "teradatasql"
+                                    else False,
                                     # Below is necessary b/c sa.in_() uses `==` but None != None
                                     # But we only consider this if None is actually in the list of ignore values
                                     sa.column(column).is_(None)
@@ -1376,7 +1378,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif engine_dialect == "teradatasql":
             stmt = 'CREATE VOLATILE TABLE "{table_name}" AS ({custom_sql}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 table_name=table_name, custom_sql=custom_sql
-            )     
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
                 table_name=table_name, custom_sql=custom_sql
@@ -1619,7 +1621,7 @@ WHERE
                 return bigquery_types_tuple
         except (TypeError, AttributeError):
             pass
-        
+
         # Teradata types module
         try:
             if (
@@ -1631,7 +1633,7 @@ WHERE
             ):
                 return teradatatypes
         except (TypeError, AttributeError):
-            pass 
+            pass
 
         return self.dialect
 
@@ -2028,16 +2030,26 @@ WHERE
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
             pass
-        
+
         try:
             # Teradata
-            if isinstance(self.sql_engine_dialect, teradatasqlalchemy.dialect.TeradataDialect):
+            if isinstance(
+                self.sql_engine_dialect, teradatasqlalchemy.dialect.TeradataDialect
+            ):
                 if positive:
-                    return (sa.func.REGEXP_SIMILAR(sa.column(column), literal(regex), literal('i')) == 1)
+                    return (
+                        sa.func.REGEXP_SIMILAR(
+                            sa.column(column), literal(regex), literal("i")
+                        )
+                        == 1
+                    )
                 else:
                     return (
-                        sa.func.REGEXP_SIMILAR(sa.column(column) , literal(regex), literal('i')) == 0
-                    )      
+                        sa.func.REGEXP_SIMILAR(
+                            sa.column(column), literal(regex), literal("i")
+                        )
+                        == 0
+                    )
         except (AttributeError, TypeError):
             pass
 
@@ -2192,9 +2204,11 @@ WHERE
                 dialect_supported = True
         except (AttributeError, TypeError):
             pass
-        
+
         try:
-            if isinstance(self.sql_engine_dialect, teradatasqlalchemy.dialect.TeradataDialect):
+            if isinstance(
+                self.sql_engine_dialect, teradatasqlalchemy.dialect.TeradataDialect
+            ):
                 dialect_supported = True
         except (AttributeError, TypeError):
             pass
