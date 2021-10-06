@@ -40,6 +40,7 @@ from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
+from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
 from ..render.types import (
     CollapseContent,
@@ -1090,6 +1091,7 @@ class TableExpectation(Expectation, ABC):
         "condition_parser",
     )
     metric_dependencies = tuple()
+    domain_type = MetricDomainTypes.TABLE
 
     def get_validation_dependencies(
         self,
@@ -1214,6 +1216,7 @@ class TableExpectation(Expectation, ABC):
 
 class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_type = MetricDomainTypes.COLUMN
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         # Ensuring basic configuration parameters are properly set
@@ -1229,6 +1232,7 @@ class ColumnExpectation(TableExpectation, ABC):
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_type = MetricDomainTypes.COLUMN
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -1424,6 +1428,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "row_condition",
         "condition_parser",
     )
+    domain_type = MetricDomainTypes.COLUMN_PAIR
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -1626,6 +1631,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "condition_parser",
         "ignore_row_if",
     )
+    domain_type = MetricDomainTypes.MULTICOLUMN
     success_keys = tuple()
     default_kwarg_values = {
         "row_condition": None,
