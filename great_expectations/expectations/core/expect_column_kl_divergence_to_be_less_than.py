@@ -916,6 +916,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             "string_template": {"template": template_str, "params": params},
         }
 
+        # how do we handle things that return more than one?
+        # summary?
+        # we assume we only get back one thing
         if expected_distribution:
             return [expectation_string_obj, expected_distribution]
         else:

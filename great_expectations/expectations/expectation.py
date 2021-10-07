@@ -39,11 +39,13 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
+from ..data_context.types.base import renderedAtomicValueSchema
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
 from ..render.types import (
     CollapseContent,
+    RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
@@ -195,11 +197,15 @@ class Expectation(metaclass=MetaExpectation):
         (template_str, params) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
-        rendered = {
-            "string": template_str,
-            "parameters": params,
-            "schema": {"hi": "will"}
-        }
+        value_obj = renderedAtomicValueSchema.load(
+            {"string": template_str, "parameters": params, "schema": {}}
+        )
+
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            valuetype="StringValueType",
+        )
         return rendered
 
     # this one goes to OSS

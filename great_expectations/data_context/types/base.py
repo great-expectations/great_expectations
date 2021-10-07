@@ -183,6 +183,10 @@ class RenderedAtomicValueSchema(Schema):
         fields.Str(), required=False, allow_none=True
     )  # do we need to have fields.float()?
 
+    @post_load()
+    def create_value_obj(self, data, **kwargs):
+        return RenderedAtomicValue(**data)
+
 
 class RenderedAtomicValue(DictDot):
     def __init__(
@@ -194,9 +198,9 @@ class RenderedAtomicValue(DictDot):
         header_row: str = None,
         table: list = None,
     ):
-        self._string = string
-        self._parameters = parameters
-        self._schema = schema
+        self.string = string
+        self.parameters = parameters
+        self.schema = schema
 
 
 class AssetConfigSchema(Schema):
@@ -2303,3 +2307,6 @@ anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
+# <WILL> Atomic.
+renderedAtomicValueSchema = RenderedAtomicValueSchema()
+# renderedAtomicContentSchema = RenderedAtomicContentSchema()

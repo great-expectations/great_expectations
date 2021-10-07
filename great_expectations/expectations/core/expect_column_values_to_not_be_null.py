@@ -2,7 +2,10 @@ from typing import Dict
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_configuration import parse_result_format
-from great_expectations.data_context.types.base import RenderedAtomicValue
+from great_expectations.data_context.types.base import (
+    RenderedAtomicValue,
+    renderedAtomicValueSchema,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -128,41 +131,32 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
         return (template_str, params, styling)
 
-    @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
-    def _prescriptive_summary(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
+    # This is in base.expectation.py
+    # and then only redefine if it is not a string
 
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
-        )
-        rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
-            value=RenderedAtomicValue(
-                string=template_str, parameters=params, schema={}
-            ),
-            valuetype="StringValueType",
-        )
-        return rendered
-
-    # # option 1 :
-    # def _atomic_summary(self:)
-    #     somethign = res = cls._prescriptive_renderer()
-    #     somethign_else = something + unpacking
-    #     return somethign_else
+    # @classmethod
+    # @renderer(renderer_type="atomic.prescriptive.summary")
+    # def _prescriptive_summary(
+    #     cls,
+    #     configuration=None,
+    #     result=None,
+    #     language=None,
+    #     runtime_configuration=None,
+    #     **kwargs,
+    # ):
     #
+    #     (template_str, params, styling) = cls._atomic_prescriptive_template(
+    #         configuration, result, language, runtime_configuration, **kwargs
+    #     )
     #
-    # # option 2:
-    # generic util
-    # def string_content_block_to_atomic_content_block(self):
-    #     # Expectation specific logic is added later
-    #     #
+    #     value_obj = renderedAtomicValueSchema.load({"string": template_str, "parameters": params, "schema": {}})
+    #
+    #     rendered = RenderedAtomicContent(
+    #         name="atomic.prescriptive.summary",
+    #         value=value_obj,
+    #         valuetype="StringValueType",
+    #     )
+    #     return (rendered)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
