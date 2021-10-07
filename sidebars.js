@@ -326,7 +326,8 @@ module.exports = {
             { type: 'doc', id: 'reference/expectations/standard_arguments' },
             // { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
-            { type: 'doc', id: 'reference/validation' }
+            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
         {
