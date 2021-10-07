@@ -413,6 +413,24 @@ class RuntimeBatchRequest(BatchRequest):
             return cp
         return copy.deepcopy(self, memo)
 
+    def to_json_dict(self) -> dict:
+        runtime_parameters = getattr(self, "_runtime_parameters", None)
+        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
+            batch_data = str(type(runtime_parameters.pop("batch_data")))
+            runtime_parameters["batch_data"] = batch_data
+        json_dict: dict = {
+            "datasource_name": self._datasource_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self._data_asset_name,
+            "runtime_parameters": runtime_parameters,
+            "batch_identifiers": self._batch_identifiers,
+        }
+        batch_spec_passthrough = getattr(self, "_batch_spec_passthrough", None)
+        if batch_spec_passthrough is not None:
+            json_dict["batch_spec_passthrough"] = self._batch_spec_passthrough
+        return json_dict
+
+
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
 class BatchMarkers(BatchKwargs):
