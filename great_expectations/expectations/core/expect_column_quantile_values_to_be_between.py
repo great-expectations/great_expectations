@@ -166,7 +166,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
-                "quntile_values and quantiles must have the same number of elements"
+                "quantile_values and quantiles must have the same number of elements"
             )
         return True
 
@@ -255,8 +255,21 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         )
 
         # this will have to change:
+        # NAME
+        # VALUE
+        # VALUE TYPE
 
-        # this is something that we have to do :
+        # THIS IS WOULD BE ULTIMATE WHAT THE FE is using
+        #
+        # ADD TO MARSHMALLOW
+        # SO WE CAN GET VALIDATION
+        # ALL POSSIBLE ATTRIBUTES
+        # IF VALUE TYPE IS ?? THEN WE SHOULD EXPECT OTHER ATTRIBUTES
+        # WE SHOULD BE ABLE TO ENFORCE SCHEMA
+        # OBJECT : ATOMIC RENDERED CONTENT :
+        # { Name, VALUE, VALUE TYPE}
+        ########
+        # VALUE_TYPE :
         rendered = {
             "content_block_type": "table",
             "string": expectation_string_obj,

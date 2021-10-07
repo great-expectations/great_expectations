@@ -2,6 +2,7 @@ import json
 from copy import deepcopy
 from string import Template as pTemplate
 
+from great_expectations.data_context.types.base import RenderedAtomicValue
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
 
@@ -67,17 +68,17 @@ class RenderedComponentContent(RenderedContent):
         return d
 
 
-# <Will> this will have a corresponding model in GraphQL
-class RenderedAtomicStringValueContent(RenderedContent):
+# <THIS IS THE OBJECT THAT IS RETURNED>
+class RenderedAtomicContent(RenderedContent):
     def __init__(
         self,
-        string: str = None,
-        parameters: dict = None,
-        schema: dict = None,
+        name: str = None,
+        value: RenderedAtomicValue = None,
+        valuetype: str = None,
     ):
-        self.string = string
-        self.parameters = parameters
-        self.schema = schema  # what does this schema look like?
+        self.name = name
+        self.value = value
+        self.valuetype = valuetype
 
 
 class RenderedHeaderContent(RenderedComponentContent):

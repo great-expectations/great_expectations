@@ -2,6 +2,7 @@ from typing import Dict
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_configuration import parse_result_format
+from great_expectations.data_context.types.base import RenderedAtomicValue
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -10,7 +11,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    RenderedAtomicStringValueContent,
+    RenderedAtomicContent,
     RenderedStringTemplateContent,
 )
 from great_expectations.render.util import (
@@ -141,12 +142,13 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         (template_str, params, styling) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
-        rendered = {
-            "content_block_type": "string_template",
-            "string": template_str,
-            "parameters": params,
-            "schema": {"hi": "rob"},
-        }
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=RenderedAtomicValue(
+                string=template_str, parameters=params, schema={}
+            ),
+            valuetype="StringValueType",
+        )
         return rendered
 
     # # option 1 :

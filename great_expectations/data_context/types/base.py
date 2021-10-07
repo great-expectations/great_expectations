@@ -167,6 +167,38 @@ class AssetConfig(DictDot):
         return self._module_name
 
 
+class RenderedAtomicValueSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    # for StringType
+    string = fields.String(required=False, allow_none=True)
+    parameters = fields.Dict(required=False, allow_none=True)
+    schema = fields.Dict(required=False, allow_none=True)
+
+    # for TableType
+    labels = fields.List(fields.Str(), required=False, allow_none=True)
+    header_row = fields.String(required=False, allow_none=True)
+    table: fields.List(
+        fields.Str(), required=False, allow_none=True
+    )  # do we need to have fields.float()?
+
+
+class RenderedAtomicValue(DictDot):
+    def __init__(
+        self,
+        string: str = None,
+        parameters: dict = None,
+        schema: dict = None,
+        labels: list = None,
+        header_row: str = None,
+        table: list = None,
+    ):
+        self._string = string
+        self._parameters = parameters
+        self._schema = schema
+
+
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
