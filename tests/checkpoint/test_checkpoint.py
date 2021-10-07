@@ -1224,9 +1224,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "datasource_name": "my_datasource",
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "test_df",
-            "batch_identifiers": {
-                "default_identifier_name": "test_identifier"
-            },
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -1285,9 +1283,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "datasource_name": "my_datasource",
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "test_df",
-            "batch_identifiers": {
-                "default_identifier_name": "test_identifier"
-            },
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
             "runtime_parameters": {"batch_data": test_df},
         }
     )

@@ -218,13 +218,15 @@ def get_runtime_batch_request(
             runtime_config_batch_request = runtime_config_batch_request.to_json_dict()
 
     if (
-        runtime_config_batch_request is not None
-        and "runtime_parameters" in runtime_config_batch_request
-    ) or (
-        validation_batch_request is not None
-        and "runtime_parameters" in validation_batch_request
-    ) or (
-        isinstance(validation_batch_request, RuntimeBatchRequest)
+        (
+            runtime_config_batch_request is not None
+            and "runtime_parameters" in runtime_config_batch_request
+        )
+        or (
+            validation_batch_request is not None
+            and "runtime_parameters" in validation_batch_request
+        )
+        or (isinstance(validation_batch_request, RuntimeBatchRequest))
     ):
         batch_request_class = RuntimeBatchRequest
     else:
