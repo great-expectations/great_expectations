@@ -99,10 +99,9 @@ def file_task(
 
 @workflow
 def file_wf(
-   dataset: CSVFile = "https://raw.githubusercontent.com/superconductive/ge_tutorials/main/data/yimport pandas as pd
-from flytekit import Resources, kwtypes, task, workflow
-from flytekit.types.file import CSVFile
-from flytekitplugins.great_expectations import GreatExpectationsTask
+   dataset: CSVFile = "https://raw.githubusercontent.com/superconductive/ge_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+) -> int:
+   return file_task(dataset=dataset)
 
 ```
 Note: Additional Batch Request parameters can be given using [`BatchRequestConfig`](https://github.com/flyteorg/flytekit/blob/b8a3c7d34e6b19722a6a968dc05506ad1eb26912/plugins/flytekit-greatexpectations/flytekitplugins/great_expectations/task.py#L22-L39).
