@@ -19,4 +19,4 @@ You can also disable usage statistics system-wide by setting the `GE_USAGE_STATS
     enabled=FALSE
 ```
 
-As always, please reach out [on Slack](https://greatexpectations.io/slack>) if you have any questions or comments.
+As always, please reach out [on Slack](https://greatexpectations.io/slack) if you have any questions or comments.
