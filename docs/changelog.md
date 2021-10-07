@@ -5,7 +5,6 @@ title: Changelog
 ### Develop
 * [BUGFIX] runtime_parameters: batch_data: Spark DF serialization (#3502)
 * [DOCS] Added details on Anonymous Usage Statistics to the reference documentation.
-* [BUGFIX] Fix SQLAlchemy version 1.3.24 compatibility in map metric provider.
 
 ### 0.13.37
 * [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
