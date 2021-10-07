@@ -196,10 +196,9 @@ class Expectation(metaclass=MetaExpectation):
         )
         rendered = {
             "content_block_type": "string_template",
-            "string_template": {
-                "template": template_str,
-                "params": params,
-            },
+            "string": template_str,
+            "parameters": params,
+            "schema": {},
         }
         return rendered
 
@@ -494,11 +493,6 @@ class Expectation(metaclass=MetaExpectation):
         )
 
         return unexpected_table_content_block
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive_summary")
-    def _prescriptive_summary(cls):
-        raise NotImplementedError
 
     @classmethod
     @renderer(renderer_type="renderer.diagnostic.observed_value")
