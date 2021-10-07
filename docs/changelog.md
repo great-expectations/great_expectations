@@ -3,7 +3,7 @@ title: Changelog
 ---
 
 ### Develop
-
+* [DOCS] Added details on Anonymous Usage Statistics to the reference documentation.
 
 ### 0.13.37
 * [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
