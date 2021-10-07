@@ -275,15 +275,15 @@ module.exports = {
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_flyte',
-        //{
-          //type: 'category',
-          //label: 'Contributing',
-          //items: [
-            //'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
-            //'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
-          //]
-        //}
+        'deployment_patterns/how_to_use_great_expectations_in_flyte'
+        // {
+        // type: 'category',
+        // label: 'Contributing',
+        // items: [
+        // 'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
+        // 'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
+        // ]
+        // }
       ]
     },
     {
@@ -327,7 +327,8 @@ module.exports = {
             { type: 'doc', id: 'reference/expectations/standard_arguments' },
             // { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
-            { type: 'doc', id: 'reference/validation' }
+            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
         {
