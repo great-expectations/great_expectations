@@ -1083,7 +1083,7 @@ class ConcurrencyConfig(DictDot):
     def max_database_query_concurrency(self) -> int:
         """Max number of concurrent database queries to execute with mulithreading."""
         # BigQuery has a limit of 100 for "Concurrent rate limit for interactive queries" as described at
-        # https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
+        # (https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
         # databases and/or be manually user configurable.
         return 100
 
@@ -1275,7 +1275,6 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
-    NOTEBOOKS_BASE_DIRECTORY = "notebooks"
     DEFAULT_VALIDATION_OPERATORS = {
         "action_list_operator": {
             "class_name": "ActionListValidationOperator",

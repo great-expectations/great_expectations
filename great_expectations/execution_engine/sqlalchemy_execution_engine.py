@@ -963,7 +963,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.table(table_name, schema=batch_spec.get("schema_name", None))
                     )
                     .where(split_clause)
-                ).one()[0]
+                ).scalar()
                 p: Optional[float] = batch_spec["sampling_kwargs"]["p"] or 1.0
                 sample_size: int = round(p * num_rows)
                 return (

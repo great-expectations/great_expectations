@@ -7,8 +7,24 @@ Changelog
 
 develop
 -----------------
-* [DOCS] Fix checkpoint name so it matches the rest of the docs (#3434)
+* [DOCS] Update g_e docs branding to match g_e.io  (#3741)
 
+0.13.36
+-----------------
+* [FEATURE] GREAT-3439 extended SlackNotificationsAction for slack app tokens (#3440) (Thanks @psheets)
+* [FEATURE] Implement Integration Test for "Simple SQL Datasource" with Partitioning, Splitting, and Sampling (#3454)
+* [FEATURE] Implement Integration Test for File Path Data Connectors with Partitioning, Splitting, and Sampling (#3452)
+* [BUGFIX] Fix Incorrect Implementation of the "_sample_using_random" Sampling Method in SQLAlchemyExecutionEngine (#3449)
+* [BUGFIX] Handle RuntimeBatchRequest passed to Checkpoint programatically (without yml) (#3448)
+* [DOCS] Fix typo in command to create new checkpoint (#3434) (Thanks @joeltone)
+* [DOCS] How to validate data by running a Checkpoint (#3436)
+* [ENHANCEMENT] cloud-199 - Update Expectation and ExpectationSuite classes for GE Cloud (#3453)
+* [MAINTENANCE] Does not test numpy.float128 when it doesn't exist (#3460)
+* [MAINTENANCE] Remove Unnecessary SQL OR Condition (#3469)
+* [MAINTENANCE] Remove validation playground notebooks (#3467)
+* [MAINTENANCE] clean up type hints, API usage, imports, and coding style (#3444)
+* [MAINTENANCE] comments (#3457)
+ 
 0.13.35
 -----------------
 * [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
@@ -247,7 +263,7 @@ develop
 
 0.13.23
 -----------------
-* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
+* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen)
 * [BUGFIX] fix update data docs as validation action (#3031)
 * [DOCS] Port over "How to configure an Expectation Store in Azure" from RTD to Docusaurus
 * [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus (#3018)

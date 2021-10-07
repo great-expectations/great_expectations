@@ -184,7 +184,7 @@ def test_SimpleSqlalchemyDatasource(empty_data_context):
     )
 
     # Absolutely minimal starting config
-    my_sql_datasource = context.test_yaml_config(
+    datasource_with_minimum_config = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -194,9 +194,13 @@ introspection:
     whole_table: {}
 """
     )
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
+    print(
+        json.dumps(
+            datasource_with_minimum_config.get_available_data_asset_names(), indent=4
+        )
+    )
 
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    assert datasource_with_minimum_config.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D",
             "table_full__I",
@@ -222,10 +226,45 @@ introspection:
         ]
     }
 
+    assert datasource_with_minimum_config.get_available_data_asset_names_and_types() == {
+        "whole_table": [
+            ("table_containing_id_spacers_for_D", "table"),
+            ("table_full__I", "table"),
+            ("table_partitioned_by_date_column__A", "table"),
+            ("table_partitioned_by_foreign_key__F", "table"),
+            ("table_partitioned_by_incrementing_batch_id__E", "table"),
+            (
+                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "table",
+            ),
+            ("table_partitioned_by_multiple_columns__G", "table"),
+            (
+                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "table",
+            ),
+            ("table_partitioned_by_timestamp_column__B", "table"),
+            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+            ("table_with_fk_reference_from_F", "table"),
+            ("view_by_date_column__A", "view"),
+            ("view_by_incrementing_batch_id__E", "view"),
+            (
+                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "view",
+            ),
+            ("view_by_multiple_columns__G", "view"),
+            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+            ("view_by_timestamp_column__B", "view"),
+            ("view_containing_id_spacers_for_D", "view"),
+            ("view_partitioned_by_foreign_key__F", "view"),
+            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+            ("view_with_fk_reference_from_F", "view"),
+        ]
+    }
+
     # Here we should test getting a batch
 
     # Very thin starting config
-    my_sql_datasource = context.test_yaml_config(
+    datasource_with_name_suffix = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -238,7 +277,7 @@ introspection:
 """
     )
 
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    assert datasource_with_name_suffix.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D__whole_table",
             "table_full__I__whole_table",
@@ -264,10 +303,45 @@ introspection:
         ]
     }
 
+    assert datasource_with_name_suffix.get_available_data_asset_names_and_types() == {
+        "whole_table": [
+            ("table_containing_id_spacers_for_D", "table"),
+            ("table_full__I", "table"),
+            ("table_partitioned_by_date_column__A", "table"),
+            ("table_partitioned_by_foreign_key__F", "table"),
+            ("table_partitioned_by_incrementing_batch_id__E", "table"),
+            (
+                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "table",
+            ),
+            ("table_partitioned_by_multiple_columns__G", "table"),
+            (
+                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "table",
+            ),
+            ("table_partitioned_by_timestamp_column__B", "table"),
+            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+            ("table_with_fk_reference_from_F", "table"),
+            ("view_by_date_column__A", "view"),
+            ("view_by_incrementing_batch_id__E", "view"),
+            (
+                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "view",
+            ),
+            ("view_by_multiple_columns__G", "view"),
+            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+            ("view_by_timestamp_column__B", "view"),
+            ("view_containing_id_spacers_for_D", "view"),
+            ("view_partitioned_by_foreign_key__F", "view"),
+            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+            ("view_with_fk_reference_from_F", "view"),
+        ]
+    }
+
     # Here we should test getting a batch
 
     # Add some manually configured tables...
-    my_sql_datasource = context.test_yaml_config(
+    datasource_manually_configured = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -320,8 +394,12 @@ tables:
 """
     )
 
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    print(
+        json.dumps(
+            datasource_manually_configured.get_available_data_asset_names(), indent=4
+        )
+    )
+    assert datasource_manually_configured.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D",
             "table_full__I",
@@ -353,10 +431,15 @@ tables:
         ],
     }
 
+    # can't use get_available_data_asset_names_and_types here because it's only implemented
+    # on InferredAssetSqlDataConnector, not ConfiguredAssetSqlDataConnector
+    with pytest.raises(NotImplementedError):
+        datasource_manually_configured.get_available_data_asset_names_and_types()
+
     # Here we should test getting another batch
 
     # Drop the introspection...
-    my_sql_datasource = context.test_yaml_config(
+    datasource_without_introspection = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -383,8 +466,12 @@ tables:
                     divisor: 12
 """
     )
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    print(
+        json.dumps(
+            datasource_without_introspection.get_available_data_asset_names(), indent=4
+        )
+    )
+    assert datasource_without_introspection.get_available_data_asset_names() == {
         "whole_table": [
             "table_partitioned_by_date_column__A",
         ],
