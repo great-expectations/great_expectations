@@ -4,7 +4,6 @@ from typing import Union
 
 import pandas as pd
 import pytest
-from pyspark.sql import SparkSession
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
@@ -22,6 +21,13 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+
+try:
+    pyspark = pytest.importorskip("pyspark")
+    from pyspark.sql import SparkSession
+except ImportError:
+    pyspark = None
+    SparkSession = None
 
 yaml = YAML()
 
