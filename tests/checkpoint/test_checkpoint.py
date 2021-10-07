@@ -1163,6 +1163,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
@@ -1217,6 +1222,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_pandasdf(
@@ -1274,6 +1284,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
@@ -1333,6 +1348,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_pandasdf(
@@ -1403,6 +1423,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 2
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
@@ -1475,6 +1500,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 2
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_config_substitution_simple(
