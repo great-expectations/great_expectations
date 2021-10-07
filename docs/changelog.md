@@ -4,6 +4,7 @@ title: Changelog
 
 ### Develop
 * [FEATURE] Add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
+* [DOCS] Added details on Anonymous Usage Statistics to the reference documentation.
 
 ### 0.13.36
 * [FEATURE] GREAT-3439 extended SlackNotificationsAction for slack app tokens (#3440) (Thanks @psheets)
