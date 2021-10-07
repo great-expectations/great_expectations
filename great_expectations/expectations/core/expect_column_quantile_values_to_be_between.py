@@ -171,9 +171,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    @renderer(renderer_type="atomic.prescriptive.template")
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
@@ -186,7 +185,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         include_column_name = (
             include_column_name if include_column_name is not None else True
         )
-        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration["kwargs"],
             ["column", "quantile_ranges", "row_condition", "condition_parser"],
@@ -223,7 +221,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         #                           [Q3            5            7]
         #                           [Median        3]
         #
-
         table_rows = []
 
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
@@ -237,7 +234,55 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                     str(value_range[1]) if value_range[1] is not None else "Any",
                 ]
             )
+        return (expectation_string_obj, table_header_row, table_rows)
 
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (
+            expectation_string_obj,
+            table_header_row,
+            table_rows,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+
+        # this will have to change:
+
+        # this is something that we have to do :
+        rendered = {
+            "content_block_type": "table",
+            "string": expectation_string_obj,
+            "header_row": table_header_row,
+            "table_rows": table_rows,
+        }
+        return rendered
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (
+            expectation_string_obj,
+            table_header_row,
+            table_rows,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
         quantile_range_table = RenderedTableContent(
             **{
                 "content_block_type": "table",
@@ -257,7 +302,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 },
             }
         )
-
         return [expectation_string_obj, quantile_range_table]
 
     @classmethod

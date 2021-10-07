@@ -181,6 +181,7 @@ class Expectation(metaclass=MetaExpectation):
         }
         return (template_str, params)
 
+    # this one goes to mercury
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
     def _prescriptive_summary(
@@ -201,6 +202,7 @@ class Expectation(metaclass=MetaExpectation):
         }
         return rendered
 
+    # this one goes to OSS
     # TODO : refactor to use atomic.prescriptive.template
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
