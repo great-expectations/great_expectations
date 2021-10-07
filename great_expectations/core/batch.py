@@ -431,7 +431,6 @@ class RuntimeBatchRequest(BatchRequest):
         return json_dict
 
 
-
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
 class BatchMarkers(BatchKwargs):
     """A BatchMarkers is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
