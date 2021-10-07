@@ -170,7 +170,7 @@ assert len(batch_list) == 6
 batch_data = batch_list[1].data  # 2-passenger sample of batch data
 num_rows = batch_data.execution_engine.engine.execute(
     sa.select([sa.func.count()]).select_from(batch_data.selectable)
-).one()[0]
+).scalar()
 assert num_rows < 200
 
 # NOTE: The following code is only for testing and can be ignored by users.
