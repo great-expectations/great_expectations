@@ -106,6 +106,24 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    @render_evaluation_parameter_string
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        return {
+            "content_block_type": "string_template",
+            "string": "hello",
+            "parameters": {"hi": "will"},
+            "schema": {},
+        }
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
