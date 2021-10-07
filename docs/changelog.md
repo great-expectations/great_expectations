@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [BUGFIX] runtime_parameters: {batch_data: <Spark DF>} serialization (#3502)
 * [DOCS] Added details on Anonymous Usage Statistics to the reference documentation.
 
 ### 0.13.37
