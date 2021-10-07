@@ -11,7 +11,7 @@ develop
 0.13.37
 -----------------
 * [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
-* [FEATURE] add get_available_data_asset_names_and_types (#3476) (Thanks @joshua-stauffer)
+* [FEATURE] add get_available_data_asset_names_and_types (#3476)
 * [FEATURE] add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
 * [BUGFIX] Fix TupleS3StoreBackend remove_key bug (#3489)
 * [DOCS] Adding Flyte Deployment pattern to docs (#3383)
@@ -23,7 +23,7 @@ develop
 * [MAINTENANCE] Support SQLAlchemy version 1.3.24 for compatibility with Airflow (Airflow does not currently support later versions of SQLAlchemy). (#3499)
 * [MAINTENANCE] Update contributing_checklist.md (#3478) (Thanks @plain-jane-gray)
 * [MAINTENANCE] Update how_to_configure_a_validation_result_store_in_gcs.md (#3480) (Thanks @plain-jane-gray)
-* [MAINTENANCE] update implemented_expectations (#3492) (Thanks @spencerhardwick)
+* [MAINTENANCE] update implemented_expectations (#3492)
 
 0.13.36
 -----------------
