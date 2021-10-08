@@ -203,7 +203,11 @@ class Expectation(metaclass=MetaExpectation):
             configuration, result, language, runtime_configuration, **kwargs
         )
         value_obj = renderedAtomicValueSchema.load(
-            {"template": template_str, "params": params, "schema": {}}
+            {
+                "template": template_str,
+                "params": params,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
         )
 
         rendered = RenderedAtomicContent(
