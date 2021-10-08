@@ -749,9 +749,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             assert len(query["select"]) == len(query["ids"])
             try:
-                res = self.engine.execute(
-                    sa.select(query["select"]).select_from(selectable)
-                ).fetchall()
+                if isinstance(selectable, TextClause):
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(selectable.columns().subquery())
+                    ).fetchall()
+                else:
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(selectable)
+                    ).fetchall()
                 logger.debug(
                     f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
                 )
