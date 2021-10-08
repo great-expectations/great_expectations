@@ -2,6 +2,8 @@
 title: How to configure a DataConnector to introspect and partition a file system or blob store
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 This guide will help you introspect and partition any file type data store (e.g., filesystem, cloud blob storage) using
 an `Active Data Connector`.  For background on connecting to different backends, please see the
@@ -40,7 +42,14 @@ Load your DataContext into memory using the `get_context()` method.
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L7
 ```
 
-## Inferred Asset Data Connector
+<Tabs
+  groupId="inferred-or-configured"
+  defaultValue='inferred'
+  values={[
+  {label: 'Inferred Asset Data Connector', value:'inferred'},
+  {label: 'Configured Asset Data Connector', value:'configured'},
+  ]}>
+  <TabItem value="inferred">
 
 ### 1. Configure your Datasource
 
@@ -128,8 +137,8 @@ case `InferredAssetFilesystemDataConnector`) from being successfully instantiate
 
 ### 2. Save the Datasource configuration to your DataContext
 
-Once the basic `Datasource` configuration is error-free, save it into your `DataContext` by using the `add_datasource()`
-function.
+Once the basic `Datasource` configuration is error-free and satisfies your requirements, save it into your `DataContext`
+by using the `add_datasource()` function.
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L125
 ```
@@ -142,15 +151,16 @@ types and naming structures of files in your filesystem or blob storage:
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L126-L133
 ```
 
-## Configured Asset Data Connector
+</TabItem>
+<TabItem value="configured">
 
-### 1. Initialize Configured Asset Data Connector
+### 1. Add Configured Asset Data Connector to your Datasource
 
-Now set up the bare-bones `Configured Asset Data Connector` to gradually apply structure to the discovered assets and
+Set up the bare-bones `Configured Asset Data Connector` to gradually apply structure to the discovered assets and
 partition them according to this structure.  To begin, add the following `configured_data_connector_name` section to
 your `Datasource` configuration (please feel free to change the name as you deem appropriate for your use case):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L135-L145
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L147-L164
 ```
 
 Now run this code again to test your configuration:
@@ -168,7 +178,7 @@ You can employ a data asset that reflects a relatively general file structure (e
 configuration) to represent files in a directory, which contain a certain prefix (e.g., `yellow_trip_data_sample_`) and
 whose contents are of the desired type (e.g., CSV).
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L179-L194
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L170-L185
 ```
 
 Now run `test_yaml_config()` as part of evolving and testing components of Great Expectations `YAML` configuration:
@@ -186,7 +196,7 @@ In recognition of a finer observed file path structure, you can refine the parti
 `taxi_data_year_month` in the following example configuration identifies three parts of a file path: `name` (as in
 "company name"), `year`, and `month`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L242-L264
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L224-L246
 ```
 
 and run
@@ -202,8 +212,8 @@ Verify that now two `Data Assets` (`taxi_data_flat` and `taxi_data_year_month`) 
 This partitioning affords a rich set of filtering capabilities ranging from specifying the
 exact values of the file name structure's components to allowing Python functions for implementing custom criteria.
 
-Finally, once you have configured all the `Data Connectors` to satisfy your requirements, save the enclosing
-`Datasource` into your `DataContext` using
+Finally, once your `Data Connector` configuration satisfies your requirements, save the enclosing `Datasource` into your
+`DataContext` using
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L125
 ```
@@ -213,6 +223,8 @@ Consult the
 guide for examples of considerable flexibility in querying `Batch` objects along the different dimensions materialized
 as a result of partitioning the dataset as specified by the `taxi_data_flat` and `taxi_data_year_month` `Data Assets`.
 
+</TabItem>
+</Tabs>
 
 To view the full scripts used in this page, see them on GitHub:
 

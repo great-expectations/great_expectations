@@ -152,15 +152,6 @@ execution_engine:
   module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-    default_inferred_data_connector_name:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: <PATH_TO_YOUR_DATA_HERE>
-        glob_directive: "*.csv"
-        default_regex:
-          pattern: (.*)
-          group_names:
-            - data_asset_name
-
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -201,15 +192,6 @@ execution_engine:
   module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-    default_inferred_data_connector_name:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: <PATH_TO_YOUR_DATA_HERE>
-        glob_directive: "*.csv"
-        default_regex:
-          pattern: (.*)
-          group_names:
-            - data_asset_name
-
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
