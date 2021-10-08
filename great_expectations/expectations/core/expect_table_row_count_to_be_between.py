@@ -9,8 +9,9 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...data_asset.util import parse_result_format
+from ...data_context.types.base import renderedAtomicValueSchema
 from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
+from ...render.types import RenderedAtomicContent, RenderedStringTemplateContent
 from ...render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -104,6 +105,31 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         # Setting up a configuration
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        # implemented because @render_evalutation_parameter_string decorator
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+        value_obj = renderedAtomicValueSchema.load(
+            {"string": template_str, "parameters": params, "schema": {}}
+        )
+
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            valuetype="StringValueType",
+        )
+        return [rendered]
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

@@ -172,14 +172,16 @@ class RenderedAtomicValueSchema(Schema):
         unknown = INCLUDE
 
     # for StringType
-    string = fields.String(required=False, allow_none=True)
-    parameters = fields.Dict(required=False, allow_none=True)
+    template = fields.String(required=False, allow_none=True)
+    params = fields.Dict(required=False, allow_none=True)
     schema = fields.Dict(required=False, allow_none=True)
 
     # for TableType
-    labels = fields.List(fields.Str(), required=False, allow_none=True)
+    header = fields.List(fields.Str(), required=False, allow_none=True)
     header_row = fields.String(required=False, allow_none=True)
-    table: fields.List(fields.Str(), required=False, allow_none=True)
+    table: fields.List(
+        fields.List(fields.Str, fields.Float), required=False, allow_none=True
+    )
 
     # TODO add VegaGraph
 
@@ -191,20 +193,20 @@ class RenderedAtomicValueSchema(Schema):
 class RenderedAtomicValue(DictDot):
     def __init__(
         self,
-        string: str = None,
-        parameters: dict = None,
+        template: str = None,
+        params: dict = None,
         schema: dict = None,
-        labels: list = None,
+        header: list = None,
         header_row: str = None,
         table: list = None,
     ):
         # StringType
-        self.string: str = string
-        self.parameters: dict = parameters
+        self.template: str = template
+        self.params: dict = params
         self.schema: dict = schema
 
         # TableType
-        self.labels: list = labels
+        self.header: list = header
         self.header_row: str = header_row
         self.table: list = table
 
