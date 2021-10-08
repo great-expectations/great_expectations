@@ -1314,6 +1314,29 @@ def test_map_column_pairs_equal_metric_pd():
     assert metrics[unexpected_values_metric.id] == [(0, 7), (1, 8), (2, 0)]
 
 
+def test_table_metric_sa(sa):
+    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}), sa)
+
+    desired_metric = MetricConfiguration(
+        metric_name="table.row_count.aggregate_fn",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+        metric_dependencies={"metric_partial_fn": desired_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=results
+    )
+
+    assert results == {desired_metric.id: 6}
+
+
 def test_map_column_pairs_equal_metric_sa(sa):
     engine = build_sa_engine(
         pd.DataFrame(
@@ -2239,14 +2262,14 @@ def test_table_metric_spark(spark_session):
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
         metric_dependencies={"metric_partial_fn": desired_metric},
     )
