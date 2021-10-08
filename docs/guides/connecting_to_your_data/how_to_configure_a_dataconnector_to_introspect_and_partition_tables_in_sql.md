@@ -6,10 +6,10 @@ import Prerequisites from '../connecting_to_your_data/components/prerequisites.j
 
 This guide will help you introspect and tables in an SQL database using `SimpleSqlalchemyDatasource`, which operates as
 a proxy to `InferredAssetSqlDataConnector` and `ConfiguredAssetSqlDataConnector` (for the SQL use case,
-these types of the active `Data Connector` are exercised indirectly, via `SimpleSqlalchemyDatasource`).  For background,
+these types of the `Active Data Connector` are exercised indirectly, via `SimpleSqlalchemyDatasource`).  For background,
 please see the `Datasource` specific guides in the "Connecting to your data" section.
 
-The SQL database introspection and partitioning mechanisms in Great Expectations are useful for:
+The SQL database introspection and partitioning are useful for:
 - Exploring the schema and column metadata of the tables in your SQL database, and
 - Organizing the tables into data assets according to the partitioning considerations informed by this exploration.
 
@@ -23,7 +23,7 @@ Partitioning enables you to select the desired subsets of your dataset for [Vali
 </Prerequisites>
 
 This guide will use the following `Datasource` configuration as an example:
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L9-L66
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L9-L66
 ```
 
 To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md). 
@@ -38,12 +38,12 @@ To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please se
 
 Import these necessary packages and modules.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L1-L5
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L1-L5
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L7
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L7
 ```
 
 ### 3. Configure your Datasource
@@ -51,7 +51,7 @@ Load your DataContext into memory using the `get_context()` method.
 Using the above example configuration, specify the connection string for your database.  Then run this code to test your
 configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L75
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L75
 ```
 
 You will then see your tables listed as `Available data_asset_names` in the output of `test_yaml_config()`.
@@ -62,7 +62,7 @@ Feel free to adjust your configuration and re-run `test_yaml_config()` as needed
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L77
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L77
 ```
 
 ## Introspection
@@ -72,26 +72,26 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 Getting names of available data assets using the data connector keys referenced in the `introspection` section of the
 configuration gives you visibility into the tables in your database:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L78-L80
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L78-L80
 ```
 
 ### 2.  Examine a few rows of a table
 
 Pick a `data_asset_name` from the previous step and specify it in the `BatchRequest`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L84-L88
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L84-L88
 ```
 
 Then load data into the `Validator` and print a few rows of the table (`n_rows = 5` is the default, but you may look at
 more rows e.g. `validator.head(n_rows=100)`):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L94-L99
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L94-L100
 ```
 
 At this point, you can also perform additional checks, such as confirming the number of batches and the size of a batch.
 For example (be sure to adjust this code to match the specifics of your data and configuration):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L102-L108
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L102-L108
 ```
 
 ### 3. Using Splitting to aid introspection
@@ -106,25 +106,25 @@ parameters to be used by the specified splitting method.
 For the present example, we can split according to the `pickup_datetime` column parsed to the date level precision and
 thus obtain batches containing the taxi rides data for each day found in the available data:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L112-L116
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L112-L116
 ```
 
 Perform the relevant checks, such as confirm the number of batches.  For example (be sure to adjust this code to match
 the specifics of your data and configuration):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L122-L123
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L122-L123
 ```
 
 As an additional example, we can split according to the `pickup_datetime` column parsed to the hour level precision and
 thus obtain batches containing the taxi rides data for all hours of each day found in the available data:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L127-L131
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L127-L131
 ```
 
 Perform the relevant checks, such as confirm the number of batches.  For example (be sure to adjust this code to match
 the specifics of your data and configuration):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L137-L138
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L137-L138
 ```
 
 Note that in the introspection mode, all included tables will contribute rows to the composition of the batch data
@@ -137,13 +137,13 @@ resulting batches with desired semantics.  Partitioning is fully specified in th
 
 For the present example, we can split according to the "passenger_count" column with the focus on two-passenger rides:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L142-L146
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L142-L146
 ```
 
 Perform the relevant checks, such as confirm the number of batches.  For example (be sure to adjust this code to match
 the specifics of your data and configuration):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L152-L153
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L152-L153
 ```
 
 ## Sampling
@@ -153,17 +153,17 @@ the specifics of your data and configuration):
 To configure `Sampling`, specify a dimension (i.e., `column_name` or the entire `table`), the method of sampling, and
 parameters to be used by the specified sampling method.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L159-L163
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L159-L163
 ```
 
 We can then obtain a random `10%` of the rows in the batch:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L169
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L169
 ```
 
 Finally, confirm the expected number of batches was retrieved and the reduced size of a batch (due to sampling):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L170-L176
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L170-L176
 ```
 
 ## Additional Notes
@@ -208,4 +208,4 @@ Available `Sampling` methods and their configuration parameters:
 
 To view the full script used in this page, see it on GitHub:
 
-- [yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py)
+- [yaml_example_gradual.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py)
