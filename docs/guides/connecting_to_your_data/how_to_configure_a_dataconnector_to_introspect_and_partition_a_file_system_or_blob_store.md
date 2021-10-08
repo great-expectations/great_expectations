@@ -3,11 +3,11 @@ title: How to configure a DataConnector to introspect and partition a file syste
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 
-This guide will help you introspect and partition any files type data store (e.g., filesystem, cloud blob storage) using
-the different types of the active `Data Connector`.  For background on connecting to different backends, please see the
+This guide will help you introspect and partition any file type data store (e.g., filesystem, cloud blob storage) using
+an `Active Data Connector`.  For background on connecting to different backends, please see the
 `Datasource` specific guides in the "Connecting to your data" section.
 
-The file based data introspection and partitioning mechanisms in Great Expectations are useful for:
+File-based introspection and partitioning are useful for:
 - Exploring the types, subdirectory location, and filepath naming structures of the files in your dataset, and
 - Organizing the discovered files into `Data Assets` according to the identified structures.
 
