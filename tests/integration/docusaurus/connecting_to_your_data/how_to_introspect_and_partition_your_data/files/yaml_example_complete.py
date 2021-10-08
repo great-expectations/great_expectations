@@ -65,10 +65,6 @@ available_data_asset_names = context.datasources[
 ]
 assert len(available_data_asset_names) == 36
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
-
 # Here is a BatchRequest naming an inferred data_asset.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
@@ -80,10 +76,13 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_trip_data_sample_2019-01.csv"
 
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
-print(validator.head())
+print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1

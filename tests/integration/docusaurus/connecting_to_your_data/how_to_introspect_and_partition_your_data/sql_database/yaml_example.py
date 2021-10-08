@@ -97,7 +97,7 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
-print(validator.head())
+print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
@@ -172,7 +172,7 @@ assert len(batch_list) == 6
 batch_data = batch_list[1].data  # 2-passenger sample of batch data
 num_rows = batch_data.execution_engine.engine.execute(
     sa.select([sa.func.count()]).select_from(batch_data.selectable)
-).one()[0]
+).scalar()
 assert num_rows < 200
 
 # NOTE: The following code is only for testing and can be ignored by users.

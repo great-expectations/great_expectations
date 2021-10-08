@@ -3,8 +3,39 @@ title: Changelog
 ---
 
 ### Develop
-* [FEATURE] Extended SlackNotificationAction to accept slack_token and slack_channel for slack messaging without a webhook. (#3440)
-* [BUGFIX]  Handle RuntimeBatchRequest passed programatically (without yml) (#3448)
+* [BUGFIX] runtime_parameters: batch_data: Spark DF serialization (#3502)
+* [DOCS] Added details on Anonymous Usage Statistics to the reference documentation.
+
+### 0.13.37
+* [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
+* [FEATURE] add get_available_data_asset_names_and_types (#3476)
+* [FEATURE] add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
+* [BUGFIX] Fix TupleS3StoreBackend remove_key bug (#3489)
+* [DOCS] Adding Flyte Deployment pattern to docs (#3383)
+* [DOCS] g_e docs branding updates (#3471)
+* [MAINTENANCE] Add type-hints; add utility method for creating temporary DB tables; clean up imports; improve code readability; and add a directory to pre-commit (#3475)
+* [MAINTENANCE] Clean up for a better code readability. (#3493)
+* [MAINTENANCE] Enable SQL for the "expect_compound_columns_to_be_unique" expectation. (#3488)
+* [MAINTENANCE] Fix some typos (#3474) (Thanks @mohamadmansourX)
+* [MAINTENANCE] Support SQLAlchemy version 1.3.24 for compatibility with Airflow (Airflow does not currently support later versions of SQLAlchemy). (#3499)
+* [MAINTENANCE] Update contributing_checklist.md (#3478) (Thanks @plain-jane-gray)
+* [MAINTENANCE] Update how_to_configure_a_validation_result_store_in_gcs.md (#3480) (Thanks @plain-jane-gray)
+* [MAINTENANCE] update implemented_expectations (#3492)
+
+### 0.13.36
+* [FEATURE] GREAT-3439 extended SlackNotificationsAction for slack app tokens (#3440) (Thanks @psheets)
+* [FEATURE] Implement Integration Test for "Simple SQL Datasource" with Partitioning, Splitting, and Sampling (#3454)
+* [FEATURE] Implement Integration Test for File Path Data Connectors with Partitioning, Splitting, and Sampling (#3452)
+* [BUGFIX] Fix Incorrect Implementation of the "_sample_using_random" Sampling Method in SQLAlchemyExecutionEngine (#3449)
+* [BUGFIX] Handle RuntimeBatchRequest passed to Checkpoint programatically (without yml) (#3448)
+* [DOCS] Fix typo in command to create new checkpoint (#3434) (Thanks @joeltone)
+* [DOCS] How to validate data by running a Checkpoint (#3436)
+* [ENHANCEMENT] cloud-199 - Update Expectation and ExpectationSuite classes for GE Cloud (#3453)
+* [MAINTENANCE] Does not test numpy.float128 when it doesn't exist (#3460)
+* [MAINTENANCE] Remove Unnecessary SQL OR Condition (#3469)
+* [MAINTENANCE] Remove validation playground notebooks (#3467)
+* [MAINTENANCE] clean up type hints, API usage, imports, and coding style (#3444)
+* [MAINTENANCE] comments (#3457)
 
 ### 0.13.35
 * [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
