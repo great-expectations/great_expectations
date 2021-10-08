@@ -37,11 +37,29 @@ datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRI
 
 context.test_yaml_config(datasource_yaml)
 
+datasource_yaml = f"""
+name: taxi_datasource
+class_name: SimpleSqlalchemyDatasource
+connection_string: <CONNECTION_STRING>
+
+introspection: # Each key in the "introspection" section is the name of an InferredAssetSqlDataConnector ("introspection" in "SimpleSqlalchemyDatasource" configuration is a reserved key name).
+    whole_table:
+        introspection_directives:
+            include_views: true
+        skip_inapplicable_tables: true # skip and continue upon encountering introspection errors
+        excluded_tables: # a list of tables to ignore when inferring data asset_names
+            - main.yellow_tripdata_sample_2019_03 # format: schema_name.table_name
+"""
+
+datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
+
+context.test_yaml_config(datasource_yaml)
+
 context.add_datasource(**yaml.load(datasource_yaml))
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
-assert len(available_data_asset_names) == 3
+assert len(available_data_asset_names) == 2
 
 
 # TODO: <Alex>ALEX -- DIVIDER</Alex>

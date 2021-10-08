@@ -43,7 +43,7 @@ Import Great Expectations.
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L3
 ```
 
-Load your DataContext into memory using the `get_context()` method.
+### 2. Load your DataContext into memory using the `get_context()` method.
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L7
 ```
@@ -128,20 +128,37 @@ context.test_yaml_config(yaml_string, shorten_tracebacks=True)
 showing the line numbers, where the exception occurred, most likely caused by the failure of the required class (in this
 case `InferredAssetSqlDataConnector`) from being successfully instantiated.
 
-### 2. Save the Datasource configuration to your DataContext
+### 2. Customize the introspection configuration to fit your needs
 
-Once the basic `SimpleSqlalchemyDatasource` configuration is error-free and satisfies your requirements, save it into
-your `DataContext` by using the `add_datasource()` function.
+`SimpleSqlalchemyDatasource` supports a number of configuration options to assist you with the `introspection` of your
+SQL database:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L40
+- the database views will included in the list of identified `Data References` (by setting the `include_views` flag to
+`true`)
+- if any exceptions occur during the `introspection` operation, then the process will continue (by setting the
+`skip_inapplicable_tables` flag to `true`)
+- specifying `excluded_tables` will have the effect of excluding only the tables on this list, while including the rest
+- specifying `included_tables` will have the effect of including only the tables on this list, while excluding the rest
+
+The following `YAML` configurqation example utilizes several of these configuration directives:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L40-L52
 ```
 
-### 3. Get names of available Data Assets
+### 3. Save the Datasource configuration to your DataContext
+
+Once the `SimpleSqlalchemyDatasource` configuration is error-free and satisfies your requirements, save it into your
+`DataContext` by using the `add_datasource()` function.
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L58
+```
+
+### 4. Get names of available Data Assets
  
 Getting names of available data assets using an `InferredAssetSqlDataConnector` affords you the visibility into types
 and naming structures of tables in your SQL database:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L41-L44
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L59-L62
 ```
 
 </TabItem>
