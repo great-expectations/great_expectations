@@ -63,9 +63,16 @@ def register_renderer(
         return
 
 
-# <WILL> is this is what is called
 def get_renderer_impl(object_name, renderer_type):
     return _registered_renderers.get(object_name, {}).get(renderer_type)
+
+
+def get_renderer_names(object_name: str) -> List[str]:
+    return list(_registered_renderers.get(object_name, {}).keys())
+
+
+def get_renderer_impls(object_name: str) -> list:
+    return list(_registered_renderers.get(object_name, {}).values())
 
 
 def register_expectation(expectation: Type["Expectation"]) -> None:
