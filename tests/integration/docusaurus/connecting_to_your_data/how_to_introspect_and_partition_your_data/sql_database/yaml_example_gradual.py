@@ -1,11 +1,52 @@
-from ruamel import yaml
+from ruamel import yaml ; import os # ALEX
 
-import great_expectations as ge
+import great_expectations as ge ; from great_expectations.data_context.util import file_relative_path # ALEX
 from great_expectations.core.batch import BatchRequest
 from great_expectations.expectations.metrics.import_manager import sa
 
-context = ge.get_context()
+from tests.expectations.test_expectation_arguments import build_in_memory_runtime_context ; context = build_in_memory_runtime_context() # context = ge.get_context() # ALEX
 
+datasource_yaml = f"""
+name: taxi_datasource
+class_name: SimpleSqlalchemyDatasource
+connection_string: <CONNECTION_STRING>
+
+introspection: # Each key in the "introspection" section is the name of an InferredAssetSqlDataConnector ("introspection" in "SimpleSqlalchemyDatasource" configuration is a reserved key name).
+    whole_table: {{}} # Any alphanumeric key name is acceptable.
+"""
+
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your path directly in the yaml above.
+data_dir_path = file_relative_path(__file__, os.path.join("..", "..", "..", "..", "..", "test_sets", "taxi_yellow_trip_data_samples", "sqlite")) # data_dir_path = "data" # ALEX
+CONNECTION_STRING = f"sqlite:///{data_dir_path}/yellow_tripdata.db"
+
+datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
+
+context.test_yaml_config(datasource_yaml)
+
+datasource_yaml = f"""  # buggy datasource_yaml configuration
+name: mis_configured_datasource
+class_name: SimpleSqlalchemyDatasource
+connection_string: <CONNECTION_STRING>
+
+introspecting:  # illegal top-level key name
+    whole_table: {{}}
+"""
+
+datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
+
+context.test_yaml_config(datasource_yaml)
+
+context.add_datasource(**yaml.load(datasource_yaml))
+available_data_asset_names = context.datasources[
+    "taxi_datasource"
+].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
+assert len(available_data_asset_names) == 3
+
+
+# TODO: <Alex>ALEX -- DIVIDER</Alex>
+raise Exception('TODO: <Alex>ALEX-BREAK!</Alex>')
+# TODO: <Alex>ALEX -- DIVIDER</Alex>
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
