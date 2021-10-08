@@ -123,7 +123,7 @@ validations:
   - batch_request:
       datasource_name: data__dir
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_trip_data_sample_2019-02.csv
+      data_asset_name: yellow_tripdata_sample_2019-02.csv
       data_connector_query:
         index: -1
     expectation_suite_name: taxi.demo
