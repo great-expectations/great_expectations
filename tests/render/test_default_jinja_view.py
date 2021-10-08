@@ -64,7 +64,7 @@ def test_render_DefaultJinjaPageView_meta_info():
     html = DefaultJinjaPageView().render(document)
     with open(
         file_relative_path(
-            __file__, "./output/test_render_DefaultJinjaPageView_meta_info.html)"
+            __file__, "./output/test_render_DefaultJinjaPageView_meta_info.html"
         ),
         "w",
     ) as outfile:
