@@ -1,8 +1,8 @@
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import DataContext
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context import DataContext
 
 
 def test_expect_table_row_count_to_be_between_runtime_no_temp_table_sa(
@@ -21,27 +21,27 @@ def test_expect_table_row_count_to_be_between_runtime_no_temp_table_sa(
         batch_request=batch_request,
         create_expectation_suite_with_name="test",
     )
-    results = validator.expect_table_row_count_to_be_between(min_value=100, max_value=2000)
+    results = validator.expect_table_row_count_to_be_between(
+        min_value=100, max_value=2000
+    )
     assert results == ExpectationValidationResult(
         success=True,
-        result={
-            "observed_value": 1313
-        },
+        result={"observed_value": 1313},
         meta={},
         expectation_config={
             "kwargs": {
                 "min_value": 100,
                 "max_value": 2000,
-                "batch_id": "a47a711a9984cb2a482157adf54c3cb6"
+                "batch_id": "a47a711a9984cb2a482157adf54c3cb6",
             },
             "ge_cloud_id": None,
             "meta": {},
-            "expectation_type": "expect_table_row_count_to_be_between"
+            "expectation_type": "expect_table_row_count_to_be_between",
         },
         exception_info={
             "raised_exception": False,
             "exception_traceback": None,
-            "exception_message": None
+            "exception_message": None,
         },
     )
 
@@ -62,27 +62,27 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_no_temp_table
         batch_request=batch_request,
         create_expectation_suite_with_name="test",
     )
-    results = validator.expect_table_row_count_to_be_between(min_value=100, max_value=2000)
+    results = validator.expect_table_row_count_to_be_between(
+        min_value=100, max_value=2000
+    )
     assert results == ExpectationValidationResult(
         success=True,
-        result={
-            "observed_value": 462
-        },
+        result={"observed_value": 462},
         meta={},
         expectation_config={
             "kwargs": {
                 "min_value": 100,
                 "max_value": 2000,
-                "batch_id": "a47a711a9984cb2a482157adf54c3cb6"
+                "batch_id": "a47a711a9984cb2a482157adf54c3cb6",
             },
             "ge_cloud_id": None,
             "meta": {},
-            "expectation_type": "expect_table_row_count_to_be_between"
+            "expectation_type": "expect_table_row_count_to_be_between",
         },
         exception_info={
             "raised_exception": False,
             "exception_traceback": None,
-            "exception_message": None
+            "exception_message": None,
         },
     )
 
@@ -101,26 +101,26 @@ def test_expect_table_row_count_to_be_between_no_temp_table_sa(
         batch_request=batch_request,
         create_expectation_suite_with_name="test",
     )
-    results = validator.expect_table_row_count_to_be_between(min_value=100, max_value=2000)
+    results = validator.expect_table_row_count_to_be_between(
+        min_value=100, max_value=2000
+    )
     assert results == ExpectationValidationResult(
         success=True,
-        result={
-            "observed_value": 1313
-        },
+        result={"observed_value": 1313},
         meta={},
         expectation_config={
             "kwargs": {
                 "min_value": 100,
                 "max_value": 2000,
-                "batch_id": "a47a711a9984cb2a482157adf54c3cb6"
+                "batch_id": "a47a711a9984cb2a482157adf54c3cb6",
             },
             "ge_cloud_id": None,
             "meta": {},
-            "expectation_type": "expect_table_row_count_to_be_between"
+            "expectation_type": "expect_table_row_count_to_be_between",
         },
         exception_info={
             "raised_exception": False,
             "exception_traceback": None,
-            "exception_message": None
+            "exception_message": None,
         },
     )

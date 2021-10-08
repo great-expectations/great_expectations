@@ -751,7 +751,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             try:
                 if isinstance(selectable, TextClause):
                     res = self.engine.execute(
-                        sa.select(query["select"]).select_from(selectable.columns().subquery())
+                        sa.select(query["select"]).select_from(
+                            selectable.columns().subquery()
+                        )
                     ).fetchall()
                 else:
                     res = self.engine.execute(
