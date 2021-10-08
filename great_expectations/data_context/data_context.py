@@ -921,13 +921,9 @@ class BaseDataContext:
         """
         if self.ge_cloud_mode:
             for config_path in self.GLOBAL_CONFIG_PATHS:
-                print("config_path")
-                print(config_path)
                 if os.path.isfile(config_path):
                     config = configparser.ConfigParser()
                     config.read(config_path)
-                    print("config_dict")
-                    print(config.items())
                     return dict(config.items(section="ge_cloud_config"))
             return {}
         config_variables_file_path = self.get_config().config_variables_file_path

@@ -550,7 +550,6 @@ class ExpectationSuite(SerializableDictDot):
         return expectation_configuration
 
 
-# <WILL> Breadcrumb for playing well with Mercury
 class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
@@ -599,7 +598,6 @@ class ExpectationSuiteSchema(Schema):
         data = self.clean_empty(data)
         return data
 
-    # <WILL> ding ding ding?
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite(self, data, **kwargs):

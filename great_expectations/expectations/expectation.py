@@ -166,7 +166,6 @@ class Expectation(metaclass=MetaExpectation):
     ):
         raise NotImplementedError
 
-    # @renderer(renderer_type="atomic.prescriptive.template")
     @classmethod
     def _atomic_prescriptive_template(
         cls,
@@ -176,14 +175,16 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        runtime_configuration = runtime_configuration or {}
+        styling = runtime_configuration.get("styling")
+
         template_str = "$expectation_type(**$kwargs)"
         params = {
             "expectation_type": configuration.expectation_type,
             "kwargs": configuration.kwargs,
         }
-        return (template_str, params)
+        return (template_str, params, styling)
 
-    # this one goes to mercury
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
     def _prescriptive_summary(
@@ -194,7 +195,7 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (template_str, params) = cls._atomic_prescriptive_template(
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
         value_obj = renderedAtomicValueSchema.load(
@@ -206,7 +207,7 @@ class Expectation(metaclass=MetaExpectation):
             value=value_obj,
             valuetype="StringValueType",
         )
-        return rendered
+        return [rendered]
 
     # this one goes to OSS
     # TODO : refactor to use atomic.prescriptive.template

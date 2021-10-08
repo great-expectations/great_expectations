@@ -179,9 +179,9 @@ class RenderedAtomicValueSchema(Schema):
     # for TableType
     labels = fields.List(fields.Str(), required=False, allow_none=True)
     header_row = fields.String(required=False, allow_none=True)
-    table: fields.List(
-        fields.Str(), required=False, allow_none=True
-    )  # do we need to have fields.float()?
+    table: fields.List(fields.Str(), required=False, allow_none=True)
+
+    # TODO add VegaGraph
 
     @post_load()
     def create_value_obj(self, data, **kwargs):
@@ -198,9 +198,15 @@ class RenderedAtomicValue(DictDot):
         header_row: str = None,
         table: list = None,
     ):
-        self.string = string
-        self.parameters = parameters
-        self.schema = schema
+        # StringType
+        self.string: str = string
+        self.parameters: dict = parameters
+        self.schema: dict = schema
+
+        # TableType
+        self.labels: list = labels
+        self.header_row: str = header_row
+        self.table: list = table
 
 
 class AssetConfigSchema(Schema):
@@ -2307,6 +2313,4 @@ anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
-# <WILL> Atomic.
 renderedAtomicValueSchema = RenderedAtomicValueSchema()
-# renderedAtomicContentSchema = RenderedAtomicContentSchema()
