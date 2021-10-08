@@ -1088,7 +1088,7 @@ def test_table_metric_pd(caplog):
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
@@ -1326,7 +1326,7 @@ def test_table_metric_sa(sa):
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
         metric_dependencies={"metric_partial_fn": desired_metric},
     )
@@ -2262,7 +2262,7 @@ def test_table_metric_spark(spark_session):
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
