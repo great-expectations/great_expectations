@@ -143,7 +143,7 @@ For the present example, we can split according to the "passenger_count" column 
 Perform the relevant checks, such as confirm the number of batches.  For example (be sure to adjust this code to match
 the specifics of your data and configuration):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example.py#L152-L153
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example.py#L152-L153
 ```
 
 ## Sampling
