@@ -94,10 +94,10 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
-                // 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
+                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
                 // 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
                 'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource'
+                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
               ]
             },
             {
@@ -153,7 +153,8 @@ module.exports = {
               type: 'category',
               label: 'Advanced',
               items: [
-                'guides/connecting_to_your_data/advanced/database_credentials'
+                'guides/connecting_to_your_data/advanced/database_credentials',
+                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
                 // 'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
@@ -275,15 +276,15 @@ module.exports = {
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_flyte',
-        //{
-          //type: 'category',
-          //label: 'Contributing',
-          //items: [
-            //'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
-            //'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
-          //]
-        //}
+        'deployment_patterns/how_to_use_great_expectations_in_flyte'
+        // {
+        // type: 'category',
+        // label: 'Contributing',
+        // items: [
+        // 'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
+        // 'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
+        // ]
+        // }
       ]
     },
     {
@@ -327,7 +328,8 @@ module.exports = {
             { type: 'doc', id: 'reference/expectations/standard_arguments' },
             // { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
-            { type: 'doc', id: 'reference/validation' }
+            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
         {
