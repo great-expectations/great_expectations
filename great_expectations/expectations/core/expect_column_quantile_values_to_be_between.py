@@ -263,7 +263,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             "header_row": table_header_row,
             "table_rows": table_rows,
         }
-        return rendered
+        return [rendered]
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

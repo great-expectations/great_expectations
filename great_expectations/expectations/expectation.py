@@ -200,7 +200,7 @@ class Expectation(metaclass=MetaExpectation):
             "parameters": params,
             "schema": {"hi": "will"}
         }
-        return rendered
+        return [rendered]
 
     # this one goes to OSS
     # TODO : refactor to use atomic.prescriptive.template

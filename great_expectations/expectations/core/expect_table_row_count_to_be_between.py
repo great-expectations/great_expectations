@@ -116,12 +116,11 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        return {
-            "content_block_type": "string_template",
+        return [{
             "string": "hello",
             "parameters": {"hi": "will"},
             "schema": {},
-        }
+        }]
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

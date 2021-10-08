@@ -240,12 +240,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             configuration, result, language, runtime_configuration, **kwargs
         )
         rendered = {
-            "content_block_type": "string_template",
             "string": template_str,
             "parameters": params,
             "schema": {"hi": "rob"},
         }
-        return rendered
+        return [rendered]
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

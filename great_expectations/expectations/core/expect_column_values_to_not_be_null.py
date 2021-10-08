@@ -147,7 +147,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             "parameters": params,
             "schema": {"hi": "rob"},
         }
-        return rendered
+        return [rendered]
 
     # # option 1 :
     # def _atomic_summary(self:)
