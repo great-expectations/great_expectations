@@ -30,9 +30,9 @@ To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please se
 
 ### 1. Instantiate your project's DataContext
 
-Import these necessary packages and modules.
+Import Great Expectations.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L1-L5
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L5
 ```
 
 Load your DataContext into memory using the `get_context()` method.
