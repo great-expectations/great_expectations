@@ -139,7 +139,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.template")
+    # @renderer(renderer_type="atomic.prescriptive.template")
     def _atomic_prescriptive_template(
         cls,
         configuration=None,

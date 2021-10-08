@@ -133,7 +133,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.template")
+    # @renderer(renderer_type="atomic.prescriptive.template")
     def _atomic_prescriptive_template(
         cls,
         configuration=None,

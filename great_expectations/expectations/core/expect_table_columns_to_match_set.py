@@ -99,7 +99,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.template")
+    # @renderer(renderer_type="atomic.prescriptive.template")
     def _atomic_prescriptive_template(
         cls,
         configuration=None,
