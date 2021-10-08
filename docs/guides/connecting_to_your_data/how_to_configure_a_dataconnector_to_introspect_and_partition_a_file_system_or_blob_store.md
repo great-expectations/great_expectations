@@ -22,9 +22,9 @@ File-based introspection and partitioning are useful for:
   
 </Prerequisites>
 
-We will use the "Yellow Taxi" dataset to walk you through the configuration of `Data Connectors` by starting with the
-basic `Inferred Asset Data Connector`, then moving to a bare-bones `Configured Asset Data Connector`, and gradually
-building out its configuration to achieve the introspection of your files with the semantics consistent with your goals.
+We will use the "Yellow Taxi" dataset to walk you through the configuration of `Data Connectors`.  Starting with the
+bare-bones version of either an `Inferred Asset Data Connector` or a `Configured Asset Data Connector`, we gradually
+build out the configuration to achieve the introspection of your files with the semantics consistent with your goals.
 
 To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
 
