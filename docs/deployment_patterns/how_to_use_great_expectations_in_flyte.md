@@ -99,32 +99,6 @@ def file_task(
 
 @workflow
 def file_wf(
-   dataset: CSVFile = "https://raw.githubusercontent.com/superconductive/ge_tutorials/main/data/yimport pandas as pd
-from flytekit import Resources, kwtypes, task, workflow
-from flytekit.types.file import CSVFile
-from flytekitplugins.great_expectations import GreatExpectationsTask
-
-file_task_object = GreatExpectationsTask(
-   name="great_expectations_task_flytefile",
-   datasource_name="data",
-   inputs=kwtypes(dataset=CSVFile),
-   expectation_suite_name="test.demo",
-   data_connector_name="data_flytetype_data_connector",
-   local_file_path="/tmp",
-   context_root_dir="great_expectations",
-)
-
-
-@task(limits=Resources(mem="500Mi"))
-def file_task(
-   dataset: CSVFile,
-) -> int:
-   file_task_object(dataset=dataset)
-   return len(pd.read_csv(dataset))
-
-
-@workflow
-def file_wf(
    dataset: CSVFile = "https://raw.githubusercontent.com/superconductive/ge_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
 ) -> int:
    return file_task(dataset=dataset)
