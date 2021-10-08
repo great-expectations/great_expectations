@@ -30,7 +30,10 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import legacy_method_parameters
+from great_expectations.expectations.util import (
+    legacy_method_parameters,
+    render_evaluation_parameter_string,
+)
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -187,6 +190,7 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
+    @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
         configuration=None,
@@ -199,7 +203,7 @@ class Expectation(metaclass=MetaExpectation):
             configuration, result, language, runtime_configuration, **kwargs
         )
         value_obj = renderedAtomicValueSchema.load(
-            {"string": template_str, "parameters": params, "schema": {}}
+            {"template": template_str, "params": params, "schema": {}}
         )
 
         rendered = RenderedAtomicContent(

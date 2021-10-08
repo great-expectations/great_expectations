@@ -155,7 +155,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
         return True
 
-    # TODO : does this need @render_evaluation_parameter_string?
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.template")
     def _atomic_prescriptive_template(
@@ -225,32 +224,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             params.update(conditional_params)
 
         return (template_str, params, styling)
-
-    @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
-    @render_evaluation_parameter_string
-    def _prescriptive_summary(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        # implemented because @render_evalutation_parameter_string decorator
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
-        )
-        value_obj = renderedAtomicValueSchema.load(
-            {"string": template_str, "parameters": params, "schema": {}}
-        )
-
-        rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
-            value=value_obj,
-            valuetype="StringValueType",
-        )
-        return [rendered]
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

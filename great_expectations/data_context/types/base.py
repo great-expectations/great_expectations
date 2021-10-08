@@ -179,9 +179,7 @@ class RenderedAtomicValueSchema(Schema):
     # for TableType
     header = fields.List(fields.Str(), required=False, allow_none=True)
     header_row = fields.String(required=False, allow_none=True)
-    table: fields.List(
-        fields.List(fields.Str, fields.Float), required=False, allow_none=True
-    )
+    table: fields.List(fields.List(fields.Str()), required=False, allow_none=True)
 
     # TODO add VegaGraph
 
