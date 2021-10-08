@@ -2269,7 +2269,7 @@ def test_table_metric_spark(spark_session):
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
         metric_dependencies={"metric_partial_fn": desired_metric},
     )
