@@ -749,6 +749,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             assert len(query["select"]) == len(query["ids"])
             try:
+                """
+                if a custom query is passed, selectable will be TextClause and not formatted
+                as a subquery wrapped in "(subquery) alias". TextClause must first be converted
+                to TextualSelect using sa.columns() before it can be converted to type Subquery
+                """
                 if isinstance(selectable, TextClause):
                     res = self.engine.execute(
                         sa.select(query["select"]).select_from(
