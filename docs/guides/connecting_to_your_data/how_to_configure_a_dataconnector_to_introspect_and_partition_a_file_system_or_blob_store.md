@@ -37,7 +37,7 @@ Import Great Expectations.
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L5
 ```
 
-Load your DataContext into memory using the `get_context()` method.
+### 2. Load your DataContext into memory using the `get_context()` method.
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L7
 ```
