@@ -28,7 +28,7 @@ or the `tables` section of the `SimpleSqlalchemyDatasource` configuration, we gr
 achieve the introspection of your SQL database with the semantics consistent with your goals.
 
 :::info
-Only `introspection` and `tables` are legal as keys at the top level in the `SimpleSqlalchemyDatasource` configuration.
+Only `introspection` and `tables` are the legal top-level keys in the `SimpleSqlalchemyDatasource` configuration.
 :::
 
 To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
@@ -42,7 +42,9 @@ Import Great Expectations.
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L3
 ```
 
-### 2. Load your DataContext into memory using the `get_context()` method.
+### 2. Obtain DataContext
+
+Load your DataContext into memory using the `get_context()` method.
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L7
 ```
