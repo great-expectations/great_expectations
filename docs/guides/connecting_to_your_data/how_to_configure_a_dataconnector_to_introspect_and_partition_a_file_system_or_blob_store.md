@@ -163,7 +163,7 @@ your `Datasource` configuration (please feel free to change the name as you deem
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L147-L164
 ```
 
-Now run this code again to test your configuration:
+Now run this code to test your configuration:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
 ```
