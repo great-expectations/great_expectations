@@ -116,7 +116,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 * **Core concepts are always capitalized, and always are linked on first reference within each page**. Pretend the docs are a fantasy novel, and core concepts are magic.
 
 	* Wrong: “You can create expectation suites as follows…”
-	* Better: “You can create [Expectation Suites](http://localhost:3000/docs/reference/glossary_of_expectations) as follows…”
+	* Better: “You can create [Expectation Suites](https://docs.greatexpectations.io/docs/reference/glossary_of_expectations) as follows…”
 	* Avoid: “You can create suites of Expectations as follows…”
 
 * **Class names are written in upper camel case, and always linked on first reference.** 
