@@ -63,7 +63,7 @@ pyupgrade --py3-plus
 
 #### The CLI
 
-The [CLI](docs/guides/miscellaneous/how_to_use_the_great_expectations_cli) has some conventions of its own.
+The [CLI](https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_great_expectations_cli) has some conventions of its own.
 
 * The CLI never writes to disk without asking first.
 
