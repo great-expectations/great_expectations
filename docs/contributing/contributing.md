@@ -13,7 +13,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 #### 2. Set up your development environment
 * Follow these instructions to [set up your dev environment](/docs/contributing/contributing_setup).
 
-Alternatively, for small changes that don’t need to be tested locally (e.g. documentation changes), you can make changes directly through Github.
+Alternatively, for small changes that don’t need to be tested locally (e.g. documentation changes), you can [make changes directly through GitHub](https://docs.greatexpectations.io/docs/contributing/contributing_github).
 
 #### 3. Identify the type of contribution that you want to make
 
