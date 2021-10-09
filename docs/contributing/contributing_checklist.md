@@ -32,7 +32,7 @@ Once your code is ready, please go through the following checklist before submit
 
 * You can also rebase your branch from upstream/develop. In general, the steps are:
 
-	* Run `git fetch` upstream then `git rebase upstream/develop`.
+	* Run `git fetch upstream` then `git rebase upstream/develop`.
 
 	* Fix any merge conflicts that arise from the rebase.
 
