@@ -63,12 +63,11 @@ def register_renderer(
         return
 
 
-# <WILL> check : why was this needed?
 def get_renderer_names(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).keys())
 
 
-def get_renderer_impls(object_name: str) -> list:
+def get_renderer_impls(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).values())
 
 
