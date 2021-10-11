@@ -1,16 +1,12 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...data_asset.util import parse_result_format
+from ...data_context.types.base import renderedAtomicValueSchema
 from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
+from ...render.types import RenderedAtomicContent, RenderedStringTemplateContent
 from ...render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -106,9 +102,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
@@ -128,9 +122,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "min_value",
                 "max_value",
                 "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
             ],
         )
 
@@ -159,13 +150,48 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             )
             params.update(conditional_params)
 
+        # format params
+        params_with_json_schema = {
+            "min_value": {
+                "schema": {"type": "number"},
+                "value": params.get("min_value"),
+            },
+            "max_value": {
+                "schema": {"type": "number"},
+                "value": params.get("max_value"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, kwargs
+        )
+
         return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": params,
+                        "params": {
+                            param: value_dict["value"]
+                            for param, value_dict in params.items()
+                        },
                         "styling": styling,
                     },
                 }

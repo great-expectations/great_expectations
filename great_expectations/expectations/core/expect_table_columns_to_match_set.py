@@ -99,9 +99,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
@@ -137,13 +135,42 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             for idx in range(len(params["column_list"])):
                 params["column_list_" + str(idx)] = params["column_list"][idx]
 
+        params_with_json_schema = {
+            "column_list": {
+                "schema": {"type": "array"},
+                "value": params.get("column_list"),
+            },
+            "exact_match": {
+                "schema": {"type": "boolean"},
+                "value": params.get("exact_match"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, kwargs
+        )
         return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": params,
+                        "params": {
+                            param: value_dict["value"]
+                            for param, value_dict in params.items()
+                        },
                         "styling": styling,
                     },
                 }
