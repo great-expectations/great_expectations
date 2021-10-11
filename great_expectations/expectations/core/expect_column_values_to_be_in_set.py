@@ -185,7 +185,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 "value": params.get("row_condition"),
             },
             "condition_parser": {
-                "schema": {"type": "object"},
+                "schema": {"type": "string"},
                 "value": params.get("condition_parser"),
             },
         }
