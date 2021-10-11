@@ -86,15 +86,13 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -115,7 +113,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         )
 
         # NOTE: This renderer doesn't do anything with "ignore_row_if"
-
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
             params["row_condition"] = None
@@ -141,6 +138,43 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                 + template_str[1:]
             )
             params.update(conditional_params)
+        params_with_json_schema = {
+            "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
+            "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "ignore_row_if": {
+                "schema": {"type": "string"},
+                "value": params.get("ignore_row_if"),
+            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "object"},
+                "value": params.get("condition_parser"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, kwargs
+        )
 
         return [
             RenderedStringTemplateContent(
@@ -148,7 +182,10 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": params,
+                        "params": {
+                            param: value_dict["value"]
+                            for param, value_dict in params.items()
+                        },
                         "styling": styling,
                     },
                 }

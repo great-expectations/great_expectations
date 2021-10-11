@@ -107,9 +107,7 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
@@ -137,13 +135,50 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value columns."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value columns."
+        params_with_json_schema = {
+            "min_value": {
+                "schema": {"type": "number"},
+                "value": params.get("min_value"),
+            },
+            "max_value": {
+                "schema": {"type": "number"},
+                "value": params.get("max_value"),
+            },
+            "strict_min": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_min"),
+            },
+            "strict_max": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_max"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, kwargs
+        )
         return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": params,
+                        "params": {
+                            param: value_dict["value"]
+                            for param, value_dict in params.items()
+                        },
                         "styling": styling,
                     },
                 }
