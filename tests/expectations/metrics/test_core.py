@@ -523,6 +523,152 @@ def test_map_column_value_lengths_between_pd():
     assert ser_expected_lengths.equals(result_series)
 
 
+def test_map_column_values_increasing_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3.0, 4.5, 6, None, 3]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.increasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert list(metrics[condition_metric.id][0]) == [False, False, False, False, False, True]
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index([6], dtype='int64')
+    assert metrics[unexpected_rows_metric.id]["a"].values == [3]
+
+
+def test_map_column_values_increasing_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "a": [1, 2, 3.0, 4.5, 6, None, 3],
+            }
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    table_column_types = MetricConfiguration(
+        metric_name="table.column_types",
+        metric_domain_kwargs={},
+        metric_value_kwargs={
+            "include_nested": True,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_column_types,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.increasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "strictly": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "table.column_types": table_column_types
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id] == [(3,),]
+
+
 def test_map_unique_column_exists_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, 4, None]}))
 
