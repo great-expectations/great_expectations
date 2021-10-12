@@ -183,15 +183,18 @@ class Expectation(metaclass=MetaExpectation):
 
         template_str = "$expectation_type(**$kwargs)"
         params = {
-            "expectation_type": configuration.expectation_type,
-            "kwargs": configuration.kwargs,
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
         }
         return (template_str, params, styling)
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
     @render_evaluation_parameter_string
-    def _prescriptive_summary(
+    def _atomic_prescriptive_summary(
         cls,
         configuration=None,
         result=None,
@@ -209,16 +212,13 @@ class Expectation(metaclass=MetaExpectation):
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
-
         rendered = RenderedAtomicContent(
             name="atomic.prescriptive.summary",
             value=value_obj,
             valuetype="StringValueType",
         )
-        return [rendered]
+        return rendered
 
-    # this one goes to OSS
-    # TODO : refactor to use atomic.prescriptive.template
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(

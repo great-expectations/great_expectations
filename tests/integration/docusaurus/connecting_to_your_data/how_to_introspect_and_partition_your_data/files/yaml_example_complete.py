@@ -15,6 +15,15 @@ execution_engine:
   module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
+    default_inferred_data_connector_name:
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: <PATH_TO_YOUR_DATA_HERE>
+        glob_directive: "*.csv"
+        default_regex:
+          pattern: (.*)
+          group_names:
+            - data_asset_name
+            
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -26,7 +35,7 @@ data_connectors:
         assets:
           taxi_data_flat:
             base_directory: samples_2020
-            pattern: (yellow_trip_data_sample_.*)\\.csv
+            pattern: (yellow_trip_data_sample_.+)\\.csv
             group_names:
               - filename
           taxi_data_year_month:
@@ -36,14 +45,6 @@ data_connectors:
               - name
               - year
               - month
-    default_inferred_data_connector_name:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: <PATH_TO_YOUR_DATA_HERE>
-        glob_directive: "*.csv"
-        default_regex:
-          pattern: (.*)
-          group_names:
-            - data_asset_name
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -64,10 +65,6 @@ available_data_asset_names = context.datasources[
 ]
 assert len(available_data_asset_names) == 36
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
-
 # Here is a BatchRequest naming an inferred data_asset.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
@@ -79,13 +76,17 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_trip_data_sample_2019-01.csv"
 
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
-print(validator.head())
+print(validator.head(n_rows=10))
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
+assert batch_list[0].data.dataframe.shape[0] == 10000
 
 # Here is a BatchRequest naming a configured data_asset representing an un-partitioned (flat) filename structure.
 batch_request = BatchRequest(
@@ -100,6 +101,7 @@ batch_request.data_asset_name = "taxi_data_flat"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 12
+assert batch_list[0].data.dataframe.shape[0] == 10000
 
 # Here is a BatchRequest naming a configured data_asset representing a filename structure partitioned by year and month.
 # This BatchRequest specifies multiple batches, which is useful for dataset exploration.
@@ -130,7 +132,9 @@ batch_request = BatchRequest(
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
     data_connector_query={
         "batch_filter_parameters": {
-            "<YOUR_BATCH_FILTER_PARAMETER_KEY>": "<YOUR_BATCH_FILTER_PARAMETER_VALUE>",
+            "<YOUR_BATCH_FILTER_PARAMETER_0_KEY>": "<YOUR_BATCH_FILTER_PARAMETER_0_VALUE>",
+            "<YOUR_BATCH_FILTER_PARAMETER_1_KEY>": "<YOUR_BATCH_FILTER_PARAMETER_1_VALUE>",
+            "<YOUR_BATCH_FILTER_PARAMETER_2_KEY>": "<YOUR_BATCH_FILTER_PARAMETER_2_VALUE>",
         }
     },
 )
@@ -139,6 +143,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
 batch_request.data_connector_query["batch_filter_parameters"] = {
+    "year": "2020",
     "month": "01",
 }
 
@@ -184,6 +189,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
 batch_request.data_connector_query["batch_filter_parameters"] = {
+    "year": "2020",
     "month": "01",
 }
 batch_request.batch_spec_passthrough["splitter_method"] = "_split_on_column_value"

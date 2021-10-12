@@ -7,7 +7,23 @@ Changelog
 
 develop
 -----------------
-* [DOCS] Update g_e docs branding to match g_e.io  (#3741)
+
+0.13.37
+-----------------
+* [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
+* [FEATURE] add get_available_data_asset_names_and_types (#3476)
+* [FEATURE] add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
+* [BUGFIX] Fix TupleS3StoreBackend remove_key bug (#3489)
+* [DOCS] Adding Flyte Deployment pattern to docs (#3383)
+* [DOCS] g_e docs branding updates (#3471)
+* [MAINTENANCE] Add type-hints; add utility method for creating temporary DB tables; clean up imports; improve code readability; and add a directory to pre-commit (#3475)
+* [MAINTENANCE] Clean up for a better code readability. (#3493)
+* [MAINTENANCE] Enable SQL for the "expect_compound_columns_to_be_unique" expectation. (#3488)
+* [MAINTENANCE] Fix some typos (#3474) (Thanks @mohamadmansourX)
+* [MAINTENANCE] Support SQLAlchemy version 1.3.24 for compatibility with Airflow (Airflow does not currently support later versions of SQLAlchemy). (#3499)
+* [MAINTENANCE] Update contributing_checklist.md (#3478) (Thanks @plain-jane-gray)
+* [MAINTENANCE] Update how_to_configure_a_validation_result_store_in_gcs.md (#3480) (Thanks @plain-jane-gray)
+* [MAINTENANCE] update implemented_expectations (#3492)
 
 0.13.36
 -----------------

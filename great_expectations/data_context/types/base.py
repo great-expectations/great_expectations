@@ -2304,6 +2304,50 @@ class CheckpointValidationConfigSchema(Schema):
     pass
 
 
+class RenderedAtomicValueSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    # for StringType
+    template = fields.String(required=False, allow_none=True)
+    params = fields.Dict(required=False, allow_none=True)
+    schema = fields.Dict(required=False, allow_none=True)
+
+    # TODO enable TableType
+    # header = fields.List(fields.Str(), required=False, allow_none=True)
+    # header_row = fields.List(fields.Str(), required=False, allow_none=True)
+    # table: fields.List(fields.List(fields.Str()), required=False, allow_none=True)
+
+    # TODO add VegaGraph
+
+    @post_load()
+    def create_value_obj(self, data, **kwargs):
+        return RenderedAtomicValue(**data)
+
+
+class RenderedAtomicValue(DictDot):
+    def __init__(
+        self,
+        template: str = None,
+        params: dict = None,
+        schema: dict = None,
+        # header: list = None,
+        # header_row: str = None,
+        # table: list = None,
+    ):
+        # StringType
+        self.template: str = template
+        self.params: dict = params
+        self.schema: dict = schema
+
+        # TODO enable TableType
+        # self.header: list = header
+        # self.header_row: str = header_row
+        # self.table: list = table
+
+        # TODO add VegaGraph
+
+
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()

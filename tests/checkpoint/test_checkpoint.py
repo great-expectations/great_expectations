@@ -22,6 +22,13 @@ from great_expectations.validation_operators.types.validation_operator_result im
     ValidationOperatorResult,
 )
 
+try:
+    pyspark = pytest.importorskip("pyspark")
+    from pyspark.sql import SparkSession
+except ImportError:
+    pyspark = None
+    SparkSession = None
+
 yaml = YAML()
 
 logger = logging.getLogger(__name__)
@@ -1156,6 +1163,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
@@ -1210,23 +1222,25 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_pandasdf(
+    data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     # add checkpoint config
     batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_1911",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -1270,9 +1284,78 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
+    data_context_with_datasource_spark_engine,
+):
+    context: DataContext = data_context_with_datasource_spark_engine
+    spark = SparkSession.builder.getOrCreate()
+    pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df = spark.createDataFrame(pandas_df)
+    # add checkpoint config
+    batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[{"batch_request": batch_request}],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_pandasdf(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
@@ -1289,7 +1372,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_1911",
+            "data_asset_name": "test_df",
             "batch_identifiers": {
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
@@ -1340,6 +1423,88 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 2
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
+    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    spark = SparkSession.builder.getOrCreate()
+    pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df = spark.createDataFrame(pandas_df)
+    # add checkpoint config
+    batch_request = BatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1911",
+        }
+    )
+    runtime_batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {"batch_request": runtime_batch_request},
+            {"batch_request": batch_request},
+        ],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 2
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_config_substitution_simple(
