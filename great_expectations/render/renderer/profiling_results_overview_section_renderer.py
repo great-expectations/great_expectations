@@ -59,7 +59,6 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _render_dataset_info(cls, evrs, content_blocks):
-        # <WILL> 2021107 ensure this table can be rendered in atomic.renderer
         expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(
             evrs["results"], "expect_table_row_count_to_be_between"
         )

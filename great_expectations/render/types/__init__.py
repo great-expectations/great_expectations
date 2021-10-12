@@ -68,19 +68,6 @@ class RenderedComponentContent(RenderedContent):
         return d
 
 
-# <THIS IS THE OBJECT THAT IS RETURNED>
-class RenderedAtomicContent(RenderedContent):
-    def __init__(
-        self,
-        name: str = None,
-        value: RenderedAtomicValue = None,
-        valuetype: str = None,
-    ):
-        self.name = name
-        self.value = value
-        self.valuetype = valuetype
-
-
 class RenderedHeaderContent(RenderedComponentContent):
     def __init__(
         self,
@@ -293,7 +280,6 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
-    # Marker This might help us. Use as back up if we run out of time :)
     def to_json_dict(self):
         d = super().to_json_dict()
         d["string_template"] = self.string_template

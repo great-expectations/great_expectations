@@ -31,7 +31,6 @@ class Renderer:
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
-        # <WILL> marker for
         if isinstance(ge_object, ExpectationConfiguration):
             return ge_object.expectation_type
 
