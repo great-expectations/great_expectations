@@ -178,7 +178,13 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
+        """
+        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
+        renderer.prescriptive (OSS GE)
+        """
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
         styling = runtime_configuration.get("styling")
 
         template_str = "$expectation_type(**$kwargs)"
@@ -202,6 +208,9 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
         (template_str, params, styling) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
@@ -510,7 +519,7 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
-    def _get_observed_value_from_evr(self, result: ExpectationValidationResult):
+    def _get_observed_value_from_evr(self, result: ExpectationValidationResult) -> str:
         result_dict = result.result
         if result_dict is None:
             return "--"
@@ -540,6 +549,9 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
         observed_value = cls._get_observed_value_from_evr(result=result)
         value_obj = renderedAtomicValueSchema.load(
             {
