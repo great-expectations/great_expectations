@@ -201,7 +201,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 "value": params.get("parse_strings_as_datetimes"),
             },
             "condition_parser": {
-                "schema": {"type": "object"},
+                "schema": {"type": "string"},
                 "value": params.get("condition_parser"),
             },
             "strict_min": {
