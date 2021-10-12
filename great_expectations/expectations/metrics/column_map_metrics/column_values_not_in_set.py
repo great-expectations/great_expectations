@@ -1,3 +1,7 @@
+from typing import Optional
+
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -23,7 +27,22 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
     )
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, value_set, **kwargs):
+    def _pandas(
+        cls,
+        column,
+        value_set,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        **kwargs
+    ):
+        # no need to parse as datetime; just compare the strings as-is
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+will be deprecated in a future release. Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
         if value_set is None:
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
@@ -35,17 +54,42 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
         return ~column.isin(parsed_value_set)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, value_set, parse_strings_as_datetimes, **kwargs):
+    def _sqlalchemy(
+        cls,
+        column,
+        value_set,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        **kwargs
+    ):
+        # no need to parse as datetime; just compare the strings as-is
         if parse_strings_as_datetimes:
-            parsed_value_set = parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a future
+release. Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
 
-        if parsed_value_set is None or len(parsed_value_set) == 0:
+        if value_set is None or len(value_set) == 0:
             return True
 
-        return column.notin_(tuple(parsed_value_set))
+        return column.notin_(tuple(value_set))
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, value_set, **kwargs):
+    def _spark(
+        cls,
+        column,
+        value_set,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        **kwargs
+    ):
+        # no need to parse as datetime; just compare the strings as-is
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a future
+release. Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
         return ~column.isin(value_set)
