@@ -44,7 +44,7 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
 tables:  # Each key in the "tables" section is a table_name (key name "tables" in "SimpleSqlalchemyDatasource" configuration is reserved).
     # data_asset_name is: concatenate(data_asset_name_prefix, table_name, data_asset_name_suffix)
     yellow_tripdata_sample_2019_01:  # Must match table name exactly.
-        partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration are reserved).
+        partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration is reserved).
             whole_table:
                 include_schema_name: True
                 data_asset_name_prefix: taxi__
@@ -172,7 +172,7 @@ batch_request = BatchRequest(
 batch_request.data_asset_name = "taxi__yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
-assert len(batch_list) == 6
+assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passengers
 
 batch_data = batch_list[1].data  # 2-passenger sample of batch data
 num_rows = batch_data.execution_engine.engine.execute(

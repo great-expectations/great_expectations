@@ -66,7 +66,7 @@ connection_string: <CONNECTION_STRING>
 
 tables:  # Each key in the "tables" section is a table_name (key name "tables" in "SimpleSqlalchemyDatasource" configuration is reserved).
     yellow_tripdata_sample_2019_01:  # Must match table name exactly.
-        partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration are reserved).
+        partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration is reserved).
             whole_table: {{}}
 """
 
