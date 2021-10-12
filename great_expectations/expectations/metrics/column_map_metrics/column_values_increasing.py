@@ -33,12 +33,12 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         column,
         strictly=False,
         parse_strings_as_datetimes: Optional[bool] = None,
-        **kwargs
+        **kwargs,
     ):
         if parse_strings_as_datetimes:
             warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a future
-release. Please update code accordingly.
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
 """,
                 DeprecationWarning,
             )
@@ -69,8 +69,14 @@ release. Please update code accordingly.
         runtime_configuration: Dict,
         parse_strings_as_datetimes: Optional[bool] = None,
     ):
+        parse_strings_as_datetimes = True
         if parse_strings_as_datetimes:
-            raise NotImplementedError
+            warnings.warn(
+                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._spark()", types are detected naturally.
+""",
+                DeprecationWarning,
+            )
 
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
