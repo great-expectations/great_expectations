@@ -5,8 +5,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 
 This guide will help you configure `Splitting` and `Sampling` for working with tables in an SQL database using
 `SimpleSqlalchemyDatasource`, which operates as a proxy to `InferredAssetSqlDataConnector` and
-`ConfiguredAssetSqlDataConnector` (for the SQL use case, these types of the `Active Data Connector` are exercised
-indirectly, via `SimpleSqlalchemyDatasource`).
+`ConfiguredAssetSqlDataConnector`.
 
 We will use the `tables` section of the `SimpleSqlalchemyDatasource` configuration, which exercises the
 `ConfiguredAssetSqlDataConnector`, to showcase `Splitting` and `Sampling` (the same `Splitting` and `Sampling`
@@ -22,7 +21,7 @@ your data at various levels of granularity:
 
 - [Configured and loaded a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md)
 - [Configured a Datasource and Data Connector](../../../reference/datasources.md)
-- [How to configure a DataConnector to introspect and partition tables in SQL](../how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md)
+- Reviewed [How to configure a DataConnector to introspect and partition tables in SQL](../how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md)
 
 </Prerequisites>
 

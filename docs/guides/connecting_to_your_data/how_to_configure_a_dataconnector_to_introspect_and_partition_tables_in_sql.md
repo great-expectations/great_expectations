@@ -6,9 +6,8 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 This guide will help you introspect and partition tables in an SQL database using `SimpleSqlalchemyDatasource`, which
-operates as a proxy to `InferredAssetSqlDataConnector` and `ConfiguredAssetSqlDataConnector` (for the SQL use case,
-these types of the `Active Data Connector` are exercised indirectly, via `SimpleSqlalchemyDatasource`).  For background,
-please see the `Datasource` specific guides in the "Connecting to your data" section.
+operates as a proxy to `InferredAssetSqlDataConnector` and `ConfiguredAssetSqlDataConnector`.  For background, please
+see the `Datasource` specific guides in the "Connecting to your data" section.
 
 The SQL database introspection and partitioning are useful for:
 - Exploring the schema and column metadata of the tables in your SQL database, and
