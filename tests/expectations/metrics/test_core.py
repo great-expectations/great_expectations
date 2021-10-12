@@ -562,7 +562,14 @@ def test_map_column_values_increasing_pd():
     )
     metrics.update(results)
 
-    assert list(metrics[condition_metric.id][0]) == [False, False, False, False, False, True]
+    assert list(metrics[condition_metric.id][0]) == [
+        False,
+        False,
+        False,
+        False,
+        False,
+        True,
+    ]
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
@@ -581,7 +588,9 @@ def test_map_column_values_increasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index([6], dtype='int64')
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
+        [6], dtype="int64"
+    )
     assert metrics[unexpected_rows_metric.id]["a"].values == [3]
 
 
@@ -625,7 +634,7 @@ def test_map_column_values_increasing_spark(spark_session):
         },
         metric_dependencies={
             "table.columns": table_columns_metric,
-            "table.column_types": table_column_types
+            "table.column_types": table_column_types,
         },
     )
     results = engine.resolve_metrics(
@@ -666,7 +675,164 @@ def test_map_column_values_increasing_spark(spark_session):
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id] == [(3,),]
+    assert metrics[unexpected_rows_metric.id] == [
+        (3,),
+    ]
+
+
+def test_map_column_values_decreasing_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [3, None, 6, 4.5, 3.0, 2, 1]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert list(metrics[condition_metric.id][0]) == [
+        False,
+        True,
+        False,
+        False,
+        False,
+        False,
+    ]
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
+        [2], dtype="int64"
+    )
+    assert metrics[unexpected_rows_metric.id]["a"].values == [6]
+
+
+def test_map_column_values_decreasing_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "a": [3, None, 6, 4.5, 3.0, 2, 1],
+            }
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    table_column_types = MetricConfiguration(
+        metric_name="table.column_types",
+        metric_domain_kwargs={},
+        metric_value_kwargs={
+            "include_nested": True,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_column_types,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "strictly": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "table.column_types": table_column_types,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id] == [(6,)]
 
 
 def test_map_unique_column_exists_pd():

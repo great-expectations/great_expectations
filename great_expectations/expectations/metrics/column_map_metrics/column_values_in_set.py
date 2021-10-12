@@ -1,6 +1,5 @@
-from typing import Optional
-
 import warnings
+from typing import Optional
 
 import numpy as np
 

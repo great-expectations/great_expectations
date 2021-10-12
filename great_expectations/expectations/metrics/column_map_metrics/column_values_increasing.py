@@ -1,6 +1,5 @@
-from typing import Any, Dict, Optional, Tuple
-
 import warnings
+from typing import Any, Dict, Optional, Tuple
 
 from dateutil.parser import parse
 
@@ -32,7 +31,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
     def _pandas(
         cls,
         column,
-        strictly=None,
+        strictly=False,
         parse_strings_as_datetimes: Optional[bool] = None,
         **kwargs
     ):

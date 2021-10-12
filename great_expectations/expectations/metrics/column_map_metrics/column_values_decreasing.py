@@ -1,4 +1,7 @@
+import warnings
 from typing import Any, Dict, Optional, Tuple
+
+from dateutil.parser import parse
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -15,10 +18,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.metric_provider import (
-    metric_partial,
-    metric_value,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -28,8 +28,25 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
     default_kwarg_values = {"strictly": False}
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, strictly, **kwargs):
-        series_diff = column.diff()
+    def _pandas(
+        cls,
+        column,
+        strictly=False,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        **kwargs
+    ):
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a future
+release. Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+            temp_column = column.map(parse)
+        else:
+            temp_column = column
+
+        series_diff = temp_column.diff()
         # The first element is null, so it gets a bye and is always treated as True
         series_diff[series_diff.isnull()] = -1
 
@@ -48,9 +65,13 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
+        parse_strings_as_datetimes: Optional[bool] = None,
     ):
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
