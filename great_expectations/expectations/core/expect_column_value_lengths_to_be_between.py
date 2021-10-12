@@ -7,12 +7,10 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 
 from ...core import ExpectationValidationResult
 from ...data_asset.util import parse_result_format
-from ...data_context.types.base import renderedAtomicValueSchema
 from ...exceptions import InvalidExpectationConfigurationError
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.renderer.renderer import renderer
 from ...render.types import (
-    RenderedAtomicContent,
     RenderedBulletListContent,
     RenderedContent,
     RenderedGraphContent,
@@ -156,15 +154,26 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         return True
 
     @classmethod
-    # @renderer(renderer_type="atomic.prescriptive.template")
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: ExpectationConfiguration = None,
+        result: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
         **kwargs,
-    ):
+    ) -> List[
+        Union[
+            dict,
+            str,
+            RenderedStringTemplateContent,
+            RenderedTableContent,
+            RenderedBulletListContent,
+            RenderedGraphContent,
+            Any,
+        ]
+    ]:
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
@@ -184,6 +193,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 "strict_max",
             ],
         )
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "values may have any length."
         else:
@@ -223,32 +233,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        return (template_str, params, styling)
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ) -> List[
-        Union[
-            dict,
-            str,
-            RenderedStringTemplateContent,
-            RenderedTableContent,
-            RenderedBulletListContent,
-            RenderedGraphContent,
-            Any,
-        ]
-    ]:
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
-        )
         return [
             RenderedStringTemplateContent(
                 **{
