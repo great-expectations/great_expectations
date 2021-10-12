@@ -138,9 +138,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         self.validate_metric_value_between_configuration(configuration=configuration)
 
+    # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
-    # @renderer(renderer_type="atomic.prescriptive.template")
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -201,24 +203,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-
-        return (template_str, params, styling)
-
-    # NOTE: This method is a pretty good example of good usage of `params`.
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
-        )
 
         return [
             RenderedStringTemplateContent(
