@@ -133,9 +133,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    def _atomic_prescriptive_summary(
         cls,
         configuration=None,
         result=None,
