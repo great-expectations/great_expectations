@@ -509,6 +509,7 @@ class Expectation(metaclass=MetaExpectation):
 
         return unexpected_table_content_block
 
+    @classmethod
     def _get_observed_value_from_evr(self, result: ExpectationValidationResult):
         result_dict = result.result
         if result_dict is None:
