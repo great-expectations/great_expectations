@@ -517,14 +517,14 @@ class Expectation(metaclass=MetaExpectation):
         if result_dict.get("observed_value") is not None:
             observed_value = result_dict.get("observed_value")
             if isinstance(observed_value, (int, float)) and not isinstance(
-                    observed_value, bool
+                observed_value, bool
             ):
                 return num_to_str(observed_value, precision=10, use_locale=True)
             return str(observed_value)
         elif result_dict.get("unexpected_percent") is not None:
             return (
-                    num_to_str(result_dict.get("unexpected_percent"), precision=5)
-                    + "% unexpected"
+                num_to_str(result_dict.get("unexpected_percent"), precision=5)
+                + "% unexpected"
             )
         else:
             return "--"
@@ -532,23 +532,25 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     @renderer(renderer_type="atomic.diagnostic.observed_value")
     def _atomic_diagnostic_observed_value(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs,
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         observed_value = cls._get_observed_value_from_evr(result=result)
-        value_obj = renderedAtomicValueSchema.load({
-            "template": observed_value,
-            "params": {},
-            "schema": {"type": "com.superconductive.rendered.string"}
-        })
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": observed_value,
+                "params": {},
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
         rendered = RenderedAtomicContent(
             name="atomic.diagnostic.observed_value",
             value=value_obj,
-            valuetype="StringValueType"
+            valuetype="StringValueType",
         )
         return rendered
 
