@@ -184,11 +184,27 @@ module.exports = {
               type: 'category',
               label: 'Creating Custom Expectations',
               items: [
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
+                'guides/expectations/creating_custom_expectations/creating/how_to_create_custom_expectations',
+                'guides/expectations/creating_custom_expectations/creating/how_to_create_custom_metrics',
+                'guides/expectations/creating_custom_expectations/creating/how_to_create_example_cases_for_an_expectation',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
+                //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             },
+            {
+              type: 'category',
+              label: 'Adding Features to Custom Expectations',
+              items: [
+                'guides/expectations/creating_custom_expectations/features/how_to_add_sqlalchemy_support_for_an_expectation',
+                'guides/expectations/creating_custom_expectations/features/how_to_add_spark_support_for_an_expectation',
+                'guides/expectations/creating_custom_expectations/features/how_to_add_input_validation_for_an_expectation',
+                'guides/expectations/creating_custom_expectations/features/how_to_add_text_renderers_for_an_expectation',
+                'guides/expectations/creating_custom_expectations/features/how_to_add_data_visualization_renderers_for_an_expectation',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
+                //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
+              ]
+            },
+
             {
               type: 'category',
               label: 'Contributing',
@@ -201,7 +217,7 @@ module.exports = {
               label: 'Advanced',
               items: [
                 'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
+                //'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
                 'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
                 'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
                 'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
