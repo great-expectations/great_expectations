@@ -113,13 +113,15 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         return True
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -160,53 +162,13 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "value_set": {
-                "schema": {"type": "array"},
-                "value": params.get("value_set"),
-            },
-            "ties_okay": {
-                "schema": {"type": "boolean"},
-                "value": params.get("ties_okay"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "object"},
-                "value": params.get("condition_parser"),
-            },
-        }
-        return (template_str, params_with_json_schema, styling)
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
-        )
-
         return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": {
-                            param: value_dict["value"]
-                            for param, value_dict in params.items()
-                        },
+                        "params": params,
                         "styling": styling,
                     },
                 }

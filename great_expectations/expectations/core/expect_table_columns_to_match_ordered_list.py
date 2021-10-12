@@ -111,13 +111,15 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         return True
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -140,39 +142,13 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             template_str += "$column_list_" + str(last_idx)
             params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
 
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list"),
-            },
-        }
-        return (template_str, params_with_json_schema, styling)
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
-        )
-
         return [
             RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": {
-                            param: value_dict["value"]
-                            for param, value_dict in params.items()
-                        },
+                        "params": params,
                         "styling": styling,
                     },
                 }
