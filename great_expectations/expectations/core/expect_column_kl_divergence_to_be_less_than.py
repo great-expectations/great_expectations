@@ -916,10 +916,6 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             "string_template": {"template": template_str, "params": params},
         }
 
-        # <WILL> atomic implementation note:
-        # Tables will return more than one value as a list. If other Expectations do the same,
-        # then we can handle it at the Mercury-level.
-
         if expected_distribution:
             return [expectation_string_obj, expected_distribution]
         else:
