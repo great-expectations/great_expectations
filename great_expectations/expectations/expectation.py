@@ -194,7 +194,7 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
     @render_evaluation_parameter_string
-    def _prescriptive_summary(
+    def _atomic_prescriptive_summary(
         cls,
         configuration=None,
         result=None,
