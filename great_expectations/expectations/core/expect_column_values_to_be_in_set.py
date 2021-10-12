@@ -108,9 +108,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": False}
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,

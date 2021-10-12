@@ -86,9 +86,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
