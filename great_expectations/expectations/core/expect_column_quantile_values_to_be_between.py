@@ -171,7 +171,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return True
 
     @classmethod
-    # @renderer(renderer_type="atomic.prescriptive.template")
     def _atomic_prescriptive_template(
         cls,
         configuration=None,
@@ -216,11 +215,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         value_ranges = params["quantile_ranges"]["value_ranges"]
 
         table_header_row = ["Quantile", "Min Value", "Max Value"]
-
-        # Table Row ~>              [Q1            1            3]
-        #                           [Q3            5            7]
-        #                           [Median        3]
-        #
         table_rows = []
 
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
@@ -234,50 +228,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                     str(value_range[1]) if value_range[1] is not None else "Any",
                 ]
             )
-        return ("fdsfdsfdsfsd", {}, {})
-        # return (expectation_string_obj, table_header_row, table_rows)
-
-    # @classmethod
-    # # @renderer(renderer_type="atomic.prescriptive.summary")
-    # def _prescriptive_summary(
-    #     cls,
-    #     configuration=None,
-    #     result=None,
-    #     language=None,
-    #     runtime_configuration=None,
-    #     **kwargs,
-    # ):
-    #     (
-    #         expectation_string_obj,
-    #         table_header_row,
-    #         table_rows,
-    #     ) = cls._atomic_prescriptive_template(
-    #         configuration, result, language, runtime_configuration, **kwargs
-    #     )
-    #
-    #     # this will have to change:
-    #     # NAME
-    #     # VALUE
-    #     # VALUE TYPE
-    #
-    #     # THIS IS WOULD BE ULTIMATE WHAT THE FE is using
-    #     #
-    #     # ADD TO MARSHMALLOW
-    #     # SO WE CAN GET VALIDATION
-    #     # ALL POSSIBLE ATTRIBUTES
-    #     # IF VALUE TYPE IS ?? THEN WE SHOULD EXPECT OTHER ATTRIBUTES
-    #     # WE SHOULD BE ABLE TO ENFORCE SCHEMA
-    #     # OBJECT : ATOMIC RENDERED CONTENT :
-    #     # { Name, VALUE, VALUE TYPE}
-    #     ########
-    #     # VALUE_TYPE :
-    #     rendered = {
-    #         "content_block_type": "table",
-    #         "string": expectation_string_obj,
-    #         "header_row": table_header_row,
-    #         "table_rows": table_rows,
-    #     }
-    #     return [rendered]
+        return (expectation_string_obj, table_header_row, table_rows)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
