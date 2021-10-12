@@ -1,3 +1,6 @@
+import warnings
+from typing import Optional
+
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
@@ -5,7 +8,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -31,20 +34,31 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column_A, column_B, **kwargs):
-        allow_cross_type_comparisons = kwargs.get("allow_cross_type_comparisons")
+    def _pandas(
+        cls,
+        column_A,
+        column_B,
+        allow_cross_type_comparisons=None,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        or_equal=None,
+        **kwargs
+    ):
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
-        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
         if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+will be deprecated in a future release. Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
             temp_column_A = column_A.map(parse)
             temp_column_B = column_B.map(parse)
         else:
             temp_column_A = column_A
             temp_column_B = column_B
 
-        or_equal = kwargs.get("or_equal")
         if or_equal:
             return temp_column_A >= temp_column_B
         else:
@@ -52,16 +66,21 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column_A, column_B, **kwargs):
-        allow_cross_type_comparisons = kwargs.get("allow_cross_type_comparisons")
+    def _sqlalchemy(
+        cls,
+        column_A,
+        column_B,
+        allow_cross_type_comparisons=None,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        or_equal=None,
+        **kwargs
+    ):
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
-        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
         if parse_strings_as_datetimes:
             raise NotImplementedError
 
-        or_equal = kwargs.get("or_equal")
         if or_equal:
             return sa.or_(
                 column_A >= column_B, sa.and_(column_A == None, column_B == None)
@@ -71,17 +90,34 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column_A, column_B, **kwargs):
-        allow_cross_type_comparisons = kwargs.get("allow_cross_type_comparisons")
+    def _spark(
+        cls,
+        column_A,
+        column_B,
+        allow_cross_type_comparisons=None,
+        parse_strings_as_datetimes: Optional[bool] = None,
+        or_equal=None,
+        **kwargs
+    ):
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
-        parse_strings_as_datetimes = kwargs.get("parse_strings_as_datetimes")
         if parse_strings_as_datetimes:
-            raise NotImplementedError
-
-        or_equal = kwargs.get("or_equal")
-        if or_equal:
-            return (column_A >= column_B) | (column_A.eqNullSafe(column_B))
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and \
+will be deprecated in a future release. Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+            temp_column_A = F.to_date(column_A)
+            temp_column_B = F.to_date(column_B)
         else:
-            return column_A > column_B
+            temp_column_A = column_A
+            temp_column_B = column_B
+
+        if or_equal:
+            return (temp_column_A >= temp_column_B) | (
+                temp_column_A.eqNullSafe(temp_column_B)
+            )
+        else:
+            return temp_column_A > temp_column_B
