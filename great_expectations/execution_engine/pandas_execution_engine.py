@@ -623,7 +623,6 @@ Please check your config."""
     def _split_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
-
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
@@ -741,7 +740,7 @@ Please check your config."""
         hash_value: str = "f",
         hash_function_name: str = "md5",
     ):
-        """Hash the values in the named column, and split on that"""
+        """Hash the values in the named column, and only keep rows that match the given hash_value"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
