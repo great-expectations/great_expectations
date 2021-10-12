@@ -207,7 +207,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             },
         }
 
-        return (template_str, params_with_json_schema, styling)
+        return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -220,8 +220,13 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
+        (
+            template_str,
+            params,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
         )
 
         return [
@@ -230,10 +235,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": {
-                            param: value_dict["value"]
-                            for param, value_dict in params.items()
-                        },
+                        "params": params,
                         "styling": styling,
                     },
                 }

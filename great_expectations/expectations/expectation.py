@@ -202,7 +202,12 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
+        (
+            template_str,
+            params,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
         value_obj = renderedAtomicValueSchema.load(

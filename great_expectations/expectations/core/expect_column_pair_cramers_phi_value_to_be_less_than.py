@@ -69,7 +69,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
             "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
             "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
         }
-        return (template_str, params_with_json_schema, styling)
+        return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -82,8 +82,13 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
+        (
+            template_str,
+            params,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
         )
         rendered_string_template_content = RenderedStringTemplateContent(
             **{
