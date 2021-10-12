@@ -194,7 +194,7 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
     @render_evaluation_parameter_string
-    def _prescriptive_summary(
+    def _atomic_prescriptive_summary(
         cls,
         configuration=None,
         result=None,
@@ -515,15 +515,7 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
+    def _get_observed_value_from_evr(self, result: ExpectationValidationResult):
         result_dict = result.result
         if result_dict is None:
             return "--"
@@ -542,6 +534,43 @@ class Expectation(metaclass=MetaExpectation):
             )
         else:
             return "--"
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        observed_value = cls._get_observed_value_from_evr(result=result)
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": observed_value,
+                "params": {},
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            valuetype="StringValueType",
+        )
+        return rendered
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        return cls._get_observed_value_from_evr(result=result)
 
     @classmethod
     def get_allowed_config_keys(cls):
