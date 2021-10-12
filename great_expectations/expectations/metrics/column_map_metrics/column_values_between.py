@@ -1,3 +1,6 @@
+import warnings
+from typing import Optional
+
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
@@ -7,7 +10,7 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -33,7 +36,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: Optional[bool] = None,
         allow_cross_type_comparisons=None,
         **kwargs
     ):
@@ -41,6 +44,12 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             raise ValueError("min_value and max_value cannot both be None")
 
         if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
             # tolerance = timedelta(days=tolerance)
             if min_value:
                 min_value = parse(min_value)
@@ -153,10 +162,16 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: Optional[bool] = None,
         **kwargs
     ):
         if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
             if min_value:
                 min_value = parse(min_value)
 
@@ -199,10 +214,17 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: Optional[bool] = None,
         **kwargs
     ):
         if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
             if min_value:
                 min_value = parse(min_value)
 

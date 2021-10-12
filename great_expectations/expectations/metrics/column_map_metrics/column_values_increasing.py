@@ -1,5 +1,5 @@
 import warnings
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from dateutil.parser import parse
 
