@@ -134,7 +134,6 @@ class ExpectationConfiguration(SerializableDictDot):
             },
         },
         "expect_column_values_to_not_be_null": {
-            "domain": "column",
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
             "default_kwarg_values": {
