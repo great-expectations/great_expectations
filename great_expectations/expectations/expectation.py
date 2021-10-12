@@ -509,6 +509,49 @@ class Expectation(metaclass=MetaExpectation):
 
         return unexpected_table_content_block
 
+    def _get_observed_value_from_evr(self, result: ExpectationValidationResult):
+        result_dict = result.result
+        if result_dict is None:
+            return "--"
+
+        if result_dict.get("observed_value") is not None:
+            observed_value = result_dict.get("observed_value")
+            if isinstance(observed_value, (int, float)) and not isinstance(
+                    observed_value, bool
+            ):
+                return num_to_str(observed_value, precision=10, use_locale=True)
+            return str(observed_value)
+        elif result_dict.get("unexpected_percent") is not None:
+            return (
+                    num_to_str(result_dict.get("unexpected_percent"), precision=5)
+                    + "% unexpected"
+            )
+        else:
+            return "--"
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value(
+            cls,
+            configuration=None,
+            result=None,
+            language=None,
+            runtime_configuration=None,
+            **kwargs,
+    ):
+        observed_value = cls._get_observed_value_from_evr(result=result)
+        value_obj = renderedAtomicValueSchema.load({
+            "template": observed_value,
+            "params": {},
+            "schema": {"type": "com.superconductive.rendered.string"}
+        })
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            valuetype="StringValueType"
+        )
+        return rendered
+
     @classmethod
     @renderer(renderer_type="renderer.diagnostic.observed_value")
     def _diagnostic_observed_value_renderer(
@@ -519,24 +562,7 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        result_dict = result.result
-        if result_dict is None:
-            return "--"
-
-        if result_dict.get("observed_value") is not None:
-            observed_value = result_dict.get("observed_value")
-            if isinstance(observed_value, (int, float)) and not isinstance(
-                observed_value, bool
-            ):
-                return num_to_str(observed_value, precision=10, use_locale=True)
-            return str(observed_value)
-        elif result_dict.get("unexpected_percent") is not None:
-            return (
-                num_to_str(result_dict.get("unexpected_percent"), precision=5)
-                + "% unexpected"
-            )
-        else:
-            return "--"
+        return cls._get_observed_value_from_evr(result=result)
 
     @classmethod
     def get_allowed_config_keys(cls):
