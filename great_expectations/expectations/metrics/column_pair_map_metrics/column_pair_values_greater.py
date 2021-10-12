@@ -53,6 +53,7 @@ future release.  Please update code accordingly.
 """,
                 DeprecationWarning,
             )
+
             temp_column_A = column_A.map(parse)
             temp_column_B = column_B.map(parse)
         else:
@@ -109,6 +110,7 @@ future release.  Please update code accordingly.
 """,
                 DeprecationWarning,
             )
+
             temp_column_A = F.to_date(column_A)
             temp_column_B = F.to_date(column_B)
         else:
