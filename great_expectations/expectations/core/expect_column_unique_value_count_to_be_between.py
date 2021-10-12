@@ -117,9 +117,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _atomic_prescriptive_template(
         cls,
         configuration=None,
         result=None,
