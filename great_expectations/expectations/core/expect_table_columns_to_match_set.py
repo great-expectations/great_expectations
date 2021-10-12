@@ -99,8 +99,9 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         return True
 
     @classmethod
-    # @renderer(renderer_type="atomic.prescriptive.template")
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -136,22 +137,6 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             for idx in range(len(params["column_list"])):
                 params["column_list_" + str(idx)] = params["column_list"][idx]
 
-        return (template_str, params, styling)
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
-        )
         return [
             RenderedStringTemplateContent(
                 **{

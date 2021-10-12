@@ -2,10 +2,6 @@ from typing import Dict
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_configuration import parse_result_format
-from great_expectations.data_context.types.base import (
-    RenderedAtomicValue,
-    renderedAtomicValueSchema,
-)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -13,10 +9,7 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    RenderedAtomicContent,
-    RenderedStringTemplateContent,
-)
+from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -82,22 +75,21 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     map_metric = "column_values.nonnull"
 
     @classmethod
-    # @renderer(renderer_type="atomic.prescriptive.template")
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
             include_column_name if include_column_name is not None else True
         )
-        # not needed in this
-
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -129,22 +121,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        return (template_str, params, styling)
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
-        )
         return [
             RenderedStringTemplateContent(
                 **{
@@ -166,7 +142,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs,
+        **kwargs
     ):
         result_dict = result.result
 
@@ -192,7 +168,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs,
+        **kwargs
     ):
         assert result, "Must pass in result."
         return [
@@ -221,7 +197,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs,
+        **kwargs
     ):
         assert result, "Must pass in result."
         return [

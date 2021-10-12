@@ -133,8 +133,9 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
 
     @classmethod
-    # @renderer(renderer_type="atomic.prescriptive.template")
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -178,22 +179,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
-        return (template_str, params, styling)
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
-        )
 
         return [
             RenderedStringTemplateContent(
