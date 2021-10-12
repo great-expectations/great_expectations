@@ -2,6 +2,8 @@
 title: How to configure a DataConnector to introspect and partition tables in SQL
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 This guide will help you introspect and partition tables in an SQL database using `SimpleSqlalchemyDatasource`, which
 operates as a proxy to `InferredAssetSqlDataConnector` and `ConfiguredAssetSqlDataConnector` (for the SQL use case,
