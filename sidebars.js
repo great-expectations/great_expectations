@@ -184,9 +184,9 @@ module.exports = {
               type: 'category',
               label: 'Creating Custom Expectations',
               items: [
-                'guides/expectations/creating_custom_expectations/creating/how_to_create_custom_expectations',
-                'guides/expectations/creating_custom_expectations/creating/how_to_create_custom_metrics',
-                'guides/expectations/creating_custom_expectations/creating/how_to_create_example_cases_for_an_expectation',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
+                'guides/expectations/creating_custom_expectations/how_to_create_example_cases_for_an_expectation',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
@@ -195,23 +195,22 @@ module.exports = {
               type: 'category',
               label: 'Adding Features to Custom Expectations',
               items: [
-                'guides/expectations/creating_custom_expectations/features/how_to_add_sqlalchemy_support_for_an_expectation',
-                'guides/expectations/creating_custom_expectations/features/how_to_add_spark_support_for_an_expectation',
-                'guides/expectations/creating_custom_expectations/features/how_to_add_input_validation_for_an_expectation',
-                'guides/expectations/creating_custom_expectations/features/how_to_add_text_renderers_for_an_expectation',
-                'guides/expectations/creating_custom_expectations/features/how_to_add_data_visualization_renderers_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_text_renderers_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             },
-
-            {
-              type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
-              ]
-            },
+            //{
+            //  type: 'category',
+            //  label: 'Contributing',
+            //  items: [
+            //    'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
+            //  ]
+            //},
             {
               type: 'category',
               label: 'Advanced',

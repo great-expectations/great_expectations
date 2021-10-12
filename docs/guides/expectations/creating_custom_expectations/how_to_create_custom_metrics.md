@@ -1,11 +1,11 @@
 ---
 title: How to create a custom Metric
 ---
-import Prerequisites from '../../../connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
-This guide will help you implement a custom Metric in Pandas. 
+This guide will help you implement a custom Metric in Pandas using the appropriate MetricProvider class. 
 
 <Prerequisites>
 

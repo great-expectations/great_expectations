@@ -1,7 +1,7 @@
 ---
-title: How to add SQLAlchemy support for custom Expectations
----
-import Prerequisites from '../../../connecting_to_your_data/components/prerequisites.jsx'
+title: How to add SQLAlchemy support for custom Metrics 
+
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -9,7 +9,7 @@ import TabItem from '@theme/TabItem';
 This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular Expectation architecture. If you have implemented a custom Expectation but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom renderers for your Expectation.
 :::
 
-This guide will help you implement additional execution engines for your custom Expectations, allowing them to work natively with SQLAlchemy and Spark. 
+This guide will help you implement native SQLAlchemy support for your custom Metric. 
 
 <Prerequisites>
 

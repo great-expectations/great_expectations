@@ -1,7 +1,7 @@
 ---
-title: How to Add Text Renderers for custom Expectations
+title: How to add text renderers for custom Expectations
 ---
-import Prerequisites from '../../../connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -11,7 +11,7 @@ This guide only applies to Great Expectations versions 0.13 and above, which mak
 
 This guide will help you implement renderers for your custom Expectations, allowing you to control how your custom Expectations are displayed in Data Docs. Implementing renderers as part of your custom Expectations is not strictly required - if not provided, Great Expectations will render your Expectation using a basic default renderer:
 
-![Expectation rendered using default renderer](../../../../images/expectation_fallback.png)
+![Expectation rendered using default renderer](../../../images/expectation_fallback.png)
 
 
 <Prerequisites>
@@ -34,7 +34,7 @@ Steps
 
   Use the following annotated Validation Result as a guide (most major renderer types represented):
 
-  ![Annotated Validation Result Example](../../../../images/validation_result_example.png)
+  ![Annotated Validation Result Example](../../../images/validation_result_example.png)
 
   At minimum, you should implement a renderer with type ``renderer.prescriptive``, which is used to render the human-readable form of your expectation when displaying Expectation Suites and Validation Results. In many cases, this will be the only custom renderer you will have to implement - for the remaining renderer types used on the Validation Results page, Great Expectations provides default renderers that can handle many types of Expectations.
 
@@ -96,7 +96,7 @@ example_expectation_config = ExpectationConfiguration(**{
 
 **Rendered Output:**
 
-![Simple String Example](../../../../images/simple_string.png)
+![Simple String Example](../../../images/simple_string.png)
 
 **Implementation:**
 
@@ -207,7 +207,7 @@ example_expectation_config = ExpectationConfiguration(**{
 
 **Rendered Output:**
 
-![String Template Example](../../../../images/string_template.png)
+![String Template Example](../../../images/string_template.png)
 
 **Implementation:**
 
@@ -331,7 +331,7 @@ This example shows how you can render your custom Expectation using different co
 
   **Rendered Output:**
 
-  ![Table Example](../../../../images/table.png)
+  ![Table Example](../../../images/table.png)
 
   **Implementation:**
 

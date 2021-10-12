@@ -1,5 +1,5 @@
 ---
-title: How to create custom Expectations
+title: How to create a custom Expectation
 ---
 
 This document provides examples that walk through several methods for building and deploying custom expectations.

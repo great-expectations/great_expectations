@@ -1,7 +1,7 @@
 ---
 title: How to create example cases for a custom Expectation
 ---
-import Prerequisites from '../../../connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
