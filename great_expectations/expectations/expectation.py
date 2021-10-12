@@ -182,14 +182,20 @@ class Expectation(metaclass=MetaExpectation):
         styling = runtime_configuration.get("styling")
 
         template_str = "$expectation_type(**$kwargs)"
+
         params = {
+            "expectation_type": configuration.expectation_type,
+            "kwargs": configuration.kwargs,
+        }
+
+        params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
                 "value": configuration.expectation_type,
             },
             "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
         }
-        return (template_str, params, styling)
+        return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
@@ -213,7 +219,7 @@ class Expectation(metaclass=MetaExpectation):
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
-                "params": params,
+                "params": params_with_json_schema,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )

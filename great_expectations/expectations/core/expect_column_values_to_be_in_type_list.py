@@ -133,7 +133,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         return True
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,

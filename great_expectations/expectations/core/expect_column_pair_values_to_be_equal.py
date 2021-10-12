@@ -86,7 +86,9 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         return True
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -113,6 +115,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         )
 
         # NOTE: This renderer doesn't do anything with "ignore_row_if"
+
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
             params["row_condition"] = None

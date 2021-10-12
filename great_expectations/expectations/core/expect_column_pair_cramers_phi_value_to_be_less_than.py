@@ -43,7 +43,9 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
     }
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -95,10 +97,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": template_str,
-                    "params": {
-                        param: value_dict["value"]
-                        for param, value_dict in params.items()
-                    },
+                    "params": params,
                     "styling": styling,
                 },
             }

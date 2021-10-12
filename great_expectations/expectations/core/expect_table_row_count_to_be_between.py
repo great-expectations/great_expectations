@@ -122,6 +122,9 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "min_value",
                 "max_value",
                 "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
             ],
         )
 
@@ -160,9 +163,17 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "schema": {"type": "number"},
                 "value": params.get("max_value"),
             },
-            "row_condition": {
+            "condition_parser": {
                 "schema": {"type": "string"},
-                "value": params.get("row_condition"),
+                "value": params.get("condition_parser"),
+            },
+            "strict_min": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_min"),
+            },
+            "strict_max": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_max"),
             },
         }
         return (template_str, params, params_with_json_schema, styling)

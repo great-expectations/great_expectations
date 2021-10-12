@@ -116,7 +116,9 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         return True
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -124,7 +126,6 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (

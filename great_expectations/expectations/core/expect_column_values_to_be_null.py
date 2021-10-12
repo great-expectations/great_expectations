@@ -72,7 +72,9 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     map_metric = "column_values.null"
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -80,7 +82,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
@@ -91,6 +92,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             configuration.kwargs,
             ["column", "mostly", "row_condition", "condition_parser"],
         )
+
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True

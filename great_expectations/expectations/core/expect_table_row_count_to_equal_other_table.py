@@ -65,7 +65,9 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
     }
 
     @classmethod
-    def _atomic_prescriptive_template(
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
         cls,
         configuration=None,
         result=None,
@@ -82,7 +84,12 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
 
-        params_with_json_schema = {}
+        params_with_json_schema = {
+            "other_table_name": {
+                "schema": {"type": "string"},
+                "value": params.get("other_table_name"),
+            },
+        }
         return (template_str, params, params_with_json_schema, styling)
 
     @classmethod

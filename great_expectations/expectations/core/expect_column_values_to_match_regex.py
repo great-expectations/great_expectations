@@ -181,6 +181,10 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
             "regex": {"schema": {"type": "string"}, "value": params.get("regex")},
             "row_condition": {
                 "schema": {"type": "string"},

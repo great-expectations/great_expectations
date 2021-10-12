@@ -123,6 +123,10 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
