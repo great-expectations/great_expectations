@@ -43,12 +43,12 @@ my_data_source:
 """)
 ```
 
-If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
+If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 Choose a DataConnector
 ----------------------
 
-InferredAssetDataConnectors like the `InferredAssetFilesystemDataConnector` and `InferredAssetS3DataConnector`
+InferredAssetDataConnectors like `InferredAssetFilesystemDataConnector` and `InferredAssetS3DataConnector`
 require a `default_regex` parameter, with a configured regex `pattern` and capture `group_names`.
 
 Imagine you have the following files in `my_directory/`:
