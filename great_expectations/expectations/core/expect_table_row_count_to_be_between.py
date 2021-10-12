@@ -122,6 +122,9 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "min_value",
                 "max_value",
                 "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
             ],
         )
 
@@ -160,12 +163,20 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "schema": {"type": "number"},
                 "value": params.get("max_value"),
             },
-            "row_condition": {
+            "condition_parser": {
                 "schema": {"type": "string"},
-                "value": params.get("row_condition"),
+                "value": params.get("condition_parser"),
+            },
+            "strict_min": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_min"),
+            },
+            "strict_max": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_max"),
             },
         }
-        return (template_str, params_with_json_schema, styling)
+        return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -178,8 +189,13 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
+        (
+            template_str,
+            params,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
         )
 
         return [
@@ -188,10 +204,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": {
-                            param: value_dict["value"]
-                            for param, value_dict in params.items()
-                        },
+                        "params": params,
                         "styling": styling,
                     },
                 }

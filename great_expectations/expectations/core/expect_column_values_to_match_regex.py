@@ -181,6 +181,10 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
             "regex": {"schema": {"type": "string"}, "value": params.get("regex")},
             "row_condition": {
                 "schema": {"type": "string"},
@@ -191,7 +195,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        return (template_str, params_with_json_schema, styling)
+        return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -205,7 +209,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         **kwargs,
     ):
         (template_str, params, styling) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, kwargs
+            configuration, result, language, runtime_configuration, **kwargs
         )
 
         return [
@@ -214,10 +218,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
-                        "params": {
-                            param: value_dict["value"]
-                            for param, value_dict in params.items()
-                        },
+                        "params": params,
                         "styling": styling,
                     },
                 }
