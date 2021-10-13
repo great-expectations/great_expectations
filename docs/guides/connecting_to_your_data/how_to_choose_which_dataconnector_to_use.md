@@ -2,12 +2,18 @@
 title: How to choose which DataConnector to use
 ---
 
-Great Expectations provides two types of `DataConnector` classes for connecting to file-system-like data. This includes files on disk, but also S3 object stores, etc:
+Great Expectations provides three types of `DataConnector` classes. Two classes are for connecting to file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
 
 - A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each DataAsset you want to connect to. Examples of this type of `DataConnector` include `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector`.
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure. Examples of this type of `DataConnector` include `InferredAssetFilesystemDataConnector` and `InferredAssetS3DataConnector`.
 
-The following examples will use `DataConnector` classes designed to connect to files on disk, namely `InferredAssetFilesystemDataConnector` and `ConfiguredAssetFilesystemDataConnector`.
+The third type of `DataConnector` class is for providing a batch's data directly at runtime:
+
+- A `RuntimeDataConnector` enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run).
+
+If you know for example, that your Pipeline Runner will already have your batch data in memory at runtime, you can choose to configure a `RuntimeDataConnector` with unique batch identifiers. Reference the documents on [How to configure a RuntimeDataConnector](guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector.md) and [How to create a Batch of data from an in-memory Spark or Pandas dataframe](guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe.md) to get started with `RuntimeDataConnectors`.
+
+If you aren't sure which type of the remaining `DataConnector`s to use, the following examples will use `DataConnector` classes designed to connect to files on disk, namely `InferredAssetFilesystemDataConnector` and `ConfiguredAssetFilesystemDataConnector` to demonstrate the difference between these types of `DataConnectors`.
 
 ------------------------------------------
 When to use an InferredAssetDataConnector
@@ -153,5 +159,6 @@ Available data_asset_names (4 of 4):
 Additional Notes
 ----------------
 
-- Additional examples and configurations for `ConfiguredAssetFilesystemDataConnectors` can be found here: [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_configuredassetdataconnector.md)
-- Additional examples and configurations for `InferredAssetFilesystemDataConnectors` can be found here: [How to configure an InferredAssetDataConnector](./how_to_configure_an_inferredassetdataconnector.md)
+- Additional examples and configurations for `ConfiguredAssetFilesystemDataConnector`s can be found here: [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_configuredassetdataconnector.md)
+- Additional examples and configurations for `InferredAssetFilesystemDataConnector`s can be found here: [How to configure an InferredAssetDataConnector](./how_to_configure_an_inferredassetdataconnector.md)
+- Additional examples and configurations for `RuntimeDataConnector`s can be found here: [How to configure a RuntimeDataConnector](./how_to_configure_a_runtimedataconnector.md)
