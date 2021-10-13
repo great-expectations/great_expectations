@@ -5,7 +5,10 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.util import (
+    add_value_set_params,
+    render_evaluation_parameter_string,
+)
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedGraphContent, RenderedStringTemplateContent
@@ -188,12 +191,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        # add value_set params
-        for i, v in enumerate(params["value_set"]):
-            params_with_json_schema["v__" + str(i)] = {
-                "schema": {"type": "string"},
-                "value": v,
-            }
+
+        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
 
         return (template_str, params, params_with_json_schema, styling)
 
