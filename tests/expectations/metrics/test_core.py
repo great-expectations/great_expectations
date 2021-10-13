@@ -524,7 +524,21 @@ def test_map_column_value_lengths_between_pd():
 
 
 def test_map_column_values_increasing_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3.0, 4.5, 6, None, 3]}))
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    "2021-01-01",
+                    "2021-01-31",
+                    "2021-02-28",
+                    "2021-03-20",
+                    "2021-02-21",
+                    "2021-05-01",
+                    "2021-06-18",
+                ]
+            }
+        )
+    )
 
     metrics: dict = {}
 
@@ -537,16 +551,25 @@ def test_map_column_values_increasing_pd():
     condition_metric = MetricConfiguration(
         metric_name="column_values.increasing.condition",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=None,
+        metric_value_kwargs={
+            "strictly": True,
+            "parse_strings_as_datetimes": True,
+        },
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(condition_metric,),
-        metrics=metrics,
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
     )
-    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name="column_values.increasing.unexpected_count",
@@ -567,8 +590,9 @@ def test_map_column_values_increasing_pd():
         False,
         False,
         False,
-        False,
         True,
+        False,
+        False,
     ]
     assert metrics[unexpected_count_metric.id] == 1
 
@@ -589,9 +613,9 @@ def test_map_column_values_increasing_pd():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [6], dtype="int64"
+        [4], dtype="int64"
     )
-    assert metrics[unexpected_rows_metric.id]["a"].values == [3]
+    assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
 
 
 def test_map_column_values_increasing_spark(spark_session):
@@ -631,17 +655,24 @@ def test_map_column_values_increasing_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
+            "parse_strings_as_datetimes": True,
         },
         metric_dependencies={
             "table.columns": table_columns_metric,
             "table.column_types": table_column_types,
         },
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(condition_metric,),
-        metrics=metrics,
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
     )
-    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name="column_values.increasing.unexpected_count",
@@ -681,7 +712,21 @@ def test_map_column_values_increasing_spark(spark_session):
 
 
 def test_map_column_values_decreasing_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [3, None, 6, 4.5, 3.0, 2, 1]}))
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    "2021-06-18",
+                    "2021-05-01",
+                    "2021-02-21",
+                    "2021-03-20",
+                    "2021-02-28",
+                    "2021-01-31",
+                    "2021-01-01",
+                ]
+            }
+        )
+    )
 
     metrics: dict = {}
 
@@ -694,16 +739,25 @@ def test_map_column_values_decreasing_pd():
     condition_metric = MetricConfiguration(
         metric_name="column_values.decreasing.condition",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=None,
+        metric_value_kwargs={
+            "strictly": True,
+            "parse_strings_as_datetimes": True,
+        },
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(condition_metric,),
-        metrics=metrics,
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
     )
-    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name="column_values.decreasing.unexpected_count",
@@ -721,8 +775,9 @@ def test_map_column_values_decreasing_pd():
 
     assert list(metrics[condition_metric.id][0]) == [
         False,
-        True,
         False,
+        False,
+        True,
         False,
         False,
         False,
@@ -746,9 +801,9 @@ def test_map_column_values_decreasing_pd():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [2], dtype="int64"
+        [3], dtype="int64"
     )
-    assert metrics[unexpected_rows_metric.id]["a"].values == [6]
+    assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
 
 
 def test_map_column_values_decreasing_spark(spark_session):
@@ -788,17 +843,24 @@ def test_map_column_values_decreasing_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
+            "parse_strings_as_datetimes": True,
         },
         metric_dependencies={
             "table.columns": table_columns_metric,
             "table.column_types": table_column_types,
         },
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(condition_metric,),
-        metrics=metrics,
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
     )
-    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name="column_values.decreasing.unexpected_count",

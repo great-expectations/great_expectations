@@ -34,18 +34,16 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(
-        cls,
-        column_A,
-        column_B,
-        allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes: Optional[bool] = False,
-        or_equal=None,
-        **kwargs
-    ):
+    def _pandas(cls, column_A, column_B, **kwargs):
+        allow_cross_type_comparisons: Optional[bool] = (
+            kwargs.get("allow_cross_type_comparisons") or False
+        )
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
+        parse_strings_as_datetimes: Optional[bool] = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
@@ -60,6 +58,7 @@ future release.  Please update code accordingly.
             temp_column_A = column_A
             temp_column_B = column_B
 
+        or_equal: Optional[bool] = kwargs.get("or_equal") or False
         if or_equal:
             return temp_column_A >= temp_column_B
         else:
@@ -67,21 +66,20 @@ future release.  Please update code accordingly.
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
-        cls,
-        column_A,
-        column_B,
-        allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes: Optional[bool] = False,
-        or_equal=None,
-        **kwargs
-    ):
+    def _sqlalchemy(cls, column_A, column_B, **kwargs):
+        allow_cross_type_comparisons: Optional[bool] = (
+            kwargs.get("allow_cross_type_comparisons") or False
+        )
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
+        parse_strings_as_datetimes: Optional[bool] = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             raise NotImplementedError
 
+        or_equal: Optional[bool] = kwargs.get("or_equal") or False
         if or_equal:
             return sa.or_(
                 column_A >= column_B, sa.and_(column_A == None, column_B == None)
@@ -91,18 +89,16 @@ future release.  Please update code accordingly.
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(
-        cls,
-        column_A,
-        column_B,
-        allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes: Optional[bool] = False,
-        or_equal=None,
-        **kwargs
-    ):
+    def _spark(cls, column_A, column_B, **kwargs):
+        allow_cross_type_comparisons: Optional[bool] = (
+            kwargs.get("allow_cross_type_comparisons") or False
+        )
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
+        parse_strings_as_datetimes: Optional[bool] = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
@@ -117,6 +113,7 @@ future release.  Please update code accordingly.
             temp_column_A = column_A
             temp_column_B = column_B
 
+        or_equal: Optional[bool] = kwargs.get("or_equal") or False
         if or_equal:
             return (temp_column_A >= temp_column_B) | (
                 temp_column_A.eqNullSafe(temp_column_B)

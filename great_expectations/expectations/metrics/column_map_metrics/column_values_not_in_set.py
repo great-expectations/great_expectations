@@ -30,10 +30,12 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
         cls,
         column,
         value_set,
-        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
+        parse_strings_as_datetimes: Optional[bool] = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             warnings.warn(
                 f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
@@ -57,10 +59,12 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         cls,
         column,
         value_set,
-        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
+        parse_strings_as_datetimes: Optional[bool] = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             warnings.warn(
                 f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
@@ -79,10 +83,12 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         cls,
         column,
         value_set,
-        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
+        parse_strings_as_datetimes: Optional[bool] = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             warnings.warn(
                 f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \

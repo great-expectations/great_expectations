@@ -1,6 +1,7 @@
 import warnings
 from typing import Any, Dict, Optional
 
+import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations.core import ExpectationConfiguration
@@ -31,10 +32,11 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
     def _pandas(
         cls,
         column,
-        strictly=False,
-        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs,
     ):
+        parse_strings_as_datetimes: Optional[bool] = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             warnings.warn(
                 """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
@@ -49,11 +51,20 @@ future release.  Please update code accordingly.
 
         series_diff = temp_column.diff()
         # The first element is null, so it gets a bye and is always treated as True
-        series_diff[series_diff.isnull()] = 1
+        if parse_strings_as_datetimes:
+            series_diff[series_diff.isnull()] = 1
+            series_diff = pd.to_timedelta(series_diff, unit="S")
+        else:
+            series_diff[series_diff.isnull()] = 1
 
+        strictly: Optional[bool] = kwargs.get("strictly") or False
         if strictly:
+            if parse_strings_as_datetimes:
+                return series_diff.dt.total_seconds() > 0.0
             return series_diff > 0
         else:
+            if parse_strings_as_datetimes:
+                return series_diff.dt.total_seconds() >= 0.0
             return series_diff >= 0
 
     @metric_partial(
@@ -68,9 +79,10 @@ future release.  Please update code accordingly.
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-        parse_strings_as_datetimes: Optional[bool] = False,
     ):
-        parse_strings_as_datetimes = True
+        parse_strings_as_datetimes: Optional[bool] = (
+            metric_value_kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
             warnings.warn(
                 f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
