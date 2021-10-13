@@ -192,14 +192,14 @@ class Expectation(metaclass=MetaExpectation):
             "expectation_type": configuration.expectation_type,
             "kwargs": configuration.kwargs,
         }
-        
+
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
                 "value": configuration.expectation_type,
             },
             "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
-        }  
+        }
         return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
@@ -216,7 +216,12 @@ class Expectation(metaclass=MetaExpectation):
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
-        (template_str, params, params_with_json_schema, styling) = cls._atomic_prescriptive_template(
+        (
+            template_str,
+            params,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
         value_obj = renderedAtomicValueSchema.load(
