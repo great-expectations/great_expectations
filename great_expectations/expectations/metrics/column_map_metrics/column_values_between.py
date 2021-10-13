@@ -36,7 +36,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         allow_cross_type_comparisons=None,
         **kwargs
     ):
@@ -163,7 +163,7 @@ future release.  Please update code accordingly.
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs
     ):
         if parse_strings_as_datetimes:
@@ -216,7 +216,7 @@ future release.  Please update code accordingly.
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs
     ):
         if parse_strings_as_datetimes:

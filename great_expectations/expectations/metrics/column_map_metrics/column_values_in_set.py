@@ -26,7 +26,7 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         cls,
         column,
         value_set,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
@@ -75,7 +75,7 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         cls,
         column,
         value_set,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is

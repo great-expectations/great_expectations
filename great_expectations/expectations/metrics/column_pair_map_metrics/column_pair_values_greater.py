@@ -39,7 +39,7 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         column_A,
         column_B,
         allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         or_equal=None,
         **kwargs
     ):
@@ -72,7 +72,7 @@ future release.  Please update code accordingly.
         column_A,
         column_B,
         allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         or_equal=None,
         **kwargs
     ):
@@ -96,7 +96,7 @@ future release.  Please update code accordingly.
         column_A,
         column_B,
         allow_cross_type_comparisons=None,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         or_equal=None,
         **kwargs
     ):

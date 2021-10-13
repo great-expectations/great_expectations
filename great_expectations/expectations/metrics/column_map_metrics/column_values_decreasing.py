@@ -32,7 +32,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         cls,
         column,
         strictly=False,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
         **kwargs,
     ):
         if parse_strings_as_datetimes:
@@ -68,7 +68,7 @@ future release.  Please update code accordingly.
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-        parse_strings_as_datetimes: Optional[bool] = None,
+        parse_strings_as_datetimes: Optional[bool] = False,
     ):
         if parse_strings_as_datetimes:
             warnings.warn(

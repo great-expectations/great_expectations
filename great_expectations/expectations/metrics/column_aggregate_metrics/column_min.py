@@ -26,7 +26,7 @@ class ColumnMin(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(
-        cls, column, parse_strings_as_datetimes: Optional[bool] = None, **kwargs
+        cls, column, parse_strings_as_datetimes: Optional[bool] = False, **kwargs
     ):
         if parse_strings_as_datetimes:
             warnings.warn(
@@ -43,7 +43,7 @@ future release.  Please update code accordingly.
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-        cls, column, parse_strings_as_datetimes: Optional[bool] = None, **kwargs
+        cls, column, parse_strings_as_datetimes: Optional[bool] = False, **kwargs
     ):
         if parse_strings_as_datetimes:
             raise NotImplementedError
@@ -52,7 +52,7 @@ future release.  Please update code accordingly.
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(
-        cls, column, parse_strings_as_datetimes: Optional[bool] = None, **kwargs
+        cls, column, parse_strings_as_datetimes: Optional[bool] = False, **kwargs
     ):
         if parse_strings_as_datetimes:
             warnings.warn(

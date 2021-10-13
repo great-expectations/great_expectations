@@ -1,18 +1,9 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
     handle_strict_min_max,
@@ -173,6 +164,8 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 template_str = f"maximum value must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"maximum value must be {at_least_str} $min_value."
+            else:
+                template_str = ""
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
