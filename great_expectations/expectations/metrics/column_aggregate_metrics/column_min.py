@@ -38,7 +38,10 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            temp_column = column.map(parse)
+            try:
+                temp_column = column.map(parse)
+            except TypeError:
+                temp_column = column
             return temp_column.min()
         else:
             return column.min()

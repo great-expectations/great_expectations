@@ -46,7 +46,10 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            temp_column = column.map(parse)
+            try:
+                temp_column = column.map(parse)
+            except TypeError:
+                temp_column = column
         else:
             temp_column = column
 

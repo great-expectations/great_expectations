@@ -51,12 +51,17 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            # tolerance = timedelta(days=tolerance)
             if min_value:
-                min_value = parse(min_value)
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
 
             if max_value:
-                max_value = parse(max_value)
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
             try:
                 temp_column = column.map(parse)
@@ -175,10 +180,16 @@ future release.  Please update code accordingly.
             )
 
             if min_value:
-                min_value = parse(min_value)
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
 
             if max_value:
-                max_value = parse(max_value)
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
@@ -228,10 +239,16 @@ future release.  Please update code accordingly.
             )
 
             if min_value:
-                min_value = parse(min_value)
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
 
             if max_value:
-                max_value = parse(max_value)
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")

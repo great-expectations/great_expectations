@@ -52,8 +52,15 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            temp_column_A = column_A.map(parse)
-            temp_column_B = column_B.map(parse)
+            try:
+                temp_column_A = column_A.map(parse)
+            except TypeError:
+                temp_column_A = column_A
+
+            try:
+                temp_column_B = column_B.map(parse)
+            except TypeError:
+                temp_column_B = column_B
         else:
             temp_column_A = column_A
             temp_column_B = column_B
