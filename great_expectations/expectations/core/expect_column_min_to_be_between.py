@@ -86,7 +86,13 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.min",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+        "parse_strings_as_datetimes",
+    )
 
     # Default values
     default_kwarg_values = {
@@ -97,6 +103,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "parse_strings_as_datetimes": False,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):

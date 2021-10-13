@@ -23,6 +23,7 @@ from great_expectations.expectations.metrics.import_manager import F, sa
 
 class ColumnMax(ColumnAggregateMetricProvider):
     metric_name = "column.max"
+    value_keys = ("parse_strings_as_datetimes",)
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):

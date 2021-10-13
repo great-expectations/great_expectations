@@ -2805,6 +2805,109 @@ def test_distinct_metric_pd():
     assert results == {desired_metric.id: {1, 2, 3}}
 
 
+def test_batch_aggregate_metrics_pd():
+    import datetime
+
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    "2021-01-01",
+                    "2021-01-31",
+                    "2021-02-28",
+                    "2021-03-20",
+                    "2021-02-21",
+                    "2021-05-01",
+                    "2021-06-18",
+                ],
+                "b": [
+                    "2021-06-18",
+                    "2021-05-01",
+                    "2021-02-21",
+                    "2021-03-20",
+                    "2021-02-28",
+                    "2021-01-31",
+                    "2021-01-01",
+                ],
+            }
+        )
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+
+    start = datetime.datetime.now()
+    with pytest.warns(DeprecationWarning) as records:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(
+                desired_metric_1,
+                desired_metric_2,
+                desired_metric_3,
+                desired_metric_4,
+            ),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(records) == 4
+    for record in records:
+        assert (
+            'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+            in str(record.message)
+        )
+    end = datetime.datetime.now()
+    print(end - start)
+    assert results[desired_metric_1.id] == pd.Timestamp(year=2021, month=6, day=18)
+    assert results[desired_metric_2.id] == pd.Timestamp(year=2021, month=1, day=1)
+    assert results[desired_metric_3.id] == pd.Timestamp(year=2021, month=6, day=18)
+    assert results[desired_metric_4.id] == pd.Timestamp(year=2021, month=1, day=1)
+
+
 def test_batch_aggregate_metrics_sa(caplog, sa):
     import datetime
 

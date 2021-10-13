@@ -93,7 +93,13 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.max",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+        "parse_strings_as_datetimes",
+    )
 
     # Default values
     default_kwarg_values = {
@@ -104,6 +110,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "parse_strings_as_datetimes": False,
     }
 
     """ A Column Map MetricProvider Decorator for the Maximum"""
