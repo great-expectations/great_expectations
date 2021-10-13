@@ -188,6 +188,13 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 "value": params.get("condition_parser"),
             },
         }
+        # add value_set params
+        for i, v in enumerate(params["value_set"]):
+            params_with_json_schema["v__" + str(i)] = {
+                "schema": {"type": "string"},
+                "value": v,
+            }
+
         return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
