@@ -1,3 +1,4 @@
+import datetime
 import warnings
 from typing import Any, Dict, Optional
 
@@ -52,7 +53,7 @@ future release.  Please update code accordingly.
         series_diff = temp_column.diff()
         # The first element is null, so it gets a bye and is always treated as True
         if parse_strings_as_datetimes:
-            series_diff[series_diff.isnull()] = 1
+            series_diff[series_diff.isnull()] = datetime.timedelta(seconds=1)
             series_diff = pd.to_timedelta(series_diff, unit="S")
         else:
             series_diff[series_diff.isnull()] = 1
