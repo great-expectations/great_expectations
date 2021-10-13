@@ -2286,9 +2286,9 @@ class RenderedAtomicValueSchema(Schema):
 class RenderedAtomicValue(DictDot):
     def __init__(
         self,
-        template: str = None,
-        params: dict = None,
-        schema: dict = None,
+        template: Optional[str] = None,
+        params: Optional[dict] = None,
+        schema: Optional[dict] = None,
         # header: list = None,
         # header_row: str = None,
         # table: list = None,

@@ -178,23 +178,28 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
+        """
+        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
+        renderer.prescriptive (OSS GE)
+        """
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
         styling = runtime_configuration.get("styling")
 
         template_str = "$expectation_type(**$kwargs)"
-
         params = {
             "expectation_type": configuration.expectation_type,
             "kwargs": configuration.kwargs,
         }
-
+        
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
                 "value": configuration.expectation_type,
             },
             "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
-        }
+        }  
         return (template_str, params, params_with_json_schema, styling)
 
     @classmethod
@@ -208,12 +213,10 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        (template_str, params, params_with_json_schema, styling) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
         value_obj = renderedAtomicValueSchema.load(
@@ -521,15 +524,7 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
+    def _get_observed_value_from_evr(self, result: ExpectationValidationResult) -> str:
         result_dict = result.result
         if result_dict is None:
             return "--"
@@ -548,6 +543,46 @@ class Expectation(metaclass=MetaExpectation):
             )
         else:
             return "--"
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        observed_value = cls._get_observed_value_from_evr(result=result)
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": observed_value,
+                "params": {},
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            valuetype="StringValueType",
+        )
+        return rendered
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        return cls._get_observed_value_from_evr(result=result)
 
     @classmethod
     def get_allowed_config_keys(cls):
