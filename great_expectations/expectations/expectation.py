@@ -200,7 +200,7 @@ class Expectation(metaclass=MetaExpectation):
             },
             "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
@@ -218,7 +218,6 @@ class Expectation(metaclass=MetaExpectation):
         """
         (
             template_str,
-            params,
             params_with_json_schema,
             styling,
         ) = cls._atomic_prescriptive_template(
