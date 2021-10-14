@@ -11,7 +11,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
+from ..expectation import ColumnMapExpectation
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
@@ -103,7 +103,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "max_value": None,
         "strict_min": False,
         "strict_max": False,  # tolerance=1e-9,
-        "parse_strings_as_datetimes": None,
+        "parse_strings_as_datetimes": False,
         "allow_cross_type_comparisons": None,
         "result_format": "BASIC",
         "include_config": True,
