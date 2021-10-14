@@ -167,13 +167,17 @@ The following sections detail the changes you must make to existing store backen
 For validations stores with backends of type `TupleFilesystemStoreBackend`, `TupleS3StoreBackend`, or `TupleGCSStoreBackend`,
 rename paths (or object keys) of all existing Expectation Suite Validation Result json files:
 
-Before::
+**Before**
 
-  great_expectations/uncommitted/validations/my_suite_name/my_run_id/some_batch_identifier.json
+```
+great_expectations/uncommitted/validations/my_suite_name/my_run_id/some_batch_identifier.json
+```
 
-After::
+**After**
 
-  great_expectations/uncommitted/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.json
+```
+great_expectations/uncommitted/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.json
+```
 
 For validations stores with backends of type `DatabaseStoreBackend`, perform the following database migration:
 
@@ -200,16 +204,16 @@ following migration for each database backend:
 For Data Docs sites with store backends of type `TupleFilesystemStoreBackend`, `TupleS3StoreBackend`, or `TupleGCSStoreBackend`, rename
 paths (or object keys) of all existing Expectation Suite Validation Result html files:
 
-***Before***
+**Before**
 
 ```
-  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/some_batch_identifier.html
+great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/some_batch_identifier.html
 ```
 
-***After***
+**After**
 
 ```
-  great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
+great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
 ```
 
 ## Upgrading to 0.10.x
