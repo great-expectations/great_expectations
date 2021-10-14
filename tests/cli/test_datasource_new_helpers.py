@@ -334,14 +334,14 @@ def test_SnowflakeCredentialYamlHelper_sso_auth(
     helper.prompt()
     assert helper.auth_method == SnowflakeAuthMethod.SSO
 
-    expected_credentials_snippet = '''\
+    expected_credentials_snippet = """\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name (optional -- leave blank and remove database key and the InferredAssetSqlDataConnector from example_yaml below for none)
 schema = ""  # The schema name (optional -- leave blank and remove schema key from example_yaml below for none)
 warehouse = ""  # The warehouse name (optional -- leave blank and remove warehouse key from example_yaml below for none)
 role = ""  # The role name (optional -- leave blank and remove role key from example_yaml below for none)
-authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO'''
+authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
         helper.yaml_snippet()
@@ -388,7 +388,7 @@ def test_SnowflakeCredentialYamlHelper_key_pair_auth(
     helper.prompt()
     assert helper.auth_method == SnowflakeAuthMethod.KEY_PAIR
 
-    expected_credentials_snippet = '''\
+    expected_credentials_snippet = """\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name (optional -- leave blank and remove database key and the InferredAssetSqlDataConnector from example_yaml below for none)
@@ -396,7 +396,7 @@ schema = ""  # The schema name (optional -- leave blank and remove schema key fr
 warehouse = ""  # The warehouse name (optional -- leave blank and remove warehouse key from example_yaml below for none)
 role = ""  # The role name (optional -- leave blank and remove role key from example_yaml below for none)
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
-private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)'''
+private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
