@@ -52,7 +52,12 @@ future release.  Please update code accordingly.
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            raise NotImplementedError
+            warnings.warn(
+                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._sqlalchemy()", it is not used.
+""",
+                DeprecationWarning,
+            )
 
         return sa.func.max(column)
 
