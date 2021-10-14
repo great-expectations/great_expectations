@@ -26,8 +26,14 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 class ColumnValuesDecreasing(ColumnMapMetricProvider):
     condition_metric_name = "column_values.decreasing"
-    condition_value_keys = ("strictly",)
-    default_kwarg_values = {"strictly": False}
+    condition_value_keys = (
+        "strictly",
+        "parse_strings_as_datetimes",
+    )
+    default_kwarg_values = {
+        "strictly": False,
+        "parse_strings_as_datetimes": False,
+    }
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(

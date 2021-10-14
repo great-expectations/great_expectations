@@ -51,13 +51,13 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            if min_value:
+            if min_value is not None:
                 try:
                     min_value = parse(min_value)
                 except TypeError:
                     pass
 
-            if max_value:
+            if max_value is not None:
                 try:
                     max_value = parse(max_value)
                 except TypeError:
@@ -179,13 +179,13 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            if min_value:
+            if min_value is not None:
                 try:
                     min_value = parse(min_value)
                 except TypeError:
                     pass
 
-            if max_value:
+            if max_value is not None:
                 try:
                     max_value = parse(max_value)
                 except TypeError:
@@ -238,13 +238,13 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            if min_value:
+            if min_value is not None:
                 try:
                     min_value = parse(min_value)
                 except TypeError:
                     pass
 
-            if max_value:
+            if max_value is not None:
                 try:
                     max_value = parse(max_value)
                 except TypeError:
