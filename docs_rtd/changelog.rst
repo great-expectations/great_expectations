@@ -12,9 +12,9 @@ develop
 -----------------
 * [FEATURE] Atomic Renderer: Initial framework and Prescriptive renderers (#3529)
 * [FEATURE] Atomic Renderer: Diagnostic renderers (#3534)
-* [BUGFIX] runtime_parameters: {batch_data: <Spark DF>} serialization (#3502)
+* [BUGFIX] runtime_parameters: {batch_data: <park DF} serialization (#3502)
 * [BUGFIX] Custom query in RuntimeBatchRequest for expectations using table.row_count metric (#3508)
-* [BUGFIX] Transpose newline and comma in notebook (#3463) (thanks @mccalluc)
+* [BUGFIX] Transpose \n and , in notebook (#3463) (thanks @mccalluc)
 * [BUGFIX] Fix contributor link (#3462) (thanks @mccalluc)
 * [DOCS] How to introspect and partition a files based data store (#3464)
 * [DOCS] fixed duplication of text in code example (#3503)
