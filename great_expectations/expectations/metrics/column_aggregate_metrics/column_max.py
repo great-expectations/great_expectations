@@ -69,6 +69,9 @@ future release.  Please update code accordingly.
                 DeprecationWarning,
             )
 
-            column = apply_dateutil_parse(column=column)
+            try:
+                column = apply_dateutil_parse(column=column)
+            except TypeError:
+                pass
 
         return F.max(column)
