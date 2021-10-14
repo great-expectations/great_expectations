@@ -2,14 +2,33 @@
 
 While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](data_docs) and [profilers](profilers) in addition to [validation](validation).
 
+The Batch Request (V3)  API was first introduced in the 0.13 major release of Great Expectations and included a group of new features based on "new style" Datasources and Modular Expectations.  
+
+
+The V2 (Batch Kwargs) API will be deprecated in the future.
+
+
+
+**[Add More information about V3, and difference between 0.13 and 0.14]
+
+
+
 Since expectation semantics are usually consistent across versions, there is little change required when upgrading Great Expectations, with some exceptions noted here.
+
+* What do write about V3 API? 
+    - it was first introduced in 0.13
+    - after 0.14 this is the default behavior that we are encourag
 
 ## Main differences
 
-
 **V3 (Batch Request) API vs The V2 (Batch Kwargs) API**
 
-The V3 (Batch Request) API was first introduced in the 0.13 major release of Great Expectations and included a group of new features based on "new style" Datasources and Modular Expectations.  The V2 (Batch Kwargs) API will be deprecated in the future. **[Add More information about V3, and difference between 0.13 and 0.14]
+
+Main Differences
+    - new Style DataSources
+    - modular Expectations : 
+        - is there more information that can be shared here? 
+
 
 ## Do I need to upgrade?
 
@@ -28,7 +47,6 @@ great_expectations check-config
 
 ## If you need to upgrade to V3 API
 
-
 Tell them to manually update AND run upgrader, and tell them what upgrader will remove (validation_operators in addition to what it already does).
 
 run the cli upgrade command
@@ -43,7 +61,3 @@ run check-config (recommended) or upgrade and get Success :white_check_mark: if 
 
 **** MODIFY THIS ****
 
-
-## Upgrading to 0.13.x
-
-Add additional note 0.13.x
