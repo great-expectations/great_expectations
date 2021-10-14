@@ -3,7 +3,6 @@ title: Changelog
 ---
 
 ### Develop
-* [BUGFIX] Fix deprecation warning for importing from collections
 
 ### 0.13.38
 * [FEATURE] Atomic Renderer: Initial framework and Prescriptive renderers (#3529)
