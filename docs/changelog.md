@@ -3,9 +3,25 @@ title: Changelog
 ---
 
 ### Develop
-* [BUGFIX] runtime_parameters: query: Custom query used as subquery in table metrics (#3508)
-* [BUGFIX] runtime_parameters: batch_data: Spark DF serialization (#3502)
-* [DOCS] Added details on Anonymous Usage Statistics to the reference documentation.
+
+### 0.13.38
+* [FEATURE] Atomic Renderer: Initial framework and Prescriptive renderers (#3529)
+* [FEATURE] Atomic Renderer: Diagnostic renderers (#3534)
+* [BUGFIX] runtime_parameters: {batch_data: <Spark DF>} serialization (#3502)
+* [BUGFIX] Custom query in RuntimeBatchRequest for expectations using table.row_count metric (#3508)
+* [BUGFIX] Transpose \n and , in notebook (#3463) (thanks @mccalluc)
+* [BUGFIX] Fix contributor link (#3462) (thanks @mccalluc)
+* [DOCS] How to introspect and partition a files based data store (#3464)
+* [DOCS] fixed duplication of text in code example (#3503)
+* [DOCS] Make content better reflect the document organization. (#3510)
+* [DOCS] Correcting typos and improving the language. (#3513)
+* [DOCS] Better Sections Numbering in Documentation (#3515)
+* [DOCS] Improved wording (#3516)
+* [DOCS] Improved title wording for section heading (#3517)
+* [DOCS] Improve Readability of Documentation Content (#3536)
+* [MAINTENANCE] Content and test script update (#3532)
+* [MAINTENANCE] Provide Deprecation Notice for the "parse_strings_as_datetimes" Expectation Parameter in V3 (#3539)
+
 
 ### 0.13.37
 * [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
