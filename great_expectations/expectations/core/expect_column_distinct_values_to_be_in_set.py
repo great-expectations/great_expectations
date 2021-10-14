@@ -1,10 +1,10 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
 import altair as alt
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import (
     add_value_set_params,
     render_evaluation_parameter_string,
@@ -115,7 +115,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     # Default values
     default_kwarg_values = {
         "value_set": None,
-        "parse_strings_as_datetimes": None,
+        "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
