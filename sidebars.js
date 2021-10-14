@@ -334,6 +334,15 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Migration Guide',
+          items: [
+            { type: 'doc', id: 'reference/migration_guide' },
+            { type: 'doc', id: 'reference/migration_guide_previous_versions' }
+
+          ]
+        },
+        {
+          type: 'category',
           label: 'Supporting Resources',
           items: [
             { type: 'doc', id: 'reference/supporting_resources' }
