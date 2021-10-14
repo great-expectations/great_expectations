@@ -1,6 +1,7 @@
 import logging
 import re
 import traceback
+import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
@@ -8,6 +9,7 @@ from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
+from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -1234,14 +1236,38 @@ class TableExpectation(Expectation, ABC):
     ):
         metric_value = metrics.get(metric_name)
 
+        if metric_value is None:
+            return {"success": False, "result": {"observed_value": metric_value}}
+
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
         strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
-        if metric_value is None:
-            return {"success": False, "result": {"observed_value": metric_value}}
+        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
+            "parse_strings_as_datetimes"
+        )
+
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None:
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         # Checking if mean lies between thresholds
         if min_value is not None:
