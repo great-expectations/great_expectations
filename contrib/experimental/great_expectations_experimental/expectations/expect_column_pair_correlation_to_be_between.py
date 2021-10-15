@@ -1,3 +1,4 @@
+import copy
 import json
 from typing import Any, Dict, Optional, Tuple
 
@@ -22,6 +23,10 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
     InvalidExpectationConfigurationError,
     _format_map_output,
+)
+from great_expectations.expectations.metrics import (
+    column_condition_partial,
+    column_function_partial,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnMetricProvider,
@@ -63,23 +68,101 @@ class ColumnCorrelation(ColumnPairAggregateMetricProvider):
         _table=None,
         _dialect=None,
         _sqlalchemy_engine=None,
+        _metrics=None,
         **kwargs
     ):
-        def get_query_result(f):
-            # maybe add this to the engine object for convenience
-            query = sa.select(f).select_from(_table)
-            return _sqlalchemy_engine.execute(query).scalar()
+        # def get_query_result(f):
+        #     # maybe add this to the engine object for convenience
+        #     query = sa.select(f).select_from(_table)
+        #     return _sqlalchemy_engine.execute(query).scalar()
 
         # add a way to make upstream column metrics dependencies
-        mean_a = get_query_result(sa.func.avg(column_A))
-        mean_b = get_query_result(sa.func.avg(column_B))
+        # mean_a = get_query_result(sa.func.avg(column_A))
+        # mean_b = get_query_result(sa.func.avg(column_B))
 
-        ab = get_query_result(sa.func.avg((column_A - mean_a) * (column_B - mean_b)))
-        aa = get_query_result(sa.func.avg(sa.func.pow(column_A - mean_a, 2)))
-        bb = get_query_result(sa.func.avg(sa.func.pow(column_B - mean_b, 2)))
+        mean_a = _metrics.get("column_A.mean")
+        mean_b = _metrics.get("column_B.mean")
+
+        ab, aa, bb = cls._sqlalchemy_anonymous_metric(
+            [
+                sa.func.avg((column_A - mean_a) * (column_B - mean_b)),
+                sa.func.avg(sa.func.pow(column_A - mean_a, 2)),
+                sa.func.avg(sa.func.pow(column_B - mean_b, 2)),
+            ],
+            _sqlalchemy_engine=_sqlalchemy_engine,
+            _table=_table,
+        )
+        # ab = get_query_result(sa.func.avg((column_A - mean_a) * (column_B - mean_b)))
+        # aa = get_query_result(sa.func.avg(sa.func.pow(column_A - mean_a, 2)))
+        # bb = get_query_result(sa.func.avg(sa.func.pow(column_B - mean_b, 2)))
 
         corr = ab / (aa ** 0.5) / (bb ** 0.5)
         return corr
+
+    @classmethod
+    def _sqlalchemy_anonymous_metric(
+        cls, f, _sqlalchemy_engine, _table=None, _dialect=None
+    ):
+        # maybe add this to the engine object for convenience
+        query = sa.select(f).select_from(_table)
+        return _sqlalchemy_engine.execute(query).fetchone()
+
+    @column_function_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy_function(cls, column, _metrics, _dialect, **kwargs):
+        mean = _metrics["column.mean"]
+        standard_deviation = _metrics["column.standard_deviation"]
+        return (column - mean) / standard_deviation
+
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy_condition(cls, column, _metrics, threshold, double_sided, **kwargs):
+
+        z_score, _, _ = _metrics["column_values.z_score.map"]
+        if double_sided:
+            under_threshold = sa.func.abs(z_score) < abs(threshold)
+        else:
+            under_threshold = z_score < threshold
+
+        return under_threshold
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        """Returns a dictionary of given metric names and their corresponding configuration, specifying the metric
+        types and their respective domains"""
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        if metric.metric_name == "column_pair.m1":
+            domain = copy.copy(metric.metric_domain_kwargs)
+            column_A = domain.pop("column_A")
+            column_B = domain.pop("column_B")
+
+            column_A_domain = copy.copy(domain)
+            column_A_domain.update({"column": column_A})
+
+            column_B_domain = copy.copy(domain)
+            column_B_domain.update({"column": column_B})
+
+            dependencies["column_A.mean"] = MetricConfiguration(
+                metric_name="column.mean",
+                metric_domain_kwargs=column_A_domain,
+            )
+
+            dependencies["column_B.mean"] = MetricConfiguration(
+                metric_name="column.mean",
+                metric_domain_kwargs=column_B_domain,
+            )
+
+        return dependencies
 
     # def _sqlalchemy(
     #     cls,
