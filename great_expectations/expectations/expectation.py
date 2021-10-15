@@ -1043,7 +1043,9 @@ class Expectation(metaclass=MetaExpectation):
         elif type(rendered_result) == list:
             sub_result_list = []
             for sub_result in rendered_result:
-                sub_result_list.append(self._get_rendered_result_as_string(sub_result))
+                res = self._get_rendered_result_as_string(sub_result)
+                if res is not None:
+                    sub_result_list.append(res)
 
             return "\n".join(sub_result_list)
 
