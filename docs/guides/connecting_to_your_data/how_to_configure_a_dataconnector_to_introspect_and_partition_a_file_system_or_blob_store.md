@@ -22,9 +22,9 @@ File-based introspection and partitioning are useful for:
   
 </Prerequisites>
 
-We will use the "Yellow Taxi" dataset to walk you through the configuration of `Data Connectors` by starting with the
-basic `Inferred Asset Data Connector`, then moving to a bare-bones `Configured Asset Data Connector`, and gradually
-building out its configuration to achieve the introspection of your files with the semantics consistent with your goals.
+We will use the "Yellow Taxi" dataset to walk you through the configuration of `Data Connectors`.  Starting with the
+bare-bones version of either an `Inferred Asset Data Connector` or a `Configured Asset Data Connector`, we gradually
+build out the configuration to achieve the introspection of your files with the semantics consistent with your goals.
 
 To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
 
@@ -36,6 +36,8 @@ Import Great Expectations.
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L5
 ```
+
+### 2. Obtain DataContext
 
 Load your DataContext into memory using the `get_context()` method.
 
@@ -132,7 +134,7 @@ raised and sent to standard error.  This can be converted to an exception trace 
 context.test_yaml_config(yaml_string, shorten_tracebacks=True)
 ```
 
-showing the line numbers, where the exception occurred (most likely caused by the failure of the required class (in this
+showing the line numbers, where the exception occurred, most likely caused by the failure of the required class (in this
 case `InferredAssetFilesystemDataConnector`) from being successfully instantiated.
 
 ### 2. Save the Datasource configuration to your DataContext
@@ -145,8 +147,8 @@ by using the `add_datasource()` function.
 
 ### 3. Get names of available Data Assets
  
-Getting names of available data assets using an `Inferred Asset Data Connector` gives affords you the visibility into
-types and naming structures of files in your filesystem or blob storage:
+Getting names of available data assets using an `Inferred Asset Data Connector` affords you the visibility into types
+and naming structures of files in your filesystem or blob storage:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L126-L133
 ```
@@ -163,7 +165,7 @@ your `Datasource` configuration (please feel free to change the name as you deem
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L147-L164
 ```
 
-Now run this code again to test your configuration:
+Now run this code to test your configuration:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
 ```
