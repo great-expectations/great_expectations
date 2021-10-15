@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Added get_failed to ExpectationSuiteValidationResult. (#3531)
 
 0.13.37
 -----------------
@@ -40,7 +41,7 @@ develop
 * [MAINTENANCE] Remove validation playground notebooks (#3467)
 * [MAINTENANCE] clean up type hints, API usage, imports, and coding style (#3444)
 * [MAINTENANCE] comments (#3457)
- 
+
 0.13.35
 -----------------
 * [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
