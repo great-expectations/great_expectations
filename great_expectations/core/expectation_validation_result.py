@@ -371,6 +371,33 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
+    def get_failed(self):
+        validation_results = [result for result in self.results if not result.success]
+
+        successful_expectations = sum(exp.success for exp in validation_results)
+        evaluated_expectations = len(validation_results)
+        unsuccessful_expectations = evaluated_expectations - successful_expectations
+        success = successful_expectations == evaluated_expectations
+        try:
+            success_percent = successful_expectations / evaluated_expectations * 100
+        except ZeroDivisionError:
+            success_percent = None
+        statistics = {
+            "successful_expectations": successful_expectations,
+            "evaluated_expectations": evaluated_expectations,
+            "unsuccessful_expectations": unsuccessful_expectations,
+            "success_percent": success_percent,
+            "success": success,
+        }
+
+        return ExpectationSuiteValidationResult(
+            success=success,
+            results=validation_results,
+            evaluation_parameters=self.evaluation_parameters,
+            statistics=statistics,
+            meta=self.meta,
+        )
+
 
 class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
