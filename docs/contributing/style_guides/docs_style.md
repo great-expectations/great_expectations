@@ -1,8 +1,6 @@
 ---
-title: Contributing Style Guide
+title: Documentation style guide
 ---
-
-### Style Guide
 
 :::info Note
 This style guide will be enforced for all incoming PRs. However, certain legacy areas within the repo do not yet fully adhere to the style guide. We welcome PRs to bring these areas up to code.
@@ -18,76 +16,7 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 * **We reserve the word “should” for strong directives, not just helpful guidance.**
 
-#### code
-
-* **Methods are almost always named using snake_case.**
-
-* **Methods that behave as operators (e.g. comparison or equality) are named using camelCase.** These methods are rare and should be changed with great caution. Please reach out to us if you see the need for a change of this kind.
-
-* **Experimental methods should log an experimental warning when called:** “Warning: some_method is experimental. Methods, APIs, and core behavior may change in the future.”
-
-* **Experimental classes should log an experimental warning when initialized:** “Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future.”
-
-* **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx-doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
-
-* **Lint your code.** Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. - Linting with `isort` MUST occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. So, **before running ``pre-commit install`` ensure you have activated a virtual environment that has all development requirements installed.**
-
-````console
-pre-commit uninstall
-# ACTIVATE ENV, e.g.: conda activate pre_commit_env OR source pre_commit_env/bin/activate
-pip install -r requirements-dev.txt
-pre-commit install --install-hooks
-````
-
-	* If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
-
-````console
-black .
-isort . --check-only --skip docs
-flake8 great_expectations/core
-pyupgrade --py3-plus
-````
-
-#### Expectations
-
-* **Use unambiguous Expectation names**, even if they’re a bit longer, e.g. `expect_columns_to_match_ordered_list` instead of `expect_columns_to_be`.
-
-* **Avoid abbreviations**, e.g. `column_index` instead of `column_idx`.
-
-* ((Expectation names should reflect their decorators:**
-
-	* `expect_table_...` for methods decorated directly with `@expectation`
-	* `expect_column_values_...` for `@column_map_expectation`
-	* `expect_column_...` for `@column_aggregate_expectation`
-	* `expect_column_pair_values...` for `@column_pair_map_expectation`
-
-#### The CLI
-
-The [CLI](docs/guides/miscellaneous/how_to_use_the_great_expectations_cli) has some conventions of its own.
-
-* The CLI never writes to disk without asking first.
-
-* Questions are always phrased as conversational sentences.
-
-* Sections are divided by headers: “========== Profiling ==========”
-
-* We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
-
-* Keep indentation and line spacing consistent! (We’re pythonistas, natch.)
-
-* Include exactly one blank line after every question.
-
-* Within those constraints, shorter is better. When in doubt, shorten.
-
-* Clickable links (usually to documentation) are blue.
-
-* Copyable bash commands are green.
-
-* All top-level bash commands must be nouns: “docs build”, not “build docs”
-
-#### .rst files
-
-##### Organization
+### Organization
 
 Within the table of contents, each section has specific role to play. Broadly speaking, we follow Divio’s excellent Documentation System, with the caveat that our “Reference” section is their “Explanation” section, and our “Module docs” section is their “Reference section”.
 
@@ -103,7 +32,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Module docs** link through to module docstrings themselves.
 
-#### Titles
+### Titles
 
 * **Headers are capitalized like sentences**. Yep: “Installing within a project.” Nope: “Installing Within a Project.”
 
@@ -111,7 +40,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Please follow the Sphinx guide for sections to determine which of the many, confusing .rst underlining conventions to use**: [Sphinx guide for sections](http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections)
 
-#### Core concepts and classes
+### Core concepts and classes
 
 * **Core concepts are always capitalized, and always are linked on first reference within each page**. Pretend the docs are a fantasy novel, and core concepts are magic.
 
@@ -126,7 +55,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 If a word is both a core concept and a class name, prefer the core concept unless the text refers specifically to the class.
 
-#### File names, RST refs, and links
+### File names, RST refs, and links
 
 * **File names should parallel titles, so that URLs and titles are similar**. For example: the page titled `Initialize a project` has this filename: `initialize_a_project.rst`, which produces this URL: `initialize_a_project.html`
 
