@@ -2,14 +2,9 @@
 title: Create your first Expectations
 ---
 
-[Expectations](/docs/reference/expectations/expectations) are the key concept in Great Expectations.
+Expectations are the workhorse abstraction in Great Expectations. Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with dozens of built-in Expectations, and it’s possible to develop your own custom Expectations, too.
 
-Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with [dozens of built-in Expectations](/docs/reference/glossary_of_expectations), and it’s possible to [develop your own custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations), too.
-
-:::note Admonition from Mr. Dickens.
-  “Take nothing on its looks; take everything on evidence. There’s no better rule.”
-:::
-
+### Create an Expectation Suite using the CLI
 The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called `taxi.demo`. Type the following into your terminal:
 
 ```console
@@ -63,7 +58,7 @@ You may now wonder why we chose the first file in this step. Here’s an explana
 
 Makes sense, right?
 
-## Creating Expectations in Jupyter Notebooks
+### Creating Expectations in Jupyter Notebooks
 
 Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 
@@ -79,7 +74,7 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 ```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L55-L60
 ```
 
-3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite. You can leave these defaults as-is for now - [learn more about the available parameters here](/docs/reference/profilers).
+3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite.
 
 4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the “Validate your data” section.*
 

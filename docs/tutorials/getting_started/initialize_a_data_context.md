@@ -26,13 +26,13 @@ If you haven’t already, install Great Expectations.
 pip install great_expectations
 ```
 
-You can confirm that it worked by running
+You can confirm that installation worked by running
 
 ```console
 great_expectations --version
 ```
 
-This should show something like:
+This should return something like:
 
 ```console
 great_expectations, version 0.13.29
