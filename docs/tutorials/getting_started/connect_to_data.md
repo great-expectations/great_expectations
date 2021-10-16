@@ -1,5 +1,5 @@
 ---
-title: Connect to Data
+title: Connect to data
 ---
 
 Once you have a Data Context, you’ll want to connect to data. In Great Expectations, Datasources simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.

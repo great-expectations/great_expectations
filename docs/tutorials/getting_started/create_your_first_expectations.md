@@ -58,7 +58,7 @@ You may now wonder why we chose the first file in this step. Here’s an explana
 
 Makes sense, right?
 
-### Creating Expectations in Jupyter Notebooks
+### Creating Expectations in Jupyter notebooks
 
 Notebooks are a simple way of interacting with the Great Expectations Python API. You could also just write all this in plain Python code, but for convenience, Great Expectations provides you some boilerplate code in notebooks.
 
