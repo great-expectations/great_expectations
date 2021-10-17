@@ -1,11 +1,7 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
@@ -90,7 +86,13 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.min",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+        "parse_strings_as_datetimes",
+    )
 
     # Default values
     default_kwarg_values = {
@@ -101,6 +103,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "parse_strings_as_datetimes": False,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -157,6 +160,8 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                 template_str = f"minimum value must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"minimum value must be {at_least_str} $min_value."
+            else:
+                template_str = ""
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."

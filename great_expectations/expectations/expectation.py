@@ -1,6 +1,7 @@
 import logging
 import re
 import traceback
+import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
@@ -8,6 +9,7 @@ from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
+from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -178,16 +180,16 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
+        """
+        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
+        renderer.prescriptive (OSS GE)
+        """
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
         styling = runtime_configuration.get("styling")
 
         template_str = "$expectation_type(**$kwargs)"
-
-        params = {
-            "expectation_type": configuration.expectation_type,
-            "kwargs": configuration.kwargs,
-        }
-
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
@@ -208,15 +210,15 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
         (
             template_str,
-            params,
             params_with_json_schema,
             styling,
         ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
-        )
-        value_obj = renderedAtomicValueSchema.load(
+         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
                 "params": params_with_json_schema,
@@ -521,7 +523,7 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
-    def _get_observed_value_from_evr(self, result: ExpectationValidationResult):
+    def _get_observed_value_from_evr(self, result: ExpectationValidationResult) -> str:
         result_dict = result.result
         if result_dict is None:
             return "--"
@@ -551,6 +553,9 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
         observed_value = cls._get_observed_value_from_evr(result=result)
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -1040,7 +1045,9 @@ class Expectation(metaclass=MetaExpectation):
         elif type(rendered_result) == list:
             sub_result_list = []
             for sub_result in rendered_result:
-                sub_result_list.append(self._get_rendered_result_as_string(sub_result))
+                res = self._get_rendered_result_as_string(sub_result)
+                if res is not None:
+                    sub_result_list.append(res)
 
             return "\n".join(sub_result_list)
 
@@ -1233,14 +1240,38 @@ class TableExpectation(Expectation, ABC):
     ):
         metric_value = metrics.get(metric_name)
 
+        if metric_value is None:
+            return {"success": False, "result": {"observed_value": metric_value}}
+
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
         strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
-        if metric_value is None:
-            return {"success": False, "result": {"observed_value": metric_value}}
+        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
+            "parse_strings_as_datetimes"
+        )
+
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None:
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         # Checking if mean lies between thresholds
         if min_value is not None:
