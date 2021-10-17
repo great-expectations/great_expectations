@@ -10,6 +10,7 @@ All Expectations return a JSON-serializable dictionary when evaluated, and share
 * [catch_exceptions](#catch_exceptions): If true, execution will not fail if the Expectation encounters an error.
   Instead, it will return success = False and provide an informative error message.
 * [meta](#meta): Allows user-supplied meta-data to be stored with an Expectation.
+* [mostly](#mostly): A special argument that allows for _fuzzy_ validation based on some percentage (available for all `column_map_expectations`)
 
 ## `result_format`
 See [Result format](./result_format) for more information.
