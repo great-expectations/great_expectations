@@ -181,7 +181,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -194,14 +194,61 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
         )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column_A",
+                "column_B",
+                "parse_strings_as_datetimes",
+                "ignore_row_if",
+                "mostly",
+                "or_equal",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
+            params["row_condition"] = None
+
+        if params["mostly"] is None:
+            if params["or_equal"] in [None, False]:
+                template_str = "Values in $column_A must always be greater than those in $column_B."
+            else:
+                template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
+        else:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["or_equal"] in [None, False]:
+                template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
+            else:
+                template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{

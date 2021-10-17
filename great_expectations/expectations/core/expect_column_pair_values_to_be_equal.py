@@ -160,7 +160,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -173,14 +173,51 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
         )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column_A",
+                "column_B",
+                "ignore_row_if",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        # NOTE: This renderer doesn't do anything with "ignore_row_if"
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+            params["row_condition"] = None
+
+        if params["mostly"] is None:
+            template_str = "Values in $column_A and $column_B must always be equal."
+        else:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(

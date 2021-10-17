@@ -5,7 +5,10 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.util import (
+    add_value_set_params,
+    render_evaluation_parameter_string,
+)
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedGraphContent, RenderedStringTemplateContent
@@ -188,7 +191,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        return (template_str, params, params_with_json_schema, styling)
+        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
+
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -201,14 +206,51 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
         )
+        styling = runtime_configuration.get("styling")
+
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "value_set", "row_condition", "condition_parser"],
+        )
+
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+
+            if include_column_name:
+                template_str = "$column distinct values must belong to this set: [ ]"
+            else:
+                template_str = "distinct values must belong to a set, but that set is not specified."
+
+        else:
+
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+            if include_column_name:
+                template_str = (
+                    "$column distinct values must belong to this set: "
+                    + values_string
+                    + "."
+                )
+            else:
+                template_str = (
+                    "distinct values must belong to this set: " + values_string + "."
+                )
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
