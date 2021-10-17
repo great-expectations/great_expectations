@@ -7,7 +7,10 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.util import (
+    add_value_set_params,
+    render_evaluation_parameter_string,
+)
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -146,6 +149,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
                 "value": params.get("column_list"),
             },
         }
+        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
