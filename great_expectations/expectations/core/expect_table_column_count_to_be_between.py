@@ -153,7 +153,7 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
                 "value": params.get("strict_max"),
             },
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -166,14 +166,27 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
         )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["min_value", "max_value", "strict_min", "strict_max"],
+        )
+        if params["min_value"] is None and params["max_value"] is None:
+            template_str = "May have any number of columns."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."
+            elif params["min_value"] is None:
+                template_str = f"Must have {at_most_str} $max_value columns."
+            elif params["max_value"] is None:
+                template_str = f"Must have {at_least_str} $min_value columns."
+
         return [
             RenderedStringTemplateContent(
                 **{

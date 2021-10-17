@@ -146,7 +146,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
                 "value": params.get("column_list"),
             },
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -159,14 +159,26 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
         )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
+
+        if params["column_list"] is None:
+            template_str = "Must have a list of columns in a specific order, but that order is not specified."
+
+        else:
+            template_str = "Must have these columns in this order: "
+            for idx in range(len(params["column_list"]) - 1):
+                template_str += "$column_list_" + str(idx) + ", "
+                params["column_list_" + str(idx)] = params["column_list"][idx]
+
+            last_idx = len(params["column_list"]) - 1
+            template_str += "$column_list_" + str(last_idx)
+            params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
 
         return [
             RenderedStringTemplateContent(

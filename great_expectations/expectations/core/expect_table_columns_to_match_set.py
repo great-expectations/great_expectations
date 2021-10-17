@@ -145,7 +145,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                 "value": params.get("exact_match"),
             },
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -158,14 +158,34 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
         )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs, ["column_set", "exact_match"]
+        )
+
+        if params["column_set"] is None:
+            template_str = "Must specify a set or list of columns."
+
+        else:
+            # standardize order of the set for output
+            params["column_list"] = list(params["column_set"])
+
+            column_list_template_str = ", ".join(
+                [f"$column_list_{idx}" for idx in range(len(params["column_list"]))]
+            )
+
+            exact_match_str = "exactly" if params["exact_match"] is True else "at least"
+
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+
+            for idx in range(len(params["column_list"])):
+                params["column_list_" + str(idx)] = params["column_list"][idx]
+
         return [
             RenderedStringTemplateContent(
                 **{

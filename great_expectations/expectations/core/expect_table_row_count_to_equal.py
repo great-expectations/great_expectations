@@ -140,6 +140,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
                 + template_str[1:]
             )
             params.update(conditional_params)
+
         params_with_json_schema = {
             "value": {
                 "schema": {"type": "number"},
@@ -154,7 +155,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -167,14 +168,31 @@ class ExpectTableRowCountToEqual(TableExpectation):
         runtime_configuration=None,
         **kwargs,
     ):
-        (
-            template_str,
-            params,
-            params_with_json_schema,
-            styling,
-        ) = cls._atomic_prescriptive_template(
-            configuration, result, language, runtime_configuration, **kwargs
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
         )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["value", "row_condition", "condition_parser"],
+        )
+        template_str = "Must have exactly $value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
         return [
             RenderedStringTemplateContent(
                 **{
