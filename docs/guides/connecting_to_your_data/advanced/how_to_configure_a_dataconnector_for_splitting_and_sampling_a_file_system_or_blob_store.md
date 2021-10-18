@@ -5,7 +5,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 
 This guide will help you configure `Splitting` and `Sampling` for any files type data store (e.g., filesystem, cloud
 blob storage) using a `Configured Asset Data Connector` (the same `Splitting` and `Sampling` configuration options can
-be readily applied to an `Inferred Asset Data Connector` as well).
+be readily applied to an `Inferred Asset Data Connector`).
 
 The `Splitting` and `Sampling` mechanisms provided by Great Expectations serve as additional tools for `Partitioning`
 your data at various levels of granularity:
@@ -16,7 +16,7 @@ your data at various levels of granularity:
 
 - [Configured and loaded a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md)
 - [Configured a Datasource and Data Connector](../../../reference/datasources.md)
-- [How to configure a DataConnector to introspect and partition a file system or blob store](../how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md)
+- Reviewed [How to configure a DataConnector to introspect and partition a file system or blob store](../how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md)
 
 </Prerequisites>
 
@@ -65,18 +65,18 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 To configure `Splitting`, specify a dimension (i.e., `column_name` or `column_names`), the method of `Splitting`, and
 parameters to be used by the specified `Splitting` method.
 
-To configure `Sampling`, specify a dimension (i.e., `column_name` or the entire `table`), the method of `Sampling`, and
-parameters to be used by the specified `Sampling` method.
+To configure `Sampling`, specify the method of `Sampling` and parameters to be used by the specified `Sampling` method.
+
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L158-L186
+```
 
 :::info
 Currently, the configuration of `Splitting` and `Sampling` as part of the `YAML` configuration is not supported; it must
 be done using `batch_spec_passthrough` as illustrated above.
 :::
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L158-L186
-```
-
-First, specify the `data_connector_query` to select the `Batch` at the `Partitioning` level of granularity.
+To customize the configuration for the present example, first, specify the `data_connector_query` to select the `Batch`
+at the `Partitioning` level of granularity.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L191-L194
 ```
