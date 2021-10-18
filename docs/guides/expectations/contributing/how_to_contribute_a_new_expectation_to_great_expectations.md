@@ -68,7 +68,7 @@ Recently we introduced a fast-track release process for community contributed Ex
 	* Class declaration (search for `class Expect`)
 	* A call to `run_diagnostic` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
 	
-	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/contributing_style)
+	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/style_guides/code_style)
 
 #### 4. Run diagnostics on your Expectation.
 
