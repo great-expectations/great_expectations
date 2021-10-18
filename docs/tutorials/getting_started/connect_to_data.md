@@ -22,7 +22,8 @@ What are you processing your files with?
     2. PySpark
 : 1
 
-Enter the path of the root directory where the data files are stored. If files are on local disk enter a path relative to your current working directory or an absolute path.
+Enter the path of the root directory where the data files are stored. If files are on local disk
+enter a path relative to your current working directory or an absolute path.
 : data
 ````
 

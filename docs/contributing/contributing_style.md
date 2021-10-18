@@ -89,7 +89,7 @@ The [CLI](docs/guides/miscellaneous/how_to_use_the_great_expectations_cli) has s
 
 ##### Organization
 
-Within the table of contents, each section has specific role to play. Broadly speaking, we follow Divio’s excellent Documentation System, with the caveat that our “Reference” section is their “Explanation” section, and our “Module docs” section is their “Reference section”.
+Within the table of contents, each section has specific role to play. Broadly speaking, we follow [Divio’s excellent Documentation System](https://documentation.divio.com/), with the caveat that our “Reference” section is their “Explanation” section, and our “Module docs” section is their “Reference section”.
 
 * **Introduction** explains the Why of Great Expectations, so that potential users can quickly decide whether or not the library can help them.
 
