@@ -42,7 +42,18 @@ The repository you cloned contains several directories with final versions for o
 
 ### Install Great Expectations and dependencies
 
-If you haven’t already, install Great Expectations. This tutorial will be easiest if you [install Great Expectations locally](/docs/guides/setup/installation/local), but there are also guides on how to [install Great Expectations in Spark EMR Cluster](/docs/guides/setup/installation/spark_emr) and how to [install Great Expectations in Databricks](/docs/guides/setup/installation/databricks).
+Great Expectations requires Python 3 and can be installed using pip. To install, run:
+
+```bash
+pip install great_expectations
+```
+
+You can confirm your installation by running:
+```bash
+great_expectations --version
+```
+
+For detailed installation instructions, see [How to install Great Expectations locally](/docs/guides/setup/installation/local).
 
 ### Create a Data Context
 
@@ -74,7 +85,6 @@ First, Great Expectations will create a new directory:
     |-- great_expectations.yml
     |-- expectations
     |-- checkpoints
-    |-- notebooks
     |-- plugins
     |-- .gitignore
     |-- uncommitted
@@ -91,7 +101,6 @@ After running the ```init``` command, your ```great_expectations/``` directory w
 
 * ```great_expectations.yml``` contains the main configuration of your deployment.
 * The ```expectations/``` directory stores all your Expectations as JSON files. If you want to store them somewhere else, you can change that later.
-* The ```notebooks/``` directory is for helper notebooks to interact with Great Expectations.
 * The ```plugins/``` directory holds code for any custom plugins you develop as part of your deployment.
 * The ```uncommitted/``` directory contains files that shouldn’t live in version control. It has a .gitignore configured to exclude all its contents from version control. The main contents of the directory are:
 	* ```uncommitted/config_variables.yml```, which holds sensitive information, such as database credentials and other secrets.

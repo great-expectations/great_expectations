@@ -1,7 +1,9 @@
 import json
 from copy import deepcopy
 from string import Template as pTemplate
+from typing import Optional
 
+from great_expectations.data_context.types.base import RenderedAtomicValue
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
 
@@ -434,6 +436,7 @@ class RenderedDocumentContent(RenderedContent):
         expectation_suite_name=None,
         batch_kwargs=None,
         batch_spec=None,
+        ge_cloud_id=None,
     ):
         if not isinstance(sections, list) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]
@@ -452,6 +455,7 @@ class RenderedDocumentContent(RenderedContent):
         self.expectation_suite_name = expectation_suite_name
         self.batch_kwargs = batch_kwargs
         self.batch_spec = batch_spec
+        self.ge_cloud_id = ge_cloud_id
 
     def to_json_dict(self):
         d = super().to_json_dict()
@@ -465,6 +469,7 @@ class RenderedDocumentContent(RenderedContent):
         d["expectation_suite_name"] = self.expectation_suite_name
         d["batch_kwargs"] = self.batch_kwargs
         d["batch_spec"] = self.batch_spec
+        d["ge_cloud_id"] = self.ge_cloud_id
         return d
 
 
@@ -490,3 +495,15 @@ class RenderedSectionContent(RenderedContent):
         )
         d["section_name"] = self.section_name
         return d
+
+
+class RenderedAtomicContent(RenderedContent):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        value: Optional[RenderedAtomicValue] = None,
+        valuetype: Optional[str] = None,
+    ):
+        self.name = name
+        self.value = value
+        self.valuetype = valuetype

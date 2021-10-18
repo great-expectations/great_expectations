@@ -1,7 +1,9 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
+    ConfiguredAssetSqlDataConnector,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 try:
@@ -161,6 +163,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             data_asset_config = {
                 "schema_name": metadata["schema_name"],
                 "table_name": metadata["table_name"],
+                "type": metadata["type"],
             }
             if not splitter_method is None:
                 data_asset_config["splitter_method"] = splitter_method
@@ -262,3 +265,12 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                         )
 
         return tables
+
+    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+        """
+        Return the list of asset names and types known by this DataConnector.
+
+        Returns:
+            A list of tuples consisting of available names and types
+        """
+        return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]

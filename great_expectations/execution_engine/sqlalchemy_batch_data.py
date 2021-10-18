@@ -1,7 +1,7 @@
 import logging
-import uuid
 
 from great_expectations.execution_engine.execution_engine import BatchData
+from great_expectations.util import generate_temporary_table_name
 
 try:
     import sqlalchemy as sa
@@ -12,6 +12,7 @@ except ImportError:
     sa = None
     quoted_name = None
     DefaultDialect = None
+    DatabaseError = None
 
 logger = logging.getLogger(__name__)
 
@@ -135,8 +136,7 @@ class SqlAlchemyBatchData(BatchData):
             if temp_table_name:
                 generated_table_name = temp_table_name
             else:
-                # Suggestion: Pull this into a separate "_generate_temporary_table_name" method
-                generated_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+                generated_table_name = generate_temporary_table_name()
                 # mssql expects all temporary table names to have a prefix '#'
                 if engine.dialect.name.lower() == "mssql":
                     generated_table_name = f"#{generated_table_name}"
@@ -221,7 +221,9 @@ class SqlAlchemyBatchData(BatchData):
             # Split is case sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
-            query = query.string  # extracting string from MSSQLCompiler object
+            if isinstance(query, sa.dialects.mssql.base.MSSQLCompiler):
+                query = query.string  # extracting string from MSSQLCompiler object
+
             if "from" in query:
                 strsep = "from"
             else:

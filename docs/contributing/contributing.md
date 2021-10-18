@@ -26,4 +26,6 @@ Alternatively, for small changes that don’t need to be tested locally (e.g. do
 #### 4. Start developing
 * Make sure to reference the [Style Guide](/docs/contributing/contributing_style) and instructions on [Testing](/docs/contributing/contributing_test) when developing your code. When your changes are ready, run through our [Contribution checklist](/docs/contributing/contributing_checklist) for pull requests.
 
-Note that if it’s your first contribution, you will need to sign a there is a standard [Contributor license agreement](https://docs.greatexpectations.io/en/0.13.8/contributing/miscellaneous.html#contributing-cla)  (CLA).
+Note that if it’s your first contribution, there is a standard Contributor license agreement (CLA) you will need to sign :
+* [Individual Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSdA-aWKQ15yBzp8wKcFPpuxIyGwohGU1Hx-6Pa4hfaEbbb3fg/viewform?usp=sf_link)
+* [Software Grant and Corporate Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSf3RZ_ZRWOdymT8OnTxRh5FeIadfANLWUrhaSHadg_E20zBAQ/viewform?usp=sf_link)
