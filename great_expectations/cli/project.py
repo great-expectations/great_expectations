@@ -1,5 +1,7 @@
 import sys
 
+from typing import Optional
+
 import click
 
 from great_expectations import DataContext
@@ -65,9 +67,10 @@ def project_upgrade(ctx):
 
 
 def do_config_check(target_directory):
-    print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] CTX: {target_directory} ; TYPE: {str(type(target_directory))}')
+    print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] TARGET_DIRECTORY: {target_directory} ; TYPE: {str(type(target_directory))}')
     try:
-        context: DataContext = DataContext(context_root_dir=target_directory)
+        print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] GETTING_DATA_CONTEXT_FOR_TARGET_DIRECTORY: {target_directory} ; TYPE: {str(type(target_directory))}')
+        context: Optional[DataContext] = DataContext(context_root_dir=target_directory)
         print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] CONTEXT: {context} ; TYPE: {str(type(context))}')
         ge_config_version: int = context.get_config().config_version
         print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] GE_CONFIG_VERSION: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
@@ -78,7 +81,7 @@ def do_config_check(target_directory):
             upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
 Please consult the 0.13.x migration guide https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
-            """
+"""
             # TODO: <Alex>ALEX</Alex>
             return (
                 False,
@@ -88,14 +91,30 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
         elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX - raise exception -- error message; this must never happen</Alex>
-            pass  # For now <ALEX> ALEX Alex </ALEX>
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
+{CURRENT_GE_CONFIG_VERSION}.
+"""
+            )
             # TODO: <Alex>ALEX</Alex>
         else:
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX - check for datasources, validation operators; this must never happen</Alex>
-            pass  # For now <ALEX> ALEX Alex </ALEX>
+            print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] MUST_DO_SOMETHING--GE_CONFIG_VERSION: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
+            print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] MUST_DO_SOMETHING--CURRENT_GE_CONFIG_VERSION: {CURRENT_GE_CONFIG_VERSION} ; TYPE: {str(type(CURRENT_GE_CONFIG_VERSION))}')
+            upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is NOT outdated.
+            Please consult the 0.14.x migration guide <ALEX -- Alex> https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
+            upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
+"""
+            is_config_ok: bool = False
+            context = None
+            # TODO: <Alex>ALEX -- if nothing do do, then upgrade_message = None and is_config_ok = True</Alex>
+            return (
+                is_config_ok,
+                upgrade_message,
+                context,
+            )
             # TODO: <Alex>ALEX</Alex>
-        return True, None, context
     except (
         ge_exceptions.InvalidConfigurationYamlError,
         ge_exceptions.InvalidTopLevelConfigKeyError,
@@ -107,4 +126,5 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
         ge_exceptions.PluginModuleNotFoundError,
         ge_exceptions.GreatExpectationsError,
     ) as err:
+        print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] BOTTOM-ERROR: {err} ; TYPE: {str(type(err))}')
         return False, err.message, None
