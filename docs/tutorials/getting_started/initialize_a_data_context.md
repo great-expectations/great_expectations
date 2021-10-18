@@ -42,7 +42,18 @@ The repository you cloned contains several directories with final versions for o
 
 ### Install Great Expectations and dependencies
 
-If you haven’t already, install Great Expectations. This tutorial will be easiest if you [install Great Expectations locally](/docs/guides/setup/installation/local), but there are also guides on how to [install Great Expectations in Spark EMR Cluster](/docs/guides/setup/installation/spark_emr) and others are being ported.
+Great Expectations requires Python 3 and can be installed using pip. To install, run:
+
+```bash
+pip install great_expectations
+```
+
+You can confirm your installation by running:
+```bash
+great_expectations --version
+```
+
+For detailed installation instructions, see [How to install Great Expectations locally](/docs/guides/setup/installation/local).
 
 ### Create a Data Context
 
