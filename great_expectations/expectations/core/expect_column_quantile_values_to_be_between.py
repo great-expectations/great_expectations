@@ -166,7 +166,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
-                "quntile_values and quantiles must have the same number of elements"
+                "quantile_values and quantiles must have the same number of elements"
             )
         return True
 

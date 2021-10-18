@@ -16,37 +16,43 @@ The CLI will help you create your first Expectation Suite. Suites are simply col
 great_expectations --v3-api suite new
 ```
 
-You will see the following output:
+You will see the output below. Choose `3` to create the Expectation Suite Automatically, using a profiler, and `1` to profile the January taxi data in `yellow_tripdata_sample_2019-01.csv`.
+
+This will open up a **Jupyter Notebook** that helps you create the new suite, we'll explain what happens next.
+
+:::caution
+Don’t execute the Jupyter Notebook cells just yet!
+:::
 
 ```console
-Using v3 (Batch Request) API
-How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
-: 3
-
-A batch of data is required to edit the suite - let's help you to specify it.
-Select data_connector
-    1. default_inferred_data_connector_name
-    2. default_runtime_data_connector_name
-: 1
-
-Which data asset (accessible by Data Connector "taxi_data_example_data_connector") would you like to use?
-    1. yellow_tripdata_sample_2019-01.csv
-    2. yellow_tripdata_sample_2019-02.csv
-: 1
-
-Name the new Expectation Suite [yellow_tripdata_sample_2019-01.csv.warning]: taxi.demo
-
-When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "taxi.demo" here:
-
-  <path_to_project>/great_expectations/expectations/taxi/demo.json
-
-Would you like to proceed? [Y/n]: <press Enter>
+How would you like to create your Expectation Suite? 
+    1. Manually, without interacting with a sample batch of data (default) 
+    2. Interactively, with a sample batch of data 
+    3. Automatically, using a profiler 
+: 3 
+ 
+A batch of data is required to edit the suite - let's help you to specify it. 
+ 
+ 
+Which data asset (accessible by data connector "default_inferred_data_connector_name")
+would you like to use? 
+    1. yellow_tripdata_sample_2019-01.csv 
+    2. yellow_tripdata_sample_2019-02.csv 
+: 1 
+ 
+Name the new Expectation Suite [yellow_tripdata_sample_2019-01.csv.warning]: taxi.demo 
+ 
+Great Expectations will create a notebook, containing code cells that select from
+available columns in your dataset and generate expectations about them to demonstrate
+some examples of assertions you can make about your data. 
+ 
+When you run this notebook, Great Expectations will store these expectations in a new
+Expectation Suite "taxi.demo" here: 
+ 
+  <path_to_project>/great_expectations/expectations/taxi/demo.json 
+ 
+Would you like to proceed? [Y/n]:  <press Enter>
 ```
-
-This will open up a **Jupyter Notebook** that helps you create the new suite. Before diving into the notebook, let’s first explain what we just did.
 
 **What just happened?**
 
@@ -56,14 +62,6 @@ You may now wonder why we chose the first file in this step. Here’s an explana
   - `yellow_tripdata_sample_2019-02` contains the February 2019 data, which we consider the “new” data set that we want to validate before using it in production. We’ll use it later when showing you how to validate data.
 
 Makes sense, right?
-
-After selecting the table, Great Expectations will open a Jupyter Notebook which will take you through the next part of this workflow.
-
-:::caution
-
-Don’t execute the Jupyter Notebook cells just yet!
-
-:::
 
 ## Creating Expectations in Jupyter Notebooks
 
@@ -85,4 +83,4 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the “Validate your data” section.*
 
-**Let’s execute all the cells** and wait for Great Expectations to open a browser window with Data Docs. **Go to the next step in the tutorial** for an explanation of what you see in Data Docs!
+**Let’s execute all the cells** and wait for Great Expectations to open a browser window with Data Docs.**Go to the next step in the tutorial** for an explanation of what you see in Data Docs!

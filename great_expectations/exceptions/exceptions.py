@@ -1,7 +1,7 @@
 import importlib
 import itertools
 import json
-from collections import Iterable
+from collections.abc import Iterable
 
 from great_expectations.marshmallow__shade import ValidationError
 
