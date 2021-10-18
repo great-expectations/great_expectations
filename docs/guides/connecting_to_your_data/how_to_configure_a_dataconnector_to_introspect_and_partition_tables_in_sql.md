@@ -50,6 +50,8 @@ Load your DataContext into memory using the `get_context()` method.
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L5
 ```
 
+## Configuring Introspection and Tables
+
 <Tabs
   groupId="introspection-or-tables"
   defaultValue='introspection'
