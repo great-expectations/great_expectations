@@ -368,8 +368,16 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_github' },
         { type: 'doc', id: 'contributing/contributing_test' },
         { type: 'doc', id: 'contributing/contributing_maturity' },
-        { type: 'doc', id: 'contributing/contributing_style' },
-        { type: 'doc', id: 'contributing/contributing_misc' }
+        { type: 'doc', id: 'contributing/contributing_misc' },
+        {
+          type: 'category',
+          label: 'Style guides',
+          items: [
+            { type: 'doc', id: 'contributing/style_guides/docs_style' },
+            { type: 'doc', id: 'contributing/style_guides/code_style' },
+            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' },
+          ]
+        },
       ]
     },
     {
