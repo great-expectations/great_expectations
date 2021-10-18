@@ -21,11 +21,16 @@ def project():
 @click.pass_context
 def project_check_config(ctx):
     """Check a config for validity and help with migrations."""
+    print(f'\n[ALEX_TEST] [CLI_V3.PROJECT_CHECK_CONFIG] CTX: {ctx} ; TYPE: {str(type(ctx))}')
     cli_message("Checking your config files for validity...\n")
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
+    print(f'\n[ALEX_TEST] [CLI_V3.PROJECT_CHECK_CONFIG] DIRECTORY: {directory} ; TYPE: {str(type(directory))}')
     is_config_ok, error_message, context = do_config_check(directory)
+    print(f'\n[ALEX_TEST] [CLI_V3.PROJECT_CHECK_CONFIG] IS_CONFIG_OK: {is_config_ok} ; TYPE: {str(type(is_config_ok))}')
+    print(f'\n[ALEX_TEST] [CLI_V3.PROJECT_CHECK_CONFIG] ERROR_MESSAGE: {error_message} ; TYPE: {str(type(error_message))}')
+    print(f'\n[ALEX_TEST] [CLI_V3.PROJECT_CHECK_CONFIG] CONTEXT: {context} ; TYPE: {str(type(context))}')
     if context:
         toolkit.send_usage_message(
             data_context=context, event="cli.project.check_config", success=True
@@ -42,11 +47,13 @@ def project_check_config(ctx):
 @click.pass_context
 def project_upgrade(ctx):
     """Upgrade a project after installing the next Great Expectations major version."""
+    print(f'\n[ALEX_TEST] [CLI_V3.PROJECT_UPGRADE] CTX: {ctx} ; TYPE: {str(type(ctx))}')
     cli_message("\nChecking project...")
     cli_message(SECTION_SEPARATOR)
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
+    print(f'\n[ALEX_TEST] [CLI_V3.PROJECT_UPGRADE] DIRECTORY: {directory} ; TYPE: {str(type(directory))}')
     if load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=True
     ):
@@ -58,19 +65,36 @@ def project_upgrade(ctx):
 
 
 def do_config_check(target_directory):
+    print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] CTX: {target_directory} ; TYPE: {str(type(target_directory))}')
     try:
         context: DataContext = DataContext(context_root_dir=target_directory)
+        print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] CONTEXT: {context} ; TYPE: {str(type(context))}')
         ge_config_version: int = context.get_config().config_version
+        print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] GE_CONFIG_VERSION: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
+        print(f'\n[ALEX_TEST] [CLI_V3.DO_CONFIG_CHECK] CURRENT_GE_CONFIG_VERSION: {CURRENT_GE_CONFIG_VERSION} ; TYPE: {str(type(CURRENT_GE_CONFIG_VERSION))}')
         if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX -- update document link</Alex>
             upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
 Please consult the 0.13.x migration guide https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
             """
+            # TODO: <Alex>ALEX</Alex>
             return (
                 False,
                 upgrade_message,
                 None,
             )
+        elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX - raise exception -- error message; this must never happen</Alex>
+            pass  # For now <ALEX> ALEX Alex </ALEX>
+            # TODO: <Alex>ALEX</Alex>
+        else:
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX - check for datasources, validation operators; this must never happen</Alex>
+            pass  # For now <ALEX> ALEX Alex </ALEX>
+            # TODO: <Alex>ALEX</Alex>
         return True, None, context
     except (
         ge_exceptions.InvalidConfigurationYamlError,
