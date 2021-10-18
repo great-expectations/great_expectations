@@ -878,7 +878,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
     What does this test do and why?
     Ensures that all available expectation types work as expected for sqlalchemy
     """
-    if taxi_validator_sqlalchemy == None:
+    if taxi_validator_sqlalchemy is None:
         pytest.skip("a message")
 
     context = titanic_data_context_modular_api
