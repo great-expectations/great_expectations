@@ -10,24 +10,39 @@ This guide will help you Install Great Expectations locally for use with Python
 
 ## Steps
 
-### 1. Install required dependencies
+:::note Prerequisites
+- Great Expectations requires Python 3. For details on how to download and install Python on your platform, see [python.org](https://www.python.org/downloads/).
+:::
 
-First, check that you have python3 with pip installed
+### 1. Install Python
 
-```console
+First, check that you have Python 3 with pip installed. You can confirm your version of python with `python --version`.
+
+```bash
+# if python is version 3
 python --version
+python -m ensurepip --upgrade
+
 # or if multiple versions of Python installed
 python3 --version
-python3 -m pip --version
+python3 -m ensurepip --upgrade
 ```
 
 ### 2. Install Great Expectations
+
+Use pip to install Great Expectations.
+
+```bash
+# if python is version 3
+python -m pip install great_expectations
+
+# or if multiple versions of Python installed
+python3 -m pip install great_expectations
+```
+
+You can confirm that great_expectations was successfully installed with:
 ```console
-pip install great_expectations
 great_expectations --version
 ```
 
-To configure your Data Context, please look at [How to configure a new data context with the cli](../configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
-
 <Congratulations />
-
