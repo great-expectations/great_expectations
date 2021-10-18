@@ -20,15 +20,15 @@ The repository you cloned contains several directories with final versions for o
 
 ### Install Great Expectations and dependencies
 
-If you haven’t already, install Great Expectations.
+Great Expectations requires Python 3 and can be installed using pip. If you haven’t already, install Great Expectations by running:
 
-```console
+```bash
 pip install great_expectations
 ```
 
 You can confirm that installation worked by running
 
-```console
+```bash
 great_expectations --version
 ```
 
@@ -37,6 +37,8 @@ This should return something like:
 ```console
 great_expectations, version 0.13.29
 ```
+
+For detailed installation instructions, see [How to install Great Expectations locally](/docs/guides/setup/installation/local).
 
 <details>
   <summary>Other deployment patterns</summary>

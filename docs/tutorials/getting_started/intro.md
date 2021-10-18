@@ -4,7 +4,7 @@ title: Getting started with Great Expectations
 
 Welcome to Great Expectations! This tutorial will help you set up your first local deployment of Great Expectations that contains a small Expectation Suite to validate some sample data. We'll also introduce important concepts, with links to detailed material you can dig into later.
 
-:::warning
+:::tip
 The steps described in this tutorial assume you are installing Great Expectations version 0.13.8 or above.
 
 For a tutorial for older versions of Great Expectations, please see older versions of this documentation, which can be found [here](https://docs.greatexpectations.io/en/latest/guides/tutorials.html).
