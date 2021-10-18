@@ -28,7 +28,10 @@ Alternatively, for small changes that don’t need to be tested locally (e.g. do
 * Our [Levels of maturity grid](/docs/contributing/contributing_maturity) provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity of a feature.
 
 #### 5. Start developing
-* Make sure to reference the [Style Guide](/docs/contributing/contributing_style) and instructions on [Testing](/docs/contributing/contributing_test) when developing your code. When your changes are ready, run through our [Contribution checklist](/docs/contributing/contributing_checklist) for pull requests.
+* Make sure to reference the style guides for [code](/docs/contributing/style_guides/code_style) and
+[docs](/docs/contributing/style_guides/docs_style) and instructions on [Testing](/docs/contributing/contributing_test)
+when developing your code.  When your changes are ready, run through our
+[Contribution checklist](/docs/contributing/contributing_checklist) for pull requests.
 
 Note that if it’s your first contribution, there is a standard Contributor license agreement (CLA) you will need to sign :
 * [Individual Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSdA-aWKQ15yBzp8wKcFPpuxIyGwohGU1Hx-6Pa4hfaEbbb3fg/viewform?usp=sf_link)
