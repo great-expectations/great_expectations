@@ -4,7 +4,4 @@ from great_expectations.cli.upgrade_helpers.upgrade_helper_v13 import UpgradeHel
 GE_UPGRADE_HELPER_VERSION_MAP = {
     1: UpgradeHelperV11,
     2: UpgradeHelperV13,
-    # TODO: <Alex>ALEX</Alex>
-    # 3: UpgradeHelperV13,
-    # TODO: <Alex>ALEX</Alex>
 }
