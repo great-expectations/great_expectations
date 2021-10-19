@@ -190,6 +190,11 @@ class Expectation(metaclass=MetaExpectation):
         styling = runtime_configuration.get("styling")
 
         template_str = "$expectation_type(**$kwargs)"
+        params = {
+            "expectation_type": configuration.expectation_type,
+            "kwargs": configuration.kwargs,
+        }
+
         params_with_json_schema = {
             "expectation_type": {
                 "schema": {"type": "string"},
@@ -202,7 +207,7 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
     @render_evaluation_parameter_string
-    def _atomic_prescriptive_summary(
+    def _prescriptive_summary(
         cls,
         configuration=None,
         result=None,

@@ -169,8 +169,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 template_str = f"maximum value must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"maximum value must be {at_least_str} $min_value."
-            else:
-                template_str = ""
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."

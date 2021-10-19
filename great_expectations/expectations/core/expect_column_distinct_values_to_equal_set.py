@@ -137,6 +137,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             },
         }
         params_with_json_schema = add_value_set_params(params, params_with_json_schema)
+
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
@@ -166,6 +167,43 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
                 "condition_parser",
             ],
         )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "value_set",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+            values_string = "[ ]"
+        else:
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+        template_str = "distinct values must match this set: " + values_string + "."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"

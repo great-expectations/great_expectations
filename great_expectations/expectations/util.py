@@ -607,8 +607,7 @@ def render_evaluation_parameter_string(render_func):
 
 def add_value_set_params(params: dict, params_with_json_schema: dict) -> dict:
     """
-    Utility function used in _atomic_prescriptive_template() to add value_set values and column_list values to params_with_json_schema (dict)
-
+    Utility function used in _atomic_prescriptive_template() to add value_set values to params_with_json_schema (dict).
     """
     if params["value_set"] is not None and len(params["value_set"]) > 0:
         for i, v in enumerate(params["value_set"]):
@@ -616,11 +615,4 @@ def add_value_set_params(params: dict, params_with_json_schema: dict) -> dict:
                 "schema": {"type": "string"},
                 "value": v,
             }
-    if params["column_list"] is not None and len(params["column_list"]) > 0:
-        for i, v in enumerate(params["column_list"]):
-            params_with_json_schema["column_list_" + str(i)] = {
-                "schema": {"type": "string"},
-                "value": v,
-            }
-
     return params_with_json_schema

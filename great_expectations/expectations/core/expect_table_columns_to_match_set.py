@@ -148,7 +148,6 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                 "value": params.get("exact_match"),
             },
         }
-        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

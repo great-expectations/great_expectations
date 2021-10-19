@@ -191,6 +191,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 "value": params.get("condition_parser"),
             },
         }
+
         params_with_json_schema = add_value_set_params(params, params_with_json_schema)
 
         return (template_str, params_with_json_schema, styling)
