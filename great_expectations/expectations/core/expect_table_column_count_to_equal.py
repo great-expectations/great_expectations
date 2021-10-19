@@ -126,7 +126,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         params_with_json_schema = {
             "value": {"schema": {"type": "number"}, "value": params.get("value")},
         }
-        return (template_str, params, params_with_json_schema, styling)
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
