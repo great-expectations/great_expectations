@@ -16,7 +16,7 @@ can use for configuration.
 Great Expectations provides two types of `DataConnector` classes for connecting to file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
 
-- A ConfiguredAssetDataConnector requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
+- A ConfiguredAssetDataConnector requires an explicit listing of each `DataAsset` you want to connect to. This allows more fine-tuning, but also requires more setup.
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 InferredAssetDataConnector has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single `DataAsset`, or several `DataAssets` that all share the same naming convention.
