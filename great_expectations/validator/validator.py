@@ -1005,6 +1005,10 @@ set as active.
         return self._default_expectation_args
 
     @property
+    def ge_cloud_mode(self):
+        return self._data_context.ge_cloud_mode
+
+    @property
     def default_expectation_args(self):
         """A getter for default Expectation arguments"""
         return self._default_expectation_args
