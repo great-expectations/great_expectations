@@ -2,7 +2,9 @@ import findspark
 import pandas as pd
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
+from ruamel import yaml
 
+import great_expectations as ge
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
@@ -17,7 +19,7 @@ findspark.init()
 sc = SparkContext(appName="app")
 spark = SparkSession(sc)
 
-
+# basic dataframe
 data = [
     {"a": 1, "b": 2, "c": 3},
     {"a": 4, "b": 5, "c": 6},
@@ -51,10 +53,10 @@ df = spark.createDataFrame(data)
 # In-memory DataContext using DBFS and FilesystemStoreBackendDefaults
 
 # This root directory is for use in Databricks
-root_directory = "/dbfs/FileStore/"
+root_directory = "/dbfs/great_expectations/"
 
 # For testing purposes, we change the root_directory to an ephemeral location
-# TODO: Is this necessary? Can we just remove the forward slash from `/dbfs/FileStore/`?
+# TODO: Is this necessary? Can we just remove the forward slash from `/dbfs/great_expectations/`?
 import os
 
 root_directory = os.path.join(os.getcwd(), "dbfs_temp_directory")
@@ -95,6 +97,7 @@ assert os.listdir(root_directory) == ["checkpoints", "expectations", "uncommitte
 # )
 # TODO: Consider changing this to use test_yaml_config() as in: https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py
 my_spark_datasource_config = {
+    "name": "insert_your_datasource_name_here",
     "class_name": "Datasource",
     "execution_engine": {"class_name": "SparkDFExecutionEngine"},
     "data_connectors": {
@@ -109,9 +112,13 @@ my_spark_datasource_config = {
     },
 }
 
-context.add_datasource(
-    name="insert_your_datasource_name_here", **my_spark_datasource_config
-)
+context.test_yaml_config(yaml.dump(my_spark_datasource_config))
+
+context.add_datasource(**my_spark_datasource_config)
+
+# context.add_datasource(
+#     name="insert_your_datasource_name_here", **my_spark_datasource_config
+# )
 
 assert len(context.list_datasources()) == 1
 assert context.list_datasources() == [
@@ -144,13 +151,15 @@ pandas_dataframe = pd.read_csv(data_file_url)
 batch_request_from_dataframe = RuntimeBatchRequest(
     datasource_name="insert_your_datasource_name_here",
     data_connector_name="insert_your_runtime_data_connector_name_here",
-    data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
+    # data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
+    data_asset_name="example_data_asset",
     batch_identifiers={
         "some_key_maybe_pipeline_stage": "prod",
         "some_other_key_maybe_run_id": "20211231-007",
     },
     runtime_parameters={"batch_data": df},  # Your dataframe goes here
 )
+
 
 # TODO: load data from local csv path, in DBFS. Here we will need to have two versions, one for display to the user and one for getting the data from our test runner
 # batch_request_from_path =
@@ -169,10 +178,40 @@ validator = context.get_validator(
     expectation_suite_name=expectation_suite_name,
 )
 
-# validator.expect_column_values_to_not_be_null(column="vendor_id")
-# validator.expect_column_values_to_be_between(column="congestion_surcharge", min_value=0, max_value=1000)
-validator.expect_column_values_to_not_be_null(column="a")
-validator.expect_column_values_to_be_between(column="b", min_value=1, max_value=10)
+# TODO: Getting errors here, when trying to use a validator:
+# print(validator.head())
+# Traceback (most recent call last):
+#   File "/private/var/folders/ds/hn_qpp1n6y3fz28clrkfmpsr0000gn/T/pytest-of-anthonyburdi/pytest-39/test_docs_tests_integration_do0/test_script.py", line 181, in <module>
+#     print(validator.head())
+#   File "/Users/anthonyburdi/src/ge/great_expectations/great_expectations/validator/validator.py", line 1620, in head
+#     "fetch_all": fetch_all,
+#   File "/Users/anthonyburdi/src/ge/great_expectations/great_expectations/validator/validator.py", line 364, in get_metric
+#     return self.get_metrics({"_": metric})["_"]
+#   File "/Users/anthonyburdi/src/ge/great_expectations/great_expectations/validator/validator.py", line 359, in get_metrics
+#     for (metric_name, metric_configuration) in metrics.items()
+#   File "/Users/anthonyburdi/src/ge/great_expectations/great_expectations/validator/validator.py", line 359, in <dictcomp>
+#     for (metric_name, metric_configuration) in metrics.items()
+# KeyError: ('table.head', 'batch_id=b04c0ba4d1537a604c8f63fe890a44cb', '04166707abe073177c1dd922d3584468')
+
+print("DEBUG ================================================")
+print("validator.batches")
+print(validator.batches)
+print("DEBUG ================================================")
+print("validator.active_batch")
+print(validator.active_batch)
+print("DEBUG ================================================")
+print("validator.active_batch_id")
+print(validator.active_batch_id)
+print("DEBUG ================================================")
+
+print(validator.head())
+
+# # validator.expect_column_values_to_not_be_null(column="vendor_id")
+# # validator.expect_column_values_to_be_between(column="congestion_surcharge", min_value=0, max_value=1000)
+# validator.expect_column_values_to_not_be_null(column="a")
+# validator.expect_column_values_to_be_between(column="b", min_value=1, max_value=10)
+#
+
 
 # Take a look at your suite
 print(validator.get_expectation_suite(discard_failed_expectations=False))
@@ -185,6 +224,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 #
 #     View data docs
 
+checkpoint_name = "insert_your_checkpoint_name_here"
 checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "validations": [
@@ -195,7 +235,7 @@ checkpoint_config = {
     ],
 }
 checkpoint = SimpleCheckpoint(
-    f"_tmp_checkpoint_{expectation_suite_name}", context, **checkpoint_config
+    name=checkpoint_name, data_context=context, **checkpoint_config
 )
 checkpoint_result = checkpoint.run()
 
