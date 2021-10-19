@@ -59,7 +59,7 @@ my_directory/alpha-2020-01-02.csv
 my_directory/alpha-2020-01-03.csv
 ```
 
-We can imagine 2 approaches to loading the data into GE.
+We can imagine two approaches to loading the data into GE.
 
 The simplest approach would be to consider each file to be its own DataAsset. In that case, the configuration would look like the following:
 

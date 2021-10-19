@@ -3,7 +3,7 @@ title: How to configure a RuntimeDataConnector
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 
-This guide demonstrates how to configure a RuntimeDataConnector and only applies for the V3 (Batch Request) API. A `RuntimeDataConnector` allows you to specify a Batch using a Runtime Batch Request, which is used to create a Validator. A Validator is the key object used to create Expectations and validate datasets.
+This guide demonstrates how to configure a RuntimeDataConnector and only applies to the V3 (Batch Request) API. A `RuntimeDataConnector` allows you to specify a Batch using a Runtime Batch Request, which is used to create a Validator. A Validator is the key object used to create Expectations and validate datasets.
 
 <Prerequisites>
 
@@ -12,7 +12,7 @@ This guide demonstrates how to configure a RuntimeDataConnector and only applies
 
 </Prerequisites>
 
-A RuntimeDataConnector is a special kind of [Data Connector](../../reference/datasources.md) that enables you to use a RuntimeBatchRequest to provide a [Batch's](../../reference/datasources.md#batches) data directly at runtime. The RuntimeBatchRequest can wrap either an in-memory dataframe, filepath, or SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run). The batch identifiers that must be passed in at runtime are specified in the RuntimeDataConnector's configuration.
+A RuntimeDataConnector is a special kind of [Data Connector](../../reference/datasources.md) that enables you to use a RuntimeBatchRequest to provide a [Batch's](../../reference/datasources.md#batches) data directly at runtime. The RuntimeBatchRequest can wrap an in-memory dataframe, a filepath, or a SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run). The batch identifiers that must be passed in at runtime are specified in the RuntimeDataConnector's configuration.
 
 Add a RuntimeDataConnector to a Datasource configuration
 ---------------------------------------------------------
