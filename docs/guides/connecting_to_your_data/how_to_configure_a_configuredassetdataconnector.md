@@ -1,5 +1,5 @@
 ---
-title: How to configure an ConfiguredAssetDataConnector
+title: How to configure a ConfiguredAssetDataConnector
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 
@@ -15,7 +15,7 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
 Great Expectations provides two `DataConnector` classes for connecting to file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
 
-- A ConfiguredAssetDataConnector requires an explicit listing of each DataAsset you want to connect to. This allows more fine-tuning, but also requires more setup.
+- A ConfiguredAssetDataConnector requires an explicit listing of each `DataAsset` you want to connect to. This allows more fine-tuning, but also requires more setup.
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 If you're not sure which one to use, please check out [How to choose which DataConnector to use](./how_to_choose_which_dataconnector_to_use.md).
