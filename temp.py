@@ -90,7 +90,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_contain_set(
     get_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_distinct_values_to_contain_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -105,7 +105,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_equal_set(
     get_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_distinct_values_to_equal_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -120,7 +120,7 @@ def test_atomic_diagnostic_expect_column_kl_divergence_to_be_less_than(
     get_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -133,7 +133,7 @@ def test_atomic_diagnostic_expect_column_kl_divergence_to_be_less_than(
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_max_to_be_between(get_rendered_content):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_max_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -146,7 +146,7 @@ def test_atomic_diagnostic_expect_column_max_to_be_between(get_rendered_content)
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_mean_to_be_between(get_rendered_content):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_mean_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -159,7 +159,7 @@ def test_atomic_diagnostic_expect_column_mean_to_be_between(get_rendered_content
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_median_to_be_between(get_rendered_content):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_median_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -173,7 +173,7 @@ def test_atomic_diagnostic_expect_column_median_to_be_between(get_rendered_conte
 def test_atomic_diagnostic_expect_column_min_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_min_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -189,7 +189,7 @@ def test_atomic_diagnostic_expect_column_most_common_value_to_be_in_set(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_most_common_value_to_be_in_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -205,7 +205,7 @@ def test_atomic_diagnostic_expect_column_pair_cramers_phi_value_to_be_less_than(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_pair_cramers_phi_value_to_be_less_than",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -221,7 +221,7 @@ def test_atomic_diagnostic_expect_column_pair_values_a_to_be_greater_than_b(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -235,7 +235,7 @@ def test_atomic_diagnostic_expect_column_pair_values_a_to_be_greater_than_b(
 def test_atomic_diagnostic_expect_column_pair_values_to_be_equal(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_pair_values_to_be_equal",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -263,7 +263,7 @@ def test_atomic_diagnostic_expect_column_proportion_of_unique_values_to_be_betwe
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -279,7 +279,7 @@ def test_atomic_diagnostic_expect_column_quantile_values_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_quantile_values_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -293,7 +293,7 @@ def test_atomic_diagnostic_expect_column_quantile_values_to_be_between(
 def test_atomic_diagnostic_expect_column_stdev_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_stdev_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -307,7 +307,7 @@ def test_atomic_diagnostic_expect_column_stdev_to_be_between(get_rendered_conten
 def test_atomic_diagnostic_expect_column_sum_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_sum_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -321,7 +321,7 @@ def test_atomic_diagnostic_expect_column_sum_to_be_between(get_rendered_content)
 def test_atomic_diagnostic_expect_column_to_exist(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_to_exist",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -337,7 +337,7 @@ def test_atomic_diagnostic_expect_column_unique_value_count_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -353,7 +353,7 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_value_lengths_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -367,7 +367,7 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_be_between(
 def test_atomic_diagnostic_expect_column_value_lengths_to_equal(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_value_lengths_to_equal",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -388,7 +388,7 @@ def test_atomic_diagnostic_expect_column_value_z_scores_to_be_less_than(
 def test_atomic_diagnostic_expect_column_values_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -404,7 +404,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_dateutil_parseable(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -418,7 +418,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_dateutil_parseable(
 def test_atomic_diagnostic_expect_column_values_to_be_decreasing(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_decreasing",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -432,7 +432,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_decreasing(get_rendered_co
 def test_atomic_diagnostic_expect_column_values_to_be_in_set(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -448,7 +448,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_type_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_in_type_list",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -462,7 +462,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_type_list(
 def test_atomic_diagnostic_expect_column_values_to_be_increasing(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_increasing",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -478,7 +478,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_json_parseable(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_json_parseable",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -492,7 +492,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_json_parseable(
 def test_atomic_diagnostic_expect_column_values_to_be_null(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_null",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -506,7 +506,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_null(get_rendered_content)
 def test_atomic_diagnostic_expect_column_values_to_be_of_type(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_of_type",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -520,7 +520,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_of_type(get_rendered_conte
 def test_atomic_diagnostic_expect_column_values_to_be_unique(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_unique",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -536,7 +536,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_json_schema(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_json_schema",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -564,7 +564,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_like_pattern_list(
 def test_atomic_diagnostic_expect_column_values_to_match_regex(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_regex",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -580,7 +580,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_regex_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_regex_list",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -596,7 +596,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_strftime_format(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_strftime_format",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -610,7 +610,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_strftime_format(
 def test_atomic_diagnostic_expect_column_values_to_not_be_in_set(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_be_in_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -624,7 +624,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_be_in_set(get_rendered_co
 def test_atomic_diagnostic_expect_column_values_to_not_be_null(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_be_null",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -654,7 +654,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_match_regex",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -670,7 +670,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_match_regex_list",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -684,7 +684,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex_list(
 def test_atomic_diagnostic_expect_compound_columns_to_be_unique(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_compound_columns_to_be_unique",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -703,7 +703,7 @@ def test_atomic_diagnostic_expect_multicolumn_sum_to_equal(get_rendered_content)
 def test_atomic_diagnostic_expect_multicolumn_values_to_be_unique(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_multicolumn_values_to_be_unique",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -719,7 +719,7 @@ def test_atomic_diagnostic_expect_select_column_values_to_be_unique_within_recor
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_select_column_values_to_be_unique_within_record",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -735,7 +735,7 @@ def test_atomic_diagnostic_expect_table_column_count_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_column_count_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -749,7 +749,7 @@ def test_atomic_diagnostic_expect_table_column_count_to_be_between(
 def test_atomic_diagnostic_expect_table_column_count_to_equal(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_column_count_to_equal",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -765,7 +765,7 @@ def test_atomic_diagnostic_expect_table_columns_to_match_ordered_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_columns_to_match_ordered_list",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -779,7 +779,7 @@ def test_atomic_diagnostic_expect_table_columns_to_match_ordered_list(
 def test_atomic_diagnostic_expect_table_columns_to_match_set(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_columns_to_match_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -793,7 +793,7 @@ def test_atomic_diagnostic_expect_table_columns_to_match_set(get_rendered_conten
 def test_atomic_diagnostic_expect_table_row_count_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_row_count_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -807,7 +807,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_be_between(get_rendered_con
 def test_atomic_diagnostic_expect_table_row_count_to_equal(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -823,7 +823,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_equal_other_table(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_row_count_to_equal_other_table",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
@@ -869,7 +869,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_contain_set(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_distinct_values_to_contain_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -885,7 +885,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_equal_set(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_distinct_values_to_equal_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -901,7 +901,7 @@ def test_atomic_prescriptive_expect_column_kl_divergence_to_be_less_than(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -915,7 +915,7 @@ def test_atomic_prescriptive_expect_column_kl_divergence_to_be_less_than(
 def test_atomic_prescriptive_expect_column_max_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_max_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -929,7 +929,7 @@ def test_atomic_prescriptive_expect_column_max_to_be_between(get_rendered_conten
 def test_atomic_prescriptive_expect_column_mean_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_mean_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -943,7 +943,7 @@ def test_atomic_prescriptive_expect_column_mean_to_be_between(get_rendered_conte
 def test_atomic_prescriptive_expect_column_median_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_median_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -957,7 +957,7 @@ def test_atomic_prescriptive_expect_column_median_to_be_between(get_rendered_con
 def test_atomic_prescriptive_expect_column_min_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_min_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -973,7 +973,7 @@ def test_atomic_prescriptive_expect_column_most_common_value_to_be_in_set(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_most_common_value_to_be_in_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -989,7 +989,7 @@ def test_atomic_prescriptive_expect_column_pair_cramers_phi_value_to_be_less_tha
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_pair_cramers_phi_value_to_be_less_than",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1005,7 +1005,7 @@ def test_atomic_prescriptive_expect_column_pair_values_a_to_be_greater_than_b(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1021,7 +1021,7 @@ def test_atomic_prescriptive_expect_column_pair_values_to_be_equal(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_pair_values_to_be_equal",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1051,7 +1051,7 @@ def test_atomic_prescriptive_expect_column_proportion_of_unique_values_to_be_bet
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1067,7 +1067,7 @@ def test_atomic_prescriptive_expect_column_quantile_values_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_quantile_values_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1081,7 +1081,7 @@ def test_atomic_prescriptive_expect_column_quantile_values_to_be_between(
 def test_atomic_prescriptive_expect_column_stdev_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_stdev_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1095,7 +1095,7 @@ def test_atomic_prescriptive_expect_column_stdev_to_be_between(get_rendered_cont
 def test_atomic_prescriptive_expect_column_sum_to_be_between(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_sum_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1109,7 +1109,7 @@ def test_atomic_prescriptive_expect_column_sum_to_be_between(get_rendered_conten
 def test_atomic_prescriptive_expect_column_to_exist(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_to_exist",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1125,7 +1125,7 @@ def test_atomic_prescriptive_expect_column_unique_value_count_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1141,7 +1141,7 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_value_lengths_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1155,7 +1155,7 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_be_between(
 def test_atomic_prescriptive_expect_column_value_lengths_to_equal(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_value_lengths_to_equal",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1171,7 +1171,7 @@ def test_atomic_prescriptive_expect_column_value_z_scores_to_be_less_than(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_value_z_scores_to_be_less_than",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1192,7 +1192,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_dateutil_parseable(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1208,7 +1208,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_decreasing",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1222,7 +1222,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
 def test_atomic_prescriptive_expect_column_values_to_be_in_set(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1238,7 +1238,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_type_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_in_type_list",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1254,7 +1254,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_increasing(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_increasing",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1270,7 +1270,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_json_parseable",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1284,7 +1284,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
 def test_atomic_prescriptive_expect_column_values_to_be_null(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_null",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1298,7 +1298,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_null(get_rendered_conten
 def test_atomic_prescriptive_expect_column_values_to_be_of_type(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_of_type",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1312,7 +1312,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_of_type(get_rendered_con
 def test_atomic_prescriptive_expect_column_values_to_be_unique(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_be_unique",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1328,7 +1328,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_json_schema(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_json_schema",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1356,7 +1356,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_like_pattern_list(
 def test_atomic_prescriptive_expect_column_values_to_match_regex(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_regex",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1372,7 +1372,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_regex_list",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1388,7 +1388,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_strftime_format(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_match_strftime_format",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1404,7 +1404,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_be_in_set",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1418,7 +1418,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
 def test_atomic_prescriptive_expect_column_values_to_not_be_null(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_be_null",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1448,7 +1448,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_match_regex",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1464,7 +1464,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_column_values_to_not_match_regex_list",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1478,7 +1478,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex_list(
 def test_atomic_prescriptive_expect_compound_columns_to_be_unique(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_compound_columns_to_be_unique",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1499,7 +1499,7 @@ def test_atomic_prescriptive_expect_multicolumn_values_to_be_unique(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_multicolumn_values_to_be_unique",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1515,7 +1515,7 @@ def test_atomic_prescriptive_expect_select_column_values_to_be_unique_within_rec
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_select_column_values_to_be_unique_within_record",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1531,7 +1531,7 @@ def test_atomic_prescriptive_expect_table_column_count_to_be_between(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_column_count_to_be_between",
         "kwargs": {},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
@@ -1545,8 +1545,10 @@ def test_atomic_prescriptive_expect_table_column_count_to_be_between(
 def test_atomic_prescriptive_expect_table_column_count_to_equal(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
-        "kwargs": {},
+        "expectation_type": "expect_table_column_count_to_equal",
+        "kwargs": {
+            "value": 10,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1561,8 +1563,8 @@ def test_atomic_prescriptive_expect_table_columns_to_match_ordered_list(
 ):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
-        "kwargs": {},
+        "expectation_type": "expect_table_columns_to_match_ordered_list",
+        "kwargs": {"column_list": ["a", "b", "c"]},
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1571,13 +1573,12 @@ def test_atomic_prescriptive_expect_table_columns_to_match_ordered_list(
     assert rendered_content[0].to_json_dict() == {}
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_table_columns_to_match_set(get_rendered_content):
     pass
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "expectation_type": "expect_table_columns_to_match_set",
         "kwargs": {
-            "column_list": ["a", "b", "c"],
+            "column_set": ["a", "b", "c"],
             "exact_match": True,
         },
     }
@@ -1585,7 +1586,19 @@ def test_atomic_prescriptive_expect_table_columns_to_match_set(get_rendered_cont
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0].to_json_dict())
-    assert rendered_content[0].to_json_dict() == {}
+    assert rendered_content[0].to_json_dict() == {
+        "name": "atomic.prescriptive.summary",
+        "value": {
+            "params": {
+                "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
+                "exact_match": {"schema": {"type": "boolean"}, "value": True},
+            },
+            "schema": {"type": "com.superconductive.rendered.string"},
+            "template": "Must have exactly these columns (in any order): "
+            "$column_list_0, $column_list_1, $column_list_2",
+        },
+        "valuetype": "StringValueType",
+    }
 
 
 def test_atomic_prescriptive_expect_table_row_count_to_be_between(get_rendered_content):
