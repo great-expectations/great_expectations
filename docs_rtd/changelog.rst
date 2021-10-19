@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Fix SQLAlchemy version 1.3.24 compatibility in map metric provider.
 * [BUGFIX] Fix deprecation warning for importing from collections
 
 
