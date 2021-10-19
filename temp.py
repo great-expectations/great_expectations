@@ -51,6 +51,7 @@ def get_rendered_content(
 
 
 def test_atomic_diagnostic_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -58,6 +59,7 @@ def test_atomic_diagnostic_expect_column_bootstrapped_ks_test_p_value_to_be_grea
 
 
 def test_atomic_diagnostic_expect_column_chisquare_test_p_value_to_be_greater_than(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -66,6 +68,7 @@ def test_atomic_diagnostic_expect_column_chisquare_test_p_value_to_be_greater_th
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_distinct_values_to_be_in_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -76,11 +79,12 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_be_in_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_distinct_values_to_contain_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -91,11 +95,12 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_contain_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_distinct_values_to_equal_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -106,11 +111,12 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_equal_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_kl_divergence_to_be_less_than(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -121,11 +127,13 @@ def test_atomic_diagnostic_expect_column_kl_divergence_to_be_less_than(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_max_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_column_max_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_max_to_be_between",
         "kwargs": {},
@@ -134,11 +142,13 @@ def test_atomic_diagnostic_expect_column_max_to_be_between(get_rendered_content)
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_mean_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_column_mean_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_mean_to_be_between",
         "kwargs": {},
@@ -147,11 +157,13 @@ def test_atomic_diagnostic_expect_column_mean_to_be_between(get_rendered_content
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_median_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_column_median_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_median_to_be_between",
         "kwargs": {},
@@ -160,11 +172,13 @@ def test_atomic_diagnostic_expect_column_median_to_be_between(get_rendered_conte
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_min_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_column_min_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_min_to_be_between",
         "kwargs": {},
@@ -173,11 +187,12 @@ def test_atomic_diagnostic_expect_column_min_to_be_between(get_rendered_content)
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_most_common_value_to_be_in_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -188,11 +203,12 @@ def test_atomic_diagnostic_expect_column_most_common_value_to_be_in_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_pair_cramers_phi_value_to_be_less_than(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -203,11 +219,12 @@ def test_atomic_diagnostic_expect_column_pair_cramers_phi_value_to_be_less_than(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_pair_values_a_to_be_greater_than_b(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -218,11 +235,13 @@ def test_atomic_diagnostic_expect_column_pair_values_a_to_be_greater_than_b(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_pair_values_to_be_equal(get_rendered_content):
+def test_atomic_diagnostic_expect_column_pair_values_to_be_equal(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_pair_values_to_be_equal",
         "kwargs": {},
@@ -231,15 +250,18 @@ def test_atomic_diagnostic_expect_column_pair_values_to_be_equal(get_rendered_co
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
-def test_atomic_diagnostic_expect_column_pair_values_to_be_in_set(get_rendered_content):
+def test_atomic_diagnostic_expect_column_pair_values_to_be_in_set(
+    snapshot, get_rendered_content
+):
     # Expectation is a stub; open to implement test once renderer method is available
     pass
 
 
 def test_atomic_diagnostic_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -248,6 +270,7 @@ def test_atomic_diagnostic_expect_column_parameterized_distribution_ks_test_p_va
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_proportion_of_unique_values_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -258,11 +281,12 @@ def test_atomic_diagnostic_expect_column_proportion_of_unique_values_to_be_betwe
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_quantile_values_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -273,11 +297,13 @@ def test_atomic_diagnostic_expect_column_quantile_values_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_stdev_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_column_stdev_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_stdev_to_be_between",
         "kwargs": {},
@@ -286,11 +312,13 @@ def test_atomic_diagnostic_expect_column_stdev_to_be_between(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_sum_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_column_sum_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_sum_to_be_between",
         "kwargs": {},
@@ -299,11 +327,11 @@ def test_atomic_diagnostic_expect_column_sum_to_be_between(get_rendered_content)
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_to_exist(get_rendered_content):
+def test_atomic_diagnostic_expect_column_to_exist(snapshot, get_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_to_exist",
         "kwargs": {},
@@ -312,11 +340,12 @@ def test_atomic_diagnostic_expect_column_to_exist(get_rendered_content):
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_unique_value_count_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -327,11 +356,12 @@ def test_atomic_diagnostic_expect_column_unique_value_count_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_value_lengths_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -342,11 +372,13 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_value_lengths_to_equal(get_rendered_content):
+def test_atomic_diagnostic_expect_column_value_lengths_to_equal(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_value_lengths_to_equal",
         "kwargs": {},
@@ -355,10 +387,11 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_equal(get_rendered_con
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 def test_atomic_diagnostic_expect_column_value_z_scores_to_be_less_than(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -366,7 +399,9 @@ def test_atomic_diagnostic_expect_column_value_z_scores_to_be_less_than(
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_between",
         "kwargs": {},
@@ -375,11 +410,12 @@ def test_atomic_diagnostic_expect_column_values_to_be_between(get_rendered_conte
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_be_dateutil_parseable(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -390,11 +426,13 @@ def test_atomic_diagnostic_expect_column_values_to_be_dateutil_parseable(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_be_decreasing(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_be_decreasing(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_decreasing",
         "kwargs": {},
@@ -403,11 +441,13 @@ def test_atomic_diagnostic_expect_column_values_to_be_decreasing(get_rendered_co
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_be_in_set(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_be_in_set(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {},
@@ -416,11 +456,12 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_set(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_be_in_type_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -431,11 +472,13 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_type_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_be_increasing(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_be_increasing(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_increasing",
         "kwargs": {},
@@ -444,11 +487,12 @@ def test_atomic_diagnostic_expect_column_values_to_be_increasing(get_rendered_co
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_be_json_parseable(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -459,11 +503,13 @@ def test_atomic_diagnostic_expect_column_values_to_be_json_parseable(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_be_null(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_be_null(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_null",
         "kwargs": {},
@@ -472,11 +518,13 @@ def test_atomic_diagnostic_expect_column_values_to_be_null(get_rendered_content)
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_be_of_type(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_be_of_type(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_of_type",
         "kwargs": {},
@@ -485,11 +533,13 @@ def test_atomic_diagnostic_expect_column_values_to_be_of_type(get_rendered_conte
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_be_unique(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_be_unique(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_unique",
         "kwargs": {},
@@ -498,11 +548,12 @@ def test_atomic_diagnostic_expect_column_values_to_be_unique(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_match_json_schema(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -513,10 +564,11 @@ def test_atomic_diagnostic_expect_column_values_to_match_json_schema(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 def test_atomic_diagnostic_expect_column_values_to_match_like_pattern(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -524,6 +576,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_like_pattern(
 
 
 def test_atomic_diagnostic_expect_column_values_to_match_like_pattern_list(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -531,7 +584,9 @@ def test_atomic_diagnostic_expect_column_values_to_match_like_pattern_list(
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_match_regex(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_match_regex(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_match_regex",
         "kwargs": {},
@@ -540,11 +595,12 @@ def test_atomic_diagnostic_expect_column_values_to_match_regex(get_rendered_cont
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_match_regex_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -555,11 +611,12 @@ def test_atomic_diagnostic_expect_column_values_to_match_regex_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_match_strftime_format(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -570,11 +627,13 @@ def test_atomic_diagnostic_expect_column_values_to_match_strftime_format(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_not_be_in_set(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_not_be_in_set(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_not_be_in_set",
         "kwargs": {},
@@ -583,11 +642,13 @@ def test_atomic_diagnostic_expect_column_values_to_not_be_in_set(get_rendered_co
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_column_values_to_not_be_null(get_rendered_content):
+def test_atomic_diagnostic_expect_column_values_to_not_be_null(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_not_be_null",
         "kwargs": {},
@@ -596,10 +657,11 @@ def test_atomic_diagnostic_expect_column_values_to_not_be_null(get_rendered_cont
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 def test_atomic_diagnostic_expect_column_values_to_not_match_like_pattern(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -607,6 +669,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_like_pattern(
 
 
 def test_atomic_diagnostic_expect_column_values_to_not_match_like_pattern_list(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -615,6 +678,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_like_pattern_list(
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_not_match_regex(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -625,11 +689,12 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_column_values_to_not_match_regex_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -640,11 +705,13 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_compound_columns_to_be_unique(get_rendered_content):
+def test_atomic_diagnostic_expect_compound_columns_to_be_unique(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_compound_columns_to_be_unique",
         "kwargs": {},
@@ -653,16 +720,20 @@ def test_atomic_diagnostic_expect_compound_columns_to_be_unique(get_rendered_con
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
-def test_atomic_diagnostic_expect_multicolumn_sum_to_equal(get_rendered_content):
+def test_atomic_diagnostic_expect_multicolumn_sum_to_equal(
+    snapshot, get_rendered_content
+):
     # Expectation is a stub; open to implement test once renderer method is available
     pass
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_multicolumn_values_to_be_unique(get_rendered_content):
+def test_atomic_diagnostic_expect_multicolumn_values_to_be_unique(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_multicolumn_values_to_be_unique",
         "kwargs": {},
@@ -671,11 +742,12 @@ def test_atomic_diagnostic_expect_multicolumn_values_to_be_unique(get_rendered_c
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_select_column_values_to_be_unique_within_record(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -686,11 +758,12 @@ def test_atomic_diagnostic_expect_select_column_values_to_be_unique_within_recor
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_table_column_count_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -701,11 +774,13 @@ def test_atomic_diagnostic_expect_table_column_count_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_table_column_count_to_equal(get_rendered_content):
+def test_atomic_diagnostic_expect_table_column_count_to_equal(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_column_count_to_equal",
         "kwargs": {},
@@ -714,11 +789,12 @@ def test_atomic_diagnostic_expect_table_column_count_to_equal(get_rendered_conte
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_table_columns_to_match_ordered_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -729,11 +805,13 @@ def test_atomic_diagnostic_expect_table_columns_to_match_ordered_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_table_columns_to_match_set(get_rendered_content):
+def test_atomic_diagnostic_expect_table_columns_to_match_set(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_columns_to_match_set",
         "kwargs": {},
@@ -742,11 +820,13 @@ def test_atomic_diagnostic_expect_table_columns_to_match_set(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_table_row_count_to_be_between(get_rendered_content):
+def test_atomic_diagnostic_expect_table_row_count_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_row_count_to_be_between",
         "kwargs": {},
@@ -755,11 +835,13 @@ def test_atomic_diagnostic_expect_table_row_count_to_be_between(get_rendered_con
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_diagnostic_expect_table_row_count_to_equal(get_rendered_content):
+def test_atomic_diagnostic_expect_table_row_count_to_equal(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {},
@@ -768,11 +850,12 @@ def test_atomic_diagnostic_expect_table_row_count_to_equal(get_rendered_content)
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_diagnostic_expect_table_row_count_to_equal_other_table(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -783,10 +866,11 @@ def test_atomic_diagnostic_expect_table_row_count_to_equal_other_table(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -794,6 +878,7 @@ def test_atomic_prescriptive_expect_column_bootstrapped_ks_test_p_value_to_be_gr
 
 
 def test_atomic_prescriptive_expect_column_chisquare_test_p_value_to_be_greater_than(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -802,6 +887,7 @@ def test_atomic_prescriptive_expect_column_chisquare_test_p_value_to_be_greater_
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_distinct_values_to_be_in_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -812,11 +898,12 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_be_in_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_distinct_values_to_contain_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -827,11 +914,12 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_contain_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_distinct_values_to_equal_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -842,11 +930,12 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_equal_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_kl_divergence_to_be_less_than(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -857,11 +946,13 @@ def test_atomic_prescriptive_expect_column_kl_divergence_to_be_less_than(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_max_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_column_max_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_max_to_be_between",
         "kwargs": {},
@@ -870,11 +961,13 @@ def test_atomic_prescriptive_expect_column_max_to_be_between(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_mean_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_column_mean_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_mean_to_be_between",
         "kwargs": {},
@@ -883,11 +976,13 @@ def test_atomic_prescriptive_expect_column_mean_to_be_between(get_rendered_conte
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_median_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_column_median_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_median_to_be_between",
         "kwargs": {},
@@ -896,11 +991,13 @@ def test_atomic_prescriptive_expect_column_median_to_be_between(get_rendered_con
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_min_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_column_min_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_min_to_be_between",
         "kwargs": {},
@@ -909,11 +1006,12 @@ def test_atomic_prescriptive_expect_column_min_to_be_between(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_most_common_value_to_be_in_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -924,11 +1022,12 @@ def test_atomic_prescriptive_expect_column_most_common_value_to_be_in_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_pair_cramers_phi_value_to_be_less_than(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -939,11 +1038,12 @@ def test_atomic_prescriptive_expect_column_pair_cramers_phi_value_to_be_less_tha
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_pair_values_a_to_be_greater_than_b(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -954,11 +1054,12 @@ def test_atomic_prescriptive_expect_column_pair_values_a_to_be_greater_than_b(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_pair_values_to_be_equal(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -969,10 +1070,11 @@ def test_atomic_prescriptive_expect_column_pair_values_to_be_equal(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_expect_column_pair_values_to_be_in_set(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -980,6 +1082,7 @@ def test_atomic_prescriptive_expect_column_pair_values_to_be_in_set(
 
 
 def test_atomic_prescriptive_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -988,6 +1091,7 @@ def test_atomic_prescriptive_expect_column_parameterized_distribution_ks_test_p_
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_proportion_of_unique_values_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -998,11 +1102,12 @@ def test_atomic_prescriptive_expect_column_proportion_of_unique_values_to_be_bet
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_quantile_values_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1013,11 +1118,13 @@ def test_atomic_prescriptive_expect_column_quantile_values_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_stdev_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_column_stdev_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_stdev_to_be_between",
         "kwargs": {},
@@ -1026,11 +1133,13 @@ def test_atomic_prescriptive_expect_column_stdev_to_be_between(get_rendered_cont
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_sum_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_column_sum_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_sum_to_be_between",
         "kwargs": {},
@@ -1039,11 +1148,11 @@ def test_atomic_prescriptive_expect_column_sum_to_be_between(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_to_exist(get_rendered_content):
+def test_atomic_prescriptive_expect_column_to_exist(snapshot, get_rendered_content):
     update_dict = {
         "expectation_type": "expect_column_to_exist",
         "kwargs": {},
@@ -1052,11 +1161,12 @@ def test_atomic_prescriptive_expect_column_to_exist(get_rendered_content):
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_unique_value_count_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1067,11 +1177,12 @@ def test_atomic_prescriptive_expect_column_unique_value_count_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_value_lengths_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1082,11 +1193,13 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_value_lengths_to_equal(get_rendered_content):
+def test_atomic_prescriptive_expect_column_value_lengths_to_equal(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_value_lengths_to_equal",
         "kwargs": {},
@@ -1095,11 +1208,12 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_equal(get_rendered_c
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_value_z_scores_to_be_less_than(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1110,16 +1224,19 @@ def test_atomic_prescriptive_expect_column_value_z_scores_to_be_less_than(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
-def test_atomic_prescriptive_expect_column_values_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_column_values_to_be_between(
+    snapshot, get_rendered_content
+):
     # Expectation is a stub; open to implement test once renderer method is available
     pass
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_dateutil_parseable(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1130,11 +1247,12 @@ def test_atomic_prescriptive_expect_column_values_to_be_dateutil_parseable(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1145,11 +1263,13 @@ def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_values_to_be_in_set(get_rendered_content):
+def test_atomic_prescriptive_expect_column_values_to_be_in_set(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_in_set",
         "kwargs": {},
@@ -1158,11 +1278,12 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_set(get_rendered_cont
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_in_type_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1173,11 +1294,12 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_type_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_increasing(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1188,11 +1310,12 @@ def test_atomic_prescriptive_expect_column_values_to_be_increasing(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1203,11 +1326,13 @@ def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_values_to_be_null(get_rendered_content):
+def test_atomic_prescriptive_expect_column_values_to_be_null(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_null",
         "kwargs": {},
@@ -1216,11 +1341,13 @@ def test_atomic_prescriptive_expect_column_values_to_be_null(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_values_to_be_of_type(get_rendered_content):
+def test_atomic_prescriptive_expect_column_values_to_be_of_type(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_of_type",
         "kwargs": {},
@@ -1229,11 +1356,13 @@ def test_atomic_prescriptive_expect_column_values_to_be_of_type(get_rendered_con
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_values_to_be_unique(get_rendered_content):
+def test_atomic_prescriptive_expect_column_values_to_be_unique(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_unique",
         "kwargs": {},
@@ -1242,11 +1371,12 @@ def test_atomic_prescriptive_expect_column_values_to_be_unique(get_rendered_cont
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_match_json_schema(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1257,10 +1387,11 @@ def test_atomic_prescriptive_expect_column_values_to_match_json_schema(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_expect_column_values_to_match_like_pattern(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -1268,6 +1399,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_like_pattern(
 
 
 def test_atomic_prescriptive_expect_column_values_to_match_like_pattern_list(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -1275,7 +1407,9 @@ def test_atomic_prescriptive_expect_column_values_to_match_like_pattern_list(
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_values_to_match_regex(get_rendered_content):
+def test_atomic_prescriptive_expect_column_values_to_match_regex(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_match_regex",
         "kwargs": {},
@@ -1284,11 +1418,12 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex(get_rendered_co
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_match_regex_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1299,11 +1434,12 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_match_strftime_format(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1314,11 +1450,12 @@ def test_atomic_prescriptive_expect_column_values_to_match_strftime_format(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1329,11 +1466,13 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_column_values_to_not_be_null(get_rendered_content):
+def test_atomic_prescriptive_expect_column_values_to_not_be_null(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_column_values_to_not_be_null",
         "kwargs": {},
@@ -1342,10 +1481,11 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_null(get_rendered_co
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_expect_column_values_to_not_match_like_pattern(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -1353,6 +1493,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_like_pattern(
 
 
 def test_atomic_prescriptive_expect_column_values_to_not_match_like_pattern_list(
+    snapshot,
     get_rendered_content,
 ):
     # Expectation is a stub; open to implement test once renderer method is available
@@ -1361,6 +1502,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_like_pattern_list
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_not_match_regex(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1371,11 +1513,12 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_not_match_regex_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1386,11 +1529,13 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_compound_columns_to_be_unique(get_rendered_content):
+def test_atomic_prescriptive_expect_compound_columns_to_be_unique(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_compound_columns_to_be_unique",
         "kwargs": {},
@@ -1399,16 +1544,19 @@ def test_atomic_prescriptive_expect_compound_columns_to_be_unique(get_rendered_c
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
-def test_atomic_prescriptive_expect_multicolumn_sum_to_equal(get_rendered_content):
+def test_atomic_prescriptive_expect_multicolumn_sum_to_equal(
+    snapshot, get_rendered_content
+):
     # Expectation is a stub; open to implement test once renderer method is available
     pass
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_multicolumn_values_to_be_unique(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1419,11 +1567,12 @@ def test_atomic_prescriptive_expect_multicolumn_values_to_be_unique(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_select_column_values_to_be_unique_within_record(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1434,11 +1583,12 @@ def test_atomic_prescriptive_expect_select_column_values_to_be_unique_within_rec
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_table_column_count_to_be_between(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1449,11 +1599,13 @@ def test_atomic_prescriptive_expect_table_column_count_to_be_between(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
-def test_atomic_prescriptive_expect_table_column_count_to_equal(get_rendered_content):
+def test_atomic_prescriptive_expect_table_column_count_to_equal(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_column_count_to_equal",
         "kwargs": {
@@ -1464,11 +1616,12 @@ def test_atomic_prescriptive_expect_table_column_count_to_equal(get_rendered_con
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
 # FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_table_columns_to_match_ordered_list(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1479,10 +1632,12 @@ def test_atomic_prescriptive_expect_table_columns_to_match_ordered_list(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {}
+    snapshot.assert_match(res)
 
 
-def test_atomic_prescriptive_expect_table_columns_to_match_set(get_rendered_content):
+def test_atomic_prescriptive_expect_table_columns_to_match_set(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_columns_to_match_set",
         "kwargs": {
@@ -1494,22 +1649,12 @@ def test_atomic_prescriptive_expect_table_columns_to_match_set(get_rendered_cont
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {
-        "name": "atomic.prescriptive.summary",
-        "value": {
-            "params": {
-                "column_list": {"schema": {"type": "array"}, "value": ["a", "b", "c"]},
-                "exact_match": {"schema": {"type": "boolean"}, "value": True},
-            },
-            "schema": {"type": "com.superconductive.rendered.string"},
-            "template": "Must have exactly these columns (in any order): "
-            "$column_list_0, $column_list_1, $column_list_2",
-        },
-        "valuetype": "StringValueType",
-    }
+    snapshot.assert_match(res)
 
 
-def test_atomic_prescriptive_expect_table_row_count_to_be_between(get_rendered_content):
+def test_atomic_prescriptive_expect_table_row_count_to_be_between(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_row_count_to_be_between",
         "kwargs": {"max_value": None, "min_value": 1},
@@ -1518,24 +1663,12 @@ def test_atomic_prescriptive_expect_table_row_count_to_be_between(get_rendered_c
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {
-        "name": "atomic.prescriptive.summary",
-        "value": {
-            "params": {
-                "condition_parser": {"schema": {"type": "string"}, "value": None},
-                "max_value": {"schema": {"type": "number"}, "value": None},
-                "min_value": {"schema": {"type": "number"}, "value": 1},
-                "strict_max": {"schema": {"type": "boolean"}, "value": None},
-                "strict_min": {"schema": {"type": "boolean"}, "value": None},
-            },
-            "schema": {"type": "com.superconductive.rendered.string"},
-            "template": "Must have greater than or equal to $min_value rows.",
-        },
-        "valuetype": "StringValueType",
-    }
+    snapshot.assert_match(res)
 
 
-def test_atomic_prescriptive_expect_table_row_count_to_equal(get_rendered_content):
+def test_atomic_prescriptive_expect_table_row_count_to_equal(
+    snapshot, get_rendered_content
+):
     update_dict = {
         "expectation_type": "expect_table_row_count_to_equal",
         "kwargs": {"value": 10},
@@ -1544,22 +1677,11 @@ def test_atomic_prescriptive_expect_table_row_count_to_equal(get_rendered_conten
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {
-        "name": "atomic.prescriptive.summary",
-        "value": {
-            "params": {
-                "condition_parser": {"schema": {"type": "string"}, "value": None},
-                "row_condition": {"schema": {"type": "string"}, "value": None},
-                "value": {"schema": {"type": "number"}, "value": 10},
-            },
-            "schema": {"type": "com.superconductive.rendered.string"},
-            "template": "Must have exactly $value rows.",
-        },
-        "valuetype": "StringValueType",
-    }
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_expect_table_row_count_to_equal_other_table(
+    snapshot,
     get_rendered_content,
 ):
     update_dict = {
@@ -1575,21 +1697,4 @@ def test_atomic_prescriptive_expect_table_row_count_to_equal_other_table(
 
     res = rendered_content.to_json_dict()
     pprint(res)
-    assert res == {
-        "name": "atomic.prescriptive.summary",
-        "value": {
-            "params": {
-                "other_table_name": {
-                    "schema": {"type": "string"},
-                    "value": {
-                        "schema": {"type": "string"},
-                        "value": "other_table_name",
-                    },
-                }
-            },
-            "schema": {"type": "com.superconductive.rendered.string"},
-            "template": "Row count must equal the row count of table "
-            "$other_table_name.",
-        },
-        "valuetype": "StringValueType",
-    }
+    snapshot.assert_match(res)
