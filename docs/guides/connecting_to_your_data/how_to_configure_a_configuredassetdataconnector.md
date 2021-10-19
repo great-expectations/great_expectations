@@ -15,7 +15,7 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
 Great Expectations provides two `DataConnector` classes for connecting to `DataAsset`s stored as file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
 
-- A ConfiguredAssetDataConnector requires an explicit listing of each `DataAsset` you want to connect to. This allows more fine-tuning, but also requires more setup.
+- A ConfiguredAssetDataConnector allows you to specify that you have multiple `DataAsset`s in a `Datasource`, but also requires an explicit listing of each `DataAsset` you want to connect to. This allows more fine-tuning, but also requires more setup.
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
 If you're not sure which one to use, please check out [How to choose which DataConnector to use](./how_to_choose_which_dataconnector_to_use.md).
@@ -48,7 +48,7 @@ Choose a DataConnector
 ----------------------
 
 ConfiguredAssetDataConnectors like `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector` require `DataAsset`s to be
-explicitly named.  Each `DataAsset` can have their own regex `pattern` and `group_names`, and if configured, will override any
+explicitly named. Each `DataAsset` can have their own regex `pattern` and `group_names`, and if configured, will override any
 `pattern` or `group_names` under `default_regex`.
 
 Imagine you have the following files in `my_directory/`:
