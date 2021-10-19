@@ -856,7 +856,7 @@ aborting graph resolution.
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None
+        ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         warnings.warn(
@@ -865,7 +865,9 @@ aborting graph resolution.
             DeprecationWarning,
         )
         return self._expectation_suite.find_expectations(
-            expectation_configuration=expectation_configuration, match_type=match_type, ge_cloud_id=ge_cloud_id
+            expectation_configuration=expectation_configuration,
+            match_type=match_type,
+            ge_cloud_id=ge_cloud_id,
         )
 
     def remove_expectation(
@@ -873,7 +875,7 @@ aborting graph resolution.
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-        ge_cloud_id: Optional[str] = None
+        ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         warnings.warn(
@@ -885,7 +887,7 @@ aborting graph resolution.
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             remove_multiple_matches=remove_multiple_matches,
-            ge_cloud_id=ge_cloud_id
+            ge_cloud_id=ge_cloud_id,
         )
 
     def set_config_value(self, key, value):
