@@ -500,18 +500,34 @@ def test_add_expectation_with_ge_cloud_id(
     """
     This test ensures that expectation does not lose ge_cloud_id attribute when updated
     """
-    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].ge_cloud_id
+    expectation_ge_cloud_id = (
+        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
+            0
+        ].ge_cloud_id
+    )
     # updated expectation does not have ge_cloud_id
     updated_expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
-        kwargs={"column": "a", "value_set": [11, 22, 33, 44, 55], "result_format": "BASIC"},
+        kwargs={
+            "column": "a",
+            "value_set": [11, 22, 33, 44, 55],
+            "result_format": "BASIC",
+        },
         meta={"notes": "This is an expectation."},
     )
-    single_expectation_suite_with_expectation_ge_cloud_id.add_expectation(updated_expectation, overwrite_existing=True)
-    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].ge_cloud_id == expectation_ge_cloud_id
+    single_expectation_suite_with_expectation_ge_cloud_id.add_expectation(
+        updated_expectation, overwrite_existing=True
+    )
+    assert (
+        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
+            0
+        ].ge_cloud_id
+        == expectation_ge_cloud_id
+    )
     # make sure expectation config was actually updated
-    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].kwargs["value_set"] == [11, 22, 33,
-                                                                                                         44, 55]
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].kwargs[
+        "value_set"
+    ] == [11, 22, 33, 44, 55]
 
 
 def test_remove_all_expectations_of_type(
