@@ -47,8 +47,8 @@ If you’re not familiar with the `test_yaml_config` method, please check out: [
 Choose a DataConnector
 ----------------------
 
-ConfiguredAssetDataConnectors like `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector` require DataAssets to be
-explicitly named. Each DataAsset can have their own regex `pattern` and `group_names`, and if configured, will override any
+ConfiguredAssetDataConnectors like `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector` require `DataAsset`s to be
+explicitly named.  Each `DataAsset` can have their own regex `pattern` and `group_names`, and if configured, will override any
 `pattern` or `group_names` under `default_regex`.
 
 Imagine you have the following files in `my_directory/`:
