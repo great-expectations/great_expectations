@@ -44,6 +44,8 @@ Load your DataContext into memory using the `get_context()` method.
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L7
 ```
 
+## Configuring Inferred Asset Data Connector and Configured Asset Data Connector
+
 <Tabs
   groupId="inferred-or-configured"
   defaultValue='inferred'
