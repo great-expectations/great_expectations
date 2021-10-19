@@ -2,6 +2,7 @@ import json
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -284,6 +285,11 @@ class CheckpointResult(DictDot):
         return self._validation_statistics
 
     def to_json_dict(self):
+        if hasattr(self.checkpoint_config, "validations"):
+            for val in self.checkpoint_config["validations"]:
+                if isinstance(val["batch_request"], BatchRequest):
+                    val["batch_request"] = val["batch_request"].to_json_dict()
+
         return checkpointResultSchema.dump(self)
 
     def __repr__(self):

@@ -1,7 +1,9 @@
 import json
 from copy import deepcopy
 from string import Template as pTemplate
+from typing import Optional
 
+from great_expectations.data_context.types.base import RenderedAtomicValue
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
 
@@ -493,3 +495,15 @@ class RenderedSectionContent(RenderedContent):
         )
         d["section_name"] = self.section_name
         return d
+
+
+class RenderedAtomicContent(RenderedContent):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        value: Optional[RenderedAtomicValue] = None,
+        valuetype: Optional[str] = None,
+    ):
+        self.name = name
+        self.value = value
+        self.valuetype = valuetype
