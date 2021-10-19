@@ -681,12 +681,12 @@ snapshots["test_atomic_prescriptive_expect_table_column_count_to_be_between 1"] 
     "value": {
         "params": {
             "max_value": {"schema": {"type": "number"}, "value": None},
-            "min_value": {"schema": {"type": "number"}, "value": None},
+            "min_value": {"schema": {"type": "number"}, "value": 5},
             "strict_max": {"schema": {"type": "boolean"}, "value": None},
             "strict_min": {"schema": {"type": "boolean"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "May have any number of columns.",
+        "template": "Must have greater than or equal to $min_value columns.",
     },
     "valuetype": "StringValueType",
 }
