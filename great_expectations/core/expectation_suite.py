@@ -536,6 +536,12 @@ class ExpectationSuite(SerializableDictDot):
             #   .kwargs, expectation_configuration.kwargs)
             # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
             if overwrite_existing:
+                # if existing Expectation has a ge_cloud_id, add it back to the new Expectation Configuration
+                existing_expectation_ge_cloud_id = self.expectations[
+                    found_expectation_indexes[0]
+                ].ge_cloud_id
+                if existing_expectation_ge_cloud_id is not None:
+                    expectation_configuration.ge_cloud_id = existing_expectation_ge_cloud_id
                 self.expectations[
                     found_expectation_indexes[0]
                 ] = expectation_configuration
