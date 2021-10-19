@@ -12,7 +12,7 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
 
 </Prerequisites>
 
-Great Expectations provides two `DataConnector` classes for connecting to file-system-like data. This includes files on disk,
+Great Expectations provides two `DataConnector` classes for connecting to `DataAsset`s stored as file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
 
 - A ConfiguredAssetDataConnector requires an explicit listing of each `DataAsset` you want to connect to. This allows more fine-tuning, but also requires more setup.
