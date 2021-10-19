@@ -2,10 +2,11 @@
 title: Validate your data using a Checkpoint
 ---
 
-[Validation](/docs/reference/validation) is the core operation of Great Expectations: “Validate data X against Expectation Y.”
+Validation is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
-In normal usage, the best way to validate data is with a [Checkpoint](/docs/reference/checkpoints_and_actions). Checkpoints bundle [Batches](/docs/reference/datasources#Batches) of data with corresponding [Expectation Suites](/docs/reference/expectations/expectations) for validation.
+In normal usage, the best way to validate data is with a Checkpoint. Checkpoints bundle Batches of data with corresponding Expectation Suites for validation.
 
+### Set up a Checkpoint
 Let’s set up our first Checkpoint! **Go back to your terminal** and shut down the Jupyter Notebook, if you haven’t yet. Then run the following command:
 
 
@@ -14,8 +15,6 @@ great_expectations --v3-api checkpoint new my_new_checkpoint
 ```
 
 This will open a **Jupyter Notebook** that will allow you to complete the configuration of your Checkpoint.
-
-## The `checkpoint new` notebook
 
 The Jupyter Notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows to configure a Checkpoint to validate the February data:
 
@@ -33,7 +32,7 @@ You can then execute all cells in the notebook in order to store the Checkpoint 
 
 - You configured the Checkpoint to validate the `yellow_tripdata_sample_2019-02.csv` (i.e. our February data) file.
 
-## How to run validation and inspect your Validation Results
+### How to run validation and inspect your Validation Results
 
 This is basically just a recap of the previous section on Data Docs! In order to build Data Docs and get your results in a nice, human-readable format, you can simply uncomment and run the last cell in the notebook. This will open Data Docs, where you can click on the latest validation run to see the Validation Results page for this Checkpoint run.
 
@@ -53,7 +52,7 @@ On the Validation Results page, you will see that the validation of the staging 
 
 We have successfully created an Expectation Suite based on historical data, and used it to detect an issue with our new data. **Congratulations! You have now completed the “Getting started with Great Expectations” tutorial.**
 
-## Wrap-up and next steps
+### Wrap-up and next steps
 
 In this tutorial, we have covered the following basic capabilities of Great Expectations:
 
