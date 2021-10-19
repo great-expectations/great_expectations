@@ -8,7 +8,7 @@ The V3 API will become the preferred method of interacting with GE starting with
 
 ## Determine if you need to migrate your configuration.
 
-The Great Expectations CLI contains a tool that will check your configuration and automatically try to determine what needs to be done. To do this check, run the following command: 
+The Great Expectations CLI contains a tool that will check your configuration and determine if it needs to be migrated. To perform this check, run the `check-config` command: 
 
 ```bash
 great_expectations --v3-api project check-config
@@ -31,21 +31,87 @@ Unfortunately, your config appears to be invalid:
 
 The config_version of your great_expectations.yml -- 2.0 -- is outdated.
 Please consult the 0.13.x migration guide ttps://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
-upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.```
+upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
 ```
 
 ## Run automatic upgrade script if prompted
-If your configuration needs to be 
+
+If the `check-config` method has advised you to upgrade your configuration, you can run the 
 
 ```bash
   great_expectations --v3-api project upgrade
 ```
-[ INSERT MESSAGE SAYING THINGS WILL BE UPGRADED MANUALLY]
+```python
+# [ Ensure that this message is updated ]
+```
 
+```bash
+++====================================++
+|| UpgradeHelperV13: Upgrade Overview ||
+++====================================++
+
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
+
+**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
+
+Automated Steps
+================
+
+The following Stores and/or Store Names will be upgraded:
+
+    - Stores: checkpoint_store
+    - Store Names: checkpoint_store_name
+
+Manual Steps
+=============
+
+No manual upgrade steps are required.
+
+Upgrade Confirmation
+=====================
+
+Please consult the 0.13.x migration guide to learn more about the automated upgrade process:
+
+    https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html
+
+Would you like to proceed with the project upgrade? [Y/n]: Y
+```
+And if you select `Y`, then the following automatic upgrade will occur:
+
+```bash
+
+Upgrading project...
+
+================================================================================
+
+You appear to be using a legacy capability with the latest config version (3.0).
+    Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number 3.
+++================++
+|| Upgrade Report ||
+++================++
+
+Your project was successfully upgraded to be compatible with Great Expectations 0.13.x.
+The config_version of your great_expectations.yml has been automatically incremented to 3.0.
+
+A log detailing the upgrade can be found here:
+
+    - /Users/work/Development/ge_sandbox_for_different_config_versions/validation_operators/great_expectations/uncommitted/logs/project_upgrades/UpgradeHelperV13_20211019T170407.484814Z.json
+You appear to be using a legacy capability with the latest config version (3.0).
+    Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number 3.
+Your project is up-to-date - no further upgrade is necessary.
+```
+
+[This will updated according to CLI changes]
 
 ## 3. Manually migrate Datasources from V2 to V3
 
-Therea 
+The first manual step needed is convert the old-style datasource to a new-style one. 
+
+The old-style datasource has: 
+  - data-type specific datasources (like `PandasDatasource` below)
+  - data-type specific (`PandasDataset` below)
+  - and batch_kwargs_generators
+
 
 ```YAML
 datasources:
@@ -61,8 +127,12 @@ datasources:
         base_directory: /Users/work/ge_Data/titanic
 ```
 
+Here is the equivalent example :
+  The old-style datasource has: 
+  - Data-type agnostic Datasource : which ??? 
+  - data-type specific ExecutionEngine : which ??? 
+  - data-type speific DataConnectors : which ???. Of which we are using InferredAssetFilesystemDataConnector
 
-Here is the equivalent example : 
 ```YAML
 datasources:
   my_datasource:
@@ -81,12 +151,62 @@ datasources:
         class_name: InferredAssetFilesystemDataConnector
 ```
 
-Links to new documentation? 
-- 
+This was a simple example : and how they are different in the new-style datasource. THe documentation contains many other examples of V3, which you should be able to use for your needs. 
+
+They can be found in the "Connecting To your Data Section" in the how-to-guides:
+
+- How to connect to in-memory data in a Pandas dataframe
+- How to connect to in-memory data in a Spark dataframe
+- How to connect to a Athena database
+- How to connect to a BigQuery database
+- How to connect to a MySQL database
+- How to connect to a PostgreSQL database
+- How to connect to a Redshift database
+- How to connect to a Snowflake database
+- How to connect to a SQLite database
+- How to connect to data on a filesystem using Pandas
+- How to connect to data on a filesystem using Spark
+- How to connect to data on S3 using Pandas
+- How to connect to data on S3 using Spark
+- How to connect to data on GCS using Pandas
+- How to connect to data on GCS using Spark
+- How to connect to data on Azure Blob Storage using Pandas
+- How to connect to data on Azure Blob Storage 
 
 ## 4. Manually migrate Validation Operators to V3 Checkpoints
 
+As part of the new modular expectations API in Great Expectations, Validation Operators are evolving into Checkpoints. At some point in the future Validation Operators will be fully deprecated.
+
+https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_a_validation_operator.html?highlight=validation%20operator
+
+
+
+Here is an example of a Validation Operator
+```yaml
+
+
+```
+
+Here is an example of an equivalent Checkpoint
+
+
+
+```yaml
+
+```
+
+Please look at this
+
+
 ## 5. Manually migrate V2 Checkpoints to V3 Checkpoints
+
+https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html#how-to-guides-validation-how-to-create-a-new-checkpoint
+https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html#how-to-guides-validation-how-to-create-a-new-checkpoint
+
+
+
+In some cases you wil 
+
 
 
 # Upgrading from previous versions of Great Expectations
