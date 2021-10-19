@@ -81,7 +81,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_be_in_set(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -96,7 +96,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_contain_set(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -111,7 +111,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_equal_set(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -126,7 +126,7 @@ def test_atomic_diagnostic_expect_column_kl_divergence_to_be_less_than(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -139,7 +139,7 @@ def test_atomic_diagnostic_expect_column_max_to_be_between(get_rendered_content)
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -152,7 +152,7 @@ def test_atomic_diagnostic_expect_column_mean_to_be_between(get_rendered_content
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -165,7 +165,7 @@ def test_atomic_diagnostic_expect_column_median_to_be_between(get_rendered_conte
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -179,7 +179,7 @@ def test_atomic_diagnostic_expect_column_min_to_be_between(get_rendered_content)
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -195,7 +195,7 @@ def test_atomic_diagnostic_expect_column_most_common_value_to_be_in_set(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -211,7 +211,7 @@ def test_atomic_diagnostic_expect_column_pair_cramers_phi_value_to_be_less_than(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -227,7 +227,7 @@ def test_atomic_diagnostic_expect_column_pair_values_a_to_be_greater_than_b(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -241,7 +241,7 @@ def test_atomic_diagnostic_expect_column_pair_values_to_be_equal(get_rendered_co
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -269,7 +269,7 @@ def test_atomic_diagnostic_expect_column_proportion_of_unique_values_to_be_betwe
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -285,7 +285,7 @@ def test_atomic_diagnostic_expect_column_quantile_values_to_be_between(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -299,7 +299,7 @@ def test_atomic_diagnostic_expect_column_stdev_to_be_between(get_rendered_conten
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -313,7 +313,7 @@ def test_atomic_diagnostic_expect_column_sum_to_be_between(get_rendered_content)
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -327,7 +327,7 @@ def test_atomic_diagnostic_expect_column_to_exist(get_rendered_content):
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -343,7 +343,7 @@ def test_atomic_diagnostic_expect_column_unique_value_count_to_be_between(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -359,7 +359,7 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_be_between(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -373,7 +373,7 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_equal(get_rendered_con
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -394,7 +394,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_between(get_rendered_conte
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -410,7 +410,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_dateutil_parseable(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -424,7 +424,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_decreasing(get_rendered_co
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -438,7 +438,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_set(get_rendered_conten
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -454,7 +454,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_type_list(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -468,7 +468,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_increasing(get_rendered_co
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -484,7 +484,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_json_parseable(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -498,7 +498,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_null(get_rendered_content)
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -512,7 +512,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_of_type(get_rendered_conte
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -526,7 +526,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_unique(get_rendered_conten
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -542,7 +542,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_json_schema(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -570,7 +570,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_regex(get_rendered_cont
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -586,7 +586,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_regex_list(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -602,7 +602,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_strftime_format(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -616,7 +616,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_be_in_set(get_rendered_co
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -630,7 +630,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_be_null(get_rendered_cont
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -660,7 +660,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -676,7 +676,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex_list(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -690,7 +690,7 @@ def test_atomic_diagnostic_expect_compound_columns_to_be_unique(get_rendered_con
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -709,7 +709,7 @@ def test_atomic_diagnostic_expect_multicolumn_values_to_be_unique(get_rendered_c
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -725,7 +725,7 @@ def test_atomic_diagnostic_expect_select_column_values_to_be_unique_within_recor
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -741,7 +741,7 @@ def test_atomic_diagnostic_expect_table_column_count_to_be_between(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -755,7 +755,7 @@ def test_atomic_diagnostic_expect_table_column_count_to_equal(get_rendered_conte
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -771,7 +771,7 @@ def test_atomic_diagnostic_expect_table_columns_to_match_ordered_list(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -785,7 +785,7 @@ def test_atomic_diagnostic_expect_table_columns_to_match_set(get_rendered_conten
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -799,7 +799,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_be_between(get_rendered_con
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -813,7 +813,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_equal(get_rendered_content)
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -829,7 +829,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_equal_other_table(
     rendered_content = get_rendered_content("atomic.diagnostic.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -859,7 +859,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_be_in_set(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -875,7 +875,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_contain_set(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -891,7 +891,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_equal_set(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -907,7 +907,7 @@ def test_atomic_prescriptive_expect_column_kl_divergence_to_be_less_than(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -921,7 +921,7 @@ def test_atomic_prescriptive_expect_column_max_to_be_between(get_rendered_conten
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -935,7 +935,7 @@ def test_atomic_prescriptive_expect_column_mean_to_be_between(get_rendered_conte
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -949,7 +949,7 @@ def test_atomic_prescriptive_expect_column_median_to_be_between(get_rendered_con
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -963,7 +963,7 @@ def test_atomic_prescriptive_expect_column_min_to_be_between(get_rendered_conten
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -979,7 +979,7 @@ def test_atomic_prescriptive_expect_column_most_common_value_to_be_in_set(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -995,7 +995,7 @@ def test_atomic_prescriptive_expect_column_pair_cramers_phi_value_to_be_less_tha
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1011,7 +1011,7 @@ def test_atomic_prescriptive_expect_column_pair_values_a_to_be_greater_than_b(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1027,7 +1027,7 @@ def test_atomic_prescriptive_expect_column_pair_values_to_be_equal(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1057,7 +1057,7 @@ def test_atomic_prescriptive_expect_column_proportion_of_unique_values_to_be_bet
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1073,7 +1073,7 @@ def test_atomic_prescriptive_expect_column_quantile_values_to_be_between(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1087,7 +1087,7 @@ def test_atomic_prescriptive_expect_column_stdev_to_be_between(get_rendered_cont
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1101,7 +1101,7 @@ def test_atomic_prescriptive_expect_column_sum_to_be_between(get_rendered_conten
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1115,7 +1115,7 @@ def test_atomic_prescriptive_expect_column_to_exist(get_rendered_content):
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1131,7 +1131,7 @@ def test_atomic_prescriptive_expect_column_unique_value_count_to_be_between(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1147,7 +1147,7 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_be_between(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1161,7 +1161,7 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_equal(get_rendered_c
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1177,7 +1177,7 @@ def test_atomic_prescriptive_expect_column_value_z_scores_to_be_less_than(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1198,7 +1198,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_dateutil_parseable(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1214,7 +1214,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1228,7 +1228,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_set(get_rendered_cont
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1244,7 +1244,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_type_list(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1260,7 +1260,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_increasing(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1276,7 +1276,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1290,7 +1290,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_null(get_rendered_conten
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1304,7 +1304,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_of_type(get_rendered_con
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1318,7 +1318,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_unique(get_rendered_cont
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1334,7 +1334,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_json_schema(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1362,7 +1362,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex(get_rendered_co
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1378,7 +1378,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex_list(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1394,7 +1394,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_strftime_format(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1410,7 +1410,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1424,7 +1424,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_null(get_rendered_co
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1454,7 +1454,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1470,7 +1470,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex_list(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1484,7 +1484,7 @@ def test_atomic_prescriptive_expect_compound_columns_to_be_unique(get_rendered_c
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1505,7 +1505,7 @@ def test_atomic_prescriptive_expect_multicolumn_values_to_be_unique(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1521,7 +1521,7 @@ def test_atomic_prescriptive_expect_select_column_values_to_be_unique_within_rec
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1537,7 +1537,7 @@ def test_atomic_prescriptive_expect_table_column_count_to_be_between(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1551,7 +1551,7 @@ def test_atomic_prescriptive_expect_table_column_count_to_equal(get_rendered_con
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1567,7 +1567,7 @@ def test_atomic_prescriptive_expect_table_columns_to_match_ordered_list(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1576,12 +1576,15 @@ def test_atomic_prescriptive_expect_table_columns_to_match_set(get_rendered_cont
     pass
     update_dict = {
         "expectation_type": "expect_column_distinct_values_to_be_in_set",
-        "kwargs": {},
+        "kwargs": {
+            "column_list": ["a", "b", "c"],
+            "exact_match": True,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {}
 
 
@@ -1593,7 +1596,7 @@ def test_atomic_prescriptive_expect_table_row_count_to_be_between(get_rendered_c
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {
         "name": "atomic.prescriptive.summary",
         "value": {
@@ -1619,7 +1622,7 @@ def test_atomic_prescriptive_expect_table_row_count_to_equal(get_rendered_conten
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {
         "name": "atomic.prescriptive.summary",
         "value": {
@@ -1650,7 +1653,7 @@ def test_atomic_prescriptive_expect_table_row_count_to_equal_other_table(
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
     assert len(rendered_content) == 1
-    pprint(rendered_content[0])
+    pprint(rendered_content[0].to_json_dict())
     assert rendered_content[0].to_json_dict() == {
         "name": "atomic.prescriptive.summary",
         "value": {
