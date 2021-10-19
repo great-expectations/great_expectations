@@ -1,3 +1,6 @@
+from copy import deepcopy
+from uuid import UUID
+
 import pytest
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -139,6 +142,18 @@ def single_expectation_suite(exp1):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1],
+        meta={"notes": "This is an expectation suite."},
+    )
+
+
+@pytest.fixture
+def single_expectation_suite_with_expectation_ge_cloud_id(exp1):
+    exp1_with_ge_cloud_id = deepcopy(exp1)
+    exp1_with_ge_cloud_id.ge_cloud_id = UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774")
+
+    return ExpectationSuite(
+        expectation_suite_name="warning",
+        expectations=[exp1_with_ge_cloud_id],
         meta={"notes": "This is an expectation suite."},
     )
 
@@ -477,6 +492,26 @@ def test_add_expectation(
     # Turn this on once we're ready to enforce strict typing.
     # with pytest.raises(TypeError):
     #     single_expectation_suite.append_expectation(exp1.to_json_dict())
+
+
+def test_add_expectation_with_ge_cloud_id(
+    single_expectation_suite_with_expectation_ge_cloud_id,
+):
+    """
+    This test ensures that expectation does not lose ge_cloud_id attribute when updated
+    """
+    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].ge_cloud_id
+    # updated expectation does not have ge_cloud_id
+    updated_expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={"column": "a", "value_set": [11, 22, 33, 44, 55], "result_format": "BASIC"},
+        meta={"notes": "This is an expectation."},
+    )
+    single_expectation_suite_with_expectation_ge_cloud_id.add_expectation(updated_expectation, overwrite_existing=True)
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].ge_cloud_id == expectation_ge_cloud_id
+    # make sure expectation config was actually updated
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].kwargs["value_set"] == [11, 22, 33,
+                                                                                                         44, 55]
 
 
 def test_remove_all_expectations_of_type(
