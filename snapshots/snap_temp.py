@@ -406,18 +406,18 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_be_decreasing 1"] = 
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
-                "value": None,
+                "value": True,
             },
             "row_condition": {"schema": {"type": "string"}, "value": None},
-            "strictly": {"schema": {"type": "boolean"}, "value": None},
+            "strictly": {"schema": {"type": "boolean"}, "value": 50},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must be less than or equal to previous values.",
+        "template": "$column values must be strictly less than previous values, at least $mostly_pct % of the time. Values should be parsed as datetimes.",
     },
     "valuetype": "StringValueType",
 }
@@ -426,18 +426,45 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_be_in_set 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
-                "value": None,
+                "value": True,
             },
             "row_condition": {"schema": {"type": "string"}, "value": None},
-            "value_set": {"schema": {"type": "array"}, "value": None},
+            "v__0": {"schema": {"type": "string"}, "value": 1},
+            "v__1": {"schema": {"type": "string"}, "value": 2},
+            "v__2": {"schema": {"type": "string"}, "value": 3},
+            "v__3": {"schema": {"type": "string"}, "value": 4},
+            "value_set": {"schema": {"type": "array"}, "value": [1, 2, 3, 4]},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must belong to this set: [ ].",
+        "template": "$column values must belong to this set: $v__0 $v__1 $v__2 $v__3, at least $mostly_pct % of the time. Values should be parsed as datetimes.",
+    },
+    "valuetype": "StringValueType",
+}
+
+snapshots["test_atomic_prescriptive_expect_column_values_to_be_in_type_list 1"] = {
+    "name": "atomic.prescriptive.summary",
+    "value": {
+        "params": {
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
+            "condition_parser": {"schema": {"type": "string"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "row_condition": {"schema": {"type": "string"}, "value": None},
+            "type_list": {
+                "schema": {"type": "array"},
+                "value": ["type_a", "type_b", "type_c"],
+            },
+            "v__0": {"schema": {"type": "string"}, "value": 1},
+            "v__1": {"schema": {"type": "string"}, "value": 2},
+            "v__2": {"schema": {"type": "string"}, "value": 3},
+            "v__3": {"schema": {"type": "string"}, "value": 4},
+        },
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "$column value types must belong to this set: $v__0 $v__1 $v__2, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -446,18 +473,18 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_be_increasing 1"] = 
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
-                "value": None,
+                "value": True,
             },
             "row_condition": {"schema": {"type": "string"}, "value": None},
-            "strictly": {"schema": {"type": "boolean"}, "value": None},
+            "strictly": {"schema": {"type": "boolean"}, "value": 10},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must be greater than or equal to previous values.",
+        "template": "$column values must be strictly greater than previous values, at least $mostly_pct % of the time. Values should be parsed as datetimes.",
     },
     "valuetype": "StringValueType",
 }
@@ -466,13 +493,13 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_be_json_parseable 1"
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must be parseable as JSON.",
+        "template": "$column values must be parseable as JSON, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -481,13 +508,13 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_be_null 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must be null.",
+        "template": "$column values must be null, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -496,15 +523,15 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_be_of_type 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
-            "mostly_pct": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "mostly_pct": {"schema": {"type": "number"}, "value": "80"},
             "row_condition": {"schema": {"type": "string"}, "value": None},
-            "type_": {"schema": {"type": "string"}, "value": None},
+            "type_": {"schema": {"type": "string"}, "value": "my_type"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must be of type $type_.",
+        "template": "$column values must be of type $type_, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -513,13 +540,13 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_be_unique 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must be unique.",
+        "template": "$column values must be unique, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -528,14 +555,14 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_match_json_schema 1"
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "json_schema": {"schema": {"type": "object"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "json_schema": {"schema": {"type": "object"}, "value": {"foo": "bar"}},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must match a JSON Schema but none was specified.",
+        "template": "$column values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json",
     },
     "valuetype": "StringValueType",
 }
@@ -544,15 +571,15 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_match_regex 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
-            "mostly_pct": {"schema": {"type": "number"}, "value": None},
-            "regex": {"schema": {"type": "string"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "mostly_pct": {"schema": {"type": "number"}, "value": "80"},
+            "regex": {"schema": {"type": "string"}, "value": "^superconductive$"},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must match a regular expression but none was specified.",
+        "template": "$column values must match this regular expression: $regex, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -563,14 +590,14 @@ snapshots[
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "row_condition": {"schema": {"type": "string"}, "value": None},
-            "strftime_format": {"schema": {"type": "string"}, "value": None},
+            "strftime_format": {"schema": {"type": "string"}, "value": "%Y-%m"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must match a strftime format but none was specified.",
+        "template": "$column values must match the following strftime format: $strftime_format, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -579,18 +606,21 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_not_be_in_set 1"] = 
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
                 "value": None,
             },
             "row_condition": {"schema": {"type": "string"}, "value": None},
-            "value_set": {"schema": {"type": "array"}, "value": None},
+            "v__0": {"schema": {"type": "string"}, "value": 1},
+            "v__1": {"schema": {"type": "string"}, "value": 2},
+            "v__2": {"schema": {"type": "string"}, "value": 3},
+            "value_set": {"schema": {"type": "array"}, "value": [1, 2, 3]},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must not belong to this set: [ ].",
+        "template": "$column values must not belong to this set: $v__0 $v__1 $v__2, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -599,14 +629,14 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_not_be_null 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
-            "mostly_pct": {"schema": {"type": "number"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "mostly_pct": {"schema": {"type": "number"}, "value": "80"},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "$column values must never be null.",
+        "template": "$column values must not be null, at least $mostly_pct % of the time.",
     },
     "valuetype": "StringValueType",
 }
@@ -615,14 +645,33 @@ snapshots["test_atomic_prescriptive_expect_column_values_to_not_match_regex 1"] 
     "name": "atomic.prescriptive.summary",
     "value": {
         "params": {
-            "column": {"schema": {"type": "string"}, "value": None},
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
             "condition_parser": {"schema": {"type": "string"}, "value": None},
-            "mostly": {"schema": {"type": "number"}, "value": None},
-            "regex": {"schema": {"type": "string"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "regex": {"schema": {"type": "string"}, "value": "^superconductive$"},
             "row_condition": {"schema": {"type": "string"}, "value": None},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
-        "template": "values must not match a regular expression but none was specified.",
+        "template": "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time.",
+    },
+    "valuetype": "StringValueType",
+}
+
+snapshots["test_atomic_prescriptive_expect_compound_columns_to_be_unique 1"] = {
+    "name": "atomic.prescriptive.summary",
+    "value": {
+        "params": {
+            "column_list": {
+                "schema": {"type": "array"},
+                "value": ["my_first_col", "my_second_col", "my_third_col"],
+            },
+            "condition_parser": {"schema": {"type": "string"}, "value": None},
+            "ignore_row_if": {"schema": {"type": "string"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "row_condition": {"schema": {"type": "string"}, "value": None},
+        },
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "Values for given compound columns must be unique together, at least $mostly_pct % of the time: $column_list_0, $column_list_1, $column_list_2",
     },
     "valuetype": "StringValueType",
 }

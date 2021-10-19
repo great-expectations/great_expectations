@@ -1250,14 +1250,18 @@ def test_atomic_prescriptive_expect_column_values_to_be_dateutil_parseable(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_decreasing",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+            "parse_strings_as_datetimes": True,
+            "strictly": 50,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1266,13 +1270,18 @@ def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_in_set(
     snapshot, get_rendered_content
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "value_set": [1, 2, 3, 4],
+            "mostly": 0.8,
+            "parse_strings_as_datetimes": True,
+            "strictly": 50,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1281,14 +1290,18 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_set(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_in_type_list(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_in_type_list",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "type_list": ["type_a", "type_b", "type_c"],
+            "value_set": [1, 2, 3, 4],
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1297,14 +1310,18 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_type_list(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_increasing(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_increasing",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "strictly": 10,
+            "mostly": 0.8,
+            "parse_strings_as_datetimes": True,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1313,14 +1330,16 @@ def test_atomic_prescriptive_expect_column_values_to_be_increasing(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_json_parseable",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1329,13 +1348,15 @@ def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_null(
     snapshot, get_rendered_content
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_null",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1344,13 +1365,16 @@ def test_atomic_prescriptive_expect_column_values_to_be_null(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_of_type(
     snapshot, get_rendered_content
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_of_type",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "type_": "my_type",
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1359,13 +1383,15 @@ def test_atomic_prescriptive_expect_column_values_to_be_of_type(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_be_unique(
     snapshot, get_rendered_content
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_be_unique",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1374,14 +1400,17 @@ def test_atomic_prescriptive_expect_column_values_to_be_unique(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_match_json_schema(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_match_json_schema",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+            "json_schema": {"foo": "bar"},
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1406,13 +1435,16 @@ def test_atomic_prescriptive_expect_column_values_to_match_like_pattern_list(
     pass
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_match_regex(
     snapshot, get_rendered_content
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_match_regex",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+            "regex": "^superconductive$",
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1428,7 +1460,12 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex_list(
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_match_regex_list",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "regex_list": ["^superconductive$", "ge|great_expectations"],
+            "mostly": 0.8,
+            "match_on": "all",
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1437,14 +1474,17 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex_list(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_match_strftime_format(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_match_strftime_format",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "strftime_format": "%Y-%m",
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1453,14 +1493,18 @@ def test_atomic_prescriptive_expect_column_values_to_match_strftime_format(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_not_be_in_set",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "value_set": [1, 2, 3],
+            "mostly": 0.8,
+            "parse_string_as_datetimes": True,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1469,13 +1513,15 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_not_be_null(
     snapshot, get_rendered_content
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_not_be_null",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1500,14 +1546,17 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_like_pattern_list
     pass
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_column_values_to_not_match_regex(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_column_values_to_not_match_regex",
-        "kwargs": {},
+        "kwargs": {
+            "column": "my_column",
+            "regex": "^superconductive$",
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1532,13 +1581,15 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex_list(
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_compound_columns_to_be_unique(
     snapshot, get_rendered_content
 ):
     update_dict = {
         "expectation_type": "expect_compound_columns_to_be_unique",
-        "kwargs": {},
+        "kwargs": {
+            "column_list": ["my_first_col", "my_second_col", "my_third_col"],
+            "mostly": 0.8,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
@@ -1586,14 +1637,16 @@ def test_atomic_prescriptive_expect_select_column_values_to_be_unique_within_rec
     snapshot.assert_match(res)
 
 
-# FIXME(cdkini): Implement!
 def test_atomic_prescriptive_expect_table_column_count_to_be_between(
     snapshot,
     get_rendered_content,
 ):
     update_dict = {
         "expectation_type": "expect_table_column_count_to_be_between",
-        "kwargs": {},
+        "kwargs": {
+            "min_value": 5,
+            "max_value": None,
+        },
     }
     rendered_content = get_rendered_content("atomic.prescriptive.summary", update_dict)
 
