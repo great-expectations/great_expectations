@@ -82,7 +82,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_be_in_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -97,7 +97,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_contain_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -112,7 +112,7 @@ def test_atomic_diagnostic_expect_column_distinct_values_to_equal_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -127,7 +127,7 @@ def test_atomic_diagnostic_expect_column_kl_divergence_to_be_less_than(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -140,7 +140,7 @@ def test_atomic_diagnostic_expect_column_max_to_be_between(get_rendered_content)
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -153,7 +153,7 @@ def test_atomic_diagnostic_expect_column_mean_to_be_between(get_rendered_content
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -166,7 +166,7 @@ def test_atomic_diagnostic_expect_column_median_to_be_between(get_rendered_conte
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -180,7 +180,7 @@ def test_atomic_diagnostic_expect_column_min_to_be_between(get_rendered_content)
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -196,7 +196,7 @@ def test_atomic_diagnostic_expect_column_most_common_value_to_be_in_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -212,7 +212,7 @@ def test_atomic_diagnostic_expect_column_pair_cramers_phi_value_to_be_less_than(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -228,7 +228,7 @@ def test_atomic_diagnostic_expect_column_pair_values_a_to_be_greater_than_b(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -242,7 +242,7 @@ def test_atomic_diagnostic_expect_column_pair_values_to_be_equal(get_rendered_co
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_diagnostic_expect_column_pair_values_to_be_in_set(get_rendered_content):
@@ -270,7 +270,7 @@ def test_atomic_diagnostic_expect_column_proportion_of_unique_values_to_be_betwe
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -286,7 +286,7 @@ def test_atomic_diagnostic_expect_column_quantile_values_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -300,7 +300,7 @@ def test_atomic_diagnostic_expect_column_stdev_to_be_between(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -314,7 +314,7 @@ def test_atomic_diagnostic_expect_column_sum_to_be_between(get_rendered_content)
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -328,7 +328,7 @@ def test_atomic_diagnostic_expect_column_to_exist(get_rendered_content):
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -344,7 +344,7 @@ def test_atomic_diagnostic_expect_column_unique_value_count_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -360,7 +360,7 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -374,7 +374,7 @@ def test_atomic_diagnostic_expect_column_value_lengths_to_equal(get_rendered_con
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_diagnostic_expect_column_value_z_scores_to_be_less_than(
@@ -395,7 +395,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_between(get_rendered_conte
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -411,7 +411,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_dateutil_parseable(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -425,7 +425,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_decreasing(get_rendered_co
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -439,7 +439,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_set(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -455,7 +455,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_in_type_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -469,7 +469,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_increasing(get_rendered_co
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -485,7 +485,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_json_parseable(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -499,7 +499,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_null(get_rendered_content)
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -513,7 +513,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_of_type(get_rendered_conte
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -527,7 +527,7 @@ def test_atomic_diagnostic_expect_column_values_to_be_unique(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -543,7 +543,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_json_schema(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_diagnostic_expect_column_values_to_match_like_pattern(
@@ -571,7 +571,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_regex(get_rendered_cont
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -587,7 +587,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_regex_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -603,7 +603,7 @@ def test_atomic_diagnostic_expect_column_values_to_match_strftime_format(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -617,7 +617,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_be_in_set(get_rendered_co
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -631,7 +631,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_be_null(get_rendered_cont
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_diagnostic_expect_column_values_to_not_match_like_pattern(
@@ -661,7 +661,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -677,7 +677,7 @@ def test_atomic_diagnostic_expect_column_values_to_not_match_regex_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -691,7 +691,7 @@ def test_atomic_diagnostic_expect_compound_columns_to_be_unique(get_rendered_con
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_diagnostic_expect_multicolumn_sum_to_equal(get_rendered_content):
@@ -710,7 +710,7 @@ def test_atomic_diagnostic_expect_multicolumn_values_to_be_unique(get_rendered_c
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -726,7 +726,7 @@ def test_atomic_diagnostic_expect_select_column_values_to_be_unique_within_recor
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -742,7 +742,7 @@ def test_atomic_diagnostic_expect_table_column_count_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -756,7 +756,7 @@ def test_atomic_diagnostic_expect_table_column_count_to_equal(get_rendered_conte
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -772,7 +772,7 @@ def test_atomic_diagnostic_expect_table_columns_to_match_ordered_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -786,7 +786,7 @@ def test_atomic_diagnostic_expect_table_columns_to_match_set(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -800,7 +800,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_be_between(get_rendered_con
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -814,7 +814,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_equal(get_rendered_content)
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -830,7 +830,7 @@ def test_atomic_diagnostic_expect_table_row_count_to_equal_other_table(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_prescriptive_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
@@ -860,7 +860,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_be_in_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -876,7 +876,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_contain_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -892,7 +892,7 @@ def test_atomic_prescriptive_expect_column_distinct_values_to_equal_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -908,7 +908,7 @@ def test_atomic_prescriptive_expect_column_kl_divergence_to_be_less_than(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -922,7 +922,7 @@ def test_atomic_prescriptive_expect_column_max_to_be_between(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -936,7 +936,7 @@ def test_atomic_prescriptive_expect_column_mean_to_be_between(get_rendered_conte
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -950,7 +950,7 @@ def test_atomic_prescriptive_expect_column_median_to_be_between(get_rendered_con
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -964,7 +964,7 @@ def test_atomic_prescriptive_expect_column_min_to_be_between(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -980,7 +980,7 @@ def test_atomic_prescriptive_expect_column_most_common_value_to_be_in_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -996,7 +996,7 @@ def test_atomic_prescriptive_expect_column_pair_cramers_phi_value_to_be_less_tha
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1012,7 +1012,7 @@ def test_atomic_prescriptive_expect_column_pair_values_a_to_be_greater_than_b(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1028,7 +1028,7 @@ def test_atomic_prescriptive_expect_column_pair_values_to_be_equal(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_prescriptive_expect_column_pair_values_to_be_in_set(
@@ -1058,7 +1058,7 @@ def test_atomic_prescriptive_expect_column_proportion_of_unique_values_to_be_bet
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1074,7 +1074,7 @@ def test_atomic_prescriptive_expect_column_quantile_values_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1088,7 +1088,7 @@ def test_atomic_prescriptive_expect_column_stdev_to_be_between(get_rendered_cont
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1102,7 +1102,7 @@ def test_atomic_prescriptive_expect_column_sum_to_be_between(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1116,7 +1116,7 @@ def test_atomic_prescriptive_expect_column_to_exist(get_rendered_content):
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1132,7 +1132,7 @@ def test_atomic_prescriptive_expect_column_unique_value_count_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1148,7 +1148,7 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1162,7 +1162,7 @@ def test_atomic_prescriptive_expect_column_value_lengths_to_equal(get_rendered_c
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1178,7 +1178,7 @@ def test_atomic_prescriptive_expect_column_value_z_scores_to_be_less_than(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_prescriptive_expect_column_values_to_be_between(get_rendered_content):
@@ -1199,7 +1199,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_dateutil_parseable(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1215,7 +1215,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_decreasing(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1229,7 +1229,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_set(get_rendered_cont
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1245,7 +1245,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_in_type_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1261,7 +1261,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_increasing(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1277,7 +1277,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_json_parseable(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1291,7 +1291,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_null(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1305,7 +1305,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_of_type(get_rendered_con
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1319,7 +1319,7 @@ def test_atomic_prescriptive_expect_column_values_to_be_unique(get_rendered_cont
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1335,7 +1335,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_json_schema(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_prescriptive_expect_column_values_to_match_like_pattern(
@@ -1363,7 +1363,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex(get_rendered_co
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1379,7 +1379,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_regex_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1395,7 +1395,7 @@ def test_atomic_prescriptive_expect_column_values_to_match_strftime_format(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1411,7 +1411,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_in_set(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1425,7 +1425,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_be_null(get_rendered_co
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_prescriptive_expect_column_values_to_not_match_like_pattern(
@@ -1455,7 +1455,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1471,7 +1471,7 @@ def test_atomic_prescriptive_expect_column_values_to_not_match_regex_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1485,7 +1485,7 @@ def test_atomic_prescriptive_expect_compound_columns_to_be_unique(get_rendered_c
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_prescriptive_expect_multicolumn_sum_to_equal(get_rendered_content):
@@ -1506,7 +1506,7 @@ def test_atomic_prescriptive_expect_multicolumn_values_to_be_unique(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1522,7 +1522,7 @@ def test_atomic_prescriptive_expect_select_column_values_to_be_unique_within_rec
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1538,7 +1538,7 @@ def test_atomic_prescriptive_expect_table_column_count_to_be_between(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1552,7 +1552,7 @@ def test_atomic_prescriptive_expect_table_column_count_to_equal(get_rendered_con
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1568,7 +1568,7 @@ def test_atomic_prescriptive_expect_table_columns_to_match_ordered_list(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 # FIXME(cdkini): Implement!
@@ -1582,7 +1582,7 @@ def test_atomic_prescriptive_expect_table_columns_to_match_set(get_rendered_cont
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {}
+    assert rendered_content[0].to_json_dict() == {}
 
 
 def test_atomic_prescriptive_expect_table_row_count_to_be_between(get_rendered_content):
@@ -1594,7 +1594,7 @@ def test_atomic_prescriptive_expect_table_row_count_to_be_between(get_rendered_c
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {
+    assert rendered_content[0].to_json_dict() == {
         "name": "atomic.prescriptive.summary",
         "value": {
             "params": {
@@ -1620,7 +1620,7 @@ def test_atomic_prescriptive_expect_table_row_count_to_equal(get_rendered_conten
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {
+    assert rendered_content[0].to_json_dict() == {
         "name": "atomic.prescriptive.summary",
         "value": {
             "params": {
@@ -1651,7 +1651,7 @@ def test_atomic_prescriptive_expect_table_row_count_to_equal_other_table(
 
     assert len(rendered_content) == 1
     pprint(rendered_content[0])
-    assert rendered_content[0].to_json_dict(get_rendered_content) == {
+    assert rendered_content[0].to_json_dict() == {
         "name": "atomic.prescriptive.summary",
         "value": {
             "params": {
