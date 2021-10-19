@@ -65,13 +65,24 @@ def do_config_check(target_directory):
             upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
 Please consult the 0.13.x migration guide https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
-            """
+"""
             return (
                 False,
                 upgrade_message,
                 None,
             )
-        return True, None, context
+        elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
+{CURRENT_GE_CONFIG_VERSION}.
+"""
+            )
+        else:
+            return (
+                True,
+                None,
+                context,
+            )
     except (
         ge_exceptions.InvalidConfigurationYamlError,
         ge_exceptions.InvalidTopLevelConfigKeyError,
