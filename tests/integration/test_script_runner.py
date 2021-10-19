@@ -298,6 +298,26 @@ docs_test_matrix = [
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.MSSQL,
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
