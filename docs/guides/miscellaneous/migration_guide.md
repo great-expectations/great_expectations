@@ -4,78 +4,90 @@ While we are committed to keeping Great Expectations as stable as possible, some
 
 The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations. The Batch Request API included a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of `Validation Operators`. These offer a number of advantages including an improved better experience around deploying and maintaining Great Expectations in production.
 
-The V3 API will become the preferred method of interacting with GE starting with 0.14, so we highly recommend that you migrate to working with the V3 API as soon as possible. 
+The V3 API will become the preferred method of interacting with GE starting with version 0.14, so we highly recommend that you migrate to working with the V3 API as soon as possible. 
 
-## 1. Determine if you need to migrate your configuration.
+## Determine if you need to migrate your configuration.
 
-The Great Expectations CLI contains a tool that will check your configurations and tries to automatically migrate 
-
-case 1: nothing needs to be done
-
-case 2: only the version needs to be changed
-
-case 3: something more needs to be done
-
-## `upgrade`
-
-case 1: only version and manual steps
-case 2: changes to stores and manual steps
-
-
-## 3. Manually migratingthe 
-
-
-### Datasources
-
-
-### Validation Operators
-
-- if you have validation operators in your configuration : 
-- you want to confert them to Checkpoints 
-  - please 
-
-Manually migrating:   
-
-
-## Main differences
-
-**V3 (Batch Request) API vs The V2 (Batch Kwargs) API**
-
-
-Main Differences
-    - new Style DataSources
-    - modular Expectations : 
-        - is there more information that can be shared here? 
-
-
-## Do I need to upgrade?
-
-- To determine if you need to upgrade, run the following script in the CLI
-
+The Great Expectations CLI contains a tool that will check your configuration and automatically try to determine what needs to be done. To do this check, run the following command: 
 
 ```bash
-great_expectations check-config
+great_expectations --v3-api project check-config
 ```
 
-- if you need to upgrade, you will see the following message:
-1. run the cli `check-config` command (alert user if they have v2 config e.g. batch_kwargs_generators)
+If your configuration does not need to be changed at all, you will see the following message: 
 
-- if you dont, the following message will be displayed
+```bash
+Using v3 (Batch Request) API
+Checking your config files for validity...
+Your config file appears valid!
+```
+
+If your configuration needs to be upgraded, then you will see a message like this:
+
+```bash
+Using v3 (Batch Request) API
+Checking your config files for validity...
+Unfortunately, your config appears to be invalid:
+
+The config_version of your great_expectations.yml -- 2.0 -- is outdated.
+Please consult the 0.13.x migration guide ttps://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
+upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.```
+```
+
+## Run automatic upgrade script if prompted
+If your configuration needs to be 
+
+```bash
+  great_expectations --v3-api project upgrade
+```
+[ INSERT MESSAGE SAYING THINGS WILL BE UPGRADED MANUALLY]
 
 
-## If you need to upgrade to V3 API
+## 3. Manually migrate Datasources from V2 to V3
 
-Tell them to manually update AND run upgrader, and tell them what upgrader will remove (validation_operators in addition to what it already does).
+Therea 
 
-run the cli upgrade command
+```YAML
+datasources:
+  titanic__dir:
+    module_name: great_expectations.datasource
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
+      module_name: great_expectations.dataset
+    batch_kwargs_generators:
+      subdir_reader:
+        class_name: SubdirReaderBatchKwargsGenerator
+        base_directory: /Users/work/ge_Data/titanic
+```
 
-(does upgrade of items that are deterministic, shows Success after you don't have v2 config any longer - so if done before manual upgrade will show that you need to do manual upgrade)
 
-We recommend you do this before the manual part, and check the status of the upgrade
+Here is the equivalent example : 
+```YAML
+datasources:
+  my_datasource:
+    module_name: great_expectations.datasource
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
+    class_name: Datasource
+    data_connectors:
+      my_datasource_example_data_connector:
+        module_name: great_expectations.datasource.data_connector
+        default_regex:
+          group_names: data_asset_name
+          pattern: (.*)
+        base_directory: /Users/work/ge_Data/titanic
+        class_name: InferredAssetFilesystemDataConnector
+```
 
-Here is a guide to manually upgrade your datasources (batch_kwargs_generators → data_connectors, etc)
+Links to new documentation? 
+- 
 
-run check-config (recommended) or upgrade and get Success :white_check_mark: if you successfully upgraded, if not provide feedback.
+## 4. Manually migrate Validation Operators to V3 Checkpoints
+
+## 5. Manually migrate V2 Checkpoints to V3 Checkpoints
+
 
 # Upgrading from previous versions of Great Expectations
 
