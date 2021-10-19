@@ -1010,7 +1010,10 @@ set as active.
         return self._default_expectation_args
 
     @property
-    def ge_cloud_mode(self):
+    def ge_cloud_mode(self) -> bool:
+        """
+        Wrapper around ge_cloud_mode property of associated Data Context
+        """
         return self._data_context.ge_cloud_mode
 
     @property
