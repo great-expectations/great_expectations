@@ -1,8 +1,86 @@
-# Upgrading from previous versions
+# Migrating to the Batch Request (V3) API
 
-We recommend that you don't If you are starting from a previous version that. you only want to do 1 "jump" in version each time.
+While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](data_docs) and [profilers](profilers) in addition to [validation](validation).
 
-- So these are included here as reference if you are going to be upgrading from a previous version
+The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations. The Batch Request API included a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of `Validation Operators`. These offer a number of advantages including an improved better experience around deploying and maintaining Great Expectations in production.
+
+The V3 API will become the preferred method of interacting with GE starting with 0.14, so we highly recommend that you migrate to working with the V3 API as soon as possible. 
+
+## 1. Determine if you need to migrate your configuration.
+
+The Great Expectations CLI contains a tool that will check your configurations and tries to automatically migrate 
+
+case 1: nothing needs to be done
+
+case 2: only the version needs to be changed
+
+case 3: something more needs to be done
+
+## `upgrade`
+
+case 1: only version and manual steps
+case 2: changes to stores and manual steps
+
+
+## 3. Manually migratingthe 
+
+
+### Datasources
+
+
+### Validation Operators
+
+- if you have validation operators in your configuration : 
+- you want to confert them to Checkpoints 
+  - please 
+
+Manually migrating:   
+
+
+## Main differences
+
+**V3 (Batch Request) API vs The V2 (Batch Kwargs) API**
+
+
+Main Differences
+    - new Style DataSources
+    - modular Expectations : 
+        - is there more information that can be shared here? 
+
+
+## Do I need to upgrade?
+
+- To determine if you need to upgrade, run the following script in the CLI
+
+
+```bash
+great_expectations check-config
+```
+
+- if you need to upgrade, you will see the following message:
+1. run the cli `check-config` command (alert user if they have v2 config e.g. batch_kwargs_generators)
+
+- if you dont, the following message will be displayed
+
+
+## If you need to upgrade to V3 API
+
+Tell them to manually update AND run upgrader, and tell them what upgrader will remove (validation_operators in addition to what it already does).
+
+run the cli upgrade command
+
+(does upgrade of items that are deterministic, shows Success after you don't have v2 config any longer - so if done before manual upgrade will show that you need to do manual upgrade)
+
+We recommend you do this before the manual part, and check the status of the upgrade
+
+Here is a guide to manually upgrade your datasources (batch_kwargs_generators → data_connectors, etc)
+
+run check-config (recommended) or upgrade and get Success :white_check_mark: if you successfully upgraded, if not provide feedback.
+
+# Upgrading from previous versions of Great Expectations
+
+Since each major version introduces breaking changes that can have unintended interactions when combined with other changes, we recommend that you only upgrade 1 major version at a time. 
+If you are running an older version of GE (0.12 or before) we recommend you only upgrade 1 major version at a time. Notes from previous migration guides are included for reference. 
 
 ## Upgrading to 0.12.x
 
@@ -259,108 +337,116 @@ Follow these steps to upgrade your existing Great Expectations project:
 - Rename your Expectation Suites to make them compatible with the new naming. Save this Python code snippet in a file called `update_project.py`, then run it using the command: `python update_project.py PATH_TO_GE_CONFIG_DIRECTORY`:
 
 ```python
-    #!/usr/bin/env python3
-    import sys
-    import os
-    import json
-    import uuid
-    import shutil
-    def update_validation_result_name(validation_result):
-        data_asset_name = validation_result["meta"].get("data_asset_name")
-        if data_asset_name is None:
-            print("    No data_asset_name in this validation result. Unable to update it.")
-            return
-        data_asset_name_parts = data_asset_name.split("/")
-        if len(data_asset_name_parts) != 3:
-            print("    data_asset_name in this validation result does not appear to be normalized. Unable to update it.")
-            return
-        expectation_suite_suffix = validation_result["meta"].get("expectation_suite_name")
-        if expectation_suite_suffix is None:
-            print("    No expectation_suite_name found in this validation result. Unable to update it.")
-            return
-        expectation_suite_name = ".".join(
-            data_asset_name_parts +
-            [expectation_suite_suffix]
-        )
-        validation_result["meta"]["expectation_suite_name"] = expectation_suite_name
-        try:
-            del validation_result["meta"]["data_asset_name"]
-        except KeyError:
-            pass
-    def update_expectation_suite_name(expectation_suite):
-        data_asset_name = expectation_suite.get("data_asset_name")
-        if data_asset_name is None:
-            print("    No data_asset_name in this expectation suite. Unable to update it.")
-            return
-        data_asset_name_parts = data_asset_name.split("/")
-        if len(data_asset_name_parts) != 3:
-            print("    data_asset_name in this expectation suite does not appear to be normalized. Unable to update it.")
-            return
-        expectation_suite_suffix = expectation_suite.get("expectation_suite_name")
-        if expectation_suite_suffix is None:
-            print("    No expectation_suite_name found in this expectation suite. Unable to update it.")
-            return
-        expectation_suite_name = ".".join(
-            data_asset_name_parts +
-            [expectation_suite_suffix]
-        )
-        expectation_suite["expectation_suite_name"] = expectation_suite_name
-        try:
-            del expectation_suite["data_asset_name"]
-        except KeyError:
-            pass
-    def update_context_dir(context_root_dir):
-        # Update expectation suite names in expectation suites
-        expectations_dir = os.path.join(context_root_dir, "expectations")
-        for subdir, dirs, files in os.walk(expectations_dir):
-            for file in files:
-                if file.endswith(".json"):
-                    print("Migrating suite located at: " + str(os.path.join(subdir, file)))
+    # !/usr/bin/env python3
+import sys
+import os
+import json
+import uuid
+import shutil
+
+
+def update_validation_result_name(validation_result):
+    data_asset_name = validation_result["meta"].get("data_asset_name")
+    if data_asset_name is None:
+        print("    No data_asset_name in this validation result. Unable to update it.")
+        return
+    data_asset_name_parts = data_asset_name.split("/")
+    if len(data_asset_name_parts) != 3:
+        print("    data_asset_name in this validation result does not appear to be normalized. Unable to update it.")
+        return
+    expectation_suite_suffix = validation_result["meta"].get("expectation_suite_name")
+    if expectation_suite_suffix is None:
+        print("    No expectation_suite_name found in this validation result. Unable to update it.")
+        return
+    expectation_suite_name = ".".join(
+        data_asset_name_parts +
+        [expectation_suite_suffix]
+    )
+    validation_result["meta"]["expectation_suite_name"] = expectation_suite_name
+    try:
+        del validation_result["meta"]["data_asset_name"]
+    except KeyError:
+        pass
+
+
+def update_expectation_suite_name(expectation_suite):
+    data_asset_name = expectation_suite.get("data_asset_name")
+    if data_asset_name is None:
+        print("    No data_asset_name in this expectation suite. Unable to update it.")
+        return
+    data_asset_name_parts = data_asset_name.split("/")
+    if len(data_asset_name_parts) != 3:
+        print("    data_asset_name in this expectation suite does not appear to be normalized. Unable to update it.")
+        return
+    expectation_suite_suffix = expectation_suite.get("expectation_suite_name")
+    if expectation_suite_suffix is None:
+        print("    No expectation_suite_name found in this expectation suite. Unable to update it.")
+        return
+    expectation_suite_name = ".".join(
+        data_asset_name_parts +
+        [expectation_suite_suffix]
+    )
+    expectation_suite["expectation_suite_name"] = expectation_suite_name
+    try:
+        del expectation_suite["data_asset_name"]
+    except KeyError:
+        pass
+
+
+def update_context_dir(context_root_dir):
+    # Update expectation suite names in expectation suites
+    expectations_dir = os.path.join(context_root_dir, "../../reference/expectations")
+    for subdir, dirs, files in os.walk(expectations_dir):
+        for file in files:
+            if file.endswith(".json"):
+                print("Migrating suite located at: " + str(os.path.join(subdir, file)))
+                with open(os.path.join(subdir, file), 'r') as suite_fp:
+                    suite = json.load(suite_fp)
+                update_expectation_suite_name(suite)
+                with open(os.path.join(subdir, file), 'w') as suite_fp:
+                    json.dump(suite, suite_fp)
+    # Update expectation suite names in validation results
+    validations_dir = os.path.join(context_root_dir, "../../../uncommitted", "validations")
+    for subdir, dirs, files in os.walk(validations_dir):
+        for file in files:
+            if file.endswith(".json"):
+                print("Migrating validation_result located at: " + str(os.path.join(subdir, file)))
+                try:
                     with open(os.path.join(subdir, file), 'r') as suite_fp:
                         suite = json.load(suite_fp)
-                    update_expectation_suite_name(suite)
+                    update_validation_result_name(suite)
                     with open(os.path.join(subdir, file), 'w') as suite_fp:
                         json.dump(suite, suite_fp)
-        # Update expectation suite names in validation results
-        validations_dir = os.path.join(context_root_dir, "uncommitted", "validations")
-        for subdir, dirs, files in os.walk(validations_dir):
-            for file in files:
-                if file.endswith(".json"):
-                    print("Migrating validation_result located at: " + str(os.path.join(subdir, file)))
                     try:
-                        with open(os.path.join(subdir, file), 'r') as suite_fp:
-                            suite = json.load(suite_fp)
-                        update_validation_result_name(suite)
-                        with open(os.path.join(subdir, file), 'w') as suite_fp:
-                            json.dump(suite, suite_fp)
-                        try:
-                            run_id = suite["meta"].get("run_id")
-                            es_name = suite["meta"].get("expectation_suite_name").split(".")
-                            filename = "converted__" + str(uuid.uuid1()) + ".json"
-                            os.makedirs(os.path.join(
-                                context_root_dir, "uncommitted", "validations",
-                                *es_name, run_id
-                            ), exist_ok=True)
-                            shutil.move(os.path.join(subdir, file),
-                                        os.path.join(
-                                            context_root_dir, "uncommitted", "validations",
-                                            *es_name, run_id, filename
-                                        )
-                            )
-                        except OSError as e:
-                            print("    Unable to move validation result; file has been updated to new "
-                                  "format but not moved to new store location.")
-                        except KeyError:
-                            pass  # error will have been generated above
-                    except json.decoder.JSONDecodeError:
-                        print("    Unable to process file: error reading JSON.")
-    if __name__ == "__main__":
-        if len(sys.argv) < 2:
-            print("Please provide a path to update.")
-            sys.exit(-1)
-        path = str(os.path.abspath(sys.argv[1]))
-        print("About to update context dir for path: " + path)
-        update_context_dir(path)
+                        run_id = suite["meta"].get("run_id")
+                        es_name = suite["meta"].get("expectation_suite_name").split(".")
+                        filename = "converted__" + str(uuid.uuid1()) + ".json"
+                        os.makedirs(os.path.join(
+                            context_root_dir, "../../../uncommitted", "validations",
+                            *es_name, run_id
+                        ), exist_ok=True)
+                        shutil.move(os.path.join(subdir, file),
+                                    os.path.join(
+                                        context_root_dir, "../../../uncommitted", "validations",
+                                        *es_name, run_id, filename
+                                    )
+                                    )
+                    except OSError as e:
+                        print("    Unable to move validation result; file has been updated to new "
+                              "format but not moved to new store location.")
+                    except KeyError:
+                        pass  # error will have been generated above
+                except json.decoder.JSONDecodeError:
+                    print("    Unable to process file: error reading JSON.")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Please provide a path to update.")
+        sys.exit(-1)
+    path = str(os.path.abspath(sys.argv[1]))
+    print("About to update context dir for path: " + path)
+    update_context_dir(path)
 ```
 
 - Rebuild Data Docs:

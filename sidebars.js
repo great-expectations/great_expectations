@@ -263,7 +263,8 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
+            { type: 'doc', id: 'guides/miscellaneous/how_to_template' },
+            { type: 'doc', id: 'guides/miscellaneous/migration_guide'}
           ]
         }
       ]
@@ -330,15 +331,6 @@ module.exports = {
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
             { type: 'doc', id: 'reference/validation' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Migration Guide',
-          items: [
-            { type: 'doc', id: 'reference/migration_guide' },
-            { type: 'doc', id: 'reference/migration_guide_previous_versions' }
-
           ]
         },
         {
