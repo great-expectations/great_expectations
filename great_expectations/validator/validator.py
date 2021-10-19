@@ -1206,7 +1206,9 @@ set as active.
         if filepath is None and self._data_context is not None:
             self._data_context.save_expectation_suite(expectation_suite)
             if self.ge_cloud_mode:
-                updated_suite = self._data_context.get_expectation_suite(ge_cloud_id=str(expectation_suite.ge_cloud_id))
+                updated_suite = self._data_context.get_expectation_suite(
+                    ge_cloud_id=str(expectation_suite.ge_cloud_id)
+                )
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
             with open(filepath, "w") as outfile:
