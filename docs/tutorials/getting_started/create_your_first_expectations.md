@@ -78,4 +78,4 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the “Validate your data” section.*
 
-**Let’s execute all the cells** and wait for Great Expectations to open a browser window with Data Docs.**Go to the next step in the tutorial** for an explanation of what you see in Data Docs!
+**Let’s execute all the cells** and wait for Great Expectations to open a browser window with Data Docs. **Go to the next step in the tutorial** for an explanation of what you see in Data Docs!
