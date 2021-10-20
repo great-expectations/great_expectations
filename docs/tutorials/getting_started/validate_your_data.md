@@ -16,7 +16,7 @@ great_expectations --v3-api checkpoint new my_new_checkpoint
 
 This will open a **Jupyter Notebook** that will allow you to complete the configuration of your Checkpoint.
 
-The Jupyter Notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows to configure a Checkpoint to validate the February data:
+The Jupyter Notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit the `data_asset_name` to reference the data we want to validate (the February data), as follows:
 
 
 ```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L117-L130
@@ -34,7 +34,7 @@ You can then execute all cells in the notebook in order to store the Checkpoint 
 
 ### How to run validation and inspect your Validation Results
 
-This is basically just a recap of the previous section on Data Docs! In order to build Data Docs and get your results in a nice, human-readable format, you can simply uncomment and run the last cell in the notebook. This will open Data Docs, where you can click on the latest validation run to see the Validation Results page for this Checkpoint run.
+In order to build Data Docs and get your results in a nice, human-readable format, you can simply uncomment and run the last cell in the notebook. This will open Data Docs, where you can click on the latest validation run to see the Validation Results page for this Checkpoint run.
 
 ![data_docs_failed_validation1](../../../docs/images/data_docs_taxi_failed_validation01.png)
 
