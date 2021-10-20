@@ -177,112 +177,128 @@ As you might expect, migrating configurations that contain connections to the cl
 
 ### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
-As of Great Expectations version 0.13.7, we have updated and improved the Checkpoints feature. You can continue to use your existing legacy Checkpoint workflows if you’re working with concepts from the Batch Kwargs (v2) API. If you’re using concepts from the BatchRequest (v3) API, please refer to the new Checkpoints guides.
-
-
-```yaml
-name: test_v2_checkpoint
-config_version:
-module_name: great_expectations.checkpoint
-class_name: LegacyCheckpoint
-validation_operator_name:
-batches:
-  - batch_kwargs:
-      path: /ge_Data/Titanic.csv
-      datasource: dir
-      data_asset_name: Titanic
-    expectation_suite_names:
-      - Titanic.warning
-```
-
-
-
-### Manually Migrate Validation Operators to V3 Checkpoints
-
-
-
-In the V2 API, Validation Operators contained a list of actions to be performed at Validation time, and these Operators were referenced by Checkpoints. In the V3 API, Validation Operators were subsumed by Checkpoints, as actions under the `action_list` list field.
+As of Great Expectations version 0.13.7, we introduced improved the Checkpoints feature. One feature is that the use of Validation Operators, which were reference in the `great_expectations.yml` file by the checkpoint, have been combined into the checkpoint configuration itself.  As a result, the mingration to using this new.
 
 <Tabs
-  groupId="v2-v3-datasource"
-  defaultValue='v2-validation-operator'
+  groupId="v2-v3-checkpoint"
+  defaultValue='v2-checkpoint'
   values={[
-  {label: 'V2-Style Validation Operator', value:'v2-validation-operator'},
+  {label: 'V2-Style Checkpoint', value:'v2-checkpoint'},
   {label: 'V3-Style Checkpoint', value:'v3-checkpoint'},
   ]}>
 
-<TabItem value="v2-validation-operator">
+<TabItem value="v2-checkpoint">
 
-Here is an example of a Validation Operator
+Here is an example of v2-checkpoint that refers to a validation operator named `action_list_operator`.
+
 ```yaml
-validation_operators:
-  action_list_operator:
-    class_name: ActionListValidationOperator
-    action_list:
-    - name: store_validation_result
-      action:
-        class_name: StoreValidationResultAction
-    - name: store_evaluation_params
-      action:
-        class_name: StoreEvaluationParametersAction
-    - name: update_data_docs
-      action:
-        class_name: UpdateDataDocsAction
-```
-
-And how the V2 checkpoint would have originally referenced it:
-```yaml
-
+# in the test_v2_checkpoint.yml file
+name: test_v2_checkpoint
+module_name: great_expectations.checkpoint
+class_name: LegacyCheckpoint # is this going to be Legacy checkpoint always?
 validation_operator_name: action_list_operator
-# Batches are a list of batch_kwargs paired with a list of one or more suite
-# names. A checkpoint can have one or more batches. This makes deploying
-# Great Expectations in your pipelines easy!
 batches:
   - batch_kwargs:
-      table: imdb_100k_main
-      schema: testdb
-#      data_asset_name: imdb_100k_main
-      datasource: demo_mysql_db
-    expectation_suite_names: # one or more suites may validate against a single batch
-      - Titanic.warnings
+      path: /Users/work/Development/ge_data/titanic/Titanic.csv
+      datasource: my_datasource
+      data_asset_name: Titanic
+    expectation_suite_names:
+      - Titanic.profiled
 ```
 
-</TabItem>
-<TabItem value="v3-checkpoint">
-
-Here is an example of a V3 checkpoint that includes the same Actions under `action_list`
+The `action_list_operator` would be contained in the following section of the `great_expectations.yml` file.
 
 ```yaml
-name: my_checkpoint
-config_version: 1
+
+# Validation Operators are customizable workflows that bundle the validation of
+# one or more expectation suites and subsequent actions. The example below
+# stores validations and send a slack notification. To read more about
+# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
+validation_operators:
+  action_list_operator:
+    # To learn how to configure sending Slack notifications during evaluation
+    # (and other customizations), read: https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/validation_operators/index.html#great_expectations.validation_operators.ActionListValidationOperator
+    class_name: ActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+```
+
+Now click the V3-style Checkpoint to see how the configuration should change in V3 Checkpoints.
+
+</TabItem>
+
+<TabItem value="v3-checkpoint">
+Here is the equivalent configuration in V3-checkpoints. Notice that the validation actions have been migrated into the `action_list` list field in the Checkpoint configuration.
+
+```yaml
+# in the test_v3_checkpoint.yml file
+name: test_v3_checkpoint
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
 class_name: Checkpoint
-run_name_template: "%Y-%m-foo-bar-template-$VAR"
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name:
+batch_request:
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
-      data_asset_name: users
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: Titanic.csv
       data_connector_query:
         index: -1
-    expectation_suite_name: users.warning
-    action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20     
+    expectation_suite_name: Titanic.profiled
+profilers: []
+ge_cloud_id:
+expectation_suite_ge_cloud_id:
+
 ```
+
+Finally, you can check if your migration has worked by running your new checkpoint
+
+```bash
+great_expectations --v3-api checkpoint run test_v3_checkpoint
+```
+
+If everything is successful, then you should see output similar to below.:
+
+```bash
+Using v3 (Batch Request) API
+Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 604.83it/s]
+Validation succeeded!
+
+Suite Name                                   Status     Expectations met
+- Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
+```
+
+To see examples of other configurations for V3 checkpoints, please refer to our documentation here:
+
+- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
+- [How to create a new Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint)
+- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+
+
 </TabItem>
 </Tabs>
 
