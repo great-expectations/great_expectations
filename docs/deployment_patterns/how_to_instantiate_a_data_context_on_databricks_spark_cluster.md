@@ -114,7 +114,7 @@ Additional notes
     ```python
     from great_expectations.data_context import BaseDataContext
     from great_expectations.data_context.types.base import DatasourceConfig
-    from great_expectations.core.batch import BatchRequest
+    from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
     # Load your data into a dataframe
 
@@ -163,8 +163,8 @@ Additional notes
         datasource_name="insert_your_datasource_name_here",
         data_connector_name="insert_your_runtime_data_connector_name_here",
         data_asset_name="insert_your_data_asset_name_here",
-        runtime_parameters: {
-          batch_data=df,
+        runtime_parameters={
+          "batch_data": df,
         },
         data_connector_query={
             "batch_filter_parameters": {
