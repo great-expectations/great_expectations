@@ -5,6 +5,24 @@ from great_expectations.core.batch import RuntimeBatchRequest
 
 context = ge.get_context()
 
+# YAML
+datasource_yaml = f"""
+name: taxi_datasource
+class_name: Datasource
+module_name: great_expectations.datasource
+execution_engine:
+  module_name: great_expectations.execution_engine
+  class_name: PandasExecutionEngine
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+"""
+
+context.test_yaml_config(datasource_yaml)
+
+# Python
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",

@@ -5,6 +5,32 @@ from great_expectations.core.batch import BatchRequest
 
 context = ge.get_context()
 
+# YAML
+datasource_yaml = f"""
+name: taxi_datasource
+class_name: Datasource
+module_name: great_expectations.datasource
+execution_engine:
+  module_name: great_expectations.execution_engine
+  class_name: PandasExecutionEngine
+data_connectors:
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetFilesystemDataConnector
+    base_directory: my_directory/
+    assets:
+      taxi:
+        pattern: (.*)\.csv
+        group_names:
+          - month
+"""
+
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your path directly in the yaml above.
+datasource_yaml = datasource_yaml.replace("my_directory/", "../data/single_directory_one_data_asset/")
+
+context.test_yaml_config(datasource_yaml)
+
+# Python
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -28,7 +54,7 @@ datasource_config = {
 }
 
 # Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your path directly in the yaml above.
+# In normal usage you'd set your path directly in the code above.
 datasource_config["data_connectors"]["default_configured_data_connector_name"][
     "base_directory"
 ] = "../data/single_directory_one_data_asset/"
