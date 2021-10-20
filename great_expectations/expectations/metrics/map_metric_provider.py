@@ -2082,8 +2082,10 @@ def _sqlalchemy_column_pair_map_condition_values(
             )
 
     query = sa.select(
-        sa.column(column_A_name).label("unexpected_values_A"),
-        sa.column(column_B_name).label("unexpected_values_B"),
+        [
+            sa.column(column_A_name).label("unexpected_values_A"),
+            sa.column(column_B_name).label("unexpected_values_B"),
+        ]
     ).where(boolean_mapped_unexpected_values)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = query.select_from(selectable)

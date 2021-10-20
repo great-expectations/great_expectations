@@ -1,4 +1,6 @@
 from typing import Any, Dict, List, Set, Tuple, Union
+from unittest import mock
+from uuid import UUID
 
 import pandas as pd
 import pytest
@@ -622,6 +624,92 @@ def multi_batch_taxi_validator(
     )
 
     return validator_multi_batch
+
+
+@pytest.fixture()
+def multi_batch_taxi_validator_ge_cloud_mode(
+    yellow_trip_pandas_data_context,
+) -> Validator:
+    context: DataContext = yellow_trip_pandas_data_context
+    context._ge_cloud_mode = True
+
+    suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name="validating_taxi_data",
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_between",
+                kwargs={
+                    "column": "passenger_count",
+                    "min_value": 0,
+                    "max_value": 99,
+                    "result_format": "BASIC",
+                },
+                meta={"notes": "This is an expectation."},
+                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+            )
+        ],
+        meta={"notes": "This is an expectation suite."},
+    )
+
+    multi_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_pandas",
+        data_connector_name="monthly",
+        data_asset_name="my_reports",
+        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
+    )
+
+    validator_multi_batch: Validator = context.get_validator(
+        batch_request=multi_batch_request, expectation_suite=suite
+    )
+
+    return validator_multi_batch
+
+
+@mock.patch(
+    "great_expectations.data_context.data_context.BaseDataContext.save_expectation_suite"
+)
+@mock.patch(
+    "great_expectations.data_context.data_context.BaseDataContext.get_expectation_suite"
+)
+def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
+    mock_context_get_suite,
+    mock_context_save_suite,
+    multi_batch_taxi_validator_ge_cloud_mode,
+):
+    """
+    This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
+    The multi_batch_taxi_validator_ge_cloud_mode fixture has a suite with a single expectation.
+    :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GE Cloud
+    :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GE Cloud
+    """
+    mock_suite = ExpectationSuite(
+        expectation_suite_name="validating_taxi_data",
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_between",
+                kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
+                meta={"notes": "This is an expectation."},
+                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_between",
+                kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
+                meta={"notes": "This is an expectation."},
+                ge_cloud_id=UUID("3e8eee33-b425-4b36-a831-6e9dd31ad5af"),
+            ),
+        ],
+        meta={"notes": "This is an expectation suite."},
+    )
+    mock_context_save_suite.return_value = True
+    mock_context_get_suite.return_value = mock_suite
+    multi_batch_taxi_validator_ge_cloud_mode.expect_column_values_to_be_between(
+        column="trip_distance", min_value=11, max_value=22
+    )
+    multi_batch_taxi_validator_ge_cloud_mode.save_expectation_suite()
+    assert (
+        multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
+        == mock_suite.to_json_dict()
+    )
 
 
 def test_validator_can_instantiate_with_a_multi_batch_request(
