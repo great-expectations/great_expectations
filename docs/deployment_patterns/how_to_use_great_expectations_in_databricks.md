@@ -11,17 +11,25 @@ There are several ways to set up Databricks, this guide centers around an AWS de
 
 We will cover a simple configuration to get you up and running quickly, and link to our other guides for more customized configurations.
 
+This guide parallels notebook workflows from our CLI, you may wish to prototype your setup with a local sample batch before moving to databricks. You can also use examples and code from the notebooks that the CLI generates, and indeed much of the examples that follow parallel those notebooks closely.
+
 ### 1. Install Great Expectations
 
-There are two ways to install Great Expectations:
-- [Cluster scoped library](https://docs.databricks.com/libraries/cluster-libraries.html)
-- [Notebook-scoped library](https://docs.databricks.com/libraries/notebooks-python-libraries.html)
-
-Here we will install Great Expectations as a notebook-scoped library by running the following command in your notebook:
+Install Great Expectations as a notebook-scoped library by running the following command in your notebook:
 ```bash
   %pip install great-expectations
   ```
 
+
+# TODO: Fix the links here:
+<details>
+  <summary>What is a notebook-scoped library?</summary>
+There are two ways to install Great Expectations, see the below links to the Databricks documentation on :
+- [Cluster scoped library](https://docs.databricks.com/libraries/cluster-libraries.html)
+- [Notebook-scoped library](https://docs.databricks.com/libraries/notebooks-python-libraries.html)
+</details>
+
+# TODO: Add all imports needed, pull this from the example code
 After that we will take care of some imports that will be used later:
 ```python
 from ruamel import yaml
@@ -30,7 +38,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 
 ### 2. Set up Great Expectations
 
-In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and [Data Docs](../reference/data_docs.md) store. 
+In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and [Data Docs](../reference/data_docs.md) store. This is a simple way to get up and running within the Databricks environment, for other options for storing data see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
 
 <details>
   <summary>What is DBFS?</summary>
@@ -55,7 +63,26 @@ context = BaseDataContext(project_config=data_context_config)
 
 ### 3. Load your data
 
-We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Run the following code in your notebook to load a month of data:
+<Tabs
+  groupId="file-or-dataframe"
+  defaultValue='file'
+  values={[
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
+  ]}>
+  <TabItem value="file">
+
+# TODO: Insert file instructions here
+
+</TabItem>
+<TabItem value="dataframe">
+
+# TODO: Insert dataframe instructions here
+
+</TabItem>
+</Tabs>
+
+We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Run the following code in your notebook to load a month of data as a dataframe:
 
 ```python
 df = spark.read.format("csv")\
@@ -65,6 +92,25 @@ df = spark.read.format("csv")\
 ```
 
 ### 4. Connect to your data
+
+<Tabs
+  groupId="file-or-dataframe"
+  defaultValue='file'
+  values={[
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
+  ]}>
+  <TabItem value="file">
+
+# TODO: Insert file instructions here
+
+</TabItem>
+<TabItem value="dataframe">
+
+# TODO: Insert dataframe instructions here
+
+</TabItem>
+</Tabs>
 
 We will add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can validate our loaded dataframe, but instead you may use any of the other types of Data Connectors available to you (check out our documentation on "Connecting to your data").
 
@@ -91,6 +137,17 @@ context.test_yaml_config(yaml.dump(my_spark_datasource_config))
 
 context.add_datasource(**my_spark_datasource_config)
 ```
+
+my_inferred_asset_filesystem_data_connector = {
+    "module_name": "great_expectations.datasource.data_connector",
+    "class_name": "InferredAssetFilesystemDataConnector",
+    "base_directory": "/dbfs//databricks-datasets/nyctaxi/tripdata/yellow/",
+    "default_regex": {
+        "group_names": ["year", "month"],
+        "pattern": "yellow_tripdata_(\\d{{4}})-(\\d{{2}})\\.csv\\.gz"
+    },
+}
+
 
 Next we will create a `RuntimeBatchRequest` to reference our loaded dataframe and add metadata:
 # TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
@@ -140,6 +197,25 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 ```
 
 ### 5. Validate your data
+
+<Tabs
+  groupId="file-or-dataframe"
+  defaultValue='file'
+  values={[
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
+  ]}>
+  <TabItem value="file">
+
+# TODO: Insert file instructions here
+
+</TabItem>
+<TabItem value="dataframe">
+
+# TODO: Insert dataframe instructions here
+
+</TabItem>
+</Tabs>
 
 Here we will create and store a checkpoint with no defined validations, then pass in our dataframe at runtime.
 
@@ -199,3 +275,5 @@ Run the following databricks CLI command to download your data docs (replacing t
 ```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 ```
+
+# TODO: Add link to file with example code
