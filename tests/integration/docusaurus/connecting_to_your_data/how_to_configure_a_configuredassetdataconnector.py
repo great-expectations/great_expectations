@@ -18,7 +18,7 @@ data_connectors:
     class_name: ConfiguredAssetFilesystemDataConnector
     base_directory: my_directory/
     assets:
-      taxi:
+      yellow_tripdata:
         pattern: (.*)\.csv
         group_names:
           - month
@@ -46,7 +46,7 @@ datasource_config = {
             "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "my_directory/",
             "assets": {
-                "taxi": {
+                "yellow_tripdata": {
                     "pattern": "yellow_tripdata_(.*)\.csv",
                     "group_names": ["month"],
                 }
@@ -69,11 +69,10 @@ assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 
-# Here is a BatchRequest using a path to a single CSV file
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_configured_data_connector_name",
-    data_asset_name="taxi",
+    data_asset_name="yellow_tripdata",
 )
 
 context.create_expectation_suite(
@@ -90,7 +89,7 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-assert "taxi" in set(
+assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
         "default_configured_data_connector_name"
     ]

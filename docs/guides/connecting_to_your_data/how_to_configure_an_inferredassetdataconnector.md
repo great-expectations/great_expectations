@@ -130,13 +130,13 @@ The simplest approach would be to consider each file to be its own DataAsset. In
   ]}>
 <TabItem value="yaml">
 
-```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L9-L24
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L9-L24
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L33-L51
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L33-L51
 ```
 
 </TabItem>
@@ -151,25 +151,28 @@ We could treat `yellow_tripdata_*.csv` files as batches within the `yellow_tripd
 
 **Note: ** We have chosen to be more specific in the capture groups for the `year` and `month` by specifying the integer value (using `\d`) and the number of digits, but a simpler capture group like `(.*)` would also work.
 
-```yaml
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  my_filesystem_data_connector:
-    class_name: InferredAssetFilesystemDataConnector
-    datasource_name: my_data_source
-    base_directory: my_directory/
-    default_regex:
-      group_names:
-        - data_asset_name
-        - year
-        - month
-        - day
-      pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L77-L94
 ```
 
-Running `test_yaml_config()` would result in 1 DataAsset `alpha` with 3 associated data_references: `alpha-2020-01-01.csv`, `alpha-2020-01-02.csv` and `alpha-2020-01-03.csv`, seen also in Example 1 below.
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L105-L123
+```
+
+</TabItem>
+</Tabs>
+
+Running `test_yaml_config()` would result in 1 DataAsset `yellow_tripdata` with 3 associated data_references: `yellow_tripdata_2019-01.csv`, `yellow_tripdata_2019-02.csv` and `yellow_tripdata_2019-03.csv`, seen also in Example 1 below.
 
 A corresponding configuration for `InferredAssetS3DataConnector` would look similar but would require `bucket` and `prefix` values instead of `base_directory`.
 

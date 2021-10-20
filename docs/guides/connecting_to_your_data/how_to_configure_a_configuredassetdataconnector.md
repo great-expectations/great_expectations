@@ -127,13 +127,13 @@ In that case, the configuration would look like the following:
   ]}>
 <TabItem value="yaml">
 
-```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L9-L25
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L9-L25
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L34-L54
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L34-L54
 ```
 
 </TabItem>
@@ -143,18 +143,12 @@ Notice that we have specified a pattern that captures the year-month combination
 
 The configuration would also work with a regex capturing the entire filename (ie `pattern: (.*)\\.csv`).  However, capturing the month on its own allows for `batch_identifiers` to be used to retrieve a specific Batch of the `DataAsset`.
 
-Later on we could retrieve the data in `yellow_tripdata_2019-02.csv` of `yellow_tripdata` as its own batch using `context.get_batch()` by specifying `{"month": "2019-02"}` as the `batch_identifier`.
+Later on we could retrieve the data in `yellow_tripdata_2019-02.csv` of `yellow_tripdata` as its own batch using `context.get_validator()` by specifying `{"month": "2019-02"}` as the `batch_identifier`.
 
-```python
-my_batch = context.get_batch(
-    datasource_name="my_data_source",
-    data_connector_name="my_filesystem_data_connector",
-    data_asset_name="alpha",
-    batch_identifiers={"index": "2"}
-)
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L72-L87
 ```
 
-This ability to access specific Batches using `batch_identifiers` is very useful when validating DataAssets that span multiple files.
+This ability to access specific Batches using `batch_identifiers` is very useful when validating `DataAsset`s that span multiple files.
 For more information on `batches` and `batch_identifiers`, please refer to the [Core Concepts document](../../reference/dividing_data_assets_into_batches.md).
 
 A corresponding configuration for `ConfiguredAssetS3DataConnector` would look similar but would require `bucket` and `prefix` values instead of `base_directory`.
