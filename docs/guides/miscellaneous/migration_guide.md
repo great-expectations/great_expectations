@@ -138,7 +138,7 @@ A [Data Connector](../../reference/datasources) facilitates access to an externa
 
 ```YAML
 datasources:
-  my_v2_datasource:
+  my_datasource:
     module_name: great_expectations.datasource
     class_name: PandasDatasource
     data_asset_type:
@@ -147,14 +147,14 @@ datasources:
     batch_kwargs_generators:
       subdir_reader:
         class_name: SubdirReaderBatchKwargsGenerator
-        base_directory: /ge_Data/titanic
+        base_directory: ../../
 ```
 </TabItem>
 <TabItem value="v3">
 
 ```YAML
 datasources:
-  my_v3_datasource:
+  my_datasource:
     module_name: great_expectations.datasource
     execution_engine:
       module_name: great_expectations.execution_engine
@@ -166,7 +166,7 @@ datasources:
         default_regex:
           group_names: data_asset_name
           pattern: (.*)
-        base_directory: /ge_Data/titanic
+        base_directory: ../../
         class_name: InferredAssetFilesystemDataConnector
 ```
 
@@ -195,13 +195,13 @@ Here is an example of v2-checkpoint that refers to a validation operator named `
 # in the test_v2_checkpoint.yml file
 name: test_v2_checkpoint
 module_name: great_expectations.checkpoint
-class_name: LegacyCheckpoint # is this going to be Legacy checkpoint always?
+class_name: LegacyCheckpoint
 validation_operator_name: action_list_operator
 batches:
   - batch_kwargs:
-      path: /Users/work/Development/ge_data/titanic/Titanic.csv
+      path: ../Titanic.csv
       datasource: my_datasource
-      data_asset_name: Titanic
+      data_asset_name: Titanic.csv
     expectation_suite_names:
       - Titanic.profiled
 ```
