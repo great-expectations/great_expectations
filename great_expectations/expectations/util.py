@@ -609,8 +609,9 @@ def add_value_set_params(params: dict, params_with_json_schema: dict) -> dict:
     """
     Utility function used in _atomic_prescriptive_template() to add value_set values to params_with_json_schema (dict).
     """
-    if params["value_set"] is not None and len(params["value_set"]) > 0:
-        for i, v in enumerate(params["value_set"]):
+    value_set = params.get("value_set")
+    if value_set is not None and len(value_set) > 0:
+        for i, v in enumerate(value_set):
             params_with_json_schema["v__" + str(i)] = {
                 "schema": {"type": "string"},
                 "value": v,
