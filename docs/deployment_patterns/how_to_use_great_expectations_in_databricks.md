@@ -4,6 +4,7 @@ title: How to Use Great Expectations in Databricks
 import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 
 Great Expectations works well with many types of Databricks workflows. This guide will help you run Great Expectations in [Databricks](https://databricks.com/).
 
@@ -60,7 +61,7 @@ data_context_config = DataContextConfig(
 context = BaseDataContext(project_config=data_context_config)
 ```
 
-### 3. Load your data
+### 3. Prepare your data
 
 <Tabs
   groupId="file-or-dataframe"
@@ -71,13 +72,18 @@ context = BaseDataContext(project_config=data_context_config)
   ]}>
   <TabItem value="file">
 
-Let's copy some example csv data to our DBFS folder for easier access:
+We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Let's copy some example csv data to our DBFS folder for easier access using [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html):
 
 ```python
 dbutils.fs.cp(
-    "/databricks-datasets/online_retail/data-001/data.csv", 
-    "/example_data/online_retail/data-001/data.csv"
+  "/databricks-datasets/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz",
+  "/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz"
 )
+```
+
+And then unzip it using the %sh [magic command](https://docs.databricks.com/notebooks/notebooks-use.html#language-magic):
+```bash
+%sh gzip -d /dbfs/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz
 ```
 
 </TabItem>
@@ -108,12 +114,11 @@ df = spark.read.format("csv")\
   ]}>
   <TabItem value="file">
 
+Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `InferredAssetFilesystemDataConnector` so that we can access and validate our file as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+
 #### TODO: retrieve this code from databricks_deployment_patterns.py
 
 #### TODO: Change this to yaml
-
-</TabItem>
-<TabItem value="dataframe">
 
 ```python
 my_spark_datasource_config = {
@@ -121,10 +126,10 @@ my_spark_datasource_config = {
     "class_name": "Datasource",
     "execution_engine": {"class_name": "SparkDFExecutionEngine"},
     "data_connectors": {
-        "insert_your_inferred_asset_filesystem_data_connector_name_here": {
+        "insert_your_data_connector_name_here": {
             "module_name": "great_expectations.datasource.data_connector",
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "/dbfs/example_data/online_retail/data-001/",
+            "base_directory": "/dbfs/example_data/nyctaxi/tripdata/yellow/",
             "default_regex": {
                 "pattern": r"(.*)",
                 "group_names": ["data_asset_name"]
@@ -137,7 +142,22 @@ context.test_yaml_config(yaml.dump(my_spark_datasource_config))
 
 context.add_datasource(**my_spark_datasource_config)
 ```
-We will add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can validate our loaded dataframe, but instead you may use any of the other types of Data Connectors available to you (check out our documentation on "Connecting to your data").
+
+# TODO: Add batch request
+Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating expectations:
+```python
+batch_request = BatchRequest(
+    datasource_name="insert_your_datasource_name_here",
+    data_connector_name="insert_your_data_connector_name_here",
+    data_asset_name="yellow_tripdata_2019-01.csv",
+)
+```
+
+
+</TabItem>
+<TabItem value="dataframe">
+
+Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
   
 #### TODO: retrieve this code from databricks_deployment_patterns.py
 #### TODO: Should this be yaml instead of python? Probably for compactness.
@@ -147,7 +167,7 @@ my_spark_datasource_config = {
     "class_name": "Datasource",
     "execution_engine": {"class_name": "SparkDFExecutionEngine"},
     "data_connectors": {
-        "insert_your_runtime_data_connector_name_here": {
+        "insert_your_data_connector_name_here": {
             "module_name": "great_expectations.datasource.data_connector",
             "class_name": "RuntimeDataConnector",
             "batch_identifiers": [
@@ -164,11 +184,11 @@ context.add_datasource(**my_spark_datasource_config)
 ```
 
 Next we will create a `RuntimeBatchRequest` to reference our loaded dataframe and add metadata:
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substitute the data_asset_name
 ```python
-batch_request_from_dataframe = RuntimeBatchRequest(
+batch_request = RuntimeBatchRequest(
     datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_runtime_data_connector_name_here",
+    data_connector_name="insert_your_data_connector_name_here",
     data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
     batch_identifiers={
         "some_key_maybe_pipeline_stage": "prod",
@@ -182,27 +202,28 @@ batch_request_from_dataframe = RuntimeBatchRequest(
 </Tabs>
 
 
-
+<Congratulations />
+Now let's keep going to create an Expectation Suite and validate our data.
 
 ### 5. Create expectations
 
 Here we will use a `Validator` to interact with our batch of data and generate an `Expectation Suite` (like the method used in the CLI interactive mode notebook `great_expectations --v3-api suite new --interactive`).
 
 First we create the suite and get a validator:
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 expectation_suite_name = "insert_your_expectation_suite_name_here"
 context.create_expectation_suite(
     expectation_suite_name=expectation_suite_name, overwrite_existing=True
 )
 validator = context.get_validator(
-    batch_request=batch_request_from_dataframe,
+    batch_request=batch_request,
     expectation_suite_name=expectation_suite_name,
 )
 ```
 
 Then we use the `Validator` to add a few expectations:
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 ```
@@ -215,7 +236,7 @@ Finally we save our suite to our expectation store:
 validator.save_expectation_suite(discard_failed_expectations=False)
 ```
 
-### 5. Validate your data
+### 6. Validate your data
 
 <Tabs
   groupId="file-or-dataframe"
@@ -226,23 +247,54 @@ validator.save_expectation_suite(discard_failed_expectations=False)
   ]}>
   <TabItem value="file">
 
-#### TODO: Insert file instructions here
+  #### TODO: Insert file instructions here
+  Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to [Validate](../reference/validation.md) and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
-</TabItem>
+  First we create the Checkpoint configuration mirroring our `batch_request` configuration above and using the Expectation Suite we created.:
+
+  ```python
+  checkpoint_config = """
+    name: insert_your_checkpoint_name_here
+    config_version: 1
+    class_name: SimpleCheckpoint
+    validations:
+      - batch_request:
+          datasource_name: insert_your_datasource_name_here
+          data_connector_name: insert_your_data_connector_name_here
+          data_asset_name: yellow_tripdata_2019-01.csv
+        expectation_suite_name: insert_your_expectation_suite_name_here
+    """
+  ```
+
+  Then we test our syntax using `test_yaml_config`
+  #### TODO: retrieve this code from databricks_deployment_patterns.py
+  ```python
+  context.test_yaml_config(yaml_config=checkpoint_config)
+  ```
+
+  If all is well, we add the Checkpoint:
+  #### TODO: retrieve this code from databricks_deployment_patterns.py
+  ```python
+  context.add_checkpoint(**yaml.load(checkpoint_config))
+  ```
+  
+  Finally we run the Checkpoint:
+  #### TODO: retrieve this code from databricks_deployment_patterns.py
+  ```python
+  context.run_checkpoint(checkpoint_name=my_checkpoint_name)
+  ```
+  </TabItem>
+
 <TabItem value="dataframe">
 
 #### TODO: Insert dataframe instructions here
+Here we will create and store a Checkpoint with no defined validations, then pass in our dataframe at runtime.
 
-</TabItem>
-</Tabs>
-
-Here we will create and store a checkpoint with no defined validations, then pass in our dataframe at runtime.
-
-First we create the checkpoint configuration
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+First we create the Checkpoint configuration
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 
-my_checkpoint_name = "my_checkpoint"
+my_checkpoint_name = "insert_your_checkpoint_name_here"
 yaml_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
@@ -253,19 +305,19 @@ print(yaml_config)
 ```
 
 Then we test our syntax using `test_yaml_config`
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 my_checkpoint = context.test_yaml_config(yaml_config=yaml_config)
 ```
 
-If all is well, we add the checkpoint:
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+If all is well, we add the Checkpoint:
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 context.add_checkpoint(**yaml.load(yaml_config))
 ```
 
-Finally we run it with a validation defined using the batch request containing a reference to our dataframe and our expectation suite name:
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+Finally we run it with a validation defined using the batch request containing a reference to our dataframe and our Expectation Suite name:
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
@@ -278,15 +330,20 @@ context.run_checkpoint(
 )
 ```
 
-### 6. Build and view Data Docs
+</TabItem>
+</Tabs>
 
-Since we used a `SimpleCheckpoint`, it already contained an `UpdateDataDocsAction` so our Data Docs store will contain a new rendered validation result.
 
-To see the full Checkpoint configuration, you can run:
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
-```python
-print(my_checkpoint.get_substituted_config().to_yaml_str())
-```
+### 7. Build and view Data Docs
+
+Since we used a `SimpleCheckpoint`, it already contained an `UpdateDataDocsAction` which rendered our [Data Docs](../reference/data_docs.md) from the validation we just ran. That means our Data Docs store will contain a new rendered validation result. 
+
+<details>
+<summary>How do I customize these actions?</summary>
+  Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
+  
+  Also, to see the full Checkpoint configuration, you can run: `print(my_checkpoint.get_substituted_config().to_yaml_str())`
+</details>
 
 Since we used DBFS for our Data Docs store, we need to download our data docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your team. To learn more, see our documentation on Data Docs for other locations to use e.g. [filesystem](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md), [s3](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md), [GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), [ABS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
 
@@ -295,4 +352,9 @@ Run the following databricks CLI command to download your data docs (replacing t
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 ```
 
-#### TODO: Add link to file with example code
+### Congratulations!
+You've successfully validated your data with Great Expectations using Databricks and viewed the resulting human-readable Data Docs. Check out our other guides for more customization options and happy validating!
+
+View the full script used in this page on GitHub:
+
+- [databricks_deployment_patterns.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns.py)
