@@ -44,7 +44,7 @@ You’ll see that the test suite failed when you ran it against the February dat
 
 We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that’s correct, and that’s we wanted. We know that in this example, the February data has data quality issues, which means we expect the validation to fail.
 
-On the Validation Results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the `passenger_count` column contained the value 0.0! This violates our Expectation, which makes the validation fail.
+On the Validation Results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the `passenger_count` column contained the value **0**! This violates our Expectation, which makes the validation fail.
 
 ![data_docs_failed_validation2](../../../docs/images/data_docs_taxi_failed_validation02.png)
 
