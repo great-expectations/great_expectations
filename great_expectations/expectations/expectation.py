@@ -1,6 +1,7 @@
 import logging
 import re
 import traceback
+import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
@@ -8,6 +9,7 @@ from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
+from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -30,7 +32,10 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import legacy_method_parameters
+from great_expectations.expectations.util import (
+    legacy_method_parameters,
+    render_evaluation_parameter_string,
+)
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -39,10 +44,13 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
+from ..data_context.types.base import renderedAtomicValueSchema
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
+from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
 from ..render.types import (
     CollapseContent,
+    RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
@@ -162,6 +170,65 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         raise NotImplementedError
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
+        renderer.prescriptive (OSS GE)
+        """
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
+        styling = runtime_configuration.get("styling")
+
+        template_str = "$expectation_type(**$kwargs)"
+        params = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
+        return (template_str, params, styling)
+
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    @render_evaluation_parameter_string
+    def _atomic_prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        (template_str, params, styling) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": template_str,
+                "params": params,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            valuetype="StringValueType",
+        )
+        return rendered
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -487,15 +554,7 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
+    def _get_observed_value_from_evr(self, result: ExpectationValidationResult) -> str:
         result_dict = result.result
         if result_dict is None:
             return "--"
@@ -514,6 +573,46 @@ class Expectation(metaclass=MetaExpectation):
             )
         else:
             return "--"
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        observed_value = cls._get_observed_value_from_evr(result=result)
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": observed_value,
+                "params": {},
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            valuetype="StringValueType",
+        )
+        return rendered
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        return cls._get_observed_value_from_evr(result=result)
 
     @classmethod
     def get_allowed_config_keys(cls):
@@ -977,7 +1076,9 @@ class Expectation(metaclass=MetaExpectation):
         elif type(rendered_result) == list:
             sub_result_list = []
             for sub_result in rendered_result:
-                sub_result_list.append(self._get_rendered_result_as_string(sub_result))
+                res = self._get_rendered_result_as_string(sub_result)
+                if res is not None:
+                    sub_result_list.append(res)
 
             return "\n".join(sub_result_list)
 
@@ -1078,6 +1179,7 @@ class TableExpectation(Expectation, ABC):
         "condition_parser",
     )
     metric_dependencies = tuple()
+    domain_type = MetricDomainTypes.TABLE
 
     def get_validation_dependencies(
         self,
@@ -1169,14 +1271,38 @@ class TableExpectation(Expectation, ABC):
     ):
         metric_value = metrics.get(metric_name)
 
+        if metric_value is None:
+            return {"success": False, "result": {"observed_value": metric_value}}
+
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
         strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
-        if metric_value is None:
-            return {"success": False, "result": {"observed_value": metric_value}}
+        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
+            "parse_strings_as_datetimes"
+        )
+
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None:
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         # Checking if mean lies between thresholds
         if min_value is not None:
@@ -1202,6 +1328,7 @@ class TableExpectation(Expectation, ABC):
 
 class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_type = MetricDomainTypes.COLUMN
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         # Ensuring basic configuration parameters are properly set
@@ -1217,6 +1344,7 @@ class ColumnExpectation(TableExpectation, ABC):
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_type = MetricDomainTypes.COLUMN
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -1412,6 +1540,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "row_condition",
         "condition_parser",
     )
+    domain_type = MetricDomainTypes.COLUMN_PAIR
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -1614,6 +1743,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "condition_parser",
         "ignore_row_if",
     )
+    domain_type = MetricDomainTypes.MULTICOLUMN
     success_keys = tuple()
     default_kwarg_values = {
         "row_condition": None,

@@ -58,6 +58,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 else None
             )
             for obj_ in render_object:
+
                 expectation_type = cls._get_expectation_type(obj_)
 
                 content_block_fn = cls._get_content_block_fn(expectation_type)

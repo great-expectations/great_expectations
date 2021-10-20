@@ -7,7 +7,45 @@ Changelog
 
 develop
 -----------------
-* [DOCS] Update g_e docs branding to match g_e.io  (#3741)
+* [BUGFIX] Fix SQLAlchemy version 1.3.24 compatibility in map metric provider.
+* [BUGFIX] Fix deprecation warning for importing from collections
+
+
+0.13.38
+-----------------
+* [FEATURE] Atomic Renderer: Initial framework and Prescriptive renderers (#3529)
+* [FEATURE] Atomic Renderer: Diagnostic renderers (#3534)
+* [BUGFIX] runtime_parameters: {batch_data: <park DF} serialization (#3502)
+* [BUGFIX] Custom query in RuntimeBatchRequest for expectations using table.row_count metric (#3508)
+* [BUGFIX] Transpose \n and , in notebook (#3463) (thanks @mccalluc)
+* [BUGFIX] Fix contributor link (#3462) (thanks @mccalluc)
+* [DOCS] How to introspect and partition a files based data store (#3464)
+* [DOCS] fixed duplication of text in code example (#3503)
+* [DOCS] Make content better reflect the document organization. (#3510)
+* [DOCS] Correcting typos and improving the language. (#3513)
+* [DOCS] Better Sections Numbering in Documentation (#3515)
+* [DOCS] Improved wording (#3516)
+* [DOCS] Improved title wording for section heading (#3517)
+* [DOCS] Improve Readability of Documentation Content (#3536)
+* [MAINTENANCE] Content and test script update (#3532)
+* [MAINTENANCE] Provide Deprecation Notice for the "parse_strings_as_datetimes" Expectation Parameter in V3 (#3539)
+
+0.13.37
+-----------------
+* [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
+* [FEATURE] add get_available_data_asset_names_and_types (#3476)
+* [FEATURE] add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
+* [BUGFIX] Fix TupleS3StoreBackend remove_key bug (#3489)
+* [DOCS] Adding Flyte Deployment pattern to docs (#3383)
+* [DOCS] g_e docs branding updates (#3471)
+* [MAINTENANCE] Add type-hints; add utility method for creating temporary DB tables; clean up imports; improve code readability; and add a directory to pre-commit (#3475)
+* [MAINTENANCE] Clean up for a better code readability. (#3493)
+* [MAINTENANCE] Enable SQL for the "expect_compound_columns_to_be_unique" expectation. (#3488)
+* [MAINTENANCE] Fix some typos (#3474) (Thanks @mohamadmansourX)
+* [MAINTENANCE] Support SQLAlchemy version 1.3.24 for compatibility with Airflow (Airflow does not currently support later versions of SQLAlchemy). (#3499)
+* [MAINTENANCE] Update contributing_checklist.md (#3478) (Thanks @plain-jane-gray)
+* [MAINTENANCE] Update how_to_configure_a_validation_result_store_in_gcs.md (#3480) (Thanks @plain-jane-gray)
+* [MAINTENANCE] update implemented_expectations (#3492)
 
 0.13.36
 -----------------
@@ -24,7 +62,7 @@ develop
 * [MAINTENANCE] Remove validation playground notebooks (#3467)
 * [MAINTENANCE] clean up type hints, API usage, imports, and coding style (#3444)
 * [MAINTENANCE] comments (#3457)
- 
+
 0.13.35
 -----------------
 * [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
@@ -263,7 +301,7 @@ develop
 
 0.13.23
 -----------------
-* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
+* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen)
 * [BUGFIX] fix update data docs as validation action (#3031)
 * [DOCS] Port over "How to configure an Expectation Store in Azure" from RTD to Docusaurus
 * [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus (#3018)
