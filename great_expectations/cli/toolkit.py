@@ -1,4 +1,3 @@
-import datetime
 import json
 import os
 import subprocess
@@ -411,7 +410,12 @@ def load_data_context_with_error_handling(
     """Return a DataContext with good error handling and exit codes."""
     try:
         context: DataContext = DataContext(context_root_dir=directory)
-        if from_cli_upgrade_command:
+        ge_config_version: int = context.get_config().config_version
+        if (
+            from_cli_upgrade_command
+            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
+        ):
+            # noinspection PyBroadException
             try:
                 send_usage_message(
                     data_context=context,
@@ -421,29 +425,61 @@ def load_data_context_with_error_handling(
             except Exception:
                 # Don't fail for usage stats
                 pass
-        ge_config_version: int = context.get_config().config_version
-        if (
-            from_cli_upgrade_command
-            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
-        ):
-            directory = directory or context.root_directory
-            (
-                increment_version,
-                exception_occurred,
-            ) = upgrade_project_one_version_increment(
-                context_root_dir=directory,
-                ge_config_version=ge_config_version,
-                continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-                from_cli_upgrade_command=from_cli_upgrade_command,
-            )
-            if not exception_occurred and increment_version:
-                context = DataContext(context_root_dir=directory)
-                if from_cli_upgrade_command:
-                    send_usage_message(
-                        data_context=context,
-                        event="cli.project.upgrade.end",
-                        success=True,
+
+            if (CURRENT_GE_CONFIG_VERSION - int(ge_config_version)) == 1:
+                directory = directory or context.root_directory
+                (
+                    increment_version,
+                    exception_occurred,
+                ) = upgrade_project_one_version_increment(
+                    context_root_dir=directory,
+                    ge_config_version=ge_config_version,
+                    continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+                    from_cli_upgrade_command=from_cli_upgrade_command,
+                )
+                if not exception_occurred and increment_version:
+                    context = DataContext(context_root_dir=directory)
+                    # noinspection PyBroadException
+                    try:
+                        send_usage_message(
+                            data_context=context,
+                            event="cli.project.upgrade.end",
+                            success=True,
+                        )
+                    except Exception:
+                        # Don't fail for usage stats
+                        pass
+            else:
+                directory = directory or DataContext.find_context_root_dir()
+                ge_config_version = DataContext.get_ge_config_version(
+                    context_root_dir=directory
+                )
+                upgrade_helper_class = (
+                    GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+                    if ge_config_version
+                    else None
+                )
+                if upgrade_helper_class:
+                    upgrade_project(
+                        context_root_dir=directory,
+                        ge_config_version=ge_config_version,
+                        from_cli_upgrade_command=from_cli_upgrade_command,
                     )
+                    context = DataContext(context_root_dir=directory)
+                    # noinspection PyBroadException
+                    try:
+                        send_usage_message(
+                            data_context=context,
+                            event="cli.project.upgrade.end",
+                            success=True,
+                        )
+                    except Exception:
+                        # Don't fail for usage stats
+                        pass
+                else:
+                    error_message: str = f"The upgrade utility for version {int(ge_config_version)} could not be found."
+                    cli_message(string=f"<red>{error_message}</red>")
+                    sys.exit(1)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
@@ -461,6 +497,17 @@ def load_data_context_with_error_handling(
                 ge_config_version=ge_config_version,
                 from_cli_upgrade_command=from_cli_upgrade_command,
             )
+            context = DataContext(context_root_dir=directory)
+            # noinspection PyBroadException
+            try:
+                send_usage_message(
+                    data_context=context,
+                    event="cli.project.upgrade.end",
+                    success=True,
+                )
+            except Exception:
+                # Don't fail for usage stats
+                pass
         else:
             cli_message(string=f"<red>{err.message}</red>")
             sys.exit(1)
@@ -503,6 +550,7 @@ def upgrade_project(
         "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
     )
     # This loading of DataContext is optional and just to track if someone exits here
+    # noinspection PyBroadException
     try:
         data_context = DataContext(context_root_dir)
     except Exception:
@@ -553,6 +601,7 @@ To learn more about the upgrade process, visit \
             pass
     else:
         cli_message(upgrade_success_message)
+        # noinspection PyBroadException
         try:
             context: DataContext = DataContext(context_root_dir)
             send_usage_message(
