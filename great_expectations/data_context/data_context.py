@@ -2313,7 +2313,10 @@ class BaseDataContext:
         """
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+                resource_type="expectation_suite",
+                ge_cloud_id=ge_cloud_id
+                if ge_cloud_id is not None
+                else str(expectation_suite.ge_cloud_id),
             )
             if self.expectations_store.has_key(key) and not overwrite_existing:
                 raise ge_exceptions.DataContextError(
