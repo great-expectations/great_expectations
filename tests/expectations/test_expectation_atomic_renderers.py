@@ -39,7 +39,7 @@ def get_prescriptive_rendered_content(
             renderer_type="atomic.prescriptive.summary",
         )[1]
 
-        # Determine output list of RenderedAtomicContent
+        # Determine RenderedAtomicContent output
         source_obj = {"configuration": config}
         res = renderer_impl(**source_obj)
         return res
@@ -77,7 +77,7 @@ def get_diagnostic_rendered_content(
             renderer_type="atomic.diagnostic.observed_value",
         )[1]
 
-        # Determine output list of RenderedAtomicContent
+        # Determine RenderedAtomicContent output
         source_obj = {"result": evr}
         res = renderer_impl(**source_obj)
         return res
