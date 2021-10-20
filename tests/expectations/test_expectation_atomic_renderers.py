@@ -2,7 +2,6 @@ from pprint import pprint
 from typing import Callable, Dict, Union
 
 import pytest
-from typing_extensions import Literal
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
