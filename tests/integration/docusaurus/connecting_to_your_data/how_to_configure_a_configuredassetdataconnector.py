@@ -19,7 +19,7 @@ datasource_config = {
             "base_directory": "my_directory/",
             "assets": {
                 "taxi": {
-                    "pattern": "yellow_trip_data_sample_(.*)\.csv",
+                    "pattern": "yellow_tripdata_(.*)\.csv",
                     "group_names": ["month"],
                 }
             },
@@ -31,7 +31,7 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["default_configured_data_connector_name"][
     "base_directory"
-] = "../data/"
+] = "../data/single_directory_one_data_asset/"
 
 context.test_yaml_config(yaml.dump(datasource_config))
 
