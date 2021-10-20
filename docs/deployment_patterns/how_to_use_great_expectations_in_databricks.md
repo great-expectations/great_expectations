@@ -14,7 +14,7 @@ There are several ways to set up Databricks, this guide centers around an AWS de
 
 We will cover a simple configuration to get you up and running quickly, and link to our other guides for more customized configurations.
 
-This guide parallels notebook workflows from our CLI, so you can optionally prototype your setup with a local sample batch before moving to databricks. You can also use examples and code from the notebooks that the CLI generates, and indeed much of the examples that follow parallel those notebooks closely.
+This guide parallels notebook workflows from the Great Expectations CLI, so you can optionally prototype your setup with a local sample batch before moving to Databricks. You can also use examples and code from the notebooks that the CLI generates, and indeed much of the examples that follow parallel those notebooks closely.
 
 ### 1. Install Great Expectations
 
@@ -28,29 +28,28 @@ Install Great Expectations as a notebook-scoped library by running the following
 A notebook-scoped library is what it sounds like - "custom Python environments that are specific to a notebook." You can also install a library at the cluster or workspace level. See the <a href="https://docs.databricks.com/libraries/index.html">Databricks documentation on Libraries</a> for more information.
 </details>
 
-#### TODO: Add all imports needed, pull this from the example code
 After that we will take care of some imports that will be used later:
+#### TODO: Add all imports needed, pull this from the example code:
 ```python
 from ruamel import yaml
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.types.base import DataContextConfig, FilesystemStoreBackendDefaults
 ```
 
 ### 2. Set up Great Expectations
 
-In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and [Data Docs](../reference/data_docs.md) store. This is a simple way to get up and running within the Databricks environment, for other options for storing data see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
+In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and [Data Docs](../reference/data_docs.md) store. This is a simple way to get up and running within the Databricks environment without configuring external resources. For other options for storing data see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
 
-<details>
-  <summary>What is DBFS?</summary>
-Paraphrased from Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster.
-</details>
+  <details>
+    <summary>What is DBFS?</summary>
+    Paraphrased from the Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster.
+  </details>
 
 Run the following code to set up a [Data Context](../reference/data_context.md) using the appropriate defaults: 
 
 #### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
-from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.types.base import DataContextConfig, FilesystemStoreBackendDefaults
-
 root_directory = "/dbfs/great_expectations/"
 
 data_context_config = DataContextConfig(
@@ -143,7 +142,6 @@ context.test_yaml_config(yaml.dump(my_spark_datasource_config))
 context.add_datasource(**my_spark_datasource_config)
 ```
 
-# TODO: Add batch request
 Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating expectations:
 ```python
 batch_request = BatchRequest(
@@ -152,7 +150,6 @@ batch_request = BatchRequest(
     data_asset_name="yellow_tripdata_2019-01.csv",
 )
 ```
-
 
 </TabItem>
 <TabItem value="dataframe">
@@ -207,7 +204,9 @@ Now let's keep going to create an Expectation Suite and validate our data.
 
 ### 5. Create expectations
 
-Here we will use a `Validator` to interact with our batch of data and generate an `Expectation Suite` (like the method used in the CLI interactive mode notebook `great_expectations --v3-api suite new --interactive`).
+Here we will use a `Validator` to interact with our batch of data and generate an `Expectation Suite`. 
+
+This is the same method used in the CLI interactive mode notebook accessed via `great_expectations --v3-api suite new --interactive`.
 
 First we create the suite and get a validator:
 #### TODO: retrieve this code from databricks_deployment_patterns.py
@@ -232,6 +231,7 @@ validator.expect_column_values_to_be_between(column="congestion_surcharge", min_
 ```
 
 Finally we save our suite to our expectation store:
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 validator.save_expectation_suite(discard_failed_expectations=False)
 ```
@@ -247,10 +247,9 @@ validator.save_expectation_suite(discard_failed_expectations=False)
   ]}>
   <TabItem value="file">
 
-  #### TODO: Insert file instructions here
   Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to [Validate](../reference/validation.md) and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
-  First we create the Checkpoint configuration mirroring our `batch_request` configuration above and using the Expectation Suite we created.:
+  First we create the Checkpoint configuration mirroring our `batch_request` configuration above and using the Expectation Suite we created:
 
   ```python
   checkpoint_config = """
@@ -266,7 +265,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
     """
   ```
 
-  Then we test our syntax using `test_yaml_config`
+  Then we test our syntax using `test_yaml_config`:
   #### TODO: retrieve this code from databricks_deployment_patterns.py
   ```python
   context.test_yaml_config(yaml_config=checkpoint_config)
@@ -287,7 +286,6 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 <TabItem value="dataframe">
 
-#### TODO: Insert dataframe instructions here
 Here we will create and store a Checkpoint with no defined validations, then pass in our dataframe at runtime.
 
 First we create the Checkpoint configuration
@@ -316,7 +314,7 @@ If all is well, we add the Checkpoint:
 context.add_checkpoint(**yaml.load(yaml_config))
 ```
 
-Finally we run it with a validation defined using the batch request containing a reference to our dataframe and our Expectation Suite name:
+Finally we run it with a validation defined using the Batch Request containing a reference to our dataframe and our Expectation Suite name:
 #### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 context.run_checkpoint(
@@ -336,7 +334,7 @@ context.run_checkpoint(
 
 ### 7. Build and view Data Docs
 
-Since we used a `SimpleCheckpoint`, it already contained an `UpdateDataDocsAction` which rendered our [Data Docs](../reference/data_docs.md) from the validation we just ran. That means our Data Docs store will contain a new rendered validation result. 
+Since we used a `SimpleCheckpoint`, our Checkpoint already contained an `UpdateDataDocsAction` which rendered our [Data Docs](../reference/data_docs.md) from the validation we just ran. That means our Data Docs store will contain a new rendered validation result. 
 
 <details>
 <summary>How do I customize these actions?</summary>
@@ -345,14 +343,14 @@ Since we used a `SimpleCheckpoint`, it already contained an `UpdateDataDocsActio
   Also, to see the full Checkpoint configuration, you can run: `print(my_checkpoint.get_substituted_config().to_yaml_str())`
 </details>
 
-Since we used DBFS for our Data Docs store, we need to download our data docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your team. To learn more, see our documentation on Data Docs for other locations to use e.g. [filesystem](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md), [s3](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md), [GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), [ABS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
+Since we used DBFS for our Data Docs store, we need to download our data docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your team. To learn more, see our documentation on Data Docs for other locations e.g. [filesystem](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md), [s3](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md), [GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), [ABS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
 
-Run the following databricks CLI command to download your data docs (replacing the paths as appropriate), then open the local copy of `index.html`: 
+Run the following Databricks CLI command to download your data docs (replacing the paths as appropriate), then open the local copy of `index.html` to view your updated Data Docs: 
 ```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 ```
 
-### Congratulations!
+### 8. Congratulations!
 You've successfully validated your data with Great Expectations using Databricks and viewed the resulting human-readable Data Docs. Check out our other guides for more customization options and happy validating!
 
 View the full script used in this page on GitHub:
