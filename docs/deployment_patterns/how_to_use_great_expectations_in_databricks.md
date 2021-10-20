@@ -44,7 +44,8 @@ Paraphrased from Databricks docs: DBFS is a distributed file system mounted into
 </details>
 
 Run the following code to set up a [Data Context](../reference/data_context.md) using the appropriate defaults: 
-# TODO: retrieve this code from databricks_deployment_patterns.py
+
+#### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig, FilesystemStoreBackendDefaults
@@ -70,15 +71,17 @@ context = BaseDataContext(project_config=data_context_config)
   ]}>
   <TabItem value="file">
 
-# TODO: Insert file instructions here
+Let's copy some example csv data to our DBFS folder for easier access:
+
+```python
+dbutils.fs.cp(
+    "/databricks-datasets/online_retail/data-001/data.csv", 
+    "/example_data/online_retail/data-001/data.csv"
+)
+```
 
 </TabItem>
 <TabItem value="dataframe">
-
-# TODO: Insert dataframe instructions here
-
-</TabItem>
-</Tabs>
 
 We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Run the following code in your notebook to load a month of data as a dataframe:
 
@@ -88,6 +91,11 @@ df = spark.read.format("csv")\
     .option("inferSchema", "true")\
     .load("/databricks-datasets/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz")
 ```
+
+</TabItem>
+</Tabs>
+
+
 
 ### 4. Connect to your data
 
@@ -100,16 +108,35 @@ df = spark.read.format("csv")\
   ]}>
   <TabItem value="file">
 
-# TODO: Insert file instructions here
+#### TODO: retrieve this code from databricks_deployment_patterns.py
+
+#### TODO: Change this to yaml
 
 </TabItem>
 <TabItem value="dataframe">
 
-# TODO: Insert dataframe instructions here
+```python
+my_spark_datasource_config = {
+    "name": "insert_your_datasource_name_here",
+    "class_name": "Datasource",
+    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
+    "data_connectors": {
+        "insert_your_inferred_asset_filesystem_data_connector_name_here": {
+            "module_name": "great_expectations.datasource.data_connector",
+            "class_name": "InferredAssetFilesystemDataConnector",
+            "base_directory": "/dbfs/example_data/online_retail/data-001/",
+            "default_regex": {
+                "pattern": r"(.*)",
+                "group_names": ["data_asset_name"]
+            },
+        }
+    },
+}
 
-</TabItem>
-</Tabs>
+context.test_yaml_config(yaml.dump(my_spark_datasource_config))
 
+context.add_datasource(**my_spark_datasource_config)
+```
 We will add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can validate our loaded dataframe, but instead you may use any of the other types of Data Connectors available to you (check out our documentation on "Connecting to your data").
   
 #### TODO: retrieve this code from databricks_deployment_patterns.py
@@ -136,17 +163,6 @@ context.test_yaml_config(yaml.dump(my_spark_datasource_config))
 context.add_datasource(**my_spark_datasource_config)
 ```
 
-my_inferred_asset_filesystem_data_connector = {
-    "module_name": "great_expectations.datasource.data_connector",
-    "class_name": "InferredAssetFilesystemDataConnector",
-    "base_directory": "/dbfs//databricks-datasets/nyctaxi/tripdata/yellow/",
-    "default_regex": {
-        "group_names": ["year", "month"],
-        "pattern": "yellow_tripdata_(\\d{{4}})-(\\d{{2}})\\.csv\\.gz"
-    },
-}
-
-
 Next we will create a `RuntimeBatchRequest` to reference our loaded dataframe and add metadata:
 #### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
@@ -161,6 +177,9 @@ batch_request_from_dataframe = RuntimeBatchRequest(
     runtime_parameters={"batch_data": df},  # Your dataframe goes here
 )
 ```
+  
+</TabItem>
+</Tabs>
 
 
 
