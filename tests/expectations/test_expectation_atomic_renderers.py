@@ -59,9 +59,11 @@ def evr_kwargs(expectation_configuration_kwargs):
 
 
 @pytest.fixture
-def get_diagnostic_rendered_content(evr_kwargs: Dict[str, Union[str, dict]]):
+def get_diagnostic_rendered_content(
+    evr_kwargs: Dict[str, Union[dict, ExpectationConfiguration]]
+) -> Callable:
     def _get_diagnostic_rendered_content(
-        update_dict: Dict[str, Union[str, dict]],
+        update_dict: Dict[str, Union[dict, ExpectationConfiguration]],
     ) -> RenderedAtomicContent:
         # Overwrite any fields passed in from test and instantiate ExpectationValidationResult
         evr_kwargs.update(update_dict)
