@@ -28,7 +28,7 @@ data_connectors:
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace("my_directory/", "../data/single_directory_one_data_asset/")
 
-context.test_yaml_config(datasource_yaml)
+test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
 datasource_config = {
@@ -59,7 +59,9 @@ datasource_config["data_connectors"]["default_configured_data_connector_name"][
     "base_directory"
 ] = "../data/single_directory_one_data_asset/"
 
-context.test_yaml_config(yaml.dump(datasource_config))
+test_python = context.test_yaml_config(yaml.dump(datasource_config), return_mode="report_object")
+
+assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 

@@ -20,7 +20,7 @@ data_connectors:
       - default_identifier_name
 """
 
-context.test_yaml_config(datasource_yaml)
+test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
 datasource_config = {
@@ -39,7 +39,9 @@ datasource_config = {
     },
 }
 
-context.test_yaml_config(yaml.dump(datasource_config))
+test_python = context.test_yaml_config(yaml.dump(datasource_config), return_mode="report_object")
+
+assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 
