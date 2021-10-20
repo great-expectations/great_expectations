@@ -23,7 +23,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 
 class UpgradeHelperV11(BaseUpgradeHelper):
-    def __init__(self, data_context=None, context_root_dir=None):
+    def __init__(self, data_context=None, context_root_dir=None, **kwargs):
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."

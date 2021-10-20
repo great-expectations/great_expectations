@@ -7,8 +7,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
 
 import click
-from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
 
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
@@ -43,24 +41,6 @@ EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
     "</cyan>.\n"
 )
-
-
-class MyYAML(YAML):
-    # copied from https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
-    def dump(self, data, stream=None, **kw):
-        inefficient = False
-        if stream is None:
-            inefficient = True
-            stream = StringIO()
-        YAML.dump(self, data, stream, **kw)
-        if inefficient:
-            return stream.getvalue()
-
-
-yaml = MyYAML()  # or typ='safe'/'unsafe' etc
-
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
 
 
 def prompt_profile_to_create_a_suite(
@@ -408,33 +388,133 @@ def load_data_context_with_error_handling(
     directory: str, from_cli_upgrade_command: bool = False
 ) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] DIRECTORY: {directory} ; TYPE: {str(type(directory))}')
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] FROM_CLI_UPGRADE_COMMAND: {from_cli_upgrade_command} ; TYPE: {str(type(from_cli_upgrade_command))}')
     try:
         context: DataContext = DataContext(context_root_dir=directory)
-        print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] CONTEXT: {context} ; TYPE: {str(type(context))}')
+        directory = (
+            directory or context.root_directory or DataContext.find_context_root_dir()
+        )
         ge_config_version: int = context.get_config().config_version
-        print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] GE_CONFIG_VERSION: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
-        print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] CURRENT_GE_CONFIG_VERSION: {CURRENT_GE_CONFIG_VERSION} ; TYPE: {str(type(CURRENT_GE_CONFIG_VERSION))}')
-        if (
-            from_cli_upgrade_command
-            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
-        ):
-            # noinspection PyBroadException
-            try:
-                send_usage_message(
-                    data_context=context,
-                    event="cli.project.upgrade.begin",
-                    success=True,
-                )
-            except Exception:
-                # Don't fail for usage stats
-                pass
+        if from_cli_upgrade_command:
+            if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+                # noinspection PyBroadException
+                try:
+                    send_usage_message(
+                        data_context=context,
+                        event="cli.project.upgrade.begin",
+                        success=True,
+                    )
+                except Exception:
+                    # Don't fail for usage stats
+                    pass
 
-            if (CURRENT_GE_CONFIG_VERSION - int(ge_config_version)) == 1:
-                print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] CONTEXT.ROOT_DIRECTORY-ONE_UNIT: {context.root_directory} ; TYPE: {str(type(context.root_directory))}')
+                if (CURRENT_GE_CONFIG_VERSION - int(ge_config_version)) == 1:
+                    upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(
+                        int(ge_config_version)
+                    )
+                    upgrade_helper = upgrade_helper_class(
+                        context_root_dir=directory, update_version=False
+                    )
+                    manual_steps_required = upgrade_helper.manual_steps_required()
+
+                    (
+                        increment_version,
+                        exception_occurred,
+                    ) = upgrade_project_one_version_increment(
+                        context_root_dir=directory,
+                        ge_config_version=ge_config_version,
+                        continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+                        update_version=True,
+                        from_cli_upgrade_command=from_cli_upgrade_command,
+                    )
+                    if not exception_occurred and increment_version:
+                        if manual_steps_required:
+                            upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
+                        else:
+                            upgrade_message = "Your project is up-to-date - no further upgrade is necessary.\n"
+
+                        cli_message(f"<yellow>{upgrade_message}</yellow>")
+
+                        context = DataContext(context_root_dir=directory)
+
+                        # noinspection PyBroadException
+                        try:
+                            send_usage_message(
+                                data_context=context,
+                                event="cli.project.upgrade.end",
+                                success=True,
+                            )
+                        except Exception:
+                            # Don't fail for usage stats
+                            pass
+                else:
+                    ge_config_version = DataContext.get_ge_config_version(
+                        context_root_dir=directory
+                    )
+                    upgrade_helper_class = (
+                        GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+                        if ge_config_version
+                        else None
+                    )
+                    if upgrade_helper_class:
+                        upgrade_helper = upgrade_helper_class(
+                            context_root_dir=directory, update_version=True
+                        )
+                        manual_steps_required = upgrade_helper.manual_steps_required()
+                        upgrade_project(
+                            context_root_dir=directory,
+                            ge_config_version=ge_config_version,
+                            from_cli_upgrade_command=from_cli_upgrade_command,
+                        )
+                        if manual_steps_required:
+                            upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
+                        else:
+                            upgrade_message = "Your project is up-to-date - no further upgrade is necessary.\n"
+
+                        cli_message(f"<yellow>{upgrade_message}</yellow>")
+
+                        context = DataContext(context_root_dir=directory)
+
+                        # noinspection PyBroadException
+                        try:
+                            send_usage_message(
+                                data_context=context,
+                                event="cli.project.upgrade.end",
+                                success=True,
+                            )
+                        except Exception:
+                            # Don't fail for usage stats
+                            pass
+                    else:
+                        error_message: str = f"The upgrade utility for version {int(ge_config_version)} could not be found."
+                        cli_message(string=f"<red>{error_message}</red>")
+                        sys.exit(1)
+            elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
+{CURRENT_GE_CONFIG_VERSION}.
+"""
+                )
+            else:
+                upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(
+                    int(ge_config_version)
+                )
+                upgrade_helper = upgrade_helper_class(
+                    context_root_dir=directory, update_version=False
+                )
+                manual_steps_required = upgrade_helper.manual_steps_required()
+                if manual_steps_required:
+                    # noinspection PyBroadException
+                    try:
+                        send_usage_message(
+                            data_context=context,
+                            event="cli.project.upgrade.begin",
+                            success=True,
+                        )
+                    except Exception:
+                        # Don't fail for usage stats
+                        pass
+
                 directory = directory or context.root_directory
-                print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] DIRECTORY-CERTIFIED-ONE_UNIT: {directory} ; TYPE: {str(type(directory))}')
                 (
                     increment_version,
                     exception_occurred,
@@ -442,12 +522,19 @@ def load_data_context_with_error_handling(
                     context_root_dir=directory,
                     ge_config_version=ge_config_version,
                     continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+                    update_version=False,
                     from_cli_upgrade_command=from_cli_upgrade_command,
                 )
-                print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] INCREMENT_VERSION-ONE_UNIT: {increment_version} ; TYPE: {str(type(increment_version))}')
-                print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] EXCEPTION_OCCURRED-ONE_UNIT: {exception_occurred} ; TYPE: {str(type(exception_occurred))}')
-                if not exception_occurred and increment_version:
+                if not (exception_occurred or increment_version):
+                    if manual_steps_required:
+                        upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
+                    else:
+                        upgrade_message = "Your project is up-to-date - no further upgrade is necessary.\n"
+
+                    cli_message(f"<yellow>{upgrade_message}</yellow>")
+
                     context = DataContext(context_root_dir=directory)
+
                     # noinspection PyBroadException
                     try:
                         send_usage_message(
@@ -458,57 +545,18 @@ def load_data_context_with_error_handling(
                     except Exception:
                         # Don't fail for usage stats
                         pass
-            else:
-                print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] CONTEXT.ROOT_DIRECTORY-MULTI_UNIT: {context.root_directory} ; TYPE: {str(type(context.root_directory))}')
-                directory = directory or DataContext.find_context_root_dir()
-                print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] DIRECTORY-CERTIFIED-MULTI_UNIT: {directory} ; TYPE: {str(type(directory))}')
-                ge_config_version = DataContext.get_ge_config_version(
-                    context_root_dir=directory
-                )
-                print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] GE_CONFIG_VERSION-MULTI_UNIT: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
-                upgrade_helper_class = (
-                    GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-                    if ge_config_version
-                    else None
-                )
-                if upgrade_helper_class:
-                    print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] URRED_UPGRADE_HELPER_CLASS-MULTI_UNIT: {upgrade_helper_class} ; TYPE: {str(type(upgrade_helper_class))}')
-                    upgrade_project(
-                        context_root_dir=directory,
-                        ge_config_version=ge_config_version,
-                        from_cli_upgrade_command=from_cli_upgrade_command,
-                    )
-                    context = DataContext(context_root_dir=directory)
-                    # noinspection PyBroadException
-                    try:
-                        send_usage_message(
-                            data_context=context,
-                            event="cli.project.upgrade.end",
-                            success=True,
-                        )
-                    except Exception:
-                        # Don't fail for usage stats
-                        pass
-                else:
-                    error_message: str = f"The upgrade utility for version {int(ge_config_version)} could not be found."
-                    cli_message(string=f"<red>{error_message}</red>")
-                    sys.exit(1)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
-        print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] ge_exceptions.UnsupportedConfigVersionError_OCCURRED: {err} ; TYPE: {str(type(err))}')
         directory = directory or DataContext.find_context_root_dir()
-        print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] ge_exceptions.UnsupportedConfigVersionError_OCCURRED_DIRECTORY-CERTIFIED: {directory} ; TYPE: {str(type(directory))}')
         ge_config_version = DataContext.get_ge_config_version(
             context_root_dir=directory
         )
-        print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] ge_exceptions.UnsupportedConfigVersionError_OCCURRED_GE_CONFIG_VERSION: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
         upgrade_helper_class = (
             GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
             if ge_config_version
             else None
         )
         if upgrade_helper_class and ge_config_version < CURRENT_GE_CONFIG_VERSION:
-            print(f'\n[ALEX_TEST] [TOOLKIT_V3.LOAD_DATA_CONTEXT_WITH_ERROR_HANDLING] ge_exceptions.UnsupportedConfigVersionError_OCCURRED_UPGRADE_HELPER_CLASS: {upgrade_helper_class} ; TYPE: {str(type(upgrade_helper_class))}')
             upgrade_project(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
@@ -525,6 +573,8 @@ def load_data_context_with_error_handling(
             except Exception:
                 # Don't fail for usage stats
                 pass
+
+            return context
         else:
             cli_message(string=f"<red>{err.message}</red>")
             sys.exit(1)
@@ -548,9 +598,6 @@ def load_data_context_with_error_handling(
 def upgrade_project(
     context_root_dir, ge_config_version, from_cli_upgrade_command=False
 ):
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.UPGRADE_PROJECT] CONTEXT_ROOT_DIR: {context_root_dir} ; TYPE: {str(type(context_root_dir))}')
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.UPGRADE_PROJECT] GE_CONFIG_VERSION: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.UPGRADE_PROJECT] FROM_CLI_UPGRADE_COMMAND: {from_cli_upgrade_command} ; TYPE: {str(type(from_cli_upgrade_command))}')
     if from_cli_upgrade_command:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
@@ -585,12 +632,12 @@ def upgrade_project(
     cli_message(string=SECTION_SEPARATOR)
 
     # use loop in case multiple upgrades need to take place
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.UPGRADE_PROJECT] CURRENT_GE_CONFIG_VERSION: {CURRENT_GE_CONFIG_VERSION} ; TYPE: {str(type(CURRENT_GE_CONFIG_VERSION))}')
     while ge_config_version < CURRENT_GE_CONFIG_VERSION:
         increment_version, exception_occurred = upgrade_project_one_version_increment(
             context_root_dir=context_root_dir,
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+            update_version=True,
             from_cli_upgrade_command=from_cli_upgrade_command,
         )
         if exception_occurred or not increment_version:
@@ -606,7 +653,7 @@ def upgrade_project(
     - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{
     ge_config_version + 1}</cyan>\n
 To learn more about the upgrade process, visit \
-<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>
+<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide</cyan>
 """
 
     if ge_config_version < CURRENT_GE_CONFIG_VERSION:
@@ -638,24 +685,34 @@ def upgrade_project_one_version_increment(
     context_root_dir: str,
     ge_config_version: float,
     continuation_message: str,
+    update_version: bool,
     from_cli_upgrade_command: bool = False,
 ) -> [bool, bool]:  # Returns increment_version, exception_occurred
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.UPGRADE_PROJECT_ONE_VERSION_INCREMENT] CONTEXT_ROOT_DIR: {context_root_dir} ; TYPE: {str(type(context_root_dir))}')
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.UPGRADE_PROJECT_ONE_VERSION_INCREMENT] GE_CONFIG_VERSION: {ge_config_version} ; TYPE: {str(type(ge_config_version))}')
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-    print(f'\n[ALEX_TEST] [TOOLKIT_V3.UPGRADE_PROJECT_ONE_VERSION_INCREMENT] UPGRADE_HELPER_CLASS: {upgrade_helper_class} ; TYPE: {str(type(upgrade_helper_class))}')
     if not upgrade_helper_class:
         return False, False
-    target_ge_config_version = int(ge_config_version) + 1
+
+    if update_version:
+        target_ge_config_version = int(ge_config_version) + 1
+
     # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
     DataContext.set_ge_config_version(
         config_version=CURRENT_GE_CONFIG_VERSION,
         context_root_dir=context_root_dir,
     )
-    upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
+
+    upgrade_helper = upgrade_helper_class(
+        context_root_dir=context_root_dir, update_version=update_version
+    )
+
+    manual_steps_required = upgrade_helper.manual_steps_required()
+
+    if not (update_version or manual_steps_required):
+        return False, False
+
     upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
 
-    if confirmation_required or from_cli_upgrade_command:
+    if from_cli_upgrade_command and confirmation_required:
         upgrade_confirmed = confirm_proceed_or_exit(
             confirm_prompt=upgrade_overview,
             continuation_message=continuation_message,
@@ -665,8 +722,10 @@ def upgrade_project_one_version_increment(
         upgrade_confirmed = True
 
     if upgrade_confirmed:
-        cli_message(string="\nUpgrading project...")
-        cli_message(string=SECTION_SEPARATOR)
+        if confirmation_required:
+            cli_message(string="\nUpgrading project...")
+            cli_message(string=SECTION_SEPARATOR)
+
         # run upgrade and get report of what was done, if version number should be incremented
         (
             upgrade_report,

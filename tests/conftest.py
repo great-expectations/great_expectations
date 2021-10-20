@@ -3035,6 +3035,29 @@ def titanic_data_context(
 
 
 @pytest.fixture
+def titanic_data_context_clean(
+    tmp_path_factory,
+) -> DataContext:
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_v013clean_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
 def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -3441,6 +3464,30 @@ def v20_project_directory(tmp_path_factory):
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_v20_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
         os.path.join(context_root_dir, "great_expectations.yml"),
     )

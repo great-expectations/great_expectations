@@ -1,5 +1,7 @@
 {
-  "skipped_upgrade": false,
+  "skipped_checkpoints_upgrade": false,
+  "skipped_datasources_upgrade": false,
+  "skipped_validation_operators_upgrade": false,
   "update_version": true,
   "added_checkpoint_store": {
     "stores": {
