@@ -4,6 +4,56 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots["test_atomic_diagnostic_observed_value_with_empty_result 1"] = {
+    "name": "atomic.diagnostic.observed_value",
+    "value": {
+        "params": {},
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "--",
+    },
+    "valuetype": "StringValueType",
+}
+
+snapshots["test_atomic_diagnostic_observed_value_with_numeric_observed_value 1"] = {
+    "name": "atomic.diagnostic.observed_value",
+    "value": {
+        "params": {},
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "1,776",
+    },
+    "valuetype": "StringValueType",
+}
+
+snapshots["test_atomic_diagnostic_observed_value_with_str_observed_value 1"] = {
+    "name": "atomic.diagnostic.observed_value",
+    "value": {
+        "params": {},
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "foo",
+    },
+    "valuetype": "StringValueType",
+}
+
+snapshots["test_atomic_diagnostic_observed_value_with_unexpected_percent 1"] = {
+    "name": "atomic.diagnostic.observed_value",
+    "value": {
+        "params": {},
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "10% unexpected",
+    },
+    "valuetype": "StringValueType",
+}
+
+snapshots["test_atomic_diagnostic_observed_value_without_result 1"] = {
+    "name": "atomic.diagnostic.observed_value",
+    "value": {
+        "params": {},
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "--",
+    },
+    "valuetype": "StringValueType",
+}
+
 snapshots[
     "test_atomic_prescriptive_summary_expect_column_distinct_values_to_be_in_set 1"
 ] = {
