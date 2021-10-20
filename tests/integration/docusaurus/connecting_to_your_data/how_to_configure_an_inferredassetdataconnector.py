@@ -25,7 +25,9 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace("my_directory/", "../data/single_directory_one_data_asset/")
+datasource_yaml = datasource_yaml.replace(
+    "my_directory/", "../data/single_directory_one_data_asset/"
+)
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
@@ -56,7 +58,9 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "base_directory"
 ] = "../data/single_directory_one_data_asset/"
 
-test_python = context.test_yaml_config(yaml.dump(datasource_config), return_mode="report_object")
+test_python = context.test_yaml_config(
+    yaml.dump(datasource_config), return_mode="report_object"
+)
 
 assert test_yaml == test_python
 

@@ -39,7 +39,9 @@ datasource_config = {
     },
 }
 
-test_python = context.test_yaml_config(yaml.dump(datasource_config), return_mode="report_object")
+test_python = context.test_yaml_config(
+    yaml.dump(datasource_config), return_mode="report_object"
+)
 
 assert test_yaml == test_python
 
@@ -55,7 +57,9 @@ batch_request = RuntimeBatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters["path"] = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
+batch_request.runtime_parameters[
+    "path"
+] = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
