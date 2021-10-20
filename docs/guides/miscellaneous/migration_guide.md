@@ -48,6 +48,12 @@ upgrade your Great Expectations configuration to version 3.0 in order to take ad
 If the `check-config` method has advised you to upgrade your configuration, you can run the following `upgrade` command
 
 ```bash
+great_expectations --v3-api project upgrade
+```
+
+Then you will see the following prompt:
+
+```bash
 ++====================================++
 || UpgradeHelperV13: Upgrade Overview ||
 ++====================================++
@@ -101,6 +107,8 @@ You appear to be using a legacy capability with the latest config version (3.0).
     Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number 3.
 Your project is up-to-date - no further upgrade is necessary.
 ```
+
+Now you are ready to migrate Datasources and checkpoints to V3.
 
 ### Manually migrate Datasources from V2 to V3
 
@@ -181,7 +189,7 @@ validation_operator_name:
 batches:
   - batch_kwargs:
       path: /ge_Data/Titanic.csv
-      datasource: __dir
+      datasource: dir
       data_asset_name: Titanic
     expectation_suite_names:
       - Titanic.warning
