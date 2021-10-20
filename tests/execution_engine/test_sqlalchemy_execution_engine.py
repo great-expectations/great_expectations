@@ -766,7 +766,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
         sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).one()[0]
+    ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
     rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
@@ -776,7 +776,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
         sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).one()[0]
+    ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
     rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
@@ -803,7 +803,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
         sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).one()[0]
+    ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
     rows_0 = batch_data.execution_engine.engine.execute(
@@ -813,7 +813,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
         sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).one()[0]
+    ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
     rows_1 = batch_data.execution_engine.engine.execute(

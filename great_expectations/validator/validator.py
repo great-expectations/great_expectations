@@ -856,6 +856,7 @@ aborting graph resolution.
         self,
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
+        ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         warnings.warn(
@@ -864,7 +865,9 @@ aborting graph resolution.
             DeprecationWarning,
         )
         return self._expectation_suite.find_expectations(
-            expectation_configuration=expectation_configuration, match_type=match_type
+            expectation_configuration=expectation_configuration,
+            match_type=match_type,
+            ge_cloud_id=ge_cloud_id,
         )
 
     def remove_expectation(
@@ -872,6 +875,7 @@ aborting graph resolution.
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
+        ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         warnings.warn(
@@ -883,6 +887,7 @@ aborting graph resolution.
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             remove_multiple_matches=remove_multiple_matches,
+            ge_cloud_id=ge_cloud_id,
         )
 
     def set_config_value(self, key, value):
@@ -1003,6 +1008,13 @@ set as active.
             set_default_expectation_arguments
         """
         return self._default_expectation_args
+
+    @property
+    def ge_cloud_mode(self) -> bool:
+        """
+        Wrapper around ge_cloud_mode property of associated Data Context
+        """
+        return self._data_context.ge_cloud_mode
 
     @property
     def default_expectation_args(self):
@@ -1201,6 +1213,11 @@ set as active.
         )
         if filepath is None and self._data_context is not None:
             self._data_context.save_expectation_suite(expectation_suite)
+            if self.ge_cloud_mode:
+                updated_suite = self._data_context.get_expectation_suite(
+                    ge_cloud_id=str(expectation_suite.ge_cloud_id)
+                )
+                self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
             with open(filepath, "w") as outfile:
                 json.dump(
