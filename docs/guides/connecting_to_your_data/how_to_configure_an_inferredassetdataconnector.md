@@ -2,6 +2,8 @@
 title: How to configure an InferredAssetDataConnector
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 This guide demonstrates how to configure an InferredAssetDataConnector, and provides several examples you
 can use for configuration.
@@ -23,25 +25,84 @@ InferredAssetDataConnector has fewer options, so it's simpler to set up. It’s 
 
 If you're not sure which one to use, please check out [How to choose which DataConnector to use](./how_to_choose_which_dataconnector_to_use.md).
 
-Set up a Datasource
--------------------
+## Steps
+
+### 1. Instantiate your project's DataContext
+
+Import these necessary packages and modules:
+
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L3-L4
+```
+
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L1-L4
+```
+
+</TabItem>
+</Tabs>
+
+### 2. Set up a Datasource
 
 All the examples below assume you’re testing configurations using something like:
 
-```python
-import great_expectations as ge
-context = ge.DataContext()
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
 
-context.test_yaml_config("""
-my_data_source:
-  class_name: Datasource
-  execution_engine:
-    class_name: PandasExecutionEngine
-  data_connectors:
-    my_filesystem_data_connector:
-      {data_connector configuration goes here}
-""")
+```python
+datasource_yaml = """
+name: taxi_datasource
+class_name: Datasource
+execution_engine:
+  class_name: PandasExecutionEngine
+data_connectors:
+  default_inferred_data_connector_name:
+    <DATACONNECTOR CONFIGURATION GOES HERE>
+"""
+context.test_yaml_config(yaml_config=datasource_config)
 ```
+
+</TabItem>
+<TabItem value="python">
+
+```python
+datasource_config = {
+    "name": "taxi_datasource",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "module_name": "great_expectations.execution_engine",
+        "class_name": "PandasExecutionEngine",
+    },
+    "data_connectors": {
+        "default_inferred_data_connector_name": {
+          <DATACONNECTOR CONFIGURATION GOES HERE>
+        },
+    },
+}
+context.test_yaml_config(yaml.dump(datasource_config))
+```
+
+</TabItem>
+</Tabs>
+
+
 
 If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
