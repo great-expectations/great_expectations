@@ -99,12 +99,9 @@ context.test_yaml_config(yaml.dump(datasource_config))
 </TabItem>
 </Tabs>
 
-
-
 If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
-Choose a DataConnector
-----------------------
+### 3. Choose a DataConnector
 
 ConfiguredAssetDataConnectors like `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector` require `DataAsset`s to be
 explicitly named. Each `DataAsset` can have their own regex `pattern` and `group_names`, and if configured, will override any
@@ -113,36 +110,40 @@ explicitly named. Each `DataAsset` can have their own regex `pattern` and `group
 Imagine you have the following files in `my_directory/`:
 
 ```
-my_directory/alpha-1.csv
-my_directory/alpha-2.csv
-my_directory/alpha-3.csv
+my_directory/yellow_tripdata_2019-01.csv
+my_directory/yellow_tripdata_2019-02.csv
+my_directory/yellow_tripdata_2019-03.csv
 ```
 
-We could create a DataAsset `alpha` that contains 3 data_references (`alpha-1.csv`, `alpha-2.csv`, and `alpha-3.csv`).
+We could create a DataAsset `yellow_tripdata` that contains 3 data_references (`yellow_tripdata_2019-01.csv`, `yellow_tripdata_2019-02.csv`, and `yellow_tripdata_2019-03.csv`).
 In that case, the configuration would look like the following:
 
-```yaml
- my_data_source:
-   class_name: Datasource
-   execution_engine:
-     class_name: PandasExecutionEngine
-   data_connectors:
-     my_filesystem_data_connector:
-       class_name: ConfiguredAssetFilesystemDataConnector
-       base_directory: my_directory/
-       default_regex:
-       assets:
-         alpha:
-           pattern: alpha-(.*)\.csv
-           group_names:
-             - index
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L9-L25
 ```
 
-Notice that we have specified a pattern that captures the number after `alpha-` in the filename and assigns it to the `group_name` `index`.
+</TabItem>
+<TabItem value="python">
 
-The configuration would also work with a regex capturing the entire filename (ie `pattern: (.*)\\.csv`).  However, capturing the index on its own allows for `batch_identifiers` to be used to retrieve a specific Batch of the Data Asset.
+```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L34-L54
+```
 
-Later on we could retrieve the data in `alpha-2.csv` of `alpha` as its own batch using `context.get_batch()` by specifying `{"index": "2"}` as the `batch_identifier`.
+</TabItem>
+</Tabs>
+
+Notice that we have specified a pattern that captures the year-month combination after `yellow_tripdata_` in the filename and assigns it to the `group_name` `month`.
+
+The configuration would also work with a regex capturing the entire filename (ie `pattern: (.*)\\.csv`).  However, capturing the month on its own allows for `batch_identifiers` to be used to retrieve a specific Batch of the `DataAsset`.
+
+Later on we could retrieve the data in `yellow_tripdata_2019-02.csv` of `yellow_tripdata` as its own batch using `context.get_batch()` by specifying `{"month": "2019-02"}` as the `batch_identifier`.
 
 ```python
 my_batch = context.get_batch(

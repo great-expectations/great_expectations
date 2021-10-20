@@ -102,12 +102,9 @@ context.test_yaml_config(yaml.dump(datasource_config))
 </TabItem>
 </Tabs>
 
-
-
 If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
-Choose a DataConnector
-----------------------
+### 3. Choose a DataConnector
 
 InferredAssetDataConnectors like `InferredAssetFilesystemDataConnector` and `InferredAssetS3DataConnector`
 require a `default_regex` parameter, with a configured regex `pattern` and capture `group_names`.
@@ -115,38 +112,44 @@ require a `default_regex` parameter, with a configured regex `pattern` and captu
 Imagine you have the following files in `my_directory/`:
 
 ```
-my_directory/alpha-2020-01-01.csv
-my_directory/alpha-2020-01-02.csv
-my_directory/alpha-2020-01-03.csv
+my_directory/yellow_tripdata_2019-01.csv
+my_directory/yellow_tripdata_2019-02.csv
+my_directory/yellow_tripdata_2019-03.csv
 ```
 
 We can imagine two approaches to loading the data into GE.
 
 The simplest approach would be to consider each file to be its own DataAsset. In that case, the configuration would look like the following:
 
-```yaml
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  my_filesystem_data_connector:
-    class_name: InferredAssetFilesystemDataConnector
-    datasource_name: my_data_source
-    base_directory: my_directory/
-    default_regex:
-      group_names:
-        - data_asset_name
-      pattern: (.*)\.csv
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L9-L24
 ```
 
+</TabItem>
+<TabItem value="python">
+
+```python file=./../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L33-L51
+```
+
+</TabItem>
+</Tabs>
+
 Notice that the `default_regex` is configured to have one capture group (`(.*)`) which captures the entire filename. That capture group is assigned to `data_asset_name` under `group_names`.
-Running `test_yaml_config()` would result in 3 DataAssets : `alpha-2020-01-01`, `alpha-2020-01-02` and `alpha-2020-01-03`.
+Running `test_yaml_config()` would result in 3 DataAssets : `yellow_tripdata_2019-01`, `yellow_tripdata_2019-02` and `yellow_tripdata_2019-03`.
 
-However, a closer look at the filenames reveals a pattern that is common to the 3 files. Each have `alpha-` in the name, and have date information afterwards. These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of.
+However, a closer look at the filenames reveals a pattern that is common to the 3 files. Each have `yellow_tripdata_` in the name, and have date information afterwards. These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of.
 
-We could treat `alpha-*.csv` files as batches within the `alpha` DataAsset with a more specific regex `pattern` and adding `group_names` for `year`, `month` and `day`.
+We could treat `yellow_tripdata_*.csv` files as batches within the `yellow_tripdata` `DataAsset` with a more specific regex `pattern` and adding `group_names` for `year` and `month`.
 
-**Note: ** We have chosen to be more specific in the capture groups for the `year` `month` and `day` by specifying the integer value (using `\d`) and the number of digits, but a simpler capture group like `(.*)` would also work.
+**Note: ** We have chosen to be more specific in the capture groups for the `year` and `month` by specifying the integer value (using `\d`) and the number of digits, but a simpler capture group like `(.*)` would also work.
 
 ```yaml
 class_name: Datasource
