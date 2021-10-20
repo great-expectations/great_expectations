@@ -2,6 +2,8 @@
 title: How to Use Great Expectations in Databricks
 ---
 import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 Great Expectations works well with many types of Databricks workflows. This guide will help you run Great Expectations in [Databricks](https://databricks.com/).
 
@@ -11,7 +13,7 @@ There are several ways to set up Databricks, this guide centers around an AWS de
 
 We will cover a simple configuration to get you up and running quickly, and link to our other guides for more customized configurations.
 
-This guide parallels notebook workflows from our CLI, you may wish to prototype your setup with a local sample batch before moving to databricks. You can also use examples and code from the notebooks that the CLI generates, and indeed much of the examples that follow parallel those notebooks closely.
+This guide parallels notebook workflows from our CLI, so you can optionally prototype your setup with a local sample batch before moving to databricks. You can also use examples and code from the notebooks that the CLI generates, and indeed much of the examples that follow parallel those notebooks closely.
 
 ### 1. Install Great Expectations
 
@@ -20,16 +22,12 @@ Install Great Expectations as a notebook-scoped library by running the following
   %pip install great-expectations
   ```
 
-
-# TODO: Fix the links here:
 <details>
   <summary>What is a notebook-scoped library?</summary>
-There are two ways to install Great Expectations, see the below links to the Databricks documentation on :
-- [Cluster scoped library](https://docs.databricks.com/libraries/cluster-libraries.html)
-- [Notebook-scoped library](https://docs.databricks.com/libraries/notebooks-python-libraries.html)
+A notebook-scoped library is what it sounds like - "custom Python environments that are specific to a notebook." You can also install a library at the cluster or workspace level. See the <a href="https://docs.databricks.com/libraries/index.html">Databricks documentation on Libraries</a> for more information.
 </details>
 
-# TODO: Add all imports needed, pull this from the example code
+#### TODO: Add all imports needed, pull this from the example code
 After that we will take care of some imports that will be used later:
 ```python
 from ruamel import yaml
@@ -113,9 +111,9 @@ df = spark.read.format("csv")\
 </Tabs>
 
 We will add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can validate our loaded dataframe, but instead you may use any of the other types of Data Connectors available to you (check out our documentation on "Connecting to your data").
-
-# TODO: retrieve this code from databricks_deployment_patterns.py
-# TODO: Should this be yaml instead of python? Probably for compactness.
+  
+#### TODO: retrieve this code from databricks_deployment_patterns.py
+#### TODO: Should this be yaml instead of python? Probably for compactness.
 ```python
 my_spark_datasource_config = {
     "name": "insert_your_datasource_name_here",
@@ -150,7 +148,7 @@ my_inferred_asset_filesystem_data_connector = {
 
 
 Next we will create a `RuntimeBatchRequest` to reference our loaded dataframe and add metadata:
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 batch_request_from_dataframe = RuntimeBatchRequest(
     datasource_name="insert_your_datasource_name_here",
@@ -165,12 +163,14 @@ batch_request_from_dataframe = RuntimeBatchRequest(
 ```
 
 
-### 4. Create expectations
+
+
+### 5. Create expectations
 
 Here we will use a `Validator` to interact with our batch of data and generate an `Expectation Suite` (like the method used in the CLI interactive mode notebook `great_expectations --v3-api suite new --interactive`).
 
 First we create the suite and get a validator:
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 expectation_suite_name = "insert_your_expectation_suite_name_here"
 context.create_expectation_suite(
@@ -183,7 +183,7 @@ validator = context.get_validator(
 ```
 
 Then we use the `Validator` to add a few expectations:
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 ```
@@ -207,12 +207,12 @@ validator.save_expectation_suite(discard_failed_expectations=False)
   ]}>
   <TabItem value="file">
 
-# TODO: Insert file instructions here
+#### TODO: Insert file instructions here
 
 </TabItem>
 <TabItem value="dataframe">
 
-# TODO: Insert dataframe instructions here
+#### TODO: Insert dataframe instructions here
 
 </TabItem>
 </Tabs>
@@ -220,7 +220,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 Here we will create and store a checkpoint with no defined validations, then pass in our dataframe at runtime.
 
 First we create the checkpoint configuration
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 
 my_checkpoint_name = "my_checkpoint"
@@ -234,19 +234,19 @@ print(yaml_config)
 ```
 
 Then we test our syntax using `test_yaml_config`
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 my_checkpoint = context.test_yaml_config(yaml_config=yaml_config)
 ```
 
 If all is well, we add the checkpoint:
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 context.add_checkpoint(**yaml.load(yaml_config))
 ```
 
 Finally we run it with a validation defined using the batch request containing a reference to our dataframe and our expectation suite name:
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
@@ -264,7 +264,7 @@ context.run_checkpoint(
 Since we used a `SimpleCheckpoint`, it already contained an `UpdateDataDocsAction` so our Data Docs store will contain a new rendered validation result.
 
 To see the full Checkpoint configuration, you can run:
-# TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
+#### TODO: retrieve this code from databricks_deployment_patterns.py, substituting the data_asset_name
 ```python
 print(my_checkpoint.get_substituted_config().to_yaml_str())
 ```
@@ -276,4 +276,4 @@ Run the following databricks CLI command to download your data docs (replacing t
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 ```
 
-# TODO: Add link to file with example code
+#### TODO: Add link to file with example code
