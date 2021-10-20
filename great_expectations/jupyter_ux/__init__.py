@@ -12,6 +12,9 @@ from IPython.core.display import HTML, display
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
+
+# must be -1 for Pandas 0.23 and 0.25 compatibility checks
+# ... however -1 throws a deprecation warning in current versions
 pd.set_option("display.max_colwidth", -1)
 
 from great_expectations.render.renderer import (
