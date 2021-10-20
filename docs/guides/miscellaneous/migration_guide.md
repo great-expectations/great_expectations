@@ -1,20 +1,31 @@
-# Migrating to the Batch Request (V3) API
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](data_docs) and [profilers](profilers) in addition to [validation](validation).
+# Migration Guide
 
-The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations. The Batch Request API included a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of `Validation Operators`. These offer a number of advantages including an improved better experience around deploying and maintaining Great Expectations in production.
+While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](/docs/reference/data_docs) and [profilers](/docs/reference/profilers) in addition to [validation](/docs/reference/validation).
 
-The V3 API will become the preferred method of interacting with GE starting with version 0.14, so we highly recommend that you migrate to working with the V3 API as soon as possible. 
+The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations. The Batch Request API included a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of `Validation Operators`. These offer a number of advantages including an improved experience around deploying and maintaining Great Expectations in production.
 
-## Determine if you need to migrate your configuration.
 
-The Great Expectations CLI contains a tool that will check your configuration and determine if it needs to be migrated. To perform this check, run the `check-config` command: 
+## Migrating to the Batch Request (V3) API
+
+The V3 API will become the preferred method of interacting with GE starting with version 0.14, so we highly recommend that you migrate to working with the V3 API as soon as possible.
+
+The migration involves first using an automated CLI tool to upgrade Stores (like checkpoint stores), and manually upgrading Datasources and Validation Operators to V3.
+
+In order to migrate your configuration from V2 to V3, first do the following:
+
+
+### Check configuration using Great Expectations CLI
+
+The Great Expectations CLI contains a tool that will check your configuration and determine if it needs to be migrated. To perform this check, run the `check-config` command:
 
 ```bash
 great_expectations --v3-api project check-config
 ```
 
-If your configuration does not need to be changed at all, you will see the following message: 
+If your configuration is up-to-date and does not need to be upgraded, you will see the following message:
 
 ```bash
 Using v3 (Batch Request) API
@@ -22,7 +33,7 @@ Checking your config files for validity...
 Your config file appears valid!
 ```
 
-If your configuration needs to be upgraded, then you will see a message like this:
+If your configuration needs to be upgraded, you will see a message like this:
 
 ```bash
 Using v3 (Batch Request) API
@@ -34,16 +45,7 @@ Please consult the 0.13.x migration guide ttps://docs.greatexpectations.io/en/la
 upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
 ```
 
-## Run automatic upgrade script if prompted
-
-If the `check-config` method has advised you to upgrade your configuration, you can run the 
-
-```bash
-  great_expectations --v3-api project upgrade
-```
-```python
-# [ Ensure that this message is updated ]
-```
+If the `check-config` method has advised you to upgrade your configuration, you can run the following `upgrade` command
 
 ```bash
 ++====================================++
@@ -65,14 +67,13 @@ The following Stores and/or Store Names will be upgraded:
 Manual Steps
 =============
 
-No manual upgrade steps are required.
 
 Upgrade Confirmation
 =====================
 
 Please consult the 0.13.x migration guide to learn more about the automated upgrade process:
 
-    https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html
+    https://docs.greatexpectations.io/guides/miscellaneous/migration_guide.html
 
 Would you like to proceed with the project upgrade? [Y/n]: Y
 ```
@@ -101,21 +102,35 @@ You appear to be using a legacy capability with the latest config version (3.0).
 Your project is up-to-date - no further upgrade is necessary.
 ```
 
-[This will updated according to CLI changes]
+### Manually migrate Datasources from V2 to V3
 
-## 3. Manually migrate Datasources from V2 to V3
+The first manual step needed is to convert the V2-style datasource to a V3-style one.
 
-The first manual step needed is convert the old-style datasource to a new-style one. 
+The v2-style datasource has:
+  - Data-type specific datasources, like the `PandasDatasource` below.
+  - Data-type specific datasets, like the `PandasDataset` below.
+  - batch_kwargs_generators like the `SubdirReaderBatchKwargsGenerator` below.
 
-The old-style datasource has: 
-  - data-type specific datasources (like `PandasDatasource` below)
-  - data-type specific (`PandasDataset` below)
-  - and batch_kwargs_generators
+The v3-style datasource
+  - Datasource that is agnostic to data-type
+  - Datatype-specific ExecutionEngine, like the `PandasExecutionEngine` below.
+  - Data-specific DataConnectors, like the `InferredAssetFilesystemDataConnector` below.
 
+A [Data Connector](../../reference/datasources) facilitates access to an external data store, such as a database, filesystem, or cloud storage and the [Execution Engine](../../reference/execution_engine) is responsible for providing the computing resources that will be used to actually perform validation.
+
+<Tabs
+  groupId="v2-v3-datasource"
+  defaultValue='v2'
+  values={[
+  {label: 'V2-Style Datasource', value:'v2'},
+  {label: 'V3-Style Datasource', value:'v3'},
+  ]}>
+
+<TabItem value="v2">
 
 ```YAML
 datasources:
-  titanic__dir:
+  my_v2_datasource:
     module_name: great_expectations.datasource
     class_name: PandasDatasource
     data_asset_type:
@@ -124,18 +139,14 @@ datasources:
     batch_kwargs_generators:
       subdir_reader:
         class_name: SubdirReaderBatchKwargsGenerator
-        base_directory: /Users/work/ge_Data/titanic
+        base_directory: /ge_Data/titanic
 ```
-
-Here is the equivalent example :
-  The old-style datasource has: 
-  - Data-type agnostic Datasource : which ??? 
-  - data-type specific ExecutionEngine : which ??? 
-  - data-type speific DataConnectors : which ???. Of which we are using InferredAssetFilesystemDataConnector
+</TabItem>
+<TabItem value="v3">
 
 ```YAML
 datasources:
-  my_datasource:
+  my_v3_datasource:
     module_name: great_expectations.datasource
     execution_engine:
       module_name: great_expectations.execution_engine
@@ -147,76 +158,134 @@ datasources:
         default_regex:
           group_names: data_asset_name
           pattern: (.*)
-        base_directory: /Users/work/ge_Data/titanic
+        base_directory: /ge_Data/titanic
         class_name: InferredAssetFilesystemDataConnector
 ```
 
-This was a simple example : and how they are different in the new-style datasource. THe documentation contains many other examples of V3, which you should be able to use for your needs. 
+</TabItem>
+</Tabs>
 
-They can be found in the "Connecting To your Data Section" in the how-to-guides:
+As you might expect, migrating configurations that contain connections to the cloud or databases have additional complexities (like credentials) that are specific to each situation. Fortunately, the how-to-guides contain many other examples of V3 configurations that can be used in your situation. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index).
 
-- How to connect to in-memory data in a Pandas dataframe
-- How to connect to in-memory data in a Spark dataframe
-- How to connect to a Athena database
-- How to connect to a BigQuery database
-- How to connect to a MySQL database
-- How to connect to a PostgreSQL database
-- How to connect to a Redshift database
-- How to connect to a Snowflake database
-- How to connect to a SQLite database
-- How to connect to data on a filesystem using Pandas
-- How to connect to data on a filesystem using Spark
-- How to connect to data on S3 using Pandas
-- How to connect to data on S3 using Spark
-- How to connect to data on GCS using Pandas
-- How to connect to data on GCS using Spark
-- How to connect to data on Azure Blob Storage using Pandas
-- How to connect to data on Azure Blob Storage 
+### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
-## 4. Manually migrate Validation Operators to V3 Checkpoints
-
-As part of the new modular expectations API in Great Expectations, Validation Operators are evolving into Checkpoints. At some point in the future Validation Operators will be fully deprecated.
-
-https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_a_validation_operator.html?highlight=validation%20operator
+As of Great Expectations version 0.13.7, we have updated and improved the Checkpoints feature. You can continue to use your existing legacy Checkpoint workflows if you’re working with concepts from the Batch Kwargs (v2) API. If you’re using concepts from the BatchRequest (v3) API, please refer to the new Checkpoints guides.
 
 
+```yaml
+name: test_v2_checkpoint
+config_version:
+module_name: great_expectations.checkpoint
+class_name: LegacyCheckpoint
+validation_operator_name:
+batches:
+  - batch_kwargs:
+      path: /ge_Data/Titanic.csv
+      datasource: __dir
+      data_asset_name: Titanic
+    expectation_suite_names:
+      - Titanic.warning
+```
+
+
+
+### Manually Migrate Validation Operators to V3 Checkpoints
+
+
+
+In the V2 API, Validation Operators contained a list of actions to be performed at Validation time, and these Operators were referenced by Checkpoints. In the V3 API, Validation Operators were subsumed by Checkpoints, as actions under the `action_list` list field.
+
+<Tabs
+  groupId="v2-v3-datasource"
+  defaultValue='v2-validation-operator'
+  values={[
+  {label: 'V2-Style Validation Operator', value:'v2-validation-operator'},
+  {label: 'V3-Style Checkpoint', value:'v3-checkpoint'},
+  ]}>
+
+<TabItem value="v2-validation-operator">
 
 Here is an example of a Validation Operator
 ```yaml
-
-
+validation_operators:
+  action_list_operator:
+    class_name: ActionListValidationOperator
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
 ```
 
-Here is an example of an equivalent Checkpoint
-
-
-
+And how the V2 checkpoint would have originally referenced it:
 ```yaml
 
+validation_operator_name: action_list_operator
+# Batches are a list of batch_kwargs paired with a list of one or more suite
+# names. A checkpoint can have one or more batches. This makes deploying
+# Great Expectations in your pipelines easy!
+batches:
+  - batch_kwargs:
+      table: imdb_100k_main
+      schema: testdb
+#      data_asset_name: imdb_100k_main
+      datasource: demo_mysql_db
+    expectation_suite_names: # one or more suites may validate against a single batch
+      - Titanic.warnings
 ```
 
-Please look at this
+</TabItem>
+<TabItem value="v3-checkpoint">
 
+Here is an example of a V3 checkpoint that includes the same Actions under `action_list`
 
-## 5. Manually migrate V2 Checkpoints to V3 Checkpoints
+```yaml
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%m-foo-bar-template-$VAR"
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_data_connector
+      data_asset_name: users
+      data_connector_query:
+        index: -1
+    expectation_suite_name: users.warning
+    action_list:
+        - name: store_validation_result
+          action:
+            class_name: StoreValidationResultAction
+        - name: store_evaluation_params
+          action:
+            class_name: StoreEvaluationParametersAction
+        - name: update_data_docs
+          action:
+            class_name: UpdateDataDocsAction
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20     
+```
+</TabItem>
+</Tabs>
 
-https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html#how-to-guides-validation-how-to-create-a-new-checkpoint
-https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html#how-to-guides-validation-how-to-create-a-new-checkpoint
+## Upgrading from previous versions of Great Expectations
 
+Since each major version introduces breaking changes that can have unintended interactions when combined with other changes, we recommend that you only upgrade 1 major version at a time.
+If you are running an older version of GE (0.12 or before) we recommend you only upgrade 1 major version at a time. Notes from previous migration guides are included for reference.
 
+### Upgrading to 0.12.x
 
-In some cases you wil 
-
-
-
-# Upgrading from previous versions of Great Expectations
-
-Since each major version introduces breaking changes that can have unintended interactions when combined with other changes, we recommend that you only upgrade 1 major version at a time. 
-If you are running an older version of GE (0.12 or before) we recommend you only upgrade 1 major version at a time. Notes from previous migration guides are included for reference. 
-
-## Upgrading to 0.12.x
-
-The 0.12.0 release makes a small but breaking change to the `add_expectation`, `remove_expectation`, and `find_expectations` methods. To update your code, replace the `expectation_type`, `column`, or `kwargs` arguments with an Expectation Configuration object. For more information on the `match_type` parameter, see [Expectation Suite Operations](expectation_suite_operations)
+The 0.12.0 release makes a small but breaking change to the `add_expectation`, `remove_expectation`, and `find_expectations` methods. To update your code, replace the `expectation_type`, `column`, or `kwargs` arguments with an Expectation Configuration object. For more information on the `match_type` parameter, see [Expectation Suite Operations](/docs/reference/expectation_suite_operations)
 
 For example, using the old API:
 
@@ -245,13 +314,13 @@ Using the new API:
 ```
 
 
-## Upgrading to 0.11.x
+### Upgrading to 0.11.x
 
 The 0.11.0 release has several breaking changes related to `run_id` and `ValidationMetric` objects. Existing projects that have Expectation Suite Validation Results or configured evaluation parameter stores with DatabaseStoreBackend backends must be migrated.
 
 In addition, `ValidationOperator.run` now returns an instance of new type, `ValidationOperatorResult` (instead of a dictionary). If your code uses output from Validation Operators, it must be updated.
 
-### `run_id` and `ValidationMetric` Changes
+#### `run_id` and `ValidationMetric` Changes
 
 `run_id` is now typed using the new `RunIdentifier` class, with optional `run_name` and `run_time` instantiation
 arguments. The `run_name` can be any string (this could come from your pipeline runner, e.g. Airflow run id). The `run_time`
@@ -270,7 +339,7 @@ stores of type `ValidationsStore` (and subclasses) or `EvaluationParameterStore`
 `MetricStore`). In addition, because Expectation Suite Validation Result json objects have a `run_id` key,
 existing validation result json files must be updated with a new typed `run_id`.
 
-### Migrating Your 0.10.x Project
+#### Migrating Your 0.10.x Project
 
 Before performing any of the following migration steps, please make sure you have appropriate backups of your project.
 
@@ -426,7 +495,7 @@ great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/
 great_expectations/uncommitted/data_docs/my_site_name/validations/my_suite_name/my_run_id/my_run_time/batch_identifier.html
 ```
 
-## Upgrading to 0.10.x
+### Upgrading to 0.10.x
 
 In the 0.10.0 release, there are several breaking changes to the DataContext API.
 
@@ -442,7 +511,7 @@ If you are using `BatchKwargsGenerators` in your project config, follow these st
 - Run a simple command such as: `great_expectations datasource list` and ensure you see a list of datasources.
 
 
-## Upgrading to 0.9.x
+### Upgrading to 0.9.x
 
 In the 0.9.0 release, there are several changes to the DataContext API.
 
@@ -652,7 +721,7 @@ if __name__ == "__main__":
 - There are numerous under-the-scenes changes to the internal types used in
   GreatExpectations. These should be transparent to users.
 
-## Upgrading to 0.8.x
+### Upgrading to 0.8.x
 
 In the 0.8.0 release, our DataContext config format has changed dramatically to
 enable new features including extensibility.
@@ -669,7 +738,7 @@ Some specific changes:
   `class_name` (and `module_name` as well when ambiguous).
 - Completely new `SiteBuilder` configuration.
 
-### Breaking Changes
+#### Breaking Changes
 
  - **top-level `validate` has a new signature**, that offers a variety of different options for specifying the DataAsset
    class to use during validation, including `data_asset_class_name` / `data_asset_module_name` or `data_asset_class`
@@ -685,13 +754,13 @@ Pre-0.8.x configuration files `great_expectations.yml` are not compatible with 0
 
 If you run into any issues, please ask for help on [Slack](https://greatexpectations.io/slack).
 
-## Upgrading to 0.7.x
+### Upgrading to 0.7.x
 
 In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
 
- - A [DataContext](data_context) object manages access to expectation suites and other configuration in addition to data assets.
+ - A [DataContext](/docs/reference/data_context) object manages access to expectation suites and other configuration in addition to data assets.
    - It provides a flexible but opinionated structure for creating and storing configuration and expectations in version control.
 
- - When upgrading from prior versions, the new [datasource](datasources) objects provide the same functionality that compute-environment-specific data context objects provided before, but with significantly more flexibility.
+ - When upgrading from prior versions, the new [datasource](/docs/reference/datasources) objects provide the same functionality that compute-environment-specific data context objects provided before, but with significantly more flexibility.
 
- - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible [profiler](profilers) feature.
+ - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible [profiler](/docs/reference/profilers) feature.
