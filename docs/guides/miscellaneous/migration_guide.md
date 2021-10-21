@@ -123,15 +123,7 @@ The v3-style datasource has:
 
 For reference, a [Data Connector](../../reference/datasources) facilitates access to an external data store, such as a database, filesystem, or cloud storage and the [Execution Engine](../../reference/execution_engine) is responsible for providing the computing resources that will be used to actually perform validation.
 
-<Tabs
-  groupId="v2-v3-datasource"
-  defaultValue='v2'
-  values={[
-  {label: 'V2-Style Datasource', value:'v2'},
-  {label: 'V3-Style Datasource', value:'v3'},
-  ]}>
-
-<TabItem value="v2">
+#### V2-Style Datasource
 
 ```YAML
 datasources:
@@ -146,9 +138,8 @@ datasources:
         class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../../
 ```
-</TabItem>
-<TabItem value="v3">
 
+#### V3-Style Datasource
 ```YAML
 datasources:
   my_datasource:
@@ -167,26 +158,14 @@ datasources:
         class_name: InferredAssetFilesystemDataConnector
 ```
 
-</TabItem>
-</Tabs>
 
 Migrating configurations that contain connections to the cloud or databases have additional complexities like credentials that are specific to each instance. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situation. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
 
 ### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
-In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature which deprecated Validation Operators. Instead of the Checkpoint refering to Validation Operators that were in the `great_expectations.yml` file, they were combined into the Checkpoint configuration itself as part of the `action_list`.  In addition, the V3 Checkpoints utilize the `BatchRequest`, which take advantage of the `DataConnectors` and `ExecutionEngine` that are features of the V3-style Datasource. To perform the migration, please refer to the example below:
+In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature which deprecated Validation Operators. Instead of the Checkpoint refering to Validation Operators that were in the `great_expectations.yml` file, they were combined into the Checkpoint configuration itself as part of the `action_list`.  In addition, the V3 Checkpoints utilize the `BatchRequest`, which take advantage of the `DataConnectors` and `ExecutionEngine` that are features of the V3-style Datasource.  `BatchRequest` enables your V3 Checkpoint to be run on the latest single batch of data, or the latest year of batches, with multi-batch Expectations soon to come. To perform the migration, please refer to the example below:
 
-<Tabs
-  groupId="v2-v3-checkpoint"
-  defaultValue='v2-checkpoint'
-  values={[
-  {label: 'V2-Style Checkpoint', value:'v2-checkpoint'},
-  {label: 'V3-Style Checkpoint', value:'v3-checkpoint'},
-  ]}>
-
-<TabItem value="v2-checkpoint">
-
-Here is an example of V2 Checkpoint that refers to a Validation Operator named `action_list_operator`.
+#### V2-Style Checkpoint
 
 ```yaml
 # in the test_v2_checkpoint.yml file
@@ -222,11 +201,8 @@ validation_operators:
           class_name: UpdateDataDocsAction
 ```
 
-Now click the V3-style Checkpoint tab to see how the equivalent configuration would look like for V3.
+#### V3-Style Checkpoint
 
-</TabItem>
-
-<TabItem value="v3-checkpoint">
 Here is the equivalent configuration in V3-checkpoints. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.
 
 ```yaml
@@ -263,7 +239,6 @@ validations:
 profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:
-
 ```
 
 Finally, you can check if your migration has worked by running your new V3-style Checkpoint
@@ -289,9 +264,6 @@ Congratulations! You have successfully migrated your configuration of Great Expe
 - [How to create a new Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint)
 - [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
 
-
-</TabItem>
-</Tabs>
 
 ## Upgrading from previous versions of Great Expectations
 
