@@ -191,7 +191,7 @@ A corresponding configuration for `InferredAssetS3DataConnector` would look simi
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L180-L199
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L178-L197
 ```
 
 </TabItem>

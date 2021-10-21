@@ -116,9 +116,7 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<MY S3 BUCKET>", "superconductive-public"
-)
+datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>", "superconductive-public")
 datasource_yaml = datasource_yaml.replace(
     "<MY S3 BUCKET PREFIX>", "data/taxi_yellow_trip_data_samples/"
 )
