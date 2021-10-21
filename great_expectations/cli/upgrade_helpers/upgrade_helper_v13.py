@@ -1,11 +1,12 @@
 import datetime
 import json
 import os
-from typing import Optional
+from typing import List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations import DataContext
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -32,8 +33,9 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         # noinspection SpellCheckingInspection
         self.upgrade_log = {
             "update_version": update_version,
-            "skipped_checkpoints_upgrade": False,
+            "skipped_checkpoint_store_upgrade": False,
             "added_checkpoint_store": {},
+            "skipped_checkpoint_config_upgrade": False,
             "skipped_datasources_upgrade": False,
             "skipped_validation_operators_upgrade": False,
         }
@@ -45,6 +47,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
                 "store_names": {},
             },
             "manual": {
+                "checkpoints": {},
                 "datasources": {},
                 "validation_operators": {},
             },
@@ -54,6 +57,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
     def _generate_upgrade_checklist(self):
         self._process_checkpoint_store_for_checklist()
+        self._process_checkpoint_config_for_checklist()
         self._process_datasources_for_checklist()
         self._process_validation_operators_for_checklist()
 
@@ -68,7 +72,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             stores: dict = config_commented_map["stores"]
             if checkpoint_store_name:
                 if stores.get(checkpoint_store_name):
-                    self.upgrade_log["skipped_checkpoints_upgrade"] = True
+                    self.upgrade_log["skipped_checkpoint_store_upgrade"] = True
                 else:
                     self.upgrade_checklist["automatic"]["stores"] = {
                         checkpoint_store_name: DataContextConfigDefaults.DEFAULT_STORES.value[
@@ -89,7 +93,24 @@ class UpgradeHelperV13(BaseUpgradeHelper):
                         ]
                     }
         else:
-            self.upgrade_log["skipped_checkpoints_upgrade"] = True
+            self.upgrade_log["skipped_checkpoint_store_upgrade"] = True
+
+    def _process_checkpoint_config_for_checklist(self):
+        legacy_checkpoints: List[Union[Checkpoint, LegacyCheckpoint]] = []
+        checkpoint: Union[Checkpoint, LegacyCheckpoint]
+        checkpoint_name: str
+        for checkpoint_name in self.data_context.list_checkpoints():
+            checkpoint = self.data_context.get_checkpoint(name=checkpoint_name)
+            if checkpoint.config.config_version is None:
+                legacy_checkpoints.append(checkpoint)
+
+        self.upgrade_checklist["manual"]["checkpoints"] = {
+            checkpoint.name: checkpoint.config.to_json_dict()
+            for checkpoint in legacy_checkpoints
+        }
+
+        if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
+            self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection
     def _process_datasources_for_checklist(self):
@@ -139,11 +160,14 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         )
 
     def get_upgrade_overview(self):
-        confirmation_required = not self.upgrade_log["skipped_checkpoints_upgrade"]
-
         manual_steps_required = self.manual_steps_required()
 
         increment_version = self.upgrade_log["update_version"]
+
+        confirmation_required = (
+            increment_version
+            and not self.upgrade_log["skipped_checkpoint_store_upgrade"]
+        )
 
         upgrade_overview = f"""\
 <cyan>\
@@ -170,10 +194,13 @@ Please consult the 0.13.x migration guide for instructions on how to complete an
 more about the automated upgrade process:
 
     <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide</cyan>
+"""
+            )
+            if confirmation_required:
+                upgrade_overview += f"""\
 
 Would you like to proceed with the project upgrade?\
 """
-            )
         else:
             upgrade_overview += f"""\
 Your project needs to be upgraded in order to be compatible with Great Expectations 0.13.x.
@@ -191,6 +218,10 @@ Your project needs to be upgraded in order to be compatible with Great Expectati
             self.upgrade_checklist["automatic"]["store_names"].keys()
         )
 
+        checkpoint_config_upgrade_checklist = self.upgrade_checklist["manual"][
+            "checkpoints"
+        ]
+
         # noinspection SpellCheckingInspection
         datasources_upgrade_checklist = self.upgrade_checklist["manual"]["datasources"]
 
@@ -198,7 +229,8 @@ Your project needs to be upgraded in order to be compatible with Great Expectati
 
         # noinspection SpellCheckingInspection
         if (
-            self.upgrade_log["skipped_checkpoints_upgrade"]
+            self.upgrade_log["skipped_checkpoint_store_upgrade"]
+            and self.upgrade_log["skipped_checkpoint_config_upgrade"]
             and self.upgrade_log["skipped_datasources_upgrade"]
             and self.upgrade_log["skipped_validation_operators_upgrade"]
         ):
@@ -212,7 +244,7 @@ The Upgrade Helper will simply increment the config_version of your great_expect
             upgrade_overview += """
 <red>**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.</red>
 """
-            if not self.upgrade_log["skipped_checkpoints_upgrade"]:
+            if not self.upgrade_log["skipped_checkpoint_store_upgrade"]:
                 if stores_upgrade_checklist or store_names_upgrade_checklist:
                     upgrade_overview += """
 <cyan>\
@@ -237,7 +269,6 @@ The following Stores and/or Store Names will be upgraded:
                         else ""
                     )
 
-            # noinspection SpellCheckingInspection
             if manual_steps_required:
                 upgrade_overview += """
 <cyan>\
@@ -245,9 +276,22 @@ Manual Steps
 =============
 </cyan>
 """
+                if not self.upgrade_log["skipped_checkpoint_config_upgrade"]:
+                    upgrade_overview += """\
+The following Checkpoints must be upgraded manually, due to using the old Checkpoint format, which is being deprecated:
+
+"""
+                    upgrade_overview += (
+                        f"""\
+    - Checkpoints: {", ".join(checkpoint_config_upgrade_checklist)}
+"""
+                        if checkpoint_config_upgrade_checklist
+                        else ""
+                    )
+
                 # noinspection SpellCheckingInspection
                 if not self.upgrade_log["skipped_datasources_upgrade"]:
-                    upgrade_overview += """\
+                    upgrade_overview += """
 The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
 
 """
@@ -292,7 +336,7 @@ No manual upgrade steps are required.
         return upgrade_report, increment_version, exception_occurred
 
     def _upgrade_configuration_automatically(self):
-        if not self.upgrade_log["skipped_checkpoints_upgrade"]:
+        if not self.upgrade_log["skipped_checkpoint_store_upgrade"]:
             config_commented_map: CommentedMap = (
                 self.data_context.get_config().commented_map
             )

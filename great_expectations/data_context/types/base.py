@@ -1244,9 +1244,11 @@ class DataContextConfigSchema(Schema):
         ):
             # TODO: <Alex>Add a URL to the migration guide with instructions for how to replace validation_operators with appropriate actions.</Alex>
             logger.warning(
-                "You appear to be using a legacy capability with the latest config version ({}).\n    Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number {}.".format(
-                    data["config_version"], CURRENT_GE_CONFIG_VERSION
-                ),
+                f"""You appear to be using a legacy capability with the latest config version \
+({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
+are being deprecated.  Please update your configuration to be compatible with the version number \
+{CURRENT_GE_CONFIG_VERSION}.\n    (This message will appear repeatedly until your configuration is updated.)
+"""
             )
 
 
