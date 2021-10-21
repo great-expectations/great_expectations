@@ -110,9 +110,9 @@ explicitly named. Each `DataAsset` can have their own regex `pattern` and `group
 Imagine you have the following files in `my_directory/`:
 
 ```
-my_directory/yellow_tripdata_2019-01.csv
-my_directory/yellow_tripdata_2019-02.csv
-my_directory/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata_2019-03.csv
 ```
 
 We could create a DataAsset `yellow_tripdata` that contains 3 data_references (`yellow_tripdata_2019-01.csv`, `yellow_tripdata_2019-02.csv`, and `yellow_tripdata_2019-03.csv`).

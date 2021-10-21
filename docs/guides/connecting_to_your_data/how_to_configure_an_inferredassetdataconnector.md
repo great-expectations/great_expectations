@@ -112,9 +112,9 @@ require a `default_regex` parameter, with a configured regex `pattern` and captu
 Imagine you have the following files in `my_directory/`:
 
 ```
-my_directory/yellow_tripdata_2019-01.csv
-my_directory/yellow_tripdata_2019-02.csv
-my_directory/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata_2019-03.csv
 ```
 
 We can imagine two approaches to loading the data into GE.
@@ -176,24 +176,26 @@ Running `test_yaml_config()` would result in 1 DataAsset `yellow_tripdata` with 
 
 A corresponding configuration for `InferredAssetS3DataConnector` would look similar but would require `bucket` and `prefix` values instead of `base_directory`.
 
-```yaml
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  my_filesystem_data_connector:
-    class_name: InferredAssetS3DataConnector
-    datasource_name: my_data_source
-    bucket: MY_S3_BUCKET
-    prefix: MY_S3_BUCKET_PREFIX
-    default_regex:
-      group_names:
-        - data_asset_name
-        - year
-        - month
-        - day
-      pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L147-L165
 ```
+
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L180-L199
+```
+
+</TabItem>
+</Tabs>
 
 The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using `InferredAssetFilesystemDataConnector` as an example and only show the configuration under `data_connectors` for simplicity.
 
