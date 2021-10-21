@@ -176,80 +176,85 @@ A corresponding configuration for `ConfiguredAssetS3DataConnector` would look si
 
 The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using `ConfiguredAssetFilesystemDataConnector`.
 
-**Note**: The examples will only show the configuration for `data_connectors` for simplicity.
+### Example 1: Basic Configuration for a single DataAsset
 
-Example 1: Basic Configuration for a single DataAsset
------------------------------------------------------
-
-Continuing the example above, imagine you have the following files in the directory `my_directory/`:
+Continuing the example above, imagine you have the following files in the directory `<MY DIRECTORY>`:
 
 ```
-test/alpha-1.csv
-test/alpha-2.csv
-test/alpha-3.csv
+<MY DIRECTORY>/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata_2019-03.csv
 ```
 
 Then this configuration...
 
-```yaml
-class_name: ConfiguredAssetFilesystemDataConnector
-base_directory: test/
-default_regex:
-assets:
-  alpha:
-    pattern: alpha-(.*)\.csv
-    group_names:
-      - index
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L175-L191
 ```
 
-...will make available `alpha` as a single DataAsset with the following data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L202-L222
+```
+
+</TabItem>
+</Tabs>
+
+...will make available `yelow_tripdata` as a single DataAsset with the following data_references:
 
 ```bash
 Available data_asset_names (1 of 1):
-    alpha (3 of 3): [
-        'alpha-1.csv',
-        'alpha-2.csv',
-        'alpha-3.csv'
-     ]
+    yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
+
+Unmatched data_references (0 of 0):[]
 ```
 
 Once configured, you can get a `Validator` from the `Data Context` as follows:
 
-```python
-my_validator = context.get_validator(
-    datasource_name="my_data_source",
-    data_connector_name="my_filesystem_data_connector",
-    data_asset_name="alpha",
-    batch_identifiers={
-        "index": "2"
-    },
-    expectation_suite_name="my_expectation_suite" # the suite with this name must exist by the time of this call
-)
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L238-L248
 ```
 
 But what if the regex does not match any files in the directory?
 
 Then this configuration...
 
-```yaml
-class_name: ConfiguredAssetFilesystemDataConnector
-base_directory: test/
-default_regex:
-assets:
-    alpha:
-      pattern: beta-(.*)\.csv
-      group_names:
-        - index
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L260-L276
 ```
+
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L287-L307
+```
+
+</TabItem>
+</Tabs>
 
 ...will give you this output
 
 ```bash
-Successfully instantiated ConfiguredAssetFilesystemDataConnector
 Available data_asset_names (1 of 1):
-    alpha (0 of 0): []
+    yellow_tripdata (0 of 0): []
 
-Unmatched data_references (3 of 3): ['alpha-1.csv', 'alpha-2.csv', 'alpha-3.csv']
+Unmatched data_references (3 of 3):['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
 ```
 
 Notice that `alpha` has 0 data_references, and there are 3 `Unmatched data_references` listed.

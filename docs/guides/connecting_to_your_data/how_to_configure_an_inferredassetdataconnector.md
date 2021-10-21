@@ -197,56 +197,54 @@ A corresponding configuration for `InferredAssetS3DataConnector` would look simi
 </TabItem>
 </Tabs>
 
-The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using `InferredAssetFilesystemDataConnector` as an example and only show the configuration under `data_connectors` for simplicity.
+The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using `InferredAssetFilesystemDataConnector`.
 
 
-Example 1: Basic configuration for a single DataAsset
------------------------------------------------------
+### Example 1: Basic configuration for a single DataAsset
 
-Continuing the example above, imagine you have the following files in the directory `my_directory/`:
+Continuing the example above, imagine you have the following files in the directory `<MY DIRECTORY>`:
 
 ```
-my_directory/alpha-2020-01-01.csv
-my_directory/alpha-2020-01-02.csv
-my_directory/alpha-2020-01-03.csv
+<MY DIRECTORY>/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata_2019-03.csv
 ```
 
 Then this configuration...
 
-```yaml
-class_name: InferredAssetFilesystemDataConnector
-base_directory: my_directory/
-default_regex:
-  group_names:
-    - data_asset_name
-    - year
-    - month
-    - day
-  pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L225-L242
 ```
 
-...will make available the following data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L253-L271
+```
+
+</TabItem>
+</Tabs>
+
+...will make available `yelow_tripdata` as a single DataAsset with the following data_references:
 
 ```bash
 Available data_asset_names (1 of 1):
-    alpha (3 of 3): [
-        'alpha-2020-01-01.csv',
-        'alpha-2020-01-02.csv',
-        'alpha-2020-01-03.csv'
-    ]
+    yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
 
-Unmatched data_references (0 of 0): []
+Unmatched data_references (0 of 0):[]
 ```
 
 Once configured, you can get `Validators` from the `Data Context` as follows:
 
-```python
-my_validator = my_context.get_validator(
-    execution_engine_name="my_execution_engine",
-    data_connector_name="my_data_connector",
-    data_asset_name="alpha",
-    create_expectation_suite_with_name="my_expectation_suite",
-)
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L294-L303
 ```
 
 Example 2: Basic configuration with more than one DataAsset
