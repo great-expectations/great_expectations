@@ -163,7 +163,7 @@ Migrating configurations that contain connections to the cloud or databases have
 
 ### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
-In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature which deprecated Validation Operators. Instead of the Checkpoint refering to Validation Operators that were in the `great_expectations.yml` file, they were combined into the Checkpoint configuration itself as part of the `action_list`.  In addition, the V3 Checkpoints utilize the `BatchRequest`, which take advantage of the `DataConnectors` and `ExecutionEngine` that are features of the V3-style Datasource.  `BatchRequest` enables your V3 Checkpoint to be run on the latest single batch of data, or the latest year of batches, with multi-batch Expectations soon to come. To perform the migration, please refer to the example below:
+In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature which deprecated Validation Operators. Instead of the Checkpoint refering to Validation Operators that were in the `great_expectations.yml` file, they were combined into the Checkpoint configuration itself as part of the `action_list`.  In addition, the V3 Checkpoints utilize the `BatchRequest`, which take advantage of the `DataConnectors` and `ExecutionEngine` that are features of the V3-style Datasource.  `BatchRequest` enables your V3 Checkpoint to filter and sort your batches, allowing the Checkpoint run on the latest single batch of data, or the latest year of batches, with multi-batch Expectations soon to come. To perform the migration, please refer to the example below:
 
 #### V2-Style Checkpoint
 
