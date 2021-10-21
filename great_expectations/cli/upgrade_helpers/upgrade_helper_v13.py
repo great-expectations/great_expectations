@@ -153,99 +153,15 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 </cyan>
 
 """
-        stores_upgrade_checklist = list(
-            self.upgrade_checklist["automatic"]["stores"].keys()
-        )
-        store_names_upgrade_checklist = list(
-            self.upgrade_checklist["automatic"]["store_names"].keys()
-        )
-
-        # noinspection SpellCheckingInspection
-        datasources_upgrade_checklist = self.upgrade_checklist["manual"]["datasources"]
-
         if increment_version:
-            upgrade_overview += f"""\
+            upgrade_overview += (
+                f"""\
 UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
 """
-            # noinspection SpellCheckingInspection
-            if (
-                self.upgrade_log["skipped_checkpoints_upgrade"]
-                and self.upgrade_log["skipped_datasources_upgrade"]
-                and self.upgrade_log["skipped_validation_operators_upgrade"]
-            ):
-                upgrade_overview += """
-<green>\
-Good news! No special upgrade steps are required to bring your project up to date.
-The Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.
-</green>
-"""
-            else:
-                upgrade_overview += """
-<red>**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.</red>
-"""
-                if not self.upgrade_log["skipped_checkpoints_upgrade"]:
-                    if stores_upgrade_checklist or store_names_upgrade_checklist:
-                        upgrade_overview += """
-<cyan>\
-Automated Steps
-================
-</cyan>
-The following Stores and/or Store Names will be upgraded:
-
-"""
-                        upgrade_overview += (
-                            f"""\
-    - Stores: {", ".join(stores_upgrade_checklist)}
-"""
-                            if stores_upgrade_checklist
-                            else ""
-                        )
-                        upgrade_overview += (
-                            f"""\
-    - Store Names: {", ".join(store_names_upgrade_checklist)}
-"""
-                            if store_names_upgrade_checklist
-                            else ""
-                        )
-
-                # noinspection SpellCheckingInspection
-                if manual_steps_required:
-                    upgrade_overview += """
-<cyan>\
-Manual Steps
-=============
-</cyan>
-"""
-                    # noinspection SpellCheckingInspection
-                    if not self.upgrade_log["skipped_datasources_upgrade"]:
-                        upgrade_overview += """\
-The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
-
-"""
-                        upgrade_overview += (
-                            f"""\
-    - Data Sources: {", ".join(datasources_upgrade_checklist)}
-"""
-                            if datasources_upgrade_checklist
-                            else ""
-                        )
-
-                    if not self.upgrade_log["skipped_validation_operators_upgrade"]:
-                        upgrade_overview += """
-Your configuration uses validation_operators, which are being deprecated.  Please, manually convert \
-validation_operators to use the new Checkpoint validation unit, since validation_operators will be deleted.
-
-"""
-                else:
-                    upgrade_overview += """
-<cyan>\
-Manual Steps
-=============
-</cyan>
-No manual upgrade steps are required.
-"""
-
-                upgrade_overview += """
+                + self._upgrade_overview_common_content(
+                    manual_steps_required=manual_steps_required
+                )
+                + """
 <cyan>\
 Upgrade Confirmation
 =====================
@@ -257,86 +173,107 @@ more about the automated upgrade process:
 
 Would you like to proceed with the project upgrade?\
 """
+            )
         else:
             upgrade_overview += f"""\
 Your project needs to be upgraded in order to be compatible with Great Expectations 0.13.x.
-"""
-            # noinspection SpellCheckingInspection
-            if (
-                self.upgrade_log["skipped_checkpoints_upgrade"]
-                and self.upgrade_log["skipped_datasources_upgrade"]
-                and self.upgrade_log["skipped_validation_operators_upgrade"]
-            ):
-                upgrade_overview += """
+""" + self._upgrade_overview_common_content(
+                manual_steps_required=manual_steps_required
+            )
+
+        return upgrade_overview, confirmation_required
+
+    def _upgrade_overview_common_content(self, manual_steps_required: bool):
+        stores_upgrade_checklist = list(
+            self.upgrade_checklist["automatic"]["stores"].keys()
+        )
+        store_names_upgrade_checklist = list(
+            self.upgrade_checklist["automatic"]["store_names"].keys()
+        )
+
+        # noinspection SpellCheckingInspection
+        datasources_upgrade_checklist = self.upgrade_checklist["manual"]["datasources"]
+
+        upgrade_overview = ""
+
+        # noinspection SpellCheckingInspection
+        if (
+            self.upgrade_log["skipped_checkpoints_upgrade"]
+            and self.upgrade_log["skipped_datasources_upgrade"]
+            and self.upgrade_log["skipped_validation_operators_upgrade"]
+        ):
+            upgrade_overview += """
 <green>\
 Good news! No special upgrade steps are required to bring your project up to date.
 The Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.
 </green>
-
 """
-            else:
-                if not self.upgrade_log["skipped_checkpoints_upgrade"]:
-                    if stores_upgrade_checklist or store_names_upgrade_checklist:
-                        upgrade_overview += """
+        else:
+            upgrade_overview += """
+<red>**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.</red>
+"""
+            if not self.upgrade_log["skipped_checkpoints_upgrade"]:
+                if stores_upgrade_checklist or store_names_upgrade_checklist:
+                    upgrade_overview += """
 <cyan>\
 Automated Steps
 ================
 </cyan>
-The following Stores and/or Store Names need to be upgraded:
+The following Stores and/or Store Names will be upgraded:
 
 """
-                        upgrade_overview += (
-                            f"""\
+                    upgrade_overview += (
+                        f"""\
     - Stores: {", ".join(stores_upgrade_checklist)}
 """
-                            if stores_upgrade_checklist
-                            else ""
-                        )
-                        upgrade_overview += (
-                            f"""\
+                        if stores_upgrade_checklist
+                        else ""
+                    )
+                    upgrade_overview += (
+                        f"""\
     - Store Names: {", ".join(store_names_upgrade_checklist)}
 """
-                            if store_names_upgrade_checklist
-                            else ""
-                        )
+                        if store_names_upgrade_checklist
+                        else ""
+                    )
 
-                # noinspection SpellCheckingInspection
-                if manual_steps_required:
-                    upgrade_overview += """
+            # noinspection SpellCheckingInspection
+            if manual_steps_required:
+                upgrade_overview += """
 <cyan>\
 Manual Steps
 =============
 </cyan>
 """
-                    # noinspection SpellCheckingInspection
-                    if not self.upgrade_log["skipped_datasources_upgrade"]:
-                        upgrade_overview += """\
+                # noinspection SpellCheckingInspection
+                if not self.upgrade_log["skipped_datasources_upgrade"]:
+                    upgrade_overview += """\
 The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
 
 """
-                        upgrade_overview += (
-                            f"""\
+                    upgrade_overview += (
+                        f"""\
     - Data Sources: {", ".join(datasources_upgrade_checklist)}
 """
-                            if datasources_upgrade_checklist
-                            else ""
-                        )
+                        if datasources_upgrade_checklist
+                        else ""
+                    )
 
-                    if not self.upgrade_log["skipped_validation_operators_upgrade"]:
-                        upgrade_overview += """
+                if not self.upgrade_log["skipped_validation_operators_upgrade"]:
+                    upgrade_overview += """
 Your configuration uses validation_operators, which are being deprecated.  Please, manually convert \
 validation_operators to use the new Checkpoint validation unit, since validation_operators will be deleted.
+
 """
-                else:
-                    upgrade_overview += """
+            else:
+                upgrade_overview += """
 <cyan>\
 Manual Steps
 =============
 </cyan>
 No manual upgrade steps are required.
 """
-
-        return upgrade_overview, confirmation_required
+        return upgrade_overview
 
     def upgrade_project(self):
         # noinspection PyBroadException
