@@ -2,7 +2,6 @@ import configparser
 import copy
 import datetime
 import errno
-import glob
 import itertools
 import json
 import logging
@@ -16,6 +15,7 @@ import webbrowser
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
+import requests
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
@@ -57,11 +57,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import (
-    GeCloudStoreBackend,
-    Store,
-    TupleStoreBackend,
-)
+from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG,
@@ -77,6 +73,7 @@ from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
+    DataContextConfigSchema,
     DatasourceConfig,
     GeCloudConfig,
     anonymizedUsageStatisticsSchema,
@@ -355,7 +352,16 @@ class BaseDataContext:
 
         # Init stores
         self._stores = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._init_stores(
+            self.project_config_with_variables_substituted.stores
+        )  # Possibly change this?
+
+        if ge_cloud_mode:
+            # Retrieve datasource from GE Cloud here?
+            # What store are we using and what method are we invoking (get?)?
+            # What endpoint are we hitting on the Mercury side?
+            print(self._stores["default_expectations_store"].store_backend.config)
+            pass
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -372,7 +378,9 @@ class BaseDataContext:
         self._cached_datasources = {}
 
         # Build the datasources we know about and have access to
-        self._init_datasources(self.project_config_with_variables_substituted)
+        self._init_datasources(
+            self.project_config_with_variables_substituted
+        )  # Possibly change this?
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -2244,6 +2252,7 @@ class BaseDataContext:
             self.expectations_store.remove_key(key)
             return True
 
+    # TODO: Walk a debugger through this (all CRUD)
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
@@ -4068,20 +4077,27 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
-    @property
-    def default_ge_cloud_data_context_config_template(self):
-        config_commented_map_from_yaml = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
-        try:
-            return (
-                DataContextConfig(**config_commented_map_from_yaml)
-                if self.ge_cloud_mode
-                else DataContextConfig.from_commented_map(
-                    commented_map=config_commented_map_from_yaml
-                )
-            )
-        except ge_exceptions.InvalidDataContextConfigError:
-            # Just to be explicit about what we intended to catch
+    def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
+        if not self.ge_cloud_mode:
             raise
+        ge_cloud_url = os.path.join(
+            self.ge_cloud_config.base_url,
+            f"/accounts/{self.ge_cloud_config.account_id}/data_context_configuration",
+        )
+        auth_headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",
+        }
+        try:
+            response = requests.get(ge_cloud_url, headers=auth_headers)
+            if response.status_code != 200:
+                raise
+            config = DataContextConfigSchema().load(data=response.json())
+            # Parse response into DataContextConfig
+        except:
+            # Placeholder until everything is working nicely!
+            config = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
+        return DataContextConfig(**config)
 
     def _load_project_config(self):
         """
@@ -4097,7 +4113,8 @@ class DataContext(BaseDataContext):
         :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
-            return self.default_ge_cloud_data_context_config_template
+            config = self._retrieve_data_context_config_from_ge_cloud()
+            return config
 
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
