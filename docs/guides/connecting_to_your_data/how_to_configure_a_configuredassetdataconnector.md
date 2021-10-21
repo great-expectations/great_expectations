@@ -168,7 +168,7 @@ A corresponding configuration for `ConfiguredAssetS3DataConnector` would look si
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L130-L149
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L128-L147
 ```
 
 </TabItem>
