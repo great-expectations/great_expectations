@@ -47,5 +47,5 @@ Upgrading project...[0m
 A log detailing the upgrade can be found here:
 
     - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json[0m[0m
-[33mYour project is up-to-date - no further upgrade is necessary.
+[32mYour project is up-to-date - no further upgrade is necessary.
 [0m[0m
