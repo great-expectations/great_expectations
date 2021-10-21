@@ -1,13 +1,15 @@
 from timeit import timeit
 
+import pandas
 import pytest
 
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
     parse_evaluation_parameter,
 )
-from great_expectations.exceptions import EvaluationParameterError
+from great_expectations.exceptions import DataContextError, EvaluationParameterError
 
 
 def test_parse_evaluation_parameter():
@@ -197,3 +199,54 @@ def test_deduplicate_evaluation_parameter_dependencies():
             }
         ]
     } == deduplicated
+
+
+def test_evaluation_parameters_for_between_expectations_parse_correctly(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # Note that if you modify this batch request, you may save the new version as a .json file
+    #  to pass in later via the --batch-request option
+    df = pandas.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+    batch_request = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_runtime_data_connector",
+        "data_asset_name": "foo",
+        "runtime_parameters": {"batch_data": df},
+        "batch_identifiers": {
+            "pipeline_stage_name": "kickoff",
+            "airflow_run_id": "1234",
+        },
+    }
+
+    # Feel free to change the name of your suite here. Renaming this will not remove the other one.
+    expectation_suite_name = "abcde"
+    try:
+        suite = context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(
+            f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} '
+            f"expectations."
+        )
+    except DataContextError:
+        suite = context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
+    )
+    column_names = [f'"{column_name}"' for column_name in validator.columns()]
+    print(f"Columns: {', '.join(column_names)}.")
+
+    validator.set_evaluation_parameter("bob", 10000)
+    validator.set_evaluation_parameter("alice", 20000)
+
+    validator.expect_table_row_count_to_be_between(
+        min_value={"$PARAMETER": "bob", "$PARAMETER.upstream_row_count": 10},
+        max_value={"$PARAMETER": "alice", "$PARAMETER.upstream_row_count": 20},
+    )
