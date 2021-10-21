@@ -5,7 +5,16 @@ import TabItem from '@theme/TabItem';
 
 While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](/docs/reference/data_docs) and [profilers](/docs/reference/profilers) as well as [validation](/docs/reference/validation).
 
-The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations, with an improved Checkpoints feature introduced as part of the 0.13.7 release. The Batch Request API included a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of `Validation Operators`  These offer a number of advantages including an improved experience around deploying and maintaining Great Expectations in production.
+The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations, with an improved Checkpoints feature introduced as part of the 0.13.7 release. The Batch Request API included a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of Validation Operators.  These offer a number of advantages including an improved experience around deploying and maintaining Great Expectations in production.
+
+:::note Note on V3 Expectations
+
+  A small number of statistical Expectations have not been fully migrated to V3, and will be very soon. These currently include:
+  - `expect_column_bootstrapped_ks_test_p_value_to_be_greater_than`
+  - `expect_column_chisquare_test_p_value_to_be_greater_than`
+  - `expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than`
+  - `expect_column_value_z_scores_to_be_less_than`
+:::
 
 ## Migrating to the Batch Request (V3) API
 
