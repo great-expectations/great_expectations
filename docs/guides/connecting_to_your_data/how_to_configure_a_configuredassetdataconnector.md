@@ -153,17 +153,26 @@ For more information on `batches` and `batch_identifiers`, please refer to the [
 
 A corresponding configuration for `ConfiguredAssetS3DataConnector` would look similar but would require `bucket` and `prefix` values instead of `base_directory`.
 
-```yaml
-class_name: ConfiguredAssetS3DataConnector
-bucket: MY_S3_BUCKET
-prefix: MY_S3_BUCKET_PREFIX
-default_regex:
-assets:
-  alpha:
-    pattern: alpha-(.*)\.csv
-    group_names:
-      - index
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L99-L115
 ```
+
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L130-L149
+```
+
+</TabItem>
+</Tabs>
 
 The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using `ConfiguredAssetFilesystemDataConnector`.
 
