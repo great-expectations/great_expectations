@@ -4,7 +4,7 @@ import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
-from copy import copy, deepcopy
+from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
