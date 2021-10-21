@@ -384,6 +384,186 @@ def select_datasource(
     return data_source
 
 
+def load_data_context_with_error_handling(
+    directory: str, from_cli_upgrade_command: bool = False
+) -> Optional[DataContext]:
+    """Return a DataContext with good error handling and exit codes."""
+    context: Optional[DataContext]
+    ge_config_version: float
+    try:
+        directory = directory or DataContext.find_context_root_dir()
+        context = DataContext(context_root_dir=directory)
+        ge_config_version = context.get_config().config_version
+
+        if from_cli_upgrade_command:
+            if ge_config_version < CURRENT_GE_CONFIG_VERSION:
+                context = upgrade_project_one_or_multiple_versions_increment(
+                    directory=directory,
+                    context=context,
+                    ge_config_version=ge_config_version,
+                    from_cli_upgrade_command=from_cli_upgrade_command,
+                )
+            elif ge_config_version > CURRENT_GE_CONFIG_VERSION:
+                raise ge_exceptions.UnsupportedConfigVersionError(
+                    f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
+{CURRENT_GE_CONFIG_VERSION}.
+"""
+                )
+            else:
+                context = upgrade_project_zero_versions_increment(
+                    directory=directory,
+                    context=context,
+                    ge_config_version=ge_config_version,
+                    from_cli_upgrade_command=from_cli_upgrade_command,
+                )
+
+        return context
+    except ge_exceptions.UnsupportedConfigVersionError as err:
+        directory = directory or DataContext.find_context_root_dir()
+        ge_config_version = DataContext.get_ge_config_version(
+            context_root_dir=directory
+        )
+        context = upgrade_project_strictly_multiple_versions_increment(
+            directory=directory,
+            ge_config_version=ge_config_version,
+            from_cli_upgrade_command=from_cli_upgrade_command,
+        )
+        if context:
+            return context
+        else:
+            cli_message(string=f"<red>{err.message}</red>")
+            sys.exit(1)
+    except (
+        ge_exceptions.ConfigNotFoundError,
+        ge_exceptions.InvalidConfigError,
+    ) as err:
+        cli_message(string=f"<red>{err.message}</red>")
+        sys.exit(1)
+    except ge_exceptions.PluginModuleNotFoundError as err:
+        cli_message(string=err.cli_colored_message)
+        sys.exit(1)
+    except ge_exceptions.PluginClassNotFoundError as err:
+        cli_message(string=err.cli_colored_message)
+        sys.exit(1)
+    except ge_exceptions.InvalidConfigurationYamlError as err:
+        cli_message(string=f"<red>{str(err)}</red>")
+        sys.exit(1)
+
+
+def upgrade_project_strictly_multiple_versions_increment(
+    directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
+) -> Optional[DataContext]:
+    upgrade_helper_class = (
+        GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+        if ge_config_version
+        else None
+    )
+    context: Optional[DataContext]
+    if upgrade_helper_class and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+        upgrade_project(
+            context_root_dir=directory,
+            ge_config_version=ge_config_version,
+            from_cli_upgrade_command=from_cli_upgrade_command,
+        )
+        context = DataContext(context_root_dir=directory)
+        # noinspection PyBroadException
+        try:
+            send_usage_message(
+                data_context=context,
+                event="cli.project.upgrade.end",
+                success=True,
+            )
+        except Exception:
+            # Don't fail for usage stats
+            pass
+    else:
+        context = None
+
+    return context
+
+
+def upgrade_project(
+    context_root_dir: str,
+    ge_config_version: float,
+    from_cli_upgrade_command: bool = False,
+):
+    if from_cli_upgrade_command:
+        message = (
+            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
+            f"the version "
+            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"
+        )
+    else:
+        message = (
+            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
+            f"the version "
+            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.\nIn order to proceed, "
+            f"your project must be upgraded.</red>"
+        )
+
+    cli_message(string=message)
+    upgrade_prompt = (
+        "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
+    )
+    # This loading of DataContext is optional and just to track if someone exits here.
+    # noinspection PyBroadException
+    try:
+        data_context = DataContext(context_root_dir)
+    except Exception:
+        # Do not raise error for usage stats
+        data_context = None
+
+    confirm_proceed_or_exit(
+        confirm_prompt=upgrade_prompt,
+        continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+        data_context=data_context,
+        usage_stats_event="cli.project.upgrade.end",
+    )
+    cli_message(string=SECTION_SEPARATOR)
+
+    # use loop in case multiple upgrades need to take place
+    while int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+        increment_version, exception_occurred = upgrade_project_one_version_increment(
+            context_root_dir=context_root_dir,
+            ge_config_version=ge_config_version,
+            continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+            update_version=True,
+            from_cli_upgrade_command=from_cli_upgrade_command,
+        )
+        if exception_occurred or not increment_version:
+            break
+
+        ge_config_version += 1.0
+
+    cli_message(string=SECTION_SEPARATOR)
+    upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
+    upgrade_incomplete_message = f"""\
+<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
+
+    - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
+    - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{ge_config_version + 1.0}</cyan>\n
+To learn more about the upgrade process, visit \
+<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide</cyan>
+"""
+
+    if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+        cli_message(string=upgrade_incomplete_message)
+    else:
+        cli_message(upgrade_success_message)
+
+    # noinspection PyBroadException
+    try:
+        context: DataContext = DataContext(context_root_dir=context_root_dir)
+        send_usage_message(
+            data_context=context, event="cli.project.upgrade.end", success=False
+        )
+    except Exception:
+        # Do not raise error for usage stats
+        pass
+
+    sys.exit(0)
+
+
 def upgrade_project_one_or_multiple_versions_increment(
     directory: str,
     context: DataContext,
@@ -536,191 +716,6 @@ def upgrade_project_zero_versions_increment(
             pass
 
     return context
-
-
-def upgrade_project_strictly_multiple_versions_increment(
-    directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
-    upgrade_helper_class = (
-        GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-        if ge_config_version
-        else None
-    )
-    context: Optional[DataContext]
-    if upgrade_helper_class and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
-        upgrade_project(
-            context_root_dir=directory,
-            ge_config_version=ge_config_version,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
-        context = DataContext(context_root_dir=directory)
-        # noinspection PyBroadException
-        try:
-            send_usage_message(
-                data_context=context,
-                event="cli.project.upgrade.end",
-                success=True,
-            )
-        except Exception:
-            # Don't fail for usage stats
-            pass
-    else:
-        context = None
-
-    return context
-
-
-def load_data_context_with_error_handling(
-    directory: str, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
-    """Return a DataContext with good error handling and exit codes."""
-    context: Optional[DataContext]
-    ge_config_version: float
-    try:
-        directory = directory or DataContext.find_context_root_dir()
-        context = DataContext(context_root_dir=directory)
-        ge_config_version = context.get_config().config_version
-
-        if from_cli_upgrade_command:
-            if ge_config_version < CURRENT_GE_CONFIG_VERSION:
-                context = upgrade_project_one_or_multiple_versions_increment(
-                    directory=directory,
-                    context=context,
-                    ge_config_version=ge_config_version,
-                    from_cli_upgrade_command=from_cli_upgrade_command,
-                )
-            elif ge_config_version > CURRENT_GE_CONFIG_VERSION:
-                raise ge_exceptions.UnsupportedConfigVersionError(
-                    f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
-{CURRENT_GE_CONFIG_VERSION}.
-"""
-                )
-            else:
-                context = upgrade_project_zero_versions_increment(
-                    directory=directory,
-                    context=context,
-                    ge_config_version=ge_config_version,
-                    from_cli_upgrade_command=from_cli_upgrade_command,
-                )
-
-        return context
-    except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
-            context_root_dir=directory
-        )
-        context = upgrade_project_strictly_multiple_versions_increment(
-            directory=directory,
-            ge_config_version=ge_config_version,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
-        if context:
-            return context
-        else:
-            cli_message(string=f"<red>{err.message}</red>")
-            sys.exit(1)
-    except (
-        ge_exceptions.ConfigNotFoundError,
-        ge_exceptions.InvalidConfigError,
-    ) as err:
-        cli_message(string=f"<red>{err.message}</red>")
-        sys.exit(1)
-    except ge_exceptions.PluginModuleNotFoundError as err:
-        cli_message(string=err.cli_colored_message)
-        sys.exit(1)
-    except ge_exceptions.PluginClassNotFoundError as err:
-        cli_message(string=err.cli_colored_message)
-        sys.exit(1)
-    except ge_exceptions.InvalidConfigurationYamlError as err:
-        cli_message(string=f"<red>{str(err)}</red>")
-        sys.exit(1)
-
-
-def upgrade_project(
-    context_root_dir: str,
-    ge_config_version: float,
-    from_cli_upgrade_command: bool = False,
-):
-    if from_cli_upgrade_command:
-        message = (
-            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
-            f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"
-        )
-    else:
-        message = (
-            f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
-            f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.\nIn order to proceed, "
-            f"your project must be upgraded.</red>"
-        )
-
-    cli_message(string=message)
-    upgrade_prompt = (
-        "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
-    )
-    # This loading of DataContext is optional and just to track if someone exits here
-    # noinspection PyBroadException
-    try:
-        data_context = DataContext(context_root_dir)
-    except Exception:
-        # Do not raise error for usage stats
-        data_context = None
-    confirm_proceed_or_exit(
-        confirm_prompt=upgrade_prompt,
-        continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-        data_context=data_context,
-        usage_stats_event="cli.project.upgrade.end",
-    )
-    cli_message(string=SECTION_SEPARATOR)
-
-    # use loop in case multiple upgrades need to take place
-    while int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
-        increment_version, exception_occurred = upgrade_project_one_version_increment(
-            context_root_dir=context_root_dir,
-            ge_config_version=ge_config_version,
-            continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-            update_version=True,
-            from_cli_upgrade_command=from_cli_upgrade_command,
-        )
-        if exception_occurred or not increment_version:
-            break
-        ge_config_version += 1.0
-
-    cli_message(string=SECTION_SEPARATOR)
-    upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
-    upgrade_incomplete_message = f"""\
-<red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
-
-    - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
-    - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{ge_config_version + 1.0}</cyan>\n
-To learn more about the upgrade process, visit \
-<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide</cyan>
-"""
-
-    if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
-        cli_message(string=upgrade_incomplete_message)
-        # noinspection PyBroadException
-        try:
-            context: DataContext = DataContext(context_root_dir=context_root_dir)
-            send_usage_message(
-                data_context=context, event="cli.project.upgrade.end", success=False
-            )
-        except Exception:
-            # Do not raise error for usage stats
-            pass
-    else:
-        cli_message(upgrade_success_message)
-        # noinspection PyBroadException
-        try:
-            context: DataContext = DataContext(context_root_dir)
-            send_usage_message(
-                data_context=context, event="cli.project.upgrade.end", success=True
-            )
-        except Exception:
-            # Do not raise error for usage stats
-            pass
-    sys.exit(0)
 
 
 def upgrade_project_one_version_increment(
