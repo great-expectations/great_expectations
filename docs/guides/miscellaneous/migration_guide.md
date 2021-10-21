@@ -283,7 +283,7 @@ Suite Name                                   Status     Expectations met
 - Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
 ```
 
-Congratulations! You have successfully migrated your configuration of Great Expectations to be compatible with the V3-API. To see additional examples of V3 Checkpoints, please refer to our documentation here:
+Congratulations! You have successfully migrated your configuration of Great Expectations to be compatible with the V3-API. To see more examples of V3 Checkpoints, please refer to our documentation here:
 
 - [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
 - [How to create a new Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint)
