@@ -8,7 +8,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.util import (
-    add_value_set_params,
+    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 
@@ -149,7 +149,11 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
                 "value": params.get("column_list"),
             },
         }
-        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="column_list",
+        )
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

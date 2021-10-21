@@ -1,6 +1,6 @@
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import (
-    add_value_set_params,
+    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.render.renderer.renderer import renderer
@@ -152,7 +152,11 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                 "value": params.get("mostly"),
             },
         }
-        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="column_list",
+        )
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

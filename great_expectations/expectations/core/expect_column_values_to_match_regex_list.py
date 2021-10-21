@@ -2,7 +2,7 @@ from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.util import (
-    add_value_set_params,
+    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 
@@ -202,7 +202,11 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="regex_list",
+        )
 
         return (template_str, params_with_json_schema, styling)
 

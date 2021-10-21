@@ -20,7 +20,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.expectations.util import (
-    add_value_set_params,
+    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.render.renderer.renderer import renderer
@@ -222,7 +222,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
-        params_with_json_schema = add_value_set_params(params, params_with_json_schema)
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="type_list",
+        )
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
