@@ -76,7 +76,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "parse_strings_as_datetimes": None,
+        "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,

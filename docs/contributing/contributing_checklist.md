@@ -18,7 +18,7 @@ Once your code is ready, please go through the following checklist before submit
 
 #### 2. Have you followed the Style Guide for code and comments?
 
-* The [Style Guide](/docs/contributing/contributing_style) is here.
+* The [Style Guide](/docs/contributing/style_guides/code_style) is here.
 
 * Thanks for helping us keep the codebase and documentation clean and consistent, so that it’s easier to maintain it as a community!
 
@@ -32,7 +32,7 @@ Once your code is ready, please go through the following checklist before submit
 
 * You can also rebase your branch from upstream/develop. In general, the steps are:
 
-	* Run `git fetch` upstream then `git rebase upstream/develop`.
+	* Run `git fetch upstream` then `git rebase upstream/develop`.
 
 	* Fix any merge conflicts that arise from the rebase.
 
