@@ -4,7 +4,7 @@ import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
-from copy import deepcopy
+from copy import copy, deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
@@ -733,7 +733,7 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
     ):
         if configuration is None:
-            configuration = self.configuration
+            configuration = deepcopy(self.configuration)
 
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context

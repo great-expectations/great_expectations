@@ -3,6 +3,7 @@ from timeit import timeit
 import pandas
 import pytest
 
+from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -243,10 +244,33 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     column_names = [f'"{column_name}"' for column_name in validator.columns()]
     print(f"Columns: {', '.join(column_names)}.")
 
-    validator.set_evaluation_parameter("bob", 10000)
-    validator.set_evaluation_parameter("alice", 20000)
+    validator.set_evaluation_parameter("my_min", 1)
+    validator.set_evaluation_parameter("my_max", 5)
 
-    validator.expect_table_row_count_to_be_between(
-        min_value={"$PARAMETER": "bob", "$PARAMETER.upstream_row_count": 10},
-        max_value={"$PARAMETER": "alice", "$PARAMETER.upstream_row_count": 20},
+    result = validator.expect_table_row_count_to_be_between(
+        min_value={"$PARAMETER": "my_min", "$PARAMETER.upstream_row_count": 10},
+        max_value={"$PARAMETER": "my_max", "$PARAMETER.upstream_row_count": 50},
+    )
+
+    assert result == ExpectationValidationResult(
+        **{
+            "expectation_config": {
+                "meta": {"substituted_parameters": {"min_value": 1, "max_value": 5}},
+                "kwargs": {
+                    "min_value": 1,
+                    "max_value": 5,
+                    "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
+                },
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "ge_cloud_id": None,
+            },
+            "meta": {},
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": True,
+            "result": {"observed_value": 3},
+        }
     )
