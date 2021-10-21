@@ -606,10 +606,10 @@ def render_evaluation_parameter_string(render_func):
 
 
 def add_values_with_json_schema_from_list_in_params(
-        params: dict,
-        params_with_json_schema: dict,
-        param_key_with_list: str,
-        list_values_type: str = "string"
+    params: dict,
+    params_with_json_schema: dict,
+    param_key_with_list: str,
+    list_values_type: str = "string",
 ) -> dict:
     """
     Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
