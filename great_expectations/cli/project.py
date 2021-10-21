@@ -27,15 +27,17 @@ def project_check_config(ctx):
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
+
     is_config_ok, error_message, context = do_config_check(directory)
-    if context:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.project.check_config", success=True
-        )
-    if not is_config_ok:
+
+    if not (is_config_ok and context):
         cli_message("Unfortunately, your config appears to be invalid:\n")
         cli_message(f"<red>{error_message}</red>")
         sys.exit(1)
+
+    toolkit.send_usage_message(
+        data_context=context, event="cli.project.check_config", success=True
+    )
 
     cli_message("<green>Your config file appears valid!</green>")
 
@@ -49,6 +51,7 @@ def project_upgrade(ctx):
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
+
     if load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=True
     ):
