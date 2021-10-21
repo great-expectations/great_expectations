@@ -352,16 +352,7 @@ class BaseDataContext:
 
         # Init stores
         self._stores = {}
-        self._init_stores(
-            self.project_config_with_variables_substituted.stores
-        )  # Possibly change this?
-
-        if ge_cloud_mode:
-            # Retrieve datasource from GE Cloud here?
-            # What store are we using and what method are we invoking (get?)?
-            # What endpoint are we hitting on the Mercury side?
-            print(self._stores["default_expectations_store"].store_backend.config)
-            pass
+        self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -378,9 +369,7 @@ class BaseDataContext:
         self._cached_datasources = {}
 
         # Build the datasources we know about and have access to
-        self._init_datasources(
-            self.project_config_with_variables_substituted
-        )  # Possibly change this?
+        self._init_datasources(self.project_config_with_variables_substituted)
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -2252,7 +2241,6 @@ class BaseDataContext:
             self.expectations_store.remove_key(key)
             return True
 
-    # TODO: Walk a debugger through this (all CRUD)
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,

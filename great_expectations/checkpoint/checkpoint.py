@@ -274,7 +274,6 @@ class Checkpoint:
             ] = []
             for idx, validation_dict in enumerate(validations):
                 try:
-                    # TODO(cdkini): Dig into this
                     substituted_validation_dict: dict = get_substituted_validation_dict(
                         substituted_runtime_config=substituted_runtime_config,
                         validation_dict=validation_dict,
