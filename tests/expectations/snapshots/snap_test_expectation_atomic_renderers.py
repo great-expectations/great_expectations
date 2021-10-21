@@ -411,6 +411,26 @@ snapshots["test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal
     "valuetype": "StringValueType",
 }
 
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_between 1"] = {
+    "name": "atomic.prescriptive.summary",
+    "value": {
+        "params": {
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
+            "condition_parser": {"schema": {"type": "string"}, "value": None},
+            "max_value": {"schema": {"type": "number"}, "value": 5},
+            "min_value": {"schema": {"type": "number"}, "value": 1},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "mostly_pct": {"schema": {"type": "number"}, "value": "80"},
+            "row_condition": {"schema": {"type": "string"}, "value": None},
+            "strict_max": {"schema": {"type": "boolean"}, "value": None},
+            "strict_min": {"schema": {"type": "boolean"}, "value": None},
+        },
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "template": "$column values must be greater than or equal to $min_value and less than or equal to $max_value, at least $mostly_pct % of the time.",
+    },
+    "valuetype": "StringValueType",
+}
+
 snapshots[
     "test_atomic_prescriptive_summary_expect_column_values_to_be_dateutil_parseable 1"
 ] = {

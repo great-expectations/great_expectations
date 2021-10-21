@@ -480,15 +480,27 @@ def test_atomic_prescriptive_summary_expect_column_value_z_scores_to_be_less_tha
     snapshot,
     get_prescriptive_rendered_content,
 ):
-    # Expectation is yet to implement _atomic_prescriptive_template; open to implement test once method is written
+    # Expectation is a stub; open to implement test once renderer method is available
     pass
 
 
 def test_atomic_prescriptive_summary_expect_column_values_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
-    # Expectation is a stub; open to implement test once renderer method is available
-    pass
+    update_dict = {
+        "expectation_type": "expect_column_values_to_be_between",
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 0.8,
+            "min_value": 1,
+            "max_value": 5,
+        },
+    }
+    rendered_content = get_prescriptive_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_summary_expect_column_values_to_be_dateutil_parseable(
