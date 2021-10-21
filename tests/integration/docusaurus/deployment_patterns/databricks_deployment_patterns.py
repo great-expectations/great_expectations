@@ -1,12 +1,11 @@
-import findspark
+import os
+
 import pandas as pd
-from pyspark import SparkContext
-from pyspark.sql import SparkSession
 from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
@@ -19,39 +18,33 @@ from great_expectations.util import gen_directory_tree_str
 SKIP_IN_TEST = True
 
 spark = get_or_create_spark_application(
-    spark_config={
-        # TODO: is this spark_config required?
-        "spark.sql.catalogImplementation": "hive",
-        "spark.executor.memory": "450m",
-        # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-    }
+    # spark_config={
+    #     # TODO: is this spark_config required?
+    #     "spark.sql.catalogImplementation": "hive",
+    #     "spark.executor.memory": "450m",
+    #     # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+    # }
 )
+
+# TODO: ABOVE THIS LINE HAS NOT BEEN CLEANED UP
+# ---------------------------------------------
 
 ##################
 # BEGIN CONTENT
 ##################
 
-# basic dataframe
-data = [
-    {"a": 1, "b": 2, "c": 3},
-    {"a": 4, "b": 5, "c": 6},
-    {"a": 7, "b": 8, "c": 9},
-]
-df = spark.createDataFrame(data)
+# 1. Install Great Expectations
+# %pip install great-expectations
+# Imports
 
-# 1. Set up Great Expectations
-# install GE in notebook cell
+# 2. Set up Great Expectations
 # In-memory DataContext using DBFS and FilesystemStoreBackendDefaults
 
 # This root directory is for use in Databricks
 root_directory = "/dbfs/great_expectations/"
 
 # For testing purposes, we change the root_directory to an ephemeral location
-# TODO: Is this necessary? Can we just remove the forward slash from `/dbfs/great_expectations/`?
-import os
-
 root_directory = os.path.join(os.getcwd(), "dbfs_temp_directory")
-
 
 data_context_config = DataContextConfig(
     store_backend_defaults=FilesystemStoreBackendDefaults(
@@ -61,11 +54,194 @@ data_context_config = DataContextConfig(
 context = BaseDataContext(project_config=data_context_config)
 
 # Check the stores were initialized
-# TODO: Should this check the full tree?
+uncommitted_directory = os.path.join(root_directory, "uncommitted")
 assert os.listdir(root_directory) == ["checkpoints", "expectations", "uncommitted"]
+assert os.listdir(uncommitted_directory) == ["validations"]
+
+# 3. Prepare your data (File & Dataframe)
+
+filename = "yellow_trip_data_sample_2019-01.csv"
+pandas_df = pd.read_csv(os.path.join(os.getcwd(), "data", filename))
+df = spark.createDataFrame(data=pandas_df)
+
+assert len(pandas_df) == df.count() == 10000
+assert len(pandas_df.columns) == len(df.columns) == 18
 
 
-# 2. Connect to your data
+# 4. Connect to your data (File)
+
+# CODE vvvvv vvvvv
+my_spark_datasource_config = """
+name: insert_your_datasource_name_here
+class_name: Datasource
+execution_engine:
+  class_name: SparkDFExecutionEngine
+data_connectors:
+  insert_your_data_connector_name_here:
+    module_name: great_expectations.datasource.data_connector
+    class_name: InferredAssetFilesystemDataConnector
+    base_directory: /dbfs/example_data/nyctaxi/tripdata/yellow/
+    default_regex:
+      pattern: (.*)
+      group_names:
+        - data_asset_name
+"""
+
+# For this test script, change base_directory to location where test runner data is located
+my_spark_datasource_config = my_spark_datasource_config.replace(
+    "/dbfs/example_data/nyctaxi/tripdata/yellow/", "data"
+)
+
+context.test_yaml_config(my_spark_datasource_config)
+
+context.add_datasource(**yaml.load(my_spark_datasource_config))
+
+batch_request = BatchRequest(
+    datasource_name="insert_your_datasource_name_here",
+    data_connector_name="insert_your_data_connector_name_here",
+    data_asset_name="yellow_tripdata_2019-01.csv",
+)
+# CODE ^^^^^ ^^^^^
+
+# ASSERTIONS vvvvv vvvvv
+my_spark_datasource_config_dict = {
+    "name": "insert_your_datasource_name_here",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "module_name": "great_expectations.execution_engine",
+        "class_name": "SparkDFExecutionEngine",
+    },
+    "data_connectors": {
+        "insert_your_data_connector_name_here": {
+            "module_name": "great_expectations.datasource.data_connector",
+            "class_name": "InferredAssetFilesystemDataConnector",
+            "base_directory": "data",
+            "default_regex": {"pattern": "(.*)", "group_names": ["data_asset_name"]},
+        }
+    },
+}
+assert len(context.list_datasources()) == 1
+assert context.list_datasources() == [my_spark_datasource_config_dict]
+assert sorted(
+    context.get_available_data_asset_names()["insert_your_datasource_name_here"][
+        "insert_your_data_connector_name_here"
+    ]
+) == sorted(
+    [
+        "yellow_trip_data_sample_2019-01.csv",
+        "yellow_trip_data_sample_2019-02.csv",
+        "yellow_trip_data_sample_2019-03.csv",
+    ]
+)
+available_data_asset_names = context.datasources[
+    "insert_your_datasource_name_here"
+].get_available_data_asset_names(
+    data_connector_names="insert_your_data_connector_name_here"
+)[
+    "insert_your_data_connector_name_here"
+]
+assert len(available_data_asset_names) == 3
+# assert context.get_batch_list(batch_request=batch_request) == []
+# ASSERTIONS ^^^^^ ^^^^^
+
+# TODO: BELOW THIS LINE HAS NOT BEEN CLEANED UP
+# ---------------------------------------------
+
+print("DEBUG ==============================")
+print(
+    context.get_available_data_asset_names(
+        datasource_names=["insert_your_datasource_name_here"]
+    )
+)
+print(context.get_batch_list(batch_request=batch_request))
+print(
+    context.get_batch_list(
+        datasource_name="insert_your_datasource_name_here",
+        data_connector_name="insert_your_data_connector_name_here",
+        data_asset_name="yellow_tripdata_2019-01.csv",
+    )
+)
+
+
+# TODO: Why am I getting an error here and no batches above even with a data_asset_name provided?
+# Traceback (most recent call last):
+#   File "/private/var/folders/ds/hn_qpp1n6y3fz28clrkfmpsr0000gn/T/pytest-of-anthonyburdi/pytest-103/test_docs_tests_integration_do0/test_script.py", line 167, in <module>
+#     expectation_suite_name=expectation_suite_name,
+#   File "/Users/anthonyburdi/src/ge/great_expectations/great_expectations/data_context/data_context.py", line 1868, in get_validator
+#     batch_definition = batch_list[-1].batch_definition
+# IndexError: list index out of range
+# 5. Create expectations (File)
+# CODE vvvvv vvvvv
+expectation_suite_name = "insert_your_expectation_suite_name_here"
+context.create_expectation_suite(
+    expectation_suite_name=expectation_suite_name, overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request,
+    expectation_suite_name=expectation_suite_name,
+)
+
+validator.expect_column_values_to_not_be_null(column="passenger_count")
+
+validator.expect_column_values_to_be_between(
+    column="congestion_surcharge", min_value=0, max_value=1000
+)
+
+validator.save_expectation_suite(discard_failed_expectations=False)
+# CODE ^^^^^ ^^^^^
+# ASSERTIONS vvvvv vvvvv
+assert context.list_expectation_suite_names() == [expectation_suite_name]
+# ASSERTIONS ^^^^^ ^^^^^
+
+# Working above this line ---------------------------------------------
+print("Everything that has been cleaned up ran successfully")
+print("DEBUG ==============================")
+
+# TODO: BELOW THIS LINE HAS NOT BEEN CLEANED UP
+# ---------------------------------------------
+
+# 6. Validate your data (File)
+# CODE vvvvv vvvvv
+# CODE ^^^^^ ^^^^^
+# ASSERTIONS vvvvv vvvvv
+# ASSERTIONS ^^^^^ ^^^^^
+
+# 7. Build and view Data Docs (File)
+# CODE vvvvv vvvvv
+# CODE ^^^^^ ^^^^^
+# ASSERTIONS vvvvv vvvvv
+# ASSERTIONS ^^^^^ ^^^^^
+
+# 4. Connect to your data (Dataframe)
+# CODE vvvvv vvvvv
+# CODE ^^^^^ ^^^^^
+# ASSERTIONS vvvvv vvvvv
+# ASSERTIONS ^^^^^ ^^^^^
+
+# 5. Create expectations (Dataframe)
+# CODE vvvvv vvvvv
+# CODE ^^^^^ ^^^^^
+# ASSERTIONS vvvvv vvvvv
+# ASSERTIONS ^^^^^ ^^^^^
+
+# 6. Validate your data (Dataframe)
+# CODE vvvvv vvvvv
+# CODE ^^^^^ ^^^^^
+# ASSERTIONS vvvvv vvvvv
+# ASSERTIONS ^^^^^ ^^^^^
+
+# 7. Build and view Data Docs (Dataframe)
+# CODE vvvvv vvvvv
+# CODE ^^^^^ ^^^^^
+# ASSERTIONS vvvvv vvvvv
+# ASSERTIONS ^^^^^ ^^^^^
+
+# TODO: BELOW THIS LINE HAS NOT BEEN CLEANED UP
+# ---------------------------------------------
+
+
+# 4. Connect to your data (Dataframe)
 # Add a Datasource to our DataContext with data in a spark dataframe using RuntimeDataConnector and RuntimeBatchRequest with SparkDFExecutionEngine
 #
 #     (Use one of the available sample Databricks datasets to make this easily runnable as a tutorial)
@@ -130,10 +306,6 @@ assert context.list_datasources() == [
     }
 ]
 
-# TODO: Should this be pulled from our repo during automated tests and only from the url for databricks notebooks as part of the guide?
-data_file_url = "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2018-01.csv"
-pandas_dataframe = pd.read_csv(data_file_url)
-# df = spark.createDataFrame(data=pandas_dataframe)
 
 batch_request_from_dataframe = RuntimeBatchRequest(
     datasource_name="insert_your_datasource_name_here",
@@ -146,11 +318,6 @@ batch_request_from_dataframe = RuntimeBatchRequest(
     },
     runtime_parameters={"batch_data": df},  # Your dataframe goes here
 )
-
-print("DEBUG=================2 after RuntimeBatchRequest init")
-df.printSchema()
-print(df.show())
-print("DEBUG=================2")
 
 
 # TODO: load data from local csv path, in DBFS. Here we will need to have two versions, one for display to the user and one for getting the data from our test runner
@@ -222,8 +389,8 @@ print(validator.head())
 
 # validator.expect_column_values_to_not_be_null(column="vendor_id")
 # validator.expect_column_values_to_be_between(column="congestion_surcharge", min_value=0, max_value=1000)
-validator.expect_column_values_to_not_be_null(column="a")
-validator.expect_column_values_to_be_between(column="b", min_value=1, max_value=10)
+# validator.expect_column_values_to_not_be_null(column="a")
+# validator.expect_column_values_to_be_between(column="b", min_value=1, max_value=10)
 
 
 # Take a look at your suite
