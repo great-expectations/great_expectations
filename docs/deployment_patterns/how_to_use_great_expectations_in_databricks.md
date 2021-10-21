@@ -8,7 +8,15 @@ import Congratulations from '../guides/connecting_to_your_data/components/congra
 
 Great Expectations works well with many types of Databricks workflows. This guide will help you run Great Expectations in [Databricks](https://databricks.com/).
 
-<Prerequisites></Prerequisites>
+# TODO: update Prerequisites, empty Prerequisites component?
+
+<Prerequisites>
+
+- Have completed Databricks setup including having a running Databricks cluster with attached notebook
+- If you are using the file based version of this guide, you'll need to have DBFS set up
+
+</Prerequisites>
+
 
 There are several ways to set up Databricks, this guide centers around an AWS deployment using Databricks Data Science & Engineering Notebooks and Jobs. If you use Databricks on GCP or Azure and there are steps in this guide that don't work for you please reach out to us.
 
@@ -43,12 +51,15 @@ In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.
 
   <details>
     <summary>What is DBFS?</summary>
-    Paraphrased from the Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster.
+    Paraphrased from the Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster. See the Databricks documentation for best practices including mounting object stores.
   </details>
 
 Run the following code to set up a [Data Context](../reference/data_context.md) using the appropriate defaults: 
 
 #### TODO: retrieve this code from databricks_deployment_patterns.py
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns.py#L1-L2
+```
+
 ```python
 root_directory = "/dbfs/great_expectations/"
 
@@ -142,7 +153,7 @@ context.test_yaml_config(yaml.dump(my_spark_datasource_config))
 context.add_datasource(**my_spark_datasource_config)
 ```
 
-Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating expectations:
+Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
 ```python
 batch_request = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
@@ -202,7 +213,7 @@ batch_request = RuntimeBatchRequest(
 <Congratulations />
 Now let's keep going to create an Expectation Suite and validate our data.
 
-### 5. Create expectations
+### 5. Create Expectations
 
 Here we will use a `Validator` to interact with our batch of data and generate an `Expectation Suite`. 
 
@@ -221,7 +232,7 @@ validator = context.get_validator(
 )
 ```
 
-Then we use the `Validator` to add a few expectations:
+Then we use the `Validator` to add a few Expectations:
 #### TODO: retrieve this code from databricks_deployment_patterns.py
 ```python
 validator.expect_column_values_to_not_be_null(column="passenger_count")
@@ -256,6 +267,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
     name: insert_your_checkpoint_name_here
     config_version: 1
     class_name: SimpleCheckpoint
+    run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
     validations:
       - batch_request:
           datasource_name: insert_your_datasource_name_here

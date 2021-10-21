@@ -43,7 +43,7 @@ spark = get_or_create_spark_application(
 # This root directory is for use in Databricks
 root_directory = "/dbfs/great_expectations/"
 
-# For testing purposes, we change the root_directory to an ephemeral location
+# For testing purposes only, we change the root_directory to an ephemeral location created by our test runner
 root_directory = os.path.join(os.getcwd(), "dbfs_temp_directory")
 
 data_context_config = DataContextConfig(
@@ -68,10 +68,11 @@ assert len(pandas_df) == df.count() == 10000
 assert len(pandas_df.columns) == len(df.columns) == 18
 
 
-# 4. Connect to your data (File)
+# 4. Connect to your data (File / YAML)
 
 # CODE vvvvv vvvvv
-my_spark_datasource_config = """
+# YAML Version
+my_spark_datasource_config_yaml = """
 name: insert_your_datasource_name_here
 class_name: Datasource
 execution_engine:
@@ -87,23 +88,7 @@ data_connectors:
         - data_asset_name
 """
 
-# For this test script, change base_directory to location where test runner data is located
-my_spark_datasource_config = my_spark_datasource_config.replace(
-    "/dbfs/example_data/nyctaxi/tripdata/yellow/", "data"
-)
-
-context.test_yaml_config(my_spark_datasource_config)
-
-context.add_datasource(**yaml.load(my_spark_datasource_config))
-
-batch_request = BatchRequest(
-    datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="yellow_tripdata_2019-01.csv",
-)
-# CODE ^^^^^ ^^^^^
-
-# ASSERTIONS vvvvv vvvvv
+# Python Version
 my_spark_datasource_config_dict = {
     "name": "insert_your_datasource_name_here",
     "class_name": "Datasource",
@@ -116,11 +101,41 @@ my_spark_datasource_config_dict = {
         "insert_your_data_connector_name_here": {
             "module_name": "great_expectations.datasource.data_connector",
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "data",
+            "base_directory": "/dbfs/example_data/nyctaxi/tripdata/yellow/",
             "default_regex": {"pattern": "(.*)", "group_names": ["data_asset_name"]},
         }
     },
 }
+
+# For this test script, change base_directory to location where test runner data is located
+my_spark_datasource_config = my_spark_datasource_config_yaml.replace(
+    "/dbfs/example_data/nyctaxi/tripdata/yellow/", "data"
+)
+my_spark_datasource_config_dict["data_connectors"][
+    "insert_your_data_connector_name_here"
+]["base_directory"] = "data"
+
+# Yaml Version
+context.test_yaml_config(my_spark_datasource_config)
+
+context.add_datasource(**yaml.load(my_spark_datasource_config))
+
+# Python Version
+# TODO: python version
+context.test_yaml_config(my_spark_datasource_config)
+
+context.add_datasource(**yaml.load(my_spark_datasource_config))
+
+# Both Versions
+batch_request = BatchRequest(
+    datasource_name="insert_your_datasource_name_here",
+    data_connector_name="insert_your_data_connector_name_here",
+    data_asset_name="yellow_tripdata_2019-01.csv",
+)
+# CODE ^^^^^ ^^^^^
+
+# ASSERTIONS vvvvv vvvvv
+
 assert len(context.list_datasources()) == 1
 assert context.list_datasources() == [my_spark_datasource_config_dict]
 assert sorted(
