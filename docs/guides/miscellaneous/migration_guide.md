@@ -9,11 +9,17 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
 
 :::note Note on V3 Expectations
 
-  A small number of statistical Expectations have not been fully migrated to V3, and will be very soon. These currently include:
+  A number of Expectations have not been fully migrated to V3, and will be very soon. These currently include:
   - `expect_column_bootstrapped_ks_test_p_value_to_be_greater_than`
   - `expect_column_chisquare_test_p_value_to_be_greater_than`
+  - `expect_column_pair_values_to_be_in_set`
   - `expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than`
   - `expect_column_value_z_scores_to_be_less_than`
+  - `expect_column_values_to_match_like_pattern`
+  - `expect_column_values_to_match_like_pattern_list`
+  - `expect_column_values_to_not_match_like_pattern`
+  - `expect_column_values_to_not_match_like_pattern_list`
+  - `expect_multicolumn_sum_to_equal`
 :::
 
 ## Migrating to the Batch Request (V3) API
@@ -35,7 +41,9 @@ If your configuration is up-to-date and does not need to be upgraded, you will s
 ```bash
 Using v3 (Batch Request) API
 Checking your config files for validity...
+
 Your config file appears valid!
+
 ```
 
 If your configuration needs to be upgraded, you will see a message like this:
@@ -43,11 +51,12 @@ If your configuration needs to be upgraded, you will see a message like this:
 ```bash
 Using v3 (Batch Request) API
 Checking your config files for validity...
+
 Unfortunately, your config appears to be invalid:
 
 The config_version of your great_expectations.yml -- 2.0 -- is outdated.
-Please consult the 0.13.x migration guide ttps://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
-upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
+
+Please consult the 0.13.x migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide and upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
 ```
 
 If the `check-config` method has advised you to upgrade your configuration, you can run the following `project upgrade` command
@@ -59,6 +68,13 @@ great_expectations --v3-api project upgrade
 Then you will see the following prompt:
 
 ```bash
+
+Checking project...
+
+================================================================================
+
+You appear to be using a legacy capability with the latest config version (3.0).
+    Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number 3.
 ++====================================++
 || UpgradeHelperV13: Upgrade Overview ||
 ++====================================++
@@ -78,21 +94,27 @@ The following Stores and/or Store Names will be upgraded:
 Manual Steps
 =============
 
+The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
+
+    - Data Sources: my_datasource
+
+Your configuration uses validation_operators, which are being deprecated.  Please, manually convert validation_operators to use the new Checkpoint validation unit, since validation_operators will be deleted.
+
 
 Upgrade Confirmation
 =====================
 
-Please consult the 0.13.x migration guide to learn more about the automated upgrade process:
+Please consult the 0.13.x migration guide for instructions on how to complete any required manual steps or to learn more about the automated upgrade process:
 
-    https://docs.greatexpectations.io/guides/miscellaneous/migration_guide.html
+    https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide
 
-Would you like to proceed with the project upgrade? [Y/n]: Y
+Would you like to proceed with the project upgrade? [Y/n]:
+
 ```
 
 If you select `Y`, then the following upgrade will automatically occur:
 
 ```bash
-
 Upgrading project...
 
 ================================================================================
@@ -103,15 +125,15 @@ You appear to be using a legacy capability with the latest config version (3.0).
 || Upgrade Report ||
 ++================++
 
-Your project was successfully upgraded to be compatible with Great Expectations 0.13.x.
-The config_version of your great_expectations.yml has been automatically incremented to 3.0.
+The Upgrade Helper has performed the automated upgrade steps as part of upgrading your project to be compatible with Great Expectations 0.13.x, and the config_version of your great_expectations.yml has been automatically incremented to 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully.
 
 A log detailing the upgrade can be found here:
 
-    - /Users/work/Development/ge_sandbox_for_different_config_versions/validation_operators/great_expectations/uncommitted/logs/project_upgrades/UpgradeHelperV13_20211019T170407.484814Z.json
+    - /Users/work/Development/ge_dev_tracking/MarioPod/202110/configuration_for_testing_v2_v3_migration/v2/great_expectations/uncommitted/logs/project_upgrades/UpgradeHelperV13_20211021T220138.730810Z.json
 You appear to be using a legacy capability with the latest config version (3.0).
     Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number 3.
-Your project is up-to-date - no further upgrade is necessary.
+Your project requires manual upgrade steps in order to be up-to-date.
+
 ```
 
 Now you are ready to manually migrate Datasources and Checkpoints to be compatible with the V3 API.
