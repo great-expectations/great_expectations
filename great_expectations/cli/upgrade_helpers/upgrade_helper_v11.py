@@ -572,7 +572,7 @@ Upgrade Confirmation
 Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
 to learn more about the automated upgrade process:
 
-    <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide</cyan>
+    <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
 
 Would you like to proceed with the project upgrade?\
 """
