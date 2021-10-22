@@ -70,7 +70,7 @@ def translate_expectation_config_to_dlt_expectation(
 
             string_repr_min = f"{column_name} {min_conditional} {str(min_value)}"
 
-            return_list.append((f"{dlt_expectation_name}_1", string_repr_min))
+            # return_list.append((f"{dlt_expectation_name}_1", string_repr_min))
 
         if max_value is not None:
             if success_kwargs.get("strict_max"):
@@ -80,7 +80,17 @@ def translate_expectation_config_to_dlt_expectation(
 
             string_repr_max = f"{column_name} {max_conditional} {str(max_value)}"
 
-            return_list.append((f"{dlt_expectation_name}_2", string_repr_max))
+            # return_list.append((f"{dlt_expectation_name}_2", string_repr_max))
+
+        # TODO: return can be a single item if we can AND two conditionals
+        if min_value is not None and max_value is not None:
+            return_list.append(
+                (dlt_expectation_name, f"{string_repr_min} AND {string_repr_max}")
+            )
+        elif min_value is not None:
+            return_list.append((dlt_expectation_name, f"{string_repr_min}"))
+        elif max_value is not None:
+            return_list.append((dlt_expectation_name, f"{string_repr_max}"))
 
         return return_list
 
@@ -96,6 +106,7 @@ def translate_dlt_expectation_to_expectation_config(
     Returns:
         Great Expectations ExpectationConfiguration objects
     """
+    # TODO: In the future we can infer the GE expectation type
     if ge_expectation_type not in ENABLED_EXPECTATIONS_DLT_TO_GE:
         raise UnsupportedExpectationConfiguration(
             f"The expectation type `{ge_expectation_type}` is not supported. Please provide one of the supported types: {ENABLED_EXPECTATIONS_DLT_TO_GE}"

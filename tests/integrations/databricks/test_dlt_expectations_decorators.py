@@ -1,3 +1,5 @@
+from typing import List
+
 import pandas as pd
 import pytest
 
@@ -58,7 +60,7 @@ def expect_column_values_to_be_between_strict_config():
             "strict_max": True,
             "result_format": "COMPLETE",
         },
-        meta={"notes": "This is an expectation."},
+        meta={"notes": "This is an expectation from GE config."},
     )
 
 
@@ -116,15 +118,15 @@ def test_dlt_expect_decorator(
 
     # To set off test output
     print("\n\nSTART =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-    print("Starting directory tree structure")
-    print(gen_directory_tree_str(str(d)))
+    # print("Starting directory tree structure")
+    # print(gen_directory_tree_str(str(d)))
+    print("\n", "Beginning of pipeline df:", simple_pandas_df)
 
-    # Our first "dlt" transformation
+    # Our first "dlt" transformation from a GE expectation
     @dlt_expectations.expect(
-        # TODO: Use a real data_context
         data_context=data_context,
         dlt_expectation_name="my_expect_column_values_to_be_between_expectation",
-        expectation_configuration=expect_column_values_to_be_between_strict_config,
+        ge_expectation_configuration=expect_column_values_to_be_between_strict_config,
     )
     def transformation_1(df):
         # Note that in DLT, the dataframe is retrieved in the function body
@@ -132,11 +134,12 @@ def test_dlt_expect_decorator(
         df += 1
         return df
 
-    # Our second "dlt" transformation
+    # Our second "dlt" transformation from a DLT expectation
     @dlt_expectations.expect(
         data_context=data_context,
         dlt_expectation_name="my_expect_column_values_to_not_be_null_expectation",
-        expectation_configuration=expect_column_values_to_not_be_null_config,
+        # ge_expectation_configuration=expect_column_values_to_not_be_null_config,
+        dlt_expectation_condition="col2 IS NOT NULL",
     )
     def transformation_2(df):
         df += 2
@@ -146,6 +149,16 @@ def test_dlt_expect_decorator(
     df_2 = transformation_2(df_1)
 
     print("\n", "Resulting end of pipeline df:", df_2)
+
+    print("GE Expectation Suites")
+    expectation_suite_names: List[str] = data_context.list_expectation_suite_names()
+    # print(expectation_suite_names)
+    for expectation_suite_name in expectation_suite_names:
+        suite = data_context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(expectation_suite_name)
+        print(suite)
 
     print("Ending directory tree structure")
     print(gen_directory_tree_str(str(d)))
