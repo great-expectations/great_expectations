@@ -299,7 +299,7 @@ Congratulations! You have successfully migrated your configuration of Great Expe
 ## Upgrading from previous versions of Great Expectations
 
 Since each major version introduces breaking changes that can have unintended interactions when combined with other changes, we recommend that you only upgrade 1 major version at a time.
-If you are running an older version of GE (0.12 or before) we recommend you only upgrade 1 major version at a time. Notes from previous migration guides are included for reference.
+Notes from previous migration guides are included for reference.
 
 ### Upgrading to 0.12.x
 
