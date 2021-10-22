@@ -4066,25 +4066,31 @@ class DataContext(BaseDataContext):
             self._save_project_config()
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
+        """
+        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
+        Given proper authorization, the request retrieves a data context config that is pre-populated with
+        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+
+        The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
+        for how these are substituted.
+
+        :return: the confugration object retrieved from the Cloud API
+        """
         if not self.ge_cloud_mode:
-            raise
-        ge_cloud_url = os.path.join(
-            self.ge_cloud_config.base_url,
-            f"/accounts/{self.ge_cloud_config.account_id}/data_context_configuration",
+            raise  # TODO: Add appropriate exception/error
+        ge_cloud_url = (
+            self.ge_cloud_config.base_url
+            + f"/accounts/{self.ge_cloud_config.account_id}/data_context_configuration"
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
             "Authorization": f"Bearer {self.ge_cloud_config.access_token}",
         }
-        try:
-            response = requests.get(ge_cloud_url, headers=auth_headers)
-            if response.status_code != 200:
-                raise
-            config = DataContextConfigSchema().load(data=response.json())
-            # Parse response into DataContextConfig
-        except:
-            # Placeholder until everything is working nicely!
-            config = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
+
+        response = requests.get(ge_cloud_url, headers=auth_headers)
+        if response.status_code != 200:
+            raise  # TODO: Add appropriate exception/error
+        config = response.json()
         return DataContextConfig(**config)
 
     def _load_project_config(self):
@@ -4093,10 +4099,9 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        For Data Contexts in GE Cloud mode, a default configuration template with pre-defined ${
-        SOME_VARIABLE} variables is returned. (see
-        great_expectations.data_context.templates.DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG). These variables are
-        substituted later using the same process referenced above.
+        For Data Contexts in GE Cloud mode, a use-specific template is retrieved from the Cloud API
+        and populated in a similar fashion - see self._retrieve_data_context_config_from_ge_cloud for
+        more details.
 
         :return: the configuration object read from the file or template
         """
