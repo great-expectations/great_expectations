@@ -11,15 +11,12 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
 
   A number of Expectations have not been fully migrated to V3, and will be very soon. These currently include:
   - `expect_column_bootstrapped_ks_test_p_value_to_be_greater_than`
-  - `expect_column_chisquare_test_p_value_to_be_greater_than`
-  - `expect_column_pair_values_to_be_in_set`
   - `expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than`
-  - `expect_column_value_z_scores_to_be_less_than`
-  - `expect_column_values_to_match_like_pattern`
-  - `expect_column_values_to_match_like_pattern_list`
-  - `expect_column_values_to_not_match_like_pattern`
-  - `expect_column_values_to_not_match_like_pattern_list`
-  - `expect_multicolumn_sum_to_equal`
+  - `expect_column_chisquare_test_p_value_to_be_greater_than`
+  - `expect_column_kl_divergence_to_be_less_than`
+  - `expect_column_pair_cramers_phi_value_to_be_less_than`
+  - `expect_table_row_count_to_equal_other_table`
+
 :::
 
 ## Migrating to the Batch Request (V3) API
@@ -56,7 +53,7 @@ Unfortunately, your config appears to be invalid:
 
 The config_version of your great_expectations.yml -- 2.0 -- is outdated.
 
-Please consult the 0.13.x migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide and upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
+Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
 ```
 
 If the `check-config` method has advised you to upgrade your configuration, you can run the following `project upgrade` command
@@ -104,9 +101,9 @@ Your configuration uses validation_operators, which are being deprecated.  Pleas
 Upgrade Confirmation
 =====================
 
-Please consult the 0.13.x migration guide for instructions on how to complete any required manual steps or to learn more about the automated upgrade process:
+Please consult the V3 API migration guide for instructions on how to complete any required manual steps or to learn more about the automated upgrade process:
 
-    https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide
+    https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api
 
 Would you like to proceed with the project upgrade? [Y/n]:
 
@@ -129,7 +126,8 @@ The Upgrade Helper has performed the automated upgrade steps as part of upgradin
 
 A log detailing the upgrade can be found here:
 
-    - /Users/work/Development/ge_dev_tracking/MarioPod/202110/configuration_for_testing_v2_v3_migration/v2/great_expectations/uncommitted/logs/project_upgrades/UpgradeHelperV13_20211021T220138.730810Z.json
+    - great_expectations/uncommitted/logs/project_upgrades/UpgradeHelperV13_20211021T220138.730810Z.json
+
 You appear to be using a legacy capability with the latest config version (3.0).
     Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number 3.
 Your project requires manual upgrade steps in order to be up-to-date.
@@ -298,8 +296,7 @@ Congratulations! You have successfully migrated your configuration of Great Expe
 
 ## Upgrading from previous versions of Great Expectations
 
-Since each major version introduces breaking changes that can have unintended interactions when combined with other changes, we recommend that you only upgrade 1 major version at a time.
-Notes from previous migration guides are included for reference.
+Since each major version introduces breaking changes that can have unintended interactions when combined with other changes, we recommend that you only upgrade 1 major version at a time. Notes from previous migration guides are included for reference.
 
 ### Upgrading to 0.12.x
 
