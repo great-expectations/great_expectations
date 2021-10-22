@@ -13,6 +13,9 @@ from great_expectations.exceptions import DataContextError, GeCloudError
 def ge_cloud_data_context_config():
     """
     This fixture is used to replicate a response retrieved from a GE Cloud API request.
+    The resulting data is packaged into a DataContextConfig.
+
+    Please see DataContext._retrieve_data_context_config_from_ge_cloud for more details.
     """
     DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG = """
     datasources:
