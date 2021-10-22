@@ -179,7 +179,7 @@ configured_data_connector_yaml = f"""
         assets:
           taxi_data_flat:
             base_directory: samples_2020
-            pattern: (yellow_trip_data_sample_.+)\\.csv
+            pattern: (yellow_tripdata_sample_.+)\\.csv
             group_names:
               - filename
 """
@@ -203,7 +203,7 @@ data_connectors:
         assets:
           taxi_data_flat:
             base_directory: samples_2020
-            pattern: (yellow_trip_data_sample_.+)\\.csv
+            pattern: (yellow_tripdata_sample_.+)\\.csv
             group_names:
               - filename
 """
@@ -233,12 +233,12 @@ configured_data_connector_yaml = f"""
         assets:
           taxi_data_flat:
             base_directory: samples_2020
-            pattern: (yellow_trip_data_sample_.+)\\.csv
+            pattern: (yellow_tripdata_sample_.+)\\.csv
             group_names:
               - filename
           taxi_data_year_month:
             base_directory: samples_2020
-            pattern: ([\\w]+)_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: ([\\w]+)_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:
               - name
               - year
@@ -273,12 +273,12 @@ data_connectors:
         assets:
           taxi_data_flat:
             base_directory: samples_2020
-            pattern: (yellow_trip_data_sample_.+)\\.csv
+            pattern: (yellow_tripdata_sample_.+)\\.csv
             group_names:
               - filename
           taxi_data_year_month:
             base_directory: samples_2020
-            pattern: ([\\w]+)_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: ([\\w]+)_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:
               - name
               - year
@@ -299,7 +299,7 @@ assert len(available_data_asset_names) == 2
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert "taxi_datasource" in [ds["name"] for ds in context.list_datasources()]
-assert "yellow_trip_data_sample_2019-01.csv" in set(
+assert "yellow_tripdata_sample_2019-01.csv" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
         "default_inferred_data_connector_name"
     ]

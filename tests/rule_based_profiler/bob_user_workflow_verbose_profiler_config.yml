@@ -1,7 +1,7 @@
 # TODO: <Alex>ALEX -- This example configuration is stale (and would need work prior to using and/or testing).</Alex>
 # Note the call to Profiler.profile() takes multiple batches
 # Unless filtered / specified this list of batches will be used for all metrics/parameters
-# This profiler is meant to be used on the NYC taxi data (yellow_trip_data_sample_2019-*.csv)
+# This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_2019-*.csv)
 variables:
   max_amount: 99999.99
   false_positive_threshold: 0.01
