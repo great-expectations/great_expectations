@@ -398,3 +398,7 @@ class MetricResolutionError(MetricError):
         if not isinstance(failed_metrics, Iterable):
             failed_metrics = (failed_metrics,)
         self.failed_metrics = failed_metrics
+
+
+class GeCloudError(GreatExpectationsError):
+    pass
