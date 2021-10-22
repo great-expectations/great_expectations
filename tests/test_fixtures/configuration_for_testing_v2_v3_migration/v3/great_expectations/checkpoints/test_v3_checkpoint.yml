@@ -1,5 +1,6 @@
+# in the test_v3_checkpoint.yml file
 name: test_v3_checkpoint
-config_version: 1.0
+config_version: 1.0 # Note this is the version of the Checkpoint configuration, and not the great_expectations.yml configuration
 template_name:
 module_name: great_expectations.checkpoint
 class_name: Checkpoint

@@ -170,38 +170,11 @@ The V3-style Datasource has:
 For reference, a [Data Connector](../../reference/datasources) facilitates access to an external data store, such as a database, filesystem, or cloud storage and the [Execution Engine](../../reference/execution_engine) is responsible for providing the computing resources that will be used to actually perform validation. For more information on these V3-style components with additional examples, please refer to the [Datasources Documentation](../../reference/datasources).
 
 #### V2-Style Datasource
-
-```YAML
-datasources:
-  my_datasource:
-    module_name: great_expectations.datasource
-    class_name: PandasDatasource
-    data_asset_type:
-      class_name: PandasDataset
-      module_name: great_expectations.dataset
-    batch_kwargs_generators:
-      subdir_reader:
-        class_name: SubdirReaderBatchKwargsGenerator
-        base_directory: ../../
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/great_expectations.yml#L16-L26
 ```
 
 #### V3-Style Datasource
-```YAML
-datasources:
-  my_datasource:
-    module_name: great_expectations.datasource
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: PandasExecutionEngine
-    class_name: Datasource
-    data_connectors:
-      my_datasource_example_data_connector:
-        module_name: great_expectations.datasource.data_connector
-        default_regex:
-          group_names: data_asset_name
-          pattern: (.*)
-        base_directory: ../../
-        class_name: InferredAssetFilesystemDataConnector
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/great_expectations.yml#L16-L31
 ```
 
 
@@ -213,79 +186,21 @@ In Great Expectations version 0.13.7, we introduced an improved Checkpoints feat
 
 #### V2-Style Checkpoint
 
-```yaml
-# in the test_v2_checkpoint.yml file
-name: test_v2_checkpoint
-module_name: great_expectations.checkpoint
-class_name: LegacyCheckpoint
-validation_operator_name: action_list_operator
-batches:
-  - batch_kwargs:
-      path: ../Titanic.csv
-      datasource: my_datasource
-      data_asset_name: Titanic.csv
-    expectation_suite_names:
-      - Titanic.profiled
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
 ```
 
-The `action_list_operator` would be part of the `great_expectations.yml` file.
+The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
-```yaml
-# in the great_expectations.yml file
-validation_operators:
-  action_list_operator:
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/great_expectations.yml#L56-L68
 ```
 
 #### V3-Style Checkpoint
 
 Here is the equivalent configuration in V3-checkpoints. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.
 
-```yaml
-# in the test_v3_checkpoint.yml file
-name: test_v3_checkpoint
-config_version: 1.0 # Note this is the version of the Checkpoint configuration, and not the great_expectations.yml configuration
-template_name:
-module_name: great_expectations.checkpoint
-class_name: Checkpoint
-run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
-expectation_suite_name:
-batch_request:
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-      site_names: []
-evaluation_parameters: {}
-runtime_configuration: {}
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: Titanic.csv
-      data_connector_query:
-        index: -1
-    expectation_suite_name: Titanic.profiled
-profilers: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
 ```
+
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations --v3-api checkpoint list`.
 
 ```bash

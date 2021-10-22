@@ -16,6 +16,10 @@ config_version: 3.0
 datasources:
   my_datasource:
     module_name: great_expectations.datasource
+    class_name: Datasource
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
     data_connectors:
       default_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
@@ -30,10 +34,6 @@ datasources:
         batch_identifiers:
           - default_identifier_name
         module_name: great_expectations.datasource.data_connector
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: PandasExecutionEngine
-    class_name: Datasource
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes

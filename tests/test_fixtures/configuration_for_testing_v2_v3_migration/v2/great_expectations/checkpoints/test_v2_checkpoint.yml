@@ -1,3 +1,4 @@
+# in the test_v3_checkpoint.yml file
 name: test_v2_checkpoint
 config_version:
 module_name: great_expectations.checkpoint

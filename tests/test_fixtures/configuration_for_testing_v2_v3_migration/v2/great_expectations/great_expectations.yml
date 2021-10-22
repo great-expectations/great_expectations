@@ -15,6 +15,7 @@ config_version: 2.0
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
   my_datasource:
+    class_name: PandasDatasource
     module_name: great_expectations.datasource
     data_asset_type:
       module_name: great_expectations.dataset
@@ -23,7 +24,6 @@ datasources:
       subdir_reader:
         class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../../
-    class_name: PandasDatasource
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
@@ -55,8 +55,6 @@ plugins_directory: plugins/
 # customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
 validation_operators:
   action_list_operator:
-    # To learn how to configure sending Slack notifications during evaluation
-    # (and other customizations), read: https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/validation_operators/index.html#great_expectations.validation_operators.ActionListValidationOperator
     class_name: ActionListValidationOperator
     action_list:
       - name: store_validation_result
