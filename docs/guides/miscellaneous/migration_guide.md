@@ -254,7 +254,7 @@ Here is the equivalent configuration in V3-checkpoints. Notice that the Validati
 ```yaml
 # in the test_v3_checkpoint.yml file
 name: test_v3_checkpoint
-config_version: 1.0 # Note this is the version of the Checkpoint configuration, and not the great_expectations.yml configuration 
+config_version: 1.0 # Note this is the version of the Checkpoint configuration, and not the great_expectations.yml configuration
 template_name:
 module_name: great_expectations.checkpoint
 class_name: Checkpoint
@@ -286,6 +286,13 @@ profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:
 ```
+If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations --v3-api checkpoint list`.
+
+```bash
+Using v3 (Batch Request) API
+Found 1 Checkpoint.
+ - test_v3_checkpoint
+ ```
 
 Finally, you can check if your migration has worked by running your new V3-style Checkpoint.
 
