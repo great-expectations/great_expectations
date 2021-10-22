@@ -4532,7 +4532,7 @@ def yellow_trip_pandas_data_context(
             os.path.join(
                 "integration",
                 "fixtures",
-                "yellow_trip_data_pandas_fixture",
+                "yellow_tripdata_pandas_fixture",
                 "great_expectations",
                 "great_expectations.yml",
             ),
@@ -4544,13 +4544,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-01.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-01.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
     )
@@ -4559,13 +4559,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-02.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-02.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
     )
@@ -4574,13 +4574,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-03.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-03.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),
     )
