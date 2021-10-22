@@ -16,7 +16,7 @@ execution_engine:
 data_connectors:
   default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    base_directory: <MY DIRECTORY>
+    base_directory: <MY DIRECTORY>/
     default_regex:
       group_names:
         - data_asset_name
@@ -26,7 +26,7 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
-    "<MY DIRECTORY>", "../data/single_directory_one_data_asset/"
+    "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -43,7 +43,7 @@ datasource_config = {
     "data_connectors": {
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "<MY DIRECTORY>",
+            "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
                 "group_names": ["data_asset_name"],
                 "pattern": "(.*)\.csv",
@@ -84,7 +84,7 @@ execution_engine:
 data_connectors:
   default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    base_directory: <MY DIRECTORY>
+    base_directory: <MY DIRECTORY>/
     default_regex:
       group_names:
         - data_asset_name
@@ -96,7 +96,7 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
-    "<MY DIRECTORY>", "../data/single_directory_one_data_asset/"
+    "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -113,7 +113,7 @@ datasource_config = {
     "data_connectors": {
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "<MY DIRECTORY>",
+            "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
                 "group_names": ["data_asset_name", "year", "month"],
                 "pattern": "(.*)_(\d{4})-(\d{2})\.csv",
@@ -154,8 +154,8 @@ execution_engine:
 data_connectors:
   default_inferred_data_connector_name:
     class_name: InferredAssetS3DataConnector
-    bucket: <MY S3 BUCKET>
-    prefix: <MY S3 BUCKET PREFIX>
+    bucket: <MY S3 BUCKET>/
+    prefix: <MY S3 BUCKET PREFIX>/
     default_regex:
       group_names:
         - data_asset_name
@@ -166,9 +166,9 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>", "superconductive-public")
+datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>/", "superconductive-public")
 datasource_yaml = datasource_yaml.replace(
-    "<MY S3 BUCKET PREFIX>", "data/taxi_yellow_trip_data_samples/"
+    "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_trip_data_samples/"
 )
 
 # TODO: Uncomment once S3 testing in Azure Pipelines is re-enabled
@@ -186,8 +186,8 @@ datasource_config = {
     "data_connectors": {
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "bucket": "<MY S3 BUCKET>",
-            "prefix": "<MY S3 BUCKET PREFIX>",
+            "bucket": "<MY S3 BUCKET>/",
+            "prefix": "<MY S3 BUCKET PREFIX>/",
             "default_regex": {
                 "group_names": ["data_asset_name", "year", "month"],
                 "pattern": "(.*)_(\d{4})-(\d{2})\.csv",
@@ -232,7 +232,7 @@ execution_engine:
 data_connectors:
   default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    base_directory: <MY DIRECTORY>
+    base_directory: <MY DIRECTORY>/
     default_regex:
       group_names:
         - data_asset_name
@@ -244,7 +244,7 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
-    "<MY DIRECTORY>", "../data/single_directory_one_data_asset/"
+    "<MY DIRECTORY>/", "../data/single_directory_one_data_asset/"
 )
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -261,7 +261,7 @@ datasource_config = {
     "data_connectors": {
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "<MY DIRECTORY>",
+            "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
                 "group_names": ["data_asset_name", "year", "month"],
                 "pattern": "(.*)_(\d{4})-(\d{2})\.csv",

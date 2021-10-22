@@ -279,47 +279,38 @@ Here’s a similar example, but this time two Data Assets are mixed together in 
 
 Then this configuration...
 
-```yaml
-class_name: ConfiguredAssetFilesystemDataConnector
-base_directory: test_data/
-assets:
-  alpha:
-    group_names:
-      - name
-      - year
-      - month
-      - day
-    pattern: alpha-(\d{4})-(\d{2})-(\d{2})\.csv
-  beta:
-    group_names:
-      - name
-      - year
-      - month
-      - day
-    pattern: beta-(\d{4})-(\d{2})-(\d{2})\.csv
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L329-L351
 ```
 
-...will now make `alpha` and `beta` both available a DataAssets, with the following data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L362-L386
+```
+
+</TabItem>
+</Tabs>
+
+...will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
-    alpha (3 of 3): [
-        'alpha-2020-01-01.csv',
-        'alpha-2020-01-02.csv',
-        'alpha-2020-01-03.csv'
-    ]
+    green_tripdata (3 of 3): ['green_tripdata_2019-01.csv', 'green_tripdata_2019-02.csv', 'green_tripdata_2019-03.csv']
+    yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
 
-    beta (3 of 3): [
-        'beta-2020-01-01.csv',
-        'beta-2020-01-02.csv',
-        'beta-2020-01-03.csv'
-    ]
-
-Unmatched data_references (0 of 0): []
+Unmatched data_references (0 of 0):[]
 ```
 
-Example 3: Example with Nested Folders
---------------------------------------------------
+### Example 3: Example with Nested Folders
 
 In the following example, files are placed folders that match the `data_asset_names` we want: `A`, `B`, `C`, and `D`.
 
