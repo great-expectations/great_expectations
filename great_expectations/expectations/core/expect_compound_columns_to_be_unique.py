@@ -39,6 +39,87 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     }
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        styling = runtime_configuration.get("styling")
+
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column_list",
+                "ignore_row_if",
+                "row_condition",
+                "condition_parser",
+                "mostly",
+            ],
+        )
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = (
+            f"Values for given compound columns must be unique together{mostly_str}: "
+        )
+        for idx in range(len(params["column_list"]) - 1):
+            template_str += "$column_list_" + str(idx) + ", "
+            params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        last_idx = len(params["column_list"]) - 1
+        template_str += "$column_list_" + str(last_idx)
+        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        params_with_json_schema = {
+            "column_list": {
+                "schema": {"type": "array"},
+                "value": params.get("column_list"),
+            },
+            "ignore_row_if": {
+                "schema": {"type": "string"},
+                "value": params.get("ignore_row_if"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+            "mostly": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
