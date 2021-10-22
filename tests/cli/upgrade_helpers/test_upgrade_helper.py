@@ -468,9 +468,6 @@ def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_
         catch_exceptions=False,
     )
     stdout: str = result.stdout
-    print(
-        f"\n[ALEX_TEST] [test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_validation_operators] ACTUAL_STDOUT:\n{stdout} ; TYPE: {str(type(stdout))}"
-    )
 
     with open(
         file_relative_path(
@@ -481,9 +478,6 @@ def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_
         expected_stdout: str = f.read()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v20_project_directory
-        )
-        print(
-            f"\n[ALEX_TEST] [test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_validation_operators] EXPECTED_STDOUT:\n{expected_stdout} ; TYPE: {str(type(expected_stdout))}"
         )
         assert stdout == expected_stdout
 
@@ -581,9 +575,6 @@ def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
         catch_exceptions=False,
     )
     stdout: str = result.stdout
-    print(
-        f"\n[ALEX_TEST] [test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints] ACTUAL_STDOUT:\n{stdout} ; TYPE: {str(type(stdout))}"
-    )
 
     with open(
         file_relative_path(
@@ -595,9 +586,6 @@ def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR",
             v20_project_directory_with_v30_configuration_and_v20_checkpoints,
-        )
-        print(
-            f"\n[ALEX_TEST] [test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints] EXPECTED_STDOUT:\n{expected_stdout} ; TYPE: {str(type(expected_stdout))}"
         )
         assert stdout == expected_stdout
 

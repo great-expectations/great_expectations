@@ -101,7 +101,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         checkpoint: Union[Checkpoint, LegacyCheckpoint]
         checkpoint_name: str
         try:
-            for checkpoint_name in self.data_context.list_checkpoints():
+            for checkpoint_name in sorted(self.data_context.list_checkpoints()):
                 checkpoint = self.data_context.get_checkpoint(name=checkpoint_name)
                 if checkpoint.config.config_version is None:
                     legacy_checkpoints.append(checkpoint)
