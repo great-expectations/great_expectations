@@ -523,7 +523,10 @@ def upgrade_project(
 
     # use loop in case multiple upgrades need to take place
     while int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
-        increment_version, exception_occurred = upgrade_project_one_version_increment(
+        (
+            increment_version,
+            exception_occurred,
+        ) = upgrade_project_up_to_one_version_increment(
             context_root_dir=context_root_dir,
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
@@ -587,7 +590,7 @@ def upgrade_project_one_or_multiple_versions_increment(
         (
             increment_version,
             exception_occurred,
-        ) = upgrade_project_one_version_increment(
+        ) = upgrade_project_up_to_one_version_increment(
             context_root_dir=directory,
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
@@ -683,7 +686,10 @@ def upgrade_project_zero_versions_increment(
             # Don't fail for usage stats
             pass
 
-    (increment_version, exception_occurred,) = upgrade_project_one_version_increment(
+    (
+        increment_version,
+        exception_occurred,
+    ) = upgrade_project_up_to_one_version_increment(
         context_root_dir=directory,
         ge_config_version=ge_config_version,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
@@ -718,7 +724,7 @@ def upgrade_project_zero_versions_increment(
     return context
 
 
-def upgrade_project_one_version_increment(
+def upgrade_project_up_to_one_version_increment(
     context_root_dir: str,
     ge_config_version: float,
     continuation_message: str,
