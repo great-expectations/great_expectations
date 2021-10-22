@@ -12,7 +12,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 context = DataContext()
-suite = context.get_expectation_suite("yellow_trip_data_validations")
+suite = context.get_expectation_suite("yellow_tripdata_validations")
 
 # Create three BatchRequests for Jan, Feb, and March 2019 data and instantiate a Validator with all three BatchRequests
 jan_batch_request: BatchRequest = BatchRequest(
