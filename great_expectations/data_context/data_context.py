@@ -60,7 +60,6 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
@@ -73,7 +72,6 @@ from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
-    DataContextConfigSchema,
     DatasourceConfig,
     GeCloudConfig,
     anonymizedUsageStatisticsSchema,
@@ -4074,13 +4072,11 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        :return: the confugration object retrieved from the Cloud API
+        :return: the configuration object retrieved from the Cloud API
         """
-        if not self.ge_cloud_mode:
-            raise  # TODO: Add appropriate exception/error
         ge_cloud_url = (
             self.ge_cloud_config.base_url
-            + f"/accounts/{self.ge_cloud_config.account_id}/data_context_configuration"
+            + f"/accounts/{self.ge_cloud_config.account_id}/data-context-configuration"
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
@@ -4089,7 +4085,9 @@ class DataContext(BaseDataContext):
 
         response = requests.get(ge_cloud_url, headers=auth_headers)
         if response.status_code != 200:
-            raise  # TODO: Add appropriate exception/error
+            raise ge_exceptions.GeCloudError(
+                f"Bad request made to GE Cloud; {response.json().get('message')}"
+            )
         config = response.json()
         return DataContextConfig(**config)
 
@@ -4099,7 +4097,7 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        For Data Contexts in GE Cloud mode, a use-specific template is retrieved from the Cloud API
+        For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
         and populated in a similar fashion - see self._retrieve_data_context_config_from_ge_cloud for
         more details.
 
