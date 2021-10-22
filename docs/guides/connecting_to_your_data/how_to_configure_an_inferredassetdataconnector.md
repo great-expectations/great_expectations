@@ -247,21 +247,20 @@ Once configured, you can get `Validators` from the `Data Context` as follows:
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L294-L303
 ```
 
-Example 2: Basic configuration with more than one DataAsset
------------------------------------------------------------
+### Example 2: Basic configuration with more than one DataAsset
 
-Here’s a similar example, but this time two data_assets are mixed together in one folder.
+Here’s a similar example, but this time two Data Assets are mixed together in one folder.
 
 **Note**: For an equivalent configuration using `ConfiguredAssetFilesSystemDataconnector`, please see Example 2
 in [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_configuredassetdataconnector).
 
 ```
-test_data/alpha-2020-01-01.csv
-test_data/beta-2020-01-01.csv
-test_data/alpha-2020-01-02.csv
-test_data/beta-2020-01-02.csv
-test_data/alpha-2020-01-03.csv
-test_data/beta-2020-01-03.csv
+<MY DIRECTORY>/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/green_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/green_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/green_tripdata_2019-03.csv
 ```
 
 The same configuration as Example 1...

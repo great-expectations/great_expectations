@@ -257,25 +257,24 @@ Available data_asset_names (1 of 1):
 Unmatched data_references (3 of 3):['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
 ```
 
-Notice that `alpha` has 0 data_references, and there are 3 `Unmatched data_references` listed.
+Notice that `yellow_tripdata` has 0 data_references, and there are 3 `Unmatched data_references` listed.
 This would indicate that some part of the configuration is incorrect and would need to be reviewed.
-In our case, changing `pattern` to : `alpha-(.*)\\.csv` will fix our problem and give the same output to above.
+In our case, changing `pattern` to : `yellow_tripdata_(.*)\\.csv` will fix our problem and give the same output to above.
 
 
-Example 2: Basic configuration with more than one DataAsset
------------------------------------------------------------
+### Example 2: Basic configuration with more than one DataAsset
 
-Here’s a similar example, but this time two data_assets are mixed together in one folder.
+Here’s a similar example, but this time two Data Assets are mixed together in one folder.
 
 **Note**: For an equivalent configuration using `InferredAssetFileSystemDataConnector`, please see Example 2 in  [How to configure an InferredAssetDataConnector](./how_to_configure_an_inferredassetdataconnector).
 
 ```
-test_data/alpha-2020-01-01.csv
-test_data/beta-2020-01-01.csv
-test_data/alpha-2020-01-02.csv
-test_data/beta-2020-01-02.csv
-test_data/alpha-2020-01-03.csv
-test_data/beta-2020-01-03.csv
+<MY DIRECTORY>/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/green_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/green_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/green_tripdata_2019-03.csv
 ```
 
 Then this configuration...
