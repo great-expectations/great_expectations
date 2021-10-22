@@ -401,4 +401,8 @@ class MetricResolutionError(MetricError):
 
 
 class GeCloudError(GreatExpectationsError):
+    """
+    Generic error used to provide additional context around Cloud-specific issues.
+    """
+
     pass
