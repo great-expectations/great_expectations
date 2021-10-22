@@ -264,7 +264,8 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
+            { type: 'doc', id: 'guides/miscellaneous/how_to_template' },
+            { type: 'doc', id: 'guides/miscellaneous/migration_guide'}
           ]
         }
       ]
