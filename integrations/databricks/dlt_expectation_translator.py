@@ -36,6 +36,7 @@ def translate_expectation_config_to_dlt_expectation(
         return [
             (
                 dlt_expectation_name,
+                # TODO: Handle columns that require quoting
                 f"{expectation_configuration.get_domain_kwargs()['column']} IS NOT NULL",
             )
         ]
