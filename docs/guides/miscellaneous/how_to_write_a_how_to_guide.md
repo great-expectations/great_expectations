@@ -61,7 +61,7 @@ Each integration test is defined by a dictionary entry similar to the one below:
 {
     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
 },
 ```
 
