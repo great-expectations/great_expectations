@@ -1,12 +1,19 @@
 from typing import List, Tuple
 
-from great_expectations.core import ExpectationConfiguration
-from integrations.databricks.exceptions import UnsupportedExpectationConfiguration
+import sqlparse
 
-ENABLED_EXPECTATIONS: Tuple = (
+from great_expectations.core import ExpectationConfiguration
+from integrations.databricks.exceptions import (
+    UnsupportedDLTExpectationConfiguration,
+    UnsupportedExpectationConfiguration,
+)
+
+ENABLED_EXPECTATIONS_GE_TO_DLT: Tuple = (
     "expect_column_values_to_not_be_null",
     "expect_column_values_to_be_between",
 )
+
+ENABLED_EXPECTATIONS_DLT_TO_GE = ("expect_column_values_to_not_be_null",)
 
 
 def translate_expectation_config_to_dlt_expectation(
@@ -23,9 +30,9 @@ def translate_expectation_config_to_dlt_expectation(
         List of (dlt_expectation_name, dlt-style condition)
     """
 
-    if expectation_configuration.expectation_type not in ENABLED_EXPECTATIONS:
+    if expectation_configuration.expectation_type not in ENABLED_EXPECTATIONS_GE_TO_DLT:
         raise UnsupportedExpectationConfiguration(
-            f"The expectation type `{expectation_configuration.expectation_type}` of the ExpectationConfiguration you provided is not supported. Please provide one of the supported types: {ENABLED_EXPECTATIONS}"
+            f"The expectation type `{expectation_configuration.expectation_type}` of the ExpectationConfiguration you provided is not supported. Please provide one of the supported types: {ENABLED_EXPECTATIONS_GE_TO_DLT}"
         )
 
     # TODO: Move these into separate methods for each expectation type:
@@ -76,3 +83,74 @@ def translate_expectation_config_to_dlt_expectation(
             return_list.append((f"{dlt_expectation_name}_2", string_repr_max))
 
         return return_list
+
+
+def translate_dlt_expectation_to_expectation_config(
+    dlt_expectations: List[Tuple[str, str]], ge_expectation_type: str
+) -> ExpectationConfiguration:
+    """
+    Only works for simple comparisons of two items e.g. a >= 10
+    Args:
+        dlt_expectations: a single or pair of dlt_expectations to convert to Great Expectations ExpectationConfigurations
+
+    Returns:
+        Great Expectations ExpectationConfiguration objects
+    """
+    if ge_expectation_type not in ENABLED_EXPECTATIONS_DLT_TO_GE:
+        raise UnsupportedExpectationConfiguration(
+            f"The expectation type `{ge_expectation_type}` is not supported. Please provide one of the supported types: {ENABLED_EXPECTATIONS_DLT_TO_GE}"
+        )
+
+    if ge_expectation_type == "expect_column_values_to_not_be_null":
+        if len(dlt_expectations) > 1:
+            raise UnsupportedDLTExpectationConfiguration(
+                f"For this expectation type {ge_expectation_type}, please submit a list of only one dlt_expectation."
+            )
+
+        dlt_expectation_name: str = dlt_expectations[0][0]
+        dlt_expectation_comparison: str = dlt_expectations[0][1]
+
+        if not "IS NOT NULL" in dlt_expectation_comparison.upper():
+            raise UnsupportedDLTExpectationConfiguration(
+                f"For this expectation type {ge_expectation_type}, please submit an expectation containing an IS NOT NULL clause."
+            )
+
+        column_name: str = sqlparse.parse(dlt_expectation_comparison)[0].tokens[0].value
+
+        return ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": column_name,
+                "result_format": "COMPLETE",
+            },
+            meta={"notes": f"DLT expectation name: {dlt_expectation_name}"},
+        )
+
+    # if ge_expectation_type == "expect_column_values_to_be_between":
+    #
+    #     for dlt_expectation in dlt_expectations:
+    #
+    #         dlt_expectation_name = dlt_expectation[0]
+    #         dlt_expectation_value = dlt_expectation[1]
+    #
+    #         comparison = sqlparse.parse(dlt_expectation_value)[0].tokens[0]
+    #
+    #         column = comparison.left
+    #         value = comparison.right
+    #         # This is very brittle
+    #         operator = comparison[1]
+    #
+    #
+    #     if operator == ">=":
+    #         expectation_configuration = ExpectationConfiguration(
+    #         expectation_type="expect_column_values_to_be_between",
+    #         kwargs={
+    #             "column": column,
+    #             "min_value": float(value),
+    #             "max_value": None,
+    #             "strict_min": False,
+    #             "strict_max": False,
+    #             "result_format": "COMPLETE",
+    #         },
+    #         meta={"notes": f"DLT expectation name: {dlt_expectation_name}"},
+    #     )

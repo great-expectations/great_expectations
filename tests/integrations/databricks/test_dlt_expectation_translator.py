@@ -2,6 +2,7 @@ import pytest
 
 from great_expectations.core import ExpectationConfiguration
 from integrations.databricks.dlt_expectation_translator import (
+    translate_dlt_expectation_to_expectation_config,
     translate_expectation_config_to_dlt_expectation,
 )
 from integrations.databricks.exceptions import UnsupportedExpectationConfiguration
@@ -111,3 +112,26 @@ def test_unsupported_expectation(expect_column_values_to_be_null_config):
             expectation_configuration=expect_column_values_to_be_null_config,
             dlt_expectation_name="dlt_expectation_name",
         )
+
+
+def test_translate_dlt_expectation_to_expectation_config():
+    # dlt_expectation = ("my_between_config_col_a_1", "a >= 10")
+
+    column_name = "col_1"
+    dlt_expectation_name = "my_dlt_not_null_expectation"
+    ge_expectation_type = "expect_column_values_to_not_be_null"
+    dlt_expectation = (dlt_expectation_name, f"{column_name} IS NOT NULL")
+
+    result = translate_dlt_expectation_to_expectation_config(
+        dlt_expectations=[dlt_expectation], ge_expectation_type=ge_expectation_type
+    )
+
+    expected = ExpectationConfiguration(
+        expectation_type=ge_expectation_type,
+        kwargs={
+            "column": column_name,
+            "result_format": "COMPLETE",
+        },
+        meta={"notes": f"DLT expectation name: {dlt_expectation_name}"},
+    )
+    assert result == expected
