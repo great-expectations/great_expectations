@@ -87,12 +87,12 @@ def test_upgrade_helper_intervention_on_cli_command(
         in stdout
     )
     assert (
-        "Ok, exiting now. To upgrade at a later time, use the following command: [36mgreat_expectations project "
+        "Ok, exiting now. To upgrade at a later time, use the following command: [36mgreat_expectations --v3-api project "
         "upgrade[0m" in stdout
     )
     assert (
         "To learn more about the upgrade process, visit ["
-        "36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+        "36mhttps://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide"
         in stdout
     )
     assert_no_logging_messages_or_tracebacks(
