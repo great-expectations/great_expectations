@@ -307,7 +307,7 @@ Available data_asset_names (2 of 2):
     green_tripdata (3 of 3): ['green_tripdata_2019-01.csv', 'green_tripdata_2019-02.csv', 'green_tripdata_2019-03.csv']
     yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
 
-Unmatched data_references (0 of 0):[]
+Unmatched data_references (0 of 0): []
 ```
 
 ### Example 3: Example with Nested Folders

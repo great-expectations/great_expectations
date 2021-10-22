@@ -293,7 +293,7 @@ Available data_asset_names (2 of 2):
     green_tripdata (3 of 3): ['green_tripdata_2019-01.csv', 'green_tripdata_2019-02.csv', 'green_tripdata_2019-03.csv']
     yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
 
-Unmatched data_references (0 of 0):[]
+Unmatched data_references (0 of 0): []
 ```
 
 
@@ -302,47 +302,61 @@ Unmatched data_references (0 of 0):[]
 Here’s a similar example, with a nested directory structure...
 
 ```
-2020/01/01/alpha.csv
-2020/01/02/alpha.csv
-2020/01/03/alpha.csv
-2020/01/04/alpha.csv
-2020/01/04/beta.csv
-2020/01/05/alpha.csv
-2020/01/05/beta.csv
+2018/10/yellow_tripdata.csv
+2018/10/green_tripdata.csv
+2018/11/yellow_tripdata.csv
+2018/11/green_tripdata.csv
+2018/12/yellow_tripdata.csv
+2018/12/green_tripdata.csv
+2019/01/yellow_tripdata.csv
+2019/01/green_tripdata.csv
+2019/02/yellow_tripdata.csv
+2019/02/green_tripdata.csv
+2019/03/yellow_tripdata.csv
+2019/03/green_tripdata.csv
 ```
 
 Then this configuration...
 
-```yaml
-class_name: InferredAssetFilesystemDataConnector
-base_directory: my_directory/
-default_regex:
-  group_names:
-    - year
-    - month
-    - day
-    - data_asset_name
-  pattern: (\d{4})/(\d{2})/(\d{2})/(.*)\.csv
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L306-L323
 ```
 
-...will now make `alpha` and `beta` both available a DataAssets, with the following data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L334-L352
+```
+
+</TabItem>
+</Tabs>
+
+...will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
-    alpha (3 of 5): [
-        'alpha-2020-01-01.csv',
-        'alpha-2020-01-02.csv',
-        'alpha-2020-01-03.csv'
+    yellow_tripdata (3 of 6): [
+        'yellow_tripdata-2018-10.csv',
+        'yellow_tripdata-2018-11.csv',
+        'yellow_tripdata-2018-12.csv'
     ]
 
-    beta (2 of 2): [
-        'beta-2020-01-04.csv',
-        'beta-2020-01-05.csv',
+    green_tripdata (3 of 6): [
+        'green_tripdata-2018-10.csv',
+        'green_tripdata-2018-11.csv',
+        'green_tripdata-2018-12.csv'
     ]
 
 Unmatched data_references (0 of 0): []
 ```
-
 
 Example 4: Nested directory structure with the data_asset_name on the outside
 -----------------------------------------------------------------------------
