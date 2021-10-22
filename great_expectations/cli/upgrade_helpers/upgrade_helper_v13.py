@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
@@ -99,17 +100,20 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         legacy_checkpoints: List[Union[Checkpoint, LegacyCheckpoint]] = []
         checkpoint: Union[Checkpoint, LegacyCheckpoint]
         checkpoint_name: str
-        for checkpoint_name in self.data_context.list_checkpoints():
-            checkpoint = self.data_context.get_checkpoint(name=checkpoint_name)
-            if checkpoint.config.config_version is None:
-                legacy_checkpoints.append(checkpoint)
+        try:
+            for checkpoint_name in self.data_context.list_checkpoints():
+                checkpoint = self.data_context.get_checkpoint(name=checkpoint_name)
+                if checkpoint.config.config_version is None:
+                    legacy_checkpoints.append(checkpoint)
 
-        self.upgrade_checklist["manual"]["checkpoints"] = {
-            checkpoint.name: checkpoint.config.to_json_dict()
-            for checkpoint in legacy_checkpoints
-        }
+            self.upgrade_checklist["manual"]["checkpoints"] = {
+                checkpoint.name: checkpoint.config.to_json_dict()
+                for checkpoint in legacy_checkpoints
+            }
 
-        if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
+            if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
+                self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
+        except ge_exceptions.InvalidTopLevelConfigKeyError as e:
             self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection
@@ -273,11 +277,12 @@ The following Stores and/or Store Names will be upgraded:
                 upgrade_overview += """
 <cyan>\
 Manual Steps
-=============
+=============\
 </cyan>
 """
                 if not self.upgrade_log["skipped_checkpoint_config_upgrade"]:
                     upgrade_overview += """\
+                    
 The following Checkpoints must be upgraded manually, due to using the old Checkpoint format, which is being deprecated:
 
 """
@@ -291,7 +296,8 @@ The following Checkpoints must be upgraded manually, due to using the old Checkp
 
                 # noinspection SpellCheckingInspection
                 if not self.upgrade_log["skipped_datasources_upgrade"]:
-                    upgrade_overview += """
+                    upgrade_overview += """\
+
 The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
 
 """

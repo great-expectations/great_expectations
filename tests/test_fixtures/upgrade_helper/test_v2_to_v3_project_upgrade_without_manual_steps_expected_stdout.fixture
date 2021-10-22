@@ -4,40 +4,6 @@ Checking project...[0m
 
 ================================================================================
 [0m
-++====================================++
-|| UpgradeHelperV13: Upgrade Overview ||
-++====================================++
-
-UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
-
-**WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
-
-Automated Steps
-================
-
-The following Stores and/or Store Names will be upgraded:
-
-    - Stores: checkpoint_store
-    - Store Names: checkpoint_store_name
-
-Manual Steps
-=============
-
-No manual upgrade steps are required.
-
-Upgrade Confirmation
-=====================
-
-Please consult the 0.13.x migration guide for instructions on how to complete any required manual steps or to learn more about the automated upgrade process:
-
-    https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide
-
-Would you like to proceed with the project upgrade? [Y/n]: 
-
-Upgrading project...[0m
-
-================================================================================
-[0m
 [36m++================++
 || Upgrade Report ||
 ++================++[0m

@@ -22,13 +22,10 @@ The following Stores and/or Store Names will be upgraded:
 
 Manual Steps
 =============
+                    
+The following Checkpoints must be upgraded manually, due to using the old Checkpoint format, which is being deprecated:
 
-The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
-
-    - Data Sources: dataset_diabetes__dir
-
-Your configuration uses validation_operators, which are being deprecated.  Please, manually convert validation_operators to use the new Checkpoint validation unit, since validation_operators will be deleted.
-
+    - Checkpoints: titanic_checkpoint_1, titanic_checkpoint_0, titanic_checkpoint_2, my_checkpoint
 
 Upgrade Confirmation
 =====================
