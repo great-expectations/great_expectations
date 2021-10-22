@@ -38,7 +38,7 @@ EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
     "<cyan>great_expectations --v3-api project upgrade</cyan>\n\nTo learn more about the upgrade "
     "process, visit "
-    "<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide"
+    "<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
     "</cyan>.\n"
 )
 
@@ -546,7 +546,7 @@ def upgrade_project(
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
     - When complete, increment the config_version key in your <cyan>great_expectations.yml</cyan> to <cyan>{ge_config_version + 1.0}</cyan>\n
 To learn more about the upgrade process, visit \
-<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide</cyan>
+<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
 """
 
     if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:

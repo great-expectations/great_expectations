@@ -44,7 +44,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
 
     assert "Checking project..." in stdout
     assert (
-        "The Upgrade Helper has performed the automated upgrade steps as part of upgrading your project to be compatible with Great Expectations 0.13.x, and the config_version of your great_expectations.yml has been automatically incremented to 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully."
+        "The Upgrade Helper has performed the automated upgrade steps as part of upgrading your project to be compatible with Great Expectations V3 API, and the config_version of your great_expectations.yml has been automatically incremented to 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully."
         in stdout
     )
     assert (
@@ -92,7 +92,7 @@ def test_upgrade_helper_intervention_on_cli_command(
     )
     assert (
         "To learn more about the upgrade process, visit ["
-        "36mhttps://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide"
+        "36mhttps://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
         in stdout
     )
     assert_no_logging_messages_or_tracebacks(

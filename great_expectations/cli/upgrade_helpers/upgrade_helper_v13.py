@@ -184,7 +184,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         if increment_version:
             upgrade_overview += (
                 f"""\
-UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 """
                 + self._upgrade_overview_common_content(
                     manual_steps_required=manual_steps_required
@@ -194,10 +194,10 @@ UpgradeHelperV13 will upgrade your project to be compatible with Great Expectati
 Upgrade Confirmation
 =====================
 </cyan>
-Please consult the 0.13.x migration guide for instructions on how to complete any required manual steps or to learn \
+Please consult the V3 API migration guide for instructions on how to complete any required manual steps or to learn \
 more about the automated upgrade process:
 
-    <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide</cyan>
+    <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
 """
             )
             if confirmation_required:
@@ -207,7 +207,7 @@ Would you like to proceed with the project upgrade?\
 """
         else:
             upgrade_overview += f"""\
-Your project needs to be upgraded in order to be compatible with Great Expectations 0.13.x.
+Your project needs to be upgraded in order to be compatible with Great Expectations V3 API.
 """ + self._upgrade_overview_common_content(
                 manual_steps_required=manual_steps_required
             )
@@ -387,7 +387,7 @@ No manual upgrade steps are required.
                 upgrade_report += f"""
 <yellow>\
 The Upgrade Helper has performed the automated upgrade steps as part of upgrading your project to be compatible with \
-Great Expectations 0.13.x, and the config_version of your great_expectations.yml has been automatically incremented to \
+Great Expectations V3 API, and the config_version of your great_expectations.yml has been automatically incremented to \
 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully.
 
 A log detailing the upgrade can be found here:
@@ -398,7 +398,7 @@ A log detailing the upgrade can be found here:
             else:
                 upgrade_report += f"""
 <green>\
-Your project was successfully upgraded to be compatible with Great Expectations 0.13.x.  The config_version of your \
+Your project was successfully upgraded to be compatible with Great Expectations V3 API.  The config_version of your \
 great_expectations.yml has been automatically incremented to 3.0.
 
 A log detailing the upgrade can be found here:
@@ -411,7 +411,7 @@ A log detailing the upgrade can be found here:
                 upgrade_report += f"""
 <yellow>\
 The Upgrade Helper does not have any automated upgrade steps to perform as part of upgrading your project to be \
-compatible with Great Expectations 0.13.x, and the config_version of your great_expectations.yml is already set to \
+compatible with Great Expectations V3 API, and the config_version of your great_expectations.yml is already set to \
 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully.
 
 A log detailing the upgrade can be found here:
@@ -422,7 +422,7 @@ A log detailing the upgrade can be found here:
             else:
                 upgrade_report += f"""
 <yellow>\
-The Upgrade Helper finds your project to be compatible with Great Expectations 0.13.x, and the config_version of your \
+The Upgrade Helper finds your project to be compatible with Great Expectations V3 API, and the config_version of your \
 great_expectations.yml is already set to 3.0.  There are no additional automatic or manual steps required, since the \
 upgrade process has been completed successfully.
 

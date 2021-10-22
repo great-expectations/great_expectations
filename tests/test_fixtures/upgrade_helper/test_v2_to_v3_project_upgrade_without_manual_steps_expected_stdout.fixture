@@ -8,7 +8,7 @@ Checking project...[0m
 || Upgrade Report ||
 ++================++[0m
 
-[32mYour project was successfully upgraded to be compatible with Great Expectations 0.13.x.  The config_version of your great_expectations.yml has been automatically incremented to 3.0.
+[32mYour project was successfully upgraded to be compatible with Great Expectations V3 API.  The config_version of your great_expectations.yml has been automatically incremented to 3.0.
 
 A log detailing the upgrade can be found here:
 

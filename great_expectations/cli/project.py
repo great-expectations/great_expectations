@@ -72,7 +72,7 @@ def do_config_check(target_directory):
         if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
             is_config_ok = False
             upgrade_message = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
-Please consult the 0.13.x migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide and
+Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
 """
             context = None
@@ -100,8 +100,8 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
                     cli_message(string=upgrade_overview)
                     is_config_ok = False
                     upgrade_message = f"""The configuration of your great_expectations.yml is outdated.  Please \
-consult the 0.13.x migration guide \
-https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide and upgrade your \
+consult the V3 API migration guide \
+https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your \
 Great Expectations configuration in order to take advantage of the latest capabilities.
 """
                     context = None

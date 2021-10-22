@@ -89,7 +89,7 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
     )
     assert "Checking your config files for validity" in result.output
     assert (
-        "Your project needs to be upgraded in order to be compatible with Great Expectations 0.13.x."
+        "Your project needs to be upgraded in order to be compatible with Great Expectations V3 API."
         in result.output
     )
     assert (
@@ -103,7 +103,7 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
     )
     assert "Unfortunately, your config appears to be invalid" in result.output
     assert (
-        "The configuration of your great_expectations.yml is outdated.  Please consult the 0.13.x migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide and upgrade your Great Expectations configuration in order to take advantage of the latest capabilities."
+        "The configuration of your great_expectations.yml is outdated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your Great Expectations configuration in order to take advantage of the latest capabilities."
         in result.output
     )
     assert result.exit_code == 1
