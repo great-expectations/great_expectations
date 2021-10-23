@@ -111,34 +111,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                 "condition_parser",
             ],
         )
-
-        # NOTE: This renderer doesn't do anything with "ignore_row_if"
-
-        if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
-            params["row_condition"] = None
-
-        if params["mostly"] is None:
-            template_str = "Values in $column_A and $column_B must always be equal."
-        else:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
         params_with_json_schema = {
             "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
             "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
@@ -160,6 +132,35 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
+
+        # NOTE: This renderer doesn't do anything with "ignore_row_if"
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
+            params["row_condition"] = None
+
+        if params["mostly"] is None:
+            template_str = "Values in $column_A and $column_B must always be equal."
+        else:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params_with_json_schema.update(conditional_params)
+
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

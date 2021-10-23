@@ -60,6 +60,28 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 "mostly",
             ],
         )
+        params_with_json_schema = {
+            "column_list": {
+                "schema": {"type": "array"},
+                "value": params.get("column_list"),
+            },
+            "ignore_row_if": {
+                "schema": {"type": "string"},
+                "value": params.get("ignore_row_if"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+            "mostly": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly"),
+            },
+        }
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
@@ -86,37 +108,15 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
             template_str = (
                 conditional_template_str
                 + ", then "
                 + template_str[0].lower()
                 + template_str[1:]
             )
-            params.update(conditional_params)
+            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list"),
-            },
-            "ignore_row_if": {
-                "schema": {"type": "string"},
-                "value": params.get("ignore_row_if"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "mostly": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly"),
-            },
-        }
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

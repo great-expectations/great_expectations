@@ -4,9 +4,12 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...data_context.types.base import renderedAtomicValueSchema
 from ...render.renderer.renderer import renderer
-from ...render.types import RenderedAtomicContent, RenderedStringTemplateContent
+from ...render.types import (
+    RenderedAtomicContent,
+    RenderedStringTemplateContent,
+    renderedAtomicValueSchema,
+)
 from ...render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -127,32 +130,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "strict_max",
             ],
         )
-
-        if params["min_value"] is None and params["max_value"] is None:
-            template_str = "May have any number of rows."
-        else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
-            elif params["min_value"] is None:
-                template_str = f"Must have {at_most_str} $max_value rows."
-            elif params["max_value"] is None:
-                template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
-
         # format params
         params_with_json_schema = {
             "min_value": {
@@ -176,6 +153,32 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "value": params.get("strict_max"),
             },
         }
+
+        if params["min_value"] is None and params["max_value"] is None:
+            template_str = "May have any number of rows."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
+            elif params["min_value"] is None:
+                template_str = f"Must have {at_most_str} $max_value rows."
+            elif params["max_value"] is None:
+                template_str = f"Must have {at_least_str} $min_value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params_with_json_schema.update(conditional_params)
+
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

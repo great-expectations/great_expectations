@@ -120,6 +120,31 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 "condition_parser",
             ],
         )
+        params_with_json_schema = {
+            "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
+            "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "ignore_row_if": {
+                "schema": {"type": "string"},
+                "value": params.get("ignore_row_if"),
+            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "or_equal": {
+                "schema": {"type": "boolean"},
+                "value": params.get("or_equal"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
 
         if (params["column_A"] is None) or (params["column_B"] is None):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
@@ -147,40 +172,15 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
             template_str = (
                 conditional_template_str
                 + ", then "
                 + template_str[0].lower()
                 + template_str[1:]
             )
-            params.update(conditional_params)
+            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = {
-            "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
-            "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": params.get("parse_strings_as_datetimes"),
-            },
-            "ignore_row_if": {
-                "schema": {"type": "string"},
-                "value": params.get("ignore_row_if"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "or_equal": {
-                "schema": {"type": "boolean"},
-                "value": params.get("or_equal"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
