@@ -44,7 +44,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
-from ..data_context.types.base import renderedAtomicValueSchema
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
@@ -53,6 +52,7 @@ from ..render.types import (
     RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
+    renderedAtomicValueSchema,
 )
 from ..render.util import num_to_str
 from ..util import is_parseable_date
@@ -232,11 +232,8 @@ class Expectation(metaclass=MetaExpectation):
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
-        rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
-            value=value_obj,
-            valuetype="StringValueType",
-        )
+        rendered = RenderedAtomicContent(name="atomic.prescriptive.summary", value=value_obj,
+                                         value_type="StringValueType")
         return rendered
 
     @classmethod
@@ -571,11 +568,8 @@ class Expectation(metaclass=MetaExpectation):
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
-        rendered = RenderedAtomicContent(
-            name="atomic.diagnostic.observed_value",
-            value=value_obj,
-            valuetype="StringValueType",
-        )
+        rendered = RenderedAtomicContent(name="atomic.diagnostic.observed_value", value=value_obj,
+                                         value_type="StringValueType")
         return rendered
 
     @classmethod
