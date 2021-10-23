@@ -1,10 +1,11 @@
 import json
 from copy import deepcopy
 from string import Template as pTemplate
-from typing import Optional
+from typing import List, Optional
 
-from great_expectations.data_context.types.base import RenderedAtomicValue
+from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
 from great_expectations.render.exceptions import InvalidRenderedContentError
+from great_expectations.types import DictDot
 
 
 class RenderedContent:
@@ -497,13 +498,51 @@ class RenderedSectionContent(RenderedContent):
         return d
 
 
-class RenderedAtomicContent(RenderedContent):
+class RenderedAtomicValue(DictDot):
     def __init__(
         self,
-        name: Optional[str] = None,
-        value: Optional[RenderedAtomicValue] = None,
-        valuetype: Optional[str] = None,
+        template: Optional[str] = None,
+        params: Optional[dict] = None,
+        schema: Optional[dict] = None,
+        header: Optional["RenderedAtomicValue"] = None,
+        header_row: Optional[List["RenderedAtomicValue"]] = None,
+        table: Optional[List[List["RenderedAtomicValue"]]] = None,
     ):
+        # StringValueType
+        self.template: str = template
+        self.params: dict = params
+        self.schema: dict = schema
+
+        # TableType
+        self.header: Optional[RenderedAtomicValue] = header
+        self.header_row: Optional[List[RenderedAtomicValue]] = header_row
+        self.table: Optional[List[List[RenderedAtomicValue]]] = table
+
+
+class RenderedAtomicValueSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    # for StringType
+    template = fields.String(required=False, allow_none=True)
+    params = fields.Dict(required=False, allow_none=True)
+    schema = fields.Dict(required=False, allow_none=True)
+
+    # for TableType
+    header = fields.Dict(required=False, allow_none=True)
+    header_row = fields.List(fields.Dict, required=False, allow_none=True)
+    table: fields.List(fields.List(fields.Dict, required=False, allow_none=True))
+
+    # TODO add VegaGraph
+
+    @post_load
+    def create_value_obj(self, data, **kwargs):
+        return RenderedAtomicValue(**data)
+
+
+class RenderedAtomicContent(RenderedContent):
+    def __init__(self, name: Optional[str] = None, value: Optional[RenderedAtomicValue] = None,
+                 value_type: Optional[str] = None):
         self.name = name
         self.value = value
         self.value_type = value_type
@@ -514,3 +553,19 @@ class RenderedAtomicContent(RenderedContent):
         d["value"] = self.value.__dict__
         d["value_type"] = self.value_type
         return d
+
+
+class RenderedAtomicContentSchema(Schema):
+    class Meta:
+        unknown: INCLUDE
+
+    name = fields.String(required=False, allow_none=True)
+    value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
+    value_type = fields.String(required=True, allow_none=False)
+
+    @post_load
+    def make_rendered_atomic_content(self, data, **kwargs):
+        return RenderedAtomicContent(**data)
+
+
+renderedAtomicValueSchema = RenderedAtomicValueSchema()
