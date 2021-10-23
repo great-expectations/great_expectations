@@ -605,15 +605,21 @@ def render_evaluation_parameter_string(render_func):
     return inner_func
 
 
-def add_value_set_params(params: dict, params_with_json_schema: dict) -> dict:
+def add_values_with_json_schema_from_list_in_params(
+    params: dict,
+    params_with_json_schema: dict,
+    param_key_with_list: str,
+    list_values_type: str = "string",
+) -> dict:
     """
-    Utility function used in _atomic_prescriptive_template() to add value_set values to params_with_json_schema (dict).
+    Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
+    convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
     """
-    value_set = params.get("value_set")
-    if value_set is not None and len(value_set) > 0:
-        for i, v in enumerate(value_set):
+    target_list = params.get(param_key_with_list)
+    if target_list is not None and len(target_list) > 0:
+        for i, v in enumerate(target_list):
             params_with_json_schema["v__" + str(i)] = {
-                "schema": {"type": "string"},
+                "schema": {"type": list_values_type},
                 "value": v,
             }
     return params_with_json_schema

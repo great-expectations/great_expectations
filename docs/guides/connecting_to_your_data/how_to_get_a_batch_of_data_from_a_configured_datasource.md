@@ -73,7 +73,7 @@ of the `Data Connector` configuration.
 1. **Partition only by file name and type**
 
     In this example, the `Data Asset` representing a relatively general naming structure of files in a directory, with
-    each file name having a certain prefix (e.g., `yellow_trip_data_sample_`) and whose contents are of the desired type
+    each file name having a certain prefix (e.g., `yellow_tripdata_sample_`) and whose contents are of the desired type
     (e.g., CSV) is `taxi_data_flat` in the `Data Connector` `configured_data_connector_name`:
 
     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L27-L40
