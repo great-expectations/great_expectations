@@ -232,8 +232,11 @@ class Expectation(metaclass=MetaExpectation):
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
-        rendered = RenderedAtomicContent(name="atomic.prescriptive.summary", value=value_obj,
-                                         value_type="StringValueType")
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            value_type="StringValueType",
+        )
         return rendered
 
     @classmethod
@@ -568,8 +571,11 @@ class Expectation(metaclass=MetaExpectation):
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
-        rendered = RenderedAtomicContent(name="atomic.diagnostic.observed_value", value=value_obj,
-                                         value_type="StringValueType")
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            value_type="StringValueType",
+        )
         return rendered
 
     @classmethod

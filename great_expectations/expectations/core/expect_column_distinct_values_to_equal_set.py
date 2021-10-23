@@ -132,7 +132,9 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
             template_str = conditional_template_str + ", then " + template_str
             params_with_json_schema.update(conditional_params)
 

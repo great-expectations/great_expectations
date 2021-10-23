@@ -214,7 +214,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
             header_template_str = (
                 conditional_template_str
                 + ", then "
@@ -307,7 +309,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 "schema": {"type": "TableType"},
             }
         )
-        rendered = RenderedAtomicContent(name="atomic.prescriptive.summary", value=value_obj, value_type="TableType")
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary", value=value_obj, value_type="TableType"
+        )
         return rendered
 
     @classmethod
@@ -514,8 +518,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                     "schema": {"type": "StringValueType"},
                 }
             )
-            return RenderedAtomicContent(name="atomic.prescriptive.summary", value=value_obj,
-                                         value_type="StringValueType")
+            return RenderedAtomicContent(
+                name="atomic.prescriptive.summary",
+                value=value_obj,
+                value_type="StringValueType",
+            )
         else:
             value_obj = renderedAtomicValueSchema.load(
                 {
@@ -524,7 +531,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                     "schema": {"type": "TableType"},
                 }
             )
-            return RenderedAtomicContent(name="atomic.prescriptive.summary", value=value_obj, value_type="TableType")
+            return RenderedAtomicContent(
+                name="atomic.prescriptive.summary",
+                value=value_obj,
+                value_type="TableType",
+            )
 
     @classmethod
     @renderer(renderer_type="renderer.descriptive.quantile_table")

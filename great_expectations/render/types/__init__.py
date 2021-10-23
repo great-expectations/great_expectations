@@ -541,8 +541,12 @@ class RenderedAtomicValueSchema(Schema):
 
 
 class RenderedAtomicContent(RenderedContent):
-    def __init__(self, name: Optional[str] = None, value: Optional[RenderedAtomicValue] = None,
-                 value_type: Optional[str] = None):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        value: Optional[RenderedAtomicValue] = None,
+        value_type: Optional[str] = None,
+    ):
         self.name = name
         self.value = value
         self.value_type = value_type
