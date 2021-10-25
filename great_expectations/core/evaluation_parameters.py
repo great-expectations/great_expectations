@@ -129,16 +129,14 @@ class EvaluationParameterParser:
             # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple
             # 20211009 - JPC - Note that it's important that we consider kwarglist
             # first as part of disabling backtracking for the function's arguments
-            fn_call = (
-                (ident + lpar + rpar).setParseAction(
-                    lambda t: t.insert(0, (t.pop(0), 0, False))
-                ) |
-                (
-                    (ident + lpar - Group(expr_list) + rpar).setParseAction(
-                        lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
-                    ) ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
-                        lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
-                    )
+            fn_call = (ident + lpar + rpar).setParseAction(
+                lambda t: t.insert(0, (t.pop(0), 0, False))
+            ) | (
+                (ident + lpar - Group(expr_list) + rpar).setParseAction(
+                    lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
+                )
+                ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
+                    lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
                 )
             )
             atom = (
