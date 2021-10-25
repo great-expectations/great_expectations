@@ -992,6 +992,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         header_params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "threshold": {"schema": {"type": "number"}, "value": params.get("threshold")},
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
