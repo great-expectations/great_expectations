@@ -148,7 +148,7 @@ However, a closer look at the filenames reveals a pattern that is common to the 
 
 We could treat `yellow_tripdata_*.csv` files as batches within the `yellow_tripdata` Data Asset with a more specific regex `pattern` and adding `group_names` for `year` and `month`.
 
-**Note: ** We have chosen to be more specific in the capture groups for the `year` and `month` by specifying the integer value (using `\d`) and the number of digits, but a simpler capture group like `(.*)` would also work.
+**Note: ** We have chosen to be more specific in the capture groups for the `year` and `month` by specifying the integer value (using `\d`) and the number of digits, but a simpler capture group like `(.*)` would also work. For more information about capture groups, refer to the Python documentation on [regular expressions](https://docs.python.org/3/library/re.html#re.Match.group).
 
 <Tabs
   groupId="yaml-or-python"
