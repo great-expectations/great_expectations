@@ -315,12 +315,12 @@ Unmatched data_references (0 of 0): []
 In the following example, files are placed folders that match the `data_asset_names` we want (`yellow_tripdata` and `green_tripdata`), but the filenames follow different formats.
 
 ```
-yellow_tripdata/yellow_tripdata_2019-01.csv
-yellow_tripdata/yellow_tripdata_2019-02.csv
-yellow_tripdata/yellow_tripdata_2019-03.csv
-green_tripdata/2019-01.csv
-green_tripdata/2019-02.csv
-green_tripdata/2019-03.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/green_tripdata/2019-01.csv
+<MY DIRECTORY>/green_tripdata/2019-02.csv
+<MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
 <Tabs
@@ -354,68 +354,48 @@ Available data_asset_names (2 of 2):
 Unmatched data_references (0 of 0):[]
 ```
 
-Example 4: Example with Explicit data_asset_names and more complex nesting
---------------------------------------------------------------------------
+### Example 4: Example with Explicit data_asset_names and more complex nesting
 
-In this example, the assets `alpha`, `beta` and `gamma` are being explicitly defined in the configuration, and have a more complex nesting pattern.
+In this example, the assets `yellow_tripdata` and `green_tripdata` are being explicitly defined in the configuration, and have a more complex nesting pattern.
 
 ```
-my_base_directory/alpha/files/go/here/alpha-202001.csv
-my_base_directory/alpha/files/go/here/alpha-202002.csv
-my_base_directory/alpha/files/go/here/alpha-202003.csv
-my_base_directory/beta_here/beta-202001.txt
-my_base_directory/beta_here/beta-202002.txt
-my_base_directory/beta_here/beta-202003.txt
-my_base_directory/beta_here/beta-202004.txt
-my_base_directory/gamma-202001.csv
-my_base_directory/gamma-202002.csv
-my_base_directory/gamma-202003.csv
-my_base_directory/gamma-202004.csv
-my_base_directory/gamma-202005.csv
+<MY DIRECTORY>/yellow/tripdata/2019-01.txt
+<MY DIRECTORY>/yellow/tripdata/2019-02.txt
+<MY DIRECTORY>/yellow/tripdata/2019-03.txt
+<MY DIRECTORY>/green_tripdata/2019-01.csv
+<MY DIRECTORY>/green_tripdata/2019-02.csv
+<MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
 The following configuration...
 
-```yaml
-class_name: ConfiguredAssetFilesystemDataConnector
-base_directory: my_base_directory/
-default_regex:
-  pattern: ^(.+)-(\d{4})(\d{2})\.(csv|txt)$
-  group_names:
-    - data_asset_name
-    - year_dir
-    - month_dir
-assets:
-  alpha:
-    base_directory: my_base_directory/alpha/files/go/here/
-    glob_directive: "*.csv"
-  beta:
-    base_directory: my_base_directory/beta_here/
-    glob_directive: "*.txt"
-  gamma:
-    glob_directive: "*.csv"
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L502-L526
 ```
 
-...will make `alpha`, `beta` and `gamma`  available a DataAssets, with the following data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L537-L565
+```
+
+</TabItem>
+</Tabs>
+
+...will make `yellow_tripdata` and `green_tripdata` available as Data Assets, with the following data_references:
 
 ```bash
-Available data_asset_names (3 of 3):
-   alpha (3 of 3): [
-      'alpha-202001.csv',
-      'alpha-202002.csv',
-      'alpha-202003.csv'
-   ]
-   beta (4 of 4):  [
-      'beta-202001.txt',
-      'beta-202002.txt',
-      'beta-202003.txt',
-      'beta-202004.txt'
-   ]
-   gamma (5 of 5): [
-      'gamma-202001.csv',
-      'gamma-202002.csv',
-      'gamma-202003.csv',
-      'gamma-202004.csv',
-      'gamma-202005.csv',
-   ]
+Available data_asset_names (2 of 2):
+    green_tripdata (3 of 3): ['green_tripdata_2019-01.', 'green_tripdata_2019-02.', 'green_tripdata_2019-03.']
+    yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.', 'yellow_tripdata_2019-02.', 'yellow_tripdata_2019-03.']
+
+Unmatched data_references (0 of 0):[]
 ```

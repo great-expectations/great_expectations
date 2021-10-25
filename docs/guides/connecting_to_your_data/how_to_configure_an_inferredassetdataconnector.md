@@ -379,7 +379,7 @@ Then this configuration...
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L414-L433
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L414-L438
 ```
 
 </TabItem>

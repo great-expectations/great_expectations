@@ -425,7 +425,12 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "glob_directive": "*/*.csv",
             "default_regex": {
-                "group_names": ["data_asset_name", "optional_data_asset_name", "year", "month"],
+                "group_names": [
+                    "data_asset_name",
+                    "optional_data_asset_name",
+                    "year",
+                    "month",
+                ],
                 "pattern": "(.*)/(.*)(\d{4})-(\d{2})\.csv",
             },
         },
