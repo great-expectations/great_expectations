@@ -770,6 +770,68 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         return expected_distribution
 
     @classmethod
+    def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
+        weights = partition_object["weights"]
+
+        chart_pixel_width = (len(weights) / 60.0) * 500
+        if chart_pixel_width < 250:
+            chart_pixel_width = 250
+        chart_container_col_width = round((len(weights) / 60.0) * 6)
+        if chart_container_col_width < 4:
+            chart_container_col_width = 4
+        elif chart_container_col_width >= 5:
+            chart_container_col_width = 6
+        elif chart_container_col_width >= 4:
+            chart_container_col_width = 5
+
+        mark_bar_args = {}
+        if len(weights) == 1:
+            mark_bar_args["size"] = 20
+
+        if partition_object.get("bins"):
+            bins = partition_object["bins"]
+            bins_x1 = [round(value, 1) for value in bins[:-1]]
+            bins_x2 = [round(value, 1) for value in bins[1:]]
+
+            df = pd.DataFrame(
+                {
+                    "bin_min": bins_x1,
+                    "bin_max": bins_x2,
+                    "fraction": weights,
+                }
+            )
+
+            bars = (
+                alt.Chart(df)
+                .mark_bar()
+                .encode(
+                    x="bin_min:O",
+                    x2="bin_max:O",
+                    y="fraction:Q",
+                    tooltip=["bin_min", "bin_max", "fraction"],
+                )
+                .properties(width=chart_pixel_width, height=400, autosize="fit")
+            )
+
+            chart = bars.to_json()
+        elif partition_object.get("values"):
+            values = partition_object["values"]
+
+            df = pd.DataFrame({"values": values, "fraction": weights})
+
+            bars = (
+                alt.Chart(df)
+                .mark_bar()
+                .encode(
+                    x="values:N", y="fraction:Q", tooltip=["values", "fraction"]
+                )
+                .properties(width=chart_pixel_width, height=400, autosize="fit")
+            )
+            chart = bars.to_json()
+
+        return chart, chart_container_col_width
+
+    @classmethod
     def _get_kl_divergence_partition_object_table(cls, partition_object, header=None):
         table_rows = []
         fractions = partition_object["weights"]
