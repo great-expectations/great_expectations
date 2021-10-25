@@ -15,13 +15,13 @@ can use for configuration.
 
 </Prerequisites>
 
-Great Expectations provides two types of `DataConnector` classes for connecting to `DataAsset`s stored as file-system-like data. This includes files on disk,
+Great Expectations provides two types of `DataConnector` classes for connecting to Data Assets stored as file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
 
-- A ConfiguredAssetDataConnector requires an explicit listing of each `DataAsset` you want to connect to. This allows more fine-tuning, but also requires more setup.
+- A ConfiguredAssetDataConnector requires an explicit listing of each Data Asset you want to connect to. This allows more fine-tuning, but also requires more setup.
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
-InferredAssetDataConnector has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single `DataAsset`, or several `DataAssets` that all share the same naming convention.
+InferredAssetDataConnector has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single Data Asset, or several `Data Assets` that all share the same naming convention.
 
 If you're not sure which one to use, please check out [How to choose which DataConnector to use](./how_to_choose_which_dataconnector_to_use.md).
 
@@ -33,7 +33,7 @@ Import these necessary packages and modules:
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -58,7 +58,7 @@ All the examples below assume you’re testing configurations using something li
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -72,7 +72,7 @@ class_name: Datasource
 execution_engine:
   class_name: PandasExecutionEngine
 data_connectors:
-  default_inferred_data_connector_name:
+  <DATA CONNECTOR NAME GOES HERE>:
     <DATACONNECTOR CONFIGURATION GOES HERE>
 """
 context.test_yaml_config(yaml_config=datasource_config)
@@ -91,8 +91,8 @@ datasource_config = {
         "class_name": "PandasExecutionEngine",
     },
     "data_connectors": {
-        "default_inferred_data_connector_name": {
-          <DATACONNECTOR CONFIGURATION GOES HERE>
+        "<DATACONNECTOR NAME GOES HERE>": {
+          "<DATACONNECTOR CONFIGURATION GOES HERE>"
         },
     },
 }
@@ -119,11 +119,11 @@ Imagine you have the following files in `my_directory/`:
 
 We can imagine two approaches to loading the data into GE.
 
-The simplest approach would be to consider each file to be its own DataAsset. In that case, the configuration would look like the following:
+The simplest approach would be to consider each file to be its own Data Asset. In that case, the configuration would look like the following:
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -136,24 +136,24 @@ The simplest approach would be to consider each file to be its own DataAsset. In
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L33-L51
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L35-L53
 ```
 
 </TabItem>
 </Tabs>
 
 Notice that the `default_regex` is configured to have one capture group (`(.*)`) which captures the entire filename. That capture group is assigned to `data_asset_name` under `group_names`.
-Running `test_yaml_config()` would result in 3 DataAssets : `yellow_tripdata_2019-01`, `yellow_tripdata_2019-02` and `yellow_tripdata_2019-03`.
+Running `test_yaml_config()` would result in 3 Data Assets : `yellow_tripdata_2019-01`, `yellow_tripdata_2019-02` and `yellow_tripdata_2019-03`.
 
 However, a closer look at the filenames reveals a pattern that is common to the 3 files. Each have `yellow_tripdata_` in the name, and have date information afterwards. These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of.
 
-We could treat `yellow_tripdata_*.csv` files as batches within the `yellow_tripdata` `DataAsset` with a more specific regex `pattern` and adding `group_names` for `year` and `month`.
+We could treat `yellow_tripdata_*.csv` files as batches within the `yellow_tripdata` Data Asset with a more specific regex `pattern` and adding `group_names` for `year` and `month`.
 
 **Note: ** We have chosen to be more specific in the capture groups for the `year` and `month` by specifying the integer value (using `\d`) and the number of digits, but a simpler capture group like `(.*)` would also work.
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -172,13 +172,13 @@ We could treat `yellow_tripdata_*.csv` files as batches within the `yellow_tripd
 </TabItem>
 </Tabs>
 
-Running `test_yaml_config()` would result in 1 DataAsset `yellow_tripdata` with 3 associated data_references: `yellow_tripdata_2019-01.csv`, `yellow_tripdata_2019-02.csv` and `yellow_tripdata_2019-03.csv`, seen also in Example 1 below.
+Running `test_yaml_config()` would result in 1 Data Asset `yellow_tripdata` with 3 associated data_references: `yellow_tripdata_2019-01.csv`, `yellow_tripdata_2019-02.csv` and `yellow_tripdata_2019-03.csv`, seen also in Example 1 below.
 
 A corresponding configuration for `InferredAssetS3DataConnector` would look similar but would require `bucket` and `prefix` values instead of `base_directory`.
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -200,7 +200,7 @@ A corresponding configuration for `InferredAssetS3DataConnector` would look simi
 The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using `InferredAssetFilesystemDataConnector`.
 
 
-### Example 1: Basic configuration for a single DataAsset
+### Example 1: Basic configuration for a single Data Asset
 
 Continuing the example above, imagine you have the following files in the directory `<MY DIRECTORY>`:
 
@@ -214,7 +214,7 @@ Then this configuration...
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -233,7 +233,7 @@ Then this configuration...
 </TabItem>
 </Tabs>
 
-...will make available `yelow_tripdata` as a single DataAsset with the following data_references:
+...will make available `yelow_tripdata` as a single Data Asset with the following data_references:
 
 ```bash
 Available data_asset_names (1 of 1):
@@ -247,7 +247,7 @@ Once configured, you can get `Validators` from the `Data Context` as follows:
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L294-L303
 ```
 
-### Example 2: Basic configuration with more than one DataAsset
+### Example 2: Basic configuration with more than one Data Asset
 
 Here’s a similar example, but this time two Data Assets are mixed together in one folder.
 
@@ -267,7 +267,7 @@ The same configuration as Example 1...
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -320,7 +320,7 @@ Then this configuration...
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -366,7 +366,7 @@ Then this configuration...
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -412,7 +412,7 @@ Then this configuration...
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},

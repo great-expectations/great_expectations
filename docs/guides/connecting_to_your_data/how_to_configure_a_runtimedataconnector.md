@@ -2,6 +2,8 @@
 title: How to configure a RuntimeDataConnector
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 This guide demonstrates how to configure a RuntimeDataConnector and only applies to the V3 (Batch Request) API. A `RuntimeDataConnector` allows you to specify a Batch using a Runtime Batch Request, which is used to create a Validator. A Validator is the key object used to create Expectations and validate datasets.
 
@@ -22,7 +24,7 @@ Import these necessary packages and modules:
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -47,7 +49,7 @@ All of the examples below assume you’re testing configuration using something 
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -61,7 +63,7 @@ class_name: Datasource
 execution_engine:
   class_name: PandasExecutionEngine
 data_connectors:
-  default_runtime_data_connector_name:
+  <DATACONNECTOR NAME GOES HERE>:
     <DATACONNECTOR CONFIGURATION GOES HERE>
 """
 context.test_yaml_config(yaml_config=datasource_config)
@@ -80,8 +82,8 @@ datasource_config = {
         "class_name": "PandasExecutionEngine",
     },
     "data_connectors": {
-        "default_runtime_data_connector_name": {
-          <DATACONNECTOR CONFIGURATION GOES HERE>
+        "<DATACONNECTOR NAME GOES HERE>": {
+          "<DATACONNECTOR CONFIGURATION GOES HERE>"
         },
     },
 }
@@ -97,7 +99,7 @@ If you’re not familiar with the `test_yaml_config` method, please check out: [
 
 <Tabs
   groupId="yaml-or-python"
-  defaultValue='python'
+  defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
@@ -128,5 +130,5 @@ At runtime, you would get a Validator from the Data Context by first defining a 
 
 and then passing that request into `context.get_validator`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L64-L72
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L64-L68
 ```

@@ -76,12 +76,12 @@ batch_request = BatchRequest(
 )
 
 context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
+    expectation_suite_name="<MY EXPECTATION SUITE NAME>", overwrite_existing=True
 )
 
 validator = context.get_validator(
     batch_request=batch_request,
-    expectation_suite_name="test_suite",
+    expectation_suite_name="<MY EXPECTATION SUITE NAME>",
     batch_identifiers={"month": "2019-02"},
 )
 print(validator.head())
@@ -243,7 +243,7 @@ batch_request = BatchRequest(
 
 validator = context.get_validator(
     batch_request=batch_request,
-    expectation_suite_name="test_suite",
+    expectation_suite_name="<MY EXPECTATION SUITE NAME>",
     batch_identifiers={"month": "2019-02"},
 )
 
