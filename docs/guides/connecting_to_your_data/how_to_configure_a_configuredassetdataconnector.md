@@ -312,77 +312,46 @@ Unmatched data_references (0 of 0): []
 
 ### Example 3: Example with Nested Folders
 
-In the following example, files are placed folders that match the `data_asset_names` we want: `A`, `B`, `C`, and `D`.
+In the following example, files are placed folders that match the `data_asset_names` we want (`yellow_tripdata` and `green_tripdata`), but the filenames follow different formats.
 
 ```
-test_dir/A/A-1.csv
-test_dir/A/A-2.csv
-test_dir/A/A-3.csv
-test_dir/B/B-1.txt
-test_dir/B/B-2.txt
-test_dir/B/B-3.txt
-test_dir/C/C-2017.csv
-test_dir/C/C-2018.csv
-test_dir/C/C-2019.csv
-test_dir/D/D-aaa.csv
-test_dir/D/D-bbb.csv
-test_dir/D/D-ccc.csv
-test_dir/D/D-ddd.csv
-test_dir/D/D-eee.csv
+yellow_tripdata/yellow_tripdata_2019-01.csv
+yellow_tripdata/yellow_tripdata_2019-02.csv
+yellow_tripdata/yellow_tripdata_2019-03.csv
+green_tripdata/2019-01.csv
+green_tripdata/2019-02.csv
+green_tripdata/2019-03.csv
 ```
 
-```yaml
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetFilesystemDataConnector
-base_directory: test_dir/
-assets:
-  A:
-    base_directory: A/
-  B:
-    base_directory: B/
-    pattern: (.*)-(.*)\.txt
-    group_names:
-      - part_1
-      - part_2
-  C:
-    glob_directive: "*"
-    base_directory: C/
-  D:
-    glob_directive: "*"
-    base_directory: D/
-default_regex:
-  pattern: (.*)-(.*)\.csv
-  group_names:
-    - part_1
-    - part_2
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L414-L438
 ```
 
-...will now make `A`, `B`, `C` and `D`  available a DataAssets, with the following data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L449-L475
+```
+
+</TabItem>
+</Tabs>
+
+...will now make `yellow_tripdata` and `green_tripdata` available a DataAssets, with the following data_references:
 
 ```bash
-Available data_asset_names (4 of 4):
-   A (3 of 3): [
-      'A-1.csv',
-      'A-2.csv',
-      'A-3.csv',
-   ]
-   B (3 of 3):  [
-      'B-1',
-      'B-2',
-      'B-3',
-   ]
-   C (3 of 3): [
-      'C-2017',
-      'C-2018',
-      'C-2019',
-   ]
-   D (5 of 5): [
-      'D-aaa.csv',
-      'D-bbb.csv',
-      'D-ccc.csv',
-      'D-ddd.csv',
-      'D-eee.csv',
-   ]
+Available data_asset_names (2 of 2):
+    green_tripdata (3 of 3): ['2019-01.csv', '2019-02.csv', '2019-03.csv']
+    yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
+
+Unmatched data_references (0 of 0):[]
 ```
 
 Example 4: Example with Explicit data_asset_names and more complex nesting

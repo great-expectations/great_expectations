@@ -343,19 +343,10 @@ Then this configuration...
 
 ```bash
 Available data_asset_names (2 of 2):
-    yellow_tripdata (3 of 6): [
-        'yellow_tripdata-2018-10.csv',
-        'yellow_tripdata-2018-11.csv',
-        'yellow_tripdata-2018-12.csv'
-    ]
+    green_tripdata (3 of 6): ['2018/10/green_tripdata.csv', '2018/11/green_tripdata.csv', '2018/12/green_tripdata.csv']
+    yellow_tripdata (3 of 6): ['2018/10/yellow_tripdata.csv', '2018/11/yellow_tripdata.csv', '2018/12/yellow_tripdata.csv']
 
-    green_tripdata (3 of 6): [
-        'green_tripdata-2018-10.csv',
-        'green_tripdata-2018-11.csv',
-        'green_tripdata-2018-12.csv'
-    ]
-
-Unmatched data_references (0 of 0): []
+Unmatched data_references (0 of 0):[]
 ```
 
 Example 4: Nested directory structure with the data_asset_name on the outside

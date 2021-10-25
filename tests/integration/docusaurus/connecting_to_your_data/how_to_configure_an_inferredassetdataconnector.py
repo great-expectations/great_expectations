@@ -314,6 +314,7 @@ data_connectors:
   default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: <MY DIRECTORY>/
+    glob_directive: "*/*/*.csv"
     default_regex:
       group_names:
         - year
@@ -325,7 +326,7 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
-    "<MY DIRECTORY>/", "../data/nested_directories/"
+    "<MY DIRECTORY>/", "../data/nested_directories_time/"
 )
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -343,6 +344,7 @@ datasource_config = {
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetFilesystemDataConnector",
             "base_directory": "<MY DIRECTORY>/",
+            "glob_directive": "*/*/*.csv",
             "default_regex": {
                 "group_names": ["year", "month", "data_asset_name"],
                 "pattern": "(\d{4})/(\d{2})/(.*)\.csv",
@@ -355,7 +357,7 @@ datasource_config = {
 # In normal usage you'd set your path directly in the code above.
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "base_directory"
-] = "../data/nested_directories/"
+] = "../data/nested_directories_time/"
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config), return_mode="report_object"
@@ -367,14 +369,14 @@ assert test_yaml == test_python
 context.add_datasource(**datasource_config)
 
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-# TODO: Uncomment after resolution of ISSUE # ()
-# assert "yellow_tripdata" in set(
-#     context.get_available_data_asset_names()["taxi_datasource"][
-#         "default_inferred_data_connector_name"
-#     ]
-# )
-# assert "green_tripdata" in set(
-#     context.get_available_data_asset_names()["taxi_datasource"][
-#         "default_inferred_data_connector_name"
-#     ]
-# )
+# TODO: Uncomment the lines below once ISSUE # () is resolved
+assert "yellow_tripdata" in set(
+    context.get_available_data_asset_names()["taxi_datasource"][
+        "default_inferred_data_connector_name"
+    ]
+)
+assert "green_tripdata" in set(
+    context.get_available_data_asset_names()["taxi_datasource"][
+        "default_inferred_data_connector_name"
+    ]
+)
