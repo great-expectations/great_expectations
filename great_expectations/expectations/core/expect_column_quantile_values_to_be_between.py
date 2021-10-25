@@ -442,7 +442,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         )
 
     @classmethod
-    def _diagnostic_observed_value_template(
+    def _atomic_diagnostic_observed_value_template(
         cls,
         configuration=None,
         result=None,
@@ -494,7 +494,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
     @classmethod
     @renderer(renderer_type="atomic.diagnostic.observed_value")
-    def _diagnostic_observed_value(
+    def _atomic_diagnostic_observed_value(
         cls,
         configuration=None,
         result=None,
@@ -507,7 +507,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             params_with_json_schema,
             table_header_row,
             table_rows,
-        ) = cls._diagnostic_observed_value_template(
+        ) = cls._atomic_diagnostic_observed_value_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
         if template_string is not None:
