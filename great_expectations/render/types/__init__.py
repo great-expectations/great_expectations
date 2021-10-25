@@ -507,7 +507,7 @@ class RenderedAtomicValue(DictDot):
         header: Optional["RenderedAtomicValue"] = None,
         header_row: Optional[List["RenderedAtomicValue"]] = None,
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
-        graph: Optional[dict] = None
+        graph: Optional[dict] = None,
     ):
         # StringValueType
         self.template: str = template

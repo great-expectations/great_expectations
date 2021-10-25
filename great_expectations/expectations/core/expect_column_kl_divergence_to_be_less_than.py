@@ -1025,7 +1025,10 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
         # generate table or chart depending on number of weights
         if len(weights) > 60:
-            distribution_table_header_row, distribution_table_rows = cls._atomic_partition_object_table_template(
+            (
+                distribution_table_header_row,
+                distribution_table_rows,
+            ) = cls._atomic_partition_object_table_template(
                 partition_object=expected_partition_object
             )
         else:
@@ -1182,14 +1185,16 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
     @classmethod
     def _atomic_diagnostic_observed_value_template(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs,
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
-        observed_partition_object = result.result.get("details", {}).get("observed_partition", {})
+        observed_partition_object = result.result.get("details", {}).get(
+            "observed_partition", {}
+        )
         weights = observed_partition_object.get("weights", [])
 
         observed_value = (
@@ -1201,7 +1206,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         header_params_with_json_schema = {
             "observed_value": {
                 "schema": {"type": "string"},
-                "value": str(observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
+                "value": str(observed_value)
+                if observed_value
+                else "None (-infinity, infinity, or NaN)",
             }
         }
 
@@ -1211,12 +1218,15 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         distribution_table_rows = None
 
         if len(weights) > 60:
-            distribution_table_header_row, distribution_table_rows = cls._atomic_partition_object_table_template(
+            (
+                distribution_table_header_row,
+                distribution_table_rows,
+            ) = cls._atomic_partition_object_table_template(
                 partition_object=observed_partition_object
             )
         else:
             chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
-             partition_object=observed_partition_object
+                partition_object=observed_partition_object
             )
 
         return (
