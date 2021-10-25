@@ -31,13 +31,13 @@ Import these necessary packages and modules:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L3-L4
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L4-L5
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L1-L4
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L2-L5
 ```
 
 </TabItem>
@@ -97,6 +97,8 @@ If you’re not familiar with the `test_yaml_config` method, please check out: [
 
 ### 3. Add a RuntimeDataConnector to a Datasource configuration
 
+This basic configuration can be used in multiple ways depending on how the `RuntimeBatchRequest` is configured:
+
 <Tabs
   groupId="yaml-or-python"
   defaultValue='yaml'
@@ -106,13 +108,13 @@ If you’re not familiar with the `test_yaml_config` method, please check out: [
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L9-L21
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L10-L22
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L26-L40
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L27-L41
 ```
 
 </TabItem>
@@ -120,15 +122,34 @@ If you’re not familiar with the `test_yaml_config` method, please check out: [
 
 Once the RuntimeDataConnector is configured you can add your datasource using:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L48-L48
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L49-L49
 ```
 
-At runtime, you would get a Validator from the Data Context by first defining a `RuntimeBatchRequest`:
+#### Example 1: RuntimeDataConnector for access to file-system data:
+
+At runtime, you would get a Validator from the Data Context by first defining a `RuntimeBatchRequest` with the `path` to your data defined in `runtime_parameters`:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L50-L57
 ```
 
-and then passing that request into `context.get_validator`:
+Next, you would pass that request into `context.get_validator`:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L64-L68
 ```
+
+### Example 2: RuntimeDataConnector that uses an in-memory DataFrame
+
+At runtime, you would get a Validator from the Data Context by first defining a `RuntimeBatchRequest` with the DataFrame passed into `batch_data` in `runtime_parameters`:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L1-L1
+```
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L80-L80
+```
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L83-L92
+```
+
+Next, you would pass that request into `context.get_validator`:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L94-L98
+```
+
