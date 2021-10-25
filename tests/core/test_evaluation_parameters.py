@@ -2,6 +2,7 @@ import math
 from datetime import datetime, timedelta
 from timeit import timeit
 
+import dateutil
 import pandas
 import pytest
 
@@ -139,7 +140,7 @@ def test_temporal_evaluation_parameters():
     now = datetime.now()
     assert (
         (now - timedelta(weeks=1, seconds=3))
-        < parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
+        < dateutil.parser.parse(parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)"))
         < now - timedelta(weeks=1, seconds=1)
     )
 
@@ -150,7 +151,7 @@ def test_temporal_evaluation_parameters_complex():
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
     assert (
         (now - timedelta(weeks=2 * 3, seconds=3))
-        < parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
+        < dateutil.parser.parse(parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)"))
         < now - timedelta(weeks=2 * 3, seconds=1)
     )
 

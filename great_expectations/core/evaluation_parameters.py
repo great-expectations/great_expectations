@@ -132,12 +132,13 @@ class EvaluationParameterParser:
             fn_call = (
                 (ident + lpar + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), 0, False))
-                )
-                | (ident + lpar - Group(kwarglist) + rpar).setParseAction(
-                    lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
-                )
-                | (ident + lpar - Group(expr_list) + rpar).setParseAction(
-                    lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
+                ) |
+                (
+                    (ident + lpar - Group(expr_list) + rpar).setParseAction(
+                        lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
+                    ) ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
+                        lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
+                    )
                 )
             )
             atom = (
