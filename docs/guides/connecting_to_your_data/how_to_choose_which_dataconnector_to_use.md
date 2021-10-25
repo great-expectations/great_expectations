@@ -29,7 +29,7 @@ If you aren't sure which type of the remaining `DataConnector`s to use, the foll
 
 ### When to use an InferredAssetDataConnector
 
-If you have the following `<MY DIRECTORY>/` directory in your filesystem, and you want to treat the `A-*.csv` files as batches within the `A` Data Asset, and do the same for `B` and `C`:
+If you have the following `<MY DIRECTORY>/` directory in your filesystem, and you want to treat the `yellow_tripdata_*.csv` files as batches within the `yellow_tripdata` Data Asset, and do the same for files in the `green_tripdata` directory:
 
 ```
 <MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-01.csv
