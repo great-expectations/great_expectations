@@ -17,9 +17,11 @@ from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
+    RenderedAtomicContent,
     RenderedContentBlockContainer,
     RenderedGraphContent,
-    RenderedStringTemplateContent, renderedAtomicValueSchema, RenderedAtomicContent,
+    RenderedStringTemplateContent,
+    renderedAtomicValueSchema,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -822,9 +824,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             bars = (
                 alt.Chart(df)
                 .mark_bar()
-                .encode(
-                    x="values:N", y="fraction:Q", tooltip=["values", "fraction"]
-                )
+                .encode(x="values:N", y="fraction:Q", tooltip=["values", "fraction"])
                 .properties(width=chart_pixel_width, height=400, autosize="fit")
             )
             chart = bars.to_json()
@@ -940,29 +940,24 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                             "type": "string",
                             "value": f"[{interval_start} - {interval_end}{interval_closing_symbol}",
                         },
-                        {
-                            "type": "string",
-                            "value": num_to_str(fraction)
-                        },
+                        {"type": "string", "value": num_to_str(fraction)},
                     ]
                 )
         else:
             values = partition_object["values"]
             table_rows = [
                 [
-                    {
-                        "schema": {"type": "string"},
-                        "value": str(value)
-                    },
-                    {
-                        "schema": {"type": "string"},
-                        "value": num_to_str(fractions[idx])
-                    }
-                ] for idx, value in enumerate(values)
+                    {"schema": {"type": "string"}, "value": str(value)},
+                    {"schema": {"type": "string"}, "value": num_to_str(fractions[idx])},
+                ]
+                for idx, value in enumerate(values)
             ]
 
         header_row = [
-            {"schema": {"type": "string"}, "value": "Interval" if partition_object.get("bins") else "Value"},
+            {
+                "schema": {"type": "string"},
+                "value": "Interval" if partition_object.get("bins") else "Value",
+            },
             {"schema": {"type": "string"}, "value": "Fraction"},
         ]
 
@@ -970,12 +965,12 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
     @classmethod
     def _atomic_prescriptive_template(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs,
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -1012,7 +1007,6 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         distribution_table_header_row = None
         distribution_table_rows = None
 
-
         if not params.get("partition_object"):
             header_template_str = "can match any distribution."
         else:
@@ -1020,7 +1014,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
                 "lower than $threshold."
             )
-            chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(params.get("partition_object"))
+            chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
+                params.get("partition_object")
+            )
 
         if include_column_name:
             header_template_str = "$column " + header_template_str
@@ -1029,8 +1025,12 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
-            header_template_str = conditional_template_str + ", then " + header_template_str
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            header_template_str = (
+                conditional_template_str + ", then " + header_template_str
+            )
             header_params_with_json_schema.update(conditional_params)
 
         return (
@@ -1040,19 +1040,19 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             chart_container_col_width,
             distribution_table_header_row,
             distribution_table_rows,
-            styling
+            styling,
         )
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.summary")
     @render_evaluation_parameter_string
     def _prescriptive_summary(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs,
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
     ):
         """
         Rendering function that is utilized by GE Cloud Front-end
@@ -1064,7 +1064,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             _,
             distribution_table_header_row,
             distribution_table_rows,
-            _
+            _,
         ) = cls._atomic_prescriptive_template(
             configuration, result, language, runtime_configuration, **kwargs
         )
@@ -1084,7 +1084,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 }
             )
             return RenderedAtomicContent(
-                name="atomic.prescriptive.summary", value=value_obj, value_type="GraphType"
+                name="atomic.prescriptive.summary",
+                value=value_obj,
+                value_type="GraphType",
             )
         else:
             value_obj = renderedAtomicValueSchema.load(
@@ -1102,7 +1104,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 }
             )
             return RenderedAtomicContent(
-                name="atomic.prescriptive.summary", value=value_obj, value_type="TableType"
+                name="atomic.prescriptive.summary",
+                value=value_obj,
+                value_type="TableType",
             )
 
     @classmethod
@@ -1114,7 +1118,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -1174,7 +1178,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         if not result.result.get("details"):
             return "--"
@@ -1218,7 +1222,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         observed_partition_object = result.result["details"]["observed_partition"]
