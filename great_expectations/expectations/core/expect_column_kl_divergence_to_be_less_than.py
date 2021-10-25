@@ -1030,7 +1030,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             )
         else:
             chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
-                params.get("partition_object")
+                partition_object=params.get("partition_object")
             )
 
         if params["row_condition"] is not None:
@@ -1095,11 +1095,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     "schema": {"type": "GraphType"},
                 }
             )
-            return RenderedAtomicContent(
-                name="atomic.prescriptive.summary",
-                value=value_obj,
-                value_type="GraphType",
-            )
+            value_type = "GraphType"
         else:
             value_obj = renderedAtomicValueSchema.load(
                 {
@@ -1115,11 +1111,13 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     "schema": {"type": "TableType"},
                 }
             )
-            return RenderedAtomicContent(
-                name="atomic.prescriptive.summary",
-                value=value_obj,
-                value_type="TableType",
-            )
+            value_type = "TableType"
+
+        return RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            value_type=value_type,
+        )
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -1181,6 +1179,127 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             return [expectation_string_obj, expected_distribution]
         else:
             return [expectation_string_obj]
+
+    @classmethod
+    def _atomic_diagnostic_observed_value_template(
+            cls,
+            configuration=None,
+            result=None,
+            language=None,
+            runtime_configuration=None,
+            **kwargs,
+    ):
+        observed_partition_object = result.result.get("details", {}).get("observed_partition", {})
+        weights = observed_partition_object.get("weights", [])
+
+        observed_value = (
+            num_to_str(result.result.get("observed_value"))
+            if result.result.get("observed_value")
+            else result.result.get("observed_value")
+        )
+        header_template_str = "KL Divergence: $observed_value"
+        header_params_with_json_schema = {
+            "observed_value": {
+                "schema": {"type": "string"},
+                "value": str(observed_value) if observed_value else "None (-infinity, infinity, or NaN)",
+            }
+        }
+
+        chart = None
+        chart_container_col_width = None
+        distribution_table_header_row = None
+        distribution_table_rows = None
+
+        if len(weights) > 60:
+            distribution_table_header_row, distribution_table_rows = cls._atomic_partition_object_table_template(
+                partition_object=observed_partition_object
+            )
+        else:
+            chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
+             partition_object=observed_partition_object
+            )
+
+        return (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            chart_container_col_width,
+            distribution_table_header_row,
+            distribution_table_rows,
+        )
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        if not result.result.get("details"):
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "template": "--",
+                    "params": {},
+                    "schema": {"type": "StringValueType"},
+                }
+            )
+            return RenderedAtomicContent(
+                name="atomic.diagnostic.observed_value",
+                value=value_obj,
+                value_type="StringValueType",
+            )
+
+        (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            chart_container_col_width,
+            distribution_table_header_row,
+            distribution_table_rows,
+        ) = cls._atomic_diagnostic_observed_value_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+
+        if chart is not None:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "graph": chart,
+                    "schema": {"type": "GraphType"},
+                }
+            )
+            value_type = "GraphType"
+        else:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "header_row": distribution_table_header_row,
+                    "table": distribution_table_rows,
+                    "schema": {"type": "TableType"},
+                }
+            )
+            value_type = "TableType"
+
+        return RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            value_type=value_type,
+        )
 
     @classmethod
     @renderer(renderer_type="renderer.diagnostic.observed_value")
