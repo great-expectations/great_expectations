@@ -140,11 +140,11 @@
           "out": {
             "unexpected_list": [],
             "unexpected_index_list": [],
-            "success": true
+            "success": false
           },
           "in": {
             "column": "ts",
-            "min_value": {
+            "max_value": {
               "$PARAMETER": "now() - timedelta(weeks=52*1000)"
             }
           }

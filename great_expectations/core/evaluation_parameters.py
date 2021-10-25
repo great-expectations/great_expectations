@@ -117,7 +117,7 @@ class EvaluationParameterParser:
             expr = Forward()
             expr_list = delimitedList(Group(expr))
 
-            # We will allow functions either to accecpt *only* keyword
+            # We will allow functions either to accept *only* keyword
             # expressions or *only* non-keyword expressions
             # define function keyword arguments
             key = Word(alphas + "_") + Suppress("=")
