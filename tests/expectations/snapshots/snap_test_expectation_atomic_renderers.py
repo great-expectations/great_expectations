@@ -87,7 +87,7 @@ snapshots[
 snapshots[
     "test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between 1"
 ] = {
-    "name": "atomic.prescriptive.summary",
+    "name": "atomic.diagnostic.observed_value",
     "value": {
         "graph": None,
         "header": None,

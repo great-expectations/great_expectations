@@ -519,7 +519,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 }
             )
             return RenderedAtomicContent(
-                name="atomic.prescriptive.summary",
+                name="atomic.diagnostic.observed_value",
                 value=value_obj,
                 value_type="StringValueType",
             )
@@ -532,7 +532,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 }
             )
             return RenderedAtomicContent(
-                name="atomic.prescriptive.summary",
+                name="atomic.diagnostic.observed_value",
                 value=value_obj,
                 value_type="TableType",
             )
