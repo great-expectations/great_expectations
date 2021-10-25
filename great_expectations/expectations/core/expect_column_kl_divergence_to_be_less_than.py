@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, Union
 
 import altair as alt
 import numpy as np
@@ -19,7 +19,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedContentBlockContainer,
     RenderedGraphContent,
-    RenderedStringTemplateContent,
+    RenderedStringTemplateContent, renderedAtomicValueSchema, RenderedAtomicContent,
 )
 from great_expectations.render.util import (
     num_to_str,
@@ -921,6 +921,52 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                     },
                 },
             }
+
+    @classmethod
+    def _atomic_partition_object_table_template(cls, partition_object: dict):
+        table_rows = []
+        fractions = partition_object["weights"]
+
+        if partition_object.get("bins"):
+            bins = partition_object["bins"]
+
+            for idx, fraction in enumerate(fractions):
+                interval_start = num_to_str(bins[idx])
+                interval_end = num_to_str(bins[idx + 1])
+                interval_closing_symbol = "]" if idx == (len(fractions) - 1) else ")"
+                table_rows.append(
+                    [
+                        {
+                            "type": "string",
+                            "value": f"[{interval_start} - {interval_end}{interval_closing_symbol}",
+                        },
+                        {
+                            "type": "string",
+                            "value": num_to_str(fraction)
+                        },
+                    ]
+                )
+        else:
+            values = partition_object["values"]
+            table_rows = [
+                [
+                    {
+                        "schema": {"type": "string"},
+                        "value": str(value)
+                    },
+                    {
+                        "schema": {"type": "string"},
+                        "value": num_to_str(fractions[idx])
+                    }
+                ] for idx, value in enumerate(values)
+            ]
+
+        header_row = [
+            {"schema": {"type": "string"}, "value": "Interval" if partition_object.get("bins") else "Value"},
+            {"schema": {"type": "string"}, "value": "Fraction"},
+        ]
+
+        return header_row, table_rows
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
