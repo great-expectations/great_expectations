@@ -349,55 +349,50 @@ Available data_asset_names (2 of 2):
 Unmatched data_references (0 of 0):[]
 ```
 
-Example 4: Nested directory structure with the data_asset_name on the outside
------------------------------------------------------------------------------
+### Example 4: Nested directory structure with the data_asset_name on the outside
 
-In the following example, files are placed in a folder structure with the `data_asset_name` defined by the folder name (A, B, C, or D)
+In the following example, files are placed in a folder structure with the `data_asset_name` defined by the folder name (yellow_tripdata or green_tripdata)
 
 ```
-A/A-1.csv
-A/A-2.csv
-A/A-3.csv
-B/B-1.csv
-B/B-2.csv
-B/B-3.csv
-C/C-1.csv
-C/C-2.csv
-C/C-3.csv
-D/D-1.csv
-D/D-2.csv
-D/D-3.csv
+yellow_tripdata/yellow_tripdata_2019-01.csv
+yellow_tripdata/yellow_tripdata_2019-02.csv
+yellow_tripdata/yellow_tripdata_2019-03.csv
+green_tripdata/2019-01.csv
+green_tripdata/2019-02.csv
+green_tripdata/2019-03.csv
 ```
 
 Then this configuration...
 
-```yaml
-class_name: InferredAssetFilesystemDataConnector
-base_directory: /
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
 
-default_regex:
-  group_names:
-    - data_asset_name
-    - letter
-    - number
-  pattern: (\w{1})/(\w{1})-(\d{1})\.csv
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L384-L403
 ```
 
-...will now make `A` and `B` and `C` into data_assets, with each containing 3 data_references
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L414-L433
+```
+
+</TabItem>
+</Tabs>
+
+...will now make `yellow_tripdata` and `green_tripdata` into Data Assets, with each containing 3 data_references
 
 ```bash
-Available data_asset_names (3 of 4):
-    A (3 of 3): ['test_dir_charlie/A/A-1.csv',
-                'test_dir_charlie/A/A-2.csv',
-                'test_dir_charlie/A/A-3.csv']
-    B (3 of 3): ['test_dir_charlie/B/B-1.csv',
-                'test_dir_charlie/B/B-2.csv',
-                'test_dir_charlie/B/B-3.csv']
-    C (3 of 3): ['test_dir_charlie/C/C-1.csv',
-                'test_dir_charlie/C/C-2.csv',
-                'test_dir_charlie/C/C-3.csv']
+Available data_asset_names (2 of 2):
+    green_tripdata (3 of 3): ['green_tripdata/2019-01.csv', 'green_tripdata/2019-02.csv', 'green_tripdata/2019-03.csv']
+    yellow_tripdata (3 of 3): ['yellow_tripdata/yellow_tripdata_2019-01.csv', 'yellow_tripdata/yellow_tripdata_2019-02.csv', 'yellow_tripdata/yellow_tripdata_2019-03.csv']
 
-Unmatched data_references (0 of 0): []
+Unmatched data_references (0 of 0):[]
 ```
 
 Example 5: Redundant information in the naming convention (S3 Bucket)
