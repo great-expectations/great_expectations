@@ -14,70 +14,119 @@ This guide demonstrates how to configure a RuntimeDataConnector and only applies
 
 A RuntimeDataConnector is a special kind of [Data Connector](../../reference/datasources.md) that enables you to use a RuntimeBatchRequest to provide a [Batch's](../../reference/datasources.md#batches) data directly at runtime. The RuntimeBatchRequest can wrap an in-memory dataframe, a filepath, or a SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run). The batch identifiers that must be passed in at runtime are specified in the RuntimeDataConnector's configuration.
 
-Add a RuntimeDataConnector to a Datasource configuration
----------------------------------------------------------
+## Steps
 
-The following example uses `test_yaml_config` and `sanitize_yaml_and_save_datasource` to add a new SQL Datasource to a project's `great_expectations.yml`. If you already have configured Datasources, you can add an additional RuntimeDataConnector configuration directly to your `great_expectations.yml`.
+### 1. Instantiate your project's DataContext
 
-:::note
-Currently, RuntimeDataConnector cannot be used with Datasources of type SimpleSqlalchemyDatasource.
-:::
+Import these necessary packages and modules:
 
-```python
-import great_expectations as ge
-from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
 
-context = ge.get_context()
-config = f"""
-name: my_sqlite_datasource
-class_name: Datasource
-execution_engine:
-  class_name: SqlAlchemyExecutionEngine
-  connection_string: sqlite:///my_db_file
-data_connectors:
-  my_runtime_data_connector:
-    class_name: RuntimeDataConnector
-    batch_identifiers:
-      - pipeline_stage_name
-      - airflow_run_id
-"""
-context.test_yaml_config(
-  yaml_config=config
-)
-sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L3-L4
 ```
 
-At runtime, you would get a Validator from the Data Context as follows:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L1-L4
+```
+
+</TabItem>
+</Tabs>
+
+### 2. Set up a Datasource
+
+All of the examples below assume you’re testing configuration using something like:
+
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
 
 ```python
-validator = context.get_validator(
-  batch_request=RuntimeBatchRequest(
-      datasource_name="my_sqlite_datasource",
-      data_connector_name="my_runtime_data_connector",
-      data_asset_name="my_data_asset_name",
-      runtime_parameters={
-          "query": "SELECT * FROM table_partitioned_by_date_column__A"
-      },
-      batch_identifiers={
-          "pipeline_stage_name": "core_processing",
-          "airflow_run_id": 1234567890,
-      },
-  ),
-  expectation_suite=my_expectation_suite,
-)
+datasource_yaml = """
+name: taxi_datasource
+class_name: Datasource
+execution_engine:
+  class_name: PandasExecutionEngine
+data_connectors:
+  default_runtime_data_connector_name:
+    <DATACONNECTOR CONFIGURATION GOES HERE>
+"""
+context.test_yaml_config(yaml_config=datasource_config)
+```
 
-  # Simplified call to get_validator - RuntimeBatchRequest is inferred under the hood
-  validator = context.get_validator(
-      datasource_name="my_sqlite_datasource",
-      data_connector_name="my_runtime_data_connector",
-      data_asset_name="my_data_asset_name",
-      runtime_parameters={
-          "query": "SELECT * FROM table_partitioned_by_date_column__A"
-      },
-      batch_identifiers={
-          "pipeline_stage_name": "core_processing",
-          "airflow_run_id": 1234567890,
-      },
-      expectation_suite=my_expectation_suite,
-  )
+</TabItem>
+<TabItem value="python">
+
+```python
+datasource_config = {
+    "name": "taxi_datasource",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "module_name": "great_expectations.execution_engine",
+        "class_name": "PandasExecutionEngine",
+    },
+    "data_connectors": {
+        "default_runtime_data_connector_name": {
+          <DATACONNECTOR CONFIGURATION GOES HERE>
+        },
+    },
+}
+context.test_yaml_config(yaml.dump(datasource_config))
+```
+
+</TabItem>
+</Tabs>
+
+If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
+
+### 3. Add a RuntimeDataConnector to a Datasource configuration
+
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L9-L21
+```
+
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L26-L40
+```
+
+</TabItem>
+</Tabs>
+
+Once the RuntimeDataConnector is configured you can add your datasource using:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L48-L48
+```
+
+At runtime, you would get a Validator from the Data Context by first defining a `RuntimeBatchRequest`:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L50-L57
+```
+
+and then passing that request into `context.get_validator`:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L64-L72
 ```

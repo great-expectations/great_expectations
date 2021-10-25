@@ -101,7 +101,7 @@ context.test_yaml_config(yaml.dump(datasource_config))
 
 If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
-### 3. Choose a DataConnector
+### 3. Add a ConfiguredAssetDataConnector to a Datasource configuration
 
 ConfiguredAssetDataConnectors like `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector` require `DataAsset`s to be
 explicitly named. Each `DataAsset` can have their own regex `pattern` and `group_names`, and if configured, will override any
