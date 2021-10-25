@@ -124,9 +124,9 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     data_connector: DataConnector = datasource.data_connectors[data_connector_name]
 
     file_list: List[str] = [
-        "yellow_trip_data_sample_2019-01.csv",
-        "yellow_trip_data_sample_2019-02.csv",
-        "yellow_trip_data_sample_2019-03.csv",
+        "yellow_tripdata_sample_2019-01.csv",
+        "yellow_tripdata_sample_2019-02.csv",
+        "yellow_tripdata_sample_2019-03.csv",
     ]
 
     assert (
