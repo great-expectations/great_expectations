@@ -507,6 +507,7 @@ class RenderedAtomicValue(DictDot):
         header: Optional["RenderedAtomicValue"] = None,
         header_row: Optional[List["RenderedAtomicValue"]] = None,
         table: Optional[List[List["RenderedAtomicValue"]]] = None,
+        graph: Optional[dict] = None
     ):
         # StringValueType
         self.template: str = template
@@ -517,6 +518,9 @@ class RenderedAtomicValue(DictDot):
         self.header: Optional[RenderedAtomicValue] = header
         self.header_row: Optional[List[RenderedAtomicValue]] = header_row
         self.table: Optional[List[List[RenderedAtomicValue]]] = table
+
+        # GraphType
+        self.graph: Optional[RenderedAtomicValue] = graph
 
 
 class RenderedAtomicValueSchema(Schema):
@@ -531,9 +535,10 @@ class RenderedAtomicValueSchema(Schema):
     # for TableType
     header = fields.Dict(required=False, allow_none=True)
     header_row = fields.List(fields.Dict, required=False, allow_none=True)
-    table: fields.List(fields.List(fields.Dict, required=False, allow_none=True))
+    table = fields.List(fields.List(fields.Dict, required=False, allow_none=True))
 
-    # TODO add VegaGraph
+    # for GraphType
+    graph = fields.String(required=False, allow_none=True)
 
     @post_load
     def create_value_obj(self, data, **kwargs):
