@@ -1044,6 +1044,68 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         )
 
     @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    @render_evaluation_parameter_string
+    def _prescriptive_summary(
+            cls,
+            configuration=None,
+            result=None,
+            language=None,
+            runtime_configuration=None,
+            **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            _,
+            distribution_table_header_row,
+            distribution_table_rows,
+            _
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+
+        if chart is not None:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "graph": chart,
+                    "schema": {"type": "GraphType"},
+                }
+            )
+            return RenderedAtomicContent(
+                name="atomic.prescriptive.summary", value=value_obj, value_type="GraphType"
+            )
+        else:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header": {
+                        "schema": {"type": "StringValueType"},
+                        "value": {
+                            "template": header_template_str,
+                            "params": header_params_with_json_schema,
+                        },
+                    },
+                    "header_row": distribution_table_header_row,
+                    "table": distribution_table_rows,
+                    "schema": {"type": "TableType"},
+                }
+            )
+            return RenderedAtomicContent(
+                name="atomic.prescriptive.summary", value=value_obj, value_type="TableType"
+            )
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
