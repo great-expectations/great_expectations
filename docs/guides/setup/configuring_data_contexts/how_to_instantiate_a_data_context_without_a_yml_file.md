@@ -7,8 +7,6 @@ This guide will help you instantiate a Data Context without a yml file, aka conf
 
 <Prerequisites>
 
-- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../../../tutorials/getting_started/intro.md)
-
 </Prerequisites>
 
 :::note

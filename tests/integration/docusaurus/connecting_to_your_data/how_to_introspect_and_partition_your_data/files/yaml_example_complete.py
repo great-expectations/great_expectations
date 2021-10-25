@@ -35,12 +35,12 @@ data_connectors:
         assets:
           taxi_data_flat:
             base_directory: samples_2020
-            pattern: (yellow_trip_data_sample_.+)\\.csv
+            pattern: (yellow_tripdata_sample_.+)\\.csv
             group_names:
               - filename
           taxi_data_year_month:
             base_directory: samples_2020
-            pattern: ([\\w]+)_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: ([\\w]+)_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:
               - name
               - year
@@ -74,7 +74,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "yellow_trip_data_sample_2019-01.csv"
+batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -207,7 +207,7 @@ assert batch_list[0].data.dataframe.shape[0] < 200
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert "taxi_datasource" in [ds["name"] for ds in context.list_datasources()]
-assert "yellow_trip_data_sample_2019-01.csv" in set(
+assert "yellow_tripdata_sample_2019-01.csv" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
         "default_inferred_data_connector_name"
     ]

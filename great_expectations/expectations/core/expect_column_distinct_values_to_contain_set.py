@@ -1,12 +1,13 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
 import pandas as pd
 
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.util import (
+    add_values_with_json_schema_from_list_in_params,
+    render_evaluation_parameter_string,
+)
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -39,7 +40,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
     # Default values
     default_kwarg_values = {
         "value_set": None,
-        "parse_strings_as_datetimes": None,
+        "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -63,6 +64,85 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         return True
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "value_set",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+
+        if params["value_set"] is None or len(params["value_set"]) == 0:
+            values_string = "[ ]"
+        else:
+            for i, v in enumerate(params["value_set"]):
+                params["v__" + str(i)] = v
+
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+            )
+
+        template_str = "distinct values must contain this set: " + values_string + "."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "value_set": {
+                "schema": {"type": "array"},
+                "value": params.get("value_set"),
+            },
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="value_set",
+        )
+
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -71,7 +151,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)

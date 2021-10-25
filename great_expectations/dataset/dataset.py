@@ -2922,7 +2922,7 @@ class Dataset(MetaDataset):
         quantile_value_ranges = quantile_ranges["value_ranges"]
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
-                "quntile_values and quantiles must have the same number of elements"
+                "quantile_values and quantiles must have the same number of elements"
             )
 
         quantile_vals = self.get_column_quantiles(
@@ -4768,16 +4768,16 @@ class Dataset(MetaDataset):
             A B C
             1 3 2
             1 5 0
-            1 1 4        
-            
+            1 1 4
+
             Pass
-            
+
             A B C
             1 3 2
             1 5 1
-            1 1 4        
-            
-            Fail on row 2     
+            1 1 4
+
+            Fail on row 2
 
         Args:
             column_list (List[str]): \

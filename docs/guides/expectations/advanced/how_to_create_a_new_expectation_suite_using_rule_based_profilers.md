@@ -21,7 +21,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 - Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations --v3-api init`
 
 ### 2. Download the data
-- Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_trip_data_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
+- Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_tripdata_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
 - Move the unzipped directory of `csv` files into the `data` directory that you created in Step 1
 
 ### 3. Setting up your Datasource
