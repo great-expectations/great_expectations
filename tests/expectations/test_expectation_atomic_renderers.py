@@ -213,7 +213,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
                     "weights": [0.3754, 0.615, 0.0096],
                 },
             },
-        }
+        },
     }
     rendered_content = get_diagnostic_rendered_content(update_dict)
 
@@ -477,7 +477,7 @@ def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_be
             "missing_count": None,
             "missing_percent": None,
             "details": {"success_details": [True, True, True, True, True]},
-        }
+        },
     }
     rendered_content = get_diagnostic_rendered_content(update_dict)
 
