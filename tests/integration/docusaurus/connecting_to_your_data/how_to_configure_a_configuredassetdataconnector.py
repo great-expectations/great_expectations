@@ -548,16 +548,16 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
                 "pattern": "(.*)_(\d{4})-(\d{2})\.(csv|txt)$",
-                "group_names": ["data_asset_name", "year", "month"]
+                "group_names": ["data_asset_name", "year", "month"],
             },
             "assets": {
                 "yellow_tripdata": {
                     "base_directory": "yellow/tripdata/",
-                    "glob_directive": "*.txt"
+                    "glob_directive": "*.txt",
                 },
                 "green_tripdata": {
                     "base_directory": "green_tripdata/",
-                    "glob_directive": "*.csv"
+                    "glob_directive": "*.csv",
                 },
             },
         },

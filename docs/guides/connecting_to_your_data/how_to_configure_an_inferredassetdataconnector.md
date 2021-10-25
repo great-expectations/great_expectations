@@ -302,18 +302,18 @@ Unmatched data_references (0 of 0): []
 Here’s a similar example, with a nested directory structure...
 
 ```
-2018/10/yellow_tripdata.csv
-2018/10/green_tripdata.csv
-2018/11/yellow_tripdata.csv
-2018/11/green_tripdata.csv
-2018/12/yellow_tripdata.csv
-2018/12/green_tripdata.csv
-2019/01/yellow_tripdata.csv
-2019/01/green_tripdata.csv
-2019/02/yellow_tripdata.csv
-2019/02/green_tripdata.csv
-2019/03/yellow_tripdata.csv
-2019/03/green_tripdata.csv
+<MY DIRECTORY>/2018/10/yellow_tripdata.csv
+<MY DIRECTORY>/2018/10/green_tripdata.csv
+<MY DIRECTORY>/2018/11/yellow_tripdata.csv
+<MY DIRECTORY>/2018/11/green_tripdata.csv
+<MY DIRECTORY>/2018/12/yellow_tripdata.csv
+<MY DIRECTORY>/2018/12/green_tripdata.csv
+<MY DIRECTORY>/2019/01/yellow_tripdata.csv
+<MY DIRECTORY>/2019/01/green_tripdata.csv
+<MY DIRECTORY>/2019/02/yellow_tripdata.csv
+<MY DIRECTORY>/2019/02/green_tripdata.csv
+<MY DIRECTORY>/2019/03/yellow_tripdata.csv
+<MY DIRECTORY>/2019/03/green_tripdata.csv
 ```
 
 Then this configuration...
@@ -351,15 +351,15 @@ Unmatched data_references (0 of 0):[]
 
 ### Example 4: Nested directory structure with the data_asset_name on the outside
 
-In the following example, files are placed in a folder structure with the `data_asset_name` defined by the folder name (yellow_tripdata or green_tripdata)
+In the following example, files are placed in a folder structure with the `data_asset_name` defined by the folder name (`yellow_tripdata` or `green_tripdata`)
 
 ```
-yellow_tripdata/yellow_tripdata_2019-01.csv
-yellow_tripdata/yellow_tripdata_2019-02.csv
-yellow_tripdata/yellow_tripdata_2019-03.csv
-green_tripdata/2019-01.csv
-green_tripdata/2019-02.csv
-green_tripdata/2019-03.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/green_tripdata/2019-01.csv
+<MY DIRECTORY>/green_tripdata/2019-02.csv
+<MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
 Then this configuration...
@@ -395,133 +395,48 @@ Available data_asset_names (2 of 2):
 Unmatched data_references (0 of 0):[]
 ```
 
-Example 5: Redundant information in the naming convention (S3 Bucket)
-----------------------------------------------------------------------
+### Example 5: Redundant information in the naming convention
 
-Here’s another example of a nested directory structure with data_asset_name defined in the bucket_name.
+In the following example, files are placed in a folder structure with the `data_asset_name` defined by the folder name (`yellow_tripdata` or `green_tripdata`), but then the term `yellow_tripdata` is repeated in some filenames.
 
 ```
-my_bucket/2021/01/01/log_file-20210101.txt.gz,
-my_bucket/2021/01/02/log_file-20210102.txt.gz,
-my_bucket/2021/01/03/log_file-20210103.txt.gz,
-my_bucket/2021/01/04/log_file-20210104.txt.gz,
-my_bucket/2021/01/05/log_file-20210105.txt.gz,
-my_bucket/2021/01/06/log_file-20210106.txt.gz,
-my_bucket/2021/01/07/log_file-20210107.txt.gz,
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/green_tripdata/2019-01.csv
+<MY DIRECTORY>/green_tripdata/2019-02.csv
+<MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
+Then this configuration...
 
-Here’s a configuration that will allow all the log files in the bucket to be associated with a single data_asset, `my_bucket`
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='python'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
 
-```yaml
-class_name: InferredAssetFilesystemDataConnector
-base_directory: /
-
-default_regex:
-  group_names:
-    - year
-    - month
-    - day
-    - data_asset_name
-  pattern: (\w{11})/(\d{4})/(\d{2})/(\d{2})/log_file-.*\.csv
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L468-L486
 ```
 
-All the log files will be mapped to a single data_asset named `my_bucket`.
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L497-L520
+```
+
+</TabItem>
+</Tabs>
+
+will not display the redundant information:
 
 ```bash
-Available data_asset_names (1 of 1):
-    my_bucket (3 of 7): [
-        'my_bucket/2021/01/03/log_file-*.csv',
-        'my_bucket/2021/01/04/log_file-*.csv',
-        'my_bucket/2021/01/05/log_file-*.csv'
-    ]
+Available data_asset_names (2 of 2):
+    green_tripdata (3 of 3): ['green_tripdata/*2019-01.csv', 'green_tripdata/*2019-02.csv', 'green_tripdata/*2019-03.csv']
+    yellow_tripdata (3 of 3): ['yellow_tripdata/*2019-01.csv', 'yellow_tripdata/*2019-02.csv', 'yellow_tripdata/*2019-03.csv']
 
-Unmatched data_references (0 of 0): []
-```
-
-
-Example 6: Random information in the naming convention
--------------------------------------------------------------------------------
-
-In the following example, files are placed in folders according to the date of creation, and given a random hash value in their name.
-
-```
-2021/01/01/log_file-2f1e94b40f310274b485e72050daf591.txt.gz
-2021/01/02/log_file-7f5d35d4f90bce5bf1fad680daac48a2.txt.gz
-2021/01/03/log_file-99d5ed1123f877c714bbe9a2cfdffc4b.txt.gz
-2021/01/04/log_file-885d40a5661bbbea053b2405face042f.txt.gz
-2021/01/05/log_file-d8e478f817b608729cfc8fb750ebfc84.txt.gz
-2021/01/06/log_file-b1ca8d1079c00fd4e210f7ef31549162.txt.gz
-2021/01/07/log_file-d34b4818c52e74b7827504920af19a5c.txt.gz
-```
-
-Here’s a configuration that will allow all the log files to be associated with a single data_asset, `log_file`
-
-```yaml
-class_name: InferredAssetFilesystemDataConnector
-base_directory: /
-
-default_regex:
-  group_names:
-    - year
-    - month
-    - day
-    - data_asset_name
-  pattern: (\d{4})/(\d{2})/(\d{2})/(log_file)-.*\.txt\.gz
-```
-
-... will give you the following output
-
-```bash
-Available data_asset_names (1 of 1):
-    log_file (3 of 7): [
-        '2021/01/03/log_file-*.txt.gz',
-        '2021/01/04/log_file-*.txt.gz',
-        '2021/01/05/log_file-*.txt.gz'
-    ]
-
-Unmatched data_references (0 of 0): []
-```
-
-Example 7: Redundant information in the naming convention (timestamp of file creation)
---------------------------------------------------------------------------------------
-
-In the following example, files are placed in a single folder, and the name includes a timestamp of when the files were created
-
-```
-log_file-2021-01-01-035419.163324.txt.gz
-log_file-2021-01-02-035513.905752.txt.gz
-log_file-2021-01-03-035455.848839.txt.gz
-log_file-2021-01-04-035251.47582.txt.gz
-log_file-2021-01-05-033034.289789.txt.gz
-log_file-2021-01-06-034958.505688.txt.gz
-log_file-2021-01-07-033545.600898.txt.gz
-```
-
-Here’s a configuration that will allow all the log files to be associated with a single data_asset named `log_file`.
-
-```yaml
-class_name: InferredAssetFilesystemDataConnector
-base_directory: /
-
-default_regex:
-  group_names:
-    - data_asset_name
-    - year
-    - month
-    - day
-  pattern: (log_file)-(\d{4})-(\d{2})-(\d{2})-.*\.*\.txt\.gz
-```
-
-All the log files will be mapped to the data_asset `log_file`.
-
-```bash
-Available data_asset_names (1 of 1):
-    some_bucket (3 of 7): [
-        'some_bucket/2021/01/03/log_file-*.txt.gz',
-        'some_bucket/2021/01/04/log_file-*.txt.gz',
-        'some_bucket/2021/01/05/log_file-*.txt.gz'
-]
-
-Unmatched data_references (0 of 0): []
+Unmatched data_references (0 of 0):[]
 ```

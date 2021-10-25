@@ -359,12 +359,12 @@ Unmatched data_references (0 of 0):[]
 In this example, the assets `yellow_tripdata` and `green_tripdata` are being explicitly defined in the configuration, and have a more complex nesting pattern.
 
 ```
-<MY DIRECTORY>/yellow/tripdata/2019-01.txt
-<MY DIRECTORY>/yellow/tripdata/2019-02.txt
-<MY DIRECTORY>/yellow/tripdata/2019-03.txt
-<MY DIRECTORY>/green_tripdata/2019-01.csv
-<MY DIRECTORY>/green_tripdata/2019-02.csv
-<MY DIRECTORY>/green_tripdata/2019-03.csv
+<MY DIRECTORY>/yellow/tripdata/yellow_tripdata_2019-01.txt
+<MY DIRECTORY>/yellow/tripdata/yellow_tripdata_2019-02.txt
+<MY DIRECTORY>/yellow/tripdata/yellow_tripdata_2019-03.txt
+<MY DIRECTORY>/green_tripdata/green_tripdata_2019-01.csv
+<MY DIRECTORY>/green_tripdata/green_tripdata_2019-02.csv
+<MY DIRECTORY>/green_tripdata/green_tripdata_2019-03.csv
 ```
 
 The following configuration...
