@@ -1,11 +1,23 @@
 ---
 title: How to choose which DataConnector to use
 ---
+import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-Great Expectations provides three types of `DataConnector` classes. Two classes are for connecting to `DataAsset`s stored as file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
+This guide demonstrates how to choose which `DataConnector`s to configure within your `Datasource`s.
+
+<Prerequisites>
+
+- [Understand the basics of Datasources in the V3 (Batch Request) API](../../reference/datasources.md)
+- Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
+
+</Prerequisites>
+
+Great Expectations provides three types of `DataConnector` classes. Two classes are for connecting to Data Assets stored as file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
 
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure. Examples of this type of `DataConnector` include `InferredAssetFilesystemDataConnector` and `InferredAssetS3DataConnector`.
-- A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each `DataAsset` you want to connect to. Examples of this type of `DataConnector` include `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector`.
+- A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each Data Asset you want to connect to. Examples of this type of `DataConnector` include `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector`.
 
 The third type of `DataConnector` class is for providing a batch's data directly at runtime:
 
@@ -15,149 +27,103 @@ If you know for example, that your Pipeline Runner will already have your batch 
 
 If you aren't sure which type of the remaining `DataConnector`s to use, the following examples will use `DataConnector` classes designed to connect to files on disk, namely `InferredAssetFilesystemDataConnector` and `ConfiguredAssetFilesystemDataConnector` to demonstrate the difference between these types of `DataConnectors`.
 
-------------------------------------------
-When to use an InferredAssetDataConnector
-------------------------------------------
+### When to use an InferredAssetDataConnector
 
-If you have the following `my_data/` directory in your filesystem, and you want to treat the `A-*.csv` files as batches within the `A` DataAsset, and do the same for `B` and `C`:
+If you have the following `<MY DIRECTORY>/` directory in your filesystem, and you want to treat the `A-*.csv` files as batches within the `A` Data Asset, and do the same for `B` and `C`:
 
 ```
-my_data/A/A-1.csv
-my_data/A/A-2.csv
-my_data/A/A-3.csv
-my_data/B/B-1.csv
-my_data/B/B-2.csv
-my_data/B/B-3.csv
-my_data/C/C-1.csv
-my_data/C/C-2.csv
-my_data/C/C-3.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/green_tripdata/2019-01.csv
+<MY DIRECTORY>/green_tripdata/2019-02.csv
+<MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
 This config...
 
-```yaml
-class_name: Datasource
-data_connectors:
-  my_data_connector:
-    class_name: InferredAssetFilesystemDataConnector
-    base_directory: my_data/
-    default_regex:
-      pattern: (.*)/.*-(\d+)\.csv
-      group_names:
-        - data_asset_name
-        - id
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L8-L26
 ```
 
-...will make available the following DataAssets and data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L37-L60
+```
+
+</TabItem>
+</Tabs>
+
+...will make available the following Data Assets and data_references:
 
 ```bash
-Available data_asset_names (3 of 3):
-   A (3 of 3): [
-      'A/A-1.csv',
-      'A/A-2.csv',
-      'A/A-3.csv'
-   ]
-   B (3 of 3): [
-      'B/B-1.csv',
-      'B/B-2.csv',
-      'B/B-3.csv'
-   ]
-   C (3 of 3): [
-      'C/C-1.csv',
-      'C/C-2.csv',
-      'C/C-3.csv'
-   ]
+Available data_asset_names (2 of 2):
+    green_tripdata (3 of 3): ['green_tripdata/*2019-01.csv', 'green_tripdata/*2019-02.csv', 'green_tripdata/*2019-03.csv']
+    yellow_tripdata (3 of 3): ['yellow_tripdata/*2019-01.csv', 'yellow_tripdata/*2019-02.csv', 'yellow_tripdata/*2019-03.csv']
 
-Unmatched data_references (0 of 0): []
+Unmatched data_references (0 of 0):[]
 ```
 
 Note that the `InferredAssetFileSystemDataConnector` **infers** `data_asset_names` **from the regex you provide.** This is the key difference between InferredAssetDataConnector and ConfiguredAssetDataConnector, and also requires that one of the `group_names` in the `default_regex` configuration be `data_asset_name`.
 
-------------------------------------------
-When to use a ConfiguredAssetDataConnector
-------------------------------------------
+### When to use a ConfiguredAssetDataConnector
 
-On the other hand, `ConfiguredAssetFilesSystemDataConnector` requires an explicit listing of each DataAsset you want to connect to. This tends to be helpful when the naming conventions for your DataAssets are less standardized.
+On the other hand, `ConfiguredAssetFilesSystemDataConnector` requires an explicit listing of each Data Asset you want to connect to. This tends to be helpful when the naming conventions for your Data Assets are less standardized.
 
-If you have the following `my_messier_data/` directory in your filesystem,
+If you have the same `<MY DIRECTORY>/` directory in your filesystem,
 
 ```
- my_messier_data/1/A-1.csv
- my_messier_data/1/B-1.txt
-
- my_messier_data/2/A-2.csv
- my_messier_data/2/B-2.txt
-
- my_messier_data/2017/C-1.csv
- my_messier_data/2018/C-2.csv
- my_messier_data/2019/C-3.csv
-
- my_messier_data/aaa/D-1.csv
- my_messier_data/bbb/D-2.csv
- my_messier_data/ccc/D-3.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-01.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-02.csv
+<MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-03.csv
+<MY DIRECTORY>/green_tripdata/2019-01.csv
+<MY DIRECTORY>/green_tripdata/2019-02.csv
+<MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
 Then this config...
 
-```yaml
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  my_data_connector:
-    class_name: ConfiguredAssetFilesystemDataConnector
-    glob_directive: "*/*"
-    base_directory: my_messier_data/
-    assets:
-      A:
-         pattern: (.+A)-(\d+)\.csv
-         group_names:
-           - name
-           - id
-       B:
-         pattern: (.+B)-(\d+)\.txt
-         group_names:
-           - name
-           - val
-       C:
-         pattern: (.+C)-(\d+)\.csv
-         group_names:
-           - name
-           - id
-       D:
-         pattern: (.+D)-(\d+)\.csv
-         group_names:
-           - name
-           - id
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+<TabItem value="yaml">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L90-L114
 ```
 
-...will make available the following DataAssets and data_references:
+</TabItem>
+<TabItem value="python">
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L125-L151
+```
+
+</TabItem>
+</Tabs>
+
+...will make available the following Data Assets and data_references:
 
 ```bash
-Available data_asset_names (4 of 4):
-   A (2 of 2): [
-      '1/A-1.csv',
-      '2/A-2.csv'
-   ]
-   B (2 of 2): [
-      '1/B-1.txt',
-      '2/B-2.txt'
-   ]
-   C (3 of 3): [
-      '2017/C-1.csv',
-      '2018/C-2.csv',
-      '2019/C-3.csv'
-   ]
-   D (3 of 3): [
-      'aaa/D-1.csv',
-      'bbb/D-2.csv',
-      'ccc/D-3.csv'
-   ]
+Available data_asset_names (2 of 2):
+    green_tripdata (3 of 3): ['2019-01.csv', '2019-02.csv', '2019-03.csv']
+    yellow_tripdata (3 of 3): ['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
+
+Unmatched data_references (0 of 0):[]
 ```
 
-----------------
-Additional Notes
-----------------
+### Additional Notes
 
 - Additional examples and configurations for `ConfiguredAssetFilesystemDataConnector`s can be found here: [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_configuredassetdataconnector.md)
 - Additional examples and configurations for `InferredAssetFilesystemDataConnector`s can be found here: [How to configure an InferredAssetDataConnector](./how_to_configure_an_inferredassetdataconnector.md)
