@@ -969,6 +969,81 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         return header_row, table_rows
 
     @classmethod
+    def _atomic_prescriptive_template(
+            cls,
+            configuration=None,
+            result=None,
+            language=None,
+            runtime_configuration=None,
+            **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "partition_object",
+                "threshold",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+        header_params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        chart = None
+        chart_container_col_width = None
+        distribution_table_header_row = None
+        distribution_table_rows = None
+
+
+        if not params.get("partition_object"):
+            header_template_str = "can match any distribution."
+        else:
+            header_template_str = (
+                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
+                "lower than $threshold."
+            )
+            chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(params.get("partition_object"))
+
+        if include_column_name:
+            header_template_str = "$column " + header_template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"], with_schema=True)
+            header_template_str = conditional_template_str + ", then " + header_template_str
+            header_params_with_json_schema.update(conditional_params)
+
+        return (
+            header_template_str,
+            header_params_with_json_schema,
+            chart,
+            chart_container_col_width,
+            distribution_table_header_row,
+            distribution_table_rows,
+            styling
+        )
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
