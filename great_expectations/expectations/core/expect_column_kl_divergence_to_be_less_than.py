@@ -1002,24 +1002,36 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             },
         }
 
+        expected_partition_object = params.get("partition_object", {})
+        weights = expected_partition_object.get("weights", [])
+
         chart = None
         chart_container_col_width = None
         distribution_table_header_row = None
         distribution_table_rows = None
 
-        if not params.get("partition_object"):
+        # generate template string for header
+        if not expected_partition_object:
             header_template_str = "can match any distribution."
         else:
             header_template_str = (
                 "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
                 "lower than $threshold."
             )
+
+        # optionally, add column name
+        if include_column_name:
+            header_template_str = "$column " + header_template_str
+
+        # generate table or chart depending on number of weights
+        if len(weights) > 60:
+            distribution_table_header_row, distribution_table_rows = cls._atomic_partition_object_table_template(
+                partition_object=expected_partition_object
+            )
+        else:
             chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
                 params.get("partition_object")
             )
-
-        if include_column_name:
-            header_template_str = "$column " + header_template_str
 
         if params["row_condition"] is not None:
             (
