@@ -289,7 +289,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         (
             header_template_str,
             header_params_with_json_schema,
-            styling,
+            _,
             table_header_row,
             table_rows,
         ) = cls._atomic_prescriptive_template(
