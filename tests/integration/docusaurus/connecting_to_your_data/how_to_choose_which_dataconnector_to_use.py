@@ -161,7 +161,7 @@ test_python = context.test_yaml_config(
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml != test_python
+assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 assert "yellow_tripdata" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
