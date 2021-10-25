@@ -120,7 +120,7 @@ def test_dlt_expect_decorator(
     print("\n\nSTART =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
     # print("Starting directory tree structure")
     # print(gen_directory_tree_str(str(d)))
-    print("\n", "Beginning of pipeline df:", simple_pandas_df)
+    print("\n", "Beginning of pipeline df:\n", simple_pandas_df)
 
     # Our first "dlt" transformation from a GE expectation
     @dlt_expectations.expect(
@@ -148,7 +148,7 @@ def test_dlt_expect_decorator(
     df_1 = transformation_1(simple_pandas_df)
     df_2 = transformation_2(df_1)
 
-    print("\n", "Resulting end of pipeline df:", df_2)
+    print("\n", "Resulting end of pipeline df:\n", df_2)
 
     print("GE Expectation Suites")
     expectation_suite_names: List[str] = data_context.list_expectation_suite_names()

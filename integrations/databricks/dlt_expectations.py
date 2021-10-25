@@ -61,7 +61,7 @@ def expect(
                 )
                 dlt_expectation = translated_dlt_expectation
 
-            # TODO: In the future we can infer the ge_expectation_type
+            # TODO: In the future we can infer the ge_expectation_type in the translator after parsing
             # Translate DLT expectation to GE ExpectationConfiguration
             ge_expectation = None
             if (
