@@ -319,6 +319,7 @@ Then we test our syntax using `test_yaml_config`
 ```python
 my_checkpoint = context.test_yaml_config(yaml_config=yaml_config)
 ```
+Note that we get a message that the Checkpoint contains no validations. See below, we will pass those in at runtime.
 
 If all is well, we add the Checkpoint:
 #### TODO: retrieve this code from databricks_deployment_patterns.py
