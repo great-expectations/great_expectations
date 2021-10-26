@@ -49,7 +49,7 @@ If you have the following `<MY DIRECTORY>/` directory in your filesystem, and yo
 <MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
-This config...
+This configuration:
 
 <Tabs
   groupId="yaml-or-python"
