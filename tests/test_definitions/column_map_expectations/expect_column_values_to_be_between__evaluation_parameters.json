@@ -113,7 +113,7 @@
           "x": "INTEGER",
           "y": "VARCHAR",
           "z": "INTEGER",
-          "ts": "DATETIME",
+          "ts": "DATETIME2",
           "alpha": "VARCHAR",
           "numeric": "INTEGER"
         }
