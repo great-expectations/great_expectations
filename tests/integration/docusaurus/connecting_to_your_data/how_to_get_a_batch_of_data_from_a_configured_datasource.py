@@ -169,7 +169,7 @@ assert row_count == 10000
 
 assert (
     validator.active_batch.batch_definition.batch_identifiers["name"]
-    == "yellow_trip_data_sample"
+    == "yellow_tripdata_sample"
 )
 assert (
     validator.active_batch.batch_definition.batch_identifiers[
@@ -186,7 +186,7 @@ assert (
 
 assert (
     batch_list_last_index_batch_request[0].batch_definition.batch_identifiers["name"]
-    == "yellow_trip_data_sample"
+    == "yellow_tripdata_sample"
 )
 assert (
     batch_list_last_index_batch_request[0].batch_definition.batch_identifiers[
