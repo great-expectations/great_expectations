@@ -16,8 +16,17 @@ This guide demonstrates how to choose which `DataConnector`s to configure within
 
 Great Expectations provides three types of `DataConnector` classes. Two classes are for connecting to Data Assets stored as file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
 
-- An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure. Examples of this type of `DataConnector` include `InferredAssetFilesystemDataConnector` and `InferredAssetS3DataConnector`.
-- A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each Data Asset you want to connect to. Examples of this type of `DataConnector` include `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector`.
+- An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
+- A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each Data Asset you want to connect to.
+
+| InferredAssetDataConnectors | ConfiguredAssetDataConnectors |
+| --- | --- |
+| InferredAssetFilesystemDataConnector | ConfiguredAssetFilesystemDataConnector |
+| InferredAssetFilePathDataConnector | ConfiguredAssetFilePathDataConnector |
+| InferredAssetAzureDataConnector | ConfiguredAssetAzureDataConnector |
+| InferredAssetGCSDataConnector | ConfiguredAssetGCSDataConnector |
+| InferredAssetS3DataConnector | ConfiguredAssetS3DataConnector |
+| InferredAssetSqlDataConnector | ConfiguredAssetSqlDataConnector |
 
 The third type of `DataConnector` class is for providing a batch's data directly at runtime:
 
