@@ -159,8 +159,8 @@ checkpoint_result = context.run_checkpoint(
         }
     ],
 )
-
 # CODE ^^^^^ ^^^^^
+
 # ASSERTIONS vvvvv vvvvv
 assert checkpoint_result.checkpoint_config["name"] == my_checkpoint_name
 assert not checkpoint_result.success
