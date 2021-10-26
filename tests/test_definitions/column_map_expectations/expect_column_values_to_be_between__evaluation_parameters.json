@@ -138,8 +138,7 @@
           "title": "basic_negative_temporal_test",
           "exact_match_out": false,
           "out": {
-            "unexpected_list": [],
-            "unexpected_index_list": [],
+            "unexpected_index_list": [0, 1, 2, 3, 4, 5, 6, 7, 9],
             "success": false
           },
           "in": {
