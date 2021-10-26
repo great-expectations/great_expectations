@@ -163,8 +163,63 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     snapshot,
     get_prescriptive_rendered_content,
 ):
-    # Expectation is yet to implement _atomic_prescriptive_template; open to implement test once method is written
-    pass
+    update_dict = {
+        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "kwargs": {
+            "column": "min_event_time",
+            "partition_object": {
+                "bins": [0, 5, 10, 30, 50],
+                "weights": [0.2, 0.3, 0.1, 0.4],
+            },
+            "threshold": 0.1,
+        },
+    }
+    rendered_content = get_prescriptive_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+    snapshot.assert_match(res)
+
+
+def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less_than(
+    snapshot, get_diagnostic_rendered_content
+):
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    expectation_config = {
+        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "kwargs": {
+            "column": "min_event_time",
+            "partition_object": {
+                "bins": [0, 5, 10, 30, 50],
+                "weights": [0.2, 0.3, 0.1, 0.4],
+            },
+            "threshold": 0.1,
+        },
+        "meta": {},
+        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+    }
+    update_dict = {
+        "expectation_config": ExpectationConfiguration(**expectation_config),
+        "result": {
+            "observed_value": 0.0,
+            "details": {
+                "observed_partition": {
+                    "values": [1, 2, 4],
+                    "weights": [0.3754, 0.615, 0.0096],
+                },
+                "expected_partition": {
+                    "values": [1, 2, 4],
+                    "weights": [0.3754, 0.615, 0.0096],
+                },
+            },
+        },
+    }
+    rendered_content = get_diagnostic_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_summary_expect_column_max_to_be_between(
@@ -361,8 +416,74 @@ def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between
     snapshot,
     get_prescriptive_rendered_content,
 ):
-    # Expectation is yet to implement _atomic_prescriptive_template; open to implement test once method is written
-    pass
+    update_dict = {
+        "expectation_type": "expect_column_quantile_values_to_be_between",
+        "kwargs": {
+            "column": "Unnamed: 0",
+            "quantile_ranges": {
+                "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                "value_ranges": [
+                    [66, 68],
+                    [328, 330],
+                    [656, 658],
+                    [984, 986],
+                    [1246, 1248],
+                ],
+            },
+            "allow_relative_error": False,
+        },
+        "meta": {},
+        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+    }
+    rendered_content = get_prescriptive_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+    snapshot.assert_match(res)
+
+
+def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between(
+    snapshot, get_diagnostic_rendered_content
+):
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    expectation_config = {
+        "expectation_type": "expect_column_quantile_values_to_be_between",
+        "kwargs": {
+            "column": "Unnamed: 0",
+            "quantile_ranges": {
+                "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                "value_ranges": [
+                    [66, 68],
+                    [328, 330],
+                    [656, 658],
+                    [984, 986],
+                    [1246, 1248],
+                ],
+            },
+            "allow_relative_error": False,
+        },
+        "meta": {},
+        "ge_cloud_id": "cd6b4f19-8167-4984-b495-54bffcb070da",
+    }
+    update_dict = {
+        "expectation_config": ExpectationConfiguration(**expectation_config),
+        "result": {
+            "observed_value": {
+                "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                "values": [67, 329, 657, 985, 1247],
+            },
+            "element_count": 1313,
+            "missing_count": None,
+            "missing_percent": None,
+            "details": {"success_details": [True, True, True, True, True]},
+        },
+    }
+    rendered_content = get_diagnostic_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+    snapshot.assert_match(res)
 
 
 def test_atomic_prescriptive_summary_expect_column_stdev_to_be_between(
