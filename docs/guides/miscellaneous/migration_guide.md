@@ -169,7 +169,7 @@ The V3-style Datasource has:
 
 :::note Note Datasource in V3
 
-One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines the Datasource and ExecutionEngine functionality to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines functionality of the Datasource and ExecutionEngine to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
 
 :::
 
@@ -190,15 +190,15 @@ In Great Expectations version 0.13.7, we introduced an improved Checkpoints feat
 
 The example below demonstrates how a V2 to V3 migration can be performed for an existing V2  Checkpoint.
 
-The V2-style Checkpoint will contain:
+The example V2-style Checkpoint contains:
   - A `LegacyCheckpoint`, with no `config_version` (versions were introduced as part of V3-style Checkpoints).
   - A `validation_operator_name` that contains a reference to Validation Operators that are configured in the `great_expectations.yml` file, like `action_list_operator` in our example below.
   - Reference to `batch_kwargs`, like in our example below.
 
-The V3-style Checkpoint will contain:
+The example V3-style Checkpoint contains:
   - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
   - A list of `validations`, which contain [BatchRequests](/docs/reference/datasources#batches) that will be used to run the Checkpoint.
-  - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were formerly known as Validation Operators in V2-style Checkpoints.
+  - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 #### V2-Style Checkpoint
 
@@ -212,7 +212,7 @@ The Validation Operator named `action_list_operator` would be part of the `great
 
 #### V3-Style Checkpoint
 
-Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.  In our example, there are also some additional parameters like `ge_cloud_id` and `expectation_suite_ge_cloud_id` that are added automatically and do not need to be modified as part of the migration. 
+Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.  In our example, there are also some additional parameters like `ge_cloud_id` and `expectation_suite_ge_cloud_id` that are added automatically and do not need to be modified as part of the migration.
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
