@@ -8,11 +8,12 @@ One of the key statements we hear from data engineering teams that use Great Exp
 
 With Great Expectations, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are basically unit tests for your data. Not only that, but Great Expectations also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use Great Expectations to:
 
-Test data they ingest from other teams or vendors and ensure its validity.
-Validate data they transform as a step in their data pipeline in order to ensure the correctness of transformations.
-Prevent data quality issues from slipping into data products.
-Streamline knowledge capture from subject-matter experts and make implicit knowledge explicit.
-Develop rich, shared documentation of their data.
+ - Test data they ingest from other teams or vendors and ensure its validity.
+ - Validate data they transform as a step in their data pipeline in order to ensure the correctness of transformations.
+ - Prevent data quality issues from slipping into data products.
+ - Streamline knowledge capture from subject-matter experts and make implicit knowledge explicit.
+ - Develop rich, shared documentation of their data.
+
 You can read more about how data teams use Great Expectations in our [case studies](https://greatexpectations.io/case-studies/).
 
 ### Key Features
