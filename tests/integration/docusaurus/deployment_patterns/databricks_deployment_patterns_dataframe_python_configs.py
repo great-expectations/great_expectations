@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from ruamel import yaml
 
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
@@ -50,8 +50,9 @@ assert os.listdir(uncommitted_directory) == ["validations"]
 # 3. Prepare your data
 
 # CODE vvvvv vvvvv
-filename = "yellow_trip_data_sample_2019-01.csv"
-pandas_df = pd.read_csv(os.path.join(os.getcwd(), "data", filename))
+filename = "yellow_tripdata_sample_2019-01.csv"
+data_dir = os.path.join(os.path.dirname(root_directory), "data")
+pandas_df = pd.read_csv(os.path.join(data_dir, filename))
 df = spark.createDataFrame(data=pandas_df)
 # CODE ^^^^^ ^^^^^
 

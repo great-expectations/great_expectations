@@ -1,28 +1,13 @@
 import os
 
-import pandas as pd
 from ruamel import yaml
 
-import great_expectations as ge
-from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DatasourceConfig,
     FilesystemStoreBackendDefaults,
 )
-from great_expectations.util import gen_directory_tree_str
-
-spark = get_or_create_spark_application()
-
-# TODO: ABOVE THIS LINE HAS NOT BEEN CLEANED UP
-# ---------------------------------------------
-
-##################
-# BEGIN CONTENT
-##################
 
 # 1. Install Great Expectations
 # %pip install great-expectations
@@ -91,12 +76,11 @@ my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_h
     "base_directory"
 ] = os.path.join(root_directory, "../data/")
 
-# Temporary location for running this file (e.g. during debugging)
-# ] = os.path.join(
+# Data location used when running or debugging this script directly
+# os.path.join(
 #     root_directory, "../../../../test_sets/taxi_yellow_tripdata_samples/first_3_files/"
 # )
 
-# Python Version
 context.test_yaml_config(yaml.dump(my_spark_datasource_config))
 
 context.add_datasource(**my_spark_datasource_config)
