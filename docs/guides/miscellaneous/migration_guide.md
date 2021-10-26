@@ -21,9 +21,9 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
 
 ## Migrating to the Batch Request (V3) API
 
-The V3 API will soon become the preferred method of interacting with GE beginning  with version 0.14, so we highly recommend that you migrate to working with the V3 API as soon as possible.
+The V3 API will soon become the preferred method of interacting with GE beginning with version 0.14, so we highly recommend that you migrate to working with the V3 API as soon as possible.
 
-The migration involves two parts: first using an automated CLI tool to upgrade the config file and Data Stores, and second,  manually upgrading Datasources and Checkpoints. To begin the migration from the V2 to the V3 API, please do the following:
+The migration involves two parts: first, using an automated CLI tool to upgrade the config file and Data Stores, and second, manually upgrading Datasources and Checkpoints. To begin the migration from the V2 to the V3 API, please do the following:
 
 ### Check configuration using Great Expectations CLI
 
@@ -52,11 +52,11 @@ Checking your config files for validity...
 Unfortunately, your config appears to be invalid:
 
 The config_version of your great_expectations.yml -- 2.0 -- is outdated.
-Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api
-and upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
+Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and
+upgrade your Great Expectations configuration to version 3.0 in order to take advantage of the latest capabilities.
 ```
 
-If the `check-config` method has advised you to upgrade your configuration, you can run the following `project upgrade` command in your project directory.
+If the `check-config` method has recommended that you upgrade your configuration, you can run the following `project upgrade` command in your project directory.
 
 ```bash
 great_expectations --v3-api project upgrade
@@ -75,7 +75,7 @@ You appear to be using a legacy capability with the latest config version (3.0).
     Your data context with this configuration version uses validation_operators, which are being deprecated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and update your configuration to be compatible with the version number 3.
     (This message will appear repeatedly until your configuration is updated.)
 
-Detected legacy config version (3.0) so will try to use default Checkpoint store.
+Checkpoint store named "checkpoint_store" is not a configured store, so will try to use default Checkpoint store.
   Please update your configuration to the new version number 3.0 in order to use the new "Checkpoint Store" feature.
   Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.
 ++====================================++
@@ -122,7 +122,7 @@ Would you like to proceed with the project upgrade? [Y/n]:
 If you select `Y`, then the following upgrade will automatically occur:
 
 ```bash
-Upgrading project...
+pgrading project...
 
 ================================================================================
 
@@ -138,7 +138,7 @@ The Upgrade Helper has performed the automated upgrade steps as part of upgradin
 
 A log detailing the upgrade can be found here:
 
-    - great_expectations/uncommitted/logs/project_upgrades/UpgradeHelperV13_20211022T171732.188954Z.json
+    - /Users/work/Development/great_expectations/tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/uncommitted/logs/project_upgrades/UpgradeHelperV13_20211026T203114.461738Z.json
 You appear to be using a legacy capability with the latest config version (3.0).
     Your data context with this configuration version uses validation_operators, which are being deprecated.  Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and update your configuration to be compatible with the version number 3.
     (This message will appear repeatedly until your configuration is updated.)
@@ -163,11 +163,15 @@ The V2-style Datasource has:
   - batch_kwargs_generators like the `SubdirReaderBatchKwargsGenerator` in our example below.
 
 The V3-style Datasource has:
-  - Datasource that is agnostic to datatype
+  - Datasource that is agnostic to datatype.
   - Datatype-specific ExecutionEngine, like the `PandasExecutionEngine` in our example below.
   - Data-specific DataConnectors, like the `InferredAssetFilesystemDataConnector` in our example below.
 
-For reference, a [Data Connector](../../reference/datasources) facilitates access to an external data store, such as a database, filesystem, or cloud storage and the [Execution Engine](../../reference/execution_engine) is responsible for providing the computing resources that will be used to actually perform validation. For more information on these V3-style components with additional examples, please refer to the [Datasources Documentation](../../reference/datasources).
+:::note Note Datasource in V3
+
+One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines the Datasource and ExecutionEngine functionality to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+
+:::
 
 #### V2-Style Datasource
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/great_expectations.yml#L16-L26
@@ -182,7 +186,19 @@ Migrating Datasource configurations that contain connections to the cloud or dat
 
 ### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
-In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to filter and sort batches, and run on the latest single batch of data (or most-recent year of batches), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into the Checkpoint configuration itself as `action_list` items.  In order to perform the V2 to V3 migration for Checkpoints, please refer to the following examples:
+In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](/docs/guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource), [introspect and partition tables as batches](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into the Checkpoint configuration itself as `action_list` items.
+
+The example below demonstrates how a V2 to V3 migration can be performed for an existing V2  Checkpoint.
+
+The V2-style Checkpoint will contain:
+  - A `LegacyCheckpoint`, with no `config_version` (versions were introduced as part of V3-style Checkpoints).
+  - A `validation_operator_name` that contains a reference to Validation Operators that are configured in the `great_expectations.yml` file, like `action_list_operator` in our example below.
+  - Reference to `batch_kwargs`, like in our example below.
+
+The V3-style Checkpoint will contain:
+  - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
+  - A list of `validations`, which contain [BatchRequests](/docs/reference/datasources#batches) that will be used to run the Checkpoint.
+  - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were formerly known as Validation Operators in V2-style Checkpoints.
 
 #### V2-Style Checkpoint
 
@@ -196,7 +212,13 @@ The Validation Operator named `action_list_operator` would be part of the `great
 
 #### V3-Style Checkpoint
 
-Here is the equivalent configuration in V3-checkpoints. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.
+Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.  In our example, there are also some additional parameters like `ge_cloud_id` and `expectation_suite_ge_cloud_id` that are added automatically and do not need to be modified as part of the migration. 
+
+For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
+
+- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
+- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
 ```
@@ -226,12 +248,7 @@ Suite Name                                   Status     Expectations met
 - Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
 ```
 
-Congratulations! You have successfully migrated your configuration of Great Expectations to be compatible with the V3-API. To see more examples of V3 Checkpoints, please refer to our documentation here:
-
-- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
-- [How to create a new Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint)
-- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
-
+Congratulations! You have successfully migrated your configuration of Great Expectations to be compatible with the V3-API.
 
 ## Upgrading from previous versions of Great Expectations
 
