@@ -735,9 +735,6 @@ def upgrade_project_up_to_one_version_increment(
     if not upgrade_helper_class:
         return False, False
 
-    if update_version:
-        target_ge_config_version = int(ge_config_version) + 1
-
     # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
     DataContext.set_ge_config_version(
         config_version=CURRENT_GE_CONFIG_VERSION,
@@ -787,7 +784,7 @@ def upgrade_project_up_to_one_version_increment(
         # set config version to target version
         if increment_version:
             DataContext.set_ge_config_version(
-                target_ge_config_version,
+                int(ge_config_version) + 1,
                 context_root_dir,
                 validate_config_version=False,
             )
