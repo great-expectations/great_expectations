@@ -28,6 +28,8 @@ Great Expectations provides three types of `DataConnector` classes. Two classes 
 | InferredAssetS3DataConnector | ConfiguredAssetS3DataConnector |
 | InferredAssetSqlDataConnector | ConfiguredAssetSqlDataConnector |
 
+InferredAssetDataConnectors and ConfiguredAssetDataConnectors are used to define Data Assets and their associated data_references. A Data Asset is an abstraction that can consist of one or more data_references to CSVs or relational database tables.
+
 The third type of `DataConnector` class is for providing a batch's data directly at runtime:
 
 - A `RuntimeDataConnector` enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run).
@@ -38,7 +40,7 @@ If you aren't sure which type of the remaining `DataConnector`s to use, the foll
 
 ### When to use an InferredAssetDataConnector
 
-If you have the following `<MY DIRECTORY>/` directory in your filesystem, and you want to treat the `yellow_tripdata_*.csv` files as batches within the `yellow_tripdata` Data Asset, and do the same for files in the `green_tripdata` directory:
+If you have the following `<MY DIRECTORY>/` directory in your filesystem, and you want to treat the `yellow_tripdata_*.csv` files as batches within the `yellow_tripdata` Data Asset, and also do the same for files in the `green_tripdata` directory:
 
 ```
 <MY DIRECTORY>/yellow_tripdata/yellow_tripdata_2019-01.csv
@@ -99,7 +101,7 @@ If you have the same `<MY DIRECTORY>/` directory in your filesystem,
 <MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
-Then this config...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"
