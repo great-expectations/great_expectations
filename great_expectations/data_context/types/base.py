@@ -1,4 +1,3 @@
-import abc
 import enum
 import itertools
 import logging
@@ -19,7 +18,6 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
-    pre_load,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
@@ -2262,50 +2260,6 @@ class CheckpointValidationConfigSchema(Schema):
     pass
 
 
-class RenderedAtomicValueSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    # for StringType
-    template = fields.String(required=False, allow_none=True)
-    params = fields.Dict(required=False, allow_none=True)
-    schema = fields.Dict(required=False, allow_none=True)
-
-    # TODO enable TableType
-    # header = fields.List(fields.Str(), required=False, allow_none=True)
-    # header_row = fields.List(fields.Str(), required=False, allow_none=True)
-    # table: fields.List(fields.List(fields.Str()), required=False, allow_none=True)
-
-    # TODO add VegaGraph
-
-    @post_load()
-    def create_value_obj(self, data, **kwargs):
-        return RenderedAtomicValue(**data)
-
-
-class RenderedAtomicValue(DictDot):
-    def __init__(
-        self,
-        template: Optional[str] = None,
-        params: Optional[dict] = None,
-        schema: Optional[dict] = None,
-        # header: list = None,
-        # header_row: str = None,
-        # table: list = None,
-    ):
-        # StringType
-        self.template: str = template
-        self.params: dict = params
-        self.schema: dict = schema
-
-        # TODO enable TableType
-        # self.header: list = header
-        # self.header_row: str = header_row
-        # self.table: list = table
-
-        # TODO add VegaGraph
-
-
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
@@ -2315,4 +2269,3 @@ anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
-renderedAtomicValueSchema = RenderedAtomicValueSchema()
