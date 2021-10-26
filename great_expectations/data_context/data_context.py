@@ -367,7 +367,9 @@ class BaseDataContext:
         self._cached_datasources = {}
 
         # Build the datasources we know about and have access to
-        self._init_datasources(self.project_config_with_variables_substituted)
+        self._init_datasources(
+            self.project_config_with_variables_substituted
+        )  # TODO: This returns an empty dict!
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing

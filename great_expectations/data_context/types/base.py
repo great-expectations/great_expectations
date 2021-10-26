@@ -169,7 +169,7 @@ class AssetConfig(DictDot):
 
 class AssetConfigSchema(Schema):
     class Meta:
-        unknown = INCLUDE
+        unknown = INCLUDE  # Is this work as intended? Seems to not include unknowns atm
 
     name = fields.String(required=False, allow_none=True)
     class_name = fields.String(required=False, allow_none=True, missing="Asset")
@@ -192,8 +192,9 @@ class AssetConfigSchema(Schema):
 
     # TODO(cdkini): Check if these are in the appropriate spot!
     table_name = fields.String(required=False, allow_none=True)
-    schema_name = fields.String(required=False, allow_none=True)
     type = fields.String(required=False, allow_none=True)
+    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    splitter_method = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
