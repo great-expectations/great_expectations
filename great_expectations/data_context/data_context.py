@@ -912,16 +912,10 @@ class BaseDataContext:
 
     def _load_config_variables_file(self):
         """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables are
-        loaded from a global great_expectations.conf file, located at one of the paths defined in
-        self.GLOBAL_CONFIG_PATHS (in order of search precedence).
+        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
+        have already been interpolated before being sent from the Cloud API.
         """
         if self.ge_cloud_mode:
-            for config_path in self.GLOBAL_CONFIG_PATHS:
-                if os.path.isfile(config_path):
-                    config = configparser.ConfigParser()
-                    config.read(config_path)
-                    return dict(config.items(section="ge_cloud_config"))
             return {}
         config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
@@ -963,14 +957,11 @@ class BaseDataContext:
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
-        # for ge_cloud_mode: in most cases, self.ge_cloud_config will be a subset of substituted_config_variables,
-        # but if one or more ge_cloud_config values are passed in at runtime, they will be reflected in
-        # self.ge_cloud_config and will take precedence
+        # Substitutions should have already occurred for GE Cloud configs at this point
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
-            **(self.ge_cloud_config.to_json_dict() if self.ge_cloud_mode else {}),
         }
 
         if self.ge_cloud_mode:
