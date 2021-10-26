@@ -439,3 +439,7 @@ Available data_asset_names (2 of 2):
 
 Unmatched data_references (0 of 0):[]
 ```
+
+### Additional Notes
+To view the full script used in this page, see it on GitHub:
+- [how_to_configure_an_inferredassetdataconnector.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py)

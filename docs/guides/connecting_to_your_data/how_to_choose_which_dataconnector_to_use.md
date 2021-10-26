@@ -137,3 +137,6 @@ Unmatched data_references (0 of 0):[]
 - Additional examples and configurations for `ConfiguredAssetFilesystemDataConnector`s can be found here: [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_configuredassetdataconnector.md)
 - Additional examples and configurations for `InferredAssetFilesystemDataConnector`s can be found here: [How to configure an InferredAssetDataConnector](./how_to_configure_an_inferredassetdataconnector.md)
 - Additional examples and configurations for `RuntimeDataConnector`s can be found here: [How to configure a RuntimeDataConnector](./how_to_configure_a_runtimedataconnector.md)
+
+To view the full script used in this page, see it on GitHub:
+- [how_to_choose_which_dataconnector_to_use.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py)
