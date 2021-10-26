@@ -195,7 +195,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -212,7 +212,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -228,7 +228,7 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )

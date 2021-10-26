@@ -1,6 +1,6 @@
 """
-Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow_trip_data_sample_2019-01.csv)
-    found in the tests/test_sets/taxi_yellow_trip_data_samples directory, and used extensively in unittest and
+Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow_tripdata_sample_2019-01.csv)
+    found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
 """
 import os

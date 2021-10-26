@@ -11,7 +11,7 @@ In the previous steps, when you executed the last cell in the Jupyter Notebook, 
 
 The Validation Results page shows you the results of using your Expectation Suite to validate a batch of data. In this case, you see the results of validating the `yellow_tripdata_sample_2019-01` file. All Expectations were automatically generated using the Profiler functionality, which we will explain below.
 
-If you scroll down, you will see all Expectations that were generated for the `passenger_count` column. This includes the Expectation we wanted: **“distinct values must belong to this set: 1, 2, 3, 4, 5, 6”**.
+If you scroll down, you will see all Expectations that were generated for the `passenger_count` column. This includes the Expectation we wanted: **“values must belong to this set: 1, 2, 3, 4, 5, 6”**.
 
 We also see the **observed values** for this batch, which is exactly the numbers 1 through 6 that we expected. This makes sense, since we’re developing the Expectation using the January data batch.
 
