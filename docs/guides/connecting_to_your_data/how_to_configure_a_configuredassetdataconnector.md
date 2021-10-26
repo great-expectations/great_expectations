@@ -140,7 +140,7 @@ In that case, the configuration would look like the following:
 
 Notice that we have specified a pattern that captures the year-month combination after `yellow_tripdata_` in the filename and assigns it to the `group_name` `month`.
 
-The configuration would also work with a regex capturing the entire filename (ie `pattern: (.*)\\.csv`).  However, capturing the month on its own allows for `batch_identifiers` to be used to retrieve a specific Batch of the Data Asset. For more information about capture groups, refer to the Python documentation on [regular expressions](https://docs.python.org/3/library/re.html#re.Match.group).
+The configuration would also work with a regex capturing the entire filename (e.g. `pattern: (.*)\.csv`).  However, capturing the month on its own allows for `batch_identifiers` to be used to retrieve a specific Batch of the Data Asset. For more information about capture groups, refer to the Python documentation on [regular expressions](https://docs.python.org/3/library/re.html#re.Match.group).
 
 Later on we could retrieve the data in `yellow_tripdata_2019-02.csv` of `yellow_tripdata` as its own batch using `context.get_validator()` by specifying `{"month": "2019-02"}` as the `batch_identifier`.
 
@@ -256,9 +256,9 @@ Available data_asset_names (1 of 1):
 Unmatched data_references (3 of 3):['yellow_tripdata_2019-01.csv', 'yellow_tripdata_2019-02.csv', 'yellow_tripdata_2019-03.csv']
 ```
 
-Notice that `yellow_tripdata` has 0 data_references, and there are 3 `Unmatched data_references` listed.
+Notice that `yellow_tripdata` has 0 `data_references`, and there are 3 `Unmatched data_references` listed.
 This would indicate that some part of the configuration is incorrect and would need to be reviewed.
-In our case, changing `pattern` to : `yellow_tripdata_(.*)\\.csv` will fix our problem and give the same output to above.
+In our case, changing `pattern` to `yellow_tripdata_(.*)\.csv` will fix our problem and give the same output to above.
 
 
 ### Example 2: Basic configuration with more than one Data Asset
