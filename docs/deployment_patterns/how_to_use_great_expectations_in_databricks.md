@@ -82,6 +82,8 @@ context = BaseDataContext(project_config=data_context_config)
   ]}>
   <TabItem value="file">
 
+# TODO: Copy over 3 files of data instead of just the 1
+
 We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Let's copy some example csv data to our DBFS folder for easier access using [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html):
 
 ```python
