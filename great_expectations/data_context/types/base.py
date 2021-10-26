@@ -169,7 +169,7 @@ class AssetConfig(DictDot):
 
 class AssetConfigSchema(Schema):
     class Meta:
-        unknown = INCLUDE  # Is this work as intended? Seems to not include unknowns atm
+        unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=True)
     class_name = fields.String(required=False, allow_none=True, missing="Asset")
