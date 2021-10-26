@@ -20,7 +20,7 @@ Great Expectations provides two types of `DataConnector` classes for connecting 
 - A ConfiguredAssetDataConnector requires an explicit listing of each Data Asset you want to connect to. This allows more fine-tuning, but also requires more setup.
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 
-InferredAssetDataConnector has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single Data Asset, or several `Data Assets` that all share the same naming convention.
+InferredAssetDataConnector has fewer options, so it's simpler to set up. It’s a good choice if you want to connect to a single Data Asset, or several Data Assets that all share the same naming convention.
 
 If you're not sure which one to use, please check out [How to choose which DataConnector to use](./how_to_choose_which_dataconnector_to_use.md).
 
