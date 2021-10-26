@@ -60,23 +60,6 @@ assert os.listdir(uncommitted_directory) == ["validations"]
 # 4. Connect to your data
 
 # CODE vvvvv vvvvv
-# # YAML Version
-# my_spark_datasource_config_yaml = """
-# name: insert_your_datasource_name_here
-# class_name: Datasource
-# execution_engine:
-#   class_name: SparkDFExecutionEngine
-# data_connectors:
-#   insert_your_data_connector_name_here:
-#     module_name: great_expectations.datasource.data_connector
-#     class_name: InferredAssetFilesystemDataConnector
-#     base_directory: /dbfs/example_data/nyctaxi/tripdata/yellow/
-#     default_regex:
-#       pattern: (.*)
-#       group_names:
-#         - data_asset_name
-# """
-
 # Python Version
 my_spark_datasource_config = {
     "name": "insert_your_datasource_name_here",
@@ -103,6 +86,7 @@ my_spark_datasource_config = {
 my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
     "base_directory"
     # ] = os.path.join(root_directory, "../data/")
+    # Temporary location for running this file
 ] = os.path.join(
     root_directory, "../../../../test_sets/taxi_yellow_tripdata_samples/first_3_files/"
 )
@@ -214,28 +198,28 @@ assert len(suite.expectations) == 2
 # 6. Validate your data
 # CODE vvvvv vvvvv
 my_checkpoint_name = "insert_your_checkpoint_name_here"
-# checkpoint_config = {
-#     "name": my_checkpoint_name,
-#     "config_version": 1.0,
-#     "class_name": "SimpleCheckpoint",
-#     "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
-#     "validations": [
-#         {
-#             "batch_request": {
-#                 "datasource_name": "insert_your_datasource_name_here",
-#                 "data_connector_name": "insert_your_data_connector_name_here",
-#                 "data_asset_name": "yellow_tripdata_2019-01.csv",
-#                 "batch_spec_passthrough": {
-#                     "reader_method": "csv",
-#                     "reader_options": {
-#                         "header": True,
-#                     },
-#                 },
-#             },
-#             "expectation_suite_name": expectation_suite_name,
-#         }
-#     ],
-# }
+checkpoint_config = {
+    "name": my_checkpoint_name,
+    "config_version": 1.0,
+    "class_name": "SimpleCheckpoint",
+    "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
+    "validations": [
+        {
+            "batch_request": {
+                "datasource_name": "insert_your_datasource_name_here",
+                "data_connector_name": "insert_your_data_connector_name_here",
+                "data_asset_name": "yellow_tripdata_2019-01.csv",
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                    },
+                },
+            },
+            "expectation_suite_name": expectation_suite_name,
+        }
+    ],
+}
 
 
 my_checkpoint = context.test_yaml_config(yaml.dump(checkpoint_config))
