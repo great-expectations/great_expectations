@@ -7,8 +7,30 @@ Changelog
 
 develop
 -----------------
-* [BUGFIX] Fix deprecation warning for importing from collections
 
+0.13.39
+-----------------
+* [FEATURE] Migration of Expectations to Atomic Prescriptive Renderers (#3530, #3537)
+* [FEATURE] Cloud: Editing Expectation Suites programmatically (#3564)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3546) (thanks @shpolina)
+* [BUGFIX] SQLAlchemy version 1.3.24 compatibility in map metric provider (#3507) (thanks @shpolina)
+* [DOCS] Clarify how to configure optional Snowflake parameters in CLI datasource new notebook (#3543)
+* [DOCS] Added breaks to code snippets, reordered guidance (#3514)
+* [DOCS] typo in documentation (#3542) (thanks @DanielEdu)
+* [DOCS] Update how_to_configure_a_new_data_context_with_the_cli.md (#3556) (thanks @plain-jane-gray)
+* [DOCS] Improved installation instructions, included in-line installation instructions to getting started (#3509)
+* [DOCS] Update contributing_style.md (#3521) (thanks @plain-jane-gray)
+* [DOCS] Update contributing_test.md (#3519) (thanks @plain-jane-gray)
+* [DOCS] Revamp style guides (#3554)
+* [DOCS] Update contributing.md (#3523, #3524) (thanks @plain-jane-gray)
+* [DOCS] Simplify getting started (#3555)
+* [DOCS] How to introspect and partition an SQL database (#3465)
+* [DOCS] Update contributing_checklist.md (#3518) (thanks @plain-jane-gray)
+* [DOCS] Removed duplicate prereq, how_to_instantiate_a_data_context_without_a_yml_file.md (#3481) (thanks @plain-jane-gray)
+* [DOCS] fix link to expectation glossary (#3558) (thanks @sephiartlist)
+* [DOCS] Minor Friction (#3574)
+* [MAINTENANCE] Make CLI Check-Config and CLI More Robust (#3562)
+* [MAINTENANCE] tzlocal version fix (#3565)
 
 0.13.38
 -----------------

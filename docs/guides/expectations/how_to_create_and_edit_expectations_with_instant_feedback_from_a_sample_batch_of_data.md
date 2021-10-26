@@ -57,7 +57,7 @@ Steps
 
    ```bash
    {
-       "datasource_name": my_datasource",
+       "datasource_name": "my_datasource",
        "data_connector_name": "my_data_connector",
        "data_asset_name": "my_asset"
    }

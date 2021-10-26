@@ -44,6 +44,8 @@ Load your DataContext into memory using the `get_context()` method.
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L7
 ```
 
+## Configuring Inferred Asset Data Connector and Configured Asset Data Connector
+
 <Tabs
   groupId="inferred-or-configured"
   defaultValue='inferred'
@@ -177,7 +179,7 @@ configuration is empty.
 ### 2. Add a Data Asset for Configured Asset Data Connector to partition only by file name and type
 
 You can employ a data asset that reflects a relatively general file structure (e.g., `taxi_data_flat` in the example
-configuration) to represent files in a directory, which contain a certain prefix (e.g., `yellow_trip_data_sample_`) and
+configuration) to represent files in a directory, which contain a certain prefix (e.g., `yellow_tripdata_sample_`) and
 whose contents are of the desired type (e.g., CSV).
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L170-L185

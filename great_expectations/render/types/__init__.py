@@ -507,3 +507,10 @@ class RenderedAtomicContent(RenderedContent):
         self.name = name
         self.value = value
         self.valuetype = valuetype
+
+    def to_json_dict(self):
+        d = super().to_json_dict()
+        d["name"] = self.name
+        d["value"] = self.value.__dict__
+        d["valuetype"] = self.valuetype
+        return d
