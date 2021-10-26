@@ -122,7 +122,7 @@ Would you like to proceed with the project upgrade? [Y/n]:
 If you select `Y`, then the following upgrade will automatically occur:
 
 ```bash
-pgrading project...
+Upgrading project...
 
 ================================================================================
 
