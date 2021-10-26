@@ -4069,8 +4069,8 @@ class DataContext(BaseDataContext):
         Given proper authorization, the request retrieves a data context config that is pre-populated with
         GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
 
-        The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
-        for how these are substituted.
+        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
+        over the wire.
 
         :return: the configuration object retrieved from the Cloud API
         """
@@ -4098,8 +4098,7 @@ class DataContext(BaseDataContext):
         for how these are substituted.
 
         For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
-        and populated in a similar fashion - see self._retrieve_data_context_config_from_ge_cloud for
-        more details.
+        - see self._retrieve_data_context_config_from_ge_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
