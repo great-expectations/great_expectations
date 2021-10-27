@@ -28,7 +28,7 @@ Great Expectations provides three types of `DataConnector` classes. Two classes 
 | InferredAssetS3DataConnector | ConfiguredAssetS3DataConnector |
 | InferredAssetSqlDataConnector | ConfiguredAssetSqlDataConnector |
 
-InferredAssetDataConnectors and ConfiguredAssetDataConnectors are used to define Data Assets and their associated data_references. A Data Asset is an abstraction that can consist of one or more data_references to CSVs or relational database tables.
+InferredAssetDataConnectors and ConfiguredAssetDataConnectors are used to define Data Assets and their associated data_references. A Data Asset is an abstraction that can consist of one or more data_references to CSVs or relational database tables. For instance, you might have a `yellow_tripdata` Data Asset containing information about taxi rides, which consists of twelve data_references to twelve CSVs, each consisting of one month of data.
 
 The third type of `DataConnector` class is for providing a batch's data directly at runtime:
 
