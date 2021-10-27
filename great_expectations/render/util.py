@@ -134,7 +134,9 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 
 
 # NOTE: the method is pretty dirty
-def parse_row_condition_string_pandas_engine(condition_string):
+def parse_row_condition_string_pandas_engine(
+    condition_string: str, with_schema: bool = False
+) -> tuple:
     if len(condition_string) == 0:
         condition_string = "True"
 
@@ -166,10 +168,18 @@ def parse_row_condition_string_pandas_engine(condition_string):
     ]
 
     for i, condition in enumerate(conditions_list):
-        params["row_condition__" + str(i)] = condition.replace(" NOT ", " not ")
-        condition_string = condition_string.replace(
-            condition, "$row_condition__" + str(i)
-        )
+        param_value = condition.replace(" NOT ", " not ")
+
+        if with_schema:
+            params["row_condition__" + str(i)] = {
+                "schema": {"type": "string"},
+                "value": param_value,
+            }
+        else:
+            params["row_condition__" + str(i)] = param_value
+            condition_string = condition_string.replace(
+                condition, "$row_condition__" + str(i)
+            )
 
     template_str += condition_string.lower()
 
