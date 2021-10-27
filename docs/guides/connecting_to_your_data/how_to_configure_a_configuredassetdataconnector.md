@@ -102,11 +102,9 @@ If you’re not familiar with the `test_yaml_config` method, please check out: [
 
 ### 3. Add a ConfiguredAssetDataConnector to a Datasource configuration
 
-ConfiguredAssetDataConnectors like `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector` require Data Assets to be
-explicitly named. Each Data Asset can have their own regex `pattern` and `group_names`, and if configured, will override any
-`pattern` or `group_names` under `default_regex`.
+ConfiguredAssetDataConnectors like `ConfiguredAssetFilesystemDataConnector` and `ConfiguredAssetS3DataConnector` require Data Assets to be explicitly named. A Data Asset is an abstraction that can consist of one or more data_references to CSVs or relational database tables. For instance, you might have a `yellow_tripdata` Data Asset containing information about taxi rides, which consists of twelve data_references to twelve CSVs, each consisting of one month of data. Each Data Asset can have their own regex `pattern` and `group_names`, and if configured, will override any `pattern` or `group_names` under `default_regex`.
 
-Imagine you have the following files in `my_directory/`:
+Imagine you have the following files in `<MY DIRECTORY>/`:
 
 ```
 <MY DIRECTORY>/yellow_tripdata_2019-01.csv
