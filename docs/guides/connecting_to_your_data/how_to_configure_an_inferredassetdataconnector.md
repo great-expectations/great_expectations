@@ -141,7 +141,7 @@ The simplest approach would be to consider each file to be its own Data Asset. I
 </TabItem>
 </Tabs>
 
-Notice that the `default_regex` is configured to have one capture group (`(.*)`) which captures the entire filename. That capture group is assigned to `data_asset_name` under `group_names`.
+Notice that the `default_regex` is configured to have one capture group (`(.*)`) which captures the entire filename. That capture group is assigned to `data_asset_name` under `group_names`. For InferredAssetDataConnectors `data_asset_name` is a required `group_name`, and it's associated capture group is the way each `data_asset_name` is inferred.
 Running `test_yaml_config()` would result in 3 Data Assets : `yellow_tripdata_2019-01`, `yellow_tripdata_2019-02` and `yellow_tripdata_2019-03`.
 
 However, a closer look at the filenames reveals a pattern that is common to the 3 files. Each have `yellow_tripdata_` in the name, and have date information afterwards. These are the types of patterns that InferredAssetDataConnectors allow you to take advantage of.
@@ -209,7 +209,7 @@ Continuing the example above, imagine you have the following files in the direct
 <MY DIRECTORY>/yellow_tripdata_2019-03.csv
 ```
 
-Then this configuration...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -232,7 +232,7 @@ Then this configuration...
 </TabItem>
 </Tabs>
 
-...will make available `yelow_tripdata` as a single Data Asset with the following data_references:
+will make available `yelow_tripdata` as a single Data Asset with the following data_references:
 
 ```bash
 Available data_asset_names (1 of 1):
@@ -262,7 +262,7 @@ in [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_config
 <MY DIRECTORY>/green_tripdata_2019-03.csv
 ```
 
-The same configuration as Example 1...
+The same configuration as Example 1:
 
 <Tabs
   groupId="yaml-or-python"
@@ -285,7 +285,7 @@ The same configuration as Example 1...
 </TabItem>
 </Tabs>
 
-...will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
+will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
@@ -298,7 +298,7 @@ Unmatched data_references (0 of 0): []
 
 ### Example 3: Nested directory structure with the data_asset_name on the inside
 
-Here’s a similar example, with a nested directory structure...
+Here’s a similar example, with a nested directory structure:
 
 ```
 <MY DIRECTORY>/2018/10/yellow_tripdata.csv
@@ -315,7 +315,7 @@ Here’s a similar example, with a nested directory structure...
 <MY DIRECTORY>/2019/03/green_tripdata.csv
 ```
 
-Then this configuration...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -338,7 +338,7 @@ Then this configuration...
 </TabItem>
 </Tabs>
 
-...will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
+will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
@@ -361,7 +361,7 @@ In the following example, files are placed in a folder structure with the `data_
 <MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
-Then this configuration...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -384,7 +384,7 @@ Then this configuration...
 </TabItem>
 </Tabs>
 
-...will now make `yellow_tripdata` and `green_tripdata` into Data Assets, with each containing 3 data_references
+will now make `yellow_tripdata` and `green_tripdata` into Data Assets, with each containing 3 data_references
 
 ```bash
 Available data_asset_names (2 of 2):
@@ -407,7 +407,7 @@ In the following example, files are placed in a folder structure with the `data_
 <MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
-Then this configuration...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"

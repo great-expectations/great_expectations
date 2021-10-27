@@ -396,7 +396,7 @@ data_connectors:
     default_regex:
       group_names:
         - data_asset_name
-        - optional_data_asset_name
+        - file_name_root
         - year
         - month
       pattern: (.*)/(.*)(\d{4})-(\d{2})\.csv
@@ -427,7 +427,7 @@ datasource_config = {
             "default_regex": {
                 "group_names": [
                     "data_asset_name",
-                    "optional_data_asset_name",
+                    "file_name_root",
                     "year",
                     "month",
                 ],

@@ -88,7 +88,7 @@ Note that the `InferredAssetFileSystemDataConnector` **infers** `data_asset_name
 
 ### When to use a ConfiguredAssetDataConnector
 
-On the other hand, `ConfiguredAssetFilesSystemDataConnector` requires an explicit listing of each Data Asset you want to connect to. This tends to be helpful when the naming conventions for your Data Assets are less standardized.
+On the other hand, `ConfiguredAssetFilesSystemDataConnector` requires an explicit listing of each Data Asset you want to connect to. This tends to be helpful when the naming conventions for your Data Assets are less standardized, but the user has a strong understanding of the semantics governing the segmentation of data (files, database tables).
 
 If you have the same `<MY DIRECTORY>/` directory in your filesystem,
 
@@ -124,7 +124,7 @@ Then this configuration:
 </TabItem>
 </Tabs>
 
-...will make available the following Data Assets and data_references:
+will make available the following Data Assets and data_references:
 
 ```bash
 Available data_asset_names (2 of 2):

@@ -185,7 +185,7 @@ Continuing the example above, imagine you have the following files in the direct
 <MY DIRECTORY>/yellow_tripdata_2019-03.csv
 ```
 
-Then this configuration...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -208,7 +208,7 @@ Then this configuration...
 </TabItem>
 </Tabs>
 
-...will make available `yelow_tripdata` as a single Data Asset with the following data_references:
+will make available `yelow_tripdata` as a single Data Asset with the following data_references:
 
 ```bash
 Available data_asset_names (1 of 1):
@@ -224,7 +224,7 @@ Once configured, you can get a `Validator` from the `Data Context` as follows:
 
 But what if the regex does not match any files in the directory?
 
-Then this configuration...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -247,7 +247,7 @@ Then this configuration...
 </TabItem>
 </Tabs>
 
-...will give you this output
+will give you this output
 
 ```bash
 Available data_asset_names (1 of 1):
@@ -276,7 +276,7 @@ Here’s a similar example, but this time two Data Assets are mixed together in 
 <MY DIRECTORY>/green_tripdata_2019-03.csv
 ```
 
-Then this configuration...
+Then this configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -299,7 +299,7 @@ Then this configuration...
 </TabItem>
 </Tabs>
 
-...will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
+will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
@@ -322,6 +322,8 @@ In the following example, files are placed folders that match the `data_asset_na
 <MY DIRECTORY>/green_tripdata/2019-03.csv
 ```
 
+The following configuration:
+
 <Tabs
   groupId="yaml-or-python"
   defaultValue='yaml'
@@ -343,7 +345,7 @@ In the following example, files are placed folders that match the `data_asset_na
 </TabItem>
 </Tabs>
 
-...will now make `yellow_tripdata` and `green_tripdata` available a Data Assets, with the following data_references:
+will now make `yellow_tripdata` and `green_tripdata` available a Data Assets, with the following data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
@@ -366,7 +368,7 @@ In this example, the assets `yellow_tripdata` and `green_tripdata` are being exp
 <MY DIRECTORY>/green_tripdata/green_tripdata_2019-03.csv
 ```
 
-The following configuration...
+The following configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -389,7 +391,7 @@ The following configuration...
 </TabItem>
 </Tabs>
 
-...will make `yellow_tripdata` and `green_tripdata` available as Data Assets, with the following data_references:
+will make `yellow_tripdata` and `green_tripdata` available as Data Assets, with the following data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
