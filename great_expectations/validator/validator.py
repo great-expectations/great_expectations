@@ -244,6 +244,9 @@ class Validator:
             configuration = ExpectationConfiguration(
                 expectation_type=name, kwargs=expectation_kwargs, meta=meta
             )
+            configuration.process_evaluation_parameters(
+                self._expectation_suite.evaluation_parameters, True, self._data_context
+            )
 
             exception_info: ExceptionInfo
 

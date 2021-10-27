@@ -44,7 +44,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
-from ..data_context.types.base import renderedAtomicValueSchema
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
@@ -53,6 +52,7 @@ from ..render.types import (
     RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
+    renderedAtomicValueSchema,
 )
 from ..render.util import num_to_str
 from ..util import is_parseable_date
@@ -235,7 +235,7 @@ class Expectation(metaclass=MetaExpectation):
         rendered = RenderedAtomicContent(
             name="atomic.prescriptive.summary",
             value=value_obj,
-            valuetype="StringValueType",
+            value_type="StringValueType",
         )
         return rendered
 
@@ -574,7 +574,7 @@ class Expectation(metaclass=MetaExpectation):
         rendered = RenderedAtomicContent(
             name="atomic.diagnostic.observed_value",
             value=value_obj,
-            valuetype="StringValueType",
+            value_type="StringValueType",
         )
         return rendered
 
@@ -733,7 +733,7 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
     ):
         if configuration is None:
-            configuration = self.configuration
+            configuration = deepcopy(self.configuration)
 
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
@@ -1186,7 +1186,6 @@ class TableExpectation(Expectation, ABC):
         # Validating that Minimum and Maximum values are of the proper format and type
         min_val = None
         max_val = None
-        parse_strings_as_datetimes = None
 
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
@@ -1194,38 +1193,26 @@ class TableExpectation(Expectation, ABC):
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
 
-        if "parse_strings_as_datetimes" in configuration.kwargs:
-            parse_strings_as_datetimes = configuration.kwargs[
-                "parse_strings_as_datetimes"
-            ]
-
         try:
-            # Ensuring Proper interval has been provided
-            if parse_strings_as_datetimes:
-                assert min_val is None or is_parseable_date(
-                    min_val
-                ), "Provided min threshold must be a dateutil-parseable date"
-                assert max_val is None or is_parseable_date(
-                    max_val
-                ), "Provided max threshold must be a dateutil-parseable date"
-            else:
-                assert min_val is None or isinstance(
-                    min_val, (float, int, dict)
-                ), "Provided min threshold must be a number"
-                if isinstance(min_val, dict):
-                    assert (
-                        "$PARAMETER" in min_val
-                    ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
+            assert (
+                min_val is None
+                or is_parseable_date(min_val)
+                or isinstance(min_val, (float, int, dict))
+            ), "Provided min threshold must be a datetime (for datetime columns) or number"
+            if isinstance(min_val, dict):
+                assert (
+                    "$PARAMETER" in min_val
+                ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
 
-                assert max_val is None or isinstance(
-                    max_val, (float, int, dict)
-                ), "Provided max threshold must be a number"
-                if isinstance(max_val, dict):
-                    assert "$PARAMETER" in max_val, (
-                        "Evaluation Parameter dict for max_value "
-                        "kwarg "
-                        'must have "$PARAMETER" key'
-                    )
+            assert (
+                max_val is None
+                or is_parseable_date(max_val)
+                or isinstance(max_val, (float, int, dict))
+            ), "Provided max threshold must be a datetime (for datetime columns) or number"
+            if isinstance(max_val, dict):
+                assert (
+                    "$PARAMETER" in max_val
+                ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key'
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

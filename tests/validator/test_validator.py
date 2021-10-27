@@ -727,9 +727,9 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
         i for i in multi_batch_taxi_validator.batches
     ]
     assert validator_batch_identifiers_for_all_batches == [
-        "18653cbf8fb5baf5fbbc5ed95f9ee94d",
-        "92bcffc67c34a1c9a67e0062ed4a9529",
-        "021563e94d7866f395288f6e306aed9b",
+        "0327cfb13205ec8512e1c28e438ab43b",
+        "0808e185a52825d22356de2fe00a8f5f",
+        "90bb41c1fbd7c71c05dbc8695320af71",
     ]
 
 
@@ -752,7 +752,7 @@ def test_validator_batch_filter(
 
     assert len(jan_batch_definition_list) == 1
     assert jan_batch_definition_list[0]["batch_identifiers"]["month"] == "01"
-    assert jan_batch_definition_list[0]["id"] == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+    assert jan_batch_definition_list[0]["id"] == "0327cfb13205ec8512e1c28e438ab43b"
 
     feb_march_batch_filter: BatchFilter = build_batch_filter(
         data_connector_query_dict={"index": slice(-1, 0, -1)}
@@ -813,12 +813,12 @@ def test_validator_batch_filter(
     assert limit_batch_filter_definition_list[0]["batch_identifiers"]["month"] == "01"
     assert (
         limit_batch_filter_definition_list[0]["id"]
-        == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+        == "0327cfb13205ec8512e1c28e438ab43b"
     )
     assert limit_batch_filter_definition_list[1]["batch_identifiers"]["month"] == "02"
     assert (
         limit_batch_filter_definition_list[1]["id"]
-        == "92bcffc67c34a1c9a67e0062ed4a9529"
+        == "0808e185a52825d22356de2fe00a8f5f"
     )
 
 
@@ -857,16 +857,16 @@ def test_validator_set_active_batch(
     jan_min_date = "2019-01-01"
     mar_min_date = "2019-03-01"
     assert (
-        multi_batch_taxi_validator.active_batch_id == "021563e94d7866f395288f6e306aed9b"
+        multi_batch_taxi_validator.active_batch_id == "90bb41c1fbd7c71c05dbc8695320af71"
     )
     assert multi_batch_taxi_validator.expect_column_values_to_be_between(
         "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
     ).success
 
-    multi_batch_taxi_validator.active_batch_id = "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+    multi_batch_taxi_validator.active_batch_id = "0327cfb13205ec8512e1c28e438ab43b"
 
     assert (
-        multi_batch_taxi_validator.active_batch_id == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+        multi_batch_taxi_validator.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
     )
     assert not multi_batch_taxi_validator.expect_column_values_to_be_between(
         "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
@@ -895,7 +895,7 @@ def test_validator_load_additional_batch_to_validator(
     )
 
     assert len(validator.batches) == 1
-    assert validator.active_batch_id == "18653cbf8fb5baf5fbbc5ed95f9ee94d"
+    assert validator.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
 
     first_batch_markers: BatchMarkers = validator.active_batch_markers
     assert (
@@ -920,7 +920,7 @@ def test_validator_load_additional_batch_to_validator(
     )
 
     assert len(validator.batches) == 2
-    assert validator.active_batch_id == "92bcffc67c34a1c9a67e0062ed4a9529"
+    assert validator.active_batch_id == "0808e185a52825d22356de2fe00a8f5f"
     assert first_batch_markers != updated_batch_markers
 
 
