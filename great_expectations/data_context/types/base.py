@@ -188,6 +188,10 @@ class AssetConfigSchema(Schema):
     max_keys = fields.Integer(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # Necessary addition for Cloud assets
+    table_name = fields.String(required=False, allow_none=True)
+    type = fields.String(required=False, allow_none=True)
+
     @validates_schema
     def validate_schema(self, data, **kwargs):
         pass

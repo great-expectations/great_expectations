@@ -2,7 +2,6 @@ import configparser
 import copy
 import datetime
 import errno
-import glob
 import itertools
 import json
 import logging
@@ -16,6 +15,7 @@ import webbrowser
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
+import requests
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
@@ -57,14 +57,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import (
-    GeCloudStoreBackend,
-    Store,
-    TupleStoreBackend,
-)
+from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
@@ -911,16 +906,10 @@ class BaseDataContext:
 
     def _load_config_variables_file(self):
         """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables are
-        loaded from a global great_expectations.conf file, located at one of the paths defined in
-        self.GLOBAL_CONFIG_PATHS (in order of search precedence).
+        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
+        have already been interpolated before being sent from the Cloud API.
         """
         if self.ge_cloud_mode:
-            for config_path in self.GLOBAL_CONFIG_PATHS:
-                if os.path.isfile(config_path):
-                    config = configparser.ConfigParser()
-                    config.read(config_path)
-                    return dict(config.items(section="ge_cloud_config"))
             return {}
         config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
@@ -962,14 +951,11 @@ class BaseDataContext:
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
-        # for ge_cloud_mode: in most cases, self.ge_cloud_config will be a subset of substituted_config_variables,
-        # but if one or more ge_cloud_config values are passed in at runtime, they will be reflected in
-        # self.ge_cloud_config and will take precedence
+        # Substitutions should have already occurred for GE Cloud configs at this point
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
-            **(self.ge_cloud_config.to_json_dict() if self.ge_cloud_mode else {}),
         }
 
         if self.ge_cloud_mode:
@@ -3325,11 +3311,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """
         # TODO mark experimental
         batch_request = batch_request or {}
-        batch_identifiers = batch_request.get("batch_identifiers", {})
-        if self.ge_cloud_mode:
-            if len(batch_identifiers.keys()) == 0:
-                batch_identifiers["timestamp"] = str(datetime.datetime.now())
-                batch_request["batch_identifiers"] = batch_identifiers
+        # NOTE: Chetan 20211027 - Adding batch_identifiers to the batch_request causes issues with GE Cloud due to BatchRequest __init__ not having such an arg
+        # Commenting out until investigated further
+
+        # batch_identifiers = batch_request.get("batch_identifiers", {})
+        # if self.ge_cloud_mode:
+        #     if len(batch_identifiers.keys()) == 0:
+        #         batch_identifiers["timestamp"] = str(datetime.datetime.now())
+        #         batch_request["batch_identifiers"] = batch_identifiers
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name, ge_cloud_id=ge_cloud_id
@@ -4064,20 +4053,33 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
-    @property
-    def default_ge_cloud_data_context_config_template(self):
-        config_commented_map_from_yaml = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
-        try:
-            return (
-                DataContextConfig(**config_commented_map_from_yaml)
-                if self.ge_cloud_mode
-                else DataContextConfig.from_commented_map(
-                    commented_map=config_commented_map_from_yaml
-                )
+    def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
+        """
+        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
+        Given proper authorization, the request retrieves a data context config that is pre-populated with
+        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+
+        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
+        over the wire.
+
+        :return: the configuration object retrieved from the Cloud API
+        """
+        ge_cloud_url = (
+            self.ge_cloud_config.base_url
+            + f"/accounts/{self.ge_cloud_config.account_id}/data-context-configuration"
+        )
+        auth_headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",
+        }
+
+        response = requests.get(ge_cloud_url, headers=auth_headers)
+        if response.status_code != 200:
+            raise ge_exceptions.GeCloudError(
+                f"Bad request made to GE Cloud; {response.json().get('message')}"
             )
-        except ge_exceptions.InvalidDataContextConfigError:
-            # Just to be explicit about what we intended to catch
-            raise
+        config = response.json()
+        return DataContextConfig(**config)
 
     def _load_project_config(self):
         """
@@ -4085,15 +4087,14 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        For Data Contexts in GE Cloud mode, a default configuration template with pre-defined ${
-        SOME_VARIABLE} variables is returned. (see
-        great_expectations.data_context.templates.DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG). These variables are
-        substituted later using the same process referenced above.
+        For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
+        - see self._retrieve_data_context_config_from_ge_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
-            return self.default_ge_cloud_data_context_config_template
+            config = self._retrieve_data_context_config_from_ge_cloud()
+            return config
 
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
