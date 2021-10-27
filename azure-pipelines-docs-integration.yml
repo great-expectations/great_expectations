@@ -96,7 +96,7 @@ stages:
         - script: |
             pip install pytest pytest-azurepipelines
             # TODO enable spark tests
-            pytest -v --docs-tests -m docs --no-spark --mysql --mssql tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m docs --mysql --mssql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
