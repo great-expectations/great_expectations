@@ -74,7 +74,7 @@ This configuration:
 </TabItem>
 </Tabs>
 
-...will make available the following Data Assets and data_references:
+will make available the following Data Assets and data_references:
 
 ```bash
 Available data_asset_names (2 of 2):
@@ -85,6 +85,8 @@ Unmatched data_references (0 of 0):[]
 ```
 
 Note that the `InferredAssetFileSystemDataConnector` **infers** `data_asset_names` **from the regex you provide.** This is the key difference between InferredAssetDataConnector and ConfiguredAssetDataConnector, and also requires that one of the `group_names` in the `default_regex` configuration be `data_asset_name`.
+
+The `glob_directive` is provided to give the `DataConnector` information about the directory structure to expect for each Data Asset. The default `glob_directive` for the `InferredAssetFileSystemDataConnector` is `"*"` and therefore must be overridden when your data_references exist in subdirectories.
 
 ### When to use a ConfiguredAssetDataConnector
 

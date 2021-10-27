@@ -348,6 +348,8 @@ Available data_asset_names (2 of 2):
 Unmatched data_references (0 of 0):[]
 ```
 
+The `glob_directive` is provided to give the `DataConnector` information about the directory structure to expect for each Data Asset. The default `glob_directive` for the `InferredAssetFileSystemDataConnector` is `"*"` and therefore must be overridden when your data_references exist in subdirectories.
+
 ### Example 4: Nested directory structure with the data_asset_name on the outside
 
 In the following example, files are placed in a folder structure with the `data_asset_name` defined by the folder name (`yellow_tripdata` or `green_tripdata`)
