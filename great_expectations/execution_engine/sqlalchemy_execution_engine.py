@@ -36,6 +36,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import filter_properties_dict, import_library_module
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.util import get_sqlalchemy_url
 
 logger = logging.getLogger(__name__)
 
@@ -333,7 +334,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 drivername, credentials
             )
         else:
-            options = sa.engine.url.URL(drivername, **credentials)
+            options = get_sqlalchemy_url(drivername, **credentials)
 
         self.drivername = drivername
         engine = sa.create_engine(options, **create_engine_kwargs)
@@ -385,7 +386,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         credentials_driver_name = credentials.pop("drivername", None)
         create_engine_kwargs = {"connect_args": {"private_key": pkb}}
         return (
-            sa.engine.url.URL(drivername or credentials_driver_name, **credentials),
+            get_sqlalchemy_url(drivername or credentials_driver_name, **credentials),
             create_engine_kwargs,
         )
 

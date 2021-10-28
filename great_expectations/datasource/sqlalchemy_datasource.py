@@ -367,7 +367,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
         credentials_driver_name = credentials.pop("drivername", None)
         create_engine_kwargs = {"connect_args": {"private_key": pkb}}
         return (
-            sqlalchemy.engine.url.URL(
+            get_sqlalchemy_url(
                 drivername or credentials_driver_name, **credentials
             ),
             create_engine_kwargs,
