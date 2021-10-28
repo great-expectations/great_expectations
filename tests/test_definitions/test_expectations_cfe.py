@@ -326,5 +326,3 @@ def test_case_runner_cfe(test_case):
             expectation_type=test_case["expectation_type"],
             test=test_case["test"],
         )
-
-
