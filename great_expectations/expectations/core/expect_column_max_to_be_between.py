@@ -157,33 +157,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 "strict_max",
             ],
         )
-
-        if (params["min_value"] is None) and (params["max_value"] is None):
-            template_str = "maximum value may have any numerical value."
-        else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
-            elif params["min_value"] is None:
-                template_str = f"maximum value must be {at_most_str} $max_value."
-            elif params["max_value"] is None:
-                template_str = f"maximum value must be {at_least_str} $min_value."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
-
-        if include_column_name:
-            template_str = "$column " + template_str
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "min_value": {
@@ -211,6 +184,34 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 "value": params.get("strict_max"),
             },
         }
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "maximum value may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"maximum value must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"maximum value must be {at_least_str} $min_value."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = conditional_template_str + ", then " + template_str
+            params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
 

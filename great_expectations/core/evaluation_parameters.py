@@ -1,4 +1,5 @@
 import copy
+import datetime
 import logging
 import math
 import operator
@@ -18,9 +19,11 @@ from pyparsing import (
     alphanums,
     alphas,
     delimitedList,
+    dictOf,
 )
 
 from great_expectations.core.urn import ge_urn
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
 
 logger = logging.getLogger(__name__)
@@ -62,6 +65,9 @@ class EvaluationParameterParser:
         "trunc": lambda a: int(a),
         "round": round,
         "sgn": lambda a: -1 if a < -_epsilon else 1 if a > _epsilon else 0,
+        "now": datetime.datetime.now,
+        "datetime": datetime.datetime,
+        "timedelta": datetime.timedelta,
     }
 
     def __init__(self):
@@ -110,9 +116,28 @@ class EvaluationParameterParser:
 
             expr = Forward()
             expr_list = delimitedList(Group(expr))
-            # add parse action that replaces the function identifier with a (name, number of args) tuple
-            fn_call = (ident + lpar - Group(expr_list) + rpar).setParseAction(
-                lambda t: t.insert(0, (t.pop(0), len(t[0])))
+
+            # We will allow functions either to accept *only* keyword
+            # expressions or *only* non-keyword expressions
+            # define function keyword arguments
+            key = Word(alphas + "_") + Suppress("=")
+            # value = (fnumber | Word(alphanums))
+            value = expr
+            keyval = dictOf(key.setParseAction(self.push_first), value)
+            kwarglist = delimitedList(keyval)
+
+            # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple
+            # 20211009 - JPC - Note that it's important that we consider kwarglist
+            # first as part of disabling backtracking for the function's arguments
+            fn_call = (ident + lpar + rpar).setParseAction(
+                lambda t: t.insert(0, (t.pop(0), 0, False))
+            ) | (
+                (ident + lpar - Group(expr_list) + rpar).setParseAction(
+                    lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
+                )
+                ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
+                    lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
+                )
             )
             atom = (
                 addop[...]
@@ -132,9 +157,9 @@ class EvaluationParameterParser:
         return self._parser
 
     def evaluate_stack(self, s):
-        op, num_args = s.pop(), 0
+        op, num_args, has_fn_kwargs = s.pop(), 0, False
         if isinstance(op, tuple):
-            op, num_args = op
+            op, num_args, has_fn_kwargs = op
         if op == "unary -":
             return -self.evaluate_stack(s)
         if op in "+-*/^":
@@ -148,8 +173,16 @@ class EvaluationParameterParser:
             return math.e  # 2.718281828
         elif op in self.fn:
             # note: args are pushed onto the stack in reverse order
-            args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
-            return self.fn[op](*args)
+            if has_fn_kwargs:
+                kwargs = dict()
+                for _ in range(num_args):
+                    v = self.evaluate_stack(s)
+                    k = s.pop()
+                    kwargs.update({k: v})
+                return self.fn[op](**kwargs)
+            else:
+                args = reversed([self.evaluate_stack(s) for _ in range(num_args)])
+                return self.fn[op](*args)
         else:
             # try to evaluate as int first, then as float if int fails
             # NOTE: JPC - 20200403 - Originally I considered returning the raw op here if parsing as float also
@@ -345,6 +378,7 @@ def parse_evaluation_parameter(
 
     try:
         result = expr.evaluate_stack(expr.exprStack)
+        result = convert_to_json_serializable(result)
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (
