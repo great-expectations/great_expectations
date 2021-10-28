@@ -9,7 +9,7 @@ import numbers
 import typing
 import uuid
 import warnings
-from collections.abc import Mapping as _Mapping
+from collections import Mapping as _Mapping
 
 from great_expectations.marshmallow__shade import class_registry, types, utils, validate
 from great_expectations.marshmallow__shade.base import FieldABC, SchemaABC

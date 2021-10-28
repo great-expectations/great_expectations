@@ -7,8 +7,7 @@ import logging
 import traceback
 import uuid
 import warnings
-from collections import Counter, defaultdict, namedtuple
-from collections.abc import Hashable
+from collections import Counter, Hashable, defaultdict, namedtuple
 from functools import wraps
 from typing import List
 

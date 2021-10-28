@@ -7,7 +7,7 @@ import json
 import re
 import typing
 import warnings
-from collections.abc import Mapping
+from collections import Mapping
 from email.utils import format_datetime, parsedate_to_datetime
 from pprint import pprint as py_pprint
 

@@ -7,8 +7,7 @@ import json
 import typing
 import uuid
 import warnings
-from collections import OrderedDict, defaultdict
-from collections.abc import Mapping
+from collections import Mapping, OrderedDict, defaultdict
 from functools import lru_cache
 
 from great_expectations.marshmallow__shade import base, class_registry

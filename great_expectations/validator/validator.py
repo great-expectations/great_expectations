@@ -6,8 +6,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
-from collections.abc import Hashable
+from collections import Hashable, defaultdict, namedtuple
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse

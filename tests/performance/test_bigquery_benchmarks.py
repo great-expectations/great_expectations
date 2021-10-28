@@ -7,7 +7,7 @@ Test performance using bigquery.
 import cProfile
 import os
 import sys
-from collections.abc import Mapping
+from collections import Mapping
 from pathlib import Path
 
 import _pytest.config

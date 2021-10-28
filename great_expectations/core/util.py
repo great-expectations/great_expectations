@@ -6,8 +6,7 @@ import os
 import re
 import sys
 import uuid
-from collections import OrderedDict
-from collections.abc import Mapping
+from collections import Mapping, OrderedDict
 from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
