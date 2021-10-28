@@ -47,7 +47,6 @@ except ModuleNotFoundError:
     # Fallback for python < 3.8
     import importlib_metadata
 
-
 logger = logging.getLogger(__name__)
 
 try:
@@ -60,9 +59,7 @@ except ImportError:
     sa = None
     reflection = None
 
-
 logger = logging.getLogger(__name__)
-
 
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
@@ -201,14 +198,14 @@ def get_currently_executing_function() -> Callable:
         referer
         for referer in get_referrers(fc)
         if getattr(referer, "__code__", None) is fc
-        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
+           and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
     ][0]
     return func_obj
 
 
 # noinspection SpellCheckingInspection
 def get_currently_executing_function_call_arguments(
-    include_module_name: bool = False, include_caller_names: bool = False, **kwargs
+        include_module_name: bool = False, include_caller_names: bool = False, **kwargs
 ) -> dict:
     """
     :param include_module_name: bool If True, module name will be determined and included in output dictionary (default is False)
@@ -235,7 +232,7 @@ def get_currently_executing_function_call_arguments(
         referer
         for referer in get_referrers(fc)
         if getattr(referer, "__code__", None) is fc
-        and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
+           and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
     ][0]
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
@@ -372,7 +369,7 @@ def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profile
 
 
 def _load_and_convert_to_dataset_class(
-    df, class_name, module_name, expectation_suite=None, profiler=None
+        df, class_name, module_name, expectation_suite=None, profiler=None
 ):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
@@ -393,14 +390,14 @@ def _load_and_convert_to_dataset_class(
 
 
 def read_csv(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
+        filename,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        profiler=None,
+        *args,
+        **kwargs,
 ):
     """Read a file using Pandas read_csv and return a great_expectations dataset.
 
@@ -437,15 +434,15 @@ def read_csv(
 
 
 def read_json(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    accessor_func=None,
-    profiler=None,
-    *args,
-    **kwargs,
+        filename,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        accessor_func=None,
+        profiler=None,
+        *args,
+        **kwargs,
 ):
     """Read a file using Pandas read_json and return a great_expectations dataset.
 
@@ -490,14 +487,14 @@ def read_json(
 
 
 def read_excel(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
+        filename,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        profiler=None,
+        *args,
+        **kwargs,
 ):
     """Read a file using Pandas read_excel and return a great_expectations dataset.
 
@@ -545,14 +542,14 @@ def read_excel(
 
 
 def read_table(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
+        filename,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        profiler=None,
+        *args,
+        **kwargs,
 ):
     """Read a file using Pandas read_table and return a great_expectations dataset.
 
@@ -589,14 +586,14 @@ def read_table(
 
 
 def read_feather(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
+        filename,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        profiler=None,
+        *args,
+        **kwargs,
 ):
     """Read a file using Pandas read_feather and return a great_expectations dataset.
 
@@ -633,14 +630,14 @@ def read_feather(
 
 
 def read_parquet(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
+        filename,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        profiler=None,
+        *args,
+        **kwargs,
 ):
     """Read a file using Pandas read_parquet and return a great_expectations dataset.
 
@@ -677,12 +674,12 @@ def read_parquet(
 
 
 def from_pandas(
-    pandas_df,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
+        pandas_df,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        profiler=None,
 ):
     """Read a Pandas data frame and return a great_expectations dataset.
 
@@ -717,14 +714,14 @@ def from_pandas(
 
 
 def read_pickle(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
-    dataset_class=None,
-    expectation_suite=None,
-    profiler=None,
-    *args,
-    **kwargs,
+        filename,
+        class_name="PandasDataset",
+        module_name="great_expectations.dataset",
+        dataset_class=None,
+        expectation_suite=None,
+        profiler=None,
+        *args,
+        **kwargs,
 ):
     """Read a file using Pandas read_pickle and return a great_expectations dataset.
 
@@ -761,16 +758,16 @@ def read_pickle(
 
 
 def validate(
-    data_asset,
-    expectation_suite=None,
-    data_asset_name=None,
-    expectation_suite_name=None,
-    data_context=None,
-    data_asset_class_name=None,
-    data_asset_module_name="great_expectations.dataset",
-    data_asset_class=None,
-    *args,
-    **kwargs,
+        data_asset,
+        expectation_suite=None,
+        data_asset_name=None,
+        expectation_suite_name=None,
+        data_context=None,
+        data_asset_class_name=None,
+        data_asset_module_name="great_expectations.dataset",
+        data_asset_class=None,
+        *args,
+        **kwargs,
 ):
     """Validate the provided data asset. Validate can accept an optional data_asset_name to apply, data_context to use
     to fetch an expectation_suite if one is not provided, and data_asset_class_name/data_asset_module_name or
@@ -858,7 +855,7 @@ def validate(
 
     if not issubclass(type(data_asset), data_asset_class):
         if isinstance(data_asset, pd.DataFrame) and issubclass(
-            data_asset_class, PandasDataset
+                data_asset_class, PandasDataset
         ):
             pass  # This is a special type of allowed coercion
         else:
@@ -927,13 +924,13 @@ def lint_code(code: str) -> str:
 
 
 def filter_properties_dict(
-    properties: dict,
-    keep_fields: Optional[list] = None,
-    delete_fields: Optional[list] = None,
-    clean_nulls: Optional[bool] = True,
-    clean_falsy: Optional[bool] = False,
-    keep_falsy_numerics: Optional[bool] = True,
-    inplace: Optional[bool] = False,
+        properties: dict,
+        keep_fields: Optional[list] = None,
+        delete_fields: Optional[list] = None,
+        clean_nulls: Optional[bool] = True,
+        clean_falsy: Optional[bool] = False,
+        keep_falsy_numerics: Optional[bool] = True,
+        inplace: Optional[bool] = False,
 ) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
@@ -982,7 +979,7 @@ def filter_properties_dict(
                     (keep_fields and key in keep_fields)
                     or (delete_fields and key in delete_fields)
                     or value is not None
-                )
+            )
             ]
         )
 
@@ -997,7 +994,7 @@ def filter_properties_dict(
                         or (delete_fields and key in delete_fields)
                         or is_numeric(value=value)
                         or value
-                    )
+                )
                 ]
             )
         else:
@@ -1009,7 +1006,7 @@ def filter_properties_dict(
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
                         or value
-                    )
+                )
                 ]
             )
 
@@ -1087,8 +1084,8 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: Optional[str] = "ge_temp_",
-    num_digits: Optional[int] = 8,
+        default_table_name_prefix: Optional[str] = "ge_temp_",
+        num_digits: Optional[int] = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
@@ -1101,3 +1098,12 @@ def get_sqlalchemy_inspector(engine):
     else:
         insp = sa.inspect(engine)
     return insp
+
+
+def get_sqlalchemy_url(drivername, **credentials):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        url = sa.engine.url.URL(drivername, **credentials)
+    else:
+        # Calling URL() deprecated since 1.4, URL.create() should be used instead
+        url = sa.engine.url.URL.create(drivername, **credentials)
+    return url
