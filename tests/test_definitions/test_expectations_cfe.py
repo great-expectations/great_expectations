@@ -312,7 +312,7 @@ def test_case_runner_cfe(test_case):
         pytest.skip()
 
     # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
-    # test_case["batch"]._initialize_expectations()
+    # test_case["batch"]._initialize_expectations() 
     if "parse_strings_as_datetimes" in test_case["test"]["in"]:
         with pytest.deprecated_call():
             evaluate_json_test_cfe(
