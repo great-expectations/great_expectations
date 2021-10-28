@@ -5,6 +5,7 @@ import warnings
 from datetime import datetime
 from functools import wraps
 from typing import Dict, Iterable, List
+from packaging import version
 
 import numpy as np
 import pandas as pd
@@ -627,7 +628,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
 
         try:
-            insp = reflection.Inspector.from_engine(self.engine)
+            if version.parse(sa.__version__) < version.parse("1.4"):
+                # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+                insp = reflection.Inspector.from_engine(self.engine)
+            else:
+                insp = sa.inspect(self.engine)
+
             self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
