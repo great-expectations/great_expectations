@@ -421,7 +421,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        'Attempted to access the "checkpoint_store_name" field with a legacy config version (2.0) and no `checkpoints` directory.'
+        'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.'
         in stdout
     )
 

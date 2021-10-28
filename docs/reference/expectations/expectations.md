@@ -16,9 +16,7 @@ Great Expectations' built-in library includes more than 50 common Expectations, 
 * `expect_table_row_count_to_be_between`
 * `expect_column_median_to_be_between`
 
-For a full list of available Expectations, please check out the [Expectation Glossary](../glossary_of_expectations). Please note that not all
-Expectations are implemented on all Execution Engines yet. You can see the grid of supported
-Expectations [here](./implemented_expectations). We welcome [contributions](../../contributing/contributing) to fill in the gaps.
+For a full list of available Expectations, please check out the [Expectation Gallery](https://greatexpectations.io/expectations).
 
 You can also extend Great Expectations by [creating your own custom Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations).
 
@@ -76,7 +74,7 @@ There are several paths to generating Expectations:
 1. Expertise. Rich experience from subject matter experts, Analysts, and data owners is often a critical source of
    Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure
    conditions can be can excellent way to generate Expectations.
-1. Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter notebooks)
+1. Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter Notebooks)
    is an important way to develop experience with both raw and derived datasets and generate useful and testable
    Expectations about characteristics that may be important for the data's eventual purpose, whether reporting or
    feeding another downstream model or data system.

@@ -8,6 +8,7 @@ import os
 import pstats
 import re
 import time
+import uuid
 from collections import OrderedDict
 from datetime import datetime
 from functools import wraps
@@ -57,6 +58,8 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "expectation_suite": "expectation_suites",
     "suite_validation_result": "suite_validation_results",
     "expectation_validation_result": "expectation_validation_results",
+    "contract": "contracts",
+    "rendered_data_doc": "rendered_data_docs",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT = {
@@ -67,6 +70,8 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "expectation_suites": "expectation_suite",
     "suite_validation_results": "suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
+    "contracts": "contract",
+    "rendered_data_docs": "rendered_data_doc",
 }
 
 
@@ -1065,3 +1070,11 @@ def generate_library_json_from_registered_expectations():
 
 def delete_blank_lines(text: str) -> str:
     return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
+
+
+def generate_temporary_table_name(
+    default_table_name_prefix: Optional[str] = "ge_temp_",
+    num_digits: Optional[int] = 8,
+) -> str:
+    table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
+    return table_name

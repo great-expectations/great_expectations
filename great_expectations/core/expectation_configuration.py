@@ -71,6 +71,16 @@ class ExpectationConfiguration(SerializableDictDot):
                 "catch_exceptions": False,
             },
         },
+        "expect_table_columns_to_match_set": {
+            "domain_kwargs": [],
+            "success_kwargs": ["column_set", "exact_match"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "exact_match": True,
+            },
+        },
         "expect_table_column_count_to_be_between": {
             "domain_kwargs": [],
             "success_kwargs": ["min_value", "max_value"],
@@ -893,7 +903,14 @@ class ExpectationConfiguration(SerializableDictDot):
 
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
 
-    def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
+    def __init__(
+        self,
+        expectation_type,
+        kwargs,
+        meta=None,
+        success_on_last_run=None,
+        ge_cloud_id=None,
+    ):
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
                 "expectation_type must be a string"
@@ -911,6 +928,7 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
+        self._ge_cloud_id = ge_cloud_id
 
     def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
@@ -971,6 +989,14 @@ class ExpectationConfiguration(SerializableDictDot):
 
         patch.apply(self.kwargs, in_place=True)
         return self
+
+    @property
+    def ge_cloud_id(self):
+        return self._ge_cloud_id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value):
+        self._ge_cloud_id = value
 
     @property
     def expectation_type(self):
@@ -1279,6 +1305,7 @@ class ExpectationConfigurationSchema(Schema):
     )
     kwargs = fields.Dict()
     meta = fields.Dict()
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load

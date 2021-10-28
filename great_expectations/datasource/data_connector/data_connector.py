@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Tuple
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -72,6 +72,10 @@ class DataConnector:
         return self._datasource_name
 
     @property
+    def execution_engine(self) -> ExecutionEngine:
+        return self._execution_engine
+
+    @property
     def data_context_root_directory(self) -> str:
         return self._data_context_root_directory
 
@@ -102,6 +106,7 @@ class DataConnector:
             batch_markers,
         )
 
+    # TODO: <Alex>9/2/2021: batch_definition->batch_spec translation should move to corresponding ExecutionEngine</Alex>
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
@@ -166,6 +171,16 @@ class DataConnector:
         Returns:
             A list of available names
         """
+        raise NotImplementedError
+
+    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+        """
+        Return the list of asset names and types known by this DataConnector.
+
+        Returns:
+            A list of tuples consisting of available names and types
+        """
+        # NOTE: Josh 20211001 only implemented in InferredAssetSqlDataConnector
         raise NotImplementedError
 
     def get_batch_definition_list_from_batch_request(

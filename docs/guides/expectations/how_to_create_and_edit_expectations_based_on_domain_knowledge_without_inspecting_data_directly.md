@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations based on domain knowledge, without inspecting data directly
+title: How to create and edit Expectations based on domain knowledge, without inspecting data directly
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
@@ -117,7 +117,7 @@ Steps
    suite.add_expectation(expectation_configuration=expectation_configuration)
    ```
 
-   You can see all the available Expectations in the :ref:`expectation_glossary`.
+   You can see all the available Expectations in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
 3. **Save your Expectation Suite**
 

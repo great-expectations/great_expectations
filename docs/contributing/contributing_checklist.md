@@ -12,13 +12,13 @@ Once your code is ready, please go through the following checklist before submit
 
 * A Contributor License Agreement helps guarantee that contributions to Great Expectations will always remain free and open.
 
-* Please see [Contributor license agreement](https://docs.greatexpectations.io/en/0.13.8/contributing/miscellaneous.html#contributing-cla) (CLA) for more information and instructions for how to sign the CLA the first time you contribute to Great Expectations.
+* Please see [Contributor license agreement](https://docs.greatexpectations.io/docs/contributing/contributing_misc/) (CLA) for more information and instructions for how to sign the CLA the first time you contribute to Great Expectations.
 
 * If you’ve included your (physical) mailing address in the CLA, we’ll send you a personalized Great Expectations mug once your first PR is merged!
 
 #### 2. Have you followed the Style Guide for code and comments?
 
-* The [Style Guide](/docs/contributing/contributing_style) is here.
+* The [Style Guide](/docs/contributing/style_guides/code_style) is here.
 
 * Thanks for helping us keep the codebase and documentation clean and consistent, so that it’s easier to maintain it as a community!
 
@@ -32,7 +32,7 @@ Once your code is ready, please go through the following checklist before submit
 
 * You can also rebase your branch from upstream/develop. In general, the steps are:
 
-	* Run git fetch upstream then git rebase upstream/develop.
+	* Run `git fetch upstream` then `git rebase upstream/develop`.
 
 	* Fix any merge conflicts that arise from the rebase.
 
@@ -40,7 +40,7 @@ Once your code is ready, please go through the following checklist before submit
 
 	* Re-run tests to ensure the rebase did not introduce any new issues.
 
-* Atlassian and Github both have good tutorials for rebasing: [Atlassian’s tutorial](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams), [Github’s tutorial](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/syncing-a-fork).
+* Atlassian and GitHub both have good tutorials for rebasing: [Atlassian’s tutorial](https://www.atlassian.com/git/tutorials/git-forks-and-upstreams), [GitHub’s tutorial](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/syncing-a-fork).
 
 #### 4. Have you written and run all the tests you need?
 

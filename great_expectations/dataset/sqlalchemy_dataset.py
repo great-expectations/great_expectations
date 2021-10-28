@@ -1,7 +1,6 @@
 import inspect
 import logging
 import traceback
-import uuid
 import warnings
 from datetime import datetime
 from functools import wraps
@@ -21,7 +20,7 @@ from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
 )
-from great_expectations.util import import_library_module
+from great_expectations.util import generate_temporary_table_name, import_library_module
 
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
@@ -374,8 +373,9 @@ class MetaSqlAlchemyDataset(Dataset):
         expected_condition: BinaryExpression,
         ignore_values_condition: BinaryExpression,
     ) -> Select:
-        # mssql expects all temporary table names to have a prefix '#'
-        temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
+        temp_table_name: str = generate_temporary_table_name(
+            default_table_name_prefix="#ge_temp_"
+        )
 
         with self.engine.begin():
             metadata: sa.MetaData = sa.MetaData(self.engine)
@@ -512,7 +512,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
             schema = None
-            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
                 table_name = f"#{table_name}"
@@ -560,7 +560,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
-            "bigquery",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
@@ -1642,7 +1641,14 @@ WHERE
                 success = True
             else:
                 type_module = self._get_dialect_type_module()
-                success = issubclass(col_type, getattr(type_module, type_))
+                potential_type = getattr(type_module, type_)
+                # In the case of the PyAthena dialect we need to verify that
+                # the type returned is indeed a type and not an instance.
+                if not inspect.isclass(potential_type):
+                    real_type = type(potential_type)
+                else:
+                    real_type = potential_type
+                success = issubclass(col_type, real_type)
 
             return {"success": success, "result": {"observed_value": col_type.__name__}}
 
@@ -1690,7 +1696,13 @@ WHERE
             type_module = self._get_dialect_type_module()
             for type_ in type_list:
                 try:
-                    type_class = getattr(type_module, type_)
+                    potential_type = getattr(type_module, type_)
+                    # In the case of the PyAthena dialect we need to verify that
+                    # the type returned is indeed a type and not an instance.
+                    if not inspect.isclass(potential_type):
+                        type_class = type(potential_type)
+                    else:
+                        type_class = potential_type
                     types.append(type_class)
                 except AttributeError:
                     logger.debug("Unrecognized type: %s" % type_)
@@ -1883,7 +1895,7 @@ WHERE
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # just the column we will be performing the expectation on, and the query is performed against it.
         if self.sql_engine_dialect.name.lower() == "mysql":
-            temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_name = generate_temporary_table_name()
             temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
                 new_temp_table=temp_table_name,
                 source_table=self._table,

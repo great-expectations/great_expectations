@@ -318,6 +318,7 @@ def test_return_all_batch_definitions_unsorted():
     )
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
@@ -326,7 +327,7 @@ def test_return_all_batch_definitions_unsorted():
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_s3_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
 
@@ -336,7 +337,7 @@ def test_return_all_batch_definitions_unsorted():
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_s3_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
     )

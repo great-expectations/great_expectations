@@ -20,7 +20,6 @@ from .map_metric_provider import (
     column_function_partial,
 )
 from .metric_provider import (
-    MetricConfiguration,
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,

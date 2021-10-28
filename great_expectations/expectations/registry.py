@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, U
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +63,24 @@ def register_renderer(
         return
 
 
+def get_renderer_names(object_name: str) -> List[str]:
+    return list(_registered_renderers.get(object_name, {}).keys())
+
+
+def get_renderer_impls(object_name: str) -> List[str]:
+    return list(_registered_renderers.get(object_name, {}).values())
+
+
 def get_renderer_impl(object_name, renderer_type):
     return _registered_renderers.get(object_name, {}).get(renderer_type)
+
+
+def get_renderer_names(object_name: str) -> List[str]:
+    return list(_registered_renderers.get(object_name, {}).keys())
+
+
+def get_renderer_impls(object_name: str) -> list:
+    return list(_registered_renderers.get(object_name, {}).values())
 
 
 def register_expectation(expectation: Type["Expectation"]) -> None:

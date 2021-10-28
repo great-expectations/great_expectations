@@ -9,10 +9,10 @@ except ImportError:
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import list_s3_keys
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -136,11 +136,9 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         ]
         return path_list
 
-    def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Asset] = None
     ) -> str:
-        # data_asset_name isn't used in this method.
+        # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         return f"s3a://{os.path.join(self._bucket, path)}"

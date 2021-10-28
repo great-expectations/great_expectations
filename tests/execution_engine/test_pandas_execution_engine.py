@@ -21,6 +21,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
+    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -31,7 +32,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -159,6 +160,28 @@ def azure_batch_spec() -> AzureBatchSpec:
     full_path = os.path.join("mock_account.blob.core.windows.net", container, path)
 
     batch_spec = AzureBatchSpec(
+        path=full_path,
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    return batch_spec
+
+
+@pytest.fixture
+def gcs_batch_spec() -> GCSBatchSpec:
+    bucket = "test_bucket"
+    keys: List[str] = [
+        "path/A-100.csv",
+        "path/A-101.csv",
+        "directory/B-1.csv",
+        "directory/B-2.csv",
+        "alpha-1.csv",
+        "alpha-2.csv",
+    ]
+    path = keys[0]
+    full_path = os.path.join("gs://", bucket, path)
+
+    batch_spec = GCSBatchSpec(
         path=full_path,
         reader_method="read_csv",
         splitter_method="_split_on_whole_table",
@@ -586,7 +609,7 @@ def test_get_batch_data(test_df):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
-def test_get_batch_with_split_on_whole_table(test_df):
+def test_get_batch_with_split_on_whole_table_runtime(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df, splitter_method="_split_on_whole_table"
@@ -939,7 +962,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
 )
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
@@ -986,3 +1009,59 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
     # Raises error due the connection object not being set
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)
+
+
+@mock.patch(
+    "great_expectations.execution_engine.pandas_execution_engine.service_account",
+)
+@mock.patch(
+    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+)
+def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
+    # default instantiation
+    PandasExecutionEngine()
+
+    # instantiation with custom parameters
+    engine = PandasExecutionEngine(discard_subset_failing_expectations=True)
+    assert "discard_subset_failing_expectations" in engine.config
+    assert engine.config.get("discard_subset_failing_expectations") is True
+    custom_gcs_options = {"filename": "a/b/c/my_gcs_credentials.json"}
+    engine = PandasExecutionEngine(gcs_options=custom_gcs_options)
+    assert "gcs_options" in engine.config
+    assert (
+        engine.config.get("gcs_options")["filename"] == "a/b/c/my_gcs_credentials.json"
+    )
+
+
+@mock.patch(
+    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+)
+def test_get_batch_data_with_gcs_batch_spec(
+    mock_gcs_conn,
+    gcs_batch_spec,
+):
+    mock_gcs_bucket = mock_gcs_conn().get_bucket()
+    mock_gcs_blob = mock_gcs_bucket.blob()
+    mock_gcs_blob.download_as_bytes.return_value = (
+        b"colA,colB,colC\n1,2,3\n4,5,6\n7,8,9"  # (3,3) CSV for testing
+    )
+
+    # Necessary to pass kwargs to bypass "os.getenv | gcs_options == {}" check
+    kwargs = {"gcs_options": {"my_option": "my_value"}}
+    df = PandasExecutionEngine(**kwargs).get_batch_data(batch_spec=gcs_batch_spec)
+
+    mock_gcs_conn().get_bucket.assert_called_with("test_bucket")
+    mock_gcs_bucket.blob.assert_called_with("path/A-100.csv")
+    mock_gcs_blob.download_as_bytes.assert_called_once()
+
+    assert df.dataframe.shape == (3, 3)
+
+
+def test_get_batch_with_no_gcs_configured(gcs_batch_spec):
+    # if GCS Client was not configured
+    execution_engine_no_gcs = PandasExecutionEngine()
+    execution_engine_no_gcs._gcs = None
+
+    # Raises error due the connection object not being set
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)

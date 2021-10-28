@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations in bulk
+title: How to create and edit Expectations in bulk
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'

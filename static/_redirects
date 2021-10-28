@@ -167,3 +167,6 @@
 /en/latest/reference/spare_parts/data_context_reference.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts/data_context_reference.html
 /en/latest/reference/spare_parts/profiling_reference.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts/profiling_reference.html
 /en/latest/reference/core_concepts.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts.html
+
+# Redirects for old style guides
+/docs/contributing/contributing_style https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style

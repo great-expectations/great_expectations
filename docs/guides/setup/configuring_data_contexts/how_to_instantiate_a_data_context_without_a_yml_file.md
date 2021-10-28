@@ -7,8 +7,6 @@ This guide will help you instantiate a Data Context without a yml file, aka conf
 
 <Prerequisites>
 
-- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../../../tutorials/getting_started/intro.md)
-
 </Prerequisites>
 
 :::note
@@ -25,14 +23,13 @@ Steps
 
     Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can continue with the existing API sans defaults by omitting this parameter, and you can override all of the parameters as shown in the last example. Note that a parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
-    **TODO(cdkini): These are links to our API Reference, which has not yet been implemented. What should we do here?**
     The following ``store_backend_defaults`` are currently available: 
         - :py:class:`~great_expectations.data_context.types.base.S3StoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.GCSStoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.FilesystemStoreBackendDefaults`
 
-    The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS s3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
+    The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS S3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 
     ```python
     from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig
@@ -77,7 +74,7 @@ Steps
 
     The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. ``default_bucket_name``, ``default_project_name`` sets the default value for all stores that are not specified individually.
 
-    The resulting DataContextConfig from the following example creates an Expectations store and Data Docs using the ``my_default_bucket`` and ``my_default_project`` parameters since their bucket and project is not specified explicitly. The validations store is created using the explicitly specified ``my_validations_bucket`` and ``my_validations_project``. Further, the prefixes are set for the Expectations store and validations store, while data docs use the default ``data_docs`` prefix.
+    The resulting DataContextConfig from the following example creates an Expectations store and Data Docs using the ``my_default_bucket`` and ``my_default_project`` parameters since their bucket and project is not specified explicitly. The validations store is created using the explicitly specified ``my_validations_bucket`` and ``my_validations_project``. Further, the prefixes are set for the Expectations store and validations store, while Data Docs use the default ``data_docs`` prefix.
 
     ```python
     data_context_config = DataContextConfig(
@@ -195,7 +192,7 @@ Steps
 
     If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
 
-    - [Deploying Great Expectations with Airflow](../../../../docs/intro.md) - **TODO(cdkini): Where do we link this?**
+    - [Deploying Great Expectations with Airflow](../../../../docs/intro.md)
 
 
 Additional resources
