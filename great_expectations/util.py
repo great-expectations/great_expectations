@@ -28,7 +28,9 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional
 
+import sqlalchemy as sa
 from dateutil.parser import parse
+from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
@@ -45,6 +47,19 @@ try:
 except ModuleNotFoundError:
     # Fallback for python < 3.8
     import importlib_metadata
+
+
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.engine import reflection
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
 
 
 logger = logging.getLogger(__name__)
@@ -1078,3 +1093,12 @@ def generate_temporary_table_name(
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
+
+
+def get_sqlalchemy_inspector(engine):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+        insp = reflection.Inspector.from_engine(engine)
+    else:
+        insp = sa.inspect(engine)
+    return insp
