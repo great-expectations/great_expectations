@@ -70,6 +70,11 @@ module.exports = {
           ]
         },
         {
+          label: 'Expectations',
+          position: 'right',
+          href: 'https://greatexpectations.io/expectations'
+        },
+        {
           label: 'Documentation',
           position: 'right',
           items: [
