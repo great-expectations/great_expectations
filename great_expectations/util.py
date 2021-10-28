@@ -28,7 +28,6 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional
 
-import sqlalchemy as sa
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
