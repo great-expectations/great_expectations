@@ -112,6 +112,22 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
             configuration.kwargs,
             ["column", "mostly", "json_schema", "row_condition", "condition_parser"],
         )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "json_schema": {
+                "schema": {"type": "object"},
+                "value": params.get("json_schema"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
 
         if not params.get("json_schema"):
             template_str = "values must match a JSON Schema but none was specified."
@@ -137,26 +153,11 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
             template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "json_schema": {
-                "schema": {"type": "object"},
-                "value": params.get("json_schema"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+            params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
 
