@@ -33,7 +33,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
 
     The InferredAssetAzureDataConnector is one of two classes (ConfiguredAssetAzureDataConnector being the
     other one) designed for connecting to filesystem-like data, more specifically files on Azure Blob Storage. It
-    connects to assets inferred from container, name_starts_with, and file name by default_regex.
+    connects to assets inferred from bucket, prefix, and file name by default_regex.
 
     As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
     docs if a greater understanding of the supported authentication methods and general functionality is desired.
@@ -44,11 +44,11 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         self,
         name: str,
         datasource_name: str,
-        container: str,
+        bucket: str,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        name_starts_with: str = "",
+        prefix: str = "",
         delimiter: str = "/",
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -59,11 +59,11 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         Args:
             name (str): required name for data_connector
             datasource_name (str): required name for datasource
-            container (str): container for Azure Blob Storage
+            bucket (str): container for Azure Blob Storage
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
             sorters (list): optional list of sorters for sorting data_references
-            name_starts_with (str): Azure prefix
+            prefix (str): Azure prefix
             delimiter (str): Azure delimiter
             azure_options (dict): wrapper object for **kwargs
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
@@ -79,8 +79,8 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
-        self._container = container
-        self._name_starts_with = os.path.join(name_starts_with, "")
+        self._bucket = bucket
+        self._prefix = os.path.join(prefix, "")
         self._delimiter = delimiter
 
         if azure_options is None:
@@ -136,8 +136,8 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         This method is used to refresh the cache.
         """
         query_options: dict = {
-            "container": self._container,
-            "name_starts_with": self._name_starts_with,
+            "container": self._bucket,
+            "name_starts_with": self._prefix,
             "delimiter": self._delimiter,
         }
 
@@ -159,11 +159,11 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         full_path: str
         if isinstance(self.execution_engine, PandasExecutionEngine):
             full_path = os.path.join(
-                f"{self._account_name}.blob.core.windows.net", self._container, path
+                f"{self._account_name}.blob.core.windows.net", self._bucket, path
             )
         elif isinstance(self.execution_engine, SparkDFExecutionEngine):
             full_path = os.path.join(
-                f"{self._container}@{self._account_name}.blob.core.windows.net", path
+                f"{self._bucket}@{self._account_name}.blob.core.windows.net", path
             )
             full_path = f"wasbs://{full_path}"
         else:

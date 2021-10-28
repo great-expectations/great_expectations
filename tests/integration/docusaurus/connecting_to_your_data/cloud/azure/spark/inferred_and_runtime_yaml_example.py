@@ -29,7 +29,7 @@ data_connectors:
             account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
             credential: <YOUR_CREDENTIAL>   # if using a protected container
         container: <YOUR_AZURE_CONTAINER_HERE>
-        name_starts_with: <CONTAINER_PATH_TO_DATA>
+        prefix: <CONTAINER_PATH_TO_DATA>
         default_regex:
             pattern: (.*)\.csv
             group_names:

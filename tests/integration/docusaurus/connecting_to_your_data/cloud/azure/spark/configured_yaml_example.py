@@ -25,7 +25,7 @@ data_connectors:
             account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
             credential: <YOUR_CREDENTIAL>
         container: <YOUR_AZURE_CONTAINER_HERE>
-        name_starts_with: <CONTAINER_PATH_TO_DATA>
+        prefix: <CONTAINER_PATH_TO_DATA>
         assets:
             taxi_data:
         default_regex:

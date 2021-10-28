@@ -246,8 +246,8 @@ def test_instantiation_with_account_url_and_credential(
             "pattern": r"(alpha)-(.*)\.csv",
             "group_names": ["data_asset_name", "index"],
         },
-        container="my_container",
-        name_starts_with="",
+        bucket="my_bucket",
+        prefix="",
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
             "credential": "my_credential",
@@ -274,11 +274,11 @@ def test_instantiation_with_conn_str_and_credential(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
-            "pattern": "(alpha)-(.*)\.csv",
+            "pattern": r"(alpha)-(.*)\.csv",
             "group_names": ["data_asset_name", "index"],
         },
-        container="my_container",
-        name_starts_with="",
+        bucket="my_bucket",
+        prefix="",
         azure_options={  # Representative of format noted in official docs
             "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
             "credential": "my_credential",
@@ -303,8 +303,8 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
-        name_starts_with="",
+        bucket="my_bucket",
+        prefix="",
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
             "credential": "my_credential",
@@ -324,8 +324,8 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
-        name_starts_with="",
+        bucket="my_bucket",
+        prefix="",
         azure_options={  # Representative of format noted in official docs
             "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
             "credential": "my_credential",
@@ -349,8 +349,8 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
             },
-            container="my_container",
-            name_starts_with="",
+            bucket="my_bucket",
+            prefix="",
             azure_options={
                 "account_url": "account.blob.core.windows.net",
                 "conn_str": "DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=my_account_key",
@@ -375,8 +375,8 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
             },
-            container="my_container",
-            name_starts_with="",
+            bucket="my_bucket",
+            prefix="",
             azure_options={"account_url": "not_a_valid_url"},
         )
 
@@ -390,8 +390,8 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
             },
-            container="my_container",
-            name_starts_with="",
+            bucket="my_bucket",
+            prefix="",
             azure_options={"conn_str": "not_a_valid_conn_str"},
         )
 
@@ -426,8 +426,8 @@ def test_instantiation_with_test_yaml_config(
             group_names:
                 - data_asset_name
                 - index
-        container: my_container
-        name_starts_with: ""
+        bucket: my_bucket
+        prefix: ""
         azure_options:
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
@@ -464,8 +464,8 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
             group_names:
                 - data_asset_name
                 - index
-        container: my_container
-        name_starts_with: ""
+        bucket: my_bucket
+        prefix: ""
         azure_options:
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
@@ -518,8 +518,8 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
             group_names:
                 - data_asset_name
                 - index
-        container: my_container
-        name_starts_with: ""
+        bucket: my_bucket
+        prefix: ""
         azure_options:
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
@@ -561,8 +561,8 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        container="my_container",
-        name_starts_with="",
+        bucket="my_bucket",
+        prefix="",
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
             "credential": "my_credential",
@@ -598,8 +598,8 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
-           name_starts_with: ""
+           bucket: my_bucket
+           prefix: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
@@ -660,8 +660,8 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
-           name_starts_with: ""
+           bucket: my_bucket
+           prefix: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
@@ -716,8 +716,8 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
-           name_starts_with: ""
+           bucket: my_bucket
+           prefix: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
@@ -793,8 +793,8 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
            datasource_name: test_environment
            execution_engine:
                class_name: PandasExecutionEngine
-           container: my_container
-           name_starts_with: ""
+           bucket: my_bucket
+           prefix: ""
            default_regex:
                pattern: (.+)_(.+)_(.+)\\.csv
                group_names:
@@ -870,8 +870,8 @@ def test_return_all_batch_definitions_basic_sorted(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
-       name_starts_with: ""
+       bucket: my_bucket
+       prefix: ""
        default_regex:
            pattern: (.+)_(.+)_(.+)\\.csv
            group_names:
@@ -957,8 +957,8 @@ def test_return_all_batch_definitions_returns_specified_partition(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
-       name_starts_with: ""
+       bucket: my_bucket
+       prefix: ""
        default_regex:
            pattern: (.+)_(.+)_(.+)\\.csv
            group_names:
@@ -1074,8 +1074,8 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
-       name_starts_with: ""
+       bucket: my_bucket
+       prefix: ""
        default_regex:
            pattern: (.+)_(.+)_(.+)\\.csv
            group_names:
@@ -1161,7 +1161,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
+       bucket: my_bucket
        default_regex:
            pattern: (.+)_.+_.+\\.csv
            group_names:
@@ -1229,8 +1229,8 @@ def test_return_all_batch_definitions_too_many_sorters(
        datasource_name: test_environment
        execution_engine:
            class_name: PandasExecutionEngine
-       container: my_container
-       name_starts_with: ""
+       bucket: my_bucket
+       prefix: ""
        default_regex:
            pattern: (.+)_.+_.+\\.csv
            group_names:
@@ -1296,8 +1296,8 @@ def test_get_full_file_path_pandas(
     yaml_string = f"""
 class_name: InferredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-container: my_container
-name_starts_with: my_base_directory/
+bucket: my_bucket
+prefix: my_base_directory/
 default_regex:
     pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
     group_names:
@@ -1339,19 +1339,19 @@ azure_options:
             path="my_base_directory/alpha/files/go/here/alpha-202001.csv",
             data_asset_name="alpha",
         )
-        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+        == "my_account_url.blob.core.windows.net/my_bucket/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
         my_data_connector._get_full_file_path(
             path="my_base_directory/beta_here/beta-202002.txt", data_asset_name="beta"
         )
-        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/beta_here/beta-202002.txt"
+        == "my_account_url.blob.core.windows.net/my_bucket/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
         my_data_connector._get_full_file_path(
             path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
         )
-        == "my_account_url.blob.core.windows.net/my_container/my_base_directory/gamma-202005.csv"
+        == "my_account_url.blob.core.windows.net/my_bucket/my_base_directory/gamma-202005.csv"
     )
 
 
@@ -1375,8 +1375,8 @@ def test_get_full_file_path_spark(
     yaml_string = f"""
 class_name: InferredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-container: my_container
-name_starts_with: my_base_directory/
+bucket: my_bucket
+prefix: my_base_directory/
 default_regex:
     pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
     group_names:
@@ -1418,19 +1418,19 @@ azure_options:
             path="my_base_directory/alpha/files/go/here/alpha-202001.csv",
             data_asset_name="alpha",
         )
-        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/alpha/files/go/here/alpha-202001.csv"
+        == "wasbs://my_bucket@my_account_url.blob.core.windows.net/my_base_directory/alpha/files/go/here/alpha-202001.csv"
     )
     assert (
         my_data_connector._get_full_file_path(
             path="my_base_directory/beta_here/beta-202002.txt", data_asset_name="beta"
         )
-        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/beta_here/beta-202002.txt"
+        == "wasbs://my_bucket@my_account_url.blob.core.windows.net/my_base_directory/beta_here/beta-202002.txt"
     )
     assert (
         my_data_connector._get_full_file_path(
             path="my_base_directory/gamma-202005.csv", data_asset_name="gamma"
         )
-        == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/gamma-202005.csv"
+        == "wasbs://my_bucket@my_account_url.blob.core.windows.net/my_base_directory/gamma-202005.csv"
     )
 
 
@@ -1450,8 +1450,8 @@ def test_get_full_file_path_bad_execution_engine(
     yaml_string = f"""
 class_name: InferredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
-container: my_container
-name_starts_with: my_base_directory/
+bucket: my_bucket
+prefix: my_base_directory/
 default_regex:
     pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
     group_names:

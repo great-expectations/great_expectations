@@ -28,7 +28,7 @@ datasource_config = {
                 "credential": "<YOUR_CREDENTIAL>",
             },
             "container": "<YOUR_CONTAINER>",
-            "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
+            "prefix": "<CONTAINER_PATH_TO_DATA>",
             "default_regex": {
                 "pattern": "(.*)\\.csv",
                 "group_names": ["data_asset_name"],
@@ -53,7 +53,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "container"
 ] = "superconductive-public"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "name_starts_with"
+    "prefix"
 ] = "data/taxi_yellow_tripdata_samples/"
 
 context.test_yaml_config(yaml.dump(datasource_config))
