@@ -749,9 +749,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             assert len(query["select"]) == len(query["ids"])
             try:
-                res = self.engine.execute(
-                    sa.select(query["select"]).select_from(selectable)
-                ).fetchall()
+                """
+                If a custom query is passed, selectable will be TextClause and not formatted
+                as a subquery wrapped in "(subquery) alias". TextClause must first be converted
+                to TextualSelect using sa.columns() before it can be converted to type Subquery
+                """
+                if isinstance(selectable, TextClause):
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(
+                            selectable.columns().subquery()
+                        )
+                    ).fetchall()
+                else:
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(selectable)
+                    ).fetchall()
                 logger.debug(
                     f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
                 )
@@ -963,7 +975,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.table(table_name, schema=batch_spec.get("schema_name", None))
                     )
                     .where(split_clause)
-                ).one()[0]
+                ).scalar()
                 p: Optional[float] = batch_spec["sampling_kwargs"]["p"] or 1.0
                 sample_size: int = round(p * num_rows)
                 return (

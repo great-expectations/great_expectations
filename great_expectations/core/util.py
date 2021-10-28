@@ -206,7 +206,7 @@ def convert_to_json_serializable(data):
     try:
         if not isinstance(data, list) and pd.isna(data):
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
-            # Hence, why we test for `not isinstance(list))`
+            # Hence, why we test for `not isinstance(list)`
             return None
     except TypeError:
         pass
