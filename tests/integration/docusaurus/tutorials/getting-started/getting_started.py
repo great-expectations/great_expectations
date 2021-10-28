@@ -40,7 +40,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 batch_request = BatchRequest(
     datasource_name="data__dir",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="yellow_trip_data_sample_2019-01.csv",
+    data_asset_name="yellow_tripdata_sample_2019-01.csv",
     limit=1000,
 )
 context.create_expectation_suite(expectation_suite_name="taxi.demo")
@@ -86,7 +86,7 @@ profiler = UserConfigurableProfiler(
 suite = profiler.build_suite()
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-# Create first checkpoint on yellow_trip_data_sample_2019-01.csv
+# Create first checkpoint on yellow_tripdata_sample_2019-01.csv
 my_checkpoint_config = f"""
 name: my_checkpoint
 config_version: 1.0
@@ -96,7 +96,7 @@ validations:
   - batch_request:
       datasource_name: data__dir
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_trip_data_sample_2019-01.csv
+      data_asset_name: yellow_tripdata_sample_2019-01.csv
       data_connector_query:
         index: -1
     expectation_suite_name: taxi.demo
@@ -113,7 +113,7 @@ checkpoint_result = checkpoint.run(site_names=None)
 assert checkpoint_result.run_results
 
 
-# Create second checkpoint on yellow_trip_data_sample_2019-02.csv
+# Create second checkpoint on yellow_tripdata_sample_2019-02.csv
 my_new_checkpoint_config = f"""
 name: my_new_checkpoint
 config_version: 1.0
@@ -123,7 +123,7 @@ validations:
   - batch_request:
       datasource_name: data__dir
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_trip_data_sample_2019-02.csv
+      data_asset_name: yellow_tripdata_sample_2019-02.csv
       data_connector_query:
         index: -1
     expectation_suite_name: taxi.demo

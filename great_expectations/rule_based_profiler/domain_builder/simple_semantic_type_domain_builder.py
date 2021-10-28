@@ -12,7 +12,7 @@ from great_expectations.rule_based_profiler.domain_builder import (
     SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
-from great_expectations.validator.validator import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):

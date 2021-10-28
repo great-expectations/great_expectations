@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations with instant feedback from a sample Batch of data
+title: How to create and edit Expectations with instant feedback from a sample Batch of data
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
@@ -57,7 +57,7 @@ Steps
 
    ```bash
    {
-       "datasource_name": my_datasource",
+       "datasource_name": "my_datasource",
        "data_connector_name": "my_data_connector",
        "data_asset_name": "my_asset"
    }

@@ -39,7 +39,7 @@ Production code in Great Expectations must be thoroughly tested. In general, we 
 
 Experimental code in Great Expectations need only be tested lightly. We are moving to a convention where experimental features are clearly labeled in documentation and the code itself. However, this convention is not uniformly applied today.
 
-Most of Great Expectations’ integration testing is in the CLI, which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should not include new integration tests, unless they change the CLI itself.
+Most of Great Expectations’ integration testing is in the [CLI](https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_great_expectations_cli), which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should not include new integration tests, unless they change the CLI itself.
 
 Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to PostgreSQL, SQLite, MSSQL, and BigQuery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
 
@@ -148,6 +148,71 @@ By convention, the name of the the file is the name of the Expectation, with a .
 Note: If you are implementing a new Expectation, but don’t plan to immediately implement it for all execution environments, you should add the new test to the appropriate list(s) in the `candidate_test_is_on_temporary_notimplemented_list` method within `tests/test_utils.py`. Often, we see Expectations developed first for pandas, then later extended to SqlAlchemy and Spark.
 
 You can run just the Expectation tests with `pytest tests/test_definitions/test_expectations.py`.
+
+### Performance testing
+
+##### Configuring Data Before Running Performance Tests
+
+The performance tests use BigQuery.
+
+Before running a performance test, setup data with `tests/performance/setup_bigquery_tables_for_performance_test.sh`.
+
+For example:
+
+```bash
+GE_TEST_BIGQUERY_PEFORMANCE_DATASET=<YOUR_GCP_PROJECT> tests/performance/setup_bigquery_tables_for_performance_test.sh
+```
+
+For more information on getting started with BigQuery, please refer to the [above section on BigQuery tests](#bigquery-tests).
+
+##### Running the Performance Tests
+
+Run the performance tests with pytest, e.g.
+
+```
+pytest tests/performance/test_bigquery_benchmarks.py \
+  --bigquery --performance-tests \
+  -k 'test_taxi_trips_benchmark[1-True-V3]'  \
+  --benchmark-json=tests/performance/results/`date "+%H%M"`_${USER}.json \
+  --no-spark --no-postgresql -rP -vv
+```
+
+Some benchmarks take a long time to complete. In this example, only the relatively fast `test_taxi_trips_benchmark[1-True-V3]` benchmark is run and the output should include runtime like the following:
+
+```
+--------------------------------------------------- benchmark: 1 tests ------------------------------------------------------
+Name (time in s)                         Min     Max    Mean  StdDev  Median     IQR  Outliers     OPS  Rounds  Iterations
+-----------------------------------------------------------------------------------------------------------------------------
+test_taxi_trips_benchmark[1-True-V3]     5.0488  5.0488  5.0488  0.0000  5.0488  0.0000       0;0  0.1981       1           1
+-----------------------------------------------------------------------------------------------------------------------------
+```
+
+The result is saved for comparisons as described below.
+
+##### Comparing Performance Results
+
+Compare test results in this directory with `py.test-benchmark compare`, e.g.
+
+```
+$ py.test-benchmark compare --group-by name tests/performance/results/initial_baseline.json tests/performance/results/*${USER}.json                                                                   
+
+---------------------------------------------------------------------------- benchmark 'test_taxi_trips_benchmark[1-True-V3]': 2 tests ---------------------------------------------------------------------------
+Name (time in s)                                        Min               Max              Mean            StdDev            Median               IQR            Outliers     OPS            Rounds  Iterations
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_taxi_trips_benchmark[1-True-V3] (initial_base)     5.0488 (1.0)      5.0488 (1.0)      5.0488 (1.0)      0.0000 (1.0)      5.0488 (1.0)      0.0000 (1.0)           0;0  0.1981 (1.0)           1           1
+test_taxi_trips_benchmark[1-True-V3] (2114_work)        6.4675 (1.28)     6.4675 (1.28)     6.4675 (1.28)     0.0000 (1.0)      6.4675 (1.28)     0.0000 (1.0)           0;0  0.1546 (0.78)          1           1
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+```
+
+Please refer to [pytest-benchmark documentation](https://pytest-benchmark.readthedocs.io/en/latest/comparing.html) for more info.
+
+#### Checking in new benchmark results
+
+When creating a pull request that is intended to improve performance, please include in the pull request benchmark results showing improvements.  Please use the script `run_benchmark_multiple_times.sh` to run the benchmark multiple times.  Name the tests with the first argument provided to that script. For example, the `tests/performance/results/minimal_multithreading_*.json` files were created with the following command:
+
+```
+$ tests/performance/run_benchmark_multiple_times.sh minimal_multithreading
+```
 
 ### Manual testing
 

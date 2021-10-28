@@ -204,9 +204,10 @@ Please check your config."""
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            s3_url = S3Url(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            path: str = batch_spec.path
+            s3_url = S3Url(path)
             if "compression" not in reader_options.keys():
                 inferred_compression_param = sniff_s3_compression(s3_url)
                 if inferred_compression_param is not None:
@@ -229,9 +230,10 @@ Please check your config."""
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
             azure_engine = self._azure
-            azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            path: str = batch_spec.path
+            azure_url = AzureUrl(path)
             blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
             )
@@ -621,7 +623,6 @@ Please check your config."""
     def _split_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
-
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
@@ -709,10 +710,7 @@ Please check your config."""
         df,
         p: float = 0.1,
     ):
-        """Take a random sample of rows, retaining proportion p
-
-        Note: the Random function behaves differently on different dialects of SQL
-        """
+        """Take a random sample of rows, retaining proportion p"""
         return df[df.index.map(lambda x: random.random() < p)]
 
     @staticmethod
@@ -742,7 +740,7 @@ Please check your config."""
         hash_value: str = "f",
         hash_function_name: str = "md5",
     ):
-        """Hash the values in the named column, and split on that"""
+        """Hash the values in the named column, and only keep rows that match the given hash_value"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):

@@ -21,7 +21,11 @@ You can read more about how data teams use Great Expectations in our [case studi
 Expectations are assertions about your data. In Great Expectations, those assertions are expressed in a declarative language in the form of simple, human-readable Python methods. For example, in order to assert that you want the column “passenger_count” to be between 1 and 6, you can say:
 
 ```` console
-expect_column_values_to_be_between(column="passenger_count", min_value=1, max_value=6)
+expect_column_values_to_be_between(
+    column="passenger_count",
+    min_value=1,
+    max_value=6
+)
 ````
 
 Great Expectations then uses this statement to validate whether the column passenger_count in a given table is indeed between 1 and 6, and returns a success or failure result. The library currently provides several dozen highly expressive built-in Expectations, and allows you to write custom Expectations.
@@ -33,7 +37,11 @@ Writing pipeline tests from scratch can be tedious and overwhelming. Great Expec
 For example, using the profiler on a column passenger_count that only contains integer values between 1 and 6, Great Expectations automatically generates this Expectation we’ve already seen:
 
 ```` console
-expect_column_values_to_be_between(column="passenger_count", min_value=1, max_value=6).
+expect_column_values_to_be_between(
+    column="passenger_count",
+    min_value=1,
+    max_value=6
+)
 ````
 
 This allows you to quickly create tests for your data, without having to write them from scratch.

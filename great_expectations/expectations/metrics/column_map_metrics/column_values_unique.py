@@ -1,4 +1,3 @@
-import uuid
 from typing import Any, Dict, Optional, Tuple
 
 from great_expectations.core import ExpectationConfiguration
@@ -21,7 +20,8 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.expectations.metrics.map_metric_provider import sa as sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.util import generate_temporary_table_name
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnValuesUnique(ColumnMapMetricProvider):
@@ -50,12 +50,6 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
     )
     def _sqlalchemy_window(cls, column, _table, **kwargs):
-        dup_query = (
-            sa.select([column])
-            .select_from(_table)
-            .group_by(column)
-            .having(sa.func.count(column) > 1)
-        )
         # Will - 20210126
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
@@ -63,7 +57,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         dialect = kwargs.get("_dialect", None)
         sql_engine = kwargs.get("_sqlalchemy_engine", None)
         if sql_engine and dialect and dialect.dialect.name == "mysql":
-            temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_name = generate_temporary_table_name()
             temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
                 new_temp_table=temp_table_name,
                 source_table=_table,
@@ -73,6 +67,13 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             dup_query = (
                 sa.select([column])
                 .select_from(sa.text(temp_table_name))
+                .group_by(column)
+                .having(sa.func.count(column) > 1)
+            )
+        else:
+            dup_query = (
+                sa.select([column])
+                .select_from(_table)
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
             )

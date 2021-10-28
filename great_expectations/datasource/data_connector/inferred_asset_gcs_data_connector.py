@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
@@ -153,9 +153,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         return path_list
 
     def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+        self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.

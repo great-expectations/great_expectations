@@ -21,7 +21,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnMedian(ColumnAggregateMetricProvider):
@@ -53,10 +53,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
-        dialect = sqlalchemy_engine.dialect
         """SqlAlchemy Median Implementation"""
-        if dialect.name.lower() == "awsathena":
-            raise NotImplementedError("AWS Athena does not support OFFSET.")
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None

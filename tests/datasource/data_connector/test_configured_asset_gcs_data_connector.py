@@ -559,6 +559,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 
     # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
 
@@ -608,7 +609,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_gcs_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
 
@@ -682,7 +683,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_gcs_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
     )

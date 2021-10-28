@@ -32,7 +32,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -609,7 +609,7 @@ def test_get_batch_data(test_df):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
-def test_get_batch_with_split_on_whole_table(test_df):
+def test_get_batch_with_split_on_whole_table_runtime(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df, splitter_method="_split_on_whole_table"

@@ -55,7 +55,7 @@ batch_request = RuntimeBatchRequest(
     datasource_name="my_spark_dataframe",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
-    batch_identifiers={"batch_id": "something_something"},
+    batch_identifiers={"batch_id": "default_identifier"},
     runtime_parameters={"batch_data": df},  # Your dataframe goes here
 )
 

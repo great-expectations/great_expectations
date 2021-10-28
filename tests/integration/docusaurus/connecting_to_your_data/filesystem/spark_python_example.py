@@ -52,14 +52,14 @@ context.add_datasource(**datasource_config)
 batch_request = RuntimeBatchRequest(
     datasource_name="my_filesystem_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
+    data_asset_name="<YOUR_MEANINGFUL_NAME>",  # this can be anything that identifies this data_asset for you
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your path here.
-    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters["path"] = "data/yellow_trip_data_sample_2018-01.csv"
+batch_request.runtime_parameters["path"] = "data/yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -81,7 +81,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "yellow_trip_data_sample_2018-01"
+batch_request.data_asset_name = "yellow_tripdata_sample_2019-01"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -95,8 +95,36 @@ print(validator.head())
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_filesystem_datasource"]
 assert (
-    "yellow_trip_data_sample_2018-01"
+    "yellow_tripdata_sample_2019-01"
     in context.get_available_data_asset_names()["my_filesystem_datasource"][
         "default_inferred_data_connector_name"
     ]
 )
+
+
+# Here is a RuntimeBatchRequest using a path to a directory
+batch_request = RuntimeBatchRequest(
+    datasource_name="my_filesystem_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="example_data_asset",
+    runtime_parameters={"path": "taxi_data_files"},
+    batch_identifiers={"default_identifier_name": 1234567890},
+    batch_spec_passthrough={"reader_method": "csv", "reader_options": {"header": True}},
+)
+
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your path directly in the BatchRequest above.
+batch_request.runtime_parameters["path"] = "data/"
+
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
+
+print(validator.head())
+print(validator.active_batch.data.dataframe.count())  # should be 30,000
+
+# assert that the 3 files in `data/` (each 10k lines) are read in as a single dataframe
+assert validator.active_batch.data.dataframe.count() == 30000

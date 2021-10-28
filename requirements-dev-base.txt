@@ -26,10 +26,12 @@ pre-commit>=2.6.0  # lint
 pyarrow>=0.12.0  # all_tests
 pypd==1.1.0  # all_tests
 pytest>=5.3.5,<6.0.0  # all_tests
+pytest-benchmark>=3.4.1  # performance tests
 pytest-cov>=2.8.1  # all_tests
 pytest-order>=0.9.5 # all tests
 pyupgrade==2.7.2  # lint
 requirements-parser>=0.2.0  # all_tests
 s3fs>=0.5.1 # all_tests
+snapshottest==0.6.0 # GE Cloud atomic renderer tests
 typing-extensions>=3.10.0.0 # typing. Added 202108 @Shinnnyshinshin and @cdkini
 xlrd>=1.1.0,<2.0.0  # all_tests

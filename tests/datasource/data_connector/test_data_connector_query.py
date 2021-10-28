@@ -164,6 +164,7 @@ def test_data_connector_query_limit(create_files_and_instantiate_data_connector)
 
     # illegal limit
     with pytest.raises(ge_exceptions.BatchFilterError):
+        # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
