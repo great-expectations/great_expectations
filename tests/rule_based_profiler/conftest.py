@@ -29,11 +29,6 @@ from tests.rule_based_profiler.alice_user_workflow_fixture import (
 )
 
 # noinspection PyUnresolvedReferences
-from tests.rule_based_profiler.bob_user_workflow_fixture import (
-    bob_columnar_table_multi_batch,
-)
-
-# noinspection PyUnresolvedReferences
 from tests.rule_based_profiler.bobby_user_workflow_fixture import (
     bobby_columnar_table_multi_batch,
 )
