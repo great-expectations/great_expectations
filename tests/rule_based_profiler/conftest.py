@@ -149,7 +149,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
                 "..",
                 "integration",
                 "fixtures",
-                "yellow_trip_data_pandas_fixture",
+                "yellow_tripdata_pandas_fixture",
                 "great_expectations",
                 "great_expectations.yml",
             ),
@@ -162,14 +162,14 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
             os.path.join(
                 "..",
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
+                "taxi_yellow_tripdata_samples",
                 "random_subsamples",
-                "yellow_trip_data_7500_lines_sample_2019-01.csv",
+                "yellow_tripdata_7500_lines_sample_2019-01.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
     )
@@ -179,14 +179,14 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
             os.path.join(
                 "..",
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
+                "taxi_yellow_tripdata_samples",
                 "random_subsamples",
-                "yellow_trip_data_8500_lines_sample_2019-02.csv",
+                "yellow_tripdata_8500_lines_sample_2019-02.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
     )
@@ -196,14 +196,14 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
             os.path.join(
                 "..",
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
+                "taxi_yellow_tripdata_samples",
                 "random_subsamples",
-                "yellow_trip_data_9000_lines_sample_2019-03.csv",
+                "yellow_tripdata_9000_lines_sample_2019-03.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),
     )
@@ -238,7 +238,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
                 "..",
                 "integration",
                 "fixtures",
-                "yellow_trip_data_pandas_fixture",
+                "yellow_tripdata_pandas_fixture",
                 "great_expectations",
                 "great_expectations.yml",
             ),
@@ -250,7 +250,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
         os.path.join(
             "..",
             "test_sets",
-            "taxi_yellow_trip_data_samples",
+            "taxi_yellow_tripdata_samples",
         ),
     )
     file_name_list: List[str] = get_filesystem_one_level_directory_glob_path_list(

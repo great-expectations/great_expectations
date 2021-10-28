@@ -67,7 +67,7 @@ If you are also storing [Expectations in GCS](../configuring_metadata_stores/how
 
 4. **Copy existing Validation results to the GCS bucket**. (This step is optional).
 
-    One way to copy Validations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. In the example below, two Validation results, ``Validation1`` and ``Validation2`` are copied to the GCS bucket.   Information on other ways to copy Validation results, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading_objects).
+    One way to copy Validations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. In the example below, two Validation results, ``Validation1`` and ``Validation2`` are copied to the GCS bucket.   Information on other ways to copy Validation results, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
 
     ```bash
     gsutil cp uncommitted/validations/Validation1.json gs://'<your_GCS_bucket_name>'/'<your_GCS_folder_name>'

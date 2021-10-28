@@ -43,6 +43,35 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
     }
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs, ["column_A", "column_B"]
+        )
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+        else:
+            template_str = "Values in $column_A and $column_B must be independent."
+
+        params_with_json_schema = {
+            "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
+            "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -66,6 +95,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
             template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
         else:
             template_str = "Values in $column_A and $column_B must be independent."
+
         rendered_string_template_content = RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
