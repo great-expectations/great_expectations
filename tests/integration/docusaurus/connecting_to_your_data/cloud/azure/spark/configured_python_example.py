@@ -27,7 +27,7 @@ datasource_config = {
                 "account_url": "<YOUR_ACCOUNT_URL>",
                 "credential": "<YOUR_CREDENTIAL>",
             },
-            "container": "<YOUR_CONTAINER>",
+            "bucket": "<YOUR_CONTAINER>",
             "prefix": "<CONTAINER_PATH_TO_DATA>",
             "assets": {"taxi_data": None},
             "default_regex": {
@@ -51,7 +51,7 @@ datasource_config["data_connectors"]["configured_data_connector_name"]["azure_op
     "credential"
 ] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"][
-    "container"
+    "bucket"
 ] = "superconductive-public"
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "prefix"

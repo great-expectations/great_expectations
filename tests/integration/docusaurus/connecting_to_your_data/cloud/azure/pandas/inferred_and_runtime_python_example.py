@@ -27,7 +27,7 @@ datasource_config = {
                 "account_url": "<YOUR_ACCOUNT_URL>",
                 "credential": "<YOUR_CREDENTIAL>",
             },
-            "container": "<YOUR_CONTAINER>",
+            "bucket": "<YOUR_CONTAINER>",
             "prefix": "<CONTAINER_PATH_TO_DATA>",
             "default_regex": {
                 "pattern": "(.*)\\.csv",
@@ -50,7 +50,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "azure_options"
 ]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "container"
+    "bucket"
 ] = "superconductive-public"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"

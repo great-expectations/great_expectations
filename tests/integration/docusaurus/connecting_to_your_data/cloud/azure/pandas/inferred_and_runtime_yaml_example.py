@@ -28,7 +28,7 @@ data_connectors:
         azure_options:
             account_url: <YOUR_ACCOUNT_URL> # or `conn_str`
             credential: <YOUR_CREDENTIAL>   # if using a protected container
-        container: <YOUR_AZURE_CONTAINER_HERE>
+        bucket: <YOUR_AZURE_CONTAINER_HERE>
         prefix: <CONTAINER_PATH_TO_DATA>
         default_regex:
             pattern: (.*)\.csv
