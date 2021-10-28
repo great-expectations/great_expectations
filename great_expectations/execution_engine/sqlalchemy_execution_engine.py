@@ -34,9 +34,12 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
-from great_expectations.util import filter_properties_dict, import_library_module
+from great_expectations.util import (
+    filter_properties_dict,
+    get_sqlalchemy_url,
+    import_library_module,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.util import get_sqlalchemy_url
 
 logger = logging.getLogger(__name__)
 
