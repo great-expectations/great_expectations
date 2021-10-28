@@ -589,9 +589,45 @@ def test_TupleS3StoreBackend_with_prefix():
         == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_BBB"
     )
 
-    my_store.remove_key(("BBB",))
+    assert my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
         my_store.get(("BBB",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
+
+    # Call remove_key on an already deleted object
+    assert not my_store.remove_key(("BBB",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
+
+    # Call remove_key on a non-existent key
+    assert not my_store.remove_key(("NON_EXISTENT_KEY",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
 
     # testing base_public_path
     my_new_store = TupleS3StoreBackend(

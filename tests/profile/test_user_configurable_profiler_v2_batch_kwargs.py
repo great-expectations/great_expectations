@@ -482,7 +482,7 @@ def test_profiler_all_expectation_types(
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         )
     )
     batch_df = ge.dataset.PandasDataset(df)

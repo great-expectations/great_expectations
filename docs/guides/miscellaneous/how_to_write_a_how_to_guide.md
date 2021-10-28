@@ -61,7 +61,7 @@ Each integration test is defined by a dictionary entry similar to the one below:
 {
     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+    "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
 },
 ```
 
@@ -143,7 +143,7 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 
 7. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 
-8. Scan your article to make sure it follows the [Style guide](../../contributing/contributing_style). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+8. Scan your article to make sure it follows the [Style guide](../../contributing/style_guides/docs_style). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 
 9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](../../contributing/contributing_test)
 

@@ -20,8 +20,8 @@ def taxi_test_file():
         os.path.join(
             "..",
             "test_sets",
-            "taxi_yellow_trip_data_samples",
-            "yellow_trip_data_sample_2019-01.csv",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2019-01.csv",
         ),
     )
 
@@ -31,7 +31,7 @@ def taxi_test_file_directory():
     return file_relative_path(
         __file__,
         os.path.join(
-            "..", "test_sets", "taxi_yellow_trip_data_samples", "first_3_files/"
+            "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
         ),
     )
 
