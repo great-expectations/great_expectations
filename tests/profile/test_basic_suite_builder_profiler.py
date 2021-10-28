@@ -440,6 +440,10 @@ def test_context_profiler(filesystem_csv_data_context):
     assert set(expectation_types) == expected_expectation_types
 
 
+# DeprecationWarning: String run_ids
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids*:DeprecationWarning:great_expectations.profile.base"
+)
 @freeze_time("09/26/2019 13:42:41")
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     """

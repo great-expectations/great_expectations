@@ -428,7 +428,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
-                    schema_name=data_object._schema_name,
+                    schema=data_object._schema_name,
                 )
             else:
                 selectable = data_object.selectable

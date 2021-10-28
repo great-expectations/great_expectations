@@ -678,7 +678,7 @@ def test_ge_pandas_automatic_failure_removal():
             "C": ["a", "b", "c", "d"],
             "D": ["e", "f", "g", "h"],
         }
-    )    
+    )
 
     # Put some simple expectations on the data frame
     df.profile(ge.profile.ColumnsExistProfiler)
