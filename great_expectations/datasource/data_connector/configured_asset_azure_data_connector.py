@@ -169,11 +169,11 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         full_path: str
         if isinstance(self.execution_engine, PandasExecutionEngine):
             full_path = os.path.join(
-                f"{self._account_name}.blob.core.windows.net", self._container, path
+                f"{self._account_name}.blob.core.windows.net", self._bucket, path
             )
         elif isinstance(self.execution_engine, SparkDFExecutionEngine):
             full_path = os.path.join(
-                f"{self._container}@{self._account_name}.blob.core.windows.net", path
+                f"{self._bucket}@{self._account_name}.blob.core.windows.net", path
             )
             full_path = f"wasbs://{full_path}"
         else:

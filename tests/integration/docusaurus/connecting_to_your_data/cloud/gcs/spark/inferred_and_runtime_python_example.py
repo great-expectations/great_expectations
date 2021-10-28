@@ -31,7 +31,7 @@ datasource_config = {
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetGCSDataConnector",
-            "bucket_or_name": "<YOUR_GCS_BUCKET_HERE>",
+            "bucket": "<YOUR_GCS_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
             "default_regex": {
                 "pattern": "(.*)\\.csv",
@@ -44,7 +44,7 @@ datasource_config = {
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
-    "bucket_or_name"
+    "bucket"
 ] = "superconductive-integration-tests"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"

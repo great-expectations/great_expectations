@@ -77,7 +77,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters (list): optional list of sorters for sorting data_references
             prefix (str): GCS prefix
             delimiter (str): GCS delimiter
-            max_results (int): max blob filepaths to return
+            max_keys (int): max blob filepaths to return
             gcs_options (dict): wrapper object for optional GCS **kwargs
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """

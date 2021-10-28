@@ -32,7 +32,7 @@ data_connectors:
             - default_identifier_name
     default_inferred_data_connector_name:
         class_name: InferredAssetGCSDataConnector
-        bucket_or_name: <YOUR_GCS_BUCKET_HERE>
+        bucket: <YOUR_GCS_BUCKET_HERE>
         prefix: <BUCKET_PATH_TO_DATA>
         default_regex:
             pattern: (.*)\.csv
