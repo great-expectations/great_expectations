@@ -1,6 +1,3 @@
-import findspark
-from pyspark import SparkContext
-from pyspark.sql import SparkSession
 from ruamel import yaml
 
 import great_expectations as ge
