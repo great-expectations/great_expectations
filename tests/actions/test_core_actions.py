@@ -67,7 +67,7 @@ def test_StoreAction():
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name="default_expectations"
             ),
-            run_id="prod_20190801",
+            run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
         ),
         validation_result_suite=ExpectationSuiteValidationResult(
