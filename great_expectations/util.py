@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -51,13 +51,17 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy import Table
     from sqlalchemy.engine import reflection
+    from sqlalchemy.sql import Select
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
     reflection = None
+    Table = None
+    Select = None
 
 logger = logging.getLogger(__name__)
 
@@ -1107,3 +1111,17 @@ def get_sqlalchemy_url(drivername, **credentials):
     else:
         url = sa.engine.url.URL.create(drivername, **credentials)
     return url
+
+
+def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+    """
+    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
+    without explicitly turning the inner select() into a subquery first. This helper method ensures that this
+    conversion takes place.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    if version.parse(sa.__version__) >= version.parse("1.4"):
+        if isinstance(selectable, Select):
+            selectable = selectable.subquery()
+    return selectable

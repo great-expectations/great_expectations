@@ -32,7 +32,10 @@ from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
 )
-from great_expectations.util import generate_temporary_table_name
+from great_expectations.util import (
+    generate_temporary_table_name,
+    get_sqlalchemy_selectable,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -1942,6 +1945,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     count_selectable: Select = sa.select([count_case_statement])
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
         count_selectable = count_selectable.select_from(selectable)
 
     try:
@@ -1969,6 +1973,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
                 count_selectable = temp_table_obj
 
+        count_selectable = get_sqlalchemy_selectable(count_selectable)
         unexpected_count_query: Select = (
             sa.select(
                 [
@@ -2088,6 +2093,7 @@ def _sqlalchemy_column_pair_map_condition_values(
         ]
     ).where(boolean_mapped_unexpected_values)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
@@ -2177,9 +2183,9 @@ def _sqlalchemy_multicolumn_map_condition_values(
             )
 
     column_selector = [sa.column(column_name) for column_name in column_list]
-
     query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
@@ -2222,9 +2228,9 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
             raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
-
+    selectable = get_sqlalchemy_selectable(selectable)
     return execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(selectable.subquery())
+        sa.select([sa.func.count()]).select_from(selectable)
     ).scalar()
 
 
@@ -2302,6 +2308,7 @@ def _sqlalchemy_map_condition_rows(
     column_selector = [sa.column(column_name) for column_name in table_columns]
     query = sa.select(column_selector).where(unexpected_condition)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
