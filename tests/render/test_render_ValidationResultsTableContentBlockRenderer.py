@@ -15,6 +15,7 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
 )
 
+
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
     evr_failed_with_exception,
 ):
@@ -187,6 +188,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
         ]
     ]
     assert content_block_fn_output == content_block_fn_expected_output
+
 
 @pytest.mark.filterwarnings("ignore:V2 API style custom rendering*:DeprecationWarning")
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2_api_style_custom_rendering():
