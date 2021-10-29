@@ -13,7 +13,6 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import pytest
 from dateutil.parser import parse
 from pandas import DataFrame as pandas_DataFrame
 
