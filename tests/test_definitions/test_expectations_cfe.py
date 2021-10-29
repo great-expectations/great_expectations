@@ -313,9 +313,16 @@ def test_case_runner_cfe(test_case):
 
     # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
     # test_case["batch"]._initialize_expectations()
-
-    evaluate_json_test_cfe(
-        validator=test_case["validator_with_data"],
-        expectation_type=test_case["expectation_type"],
-        test=test_case["test"],
-    )
+    if "parse_strings_as_datetimes" in test_case["test"]["in"]:
+        with pytest.deprecated_call():
+            evaluate_json_test_cfe(
+                validator=test_case["validator_with_data"],
+                expectation_type=test_case["expectation_type"],
+                test=test_case["test"],
+            )
+    else:
+        evaluate_json_test_cfe(
+            validator=test_case["validator_with_data"],
+            expectation_type=test_case["expectation_type"],
+            test=test_case["test"],
+        )
