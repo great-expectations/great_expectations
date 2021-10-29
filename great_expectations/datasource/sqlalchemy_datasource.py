@@ -416,12 +416,6 @@ class SqlAlchemyDatasource(LegacyDatasource):
             limit = batch_kwargs.get("limit")
             offset = batch_kwargs.get("offset")
             if limit is not None or offset is not None:
-                # AWS Athena does not support offset
-                if (
-                    offset is not None
-                    and self.engine.dialect.name.lower() == "awsathena"
-                ):
-                    raise NotImplementedError("AWS Athena does not support OFFSET.")
                 logger.info(
                     "Generating query from table batch_kwargs based on limit and offset"
                 )
