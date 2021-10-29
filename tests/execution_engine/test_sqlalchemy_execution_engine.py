@@ -18,6 +18,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.util import get_sqlalchemy_selectable, get_sqlalchemy_domain_data
 
 # Function to test for spark dataframe equality
 from great_expectations.self_check.util import build_sa_engine
@@ -247,7 +248,7 @@ def test_get_domain_records_with_column_domain(sa):
             "condition_parser": "great_expectations__experimental__",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
 
     expected_column_df = df.iloc[:3]
     engine = build_sa_engine(expected_column_df, sa)
@@ -326,7 +327,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "ignore_row_if": "neither",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
 
     expected_column_pair_df = pd.DataFrame(
         {
@@ -561,7 +562,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
         .select_from(engine.active_batch_data.selectable)
         .where(sa.column("b") > 24)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -594,7 +595,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
         .select_from(engine.active_batch_data.selectable)
         .where(sa.column("b") == 2)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
