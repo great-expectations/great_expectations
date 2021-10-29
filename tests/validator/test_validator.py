@@ -859,21 +859,24 @@ def test_validator_set_active_batch(
     assert (
         multi_batch_taxi_validator.active_batch_id == "90bb41c1fbd7c71c05dbc8695320af71"
     )
-    assert multi_batch_taxi_validator.expect_column_values_to_be_between(
-        "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
-    ).success
+    with pytest.deprecated_call():
+        assert multi_batch_taxi_validator.expect_column_values_to_be_between(
+            "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
+        ).success
 
     multi_batch_taxi_validator.active_batch_id = "0327cfb13205ec8512e1c28e438ab43b"
 
     assert (
         multi_batch_taxi_validator.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
     )
-    assert not multi_batch_taxi_validator.expect_column_values_to_be_between(
-        "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
-    ).success
-    assert multi_batch_taxi_validator.expect_column_values_to_be_between(
-        "pickup_datetime", min_value=jan_min_date, parse_strings_as_datetimes=True
-    ).success
+    with pytest.deprecated_call():
+        assert not multi_batch_taxi_validator.expect_column_values_to_be_between(
+            "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
+        ).success
+    with pytest.deprecated_call():
+        assert multi_batch_taxi_validator.expect_column_values_to_be_between(
+            "pickup_datetime", min_value=jan_min_date, parse_strings_as_datetimes=True
+        ).success
 
 
 def test_validator_load_additional_batch_to_validator(

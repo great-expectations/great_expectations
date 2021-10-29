@@ -14,6 +14,9 @@ from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     mock_webbrowser,
