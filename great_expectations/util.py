@@ -1119,8 +1119,7 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if version.parse(sa.__version__) >= version.parse("1.4.0"):
+    if version.parse(sa.__version__) >= version.parse("1.4"):
         if isinstance(selectable, Select):
             selectable = selectable.subquery()
-
     return selectable
