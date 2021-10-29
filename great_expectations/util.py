@@ -31,8 +31,6 @@ from typing import Any, Callable, Optional, Union
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
-from sqlalchemy import Table
-from sqlalchemy.sql import Select
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
 from great_expectations.exceptions import (
@@ -53,13 +51,17 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy import Table
     from sqlalchemy.engine import reflection
+    from sqlalchemy.sql import Select
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
     reflection = None
+    Table = None
+    Select = None
 
 logger = logging.getLogger(__name__)
 
