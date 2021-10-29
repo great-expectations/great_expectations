@@ -210,5 +210,3 @@ assert "insert_your_data_asset_name_here" in set(
         "insert_your_data_connector_name_here"
     ]
 )
-
-assert 1 == 1
