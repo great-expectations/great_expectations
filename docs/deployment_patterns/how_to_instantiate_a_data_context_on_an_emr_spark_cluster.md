@@ -43,4 +43,3 @@ Steps
       ```python
       context.list_datasources()
       ```
-
