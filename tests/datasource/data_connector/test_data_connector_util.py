@@ -476,6 +476,6 @@ def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
 
     # Set defaults for InferredAssetGCSDataConnector
     query_options = {"delimiter": "/"}
-    with pytest.warns(UserWarning): # warning from /datasource/data_connector/util.py:390
+    with pytest.warns(UserWarning):  # warning from /datasource/data_connector/util.py:390
         list_gcs_keys(mock_gcs_conn, query_options, recursive=True)
     assert query_options["delimiter"] is None
