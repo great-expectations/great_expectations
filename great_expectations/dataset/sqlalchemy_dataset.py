@@ -9,7 +9,6 @@ from typing import Dict, Iterable, List
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
-from packaging import version
 
 from great_expectations.core.util import (
     convert_to_json_serializable,
