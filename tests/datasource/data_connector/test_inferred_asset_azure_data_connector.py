@@ -274,7 +274,7 @@ def test_instantiation_with_conn_str_and_credential(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
-            "pattern": "(alpha)-(.*)\.csv",
+            "pattern": r"(alpha)-(.*)\.csv",
             "group_names": ["data_asset_name", "index"],
         },
         container="my_container",

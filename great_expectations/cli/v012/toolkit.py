@@ -27,6 +27,7 @@ from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    RunIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
@@ -207,7 +208,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
         profiler=BasicSuiteBuilderProfiler,
         profiler_configuration=profiler_configuration,
         expectation_suite_name=expectation_suite_name,
-        run_id=run_id,
+        run_id=RunIdentifier(run_name=run_id),
         additional_batch_kwargs=additional_batch_kwargs,
     )
     if not profiling_results["success"]:

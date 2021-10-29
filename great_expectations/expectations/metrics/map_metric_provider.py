@@ -2224,7 +2224,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
             )
 
     return execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(selectable)
+        sa.select([sa.func.count()]).select_from(selectable.subquery())
     ).scalar()
 
 

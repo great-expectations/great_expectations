@@ -668,8 +668,10 @@ def test_ge_pandas_subsetting():
     assert sub1.get_expectation_suite().expectations == exp1
 
 
-# DataAsset.remove_expectations has been deprecated
-@pytest.mark.filterwarnings("ignore:DataAsset.remove_expectations*:DeprecationWarning")
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
+@pytest.mark.filterwarnings("ignore:Removed*:UserWarning:great_expectations.data_asset")
 def test_ge_pandas_automatic_failure_removal():
     df = ge.dataset.PandasDataset(
         {
