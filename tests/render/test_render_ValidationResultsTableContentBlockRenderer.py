@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -12,7 +14,6 @@ from great_expectations.render.types import (
     RenderedComponentContent,
     RenderedStringTemplateContent,
 )
-
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
     evr_failed_with_exception,
@@ -187,7 +188,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
     ]
     assert content_block_fn_output == content_block_fn_expected_output
 
-
+@pytest.mark.filterwarnings("ignore:V2 API style custom rendering*:DeprecationWarning")
 def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2_api_style_custom_rendering():
     """Test backwards support for custom expectation rendering with the V2 API as described at
     https://docs.greatexpectations.io/en/latest/reference/spare_parts/data_docs_reference.html#customizing-data-docs.
