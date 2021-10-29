@@ -26,11 +26,13 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
+from sqlalchemy import Table
+from sqlalchemy.sql import Select
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
 from great_expectations.exceptions import (
@@ -1107,3 +1109,18 @@ def get_sqlalchemy_url(drivername, **credentials):
     else:
         url = sa.engine.url.URL.create(drivername, **credentials)
     return url
+
+
+def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+    """
+    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
+    without explicitly turning the inner select() into a subquery first. This helper method ensures that this
+    conversion takes place.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    if version.parse(sa.__version__) >= version.parse("1.4.0"):
+        if isinstance(selectable, Select):
+            selectable = selectable.subquery()
+
+    return selectable
