@@ -28,11 +28,13 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional, Union
 
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.exceptions import (
     GreatExpectationsError,
     PluginClassNotFoundError,
@@ -90,7 +92,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
 }
 
 
-def pluralize(singular_ge_noun):
+def pluralize(singular_ge_noun: str) -> str:
     """
     Pluralizes a Great Expectations singular noun
     """
@@ -103,7 +105,7 @@ def pluralize(singular_ge_noun):
         )
 
 
-def singularize(plural_ge_noun):
+def singularize(plural_ge_noun: str) -> str:
     """
     Singularizes a Great Expectations plural noun
     """
@@ -139,11 +141,11 @@ def underscore(word: str) -> str:
     return word.lower()
 
 
-def hyphen(input: str):
+def hyphen(input: str) -> str:
     return input.replace("_", "-")
 
 
-def profile(func: Callable = None) -> Callable:
+def profile(func: Optional[Callable] = None) -> Callable:
     @wraps(func)
     def profile_function_call(*args, **kwargs) -> Any:
         pr: cProfile.Profile = cProfile.Profile()
@@ -160,7 +162,7 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(func: Callable = None) -> Callable:
+def measure_execution_time(func: Optional[Callable] = None) -> Callable:
     @wraps(func)
     def compute_delta_t(*args, **kwargs) -> Any:
         time_begin: int = int(round(time.time() * 1000))
@@ -276,7 +278,9 @@ def get_currently_executing_function_call_arguments(
     return call_args_dict
 
 
-def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
+def verify_dynamic_loading_support(
+    module_name: str, package_name: Optional[str] = None
+) -> None:
     """
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
@@ -318,7 +322,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str):
+def load_class(class_name: str, module_name: str) -> None:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -344,7 +348,9 @@ def load_class(class_name: str, module_name: str):
     return klass_
 
 
-def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profiler=None):
+def _convert_to_dataset_class(
+    df: pd.DataFrame, dataset_class, expectation_suite=None, profiler=None
+):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
 
@@ -373,7 +379,7 @@ def _convert_to_dataset_class(df, dataset_class, expectation_suite=None, profile
 
 
 def _load_and_convert_to_dataset_class(
-    df, class_name, module_name, expectation_suite=None, profiler=None
+    df: pd.DataFrame, class_name, module_name, expectation_suite=None, profiler=None
 ):
     """
     Convert a (pandas) dataframe to a great_expectations dataset, with (optional) expectation_suite
@@ -394,9 +400,9 @@ def _load_and_convert_to_dataset_class(
 
 
 def read_csv(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    filename: str,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
@@ -438,9 +444,9 @@ def read_csv(
 
 
 def read_json(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    filename: str,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     accessor_func=None,
@@ -491,9 +497,9 @@ def read_json(
 
 
 def read_excel(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    filename: str,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
@@ -546,9 +552,9 @@ def read_excel(
 
 
 def read_table(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    filename: str,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
@@ -590,9 +596,9 @@ def read_table(
 
 
 def read_feather(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    filename: str,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
@@ -634,9 +640,9 @@ def read_feather(
 
 
 def read_parquet(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    filename: str,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
@@ -678,9 +684,9 @@ def read_parquet(
 
 
 def from_pandas(
-    pandas_df,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    pandas_df: pd.DataFrame,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
@@ -718,9 +724,9 @@ def from_pandas(
 
 
 def read_pickle(
-    filename,
-    class_name="PandasDataset",
-    module_name="great_expectations.dataset",
+    filename: str,
+    class_name: str = "PandasDataset",
+    module_name: str = "great_expectations.dataset",
     dataset_class=None,
     expectation_suite=None,
     profiler=None,
@@ -874,7 +880,7 @@ def validate(
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-def gen_directory_tree_str(startpath):
+def gen_directory_tree_str(startpath: str) -> str:
     """Print the structure of directory as a tree:
 
     Ex:
@@ -1054,7 +1060,7 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     return True
 
 
-def get_context():
+def get_context() -> DataContext:
     from great_expectations.data_context.data_context import DataContext
 
     return DataContext()
@@ -1068,11 +1074,11 @@ def is_sane_slack_webhook(url: str) -> bool:
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-def is_list_of_strings(_list) -> bool:
+def is_list_of_strings(_list: Any) -> bool:
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
 
-def generate_library_json_from_registered_expectations():
+def generate_library_json_from_registered_expectations() -> dict:
     """Generate the JSON object used to populate the public gallery"""
     library_json = {}
 
