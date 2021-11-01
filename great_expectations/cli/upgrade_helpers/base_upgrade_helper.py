@@ -5,11 +5,15 @@ class BaseUpgradeHelper(ABC):
     """Base UpgradeHelper abstract class"""
 
     @abstractmethod
+    def manual_steps_required(self):
+        pass
+
+    @abstractmethod
     def get_upgrade_overview(self):
         pass
 
     @abstractmethod
-    def _save_upgrade_log(self):
+    def upgrade_project(self):
         pass
 
     @abstractmethod
@@ -17,5 +21,5 @@ class BaseUpgradeHelper(ABC):
         pass
 
     @abstractmethod
-    def upgrade_project(self):
+    def _save_upgrade_log(self):
         pass
