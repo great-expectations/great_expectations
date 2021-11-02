@@ -22,6 +22,7 @@ except ImportError:
     pyspark = None
     SparkSession = None
 
+
 @pytest.fixture
 def update_data_docs_action():
     return {
@@ -1057,7 +1058,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "test_df",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
+            "runtime_parameters": {
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+            },
         }
     )
     checkpoint = SimpleCheckpoint(
