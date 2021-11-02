@@ -411,6 +411,8 @@ class RuntimeBatchRequest(BatchRequest):
             cp._runtime_parameters["batch_data"] = batch_data
             self._runtime_parameters["batch_data"] = batch_data
             return cp
+        else:
+            self.__deepcopy__ = None
         return copy.deepcopy(self, memo)
 
     def to_json_dict(self) -> dict:
