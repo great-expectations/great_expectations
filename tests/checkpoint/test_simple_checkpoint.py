@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
@@ -14,6 +15,12 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import filter_properties_dict
 
+try:
+    pyspark = pytest.importorskip("pyspark")
+    from pyspark.sql import SparkSession
+except ImportError:
+    pyspark = None
+    SparkSession = None
 
 @pytest.fixture
 def update_data_docs_action():
@@ -973,3 +980,122 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
     assert checkpoint_config.evaluation_parameters == {}
     assert checkpoint_config.runtime_configuration == {}
     assert checkpoint_config.validations == []
+
+
+def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
+    data_context_with_datasource_spark_engine,
+):
+    context: DataContext = data_context_with_datasource_spark_engine
+    spark = SparkSession.builder.getOrCreate()
+    pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df = spark.createDataFrame(pandas_df)
+    # add checkpoint config
+    batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[{"batch_request": batch_request}],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sql_custom_query(
+    data_context_with_datasource_sqlalchemy_engine,
+):
+    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    # add checkpoint config
+    batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
+        }
+    )
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[{"batch_request": batch_request}],
+    )
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
