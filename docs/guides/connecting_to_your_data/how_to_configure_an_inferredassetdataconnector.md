@@ -287,6 +287,9 @@ which outputs:
 }
 ```
 
+This ability to access specific Batches using `batch_identifiers` is very useful when validating Data Assets that span multiple files.
+For more information on `batches` and `batch_identifiers`, please refer to the [Core Concepts document](../../reference/dividing_data_assets_into_batches.md).
+
 ### Example 2: Basic configuration with more than one Data Asset
 
 Here’s a similar example, but this time two Data Assets are mixed together in one folder.
