@@ -15,6 +15,7 @@ from great_expectations.exceptions import (
 )
 from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
+from great_expectations.util import get_sqlalchemy_url
 
 logger = logging.getLogger(__name__)
 
@@ -330,7 +331,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     drivername, credentials
                 )
             else:
-                options = sqlalchemy.engine.url.URL(drivername, **credentials)
+                options = get_sqlalchemy_url(drivername, **credentials)
         return options, create_engine_kwargs, drivername
 
     def _get_sqlalchemy_key_pair_auth_url(self, drivername, credentials):
@@ -366,9 +367,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
         credentials_driver_name = credentials.pop("drivername", None)
         create_engine_kwargs = {"connect_args": {"private_key": pkb}}
         return (
-            sqlalchemy.engine.url.URL(
-                drivername or credentials_driver_name, **credentials
-            ),
+            get_sqlalchemy_url(drivername or credentials_driver_name, **credentials),
             create_engine_kwargs,
         )
 

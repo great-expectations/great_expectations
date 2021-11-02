@@ -142,6 +142,7 @@ class ProfilerTypeMapping:
         "NUMERIC",
         "FloatType",
         "DoubleType",
+        "float",
         "float_",
         "float16",
         "float32",
