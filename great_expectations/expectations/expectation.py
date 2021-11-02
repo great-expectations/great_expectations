@@ -1839,6 +1839,13 @@ def _format_map_output(
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing
 
+    if result_format["include_unexpected_rows"]:
+        return_obj["result"].update(
+            {
+                "unexpected_row_list": unexpected_row_list,
+            }
+        )
+
     if result_format["result_format"] == "BASIC":
         return return_obj
 
@@ -1883,13 +1890,8 @@ def _format_map_output(
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 
-    return_obj["result"].update(
-        {
-            "unexpected_row_list": unexpected_row_list,
-        }
-    )
 
-    if result_format["result_format"] == "INCLUDE_UNEXPECTED_ROWS":
-        return return_obj
+    # if result_format["result_format"] == "INCLUDE_UNEXPECTED_ROWS":
+    #     return return_obj
 
     raise ValueError("Unknown result_format {}.".format(result_format["result_format"]))

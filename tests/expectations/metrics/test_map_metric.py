@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -16,6 +17,52 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
+
+
+@pytest.fixture
+def dataframe_for_unexpected_rows():
+    return pd.DataFrame(
+        {
+            "a": [1, 5, 22, 3, 5, 10],
+            "b": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
+        }
+    )
+
+@pytest.fixture()
+def expected_evr_without_unexpected_rows():
+    return ExpectationValidationResult(
+        success=False,
+        expectation_config={
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "a",
+                "value_set": [1, 5, 22],
+            },
+            "meta": {},
+        },
+        result={
+            "element_count": 6,
+            "unexpected_count": 2,
+            "unexpected_percent": 33.33333333333333,
+            "partial_unexpected_list": [3, 10],
+            "unexpected_list": [3, 10],
+            "partial_unexpected_index_list": [3, 5],
+            "partial_unexpected_counts": [
+                {"value": 3, "count": 1},
+                {"value": 10, "count": 1},
+            ],
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "unexpected_percent_total": 33.33333333333333,
+            "unexpected_percent_nonmissing": 33.33333333333333,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        meta={},
+    )
 
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
@@ -96,27 +143,54 @@ def test_get_map_metric_dependencies():
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
 
 
-def test_pandas_unexpected_rows():
-    df = pd.DataFrame(
-        {
-            "a": [1, 5, 22, 3, 5, 10],
-            "b": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
-        }
-    )
+def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_rows):
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "a",
+            "column": "b",
             "mostly": 0.9,
-            "value_set": [1, 5, 22],
+            "value_set": ["cat", "fish", "dog", "giraffe"],
             "result_format": {
-                "result_format": "COMPLETE",
+                "result_format": "BASIC",
+                "include_unexpected_rows": True
             },
         },
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    batch: Batch = Batch(data=df)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows)
+    engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=engine, batches=(batch,))
+    result = expectation.validate(validator)
+    assert result == ExpectationValidationResult(
+        success=False,
+        result={
+            "unexpected_row_list": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        meta={},
+    )
+
+
+def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_rows):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "include_unexpected_rows": True
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine, batches=(batch,))
     result = expectation.validate(validator)
@@ -126,7 +200,6 @@ def test_pandas_unexpected_rows():
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {
                 "column": "a",
-                "mostly": 0.9,
                 "value_set": [1, 5, 22],
             },
             "meta": {},
@@ -155,3 +228,50 @@ def test_pandas_unexpected_rows():
         },
         meta={},
     )
+
+
+def test_pandas_default_to_not_include_unexpected_rows(
+        dataframe_for_unexpected_rows,
+    expected_evr_without_unexpected_rows
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows)
+    engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=engine, batches=(batch,))
+    result = expectation.validate(validator)
+    assert result == expected_evr_without_unexpected_rows
+
+
+def test_pandas_specify_not_include_unexpected_rows(
+        dataframe_for_unexpected_rows,
+        expected_evr_without_unexpected_rows
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "include_unexpected_rows": False
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows)
+    engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=engine, batches=(batch,))
+    result = expectation.validate(validator)
+    assert result == expected_evr_without_unexpected_rows
