@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [DOCS] Choosing and configuring DataConnectors (#3533)
 
 ### 0.13.40
 * [FEATURE] Retrieve data context config through Cloud API endpoint #3586
@@ -55,7 +56,6 @@ title: Changelog
 * [DOCS] Improve Readability of Documentation Content (#3536)
 * [MAINTENANCE] Content and test script update (#3532)
 * [MAINTENANCE] Provide Deprecation Notice for the "parse_strings_as_datetimes" Expectation Parameter in V3 (#3539)
-
 
 ### 0.13.37
 * [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
