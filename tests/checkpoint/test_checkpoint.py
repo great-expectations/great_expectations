@@ -1355,7 +1355,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         raise pytest.fail(f"EXCEPTION: {exception}")
 
 
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_top_level_batch_request(
+def test_newstyle_checkpoint_instantiates_and_produces_a_result_when_run_runtime_batch_request_object_top_level_batch_request(
     data_context_with_datasource_spark_engine,
 ):
     context: DataContext = data_context_with_datasource_spark_engine
@@ -1405,7 +1405,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
     try:
         print(results)
