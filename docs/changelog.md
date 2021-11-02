@@ -5,6 +5,17 @@ title: Changelog
 ### Develop
 * [DOCS] Choosing and configuring DataConnectors (#3533)
 
+### 0.13.40
+* [FEATURE] Retrieve data context config through Cloud API endpoint #3586
+* [FEATURE] Update Batch IDs to match name change in paths included in batch_request #3587
+* [FEATURE] V2-to-V3 Upgrade/Migration #3592
+* [FEATURE] table and graph atomic renderers #3595
+* [FEATURE] V2-to-V3 Upgrade/Migration (Sidebar.js update) #3603
+* [DOCS] Fixing broken links and linking to Expectation Gallery #3591
+* [MAINTENANCE] Get TZLocal back to its original version control. #3585
+* [MAINTENANCE] Add tests for datetime evaluation parameters #3601
+* [MAINTENANCE] Removed warning for pandas option display.max_colwidth #3606
+
 ### 0.13.39
 * [FEATURE] Migration of Expectations to Atomic Prescriptive Renderers (#3530, #3537)
 * [FEATURE] Cloud: Editing Expectation Suites programmatically (#3564)

@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, Optional
 
 import pandas as pd
@@ -88,6 +89,25 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
                 "condition_parser",
             ],
         )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "value_set": {
+                "schema": {"type": "array"},
+                "value": params.get("value_set"),
+            },
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"
@@ -111,29 +131,12 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
             template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
+            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "value_set": {
-                "schema": {"type": "array"},
-                "value": params.get("value_set"),
-            },
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": params.get("parse_strings_as_datetimes"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
             params=params,
             params_with_json_schema=params_with_json_schema,
@@ -223,6 +226,12 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
         if parse_strings_as_datetimes:
+            warnings.warn(
+                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+            future release.  Please update code accordingly. 
+            """,
+                DeprecationWarning,
+            )
             parsed_value_set = parse_value_set(value_set)
             observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
         else:

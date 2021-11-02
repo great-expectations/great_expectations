@@ -4,6 +4,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.expectations.metrics.import_manager import reflection
+from great_expectations.util import get_sqlalchemy_inspector
 
 
 def test_table_column_introspection(sa):
@@ -21,7 +22,7 @@ def test_table_column_introspection(sa):
     assert batch_data.selectable.name == "table_partitioned_by_date_column__A"
     assert batch_data.selectable.schema is None
 
-    insp = reflection.Inspector.from_engine(eng)
+    insp = get_sqlalchemy_inspector(eng)
     columns = insp.get_columns(
         batch_data.selectable.name, schema=batch_data.selectable.schema
     )

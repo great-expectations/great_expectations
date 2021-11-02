@@ -20,7 +20,11 @@ from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
 )
-from great_expectations.util import generate_temporary_table_name, import_library_module
+from great_expectations.util import (
+    generate_temporary_table_name,
+    get_sqlalchemy_inspector,
+    import_library_module,
+)
 
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
@@ -627,7 +631,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     )
 
         try:
-            insp = reflection.Inspector.from_engine(self.engine)
+            insp = get_sqlalchemy_inspector(self.engine)
             self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since

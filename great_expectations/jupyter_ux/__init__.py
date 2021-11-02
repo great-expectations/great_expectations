@@ -8,14 +8,17 @@ from datetime import datetime
 import pandas as pd
 import tzlocal
 from IPython.core.display import HTML, display
+from packaging import version
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 
-# must be -1 for Pandas 0.23 and 0.25 compatibility checks
-# ... however -1 throws a deprecation warning in current versions
-pd.set_option("display.max_colwidth", -1)
+if version.parse(pd.__version__) <= version.parse("1.0.0"):
+    # support for negative integers was deprecated in version 1.0.1
+    pd.set_option("display.max_colwidth", -1)
+else:
+    pd.set_option("display.max_colwidth", None)
 
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
