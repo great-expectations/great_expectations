@@ -252,7 +252,7 @@ Since this `BatchRequest` does not specify which data_reference to load, the `Ac
 print(validator.active_batch_definition)
 ```
 
-which outputs:
+which prints:
 ```bash
 {
   "datasource_name": "taxi_datasource",
@@ -267,14 +267,14 @@ which outputs:
 
 Notice that the `batch_identifiers` for this `batch_definition` specify `"year": "2019", "month": "03"`. The parameter `batch_identifiers` can be used in our `BatchRequest` to return the data_reference CSV of our choosing using the `group_names` defined in our `DataConnector`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L308-L320
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L308-L318
 ```
 
 ```python
 print(validator.active_batch_definition)
 ```
 
-which outputs:
+which prints:
 ```bash
 {
   "datasource_name": "taxi_datasource",
