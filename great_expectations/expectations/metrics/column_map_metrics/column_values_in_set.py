@@ -19,7 +19,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 class ColumnValuesInSet(ColumnMapMetricProvider):
     condition_metric_name = "column_values.in_set"
-    condition_value_keys = ("value_set",)
+    condition_value_keys = ("value_set", "parse_strings_as_datetimes")
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(
