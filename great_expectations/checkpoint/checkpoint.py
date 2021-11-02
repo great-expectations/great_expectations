@@ -253,7 +253,7 @@ class Checkpoint:
         batch_request: BatchRequest = substituted_runtime_config.batch_request
         if len(validations) == 0 and batch_request is None:
             raise ge_exceptions.CheckpointError(
-                f'Checkpoint "{self.name}" does not contain any validations.'
+                f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
             )
 
         if run_name is None and run_name_template is not None:
