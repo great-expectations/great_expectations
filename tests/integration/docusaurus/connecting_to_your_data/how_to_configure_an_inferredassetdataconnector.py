@@ -302,6 +302,27 @@ validator = context.get_validator(
     create_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
 )
 
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+
+batch_request = BatchRequest(
+    datasource_name="taxi_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="yellow_tripdata",
+    data_connector_query={
+        "batch_filter_parameters": {"year": "2019", "month": "02"}
+    },
+)
+
+validator = context.get_validator(
+    batch_request=batch_request,
+    expectation_suite_name="<MY EXPECTATION SUITE NAME>",
+)
+
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+assert validator.active_batch_definition.batch_identifiers == {"year": "2019", "month": "02"}
+
 # YAML
 datasource_yaml = """
 name: taxi_datasource

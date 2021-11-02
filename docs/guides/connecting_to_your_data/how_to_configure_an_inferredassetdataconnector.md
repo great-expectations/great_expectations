@@ -246,6 +246,47 @@ Once configured, you can get `Validators` from the `Data Context` as follows:
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L294-L303
 ```
 
+Since this `BatchRequest` does not specify which data_reference to load, the `ActiveBatch` for the validator will be the last data_reference that was loaded. In this case, `yellow_tripdata_2019-03.csv` is what is being used by `validator`. We can verfiy this with:
+
+```python
+print(validator.active_batch_definition)
+```
+
+which outputs:
+```bash
+{
+  "datasource_name": "taxi_datasource",
+  "data_connector_name": "default_inferred_data_connector_name",
+  "data_asset_name": "yellow_tripdata",
+  "batch_identifiers": {
+    "year": "2019",
+    "month": "03"
+  }
+}
+```
+
+Notice that the `batch_identifiers` for this `batch_definition` specify `"year": "2019", "month": "03"`. The parameter `batch_identifiers` can be used in our `BatchRequest` to return the data_reference CSV of our choosing using the `group_names` defined in our `DataConnector`:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L308-L320
+```
+
+```python
+print(validator.active_batch_definition)
+```
+
+which outputs:
+```bash
+{
+  "datasource_name": "taxi_datasource",
+  "data_connector_name": "default_inferred_data_connector_name",
+  "data_asset_name": "yellow_tripdata",
+  "batch_identifiers": {
+    "year": "2019",
+    "month": "02"
+  }
+}
+```
+
 ### Example 2: Basic configuration with more than one Data Asset
 
 Here’s a similar example, but this time two Data Assets are mixed together in one folder.
@@ -326,13 +367,13 @@ Then this configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L306-L323
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L327-L345
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L334-L352
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L356-L375
 ```
 
 </TabItem>
@@ -374,13 +415,13 @@ Then this configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L384-L403
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L405-L424
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L414-L438
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L435-L459
 ```
 
 </TabItem>
@@ -420,13 +461,13 @@ Then this configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L468-L486
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L489-L507
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L497-L520
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L518-L541
 ```
 
 </TabItem>
