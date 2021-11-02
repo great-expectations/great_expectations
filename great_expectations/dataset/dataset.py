@@ -2668,10 +2668,14 @@ class Dataset(MetaDataset):
 
         """
         if min_value is not None and not isinstance(min_value, Number):
-            raise ValueError("min_value must be a number")
+            raise ValueError(
+                "min_value must be a datetime (for datetime columns) or number"
+            )
 
         if max_value is not None and not isinstance(max_value, Number):
-            raise ValueError("max_value must be a number")
+            raise ValueError(
+                "max_value must be a datetime (for datetime columns) or number"
+            )
 
         column_mean = self.get_column_mean(column)
 
