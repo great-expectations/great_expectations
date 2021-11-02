@@ -13,7 +13,7 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
 )
-from great_expectations.render.types import RenderedContent
+from great_expectations.render.types import RenderedContent, RenderedDocumentContent
 
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
@@ -185,8 +185,8 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
 
 def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
     document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
-    # print(document)
-    # assert document == 0
+    assert isinstance(document, RenderedDocumentContent)
+    assert len(document.sections) == 8
 
 
 def test_ValidationResultsPageRenderer_render_validation_header(

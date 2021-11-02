@@ -5,6 +5,7 @@ import numpy as np
 from dateutil.parser import parse
 
 from great_expectations.execution_engine.util import check_sql_engine_dialect
+from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     import psycopg2
@@ -233,7 +234,7 @@ def get_sqlalchemy_column_metadata(
     try:
         columns: List[Dict[str, Any]]
 
-        inspector: reflection.Inspector = reflection.Inspector.from_engine(engine)
+        inspector: reflection.Inspector = get_sqlalchemy_inspector(engine)
         try:
             # if a custom query was passed
             if isinstance(table_selectable, TextClause):
