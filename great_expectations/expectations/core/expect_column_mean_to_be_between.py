@@ -290,6 +290,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        print(f'\n[ALEX_TEST] [EXPECT_COLUMN_MEAN_TO_BE_BETWEEEN._validate] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         return self._validate_metric_value_between(
             metric_name="column.mean",
             configuration=configuration,

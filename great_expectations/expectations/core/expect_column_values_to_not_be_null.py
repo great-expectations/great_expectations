@@ -289,17 +289,44 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
+        print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
+        # # configuration_result_format: dict = configuration.kwargs.get("result_format")
+        # # print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] CONFIGURATION_RESULT_FORMAT: {configuration_result_format} ; TYPE: {str(type(configuration_result_format))}')
+        # default_result_format: dict = self.default_kwarg_values.get("result_format")
+        # print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] DEFAULT_RESULT_FORMAT: {default_result_format} ; TYPE: {str(type(default_result_format))}')
+        # # configuration_or_default_result_format: dict = configuration.kwargs.get("result_format", default_result_format)
+        # # print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] CONFIGURATION_OR_DEFAULT_RESULT_FORMAT: {configuration_or_default_result_format} ; TYPE: {str(type(configuration_or_default_result_format))}')
+        # configuration_result_format: dict = configuration.kwargs.get("result_format", default_result_format)
+        # print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] CONFIGURATION_RESULT_FORMAT: {configuration_result_format} ; TYPE: {str(type(configuration_result_format))}')
+        # if runtime_configuration:
+        #     # result_format = runtime_configuration.get(
+        #     #     "result_format",
+        #     #     configuration_or_default_result_format,
+        #     # )
+        #     result_format = runtime_configuration.get(
+        #         "result_format",
+        #         configuration_result_format,
+        #     )
+        #     print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] RESULT_FORMAT-00: {result_format} ; TYPE: {str(type(result_format))}')
+        # else:
+        #     # result_format = configuration_or_default_result_format
+        #     result_format = configuration_result_format
+        #     print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] RESULT_FORMAT-01: {result_format} ; TYPE: {str(type(result_format))}')
+        # # if runtime_configuration:
+        # #     result_format = runtime_configuration.get(
+        # #         "result_format",
+        # #         configuration.kwargs.get(
+        # #             "result_format", self.default_kwarg_values.get("result_format")
+        # #         ),
+        # #     )
+        # #     print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] RESULT_FORMAT-00: {result_format} ; TYPE: {str(type(result_format))}')
+        # # else:
+        # #     result_format = configuration.kwargs.get(
+        # #         "result_format", self.default_kwarg_values.get("result_format")
+        # #     )
+        # #     print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] RESULT_FORMAT-01: {result_format} ; TYPE: {str(type(result_format))}')
+        result_format = self.get_result_format(configuration=configuration, runtime_configuration=runtime_configuration)
+        print(f'\n[ALEX_TEST] [EXPECT_COLUMN_VALUES_TO_NOT_BE_NULL._validate] RESULT_FORMAT-1: {result_format} ; TYPE: {str(type(result_format))}')
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )

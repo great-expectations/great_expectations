@@ -6,7 +6,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -165,7 +165,7 @@ class Expectation(metaclass=MetaExpectation):
     def _validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: Dict,
+        metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
@@ -600,29 +600,57 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ) -> "ExpectationValidationResult":
+    ) -> ExpectationValidationResult:
+        print(f'\n[ALEX_TEST] [EXPECTATION.metrics_validate] EXPECTATION_CONFIGURATION-0: {configuration} ; TYPE: {str(type(configuration))}')
+        print(f'\n[ALEX_TEST] [EXPECTATION.metrics_validate] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         if configuration is None:
             configuration = self.configuration
-        provided_metrics = {}
-        requested_metrics = self.get_validation_dependencies(
+        print(f'\n[ALEX_TEST] [EXPECTATION.metrics_validate] EXPECTATION_CONFIGURATION-1: {configuration} ; TYPE: {str(type(configuration))}')
+
+        validation_dependencies: dict = self.get_validation_dependencies(
             configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
-        )["metrics"]
+        )
+        runtime_configuration["result_format"] = validation_dependencies["result_format"]
+        print(f'\n[ALEX_TEST] [EXPECTATION.metrics_validate] RUNTIME_CONFIGURATION-1: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
+        requested_metrics = validation_dependencies["metrics"]
+
+        provided_metrics = {}
         for name, metric_edge_key in requested_metrics.items():
             provided_metrics[name] = metrics[metric_edge_key.id]
 
-        return self._build_evr(
-            self._validate(
-                configuration=configuration,
-                metrics=provided_metrics,
-                runtime_configuration=runtime_configuration,
-                execution_engine=execution_engine,
-            ),
-            configuration,
+        # TODO: <Alex>ALEX</Alex>
+        expectation_validation_result: Union[ExpectationValidationResult, dict] = self._validate(
+            configuration=configuration,
+            metrics=provided_metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
         )
+        print(f'\n[ALEX_TEST] [EXPECTATION.metrics_validate] EXPECTATION_VALIDATION_RESULT-0: {expectation_validation_result} ; TYPE: {str(type(expectation_validation_result))}')
+        evr: ExpectationValidationResult = self._build_evr(
+            raw_response=expectation_validation_result,
+            configuration=configuration
+        )
+        print(f'\n[ALEX_TEST] [EXPECTATION.metrics_validate] EXPECTATION_VALIDATION_RESULT-1: {evr} ; TYPE: {str(type(evr))}')
+        return evr
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # return self._build_evr(
+        #     self._validate(
+        #         configuration=configuration,
+        #         metrics=provided_metrics,
+        #         runtime_configuration=runtime_configuration,
+        #         execution_engine=execution_engine,
+        #     ),
+        #     configuration,
+        # )
+        # TODO: <Alex>ALEX</Alex>
 
-    def _build_evr(self, raw_response, configuration):
+    @staticmethod
+    def _build_evr(raw_response, configuration) -> ExpectationValidationResult:
+        print(f'\n[ALEX_TEST] [EXPECTATION._build_evr] raw_response: {raw_response} ; TYPE: {str(type(raw_response))}')
+        print(f'\n[ALEX_TEST] [EXPECTATION._build_evr] configuration: {configuration} ; TYPE: {str(type(configuration))}')
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
         if not isinstance(raw_response, ExpectationValidationResult):
@@ -641,17 +669,36 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
+    ) -> dict:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_validation_dependencies] EXPECTATION_CONFIGURATION-0: {configuration} ; TYPE: {str(type(configuration))}')
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_validation_dependencies] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
+        # TODO: <Alex>ALEX</Alex>
+        runtime_configuration = self.get_runtime_kwargs(
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_validation_dependencies] RUNTIME_CONFIGURATION-1: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
+        result_format: dict = runtime_configuration["result_format"]
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_validation_dependencies] RESULT_FORMAT-0: {result_format} ; TYPE: {str(type(result_format))}')
+        result_format = parse_result_format(result_format=result_format)
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_validation_dependencies] RESULT_FORMAT-1: {result_format} ; TYPE: {str(type(result_format))}')
         return {
-            "result_format": parse_result_format(
-                self.get_runtime_kwargs(
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                ).get("result_format")
-            ),
+            "result_format": result_format,
             "metrics": {},
         }
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # return {
+        #     "result_format": parse_result_format(
+        #         self.get_runtime_kwargs(
+        #             configuration=configuration,
+        #             runtime_configuration=runtime_configuration,
+        #         ).get("result_format")
+        #     ),
+        #     "metrics": {},
+        # }
+        # TODO: <Alex>ALEX</Alex>
 
     def get_domain_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -690,7 +737,7 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
-    ):
+    ) -> dict:
         if not configuration:
             configuration = self.configuration
 
@@ -712,6 +759,24 @@ class Expectation(metaclass=MetaExpectation):
 
         return runtime_kwargs
 
+    def get_result_format(self, configuration: ExpectationConfiguration, runtime_configuration: dict = None) -> dict:
+        default_result_format: Optional[Union[bool, str]] = self.default_kwarg_values.get("result_format")
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_result_format] DEFAULT_RESULT_FORMAT: {default_result_format} ; TYPE: {str(type(default_result_format))}')
+        configuration_result_format: dict = configuration.kwargs.get("result_format", default_result_format)
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_result_format] CONFIGURATION_RESULT_FORMAT: {configuration_result_format} ; TYPE: {str(type(configuration_result_format))}')
+        result_format: dict
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration_result_format,
+            )
+            print(f'\n[ALEX_TEST] [EXPECTATION.get_result_format] RESULT_FORMAT-00: {result_format} ; TYPE: {str(type(result_format))}')
+        else:
+            result_format = configuration_result_format
+            print(f'\n[ALEX_TEST] [EXPECTATION.get_result_format] RESULT_FORMAT-01: {result_format} ; TYPE: {str(type(result_format))}')
+        print(f'\n[ALEX_TEST] [EXPECTATION.get_result_format] RESULT_FORMAT-1: {result_format} ; TYPE: {str(type(result_format))}')
+        return result_format
+
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if configuration is None:
             configuration = self.configuration
@@ -725,7 +790,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def validate(
         self,
-        validator: "Validator",
+        validator: Validator,
         configuration: Optional[ExpectationConfiguration] = None,
         evaluation_parameters=None,
         interactive_evaluation=True,
@@ -975,7 +1040,8 @@ class Expectation(metaclass=MetaExpectation):
 
         return docstring, short_description
 
-    def _choose_example(self, examples):
+    @staticmethod
+    def _choose_example(examples):
         example = examples[0]
 
         example_data = example["data"]
@@ -983,8 +1049,8 @@ class Expectation(metaclass=MetaExpectation):
 
         return example_data, example_test
 
+    @staticmethod
     def _instantiate_example_validation_results(
-        self,
         test_batch: Batch,
         expectation_config: ExpectationConfiguration,
     ) -> List[ExpectationValidationResult]:
@@ -995,13 +1061,14 @@ class Expectation(metaclass=MetaExpectation):
 
         return validation_results
 
-    def _get_supported_renderers(self, snake_name: str) -> List[str]:
+    @staticmethod
+    def _get_supported_renderers(snake_name: str) -> List[str]:
         supported_renderers = list(_registered_renderers[snake_name].keys())
         supported_renderers.sort()
         return supported_renderers
 
+    @staticmethod
     def _get_test_results(
-        self,
         snake_name,
         examples,
         execution_engines,
@@ -1180,8 +1247,9 @@ class TableExpectation(Expectation, ABC):
 
         return dependencies
 
+    @staticmethod
     def validate_metric_value_between_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        configuration: Optional[ExpectationConfiguration]
     ):
         # Validating that Minimum and Maximum values are of the proper format and type
         min_val = None
@@ -1232,6 +1300,7 @@ class TableExpectation(Expectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        print(f'\n[ALEX_TEST] [EXPECTATION._validate_metric_value_between] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         metric_value = metrics.get(metric_name)
 
         if metric_value is None:
