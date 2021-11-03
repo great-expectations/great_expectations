@@ -100,7 +100,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         params_with_json_schema = {
             "column_list": {
                 "schema": {"type": "array"},
-                "value": params.get("column_list"),
+                "value": params.get("column_list", []),
             },
             "ignore_row_if": {
                 "schema": {"type": "string"},
@@ -108,15 +108,15 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             },
             "row_condition": {
                 "schema": {"type": "string"},
-                "value": params.get("row_condition"),
+                "value": params.get("row_condition", ""),
             },
             "condition_parser": {
                 "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
+                "value": params.get("condition_parser", ""),
             },
             "mostly": {
                 "schema": {"type": "number"},
-                "value": params.get("mostly"),
+                "value": params.get("mostly", 1),
             },
         }
 
@@ -131,13 +131,15 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         )
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
-        for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
+        column_list = params.get("column_list") if params.get("column_list") else []
+        if len(column_list) > 0:
+            for idx in range(len(column_list) - 1):
+                template_str += "$column_list_" + str(idx) + ", "
+                params["column_list_" + str(idx)] = column_list[idx]
 
-        last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+            last_idx = len(column_list) - 1
+            template_str += "$column_list_" + str(last_idx)
+            params["column_list_" + str(last_idx)] = column_list[last_idx]
 
         if params["row_condition"] is not None:
             (
