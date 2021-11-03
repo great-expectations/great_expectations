@@ -81,6 +81,7 @@ except (ImportError, KeyError):
 
 try:
     import sqlalchemy_dremio.pyodbc
+
     registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
 except ImportError:
     sqlalchemy_dremio = None
@@ -2014,9 +2015,7 @@ WHERE
 
         try:
             # Dremio
-            if isinstance(
-                self.sql_engine_dialect, sqlalchemy_dremio.pyodbc.dialect
-            ):
+            if isinstance(self.sql_engine_dialect, sqlalchemy_dremio.pyodbc.dialect):
                 if positive:
                     return sa.func.REGEXP_MATCHES(sa.column(column), literal(regex))
                 else:

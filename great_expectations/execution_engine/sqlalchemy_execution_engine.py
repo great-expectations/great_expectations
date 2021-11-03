@@ -77,6 +77,7 @@ except ImportError:
 
 try:
     import sqlalchemy_dremio.pyodbc
+
     if sa:
         sa.dialects.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
 except ImportError:
@@ -253,7 +254,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif self.engine.dialect.name.lower() == "dremio":
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
-        )
+            )
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
