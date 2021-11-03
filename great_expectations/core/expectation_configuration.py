@@ -1106,11 +1106,9 @@ class ExpectationConfiguration(SerializableDictDot):
         return success_kwargs
 
     def get_runtime_kwargs(self, runtime_configuration=None):
-        print(f'\n[ALEX_TEST] [EXPECTATION_CONFIGURTION.get_runtime_kwargs] RUNTIME_CONFIGURATION: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
-        print(f'\n[ALEX_TEST] [EXPECTATION_CONFIGURTION.GET_RUNTIME_KWARGS] expectation_kwargs_dict: {expectation_kwargs_dict} ; TYPE: {str(type(expectation_kwargs_dict))}')
         if expectation_kwargs_dict is None:
             impl = get_expectation_impl(self.expectation_type)
             if impl is not None:
@@ -1290,9 +1288,7 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_configuration: dict = None,
         execution_engine=None,
     ):
-        print(f'\n[ALEX_TEST] [EXPECTATION_CONFIGURATION.metrics_validate] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         expectation_impl = self._get_expectation_impl()
-        print(f'\n[ALEX_TEST] [EXPECTATION_CONFIGURATION.metrics_validate] EXPECTATION_IMPL-0: {expectation_impl} ; TYPE: {str(type(expectation_impl))}')
         return expectation_impl(self).metrics_validate(
             metrics,
             runtime_configuration=runtime_configuration,

@@ -128,7 +128,9 @@ class Validator:
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._default_expectation_args = copy.deepcopy(Validator.DEFAULT_RUNTIME_CONFIGURATION)
+        self._default_expectation_args = copy.deepcopy(
+            Validator.DEFAULT_RUNTIME_CONFIGURATION
+        )
         self._validator_config = {}
 
         # This special state variable tracks whether a validation run is going on, which will disable
@@ -384,7 +386,6 @@ class Validator:
                 Returns:
                     A list of Validations, validating that all necessary metrics are available.
         """
-        print(f'\n[ALEX_TEST] [VALIDATOR.graph_validate] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         if runtime_configuration is None:
             runtime_configuration = {}
 
@@ -392,7 +393,6 @@ class Validator:
             catch_exceptions = True
         else:
             catch_exceptions = False
-        print(f'\n[ALEX_TEST] [VALIDATOR.graph_validate] CATCH_EXCEPTIONS-0: {catch_exceptions} ; TYPE: {str(type(catch_exceptions))}')
 
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
@@ -528,7 +528,6 @@ class Validator:
             else:
                 raise err
 
-        print(f'\n[ALEX_TEST] [VALIDATOR.graph_validate] RUNTIME_CONFIGURATION-1: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
@@ -617,7 +616,6 @@ class Validator:
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]:
-        print(f'\n[ALEX_TEST] [VALIDATOR.resolve_validation_graph] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
         if runtime_configuration is None:
             runtime_configuration = {}
 
@@ -625,7 +623,6 @@ class Validator:
             catch_exceptions = True
         else:
             catch_exceptions = False
-        print(f'\n[ALEX_TEST] [VALIDATOR.resolve_validation_graph] CATCH_EXCEPTIONS-0: {catch_exceptions} ; TYPE: {str(type(catch_exceptions))}')
 
         failed_metric_info: Dict[
             Tuple[str, str, str],
@@ -672,7 +669,6 @@ class Validator:
                     computable_metrics.add(metric)
 
             try:
-                print(f'\n[ALEX_TEST] [VALIDATOR.resolve_validation_graph] RUNTIME_CONFIGURATION-1: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
                 metrics.update(
                     self._resolve_metrics(
                         execution_engine=self._execution_engine,
@@ -1079,9 +1075,6 @@ set as active.
         suppress_warnings=False,
         suppress_logging=False,
     ):
-        print(f'\n[ALEX_TEST] [VALIDATOR.get_expectation_suite] discard_failed_expectations: {discard_failed_expectations} ; TYPE: {str(type(discard_failed_expectations))}')
-        print(f'\n[ALEX_TEST] [VALIDATOR.get_expectation_suite] discard_result_format_kwargs: {discard_result_format_kwargs} ; TYPE: {str(type(discard_result_format_kwargs))}')
-        print(f'\n[ALEX_TEST] [VALIDATOR.get_expectation_suite] discard_catch_exceptions_kwargs: {discard_catch_exceptions_kwargs} ; TYPE: {str(type(discard_catch_exceptions_kwargs))}')
         """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
 
         Args:
@@ -1253,9 +1246,6 @@ set as active.
         run_name=None,
         run_time=None,
     ):
-        print(f'\n[ALEX_TEST] [VALIDATOR.validate] EXPECTATION_SUITE-0: {expectation_suite} ; TYPE: {str(type(expectation_suite))}')
-        print(f'\n[ALEX_TEST] [VALIDATOR.validate] CATCH_EXCEPTIONS-0: {catch_exceptions} ; TYPE: {str(type(catch_exceptions))}')
-        print(f'\n[ALEX_TEST] [VALIDATOR.validate] RESULT_FORMAT-0: {result_format} ; TYPE: {str(type(result_format))}')
         # noinspection SpellCheckingInspection
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
@@ -1364,7 +1354,6 @@ set as active.
                 # temporarily set self._data_context so it is used inside the expectation decorator
                 self._data_context = data_context
 
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] EXPECTATION_SUITE-NONE_CHECK: {expectation_suite} ; TYPE: {str(type(expectation_suite))}')
             if expectation_suite is None:
                 expectation_suite = self.get_expectation_suite(
                     discard_failed_expectations=False,
@@ -1372,7 +1361,6 @@ set as active.
                     discard_include_config_kwargs=False,
                     discard_catch_exceptions_kwargs=False,
                 )
-                print(f'\n[ALEX_TEST] [VALIDATOR.validate] EXPECTATION_SUITE_LOADED_FROM_FILE: {expectation_suite} ; TYPE: {str(type(expectation_suite))}')
             elif isinstance(expectation_suite, str):
                 try:
                     with open(expectation_suite) as infile:
@@ -1402,9 +1390,6 @@ set as active.
                     )
                 return ExpectationValidationResult(success=False)
 
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] EXPECTATION_SUITE-1: {expectation_suite} ; TYPE: {str(type(expectation_suite))}')
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] CATCH_EXCEPTIONS-1: {catch_exceptions} ; TYPE: {str(type(catch_exceptions))}')
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] RESULT_FORMAT-1: {result_format} ; TYPE: {str(type(result_format))}')
             # Evaluation parameter priority is
             # 1. from provided parameters
             # 2. from expectation configuration
@@ -1463,7 +1448,6 @@ set as active.
                 expectations_to_evaluate.extend(columns[col])
 
             runtime_configuration = copy.deepcopy(self.default_expectation_args)
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] RUNTIME_CONFIGURATION-0: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
 
             if catch_exceptions is not None:
                 runtime_configuration.update({"catch_exceptions": catch_exceptions})
@@ -1471,23 +1455,6 @@ set as active.
             if result_format is not None:
                 runtime_configuration.update({"result_format": result_format})
 
-            # TODO: <Alex>ALEX</Alex>
-            assert((Validator.RUNTIME_KEYS - set(runtime_configuration.keys())) == set())
-            modified_expectation_arg_keys = set(runtime_configuration.keys()) - Validator.RUNTIME_KEYS
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] MODIFIED_EXPECTATION_ARG_KEYS-0: {modified_expectation_arg_keys} ; TYPE: {str(type(modified_expectation_arg_keys))}')
-            for k, v in runtime_configuration.items():
-                if k in Validator.RUNTIME_KEYS and v != Validator.DEFAULT_RUNTIME_CONFIGURATION[k]:
-                    modified_expectation_arg_keys.add(k)
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] MODIFIED_EXPECTATION_ARG_KEYS-1: {modified_expectation_arg_keys} ; TYPE: {str(type(modified_expectation_arg_keys))}')
-
-            runtime_configuration = {
-                k: v
-                for k, v in runtime_configuration.items()
-                if k in modified_expectation_arg_keys
-            }
-            # TODO: <Alex>ALEX</Alex>
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] RUNTIME_CONFIGURATION-1: {runtime_configuration} ; TYPE: {str(type(runtime_configuration))}')
-            print(f'\n[ALEX_TEST] [VALIDATOR.validate] EXPECTATIONS_TO_EVALUATE_IN_GRAPH_VALIDATE: {expectations_to_evaluate} ; TYPE: {str(type(expectations_to_evaluate))} ; NUM: {len(expectations_to_evaluate)}')
             results = self.graph_validate(
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
