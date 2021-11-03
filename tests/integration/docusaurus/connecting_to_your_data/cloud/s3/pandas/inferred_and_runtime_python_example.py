@@ -112,3 +112,5 @@ assert len(batch_list) == 1
 
 batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000
+
+assert batch.data.dataframe.shape[0] == 10000
