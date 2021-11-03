@@ -94,6 +94,12 @@ stages:
           inputs:
               secureFile: 'aws_config'
               retryCount: '2'
+        - task: DownloadSecureFile@1
+          name: aws_spark_jar
+          displayName: 'Download Spark JAR for AWS'
+          inputs:
+              secureFile: 'hadoop-aws-3.2.0.jar'
+              retryCount: '2'
 
         # - task: AddAWSServiceAccount@2
         #   inputs:
@@ -109,6 +115,8 @@ stages:
             pytest -v --docs-tests -m docs --mysql --mssql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
+            # spark
+            SPARK_CLASSPATH: $(aws_spark_jar.secureFilePath)
             # snowflake credentials
             SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
             SNOWFLAKE_USER: $(SNOWFLAKE_USER)
