@@ -146,10 +146,12 @@ docs_test_matrix = [
     # },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
     # Redshift
