@@ -2,15 +2,14 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.util import get_or_create_spark_session
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
 
-# Set up a basic spark dataframe
-spark = get_or_create_spark_session()
+# Set up a basic spark session
+spark = ge.core.util.get_or_create_spark_application()
 
 # basic dataframe
 data = [
@@ -61,6 +60,7 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
+print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
