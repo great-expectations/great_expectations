@@ -2,7 +2,6 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.util import get_or_create_spark_session
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -10,7 +9,7 @@ from great_expectations.data_context.types.base import (
 )
 
 # Set up a basic spark session
-spark = get_or_create_spark_session()
+spark = ge.core.util.get_or_create_spark_application()
 
 # basic dataframe
 data = [
