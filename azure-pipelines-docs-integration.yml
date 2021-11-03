@@ -89,6 +89,11 @@ stages:
               secureFile: 'superconductive-service-acct.json'
               retryCount: '2'
 
+
+        - task: AddAWSServiceAccount@2
+          inputs:
+            AWS: 'DocusaurusAWSservice'
+          displayName: 'Connect AWS Service Connection'
         - script: |
             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
           displayName: 'Create MSSQL database test_ci'
@@ -117,7 +122,6 @@ stages:
             # AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
             # AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
             # AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-            # todo: add credentials for cloud resources here
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
             GCP_PROJECT: $(GCP_PROJECT)
