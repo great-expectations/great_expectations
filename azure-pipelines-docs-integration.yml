@@ -125,9 +125,6 @@ stages:
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
             # AWS credentials
             AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
-            # AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-            # AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-            # AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
             GCP_PROJECT: $(GCP_PROJECT)
