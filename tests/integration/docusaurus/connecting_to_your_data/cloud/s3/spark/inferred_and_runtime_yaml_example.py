@@ -20,6 +20,9 @@ data_context_config = DataContextConfig(
 )
 context = BaseDataContext(project_config=data_context_config)
 
+SPARK_HOME = os.getenv("SPARK_HOME", "")
+raise RuntimeError(SPARK_HOME)
+
 datasource_yaml = fr"""
 name: my_s3_datasource
 class_name: Datasource
