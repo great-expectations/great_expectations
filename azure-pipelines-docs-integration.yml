@@ -93,9 +93,9 @@ stages:
         #   inputs:
         #     AWS: 'DocusaurusAWSservice'
         #   displayName: 'Connect AWS Service Connection'
-        # - script: |
-        #     sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
-        #   displayName: 'Create MSSQL database test_ci'
+        - script: |
+            sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+          displayName: 'Create MSSQL database test_ci'
 
         - script: |
             pip install pytest pytest-azurepipelines
