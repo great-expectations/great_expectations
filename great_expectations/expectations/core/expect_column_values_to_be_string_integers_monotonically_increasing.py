@@ -5,8 +5,10 @@ from typing import Dict, Optional, Callable
 import numpy as np
 import pandas as pd
 
-from great_expectations.expectations.metrics.column_map_metrics.column_values_increasing import ColumnValuesIncreasing
-from great_expectations.expectations.metrics.column_map_metrics.column_values_of_type import ColumnValuesOfType
+from great_expectations.expectations.metrics.column_map_metrics.column_values_string_integers_monotonically_increasing \
+    import ColumnValuesStringIntegersMonotonicallyIncreasing
+# from great_expectations.expectations.metrics.column_map_metrics.column_values_increasing import ColumnValuesIncreasing
+# from great_expectations.expectations.metrics.column_map_metrics.column_values_of_type import ColumnValuesOfType
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
@@ -124,10 +126,8 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         "requirements": [],
     }
 
-    metric_dependencies = (
-        "column_values.increasing",
-        "column_values.of_type",
-    )
+    map_metric = "column_values.string_integers.monotonically_increasing"
+
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -171,21 +171,28 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> dict:
+        # metric_config = MetricConfiguration(
+        #     metric_name="column_values.string_integers.monotonically_increasing.map",
+        #     metric_domain_kwargs=ColumnValuesStringIntegersMonotonicallyIncreasing.default_kwarg_values
+        # )
+
         dependencies = super().get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration
         )
-        #
-        print(dependencies)
+        # dependencies["metrics"]["column_values.string_integers.monotonically_increasing"] = metric_config
+
         column_value_increasing_metric_kwargs = get_metric_kwargs(
-            metric_name="column_values.increasing",
+            metric_name="column_values.string_integers.monotonically_increasing.map",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        # dependencies["metrics"]["column_values.increasing"] = MetricConfiguration(
-        #     metric_name="column_values.increasing",
-        #     metric_domain_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"],
-        #     metric_value_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"]
-        # )
+        dependencies["metrics"]["column_values.string_integers.monotonically_increasing"] = MetricConfiguration(
+            metric_name="column_values.string_integers.monotonically_increasing.map",
+            metric_domain_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"]
+        )
         #
         # column_value_type_metric_kwargs = get_metric_kwargs(
         #     metric_name="column_values.of_type",
@@ -209,17 +216,18 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         execution_engine: ExecutionEngine = None,
     ) -> Dict:
         print(metrics.keys())
-        column_values_of_type = execution_engine.resolve_metrics(
-            metrics["column_values.of_type"]
-        )
-        column_values_increasing = metric.get("column_values.increasing")
 
-        if isinstance(execution_engine, PandasExecutionEngine):
-            return self._validate_pandas(
-                column_values_of_type=column_values_of_type,
-                column_values_increasing=column_values_increasing,
-                expected_type=str
-            )
+        # column_values_of_type = execution_engine.resolve_metrics(
+        #     metrics["column_values.of_type"],
+        # )
+        # column_values_increasing = metrics.get("column_values.increasing")
+        #
+        # if isinstance(execution_engine, PandasExecutionEngine):
+        #     return self._validate_pandas(
+        #         column_values_of_type=column_values_of_type,
+        #         column_values_increasing=column_values_increasing,
+        #         expected_type=str
+        #     )
 
         return False
 
