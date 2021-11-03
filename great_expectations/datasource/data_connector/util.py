@@ -428,7 +428,7 @@ def list_s3_keys(
     s3_objects_info: dict = s3.list_objects_v2(**query_options)
 
     if not any(key in s3_objects_info for key in ["Contents", "CommonPrefixes"]):
-        raise ValueError("S3 query may not have been configured correctly.")
+        raise ValueError(query_options)
 
     if "Contents" in s3_objects_info:
         keys: List[str] = [
