@@ -671,6 +671,7 @@ class ExecutionEngineConfigSchema(Schema):
     )
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
+    force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
