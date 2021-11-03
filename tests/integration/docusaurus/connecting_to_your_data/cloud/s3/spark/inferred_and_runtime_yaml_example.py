@@ -120,3 +120,4 @@ assert len(batch_list) == 1
 
 batch: Batch = batch_list[0]
 assert batch.data.dataframe.count() == 10000
+assert batch.data.dataframe.count() == 10000
