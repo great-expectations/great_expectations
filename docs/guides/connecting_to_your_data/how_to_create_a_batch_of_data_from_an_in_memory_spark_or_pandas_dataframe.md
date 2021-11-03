@@ -96,7 +96,7 @@ You can read more about the core classes that make Great Expectations run in our
     Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
     :::
 
-4. **Construct a Validator**`
+4. **Construct a Validator**
 
     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L75-L79
     ```
