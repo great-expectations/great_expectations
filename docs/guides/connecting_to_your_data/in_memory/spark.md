@@ -112,7 +112,7 @@ Add the variable containing your dataframe (`df` in this example) to the `batch_
 :::
 
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L58-L63
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L58-L64
 ```
 
 <Congratulations />
