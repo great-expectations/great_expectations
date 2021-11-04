@@ -439,6 +439,7 @@ class DataConnectorConfigSchema(Schema):
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
@@ -673,6 +674,7 @@ class ExecutionEngineConfigSchema(Schema):
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
     force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
@@ -831,6 +833,7 @@ class DatasourceConfigSchema(Schema):
     )
     limit = fields.Integer(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
@@ -1179,6 +1182,7 @@ class DataContextConfigSchema(Schema):
             message=message,
         )
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "config_version" not in data:
@@ -1917,6 +1921,7 @@ class CheckpointConfigSchema(Schema):
     notify_on = fields.String(required=False, allow_none=True)
     notify_with = fields.String(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if not (
@@ -1936,6 +1941,7 @@ class CheckpointConfigSchema(Schema):
                     """
                 )
 
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
         data = deepcopy(data)
@@ -2273,6 +2279,7 @@ datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
+# noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
