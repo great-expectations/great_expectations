@@ -458,13 +458,17 @@ def test_result_format_configured_no_set_default_override(
     in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
-    runtime_environment_arguments = {
+    result_format: str
+
+    result_format = "SUMMARY"
+    runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+    suite: ExpectationSuite
+
+    suite = in_memory_runtime_context.create_expectation_suite(
         "test_suite", overwrite_existing=True
     )
 
@@ -499,23 +503,94 @@ def test_result_format_configured_no_set_default_override(
         },
     )
 
-    validator: Validator = in_memory_runtime_context.get_validator(
+    validator: Validator
+
+    validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
         expectation_suite=suite,
     )
 
     # Test calling "validator.validate()" explicitly.
 
-    validator_validation: ExpectationSuiteValidationResult = validator.validate(
-        **runtime_environment_arguments
-    )
-    results: List[ExpectationValidationResult] = validator_validation.results
+    validator_validation: ExpectationSuiteValidationResult
+
+    validator_validation = validator.validate(**runtime_environment_arguments)
+
+    results: List[ExpectationValidationResult]
+
+    results = validator_validation.results
     assert len(results) == 1
 
     result: ExpectationValidationResult
 
     result = results[0]
     assert len(result.result.keys()) > 0
+
+    result_format = "BASIC"
+    runtime_environment_arguments: dict = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    suite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    validator_validation = validator.validate(**runtime_environment_arguments)
+
+    results = validator_validation.results
+    assert len(results) == 1
+
+    result = results[0]
+    assert len(result.result.keys()) > 0
+
+    result_format = "BOOLEAN_ONLY"
+    runtime_environment_arguments: dict = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    suite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    validator_validation = validator.validate(**runtime_environment_arguments)
+
+    results = validator_validation.results
+    assert len(results) == 1
+
+    result = results[0]
+    assert len(result.result.keys()) == 0
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
@@ -525,20 +600,24 @@ def test_result_format_configured_no_set_default_override(
         **expectation_arguments_without_meta, **expectation_meta
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
-    assert len(result.result.keys()) > 0
+    assert len(result.result.keys()) == 0
 
 
 def test_result_format_configured_with_set_default_override(
     in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
-    runtime_environment_arguments = {
+    result_format: str
+
+    result_format = "SUMMARY"
+    runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+    suite: ExpectationSuite
+
+    suite = in_memory_runtime_context.create_expectation_suite(
         "test_suite", overwrite_existing=True
     )
 
@@ -573,7 +652,9 @@ def test_result_format_configured_with_set_default_override(
         },
     )
 
-    validator: Validator = in_memory_runtime_context.get_validator(
+    validator: Validator
+
+    validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
         expectation_suite=suite,
     )
@@ -582,11 +663,51 @@ def test_result_format_configured_with_set_default_override(
 
     # Test calling "validator.validate()" explicitly.
 
-    validator_validation: ExpectationSuiteValidationResult = validator.validate()
-    results: List[ExpectationValidationResult] = validator_validation.results
+    validator_validation: ExpectationSuiteValidationResult
+
+    validator_validation = validator.validate()
+
+    results: List[ExpectationValidationResult]
+
+    results = validator_validation.results
     assert len(results) == 1
 
     result: ExpectationValidationResult
+
+    result = results[0]
+    assert len(result.result.keys()) == 0
+
+    result_format = "BASIC"
+    runtime_environment_arguments: dict = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    suite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    validator.set_default_expectation_argument("result_format", "BOOLEAN_ONLY")
+
+    validator_validation = validator.validate()
+
+    results = validator_validation.results
+    assert len(results) == 1
 
     result = results[0]
     assert len(result.result.keys()) == 0
