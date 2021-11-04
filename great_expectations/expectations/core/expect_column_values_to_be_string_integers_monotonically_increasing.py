@@ -5,6 +5,7 @@ from typing import Dict, Optional, Callable
 import numpy as np
 import pandas as pd
 
+from great_expectations.core.expectation_validation_result import ExpectationValidationResult
 from great_expectations.expectations.metrics.column_map_metrics.column_values_string_integers_monotonically_increasing \
     import ColumnValuesStringIntegersMonotonicallyIncreasing
 # from great_expectations.expectations.metrics.column_map_metrics.column_values_increasing import ColumnValuesIncreasing
@@ -171,17 +172,12 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> dict:
-        # metric_config = MetricConfiguration(
-        #     metric_name="column_values.string_integers.monotonically_increasing.map",
-        #     metric_domain_kwargs=ColumnValuesStringIntegersMonotonicallyIncreasing.default_kwarg_values
-        # )
 
         dependencies = super().get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration
         )
-        # dependencies["metrics"]["column_values.string_integers.monotonically_increasing"] = metric_config
 
         column_value_increasing_metric_kwargs = get_metric_kwargs(
             metric_name="column_values.string_integers.monotonically_increasing.map",
@@ -193,17 +189,6 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
             metric_domain_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"]
         )
-        #
-        # column_value_type_metric_kwargs = get_metric_kwargs(
-        #     metric_name="column_values.of_type",
-        #     configuration=configuration,
-        #     runtime_configuration=runtime_configuration,
-        # )
-        # dependencies["metrics"]["column_values.of_type"] = MetricConfiguration(
-        #     metric_name="column_values.of_type",
-        #     metric_domain_kwargs=column_value_type_metric_kwargs["metric_domain_kwargs"],
-        #     metric_value_kwargs=column_value_type_metric_kwargs["metric_value_kwargs"]
-        # )
 
         return dependencies
 
@@ -215,48 +200,22 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Dict:
-        print(metrics.keys())
 
-        # column_values_of_type = execution_engine.resolve_metrics(
-        #     metrics["column_values.of_type"],
-        # )
-        # column_values_increasing = metrics.get("column_values.increasing")
-        #
-        # if isinstance(execution_engine, PandasExecutionEngine):
-        #     return self._validate_pandas(
-        #         column_values_of_type=column_values_of_type,
-        #         column_values_increasing=column_values_increasing,
-        #         expected_type=str
-        #     )
+        SIMI = metrics.get("column_values.string_integers.monotonically_increasing")
 
-        return False
+        success = all(SIMI[0])
 
-
-    @staticmethod
-    def _validate_pandas(
-            self,
-            column_values_of_type,
-            column_values_increasing,
-            expected_type
-    ):
-        comp_types = [np.dtype(expected_type).type,
-                      pd.StringDtype,
-                      pd.core.dtypes.dtypes.str_type]
-
-        native_type = _native_type_type_map(expected_type)
-        if native_type is not None:
-            comp_types.extend(native_type)
-
-        type_success = True if all(column_values_of_type.type) else False
-
-        increasing_success = True if column_values_increasing else False
-
-        success = True if type_success is True & increasing_success is True else False
-        return {
-            "success": success,
-            "result": {
-                "observed_value": column_values_of_type.value_counts(
-                    normalize=True
-                )
-            }
-        }
+        return ExpectationValidationResult(
+                expectation_config={
+                    "expectation_type": "expect_column_values_to_be_string_integers_monotonically_increasing",
+                    "kwargs": {
+                        "column": "a",
+                        "batch_id": "57175eeb4a8baa7ae63f44c6540eb559",
+                    },
+                    "meta": {},
+                    "ge_cloud_id": None,
+                },
+                meta={},
+                result={'observed_value': SIMI[0].value_counts(normalize=True)},
+                success=success
+            )

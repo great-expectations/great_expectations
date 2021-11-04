@@ -26,18 +26,20 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
 
 
     @column_function_partial(engine=PandasExecutionEngine)
-    def _pandas_function(self, column, _metrics, **kwargs):
+    def _pandas_function(self, data, _metrics, **kwargs):
 
-        increasing = _metrics.get("column_values.increasing")
-        of_type = _metrics.get("column_values.of_type")
         try:
-            return True if all(increasing) and all(of_type) else False
-        except TypeError:
-            raise (
-                TypeError(
-                    "String Integer"
-                )
+            temp_column = data.astype(int)
+        except ValueError:
+            raise ValueError(
+                "Column must be a string-type capable of being cast to int."
             )
+            return False
+
+        series_diff = temp_column.diff()
+        series_diff[series_diff.isnull()] = 1
+
+        return series_diff >= 0
 
 
     @classmethod
@@ -57,15 +59,15 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
             runtime_configuration=runtime_configuration,
         )
 
-        if metric.metric_name == "column_values.string_integers.monotonically_increasing.map":
-            dependencies["column_values.of_type"] = MetricConfiguration(
-                metric_name="column_values.of_type.condition",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-            )
-
-            dependencies["column_values.increasing"] = MetricConfiguration(
-                metric_name="column_values.increasing.condition",
-                metric_domain_kwargs=metric.metric_domain_kwargs
-            )
+        # if metric.metric_name == "column_values.string_integers.monotonically_increasing.map":
+        #     dependencies["column_values.of_type"] = MetricConfiguration(
+        #         metric_name="column_values.of_type.condition",
+        #         metric_domain_kwargs=metric.metric_domain_kwargs,
+        #     )
+        #
+        #     dependencies["column_values.increasing"] = MetricConfiguration(
+        #         metric_name="column_values.increasing.condition",
+        #         metric_domain_kwargs=metric.metric_domain_kwargs
+        #     )
 
         return dependencies
