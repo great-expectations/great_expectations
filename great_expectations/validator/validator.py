@@ -1378,16 +1378,8 @@ set as active.
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
 
-            runtime_configuration = copy.deepcopy(self.default_expectation_args)
-
-            if catch_exceptions is not None:
-                runtime_configuration.update({"catch_exceptions": catch_exceptions})
-
-            if result_format is not None:
-                runtime_configuration.update({"result_format": result_format})
-
-            runtime_configuration = self._get_updated_runtime_configuration(
-                runtime_configuration=runtime_configuration
+            runtime_configuration = self._get_runtime_configuration(
+                catch_exceptions=catch_exceptions, result_format=result_format
             )
 
             results = self.graph_validate(
@@ -1698,24 +1690,27 @@ set as active.
             self.execution_engine
         ).__name__
 
-    @staticmethod
-    def _get_updated_runtime_configuration(runtime_configuration: dict) -> dict:
-        assert (Validator.RUNTIME_KEYS - set(runtime_configuration.keys())) == set()
-        modified_expectation_arg_keys: set = (
-            set(runtime_configuration.keys()) - Validator.RUNTIME_KEYS
-        )
-        for k, v in runtime_configuration.items():
-            if (
-                k in Validator.RUNTIME_KEYS
-                and v != Validator.DEFAULT_RUNTIME_CONFIGURATION[k]
-            ):
-                modified_expectation_arg_keys.add(k)
+    def _get_runtime_configuration(
+        self,
+        catch_exceptions: Optional[bool] = None,
+        result_format: Optional[Union[dict, str]] = None,
+    ) -> dict:
+        runtime_configuration = copy.deepcopy(self.default_expectation_args)
 
-        runtime_configuration = {
-            k: v
-            for k, v in runtime_configuration.items()
-            if k in modified_expectation_arg_keys
-        }
+        if catch_exceptions is not None:
+            runtime_configuration.update({"catch_exceptions": catch_exceptions})
+
+        if (
+            self.default_expectation_args["result_format"]
+            == Validator.DEFAULT_RUNTIME_CONFIGURATION["result_format"]
+        ):
+            if result_format is None:
+                runtime_configuration.pop("result_format")
+            else:
+                runtime_configuration.update({"result_format": result_format})
+        else:
+            if result_format is not None:
+                runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration
 
