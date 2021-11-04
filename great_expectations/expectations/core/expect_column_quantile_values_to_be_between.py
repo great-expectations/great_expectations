@@ -226,8 +226,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             header_params_with_json_schema.update(conditional_params)
 
         quantile_ranges = params["quantile_ranges"] if params["quantile_ranges"] else {}
-        quantiles = quantile_ranges.get("quantiles") if quantile_ranges.get("quantiles") else []
-        value_ranges = quantile_ranges.get("value_ranges") if quantile_ranges.get("value_ranges") else []
+        quantiles = (
+            quantile_ranges.get("quantiles") if quantile_ranges.get("quantiles") else []
+        )
+        value_ranges = (
+            quantile_ranges.get("value_ranges")
+            if quantile_ranges.get("value_ranges")
+            else []
+        )
 
         table_header_row = [
             {"schema": {"type": "string"}, "value": "Quantile"},
