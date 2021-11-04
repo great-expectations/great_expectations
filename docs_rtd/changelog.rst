@@ -8,6 +8,39 @@ Changelog
 develop
 -----------------
 
+0.13.41
+-----------------
+* [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
+* [BUGFIX] Be able to use spark execution engine with spark reuse flag (#3541) (thanks @fep2)
+* [DOCS] punctuation how_to_contribute_a_new_expectation_to_great_expectations.md (#3484) (thanks @plain-jane-gray)
+* [DOCS] Update next_steps.md (#3483) (thanks @plain-jane-gray)
+* [DOCS] Update how_to_configure_a_validation_result_store_in_gcs.md (#3482) (thanks @plain-jane-gray)
+* [DOCS] Choosing and configuring DataConnectors (#3533)
+* [DOCS] Remove --no-spark flag from docs tests (#3625)
+* [DOCS] DevRel - docs fixes (#3498)
+* [DOCS] Adding a period (#3627) (thanks @plain-jane-gray)
+* [MAINTENANCE] Update CODEOWNERS (#3604)
+* [MAINTENANCE] Fix logo (#3598)
+* [MAINTENANCE] Add Expectations to docs navbar (#3597)
+* [MAINTENANCE] Remove unused fixtures (#3218)
+* [MAINTENANCE] Remove unnecessary comment (#3608)
+* [MAINTENANCE] Superconductive Warnings hackathon (#3612)
+* [MAINTENANCE] Bring Core Skills Doc for Creating Batch Under Test (#3629)
+* [MAINTENANCE] Refactor and Clean Up Expectations and Metrics Parts of the Codebase (better encapsulation, improved type hints) (#3633)
+
+
+0.13.40
+-----------------
+* [FEATURE] Retrieve data context config through Cloud API endpoint #3586
+* [FEATURE] Update Batch IDs to match name change in paths included in batch_request #3587
+* [FEATURE] V2-to-V3 Upgrade/Migration #3592
+* [FEATURE] table and graph atomic renderers #3595
+* [FEATURE] V2-to-V3 Upgrade/Migration (Sidebar.js update) #3603
+* [DOCS] Fixing broken links and linking to Expectation Gallery #3591
+* [MAINTENANCE] Get TZLocal back to its original version control. #3585
+* [MAINTENANCE] Add tests for datetime evaluation parameters #3601
+* [MAINTENANCE] Removed warning for pandas option display.max_colwidth #3606
+
 0.13.39
 -----------------
 * [FEATURE] Migration of Expectations to Atomic Prescriptive Renderers (#3530, #3537)
