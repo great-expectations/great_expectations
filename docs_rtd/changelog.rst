@@ -19,6 +19,7 @@ develop
 * [DOCS] Remove --no-spark flag from docs tests (#3625)
 * [DOCS] DevRel - docs fixes (#3498)
 * [DOCS] Adding a period (#3627) (thanks @plain-jane-gray)
+* [DOCS] Remove comments that describe Snowflake parameters as optional (#3639)
 * [MAINTENANCE] Update CODEOWNERS (#3604)
 * [MAINTENANCE] Fix logo (#3598)
 * [MAINTENANCE] Add Expectations to docs navbar (#3597)
