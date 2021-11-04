@@ -216,6 +216,6 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
                     "ge_cloud_id": None,
                 },
                 meta={},
-                result={'observed_value': SIMI[0].value_counts(normalize=True)},
+                result={'observed_value': np.unique(SIMI[0], return_counts=True)},
                 success=success
             )

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
@@ -24,23 +25,37 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
     function_metric_name = "column_values.string_integers.monotonically_increasing"
     function_value_keys = tuple()
 
-
     @column_function_partial(engine=PandasExecutionEngine)
     def _pandas_function(self, data, _metrics, **kwargs):
 
         try:
-            temp_column = data.astype(int)
-        except ValueError:
-            raise ValueError(
+            temp_column = [int(x) for x in data if x.isdigit()]
+        except AttributeError:
+            raise AttributeError(
                 "Column must be a string-type capable of being cast to int."
             )
             return False
 
-        series_diff = temp_column.diff()
-        series_diff[series_diff.isnull()] = 1
+        series_diff = np.diff(temp_column)
 
         return series_diff >= 0
 
+
+    @column_function_partial(engine=SparkDFExecutionEngine)
+    def _spark_function(self, data, _metrics, **kwargs):
+
+        temp_column = data.select(column).rdd.flatMap(lambda x: x).collect()
+        try:
+            temp_column = [int(x) for x in data if x.isdigit()]
+        except AttributeError:
+            raise AttributeError(
+                "Column must be a string-type capable of being cast to int."
+            )
+            return False
+
+        series_diff = np.diff(temp_column)
+
+        return series_diff >= 0
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -58,16 +73,5 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-
-        # if metric.metric_name == "column_values.string_integers.monotonically_increasing.map":
-        #     dependencies["column_values.of_type"] = MetricConfiguration(
-        #         metric_name="column_values.of_type.condition",
-        #         metric_domain_kwargs=metric.metric_domain_kwargs,
-        #     )
-        #
-        #     dependencies["column_values.increasing"] = MetricConfiguration(
-        #         metric_name="column_values.increasing.condition",
-        #         metric_domain_kwargs=metric.metric_domain_kwargs
-        #     )
 
         return dependencies
