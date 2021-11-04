@@ -140,10 +140,6 @@ class SqlAlchemyBatchData(BatchData):
                 # mssql expects all temporary table names to have a prefix '#'
                 if engine.dialect.name.lower() == "mssql":
                     generated_table_name = f"#{generated_table_name}"
-
-            if (not temp_table_schema_name) and (engine.dialect.name.lower() == "snowflake"):
-                temp_table_schema_name = source_schema_name
-
             if selectable is not None:
                 if engine.dialect.name.lower() == "oracle":
                     # oracle query was already passed as a string
