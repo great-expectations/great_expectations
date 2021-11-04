@@ -144,16 +144,17 @@ docs_test_matrix = [
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_python_example.py",
     #     "extra_backend_dependencies": BackendDependencies.SPARK,
     # },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
+    # TODO: WILL THESE ARE TEH TESTS THAT WE WANT TO RUN FOR THIS PR
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    # },
     # Redshift
     # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>
     # {
@@ -298,24 +299,24 @@ docs_test_matrix = [
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.MSSQL,
     # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/dataconnector_docs",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/dataconnector_docs",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/dataconnector_docs",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    # },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
