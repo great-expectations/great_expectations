@@ -928,7 +928,8 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
-        self._ge_cloud_id = ge_cloud_id
+        if ge_cloud_id is not None:
+            self._ge_cloud_id = ge_cloud_id
 
     def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
