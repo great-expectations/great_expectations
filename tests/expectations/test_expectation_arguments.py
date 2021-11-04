@@ -102,7 +102,9 @@ def test_spark_df(test_pandas_df, spark_session):
 
 def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
+    result_format: dict = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -208,7 +210,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
+    result_format: dict = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -317,7 +321,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = True  # expect exceptions to be caught
-    result_format: str = "SUMMARY"
+    result_format: dict = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -458,9 +464,11 @@ def test_result_format_configured_no_set_default_override(
     in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str
+    result_format: dict
 
-    result_format = "SUMMARY"
+    result_format = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -525,8 +533,18 @@ def test_result_format_configured_no_set_default_override(
 
     result = results[0]
     assert len(result.result.keys()) > 0
+    assert result.result == {
+        "element_count": 4,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_index_list": None,
+        "partial_unexpected_counts": [],
+    }
 
-    result_format = "BASIC"
+    result_format = {
+        "result_format": "BASIC",
+    }
     runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -558,8 +576,16 @@ def test_result_format_configured_no_set_default_override(
 
     result = results[0]
     assert len(result.result.keys()) > 0
+    assert result.result == {
+        "element_count": 4,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+    }
 
-    result_format = "BOOLEAN_ONLY"
+    result_format = {
+        "result_format": "BOOLEAN_ONLY",
+    }
     runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -591,6 +617,7 @@ def test_result_format_configured_no_set_default_override(
 
     result = results[0]
     assert len(result.result.keys()) == 0
+    assert result.result == {}
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
@@ -601,15 +628,18 @@ def test_result_format_configured_no_set_default_override(
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert len(result.result.keys()) == 0
+    assert result.result == {}
 
 
 def test_result_format_configured_with_set_default_override(
     in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str
+    result_format: dict
 
-    result_format = "SUMMARY"
+    result_format = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -676,8 +706,11 @@ def test_result_format_configured_with_set_default_override(
 
     result = results[0]
     assert len(result.result.keys()) == 0
+    assert result.result == {}
 
-    result_format = "BASIC"
+    result_format = {
+        "result_format": "BASIC",
+    }
     runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -719,3 +752,4 @@ def test_result_format_configured_with_set_default_override(
     expectation_parameters = dict(**expectation_arguments_column, **expectation_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert len(result.result.keys()) == 0
+    assert result.result == {}
