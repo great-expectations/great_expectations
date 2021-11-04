@@ -126,7 +126,7 @@ These examples serve a dual purpose:
 
 * help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Expectations Gallery site will render these examples.
 
-* provide test cases that the Great Expectations testing framework can execute automatically
+* provide test cases that the Great Expectations testing framework can execute automatically.
 We will explain the structure of these tests using the example provided in one of the templates that implements `expect_column_values_to_equal_three`:
 
 ````python
