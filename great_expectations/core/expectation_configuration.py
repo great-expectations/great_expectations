@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import jsonpatch
 
@@ -33,7 +33,7 @@ from great_expectations.types import SerializableDictDot
 logger = logging.getLogger(__name__)
 
 
-def parse_result_format(result_format):
+def parse_result_format(result_format: Union[str, dict]) -> dict:
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""

@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
@@ -161,7 +162,7 @@ def test_action_list_operator(validation_operators_data_context):
     # a tuple of parameters for get_batch
     operator_result = data_context.run_validation_operator(
         assets_to_validate=[batch, (validator_batch_kwargs, "f1.warning")],
-        run_id="test-100",
+        run_id=RunIdentifier(run_name="test-100"),
         evaluation_parameters={},
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
@@ -268,7 +269,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
     # a tuple of parameters for get_batch
     results = data_context.run_validation_operator(
         assets_to_validate=[batch],
-        run_id="test-100",
+        run_id=RunIdentifier(run_name="test-100"),
         validation_operator_name="errors_and_warnings_validation_operator",
         base_expectation_suite_name="f1",
     )

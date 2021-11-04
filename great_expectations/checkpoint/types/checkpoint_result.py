@@ -287,7 +287,7 @@ class CheckpointResult(DictDot):
     def to_json_dict(self):
         if hasattr(self.checkpoint_config, "validations"):
             for val in self.checkpoint_config["validations"]:
-                if isinstance(val["batch_request"], BatchRequest):
+                if isinstance(val.get("batch_request"), BatchRequest):
                     val["batch_request"] = val["batch_request"].to_json_dict()
 
         return checkpointResultSchema.dump(self)

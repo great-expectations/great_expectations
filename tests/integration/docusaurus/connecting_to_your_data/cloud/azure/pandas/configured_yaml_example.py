@@ -27,7 +27,7 @@ data_connectors:
         container: <YOUR_AZURE_CONTAINER_HERE>
         name_starts_with: <CONTAINER_PATH_TO_DATA>
         default_regex:
-            pattern: data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:
                 - year
                 - month
@@ -41,7 +41,7 @@ datasource_yaml = datasource_yaml.replace(
     "<YOUR_AZURE_CONTAINER_HERE>", "superconductive-public"
 )
 datasource_yaml = datasource_yaml.replace(
-    "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
+    "<CONTAINER_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 datasource_yaml = datasource_yaml.replace(
     "<YOUR_ACCOUNT_URL>", "superconductivetesting.blob.core.windows.net"

@@ -94,8 +94,12 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
+                'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
+                'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
                 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
-                // 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
+                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
                 'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
                 'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
               ]
@@ -155,6 +159,7 @@ module.exports = {
               items: [
                 'guides/connecting_to_your_data/advanced/database_credentials',
                 'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
+                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql',
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
                 // 'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
@@ -262,6 +267,7 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
+            { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
           ]
@@ -368,8 +374,16 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_github' },
         { type: 'doc', id: 'contributing/contributing_test' },
         { type: 'doc', id: 'contributing/contributing_maturity' },
-        { type: 'doc', id: 'contributing/contributing_style' },
-        { type: 'doc', id: 'contributing/contributing_misc' }
+        { type: 'doc', id: 'contributing/contributing_misc' },
+        {
+          type: 'category',
+          label: 'Style guides',
+          items: [
+            { type: 'doc', id: 'contributing/style_guides/docs_style' },
+            { type: 'doc', id: 'contributing/style_guides/code_style' },
+            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' },
+          ]
+        },
       ]
     },
     {
