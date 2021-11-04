@@ -532,6 +532,7 @@ def test_result_format_configured_no_set_default_override(
     result: ExpectationValidationResult
 
     result = results[0]
+    assert result.success
     assert len(result.result.keys()) > 0
     assert result.result == {
         "element_count": 4,
@@ -575,6 +576,7 @@ def test_result_format_configured_no_set_default_override(
     assert len(results) == 1
 
     result = results[0]
+    assert result.success
     assert len(result.result.keys()) > 0
     assert result.result == {
         "element_count": 4,
@@ -616,6 +618,7 @@ def test_result_format_configured_no_set_default_override(
     assert len(results) == 1
 
     result = results[0]
+    assert result.success
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
@@ -627,6 +630,7 @@ def test_result_format_configured_no_set_default_override(
         **expectation_arguments_without_meta, **expectation_meta
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
+    assert result.success
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
@@ -705,6 +709,7 @@ def test_result_format_configured_with_set_default_override(
     result: ExpectationValidationResult
 
     result = results[0]
+    assert result.success
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
@@ -751,5 +756,6 @@ def test_result_format_configured_with_set_default_override(
 
     expectation_parameters = dict(**expectation_arguments_column, **expectation_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
+    assert result.success
     assert len(result.result.keys()) == 0
     assert result.result == {}
