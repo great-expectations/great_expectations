@@ -928,6 +928,7 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
+
         if ge_cloud_id is not None:
             self._ge_cloud_id = ge_cloud_id
 
@@ -993,7 +994,10 @@ class ExpectationConfiguration(SerializableDictDot):
 
     @property
     def ge_cloud_id(self):
-        return self._ge_cloud_id
+        if hasattr(self, "_ge_cloud_id"):
+            return self._ge_cloud_id
+        else:
+            return None
 
     @ge_cloud_id.setter
     def ge_cloud_id(self, value):
