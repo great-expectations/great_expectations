@@ -168,7 +168,7 @@ data_connectors:
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>/", "superconductive-public")
 datasource_yaml = datasource_yaml.replace(
-    "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_trip_data_samples/"
+    "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_tripdata_samples/"
 )
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -202,7 +202,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "superconductive-public"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
-] = "data/taxi_yellow_trip_data_samples/"
+] = "data/taxi_yellow_tripdata_samples/"
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config), return_mode="report_object"
