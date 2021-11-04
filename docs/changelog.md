@@ -3,7 +3,26 @@ title: Changelog
 ---
 
 ### Develop
+
+### 0.13.41
+* [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
+* [BUGFIX] Be able to use spark execution engine with spark reuse flag (#3541) (thanks @fep2)
+* [DOCS] punctuation how_to_contribute_a_new_expectation_to_great_expectations.md (#3484) (thanks @plain-jane-gray)
+* [DOCS] Update next_steps.md (#3483) (thanks @plain-jane-gray)
+* [DOCS] Update how_to_configure_a_validation_result_store_in_gcs.md (#3482) (thanks @plain-jane-gray)
 * [DOCS] Choosing and configuring DataConnectors (#3533)
+* [DOCS] Remove --no-spark flag from docs tests (#3625)
+* [DOCS] DevRel - docs fixes (#3498)
+* [DOCS] Adding a period (#3627) (thanks @plain-jane-gray)
+* [DOCS] Remove comments that describe Snowflake parameters as optional (#3639)
+* [MAINTENANCE] Update CODEOWNERS (#3604)
+* [MAINTENANCE] Fix logo (#3598)
+* [MAINTENANCE] Add Expectations to docs navbar (#3597)
+* [MAINTENANCE] Remove unused fixtures (#3218)
+* [MAINTENANCE] Remove unnecessary comment (#3608)
+* [MAINTENANCE] Superconductive Warnings hackathon (#3612)
+* [MAINTENANCE] Bring Core Skills Doc for Creating Batch Under Test (#3629)
+* [MAINTENANCE] Refactor and Clean Up Expectations and Metrics Parts of the Codebase (better encapsulation, improved type hints) (#3633)
 
 ### 0.13.40
 * [FEATURE] Retrieve data context config through Cloud API endpoint #3586
