@@ -1,10 +1,8 @@
 from typing import Optional
 
 import numpy as np
-import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import MetricResolutionError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -17,15 +15,13 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
+from great_expectations.expectations.metrics.import_manager import (  # sa,
     F,
     Window,
-    sa,
     sparktypes,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
-    column_condition_partial,
     column_function_partial,
     metric_partial,
 )
@@ -34,7 +30,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider):
     function_metric_name = "column_values.string_integers.monotonically_increasing"
-    function_value_keys = tuple()
 
     @column_function_partial(engine=PandasExecutionEngine)
     def _pandas(self, data, _metrics, **kwargs):
@@ -111,10 +106,20 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
             accessor_domain_kwargs,
         )
 
-    # @metric_partial(
-    #     engine=SqlAlchemyExecutionEngine,
-    #     partial_fn_type=MetricPartialFunctionTypes.WINDOW_FN,
-    # )
+    @metric_partial(
+        engine=SqlAlchemyExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_FN,
+        domain_type=MetricDomainTypes.COLUMN,
+    )
+    def _sqlalchemy(
+        cls,
+        execution_engine,
+        metric_domain_kwargs,
+        metric_value_kwargs,
+        metrics,
+        runtime_configuration,
+    ):
+        pass
 
     @classmethod
     def _get_evaluation_dependencies(

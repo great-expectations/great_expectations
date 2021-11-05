@@ -13,7 +13,11 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.data_context import DataContext
 from great_expectations.exceptions.exceptions import MetricResolutionError
-from great_expectations.self_check.util import build_spark_validator_with_data
+from great_expectations.self_check.util import (
+    build_sa_validator_with_data,
+    build_spark_validator_with_data,
+)
+
 
 def test_pandas_expect_column_values_to_be_string_integers_monotonically_increasing_success(
     data_context_with_datasource_pandas_engine,
@@ -174,7 +178,7 @@ def test_spark_expect_column_values_to_be_string_integers_monotonically_increasi
 #         result={"observed_value": [[True], [6]]},
 #         success=True,
 #     )
-
+#
 
 #
 #
