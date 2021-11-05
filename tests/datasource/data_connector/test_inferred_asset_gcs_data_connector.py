@@ -8,6 +8,7 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
+from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
 
@@ -1159,7 +1160,10 @@ default_regex:
     my_data_connector: InferredAssetGCSDataConnector = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-        runtime_environment={"name": "my_data_connector"},
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
     )
 
     assert (

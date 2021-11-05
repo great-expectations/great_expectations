@@ -177,7 +177,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             )
 
         template_arguments: dict = {
-            "bucket": self._bucket_or_name,
+            "bucket_or_name": self._bucket_or_name,
             "path": path,
         }
 

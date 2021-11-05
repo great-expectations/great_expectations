@@ -505,7 +505,7 @@ class GCSUrl:
 
     URL_REGEX_PATTERN: str = r"^gs://([^/]+)/(.+)$"
 
-    OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}{path}"
+    OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}/{path}"
 
     def __init__(self, url: str):
         search = re.search(GCSUrl.URL_REGEX_PATTERN, url)
@@ -526,7 +526,7 @@ class GCSUrl:
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
 class S3Url:
-    OBJECT_URL_TEMPLATE: str = "s3a://{bucket}{path}"
+    OBJECT_URL_TEMPLATE: str = "s3a://{bucket}/{path}"
 
     """
     >>> s = S3Url("s3://bucket/hello/world")
