@@ -18,6 +18,7 @@ from great_expectations.datasource.data_connector import (
     InferredAssetGCSDataConnector,
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
+    ConfiguredAssetDBFSDataConnector,
 )
 
 
@@ -28,6 +29,7 @@ class DataConnectorAnonymizer(Anonymizer):
         # This list should contain all DataConnector types. When new DataConnector types
         # are created, please make sure to add ordered bottom up in terms of inheritance order
         self._ge_classes = [
+            ConfiguredAssetDBFSDataConnector,
             InferredAssetSqlDataConnector,
             ConfiguredAssetSqlDataConnector,
             InferredAssetGCSDataConnector,
