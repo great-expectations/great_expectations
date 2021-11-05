@@ -84,13 +84,13 @@ stages:
 
         - task: DownloadSecureFile@1
           name: gcp_authkey
-          displayName: 'Download Google Service Account'
+          displayName: 'Download GCS Credentials'
           inputs:
               secureFile: 'superconductive-service-acct.json'
               retryCount: '2'
         - task: DownloadSecureFile@1
           name: aws_authkey
-          displayName: 'Download AWS Service Account'
+          displayName: 'Download AWS Credentials'
           inputs:
               secureFile: 'aws_config'
               retryCount: '2'
