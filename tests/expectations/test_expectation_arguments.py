@@ -619,6 +619,28 @@ def test_result_format_configured_no_set_default_override(
 
     result = results[0]
     assert result.success
+    assert result.to_json_dict() == {
+        "expectation_config": {
+            "kwargs": {
+                "catch_exceptions": False,
+                "result_format": {"result_format": "BOOLEAN_ONLY"},
+                "include_config": True,
+                "column": "Name",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "meta": {"Notes": "Some notes"},
+            "ge_cloud_id": None,
+        },
+        "meta": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        "result": {},
+        "success": True,
+    }
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
@@ -631,6 +653,32 @@ def test_result_format_configured_no_set_default_override(
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert result.success
+    assert result.to_json_dict() == {
+        "success": True,
+        "meta": {},
+        "expectation_config": {
+            "ge_cloud_id": None,
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "meta": {},
+            "kwargs": {
+                "catch_exceptions": False,
+                "result_format": {
+                    "result_format": "BOOLEAN_ONLY",
+                    "partial_unexpected_count": 20,
+                },
+                "include_config": True,
+                "column": "Name",
+                "Notes": "Some notes",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+        },
+        "result": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+    }
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
@@ -710,6 +758,28 @@ def test_result_format_configured_with_set_default_override(
 
     result = results[0]
     assert result.success
+    assert result.to_json_dict() == {
+        "result": {},
+        "expectation_config": {
+            "ge_cloud_id": None,
+            "kwargs": {
+                "catch_exceptions": False,
+                "result_format": {"result_format": "SUMMARY"},
+                "include_config": True,
+                "column": "Name",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+            "meta": {"Notes": "Some notes"},
+            "expectation_type": "expect_column_values_to_not_be_null",
+        },
+        "success": True,
+        "meta": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+    }
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
@@ -757,5 +827,26 @@ def test_result_format_configured_with_set_default_override(
     expectation_parameters = dict(**expectation_arguments_column, **expectation_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
     assert result.success
+    assert result.to_json_dict() == {
+        "result": {},
+        "expectation_config": {
+            "ge_cloud_id": None,
+            "kwargs": {
+                "include_config": True,
+                "column": "Name",
+                "Notes": "Some notes",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+            "meta": {},
+            "expectation_type": "expect_column_values_to_not_be_null",
+        },
+        "success": True,
+        "meta": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+    }
     assert len(result.result.keys()) == 0
     assert result.result == {}
