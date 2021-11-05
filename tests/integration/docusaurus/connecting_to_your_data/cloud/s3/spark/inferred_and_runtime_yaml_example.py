@@ -1,4 +1,3 @@
-import os
 from typing import List
 
 from ruamel import yaml
@@ -20,9 +19,6 @@ data_context_config = DataContextConfig(
     checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
 )
 context = BaseDataContext(project_config=data_context_config)
-
-SPARK_HOME = os.getenv("SPARK_HOME", "")
-raise RuntimeError(SPARK_HOME)
 
 datasource_yaml = fr"""
 name: my_s3_datasource
@@ -123,5 +119,4 @@ batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 
 batch: Batch = batch_list[0]
-assert batch.data.dataframe.count() == 10000
 assert batch.data.dataframe.count() == 10000
