@@ -94,13 +94,6 @@ stages:
           inputs:
               secureFile: 'aws_config'
               retryCount: '2'
-        - task: DownloadSecureFile@1
-          name: aws_spark_jar
-          displayName: 'Download Spark JAR for AWS'
-          inputs:
-              secureFile: 'hadoop-aws-3.2.0.jar'
-              retryCount: '2'
-
         - script: |
             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
           displayName: 'Create MSSQL database test_ci'
