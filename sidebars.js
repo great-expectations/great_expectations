@@ -94,8 +94,12 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
-                //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
-                //'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
+                'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
+                'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
+                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
                 'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
                 'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
               ]
@@ -142,20 +146,22 @@ module.exports = {
                 'guides/connecting_to_your_data/cloud/azure/spark'
               ]
             },
-            //{
-              //type: 'category',
-              //label: 'Contributing',
-              //items: [
-                //'guides/connecting_to_your_data/contributing/how_to_add_support_for_a_new_sqlalchemy_dialect'
-              //]
-            //},
+            // {
+            // type: 'category',
+            // label: 'Contributing',
+            // items: [
+            // 'guides/connecting_to_your_data/contributing/how_to_add_support_for_a_new_sqlalchemy_dialect'
+            // ]
+            // },
             {
               type: 'category',
               label: 'Advanced',
               items: [
                 'guides/connecting_to_your_data/advanced/database_credentials',
+                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
+                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql',
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
-		// 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
+                // 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
                 // 'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
               ]
             }
@@ -172,7 +178,7 @@ module.exports = {
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
                 'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
-                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
+                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data'
               ]
             },
             {
@@ -218,7 +224,7 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
-                // 'guides/validation/how_to_validate_data_by_running_a_checkpoint',
+                'guides/validation/how_to_validate_data_by_running_a_checkpoint'
               ]
             },
             {
@@ -261,6 +267,7 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
+            { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
           ]
@@ -275,14 +282,15 @@ module.exports = {
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
-        //{
-          //type: 'category',
-          //label: 'Contributing',
-          //items: [
-            //'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
-            //'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
-          //]
-        //}
+        'deployment_patterns/how_to_use_great_expectations_in_flyte'
+        // {
+        // type: 'category',
+        // label: 'Contributing',
+        // items: [
+        // 'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
+        // 'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
+        // ]
+        // }
       ]
     },
     {
@@ -326,7 +334,8 @@ module.exports = {
             { type: 'doc', id: 'reference/expectations/standard_arguments' },
             // { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
-            { type: 'doc', id: 'reference/validation' }
+            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
         {
@@ -365,8 +374,16 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_github' },
         { type: 'doc', id: 'contributing/contributing_test' },
         { type: 'doc', id: 'contributing/contributing_maturity' },
-        { type: 'doc', id: 'contributing/contributing_style' },
-        { type: 'doc', id: 'contributing/contributing_misc' }
+        { type: 'doc', id: 'contributing/contributing_misc' },
+        {
+          type: 'category',
+          label: 'Style guides',
+          items: [
+            { type: 'doc', id: 'contributing/style_guides/docs_style' },
+            { type: 'doc', id: 'contributing/style_guides/code_style' },
+            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' },
+          ]
+        },
       ]
     },
     {

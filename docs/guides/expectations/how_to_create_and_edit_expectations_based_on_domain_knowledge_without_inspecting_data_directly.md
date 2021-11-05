@@ -117,7 +117,7 @@ Steps
    suite.add_expectation(expectation_configuration=expectation_configuration)
    ```
 
-   You can see all the available Expectations in the :ref:`expectation_glossary`.
+   You can see all the available Expectations in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
 3. **Save your Expectation Suite**
 

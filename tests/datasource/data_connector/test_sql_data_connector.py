@@ -553,7 +553,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # }
 
 
-#  'table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
+#  ['table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
 #  'table_containing_id_spacers_for_D',
 #  'table_that_should_be_partitioned_by_random_hash__H']
 

@@ -6,6 +6,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import BaseDataContext
 from great_expectations.self_check.util import modify_locale
 from great_expectations.validation_operators.validation_operators import (
@@ -118,6 +119,9 @@ def warning_failure_validation_operator_data_context(
 
 @modify_locale
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.filterwarnings(
+    "ignore:System time is way off:urllib3.exceptions.SystemTimeWarning:urllib3"
+)
 def test_errors_warnings_validation_operator_run_slack_query(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -132,7 +136,7 @@ def test_errors_warnings_validation_operator_run_slack_query(
 
     return_obj = vo.run(
         assets_to_validate=assets_to_validate,
-        run_id="test_100",
+        run_id=RunIdentifier(run_name="test_100"),
         base_expectation_suite_name="f1",
     )
     slack_query = vo._build_slack_query(return_obj)
@@ -228,7 +232,7 @@ def test_errors_warnings_validation_operator_failed_vo_result(
     # only pass asset that yields failed "failure-level" suite and succeeded "warning-level" suite
     return_obj = vo.run(
         assets_to_validate=[assets_to_validate[3]],
-        run_id="test_100",
+        run_id=RunIdentifier(run_name="test_100"),
         base_expectation_suite_name="f1",
     )
     run_results = list(return_obj.run_results.values())
@@ -256,7 +260,7 @@ def test_errors_warnings_validation_operator_failed_vo_result(
     # only pass asset that yields failed "failure-level" suite and failed "warning-level" suite
     return_obj_2 = vo.run(
         assets_to_validate=[assets_to_validate[1]],
-        run_id="test_100",
+        run_id=RunIdentifier(run_name="test_100"),
         base_expectation_suite_name="f1",
     )
     run_results_2 = list(return_obj_2.run_results.values())
@@ -299,7 +303,7 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
     # only pass asset that yields succeeded "failure-level" suite and failed "warning-level" suite
     return_obj = vo.run(
         assets_to_validate=[assets_to_validate[0]],
-        run_id="test_100",
+        run_id=RunIdentifier(run_name="test_100"),
         base_expectation_suite_name="f1",
     )
     run_results = list(return_obj.run_results.values())
@@ -327,7 +331,7 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
     # only pass asset that yields succeeded "failure-level" suite and succeeded "warning-level" suite
     return_obj_2 = vo.run(
         assets_to_validate=[assets_to_validate[2]],
-        run_id="test_100",
+        run_id=RunIdentifier(run_name="test_100"),
         base_expectation_suite_name="f1",
     )
     run_results_2 = list(return_obj_2.run_results.values())

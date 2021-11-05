@@ -68,7 +68,8 @@ Recently we introduced a fast-track release process for community contributed Ex
 	* Class declaration (search for `class Expect`)
 	* A call to `run_diagnostic` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
 	
-	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/contributing_style)
+
+	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/style_guides/code_style).
 
 #### 4. Run diagnostics on your Expectation.
 
@@ -125,7 +126,7 @@ These examples serve a dual purpose:
 
 * help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Expectations Gallery site will render these examples.
 
-* provide test cases that the Great Expectations testing framework can execute automatically
+* provide test cases that the Great Expectations testing framework can execute automatically.
 We will explain the structure of these tests using the example provided in one of the templates that implements `expect_column_values_to_equal_three`:
 
 ````python

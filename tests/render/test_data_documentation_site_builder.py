@@ -552,7 +552,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
     run_id = "test_run_id_12345"
     context.run_validation_operator(
         assets_to_validate=[batch],
-        run_id=run_id,
+        run_id=RunIdentifier(run_name=run_id),
         validation_operator_name="validate_and_store",
     )
 
