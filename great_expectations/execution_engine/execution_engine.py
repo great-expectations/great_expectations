@@ -19,38 +19,6 @@ yaml = YAML()
 yaml.default_flow_style = False
 
 
-_DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
-    "InferredAssetS3DataConnector": "S3",
-    "ConfiguredAssetS3DataConnector": "S3",
-    "InferredAssetGCSDataConnector": "GCS",
-    "ConfiguredAssetGCSDataConnector": "GCS",
-    "InferredAssetAzureDataConnector": "ABS",
-    "ConfiguredAssetAzureDataConnector": "ABS",
-}
-_STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[Tuple[str, str], Callable] = {
-    ("S3", "PandasExecutionEngine"): lambda kwargs: S3Url.OBJECT_URL_TEMPLATE.format(
-        **kwargs
-    ),
-    ("S3", "SparkDFExecutionEngine"): lambda kwargs: S3Url.OBJECT_URL_TEMPLATE.format(
-        **kwargs
-    ),
-    ("GCS", "PandasExecutionEngine"): lambda kwargs: GCSUrl.OBJECT_URL_TEMPLATE.format(
-        **kwargs
-    ),
-    ("GCS", "SparkDFExecutionEngine"): lambda kwargs: GCSUrl.OBJECT_URL_TEMPLATE.format(
-        **kwargs
-    ),
-    (
-        "ABS",
-        "PandasExecutionEngine",
-    ): lambda kwargs: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(**kwargs),
-    (
-        "ABS",
-        "SparkDFExecutionEngine",
-    ): lambda kwargs: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(**kwargs),
-}
-
-
 class NoOpDict:
     def __getitem__(self, item):
         return None
@@ -87,6 +55,73 @@ class MetricDomainTypes(Enum):
     COLUMN_PAIR = "column_pair"
     MULTICOLUMN = "multicolumn"
     TABLE = "table"
+
+
+class DataConnectorStorageDataReferenceResolver:
+    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
+        "InferredAssetS3DataConnector": "S3",
+        "ConfiguredAssetS3DataConnector": "S3",
+        "InferredAssetGCSDataConnector": "GCS",
+        "ConfiguredAssetGCSDataConnector": "GCS",
+        "InferredAssetAzureDataConnector": "ABS",
+        "ConfiguredAssetAzureDataConnector": "ABS",
+    }
+    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
+        Tuple[str, str], Callable
+    ] = {
+        (
+            "S3",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "S3",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+    }
+
+    @staticmethod
+    def resolve_data_reference(
+        data_connector_name: str,
+        execution_engine_name: str,
+        template_arguments: dict,
+    ):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+            data_connector_name
+        ]
+        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+            (storage_name, execution_engine_name)
+        ](
+            template_arguments
+        )
 
 
 class ExecutionEngine(ABC):
@@ -435,14 +470,15 @@ class ExecutionEngine(ABC):
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs
 
-    def resolve_data_reference(self, data_connector_name: str, **kwargs):
+    def resolve_data_reference(
+        self, data_connector_name: str, template_arguments: dict
+    ):
         """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = _DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-            data_connector_name
-        ]
-        return _STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
-            (storage_name, self.__class__.__name__)
-        ](kwargs)
+        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
+            data_connector_name=data_connector_name,
+            execution_engine_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )
 
 
 class MetricPartialFunctionTypes(Enum):

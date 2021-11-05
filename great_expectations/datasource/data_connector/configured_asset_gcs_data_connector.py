@@ -174,9 +174,10 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         }
         try:
             return self.execution_engine.resolve_data_reference(
-                self.__class__.__name__, **template_arguments
+                data_connector_name=self.__class__.__name__,
+                template_arguments=template_arguments,
             )
-        except AttributeError as e:
+        except AttributeError:
             raise ge_exceptions.DataConnectorError(
                 "A non-existent/unknown ExecutionEngine instance was referenced."
             )
