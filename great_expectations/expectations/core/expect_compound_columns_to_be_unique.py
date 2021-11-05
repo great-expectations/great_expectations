@@ -103,8 +103,8 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 params["column_list_" + str(idx)] = column_list[idx]
 
             last_idx = len(column_list) - 1
-            template_str += "$column_list_" + str(last_idx)
-            params["column_list_" + str(last_idx)] = column_list[last_idx]
+            template_str += f"$column_list_{last_idx}"
+            params[f"column_list_{last_idx}"] = column_list[last_idx]
 
         if params["row_condition"] is not None:
             (
