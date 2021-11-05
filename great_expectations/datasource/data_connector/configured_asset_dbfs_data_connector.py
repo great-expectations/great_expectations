@@ -1,21 +1,11 @@
 import logging
-import os
-import re
-from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector import (
-    ConfiguredAssetFilePathDataConnector,
     ConfiguredAssetFilesystemDataConnector,
 )
 from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.util import (
-    get_filesystem_one_level_directory_glob_path_list,
-    normalize_directory_path,
-)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -23,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
     """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to the DataBricks File System (DBFS)
+    Extension of ConfiguredAssetFilesystemDataConnector used to connect to the DataBricks File System (DBFS)
 
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
