@@ -311,6 +311,40 @@ Please check your config."""
 
         return self.active_batch_data.dataframe
 
+    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
+    @staticmethod
+    def guess_reader_method_from_path(path):
+        """Helper method for deciding which reader to use to read in a certain path.
+
+        Args:
+            path (str): the to use to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return {"reader_method": "read_csv"}
+        elif path.endswith(".parquet"):
+            return {"reader_method": "read_parquet"}
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return {"reader_method": "read_excel"}
+        elif path.endswith(".json"):
+            return {"reader_method": "read_json"}
+        elif path.endswith(".pkl"):
+            return {"reader_method": "read_pickle"}
+        elif path.endswith(".feather"):
+            return {"reader_method": "read_feather"}
+        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
+            return {
+                "reader_method": "read_csv",
+                "reader_options": {"compression": "gzip"},
+            }
+
+        raise ge_exceptions.ExecutionEngineError(
+            f'Unable to determine reader method from path: "{path}".'
+        )
+
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
@@ -346,39 +380,17 @@ Please check your config."""
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
-    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
-    def guess_reader_method_from_path(path):
-        """Helper method for deciding which reader to use to read in a certain path.
+    def get_s3_object_url_template(**kwargs) -> str:
+        return S3Url.OBJECT_URL_TEMPLATE.format(**kwargs)
 
-        Args:
-            path (str): the to use to guess
+    @staticmethod
+    def get_gcs_object_url_template(**kwargs) -> str:
+        return GCSUrl.OBJECT_URL_TEMPLATE.format(**kwargs)
 
-        Returns:
-            ReaderMethod to use for the filepath
-
-        """
-        if path.endswith(".csv") or path.endswith(".tsv"):
-            return {"reader_method": "read_csv"}
-        elif path.endswith(".parquet"):
-            return {"reader_method": "read_parquet"}
-        elif path.endswith(".xlsx") or path.endswith(".xls"):
-            return {"reader_method": "read_excel"}
-        elif path.endswith(".json"):
-            return {"reader_method": "read_json"}
-        elif path.endswith(".pkl"):
-            return {"reader_method": "read_pickle"}
-        elif path.endswith(".feather"):
-            return {"reader_method": "read_feather"}
-        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
-            return {
-                "reader_method": "read_csv",
-                "reader_options": {"compression": "gzip"},
-            }
-
-        raise ge_exceptions.ExecutionEngineError(
-            f'Unable to determine reader method from path: "{path}".'
-        )
+    @staticmethod
+    def get_azure_blob_storage_object_url_template(**kwargs) -> str:
+        return AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(**kwargs)
 
     def get_domain_records(
         self,

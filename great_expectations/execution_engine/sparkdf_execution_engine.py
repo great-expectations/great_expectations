@@ -17,7 +17,12 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.util import AzureUrl, get_or_create_spark_application
+from great_expectations.core.util import (
+    AzureUrl,
+    GCSUrl,
+    S3Url,
+    get_or_create_spark_application,
+)
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -314,6 +319,7 @@ Please check your config."""
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 
+    # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
     @staticmethod
     def guess_reader_method_from_path(path):
         """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
@@ -364,6 +370,19 @@ Please check your config."""
             raise ExecutionEngineError(
                 "Unable to find reader_method %s in spark." % reader_method,
             )
+
+    @staticmethod
+    def get_s3_object_url_template(**kwargs) -> str:
+        return S3Url.OBJECT_URL_TEMPLATE.format(**kwargs)
+
+    @staticmethod
+    def get_gcs_object_url_template(**kwargs) -> str:
+        return GCSUrl.OBJECT_URL_TEMPLATE.format(**kwargs)
+
+    # noinspection SpellCheckingInspection
+    @staticmethod
+    def get_azure_blob_storage_object_url_template(**kwargs):
+        return AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(**kwargs)
 
     def get_domain_records(
         self,

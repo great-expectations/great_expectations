@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List, Optional
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.asset import Asset
@@ -168,4 +169,17 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"gs://{os.path.join(self._bucket_or_name, path)}"
+        if not hasattr(self.execution_engine, "get_gcs_object_url_template"):
+            raise ge_exceptions.DataConnectorError(
+                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
+"{self.__class__.__name__}".
+"""
+            )
+
+        template_arguments: dict = {
+            "bucket": self._bucket_or_name,
+            "path": path,
+        }
+
+        # noinspection PyUnresolvedReferences
+        return self.execution_engine.get_gcs_object_url_template(**template_arguments)

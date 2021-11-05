@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List, Optional
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.exceptions.exceptions import ParserError
@@ -139,17 +140,31 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
+        if not hasattr(self.execution_engine, "get_s3_object_url_template"):
+            raise ge_exceptions.DataConnectorError(
+                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
+"{self.__class__.__name__}".
+"""
+            )
+
         _check_valid_s3_path(path)
-        return f"s3a://{os.path.join(self._bucket, path)}"
+
+        template_arguments: dict = {
+            "bucket": self._bucket,
+            "path": path,
+        }
+
+        # noinspection PyUnresolvedReferences
+        return self.execution_engine.get_s3_object_url_template(**template_arguments)
 
 
 def _check_valid_s3_path(
     path: str,
 ) -> None:
     """Performs a basic check for validity of the S3 path"""
-    bad_chars = [c for c in INVALID_S3_CHARS if c in path]
+    bad_chars: list = [c for c in INVALID_S3_CHARS if c in path]
     if len(bad_chars) > 0:
-        msg = (
+        msg: str = (
             f"The parsed S3 path={path} contains the invalid characters {bad_chars}."
             "Please make sure your regex is correct and characters are escaped."
         )

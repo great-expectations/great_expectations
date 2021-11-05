@@ -165,21 +165,22 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
         # Pandas and Spark execution engines utilize separate path formats for accessing Azure Blob Storage service.
-        full_path: str
-        if isinstance(self.execution_engine, PandasExecutionEngine):
-            full_path = os.path.join(
-                f"{self._account_name}.blob.core.windows.net", self._container, path
-            )
-        elif isinstance(self.execution_engine, SparkDFExecutionEngine):
-            full_path = os.path.join(
-                f"{self._container}@{self._account_name}.blob.core.windows.net", path
-            )
-            full_path = f"wasbs://{full_path}"
-        else:
+        if not hasattr(
+            self.execution_engine, "get_azure_blob_storage_object_url_template"
+        ):
             raise ge_exceptions.DataConnectorError(
                 f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
 "{self.__class__.__name__}".
 """
             )
 
-        return full_path
+        template_arguments: dict = {
+            "account_name": self._account_name,
+            "container": self._container,
+            "path": path,
+        }
+
+        # noinspection PyUnresolvedReferences
+        return self.execution_engine.get_azure_blob_storage_object_url_template(
+            **template_arguments
+        )
