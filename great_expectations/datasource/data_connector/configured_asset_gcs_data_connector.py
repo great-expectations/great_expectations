@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
@@ -169,17 +168,15 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        if not hasattr(self.execution_engine, "get_gcs_object_url_template"):
-            raise ge_exceptions.DataConnectorError(
-                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
-"{self.__class__.__name__}".
-"""
-            )
-
         template_arguments: dict = {
             "bucket_or_name": self._bucket_or_name,
             "path": path,
         }
-
-        # noinspection PyUnresolvedReferences
-        return self.execution_engine.get_gcs_object_url_template(**template_arguments)
+        try:
+            return self.execution_engine.resolve_data_reference(
+                self.__class__.__name__, **template_arguments
+            )
+        except AttributeError as e:
+            raise ge_exceptions.DataConnectorError(
+                "A non-existent/unknown ExecutionEngine instance was referenced."
+            )

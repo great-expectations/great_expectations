@@ -5,7 +5,6 @@ from typing import List, Optional
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.exceptions.exceptions import ParserError
 
 try:
     import boto3
@@ -140,22 +139,19 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        if not hasattr(self.execution_engine, "get_s3_object_url_template"):
-            raise ge_exceptions.DataConnectorError(
-                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
-"{self.__class__.__name__}".
-"""
-            )
-
         _check_valid_s3_path(path)
-
         template_arguments: dict = {
             "bucket": self._bucket,
             "path": path,
         }
-
-        # noinspection PyUnresolvedReferences
-        return self.execution_engine.get_s3_object_url_template(**template_arguments)
+        try:
+            return self.execution_engine.resolve_data_reference(
+                self.__class__.__name__, **template_arguments
+            )
+        except AttributeError as e:
+            raise ge_exceptions.DataConnectorError(
+                "A non-existent/unknown ExecutionEngine instance was referenced."
+            )
 
 
 def _check_valid_s3_path(
@@ -170,4 +166,4 @@ def _check_valid_s3_path(
         )
         if "*" in bad_chars:
             msg += "Note: `*` is internally used to replace the regex for `.`."
-        raise ParserError(msg)
+        raise ge_exceptions.ParserError(msg)

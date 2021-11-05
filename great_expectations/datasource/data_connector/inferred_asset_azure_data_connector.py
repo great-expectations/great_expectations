@@ -10,11 +10,7 @@ from great_expectations.datasource.data_connector.inferred_asset_file_path_data_
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_azure_keys
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -155,23 +151,16 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        # Pandas and Spark execution engines utilize separate path formats for accessing Azure Blob Storage service.
-        if not hasattr(
-            self.execution_engine, "get_azure_blob_storage_object_url_template"
-        ):
-            raise ge_exceptions.DataConnectorError(
-                f"""Illegal ExecutionEngine type "{str(type(self.execution_engine))}" used in \
-"{self.__class__.__name__}".
-"""
-            )
-
         template_arguments: dict = {
             "account_name": self._account_name,
             "container": self._container,
             "path": path,
         }
-
-        # noinspection PyUnresolvedReferences
-        return self.execution_engine.get_azure_blob_storage_object_url_template(
-            **template_arguments
-        )
+        try:
+            return self.execution_engine.resolve_data_reference(
+                self.__class__.__name__, **template_arguments
+            )
+        except AttributeError as e:
+            raise ge_exceptions.DataConnectorError(
+                "A non-existent/unknown ExecutionEngine instance was referenced."
+            )

@@ -380,18 +380,6 @@ Please check your config."""
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
-    @staticmethod
-    def get_s3_object_url_template(**kwargs) -> str:
-        return S3Url.OBJECT_URL_TEMPLATE.format(**kwargs)
-
-    @staticmethod
-    def get_gcs_object_url_template(**kwargs) -> str:
-        return GCSUrl.OBJECT_URL_TEMPLATE.format(**kwargs)
-
-    @staticmethod
-    def get_azure_blob_storage_object_url_template(**kwargs) -> str:
-        return AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(**kwargs)
-
     def get_domain_records(
         self,
         domain_kwargs: dict,
