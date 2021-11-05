@@ -773,7 +773,8 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
     @classmethod
     def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
-        if (weights := partition_object.get("weights")) is None:
+        weights = partition_object.get("weights")
+        if weights is None:
             weights = []
 
         chart_pixel_width = (len(weights) / 60.0) * 500
@@ -1008,9 +1009,11 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             },
         }
 
-        if (expected_partition_object := params.get("partition_object")) is None:
+        expected_partition_object = params.get("partition_object")
+        if expected_partition_object is None:
             expected_partition_object = {}
-        if (weights := expected_partition_object.get("weights")) is None:
+        weights = expected_partition_object.get("weights")
+        if weights is None:
             weights = []
 
         chart = None
