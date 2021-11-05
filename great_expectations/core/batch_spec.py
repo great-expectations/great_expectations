@@ -38,10 +38,6 @@ class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
     def path(self) -> str:
         return self.get("path")
 
-    @path.setter
-    def path(self, path):
-        self["path"] = path
-
     @property
     def reader_method(self) -> str:
         return self.get("reader_method")
