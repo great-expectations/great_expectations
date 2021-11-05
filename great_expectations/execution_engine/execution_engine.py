@@ -110,11 +110,15 @@ class DataConnectorStorageDataReferenceResolver:
         (
             "DBFS",
             "SparkDFExecutionEngine",
-        ): lambda path: DBFSPath.convert_to_protocol_version(path),
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            **template_arguments
+        ),
         (
             "DBFS",
             "PandasExecutionEngine",
-        ): lambda path: DBFSPath.convert_to_file_semantics_version(path),
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
+            **template_arguments
+        ),
     }
 
     @staticmethod

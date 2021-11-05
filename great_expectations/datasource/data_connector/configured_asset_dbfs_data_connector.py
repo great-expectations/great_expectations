@@ -108,31 +108,6 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilePathDataConnector):
         self._base_directory = base_directory
         self._glob_directive = glob_directive
 
-    @staticmethod
-    def _convert_path_to_dbfs_root(path: str) -> str:
-        # TODO: AJB Replace this with regex
-        return path.replace("/dbfs", "dbfs:", 1)
-
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
-        This DBFS specific implementation converts paths to the appropriate protocol format so that it can be used
-        in the SparkDFExecutionEngine
-
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
-        batch_spec: PathBatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
-        orig_path = batch_spec.path
-        # TODO: AJB Is this the right place to do the conversion?
-        # batch_spec.path = self._convert_path_to_dbfs_root(path=orig_path)
-        return PathBatchSpec(batch_spec)
-
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         base_directory: str = self.base_directory
         glob_directive: str = self._glob_directive
@@ -161,12 +136,21 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilePathDataConnector):
                     dir_path=asset.base_directory,
                     root_directory_path=base_directory,
                 )
-        # TODO: AJB Is this the right place to add this? Or is it better to only convert in build_batch_spec()
-        # TODO: AJB - Alex says to use this instead of overriding the public method
         full_path = str(Path(base_directory).joinpath(path))
-        return_path = self._convert_path_to_dbfs_root(path=full_path)
-        # return_path = full_path
-        return return_path
+
+        template_arguments: dict = {
+            "path": full_path,
+        }
+
+        try:
+            return self.execution_engine.resolve_data_reference(
+                data_connector_name=self.__class__.__name__,
+                template_arguments=template_arguments,
+            )
+        except AttributeError:
+            raise ge_exceptions.DataConnectorError(
+                "A non-existent/unknown ExecutionEngine instance was referenced."
+            )
 
     @property
     def base_directory(self) -> str:
