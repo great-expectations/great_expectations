@@ -1,40 +1,49 @@
 import inspect
 import logging
-from typing import Dict, Optional, Callable
+from typing import Callable, Dict, Optional
 
 import numpy as np
 import pandas as pd
+from pyspark.sql import functions as F
 
-from great_expectations.core.expectation_validation_result import ExpectationValidationResult
-from great_expectations.expectations.metrics.column_map_metrics.column_values_string_integers_monotonically_increasing \
-    import ColumnValuesStringIntegersMonotonicallyIncreasing
 # from great_expectations.expectations.metrics.column_map_metrics.column_values_increasing import ColumnValuesIncreasing
 # from great_expectations.expectations.metrics.column_map_metrics.column_values_of_type import ColumnValuesOfType
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import InvalidExpectationConfigurationError, InvalidExpectationKwargsError
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
+from great_expectations.exceptions.exceptions import (
+    InvalidExpectationConfigurationError,
+    InvalidExpectationKwargsError,
+)
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.sparkdf_execution_engine import SparkDFExecutionEngine
-
+from great_expectations.execution_engine.pandas_execution_engine import (
+    PandasExecutionEngine,
+)
+from great_expectations.execution_engine.sparkdf_execution_engine import (
+    SparkDFExecutionEngine,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    ColumnMapExpectation,
+    TableExpectation,
+)
+from great_expectations.expectations.metrics.column_map_metrics.column_values_string_integers_monotonically_increasing import (
+    ColumnValuesStringIntegersMonotonicallyIncreasing,
+)
 from great_expectations.expectations.registry import get_metric_kwargs
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing
+    substitute_none_for_missing,
 )
-
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    TableExpectation,
-    ColumnExpectation
-)
-
 from great_expectations.validator.metric_configuration import MetricConfiguration
-
-from great_expectations.expectations.util import render_evaluation_parameter_string
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +91,7 @@ try:
 except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
+
 
 class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectation):
     """Expect a column to contain string-typed integers to be monotonically increasing.
@@ -137,12 +147,11 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         "catch_exceptions": False,
     }
 
-
     def _validate_success_key(
-            param: str,
-            required: bool,
-            configuration: Optional[ExpectationConfiguration],
-            validation_rules: Dict[Callable, str],
+        param: str,
+        required: bool,
+        configuration: Optional[ExpectationConfiguration],
+        validation_rules: Dict[Callable, str],
     ) -> None:
         """"""
         if param not in configuration.kwargs:
@@ -158,13 +167,10 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
             if not rule(param_value):
                 raise InvalidExpectationKwargsError(error_message)
 
-
     def validate_configuration(
-            self,
-            configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration]
     ) -> bool:
         return super().validate_configuration(configuration=configuration)
-
 
     def get_validation_dependencies(
         self,
@@ -176,7 +182,7 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         dependencies = super().get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration
+            runtime_configuration=runtime_configuration,
         )
 
         column_value_increasing_metric_kwargs = get_metric_kwargs(
@@ -184,14 +190,19 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        dependencies["metrics"]["column_values.string_integers.monotonically_increasing"] = MetricConfiguration(
+        dependencies["metrics"][
+            "column_values.string_integers.monotonically_increasing"
+        ] = MetricConfiguration(
             metric_name="column_values.string_integers.monotonically_increasing.map",
-            metric_domain_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=column_value_increasing_metric_kwargs["metric_domain_kwargs"]
+            metric_domain_kwargs=column_value_increasing_metric_kwargs[
+                "metric_domain_kwargs"
+            ],
+            metric_value_kwargs=column_value_increasing_metric_kwargs[
+                "metric_domain_kwargs"
+            ],
         )
 
         return dependencies
-
 
     def _validate(
         self,
@@ -202,20 +213,19 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
     ) -> Dict:
 
         SIMI = metrics.get("column_values.string_integers.monotonically_increasing")
-
         success = all(SIMI[0])
 
         return ExpectationValidationResult(
-                expectation_config={
-                    "expectation_type": "expect_column_values_to_be_string_integers_monotonically_increasing",
-                    "kwargs": {
-                        "column": "a",
-                        "batch_id": "57175eeb4a8baa7ae63f44c6540eb559",
-                    },
-                    "meta": {},
-                    "ge_cloud_id": None,
+            expectation_config={
+                "expectation_type": "expect_column_values_to_be_string_integers_monotonically_increasing",
+                "kwargs": {
+                    "column": "a",
+                    "batch_id": "57175eeb4a8baa7ae63f44c6540eb559",
                 },
-                meta={},
-                result={'observed_value': np.unique(SIMI[0], return_counts=True)},
-                success=success
-            )
+                "meta": {},
+                "ge_cloud_id": None,
+            },
+            meta={},
+            result={"observed_value": np.unique(SIMI[0], return_counts=True)},
+            success=success,
+        )
