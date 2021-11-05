@@ -443,7 +443,7 @@ class AzureUrl:
         r"^(https?:\/\/)?(.+?)\.blob\.core\.windows\.net/([^/]+)/(.+)$"
     )
     AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE: str = (
-        "https://{account_name}.blob.core.windows.net/{container}/{path}"
+        "{account_name}.blob.core.windows.net/{container}/{path}"
     )
 
     AZURE_BLOB_STORAGE_WASBS_URL_REGEX_PATTERN: str = (
