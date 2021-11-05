@@ -1,6 +1,3 @@
-import findspark
-from pyspark import SparkContext
-from pyspark.sql import SparkSession
 from ruamel import yaml
 
 import great_expectations as ge
@@ -11,10 +8,8 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
 )
 
-# Set up a basic spark dataframe
-findspark.init()
-sc = SparkContext(appName="app")
-spark = SparkSession(sc)
+# Set up a basic spark session
+spark = ge.core.util.get_or_create_spark_application()
 
 # basic dataframe
 data = [
@@ -65,6 +60,7 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
+print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)

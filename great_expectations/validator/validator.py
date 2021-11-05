@@ -73,6 +73,13 @@ MAX_METRIC_COMPUTATION_RETRIES = 3
 
 
 class Validator:
+    DEFAULT_RUNTIME_CONFIGURATION = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BASIC",
+    }
+    RUNTIME_KEYS = DEFAULT_RUNTIME_CONFIGURATION.keys()
+
     # noinspection PyUnusedLocal
     def __init__(
         self,
@@ -121,11 +128,9 @@ class Validator:
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._default_expectation_args = {
-            "include_config": True,
-            "catch_exceptions": False,
-            "result_format": "BASIC",
-        }
+        self._default_expectation_args = copy.deepcopy(
+            Validator.DEFAULT_RUNTIME_CONFIGURATION
+        )
         self._validator_config = {}
 
         # This special state variable tracks whether a validation run is going on, which will disable
@@ -202,19 +207,14 @@ class Validator:
 
         def inst_expectation(*args, **kwargs):
             # this is used so that exceptions are caught appropriately when they occur in expectation config
-            basic_configuration_keys = {
-                "result_format",
-                "include_config",
-                "catch_exceptions",
-            }
             basic_default_expectation_args = {
                 k: v
                 for k, v in self.default_expectation_args.items()
-                if k in basic_configuration_keys
+                if k in Validator.RUNTIME_KEYS
             }
             basic_runtime_configuration = copy.deepcopy(basic_default_expectation_args)
             basic_runtime_configuration.update(
-                {k: v for k, v in kwargs.items() if k in basic_configuration_keys}
+                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
             expectation_impl = get_expectation_impl(name)
@@ -1010,7 +1010,7 @@ set as active.
         See also:
             set_default_expectation_arguments
         """
-        return self._default_expectation_args
+        return self.default_expectation_args
 
     @property
     def ge_cloud_mode(self) -> bool:

@@ -98,6 +98,57 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
+    kwargs_json_schema_base_properties = {
+        "result_format": {
+            "oneOf": [
+                {"type": "null"},
+                {
+                    "type": "string",
+                    "enum": ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"],
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "result_format": {
+                            "type": "string",
+                            "enum": ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"],
+                        },
+                        "partial_unexpected_count": {"type": "number"},
+                    },
+                },
+            ],
+            "default": "BASIC",
+        },
+        "include_config": {
+            "oneOf": [{"type": "null"}, {"type": "boolean"}],
+            "default": "true",
+        },
+        "catch_exceptions": {
+            "oneOf": [{"type": "null"}, {"type": "boolean"}],
+            "default": "false",
+        },
+        "meta": {"type": "object"},
+    }
+
+    kwargs_json_schema = {
+        "type": "object",
+        "properties": {
+            **kwargs_json_schema_base_properties,
+            "column": {"type": "string"},
+            "min_value": {"oneOf": [{"type": "null"}, {"type": "number"}]},
+            "max_value": {"oneOf": [{"type": "null"}, {"type": "number"}]},
+            "strict_min": {
+                "oneOf": [{"type": "null"}, {"type": "boolean"}],
+                "default": "false",
+            },
+            "strict_max": {
+                "oneOf": [{"type": "null"}, {"type": "boolean"}],
+                "default": "false",
+            },
+        },
+        "required": ["column"],
+    }
+
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
