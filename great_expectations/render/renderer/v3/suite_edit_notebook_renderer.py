@@ -136,7 +136,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         for expectation in expectations:
             if "column" in expectation["kwargs"]:
                 column_name = expectation["kwargs"]["column"]
-
                 if column_name not in expectations_by_column.keys():
                     expectations_by_column[column_name] = []
                 expectations_by_column[column_name].append(expectation)
