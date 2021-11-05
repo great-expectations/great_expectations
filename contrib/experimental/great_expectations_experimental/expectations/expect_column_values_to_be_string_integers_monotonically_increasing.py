@@ -1,19 +1,16 @@
+import json
 import logging
 from typing import Callable, Dict, Optional
-import json
+
 import numpy as np
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationKwargsError,
-)
+from great_expectations.exceptions.exceptions import InvalidExpectationKwargsError
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-)
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -202,6 +199,9 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
             success=success,
         )
 
+
 if __name__ == "__main__":
-    self_check_report = ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing().run_diagnostics()
+    self_check_report = (
+        ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing().run_diagnostics()
+    )
     print(json.dumps(self_check_report, indent=2))

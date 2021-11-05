@@ -111,6 +111,10 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
             accessor_domain_kwargs,
         )
 
+    @metric_partial(
+        engine=SqlAlchemyExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.WINDOW_FN,
+    )
     @classmethod
     def _get_evaluation_dependencies(
         cls,
