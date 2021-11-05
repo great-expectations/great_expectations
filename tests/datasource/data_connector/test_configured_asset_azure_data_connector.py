@@ -626,6 +626,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetAzureDataConnector
+           datasource_name: test_environment
            container: my_container
            name_starts_with: ""
            assets:
@@ -662,7 +663,6 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_azure_data_connector",
-                "datasource_name": "test_environment",
                 "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
@@ -1281,6 +1281,7 @@ def test_return_all_batch_definitions_too_many_sorters(
     my_data_connector_yaml = yaml.load(
         f"""
        class_name: ConfiguredAssetAzureDataConnector
+       datasource_name: test_environment
        container: my_container
        name_starts_with: ""
        assets:
@@ -1326,7 +1327,6 @@ def test_return_all_batch_definitions_too_many_sorters(
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_azure_data_connector",
-                "datasource_name": "test_environment",
                 "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
