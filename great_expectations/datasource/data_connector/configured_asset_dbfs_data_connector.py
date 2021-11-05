@@ -6,14 +6,13 @@ from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
-    list_azure_keys,
     normalize_directory_path,
 )
 from great_expectations.execution_engine import (
@@ -23,14 +22,6 @@ from great_expectations.execution_engine import (
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-    logger.debug(
-        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
-    )
 
 
 # TODO: AJB Alex: make this the same as AzureDataConnector and GCSDataConnector, S3DataConnector
@@ -139,8 +130,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         orig_path = batch_spec.path
         # TODO: AJB Is this the right place to do the conversion?
-
-        batch_spec.path = self._convert_path_to_dbfs_root(path=orig_path)
+        # batch_spec.path = self._convert_path_to_dbfs_root(path=orig_path)
         return PathBatchSpec(batch_spec)
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
@@ -172,9 +162,10 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilePathDataConnector):
                     root_directory_path=base_directory,
                 )
         # TODO: AJB Is this the right place to add this? Or is it better to only convert in build_batch_spec()
+        # TODO: AJB - Alex says to use this instead of overriding the public method
         full_path = str(Path(base_directory).joinpath(path))
-        # return_path = self._convert_path_to_dbfs_root(path=full_path)
-        return_path = full_path
+        return_path = self._convert_path_to_dbfs_root(path=full_path)
+        # return_path = full_path
         return return_path
 
     @property
