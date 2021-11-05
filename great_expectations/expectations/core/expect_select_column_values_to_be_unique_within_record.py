@@ -133,13 +133,15 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         template_str = f"Values must always be unique across columns{mostly_str}: "
         column_list = params.get("column_list") if params.get("column_list") else []
         if len(column_list) > 0:
-            for idx in range(len(column_list) - 1):
-                template_str += "$column_list_" + str(idx) + ", "
-                params["column_list_" + str(idx)] = column_list[idx]
+            for idx, val in enumerate(column_list[:-1]):
+                param = f"$column_list_{idx}"
+                template_str += f"{param}, "
+                params[param] = val
 
             last_idx = len(column_list) - 1
-            template_str += "$column_list_" + str(last_idx)
-            params["column_list_" + str(last_idx)] = column_list[last_idx]
+            last_param = f"$column_list_{last_idx}"
+            template_str += last_param
+            params[last_param] = column_list[last_idx]
 
         if params["row_condition"] is not None:
             (
