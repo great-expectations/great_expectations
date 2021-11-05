@@ -106,7 +106,6 @@ class DataConnector:
             batch_markers,
         )
 
-    # TODO: <Alex>9/2/2021: batch_definition->batch_spec translation should move to corresponding ExecutionEngine</Alex>
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
