@@ -314,6 +314,7 @@ Please check your config."""
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 
+    # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
     @staticmethod
     def guess_reader_method_from_path(path):
         """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
