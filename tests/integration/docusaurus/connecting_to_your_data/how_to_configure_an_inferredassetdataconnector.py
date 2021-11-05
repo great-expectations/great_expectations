@@ -158,10 +158,11 @@ data_connectors:
     prefix: <MY S3 BUCKET PREFIX>/
     default_regex:
       group_names:
+        - prefix
         - data_asset_name
         - year
         - month
-      pattern: (.*)_(\d{4})-(\d{2})\.csv
+      pattern: (.*)/(.*)_sample_(\d{4})-(\d{2})\.csv
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -184,12 +185,12 @@ datasource_config = {
     },
     "data_connectors": {
         "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+            "class_name": "InferredAssetS3DataConnector",
             "bucket": "<MY S3 BUCKET>/",
             "prefix": "<MY S3 BUCKET PREFIX>/",
             "default_regex": {
-                "group_names": ["data_asset_name", "year", "month"],
-                "pattern": r"(.*)_(\d{4})-(\d{2})\.csv",
+                "group_names": ["prefix", "data_asset_name", "year", "month"],
+                "pattern": r"(.*)/(.*)_sample_(\d{4})-(\d{2})\.csv",
             },
         },
     },

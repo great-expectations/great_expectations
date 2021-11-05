@@ -105,13 +105,14 @@ execution_engine:
   class_name: PandasExecutionEngine
 data_connectors:
   default_inferred_data_connector_name:
-    class_name: InferredAssetS3DataConnector
+    class_name: ConfiguredAssetS3DataConnector
     bucket: <MY S3 BUCKET>/
     prefix: <MY S3 BUCKET PREFIX>/
-    default_regex:
-      group_names:
-        - month
-      pattern: yellow_tripdata_(.*)\.csv
+    assets:
+      yellow_tripdata:
+        pattern: yellow_tripdata_(.*)\.csv
+        group_names:
+          - month
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -134,12 +135,14 @@ datasource_config = {
     },
     "data_connectors": {
         "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+            "class_name": "ConfiguredAssetS3DataConnector",
             "bucket": "<MY S3 BUCKET>/",
             "prefix": "<MY S3 BUCKET PREFIX>/",
-            "default_regex": {
-                "group_names": ["month"],
-                "pattern": r"yellow_tripdata_(.*)\.csv",
+            "assets": {
+                "yellow_tripdata": {
+                    "group_names": ["month"],
+                    "pattern": r"yellow_tripdata_(.*)\.csv",
+                },
             },
         },
     },
