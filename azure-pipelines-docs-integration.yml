@@ -84,18 +84,22 @@ stages:
 
         - task: DownloadSecureFile@1
           name: gcp_authkey
-          displayName: 'Download Google Service Account'
+          displayName: 'Download GCS Credentials'
           inputs:
               secureFile: 'superconductive-service-acct.json'
               retryCount: '2'
-
+        - task: DownloadSecureFile@1
+          name: aws_authkey
+          displayName: 'Download AWS Credentials'
+          inputs:
+              secureFile: 'aws_config'
+              retryCount: '2'
         - script: |
             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
             pip install pytest pytest-azurepipelines
-            # TODO enable spark tests
             pytest -v --docs-tests -m docs --mysql --mssql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
@@ -114,10 +118,7 @@ stages:
             REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
             # AWS credentials
-            # AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-            # AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-            # AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-            # todo: add credentials for cloud resources here
+            AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
             GCP_PROJECT: $(GCP_PROJECT)

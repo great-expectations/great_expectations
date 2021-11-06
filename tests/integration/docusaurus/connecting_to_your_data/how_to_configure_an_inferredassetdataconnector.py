@@ -6,7 +6,7 @@ from great_expectations.core.batch import BatchRequest
 context = ge.get_context()
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -46,7 +46,7 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
                 "group_names": ["data_asset_name"],
-                "pattern": "(.*)\.csv",
+                "pattern": r"(.*)\.csv",
             },
         },
     },
@@ -74,7 +74,7 @@ assert "yellow_tripdata_2019-01" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -116,7 +116,7 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
                 "group_names": ["data_asset_name", "year", "month"],
-                "pattern": "(.*)_(\d{4})-(\d{2})\.csv",
+                "pattern": r"(.*)_(\d{4})-(\d{2})\.csv",
             },
         },
     },
@@ -144,7 +144,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -158,21 +158,21 @@ data_connectors:
     prefix: <MY S3 BUCKET PREFIX>/
     default_regex:
       group_names:
+        - prefix
         - data_asset_name
         - year
         - month
-      pattern: (.*)_(\d{4})-(\d{2})\.csv
+      pattern: (.*)/(.*)_sample_(\d{4})-(\d{2})\.csv
 """
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>/", "superconductive-public")
 datasource_yaml = datasource_yaml.replace(
-    "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_trip_data_samples/"
+    "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_tripdata_samples/"
 )
 
-# TODO: Uncomment once S3 testing in Azure Pipelines is re-enabled
-# test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
 datasource_config = {
@@ -185,12 +185,12 @@ datasource_config = {
     },
     "data_connectors": {
         "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+            "class_name": "InferredAssetS3DataConnector",
             "bucket": "<MY S3 BUCKET>/",
             "prefix": "<MY S3 BUCKET PREFIX>/",
             "default_regex": {
-                "group_names": ["data_asset_name", "year", "month"],
-                "pattern": "(.*)_(\d{4})-(\d{2})\.csv",
+                "group_names": ["prefix", "data_asset_name", "year", "month"],
+                "pattern": r"(.*)/(.*)_sample_(\d{4})-(\d{2})\.csv",
             },
         },
     },
@@ -203,26 +203,25 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "superconductive-public"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
-] = "data/taxi_yellow_trip_data_samples/"
+] = "data/taxi_yellow_tripdata_samples/"
 
-# TODO: Uncomment once S3 testing in Azure Pipelines is re-enabled
-# test_python = context.test_yaml_config(
-#     yaml.dump(datasource_config), return_mode="report_object"
-# )
-#
-# assert test_yaml == test_python
-#
-# context.add_datasource(**datasource_config)
-#
-# assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-# assert "yellow_tripdata" in set(
-#     context.get_available_data_asset_names()["taxi_datasource"][
-#         "default_inferred_data_connector_name"
-#     ]
-# )
+test_python = context.test_yaml_config(
+    yaml.dump(datasource_config), return_mode="report_object"
+)
+
+assert test_yaml == test_python
+
+context.add_datasource(**datasource_config)
+
+assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
+assert "yellow_tripdata" in set(
+    context.get_available_data_asset_names()["taxi_datasource"][
+        "default_inferred_data_connector_name"
+    ]
+)
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -264,7 +263,7 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
                 "group_names": ["data_asset_name", "year", "month"],
-                "pattern": "(.*)_(\d{4})-(\d{2})\.csv",
+                "pattern": r"(.*)_(\d{4})-(\d{2})\.csv",
             },
         },
     },
@@ -325,7 +324,7 @@ assert validator.active_batch_definition.batch_identifiers == {
 }
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -369,7 +368,7 @@ datasource_config = {
             "glob_directive": "*/*/*.csv",
             "default_regex": {
                 "group_names": ["year", "month", "data_asset_name"],
-                "pattern": "(\d{4})/(\d{2})/(.*)\.csv",
+                "pattern": r"(\d{4})/(\d{2})/(.*)\.csv",
             },
         },
     },
@@ -403,7 +402,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -453,7 +452,7 @@ datasource_config = {
                     "year",
                     "month",
                 ],
-                "pattern": "(.*)/(.*)(\d{4})-(\d{2})\.csv",
+                "pattern": r"(.*)/(.*)(\d{4})-(\d{2})\.csv",
             },
         },
     },
@@ -487,7 +486,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -535,7 +534,7 @@ datasource_config = {
                     "year",
                     "month",
                 ],
-                "pattern": "(.*)/.*(\d{4})-(\d{2})\.csv",
+                "pattern": r"(.*)/.*(\d{4})-(\d{2})\.csv",
             },
         },
     },
