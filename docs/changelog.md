@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] InferredAssetSqlDataConnector's introspection can list external tables in Redshift Spectrum 
 
 ### 0.13.41
 * [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
