@@ -239,6 +239,7 @@ def test_instantiation_without_args(
     my_data_connector = ConfiguredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
@@ -270,6 +271,7 @@ def test_instantiation_with_filename_arg(
     my_data_connector = ConfiguredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         gcs_options={
             "filename": "my_filename.json",
         },
@@ -305,6 +307,7 @@ def test_instantiation_with_info_arg(
     my_data_connector = ConfiguredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         gcs_options={
             "info": "{ my_json: my_content }",
         },
@@ -358,6 +361,9 @@ def test_instantiation_with_test_yaml_config(
         assets:
             alpha:
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -394,6 +400,9 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
         assets:
             alpha:
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
     assert mock_emit.call_count == 1
@@ -446,6 +455,9 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
         assets:
             alpha:
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -483,6 +495,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
     my_data_connector = ConfiguredAssetGCSDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
@@ -519,8 +532,6 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            bucket_or_name: my_bucket
            prefix: ""
            assets:
@@ -553,7 +564,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_gcs_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -580,8 +591,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            bucket_or_name: my_bucket
            prefix: ""
            assets:
@@ -599,7 +608,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_gcs_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -635,8 +644,6 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            bucket_or_name: my_bucket
            prefix: ""
            assets:
@@ -667,7 +674,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_gcs_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -711,8 +718,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            bucket_or_name: my_bucket
            prefix: ""
            assets:
@@ -743,7 +748,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_gcs_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -787,8 +792,6 @@ def test_return_all_batch_definitions_basic_sorted(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        bucket_or_name: my_bucket
        prefix: ""
        assets:
@@ -830,7 +833,7 @@ def test_return_all_batch_definitions_basic_sorted(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_gcs_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -870,8 +873,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        bucket_or_name: my_bucket
        prefix: ""
        assets:
@@ -913,7 +914,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_gcs_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -983,8 +984,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        bucket_or_name: my_bucket
        prefix: ""
        assets:
@@ -1026,7 +1025,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_gcs_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -1066,8 +1065,6 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        bucket_or_name: my_bucket
        assets:
            TestFiles:
@@ -1113,7 +1110,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_gcs_data_connector",
-                "datasource_name": "test_environment",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
@@ -1137,8 +1134,6 @@ def test_return_all_batch_definitions_too_many_sorters(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        bucket_or_name: my_bucket
        prefix: ""
        assets:
@@ -1180,7 +1175,7 @@ def test_return_all_batch_definitions_too_many_sorters(
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_gcs_data_connector",
-                "datasource_name": "test_environment",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
@@ -1241,7 +1236,10 @@ assets:
     my_data_connector: ConfiguredAssetGCSDataConnector = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-        runtime_environment={"name": "my_data_connector"},
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
     )
 
     # Since we are using mocks, we need to redefine the output of subsequent calls to `list_gcs_keys()`
