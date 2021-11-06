@@ -36,13 +36,13 @@ Import these necessary packages and modules:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L3-L4
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L1-L4
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L1-L4
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L3-L4
 ```
 
 </TabItem>
@@ -159,13 +159,13 @@ A corresponding configuration for `ConfiguredAssetS3DataConnector` would look si
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L99-L115
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L99-L116
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L128-L147
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L128-L149
 ```
 
 </TabItem>
@@ -194,13 +194,13 @@ Then this configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L175-L191
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L176-L192
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L202-L222
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L203-L223
 ```
 
 </TabItem>
@@ -217,7 +217,7 @@ Unmatched data_references (0 of 0):[]
 
 Once configured, you can get a `Validator` from the `Data Context` as follows:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L238-L248
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L239-L249
 ```
 
 But what if the regex does not match any files in the directory?
@@ -233,13 +233,13 @@ Then this configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L260-L276
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L261-L277
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L287-L307
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L288-L308
 ```
 
 </TabItem>
@@ -285,13 +285,13 @@ Then this configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L329-L351
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L330-L352
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L362-L386
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L363-L387
 ```
 
 </TabItem>
@@ -331,13 +331,13 @@ The following configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L414-L438
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L415-L439
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L449-L475
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L450-L476
 ```
 
 </TabItem>
@@ -377,13 +377,13 @@ The following configuration:
   ]}>
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L502-L526
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L503-L527
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L537-L565
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L538-L566
 ```
 
 </TabItem>
