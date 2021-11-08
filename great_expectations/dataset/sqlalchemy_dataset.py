@@ -588,6 +588,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name="pyathena.sqlalchemy_athena"
             )
         elif dialect_name == "teradatasql":
+            # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )

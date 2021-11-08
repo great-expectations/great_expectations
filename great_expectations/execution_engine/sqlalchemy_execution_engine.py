@@ -266,6 +266,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
             )
+        elif self.engine.dialect.name.lower() == "teradatasql":
+            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="teradatasqlalchemy.dialect"
+            )
         else:
             self.dialect_module = None
 
