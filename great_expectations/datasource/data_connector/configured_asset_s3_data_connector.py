@@ -7,7 +7,6 @@ try:
 except ImportError:
     boto3 = None
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.asset import Asset
@@ -146,12 +145,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             "bucket": self._bucket,
             "path": path,
         }
-        try:
-            return self.execution_engine.resolve_data_reference(
-                data_connector_name=self.__class__.__name__,
-                template_arguments=template_arguments,
-            )
-        except AttributeError:
-            raise ge_exceptions.DataConnectorError(
-                "A non-existent/unknown ExecutionEngine instance was referenced."
-            )
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )
