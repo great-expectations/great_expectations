@@ -5,16 +5,17 @@ authors:
   - family-names: Campbell
     given-names: James
   - name: Superconductive
+    website: https://superconductive.ai
+  - name: Great Expectations
     email: team@greatexpectations.io
-    website: greatexpectations.io
-    website: superconductive.ai
+    website: https://greatexpectations.io
 cff-version: 1.2.0
-date-released: "2021-10-27"
+date-released: "2021-11-04"
 identifiers:
   - description: "This is the collection of all archived snapshots of all versions of Great Expectations"
     type: doi
     value: <>
-  - description: "This is the archived snapshot of version 0.13.40 of Great Expectations"
+  - description: "This is the archived snapshot of version 0.13.41 of Great Expectations"
     type: doi
     value: <>
 keywords:
@@ -26,4 +27,4 @@ license: Apache-2.0
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/great-expectations/great_expectations"
 title: "Great Expectations"
-version: 0.13.40
+version: 0.13.41
