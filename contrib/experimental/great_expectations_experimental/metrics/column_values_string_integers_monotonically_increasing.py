@@ -30,18 +30,13 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider):
     function_metric_name = "column_values.string_integers.monotonically_increasing"
+    function_value_keys = "column"
 
     @column_function_partial(engine=PandasExecutionEngine)
-    def _pandas(self, data, _metrics, **kwargs):
-
-        try:
-            temp_column = [int(x) for x in data if x.isdigit()]
-        except AttributeError:
-            raise TypeError(
-                "Column must be a string-type capable of being cast to int."
-            )
-
-        if len(temp_column) != len(data):
+    def _pandas(self, _column, **kwargs):
+        if all(_column.str.isdigit()) is True:
+            temp_column = _column.astype(int)
+        else:
             raise TypeError(
                 "Column must be a string-type capable of being cast to int."
             )
@@ -70,12 +65,7 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
         ]
 
         if isinstance(column_metadata["type"], (sparktypes.StringType)):
-            try:
-                column = F.col(column_name).cast(sparktypes.IntegerType())
-            except TypeError:
-                raise TypeError(
-                    "Column must be a string-type capable of being cast to int."
-                )
+            column = F.col(column_name).cast(sparktypes.IntegerType())
         else:
             raise TypeError(
                 "Column must be a string-type capable of being cast to int."
@@ -105,21 +95,6 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
             compute_domain_kwargs,
             accessor_domain_kwargs,
         )
-
-    @metric_partial(
-        engine=SqlAlchemyExecutionEngine,
-        partial_fn_type=MetricPartialFunctionTypes.WINDOW_FN,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
-    def _sqlalchemy(
-        cls,
-        execution_engine,
-        metric_domain_kwargs,
-        metric_value_kwargs,
-        metrics,
-        runtime_configuration,
-    ):
-        pass
 
     @classmethod
     def _get_evaluation_dependencies(

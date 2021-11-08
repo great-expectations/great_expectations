@@ -146,7 +146,7 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
             runtime_configuration=runtime_configuration,
         )
 
-        column_value_increasing_metric_kwargs = get_metric_kwargs(
+        metric_kwargs = get_metric_kwargs(
             metric_name="column_values.string_integers.monotonically_increasing.map",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
@@ -155,12 +155,8 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
             "column_values.string_integers.monotonically_increasing"
         ] = MetricConfiguration(
             metric_name="column_values.string_integers.monotonically_increasing.map",
-            metric_domain_kwargs=column_value_increasing_metric_kwargs[
-                "metric_domain_kwargs"
-            ],
-            metric_value_kwargs=column_value_increasing_metric_kwargs[
-                "metric_domain_kwargs"
-            ],
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_domain_kwargs"],
         )
 
         return dependencies
@@ -181,7 +177,6 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
                 "expectation_type": "expect_column_values_to_be_string_integers_monotonically_increasing",
                 "kwargs": {
                     "column": "a",
-                    "batch_id": "57175eeb4a8baa7ae63f44c6540eb559",
                 },
                 "meta": {},
                 "ge_cloud_id": None,
