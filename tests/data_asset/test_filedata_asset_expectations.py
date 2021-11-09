@@ -9,7 +9,7 @@ from great_expectations.data_context.util import file_relative_path
 
 
 def test_expect_file_line_regex_match_count_to_be_between():
-    #####Invlaid File Path######
+    #####Invalid File Path######
     joke_file_path = "joke.txt"
     assert not os.path.isfile(joke_file_path)
     joke_dat = ge.data_asset.FileDataAsset(joke_file_path)

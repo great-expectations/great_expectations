@@ -2,36 +2,61 @@ import datetime
 import json
 import os
 import tempfile
+from unittest import mock
 
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
 
 
-def test_empty_store(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_empty_store(mock_emit, empty_data_context_stats_enabled):
     # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context.test_yaml_config(
+    my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
 store_backend:
-
-    module_name: "great_expectations.data_context.store.store_backend"
+    module_name: great_expectations.data_context.store.store_backend
     class_name: InMemoryStoreBackend
 """
     )
+    assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ExpectationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "InMemoryStoreBackend"
+                    },
+                },
+                "success": True,
+            }
+        ),
+    ]
 
-    # assert False
 
-
-def test_config_with_yaml_error(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_config_with_yaml_error(mock_emit, empty_data_context_stats_enabled):
     with pytest.raises(Exception):
         # noinspection PyUnusedLocal
-        my_expectation_store = empty_data_context.test_yaml_config(
+        my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -41,9 +66,24 @@ store_backend:
 EGREGIOUS FORMATTING ERROR
 """
         )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__yaml_parse_error__"]},
+                "success": False,
+            }
+        ),
+    ]
 
 
-def test_expectations_store_with_filesystem_store_backend(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_expectations_store_with_filesystem_store_backend(
+    mock_emit, empty_data_context_stats_enabled
+):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
         f_.write("\n")
@@ -51,7 +91,7 @@ def test_expectations_store_with_filesystem_store_backend(empty_data_context):
         f_.write("\n")
 
     # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context.test_yaml_config(
+    my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store
 class_name: ExpectationsStore
@@ -61,14 +101,38 @@ store_backend:
     base_directory: {tmp_dir}
 """
     )
+    assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ExpectationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
+                "success": True,
+            }
+        )
+    ]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_store_with_filesystem_store_backend(
-    empty_data_context, tmp_path_factory
+    mock_emit, empty_data_context_stats_enabled, tmp_path_factory
 ):
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
     )
+    context: DataContext = empty_data_context_stats_enabled
 
     yaml_config: str = f"""
     store_name: my_checkpoint_store
@@ -80,15 +144,64 @@ def test_checkpoint_store_with_filesystem_store_backend(
         base_directory: {tmp_dir}/checkpoints
     """
 
-    my_checkpoint_store: CheckpointStore = empty_data_context.test_yaml_config(
+    my_checkpoint_store: CheckpointStore = context.test_yaml_config(
         yaml_config=yaml_config,
         return_mode="instantiated_class",
     )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized_name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "CheckpointStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
+                "success": True,
+            }
+        ),
+    ]
 
-    report_object: dict = empty_data_context.test_yaml_config(
+    report_object: dict = context.test_yaml_config(
         yaml_config=yaml_config,
         return_mode="report_object",
     )
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "CheckpointStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "CheckpointStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
+                "success": True,
+            }
+        ),
+    ]
 
     assert my_checkpoint_store.config == report_object["config"]
 
@@ -107,20 +220,20 @@ def test_checkpoint_store_with_filesystem_store_backend(
         },
         "overwrite_existing": False,
         "runtime_environment": {
-            "root_directory": f"{empty_data_context.root_directory}",
+            "root_directory": f"{context.root_directory}",
         },
     }
     assert my_checkpoint_store.config == expected_checkpoint_store_config
 
     checkpoint_store_name: str = my_checkpoint_store.config["store_name"]
-    empty_data_context.get_config()["checkpoint_store_name"] = checkpoint_store_name
+    context.get_config()["checkpoint_store_name"] = checkpoint_store_name
 
     assert (
-        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        context.get_config_with_variables_substituted().checkpoint_store_name
         == "my_checkpoint_store"
     )
     assert (
-        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        context.get_config_with_variables_substituted().checkpoint_store_name
         == my_checkpoint_store.config["store_name"]
     )
 
@@ -136,15 +249,20 @@ def test_checkpoint_store_with_filesystem_store_backend(
         },
     }
     assert (
-        empty_data_context.get_config_with_variables_substituted().stores[
-            empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        context.get_config_with_variables_substituted().stores[
+            context.get_config_with_variables_substituted().checkpoint_store_name
         ]
         == expected_checkpoint_store_config
     )
+    # No other usage stats calls
+    assert mock_emit.call_count == 2
 
 
-def test_empty_store2(empty_data_context):
-    empty_data_context.test_yaml_config(
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_empty_store2(mock_emit, empty_data_context_stats_enabled):
+    empty_data_context_stats_enabled.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
 store_backend:
@@ -153,9 +271,32 @@ store_backend:
     class_name: InMemoryStoreBackend
 """
     )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized_name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ValidationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "InMemoryStoreBackend"
+                    },
+                },
+                "success": True,
+            }
+        ),
+    ]
 
 
-def test_datasource_config(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_datasource_config(mock_emit, empty_data_context_stats_enabled):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -174,7 +315,7 @@ def test_datasource_config(empty_data_context):
     )
     print(temp_dir)
 
-    return_obj = empty_data_context.test_yaml_config(
+    return_obj = empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=f"""
 class_name: Datasource
 
@@ -196,31 +337,72 @@ data_connectors:
         return_mode="report_object",
     )
 
+    # Test usage stats messages
+    assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        )
+    ]
+
     print(json.dumps(return_obj, indent=2))
 
     assert set(return_obj.keys()) == {"execution_engine", "data_connectors"}
     sub_obj = return_obj["data_connectors"]["my_filesystem_data_connector"]
-    sub_obj.pop("example_data_reference")
-    assert sub_obj == {
-        "class_name": "InferredAssetFilesystemDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": ["DEFAULT_ASSET_NAME"],
-        "data_assets": {
-            "DEFAULT_ASSET_NAME": {
-                "batch_definition_count": 10,
-                "example_data_references": [
-                    "abe_20200809_1040.csv",
-                    "alex_20200809_1000.csv",
-                    "alex_20200819_1300.csv",
-                ],
-            }
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+    # sub_obj.pop("example_data_reference")
+    # assert sub_obj == {
+    #     "class_name": "InferredAssetFilesystemDataConnector",
+    #     "data_asset_count": 1,
+    #     "example_data_asset_names": ["DEFAULT_ASSET_NAME"],
+    #     "data_assets": {
+    #         "DEFAULT_ASSET_NAME": {
+    #             "batch_definition_count": 10,
+    #             "example_data_references": [
+    #                 "abe_20200809_1040.csv",
+    #                 "alex_20200809_1000.csv",
+    #                 "alex_20200819_1300.csv",
+    #             ],
+    #         }
+    #     },
+    #     "example_unmatched_data_references": [],
+    #     "unmatched_data_reference_count": 0,
+    # }
+    # No other usage stats calls
+    assert mock_emit.call_count == 1
 
 
-def test_error_states(empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_error_states(mock_emit, empty_data_context_stats_enabled):
     first_config: str = """
 class_name: Datasource
 
@@ -229,19 +411,43 @@ execution_engine:
 """
 
     with pytest.raises(ge_exceptions.DatasourceInitializationError) as excinfo:
-        empty_data_context.test_yaml_config(yaml_config=first_config)
+        empty_data_context_stats_enabled.test_yaml_config(yaml_config=first_config)
         # print(excinfo.value.message)
         # shortened_message_len = len(excinfo.value.message)
         # print("="*80)
 
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Datasource"},
+                "success": False,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
-    empty_data_context.test_yaml_config(
+    empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=first_config,
         shorten_tracebacks=True,
     )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.append(
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Datasource"},
+                "success": False,
+            }
+        ),
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     # For good measure, do it again, with a different config and a different type of error
+    # Note this erroneous key/value does not cause an error and is removed from the Datasource config
     temp_dir = str(tempfile.mkdtemp())
     second_config = f"""
 class_name: Datasource
@@ -263,15 +469,56 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    datasource = empty_data_context.test_yaml_config(yaml_config=second_config)
+    datasource = empty_data_context_stats_enabled.test_yaml_config(
+        yaml_config=second_config
+    )
     assert (
         "NOT_A_REAL_KEY"
         not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
     )
+    assert mock_emit.call_count == 3
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[2][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[2][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[2][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list.append(
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
-def test_config_variables_in_test_yaml_config(empty_data_context, sa):
-    context = empty_data_context
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_config_variables_in_test_yaml_config(
+    mock_emit, empty_data_context_stats_enabled, sa
+):
+    context: DataContext = empty_data_context_stats_enabled
 
     db_file = file_relative_path(
         __file__,
@@ -304,6 +551,36 @@ introspection:
         "test_cases_for_sql_data_connector.db"
         in my_datasource.execution_engine.connection_string
     )
+    assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     report_object = context.test_yaml_config(first_config, return_mode="report_object")
     print(json.dumps(report_object, indent=2))
@@ -312,13 +589,39 @@ introspection:
         "count",
         "my_very_awesome_data_connector",
     }
+    assert mock_emit.call_count == 2
+    expected_call_args_list.append(
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_golden_path_sql_datasource_configuration(
-    sa, empty_data_context, test_connectable_postgresql_db
+    mock_emit, empty_data_context_stats_enabled, sa, test_connectable_postgresql_db
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     os.chdir(context.root_directory)
 
@@ -350,6 +653,40 @@ introspection:
         yaml_config=yaml_config,
         return_mode="report_object",
     )
+    assert mock_emit.call_count == 2
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[1][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_data_connector_name = mock_emit.call_args_list[1][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "SimpleSqlalchemyDatasource",
+                    "anonymized_execution_engine": {
+                        "parent_class": "SqlAlchemyExecutionEngine"
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetSqlDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+
     print(json.dumps(report_object, indent=2))
     print(context.datasources)
 
@@ -388,8 +725,11 @@ introspection:
     # assert my_evr.success
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_golden_path_inferred_asset_pandas_datasource_configuration(
-    empty_data_context, test_df, tmp_path_factory
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -417,12 +757,13 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     os.chdir(context.root_directory)
     import great_expectations as ge
 
     context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
 
     yaml_config = f"""
 class_name: Datasource
@@ -452,6 +793,40 @@ data_connectors:
     )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
+    assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     my_batch = context.get_batch(
         datasource_name="my_directory_datasource",
@@ -497,7 +872,8 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
-        partition_request={"batch_identifiers": {"number": "3"}},
+        data_connector_query={"batch_filter_parameters": {"number": "3"}},
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -506,7 +882,6 @@ data_connectors:
                 "hash_value": "f",
             },
         },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31
@@ -517,9 +892,15 @@ data_connectors:
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
 
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 1
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_golden_path_configured_asset_pandas_datasource_configuration(
-    empty_data_context, test_df, tmp_path_factory
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -549,12 +930,13 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     os.chdir(context.root_directory)
     import great_expectations as ge
 
     context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
 
     yaml_config = f"""
 class_name: Datasource
@@ -608,6 +990,40 @@ data_connectors:
     )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
+    assert mock_emit.call_count == 1
+    # Substitute anonymized names since it changes for each run
+    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+        "event_payload"
+    ]["anonymized_execution_engine"]["anonymized_name"]
+    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_data_connectors"
+    ][0]["anonymized_name"]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_datasource_name,
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": anonymized_execution_engine_name,
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": anonymized_data_connector_name,
+                            "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     my_batch = context.get_batch(
         datasource_name="my_directory_datasource",
@@ -655,7 +1071,8 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
-        partition_request={"batch_identifiers": {"year": "2019"}},
+        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
+        create_expectation_suite_with_name="my_expectations",
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -664,7 +1081,6 @@ data_connectors:
                 "hash_value": "f",
             },
         },
-        create_expectation_suite_with_name="my_expectations",
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31
@@ -673,3 +1089,213 @@ data_connectors:
 
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
+
+    # No other usage stats calls detected
+    assert mock_emit.call_count == 1
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+):
+    """
+    Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
+    RuntimeDataConnector. Even though the test directory contains multiple files that can be read-in
+    by GE, the RuntimeDataConnector will output 0 data_assets, and return a "note" to the user.
+
+    This is because the RuntimeDataConnector is not aware of data_assets until they are passed in
+    through the RuntimeBatchRequest.
+
+    The test asserts that the proper number of data_asset_names are returned and note is returned to the user.
+    """
+    base_directory = str(
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test_dir_charlie/A/A-1.csv",
+            "test_dir_charlie/A/A-2.csv",
+            "test_dir_charlie/A/A-3.csv",
+        ],
+        file_content_fn=lambda: test_df.to_csv(header=True, index=False),
+    )
+
+    context: DataContext = empty_data_context_stats_enabled
+
+    os.chdir(context.root_directory)
+    import great_expectations as ge
+
+    context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
+
+    yaml_config = f"""
+       class_name: Datasource
+
+       execution_engine:
+           class_name: PandasExecutionEngine
+
+       data_connectors:
+           default_runtime_data_connector_name:
+               class_name: RuntimeDataConnector
+               batch_identifiers:
+                   - default_identifier_name
+       """
+
+    # noinspection PyUnusedLocal
+    report_object = context.test_yaml_config(
+        name="my_directory_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+
+    assert report_object["execution_engine"] == {
+        "caching": True,
+        "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+        "class_name": "PandasExecutionEngine",
+        "discard_subset_failing_expectations": False,
+        "boto3_options": {},
+        "azure_options": {},
+        "gcs_options": {},
+    }
+    assert report_object["data_connectors"]["count"] == 1
+
+    # checking the correct number of data_assets have come back
+    assert (
+        report_object["data_connectors"]["default_runtime_data_connector_name"][
+            "data_asset_count"
+        ]
+        == 0
+    )
+
+    # checking that note has come back
+    assert (
+        report_object["data_connectors"]["default_runtime_data_connector_name"]["note"]
+        == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_datasource_configuration(
+    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+):
+    """
+    Tests output of test_yaml_config() for a Datacontext configured with a Datasource with InferredAssetDataConnector
+    and RuntimeDataConnector.
+
+    1. The InferredAssetDataConnector will output 4 data_assets, which correspond to the files in the test_dir_charlie folder
+
+    2.  RuntimeDataConnector will output 0 data_assets, and return a "note" to the user. This is because the
+        RuntimeDataConnector is not aware of data_assets until they are passed in through the RuntimeBatchRequest.
+
+    The test asserts that the proper number of data_asset_names are returned for both DataConnectors, and in the case of
+    the RuntimeDataConnetor, the proper note is returned to the user.
+    """
+    base_directory = str(
+        tmp_path_factory.mktemp("test_golden_path_pandas_datasource_configuration")
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test_dir_charlie/A/A-1.csv",
+            "test_dir_charlie/A/A-2.csv",
+            "test_dir_charlie/A/A-3.csv",
+            "test_dir_charlie/B/B-1.csv",
+            "test_dir_charlie/B/B-2.csv",
+            "test_dir_charlie/B/B-3.csv",
+            "test_dir_charlie/C/C-1.csv",
+            "test_dir_charlie/C/C-2.csv",
+            "test_dir_charlie/C/C-3.csv",
+            "test_dir_charlie/D/D-1.csv",
+            "test_dir_charlie/D/D-2.csv",
+            "test_dir_charlie/D/D-3.csv",
+        ],
+        file_content_fn=lambda: test_df.to_csv(header=True, index=False),
+    )
+
+    context: DataContext = empty_data_context_stats_enabled
+
+    os.chdir(context.root_directory)
+    import great_expectations as ge
+
+    context = ge.get_context()
+    mock_emit.reset_mock()  # Remove data_context.__init__ call
+
+    yaml_config = f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: PandasExecutionEngine
+
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        default_inferred_data_connector_name:
+            class_name: InferredAssetFilesystemDataConnector
+            base_directory: {base_directory}/test_dir_charlie
+            glob_directive: "*/*.csv"
+
+            default_regex:
+                pattern: (.+)/(.+)-(\\d+)\\.csv
+                group_names:
+                    - subdirectory
+                    - data_asset_name
+                    - number
+    """
+
+    # noinspection PyUnusedLocal
+    report_object = context.test_yaml_config(
+        name="my_directory_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+
+    assert report_object["execution_engine"] == {
+        "caching": True,
+        "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+        "class_name": "PandasExecutionEngine",
+        "discard_subset_failing_expectations": False,
+        "boto3_options": {},
+        "azure_options": {},
+        "gcs_options": {},
+    }
+    assert report_object["data_connectors"]["count"] == 2
+    assert report_object["data_connectors"]["default_runtime_data_connector_name"] == {
+        "class_name": "RuntimeDataConnector",
+        "data_asset_count": 0,
+        "data_assets": {},
+        "example_data_asset_names": [],
+        "example_unmatched_data_references": [],
+        "note": "RuntimeDataConnector will not have data_asset_names until they are "
+        "passed in through RuntimeBatchRequest",
+        "unmatched_data_reference_count": 0,
+    }
+    assert report_object["data_connectors"]["default_inferred_data_connector_name"] == {
+        "class_name": "InferredAssetFilesystemDataConnector",
+        "data_asset_count": 4,
+        "example_data_asset_names": ["A", "B", "C"],
+        "data_assets": {
+            "A": {
+                "batch_definition_count": 3,
+                "example_data_references": ["A/A-1.csv", "A/A-2.csv", "A/A-3.csv"],
+            },
+            "B": {
+                "batch_definition_count": 3,
+                "example_data_references": ["B/B-1.csv", "B/B-2.csv", "B/B-3.csv"],
+            },
+            "C": {
+                "batch_definition_count": 3,
+                "example_data_references": ["C/C-1.csv", "C/C-2.csv", "C/C-3.csv"],
+            },
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }

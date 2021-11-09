@@ -56,21 +56,17 @@ def titanic_data_context_with_sql_datasource(
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
-    config = yaml.load(
-        f"""
+    datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file_path}
-"""
-        + """
 introspection:
-    whole_table: {}
-""",
-    )
+  whole_table: {{}}
+"""
 
     try:
         # noinspection PyUnusedLocal
         my_sql_datasource = context.add_datasource(
-            "test_sqlite_db_datasource", **config
+            "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
@@ -85,7 +81,7 @@ def titanic_data_context_with_spark_datasource(
     test_df,
     monkeypatch,
 ):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -223,14 +219,21 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
         in stdout
     )
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.delete",
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -265,14 +268,21 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     stdout: str = result.stdout
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.delete",
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -292,6 +302,72 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     assert result.exit_code == 0
 
     stdout = result.stdout
+    assert "No Checkpoints found." in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    empty_context_with_checkpoint_v1_stats_enabled,
+):
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    checkpoint_name: str = "my_v1_checkpoint"
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api --assume-yes checkpoint delete {checkpoint_name}",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 0
+
+    assert (
+        f'Are you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is irreversible)?'
+        not in stdout
+    )
+    # This assertion is extra assurance since this test is too permissive if we change the confirmation message
+    assert "[Y/n]" not in stdout
+
+    assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
+
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+    )
+
+    result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint list",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
     assert "No Checkpoints found." in stdout
 
 
@@ -320,10 +396,24 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     stdout: str = result.stdout
     assert 'The Checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
 
-    assert mock_emit.call_count == 1
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
+                "event_payload": {"cancelled": True, "api_version": "v3"},
+                "success": True,
+            }
         ),
     ]
 
@@ -366,14 +456,21 @@ def test_checkpoint_list_with_no_checkpoints(
     assert "No Checkpoints found." in stdout
     assert "Use the command `great_expectations checkpoint new` to create one" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.list",
+                "event": "cli.checkpoint.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.list.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -408,14 +505,21 @@ def test_checkpoint_list_with_single_checkpoint(
     assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.list",
+                "event": "cli.checkpoint.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.list.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -451,6 +555,7 @@ def test_checkpoint_list_with_eight_checkpoints(
 
     stdout: str = result.stdout
     assert "Found 8 Checkpoints." in stdout
+
     checkpoint_names_list: List[str] = [
         "my_simple_checkpoint_with_slack_and_notify_with_all",
         "my_nested_checkpoint_template_1",
@@ -463,14 +568,21 @@ def test_checkpoint_list_with_eight_checkpoints(
     ]
     assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.list",
+                "event": "cli.checkpoint.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.list.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -494,7 +606,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 ):
     """
     What does this test and why?
-    The `checkpoint new` CLI flow should raise an error if the checkpoint name being created already exists in your checkpoint store.
+    The `checkpoint new` CLI flow should raise an error if the Checkpoint name being created already exists in your checkpoint store.
     """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
@@ -514,14 +626,21 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
         in stdout
     )
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.new",
+                "event": "cli.checkpoint.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.new.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -550,9 +669,9 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 ):
     """
     What does this test and why?
-    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the checkpoint.
-    This test builds that notebook and runs it to generate a checkpoint and then tests the resulting configuration in the checkpoint file.
-    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the checkpoint configuration.
+    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the Checkpoint.
+    This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
+    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
     context: DataContext = deterministic_asset_dataconnector_context
 
@@ -578,7 +697,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     stdout: str = result.stdout
     assert "open a notebook for you now" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
 
     assert mock_emit.call_args_list == [
         mock.call(
@@ -586,7 +705,14 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.new",
+                "event": "cli.checkpoint.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.new.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -615,7 +741,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     )
     assert os.path.isfile(expected_checkpoint_path)
 
-    # Ensure the checkpoint configuration in the file is as expected
+    # Ensure the Checkpoint configuration in the file is as expected
     with open(expected_checkpoint_path) as f:
         checkpoint_config: str = f.read()
     expected_checkpoint_config: str = """name: passengers
@@ -644,10 +770,12 @@ validations:
       datasource_name: my_datasource
       data_connector_name: my_other_data_connector
       data_asset_name: users
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: Titanic.warning
 profilers: []
+ge_cloud_id:
+expectation_suite_ge_cloud_id:
 """
     assert checkpoint_config == expected_checkpoint_config
 
@@ -682,14 +810,21 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     )
     assert "Try running" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -730,14 +865,21 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     stdout: str = result.stdout
     assert "expectation_suite suite_from_template_1 not found" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -787,7 +929,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
           batch_spec_passthrough:
             path: /totally/not/a/file.csv
@@ -835,13 +977,13 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     #     in stdout
     # )
     # assert (
-    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     "Please verify these batch kwargs in Checkpoint bad_batch`"
     #     in stdout
     # )
     # assert "No such file or directory" in stdout
     assert ("No such file or directory" in stdout) or ("does not exist" in stdout)
 
-    assert mock_emit.call_count == 3
+    assert mock_emit.call_count == 4
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -858,7 +1000,14 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -905,7 +1054,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         action_list:
             - name: store_validation_result
@@ -946,14 +1095,21 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         in stdout
     )
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -1028,14 +1184,21 @@ def test_checkpoint_run_on_non_existent_validations(
     stdout: str = result.stdout
     assert 'Checkpoint "no_validations" does not contain any validations.' in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -1085,7 +1248,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -1133,7 +1296,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
         ]
     )
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -1149,6 +1312,13 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
             {
                 "event_payload": {},
                 "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
@@ -1172,7 +1342,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1270,7 +1440,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         ]
     )
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -1286,6 +1456,13 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
             {
                 "event_payload": {},
                 "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
@@ -1309,7 +1486,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1411,7 +1588,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
         ]
     )
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -1427,6 +1604,13 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
             {
                 "event_payload": {},
                 "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
@@ -1450,7 +1634,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1512,7 +1696,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -1549,7 +1733,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -1565,6 +1749,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
             {
                 "event_payload": {},
                 "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
@@ -1588,7 +1779,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1676,7 +1867,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -1692,6 +1883,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
             {
                 "event_payload": {},
                 "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
@@ -1715,7 +1913,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1767,11 +1965,11 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
           datasource_name: my_datasource
           data_connector_name: my_basic_data_connector
           data_asset_name: Titanic_1911
-          partition_request:
+          data_connector_query:
             index: -1
           batch_spec_passthrough:
             reader_options:
-              header: true
+              header: True
         expectation_suite_name: Titanic.warning
         action_list:
             - name: store_validation_result
@@ -1808,7 +2006,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -1824,6 +2022,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             {
                 "event_payload": {},
                 "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
@@ -1847,7 +2052,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1908,7 +2113,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -1925,6 +2130,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
@@ -1946,7 +2152,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -1967,6 +2173,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
         ),
         mock.call(
             {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
@@ -1978,7 +2191,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -2047,6 +2260,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
@@ -2068,7 +2282,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -2089,6 +2303,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
         ),
         mock.call(
             {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
@@ -2100,7 +2321,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -2159,7 +2380,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
           batch_spec_passthrough:
             reader_options:
@@ -2179,6 +2400,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
@@ -2201,7 +2423,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
 
     expected_events: List[unittest.mock._Call] = [
         mock.call(
@@ -2222,6 +2444,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
         ),
         mock.call(
             {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
@@ -2233,7 +2462,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.run",
+                "event": "cli.checkpoint.run.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -2274,14 +2503,21 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     )
     assert "Try running" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.script",
+                "event": "cli.checkpoint.script.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.script.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -2326,14 +2562,21 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
         in stdout
     )
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.script",
+                "event": "cli.checkpoint.script.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.script.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -2382,14 +2625,21 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
         in stdout
     )
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.script",
+                "event": "cli.checkpoint.script.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.script.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -2412,7 +2662,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -2451,7 +2701,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: users.delivery
         action_list:
@@ -2526,7 +2776,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -2573,7 +2823,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -2647,7 +2897,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -2693,7 +2943,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -2710,6 +2960,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
           param1: "$MY_PARAM"
           param2: 1 + "$OLD_PARAM"
         runtime_configuration:
+          catch_exceptions: False
           result_format:
             result_format: BASIC
             partial_unexpected_count: 20
@@ -2758,58 +3009,8 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
     assert (
-        'ExecutionEngineError: Error: The column "Name" in BatchData does not exist.'
+        'MetricResolutionError: Error: The column "Name" in BatchData does not exist.'
         in output
-    )
-
-
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_with_ge_config_3_raises_error(
-    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled_config_version_3
-):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_3
-
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        f"--v3-api checkpoint new foo not_a_suite",
-        catch_exceptions=False,
-    )
-
-    assert result.exit_code == 1
-
-    stdout: str = result.stdout
-    assert (
-        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"api_version": "v3"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
     )
 
 

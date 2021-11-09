@@ -1,20 +1,40 @@
 import logging
 import traceback
-from collections import Iterable
+from collections.abc import Iterable
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
+    column_aggregate_value,
+)
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    sa as sa,
+)
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
+
+logger = logging.getLogger(__name__)
 
 try:
-    from sqlalchemy.engine import RowProxy
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
     from sqlalchemy.sql.selectable import CTE
 except ImportError:
-    RowProxy = None
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
     ProgrammingError = None
     Select = None
     Label = None
@@ -22,26 +42,22 @@ except ImportError:
     WithinGroup = None
     CTE = None
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
-    column_aggregate_value,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
-from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
+try:
+    from sqlalchemy.engine.row import Row
+except ImportError:
+    try:
+        from sqlalchemy.engine.row import RowProxy
 
-logger = logging.getLogger(__name__)
+        Row = RowProxy
+    except ImportError:
+        logger.debug(
+            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
+        )
+        RowProxy = None
+        Row = None
 
 
-class ColumnQuantileValues(ColumnMetricProvider):
+class ColumnQuantileValues(ColumnAggregateMetricProvider):
     metric_name = "column.quantile_values"
     value_keys = ("quantiles", "allow_relative_error")
 
@@ -173,9 +189,7 @@ def _get_column_quantiles_mssql(
     quantiles_query: Select = sa.select(selects).select_from(selectable)
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -197,9 +211,7 @@ def _get_column_quantiles_bigquery(
     quantiles_query: Select = sa.select(selects).select_from(selectable)
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -258,9 +270,7 @@ def _get_column_quantiles_mysql(
     )
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -291,9 +301,7 @@ def _get_column_quantiles_generic_sqlalchemy(
     quantiles_query: Select = sa.select(selects).select_from(selectable)
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError:
         # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
@@ -309,7 +317,7 @@ def _get_column_quantiles_generic_sqlalchemy(
             )
             if allow_relative_error:
                 try:
-                    quantiles_results: RowProxy = sqlalchemy_engine.execute(
+                    quantiles_results: Row = sqlalchemy_engine.execute(
                         quantiles_query_approx
                     ).fetchone()
                     return list(quantiles_results)

@@ -34,7 +34,7 @@ def project_check_config(directory):
         )
     if not is_config_ok:
         cli_message("Unfortunately, your config appears to be invalid:\n")
-        cli_message("<red>{}</red>".format(error_message))
+        cli_message(f"<red>{error_message}</red>")
         sys.exit(1)
 
     cli_message("<green>Your config file appears valid!</green>")
@@ -67,7 +67,7 @@ def do_config_check(target_directory):
         ge_config_version: int = context.get_config().config_version
         if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
             upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
-Please consult the 0.13.x migration guide ttps://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
+Please consult the V3 API migration guide https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
             """
             return (

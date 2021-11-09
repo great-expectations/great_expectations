@@ -197,7 +197,6 @@
         "title": "basic_negative_test_with_timestamps",
         "exact_match_out": false,
         "out": {
-          "unexpected_list": ["Jan 01 2001 12:00:01"],
           "unexpected_index_list": [0, 9],
           "success": false
         },

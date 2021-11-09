@@ -65,7 +65,7 @@ def titanic_dataset_profiler_expectations_with_distribution():
         ),
     ) as infile:
         return expectationSuiteSchema.load(
-            json.load(fp=infile, encoding="utf-8", object_pairs_hook=OrderedDict)
+            json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
 
 

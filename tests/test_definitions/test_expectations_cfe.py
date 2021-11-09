@@ -13,17 +13,16 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.self_check.util import (
+    BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_cfe,
     evaluate_json_test_cfe,
     get_test_validator_with_data,
+    mssqlDialect,
+    mysqlDialect,
+    postgresqlDialect,
+    sqliteDialect,
 )
 from tests.conftest import build_test_backends_list_cfe
-from tests.test_definitions.test_expectations import mssqlDialect as mssqlDialect
-from tests.test_definitions.test_expectations import mysqlDialect as mysqlDialect
-from tests.test_definitions.test_expectations import (
-    postgresqlDialect as postgresqlDialect,
-)
-from tests.test_definitions.test_expectations import sqliteDialect as sqliteDialect
 from tests.test_definitions.test_expectations import tmp_dir
 
 
@@ -35,11 +34,9 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
-
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
@@ -144,6 +141,18 @@ def pytest_generate_tests(metafunc):
                                     )
                                 ):
                                     generate_test = True
+                                elif (
+                                    "bigquery" in test["only_for"]
+                                    and BigQueryDialect is not None
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
+                                ):
+                                    generate_test = True
+
                             elif validator_with_data and isinstance(
                                 validator_with_data.execution_engine.active_batch_data,
                                 PandasBatchData,
@@ -231,6 +240,21 @@ def pytest_generate_tests(metafunc):
                                 )
                             )
                             or (
+                                "bigquery" in test["suppress_test_for"]
+                                and BigQueryDialect is not None
+                                and validator_with_data
+                                and isinstance(
+                                    validator_with_data.execution_engine.active_batch_data,
+                                    SqlAlchemyBatchData,
+                                )
+                                and hasattr(
+                                    validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                    "name",
+                                )
+                                and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                == "bigquery"
+                            )
+                            or (
                                 "pandas" in test["suppress_test_for"]
                                 and validator_with_data
                                 and isinstance(
@@ -289,9 +313,16 @@ def test_case_runner_cfe(test_case):
 
     # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
     # test_case["batch"]._initialize_expectations()
-
-    evaluate_json_test_cfe(
-        validator=test_case["validator_with_data"],
-        expectation_type=test_case["expectation_type"],
-        test=test_case["test"],
-    )
+    if "parse_strings_as_datetimes" in test_case["test"]["in"]:
+        with pytest.deprecated_call():
+            evaluate_json_test_cfe(
+                validator=test_case["validator_with_data"],
+                expectation_type=test_case["expectation_type"],
+                test=test_case["test"],
+            )
+    else:
+        evaluate_json_test_cfe(
+            validator=test_case["validator_with_data"],
+            expectation_type=test_case["expectation_type"],
+            test=test_case["test"],
+        )

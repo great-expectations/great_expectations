@@ -9,10 +9,10 @@ except ImportError:
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import list_s3_keys
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -48,6 +48,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         delimiter: Optional[str] = "/",
         max_keys: Optional[int] = 1000,
         boto3_options: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         ConfiguredAssetDataConnector for connecting to S3.
@@ -64,6 +65,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             boto3_options (dict): optional boto3 options
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
@@ -74,6 +76,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             assets=assets,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
         self._prefix = os.path.join(prefix, "")
@@ -133,11 +136,16 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         ]
         return path_list
 
-    def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Asset] = None
     ) -> str:
-        # data_assert_name isn't used in this method.
+        # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"s3a://{os.path.join(self._bucket, path)}"
+        template_arguments: dict = {
+            "bucket": self._bucket,
+            "path": path,
+        }
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )

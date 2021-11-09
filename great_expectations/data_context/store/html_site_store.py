@@ -5,6 +5,7 @@ from mimetypes import guess_type
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
 )
@@ -20,6 +21,7 @@ from great_expectations.util import (
 )
 
 from ...core.data_context_key import DataContextKey
+from .ge_cloud_store_backend import GeCloudStoreBackend
 from .tuple_store_backend import TupleStoreBackend
 
 logger = logging.getLogger(__name__)
@@ -107,9 +109,9 @@ class HtmlSiteStore:
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
-        if not issubclass(store_class, TupleStoreBackend):
+        if not issubclass(store_class, (TupleStoreBackend, GeCloudStoreBackend)):
             raise DataContextError(
-                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend"
+                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend or GeCloudStoreBackend"
             )
         if "filepath_template" in store_backend or (
             "fixed_length_key" in store_backend
@@ -123,17 +125,23 @@ class HtmlSiteStore:
         # One thing to watch for is reversibility of keys.
         # If several types are being written to overlapping directories, we could get collisions.
         module_name = "great_expectations.data_context.store"
-        filepath_prefix = "expectations"
         filepath_suffix = ".html"
+        is_ge_cloud_store = store_backend["class_name"] == "GeCloudStoreBackend"
+        expectation_config_defaults = {
+            "module_name": module_name,
+            "filepath_prefix": "expectations",
+            "filepath_suffix": filepath_suffix,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            expectation_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
         expectation_suite_identifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_prefix": filepath_prefix,
-                "filepath_suffix": filepath_suffix,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=expectation_config_defaults,
         )
         if not expectation_suite_identifier_obj:
             raise ClassInstantiationError(
@@ -142,16 +150,22 @@ class HtmlSiteStore:
                 class_name=store_backend["class_name"],
             )
 
-        filepath_prefix = "validations"
+        validation_result_config_defaults = {
+            "module_name": module_name,
+            "filepath_prefix": "validations",
+            "filepath_suffix": filepath_suffix,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            validation_result_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
+
         validation_result_idendifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_prefix": filepath_prefix,
-                "filepath_suffix": filepath_suffix,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=validation_result_config_defaults,
         )
         if not validation_result_idendifier_obj:
             raise ClassInstantiationError(
@@ -161,14 +175,21 @@ class HtmlSiteStore:
             )
 
         filepath_template = "index.html"
+        index_page_config_defaults = {
+            "module_name": module_name,
+            "filepath_template": filepath_template,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            index_page_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
+
         index_page_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_template": filepath_template,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=index_page_config_defaults,
         )
         if not index_page_obj:
             raise ClassInstantiationError(
@@ -177,15 +198,20 @@ class HtmlSiteStore:
                 class_name=store_backend["class_name"],
             )
 
-        filepath_template = None
+        static_assets_config_defaults = {
+            "module_name": module_name,
+            "filepath_template": None,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            static_assets_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
         static_assets_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_template": filepath_template,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=static_assets_config_defaults,
         )
         if not static_assets_obj:
             raise ClassInstantiationError(
@@ -207,7 +233,7 @@ class HtmlSiteStore:
         # HtmlSiteStore instance leaves scope.
         # Doing it this way allows us to prevent namespace collisions among keys while still having multiple
         # backends that write to the same directory structure.
-        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
+        # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
 
@@ -219,7 +245,7 @@ class HtmlSiteStore:
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def get(self, key):
         self._validate_key(key)
@@ -258,7 +284,7 @@ class HtmlSiteStore:
         else:
             # this method does not support getting the URL of static assets
             raise ValueError(
-                "Cannot get URL for resource {:s}".format(str(resource_identifier))
+                f"Cannot get URL for resource {str(resource_identifier):s}"
             )
 
         # <WILL> : this is a hack for Taylor. Change this back. 20200924
@@ -292,7 +318,7 @@ class HtmlSiteStore:
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(
-                "key: {!r} must a SiteSectionIdentifier, not {!r}".format(
+                "key: {!r} must be a SiteSectionIdentifier, not {!r}".format(
                     key,
                     type(key),
                 )
@@ -302,6 +328,7 @@ class HtmlSiteStore:
             try:
                 if isinstance(key.resource_identifier, key_class):
                     return
+
             except TypeError:
                 # it's ok to have a key that is not a type (e.g. the string "index_page")
                 continue
@@ -392,12 +419,15 @@ class HtmlSiteStore:
                             )
                             content_type = "text/html; charset=utf8"
 
-                    self.store_backends["static_assets"].set(
-                        store_key,
-                        f.read(),
-                        content_encoding=content_encoding,
-                        content_type=content_type,
-                    )
+                    if not isinstance(
+                        self.store_backends["static_assets"], GeCloudStoreBackend
+                    ):
+                        self.store_backends["static_assets"].set(
+                            store_key,
+                            f.read(),
+                            content_encoding=content_encoding,
+                            content_type=content_type,
+                        )
 
     @property
     def config(self) -> dict:

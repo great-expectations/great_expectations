@@ -12,6 +12,7 @@ import pytest
 
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.self_check.util import (
+    BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list,
     evaluate_json_test,
     get_dataset,
@@ -38,13 +39,13 @@ def pytest_generate_tests(metafunc):
 
     parametrized_tests = []
     ids = []
-
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        for c in build_test_backends_list(metafunc):
+        backends = build_test_backends_list(metafunc)
+        for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
@@ -135,6 +136,15 @@ def pytest_generate_tests(metafunc):
                                     )
                                 ):
                                     generate_test = True
+                                elif (
+                                    "bigquery" in test["only_for"]
+                                    and BigQueryDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
+                                ):
+                                    generate_test = True
                             elif isinstance(data_asset, PandasDataset):
                                 if "pandas" in test["only_for"]:
                                     generate_test = True
@@ -184,6 +194,13 @@ def pytest_generate_tests(metafunc):
                                 and mssqlDialect is not None
                                 and isinstance(data_asset, SqlAlchemyDataset)
                                 and isinstance(data_asset.engine.dialect, mssqlDialect)
+                            )
+                            or (
+                                "bigquery" in test["suppress_test_for"]
+                                and BigQueryDialect is not None
+                                and isinstance(data_asset, SqlAlchemyDataset)
+                                and hasattr(data_asset.engine.dialect, "name")
+                                and data_asset.engine.dialect.name.lower() == "bigquery"
                             )
                             or (
                                 "pandas" in test["suppress_test_for"]

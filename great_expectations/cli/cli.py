@@ -23,10 +23,12 @@ class CLIState:
         v2_api: bool = False,
         config_file_location: Optional[str] = None,
         data_context: DataContext = None,
+        assume_yes: bool = False,
     ):
         self.v2_api = v2_api
         self.config_file_location = config_file_location
         self._data_context = data_context
+        self.assume_yes = assume_yes
 
     @property
     def data_context(self):
@@ -122,8 +124,16 @@ class CLI(click.MultiCommand):
     default=None,
     help="Path to great_expectations configuration file location (great_expectations.yml). Inferred if not provided.",
 )
+@click.option(
+    "--assume-yes",
+    "--yes",
+    "-y",
+    is_flag=True,
+    default=False,
+    help='Assume "yes" for all prompts.',
+)
 @click.pass_context
-def cli(ctx, v2_api, verbose, config_file_location):
+def cli(ctx, v2_api, verbose, config_file_location, assume_yes):
     """
     Welcome to the great_expectations CLI!
 
@@ -137,7 +147,9 @@ def cli(ctx, v2_api, verbose, config_file_location):
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
         logger.setLevel(logging.DEBUG)
-    ctx.obj = CLIState(v2_api=v2_api, config_file_location=config_file_location)
+    ctx.obj = CLIState(
+        v2_api=v2_api, config_file_location=config_file_location, assume_yes=assume_yes
+    )
 
     if v2_api:
         cli_message("Using v2 (Batch Kwargs) API")

@@ -128,13 +128,21 @@ Quick start
 
 To see Great Expectations in action on your own data:
 
+You can install it using pip
 ```
-    pip install great_expectations
-    great_expectations init
+pip install great_expectations
+```
+or conda
+```
+conda install -c conda-forge great-expectations
+```
+and then run
 
 ```
+great_expectations init
+```
 
-(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](http://docs.greatexpectations.io/en/latest/reference/supporting_resources.html) will teach you how to get up and running in minutes before continuing.)
+(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](http://docs.greatexpectations.io/en/latest/reference/supporting_resources.html), which will teach you how to get up and running in minutes.)
 
 For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
 
@@ -201,7 +209,7 @@ What does Great Expectations _not_ do?
 
 **Great Expectations is _not_ a pipeline execution framework.**
 
-We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), etc. We DON'T execute your pipelines for you.
+We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. We DON'T execute your pipelines for you.
 
 **Great Expectations is _not_ a data versioning tool.**
 
@@ -227,4 +235,4 @@ If you'd like hands-on assistance setting up Great Expectations, establishing a 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/en/latest/contributing.html) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/contributing/) and please don't be shy with questions.

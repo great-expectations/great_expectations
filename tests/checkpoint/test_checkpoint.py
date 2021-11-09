@@ -9,8 +9,9 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -20,6 +21,13 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+
+try:
+    pyspark = pytest.importorskip("pyspark")
+    from pyspark.sql import SparkSession
+except ImportError:
+    pyspark = None
+    SparkSession = None
 
 yaml = YAML()
 
@@ -34,7 +42,7 @@ def test_checkpoint_raises_typeerror_on_incorrect_data_context():
 def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
     checkpoint = Checkpoint("foo", empty_data_context, config_version=None)
     with pytest.raises(AttributeError):
-        checkpoint.action_list
+        _ = checkpoint.action_list
 
 
 def test_checkpoint_with_config_version_has_action_list(empty_data_context):
@@ -46,11 +54,16 @@ def test_checkpoint_with_config_version_has_action_list(empty_data_context):
     assert obs == [{"foo": "bar"}]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_basic_checkpoint_config_validation(
-    empty_data_context,
+    mock_emit,
+    empty_data_context_stats_enabled,
     caplog,
     capsys,
 ):
+    context: DataContext = empty_data_context_stats_enabled
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
     checkpoint_config: Union[CheckpointConfig, dict]
@@ -66,10 +79,21 @@ def test_basic_checkpoint_config_validation(
         checkpoint_config = CheckpointConfig(**config_erroneous)
     with pytest.raises(KeyError):
         # noinspection PyUnusedLocal
-        checkpoint = empty_data_context.test_yaml_config(
+        checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
         )
+    assert mock_emit.call_count == 1
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -82,17 +106,46 @@ def test_basic_checkpoint_config_validation(
         )
     with pytest.raises(KeyError):
         # noinspection PyUnusedLocal
-        checkpoint = empty_data_context.test_yaml_config(
+        checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
         )
+    assert mock_emit.call_count == 2
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "diagnostic_info": ["__class_name_not_provided__"]
+                    },
+                    "success": False,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
+
     with pytest.raises(ge_exceptions.InvalidConfigError):
         # noinspection PyUnusedLocal
-        checkpoint = empty_data_context.test_yaml_config(
+        checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
             class_name="Checkpoint",
         )
+    assert mock_emit.call_count == 3
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {"parent_class": "Checkpoint"},
+                    "success": False,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -100,7 +153,7 @@ def test_basic_checkpoint_config_validation(
     class_name: Checkpoint
     """
     # noinspection PyUnusedLocal
-    checkpoint = empty_data_context.test_yaml_config(
+    checkpoint = context.test_yaml_config(
         yaml_config=yaml_config_erroneous,
         name="my_erroneous_checkpoint",
         class_name="Checkpoint",
@@ -120,10 +173,30 @@ def test_basic_checkpoint_config_validation(
             for message in [caplog.text, captured.out]
         ]
     )
+    assert mock_emit.call_count == 4
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[3][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "anonymized_name": anonymized_name,
+                        "parent_class": "Checkpoint",
+                    },
+                    "success": True,
+                }
+            ),
+        ]
+    )
+    assert mock_emit.call_args_list == expected_call_args_list
 
-    assert len(empty_data_context.list_checkpoints()) == 0
-    empty_data_context.add_checkpoint(**yaml.load(yaml_config_erroneous))
-    assert len(empty_data_context.list_checkpoints()) == 1
+    assert len(context.list_checkpoints()) == 0
+    context.add_checkpoint(**yaml.load(yaml_config_erroneous))
+    assert len(context.list_checkpoints()) == 1
 
     yaml_config: str = f"""
     name: my_checkpoint
@@ -166,59 +239,85 @@ def test_basic_checkpoint_config_validation(
     config: CommentedMap = yaml.load(yaml_config)
     checkpoint_config = CheckpointConfig(**config)
     checkpoint_config = checkpoint_config.to_json_dict()
-    checkpoint = Checkpoint(data_context=empty_data_context, **checkpoint_config)
+    checkpoint = Checkpoint(data_context=context, **checkpoint_config)
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.config.to_json_dict(),
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
 
-    checkpoint = empty_data_context.test_yaml_config(
+    checkpoint = context.test_yaml_config(
         yaml_config=yaml_config,
         name="my_checkpoint",
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
     assert (
         filter_properties_dict(
             properties=checkpoint.config.to_json_dict(),
+            clean_falsy=True,
         )
         == expected_checkpoint_config
     )
-
-    assert len(empty_data_context.list_checkpoints()) == 1
-    empty_data_context.add_checkpoint(**yaml.load(yaml_config))
-    assert len(empty_data_context.list_checkpoints()) == 2
-
-    empty_data_context.create_expectation_suite(
-        expectation_suite_name="my_expectation_suite"
+    assert mock_emit.call_count == 5
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[4][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list.extend(
+        [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "anonymized_name": anonymized_name,
+                        "parent_class": "Checkpoint",
+                    },
+                    "success": True,
+                }
+            ),
+        ]
     )
+    assert mock_emit.call_args_list == expected_call_args_list
+
+    assert len(context.list_checkpoints()) == 1
+    context.add_checkpoint(**yaml.load(yaml_config))
+    assert len(context.list_checkpoints()) == 2
+
+    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
     with pytest.raises(
         ge_exceptions.DataContextError,
         match=r'Checkpoint "my_checkpoint" does not contain any validations.',
     ):
         # noinspection PyUnusedLocal
-        result: CheckpointResult = empty_data_context.run_checkpoint(
+        result: CheckpointResult = context.run_checkpoint(
             checkpoint_name=checkpoint.config.name,
         )
 
-    empty_data_context.delete_checkpoint(name="my_erroneous_checkpoint")
-    empty_data_context.delete_checkpoint(name="my_checkpoint")
-    assert len(empty_data_context.list_checkpoints()) == 0
+    context.delete_checkpoint(name="my_erroneous_checkpoint")
+    context.delete_checkpoint(name="my_checkpoint")
+    assert len(context.list_checkpoints()) == 0
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
+    mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
@@ -240,7 +339,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: users.delivery
         action_list:
@@ -272,7 +371,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 },
@@ -317,9 +416,30 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
+
+    # Test usage stats messages
+    assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_checkpoint_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_checkpoint_name,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        )
+    ]
 
     assert len(data_context.list_checkpoints()) == 0
     data_context.add_checkpoint(**yaml.load(yaml_config))
@@ -359,13 +479,13 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
       - batch_request:
           datasource_name: my_datasource
           data_connector_name: my_other_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -2
     expectation_suite_name: users.delivery
     action_list:
@@ -397,7 +517,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 }
@@ -407,7 +527,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -2,
                     },
                 }
@@ -445,8 +565,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -537,8 +659,10 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -550,11 +674,11 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
         batch_request={
-            "batch_data": test_df,
-            "partition_request": {
-                "batch_identifiers": {
-                    "airflow_run_id": 1234567890,
-                }
+            "runtime_parameters": {
+                "batch_data": test_df,
+            },
+            "batch_identifiers": {
+                "airflow_run_id": 1234567890,
             },
         },
         run_name="airflow_run_1234567890",
@@ -585,7 +709,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         datasource_name: my_datasource
         data_connector_name: my_special_data_connector
         data_asset_name: users
-        partition_request:
+        data_connector_query:
             index: -1
     validations:
       - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
@@ -632,7 +756,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
             "datasource_name": "my_datasource",
             "data_connector_name": "my_special_data_connector",
             "data_asset_name": "users",
-            "partition_request": {
+            "data_connector_query": {
                 "index": -1,
             },
         },
@@ -686,8 +810,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -783,8 +909,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 0
@@ -810,7 +938,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 },
@@ -821,7 +949,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -2,
                     },
                 },
@@ -843,13 +971,13 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         datasource_name: my_datasource
         data_connector_name: my_special_data_connector
         data_asset_name: users
-        partition_request:
+        data_connector_query:
           index: -1
     - batch_request:
         datasource_name: my_datasource
         data_connector_name: my_other_data_connector
         data_asset_name: users
-        partition_request:
+        data_connector_query:
           index: -2
     expectation_suite_name: users.delivery
     """
@@ -865,7 +993,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 }
@@ -875,7 +1003,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -2,
                     },
                 }
@@ -897,8 +1025,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
+        clean_falsy=True,
     )
 
     assert len(data_context.list_checkpoints()) == 1
@@ -1033,6 +1163,348 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    # add checkpoint config
+    batch_request = BatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1911",
+        }
+    )
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[{"batch_request": batch_request}],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_pandasdf(
+    data_context_with_datasource_pandas_engine,
+):
+    context: DataContext = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    # add checkpoint config
+    batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[{"batch_request": batch_request}],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
+    data_context_with_datasource_spark_engine,
+):
+    context: DataContext = data_context_with_datasource_spark_engine
+    spark = SparkSession.builder.getOrCreate()
+    pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df = spark.createDataFrame(pandas_df)
+    # add checkpoint config
+    batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[{"batch_request": batch_request}],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_pandasdf(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    # add checkpoint config
+    batch_request = BatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1911",
+        }
+    )
+    runtime_batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {"batch_request": runtime_batch_request},
+            {"batch_request": batch_request},
+        ],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 2
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
+    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    spark = SparkSession.builder.getOrCreate()
+    pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df = spark.createDataFrame(pandas_df)
+    # add checkpoint config
+    batch_request = BatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1911",
+        }
+    )
+    runtime_batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {"batch_request": runtime_batch_request},
+            {"batch_request": batch_request},
+        ],
+    )
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    # noinspection PyUnusedLocal
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 2
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_config_substitution_simple(
@@ -1057,7 +1529,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1065,7 +1537,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1118,7 +1590,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1126,7 +1598,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1191,7 +1663,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_special_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
+                        "data_connector_query": {"partition_index": -1},
                     }
                 },
                 {
@@ -1199,7 +1671,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
+                        "data_connector_query": {"partition_index": -2},
                     }
                 },
                 {
@@ -1207,7 +1679,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_2",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
+                        "data_connector_query": {"partition_index": -3},
                     }
                 },
                 {
@@ -1215,7 +1687,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_3",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
+                        "data_connector_query": {"partition_index": -4},
                     }
                 },
             ],
@@ -1232,7 +1704,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_other_data_connector_2",
                             "data_asset_name": "users",
-                            "partition_request": {"partition_index": -3},
+                            "data_connector_query": {"partition_index": -3},
                         }
                     },
                     {
@@ -1240,7 +1712,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_other_data_connector_3",
                             "data_asset_name": "users",
-                            "partition_request": {"partition_index": -4},
+                            "data_connector_query": {"partition_index": -4},
                         }
                     },
                 ],
@@ -1314,7 +1786,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1322,7 +1794,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1379,7 +1851,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
+                    "data_connector_query": {"partition_index": -999},
                 }
             },
             {
@@ -1387,7 +1859,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1395,7 +1867,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1470,7 +1942,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource_template_1",
                         "data_connector_name": "my_special_data_connector_template_1",
                         "data_asset_name": "users_from_template_1",
-                        "partition_request": {"partition_index": -999},
+                        "data_connector_query": {"partition_index": -999},
                     }
                 },
                 {
@@ -1478,7 +1950,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_special_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
+                        "data_connector_query": {"partition_index": -1},
                     }
                 },
                 {
@@ -1486,7 +1958,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
+                        "data_connector_query": {"partition_index": -2},
                     }
                 },
                 {
@@ -1494,7 +1966,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_2_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
+                        "data_connector_query": {"partition_index": -3},
                     }
                 },
                 {
@@ -1502,7 +1974,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_3_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
+                        "data_connector_query": {"partition_index": -4},
                     }
                 },
             ],
@@ -1519,7 +1991,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_2_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
+                        "data_connector_query": {"partition_index": -3},
                     }
                 },
                 {
@@ -1527,7 +1999,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_3_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
+                        "data_connector_query": {"partition_index": -4},
                     }
                 },
             ],

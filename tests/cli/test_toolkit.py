@@ -1,10 +1,15 @@
 import os
+import shutil
 from unittest import mock
 
 import pytest
 
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
+from great_expectations.cli.toolkit import (
+    get_relative_path_from_config_file_to_base_path,
+    is_cloud_file_url,
+)
 from great_expectations.data_context import DataContext
 from great_expectations.exceptions import UnsupportedConfigVersionError
 
@@ -301,3 +306,214 @@ def test_parse_cli_config_file_location_windows_paths(tmp_path_factory):
     # Create files and re-run assertions
 
     # We are unable to create files with windows paths on our unix test CI
+
+
+def test_is_cloud_file_path_local_posix():
+    assert not is_cloud_file_url("bucket/files/ ")
+    assert not is_cloud_file_url("./bucket/files/ ")
+    assert not is_cloud_file_url("/full/path/files/ ")
+
+
+def test_is_cloud_file_path_file_url():
+    assert not is_cloud_file_url("file://bucket/files/ ")
+    assert not is_cloud_file_url("file://./bucket/files/ ")
+    assert not is_cloud_file_url("file:///full/path/files/ ")
+
+
+def test_is_cloud_file_path_ftp_url():
+    assert is_cloud_file_url("ftp://bucket/files/ ")
+    assert is_cloud_file_url("ftp://./bucket/files/ ")
+    assert is_cloud_file_url("ftp:///full/path/files/ ")
+
+
+def test_is_cloud_file_path_s3():
+    assert is_cloud_file_url("s3://bucket/files/")
+    assert is_cloud_file_url(" s3://bucket/files/ ")
+
+
+def test_is_cloud_file_path_google_storage():
+    assert is_cloud_file_url("gs://bucket/files/")
+    assert is_cloud_file_url(" gs://bucket/files/ ")
+
+
+def test_is_cloud_file_path_azure_storage():
+    assert is_cloud_file_url("wasb://bucket/files/")
+    assert is_cloud_file_url(" wasb://bucket/files/ ")
+
+
+def test_is_cloud_file_path_http_url():
+    assert is_cloud_file_url("http://bucket/files/")
+    assert is_cloud_file_url(" http://bucket/files/ ")
+    assert is_cloud_file_url("https://bucket/files/")
+    assert is_cloud_file_url(" https://bucket/files/ ")
+
+
+@pytest.fixture
+def simulated_project_directories(tmp_path_factory):
+    """
+    Using a wacky simulated directory structure allows testing of permutations
+    of relative, absolute, and current working directories.
+
+    /random/pytest/dir/projects/pipeline1/great_expectations
+    /random/pytest/dir/projects/data/pipeline1
+    """
+    test_dir = tmp_path_factory.mktemp("projects", numbered=False)
+    assert os.path.isabs(test_dir)
+
+    ge_dir = os.path.join(test_dir, "pipeline1", "great_expectations")
+    os.makedirs(ge_dir)
+    assert os.path.isdir(ge_dir)
+
+    data_dir = os.path.join(test_dir, "data", "pipeline1")
+    os.makedirs(data_dir)
+    assert os.path.isdir(data_dir)
+
+    yield ge_dir, data_dir
+    shutil.rmtree(test_dir)
+
+
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_relative_data_path(
+    monkeypatch, simulated_project_directories
+):
+    """
+    This test simulates using the CLI from within the great_expectations
+    directory.
+
+    /projects/pipeline1/great_expectations
+    /projects/data/pipeline1
+
+    cwd: /projects/pipeline1/great_expectations
+    data: ../../data/pipeline1
+    expected results in yaml: ../../data/pipeline1
+    """
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(ge_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
+
+    obs = get_relative_path_from_config_file_to_base_path(
+        ge_dir, os.path.join("..", "..", "data", "pipeline1")
+    )
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_absolute_data_path(
+    monkeypatch, simulated_project_directories
+):
+    """
+    This test simulates using the CLI from within the great_expectations
+    directory and using an absolute path.
+
+    /projects/pipeline1/great_expectations
+    /projects/data/pipeline1
+
+    cwd: /projects/pipeline1/great_expectations
+    data: /projects/data/pipeline1
+    expected results in yaml: ../../data/pipeline1
+    """
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(ge_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
+
+    absolute_path = os.path.abspath(os.path.join("..", "..", "data", "pipeline1"))
+    obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_relative_data_path(
+    monkeypatch, simulated_project_directories
+):
+    """
+    This test simulates using the CLI from a directory containing the
+    great_expectations directory.
+
+    /projects/pipeline1/great_expectations
+    /projects/data/pipeline1
+
+    cwd: /projects/pipeline1
+    data: ../data/pipeline1
+    expected results in yaml: ../../data/pipeline1
+    """
+    ge_dir, data_dir = simulated_project_directories
+    adjacent_dir = os.path.dirname(ge_dir)
+    monkeypatch.chdir(adjacent_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
+
+    obs = get_relative_path_from_config_file_to_base_path(
+        ge_dir, os.path.join("..", "data", "pipeline1")
+    )
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_absolute_data_path(
+    monkeypatch, simulated_project_directories
+):
+    """
+    This test simulates using the CLI from a directory containing the
+    great_expectations directory and using an absolute path.
+
+    /projects/pipeline1/great_expectations
+    /projects/data/pipeline1
+
+    cwd: /projects/pipeline1
+    data: /projects/data/pipeline1
+    expected results in yaml: ../../data/pipeline1
+    """
+    ge_dir, data_dir = simulated_project_directories
+    adjacent_dir = os.path.dirname(ge_dir)
+    monkeypatch.chdir(adjacent_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
+
+    absolute_path = os.path.abspath(os.path.join("..", "data", "pipeline1"))
+    obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_relative_data_path(
+    monkeypatch, misc_directory, simulated_project_directories
+):
+    """
+    This test simulates using the CLI with the --config flag operating from a
+    random directory
+
+    /projects/pipeline1/great_expectations
+    /projects/data/pipeline1
+    /tmp_path/misc
+
+    cwd: /tmp_path/random
+    data: ../../projects/data/pipeline1
+    expected results in yaml: ../../data/pipeline1
+    """
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(misc_directory)
+    assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
+
+    obs = get_relative_path_from_config_file_to_base_path(
+        ge_dir, os.path.join("..", "..", "projects", "data", "pipeline1")
+    )
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_absolute_data_path(
+    monkeypatch, misc_directory, simulated_project_directories
+):
+    """
+    This test simulates using the CLI with the --config flag operating from a
+    random directory and using an absolute path.
+
+    /projects/pipeline1/great_expectations
+    /projects/data/pipeline1
+    /tmp_path/misc
+
+    cwd: /tmp_path/misc
+    data: /projects/data/pipeline1
+    expected results in yaml: ../../data/pipeline1
+    """
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(misc_directory)
+    assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
+
+    absolute_path = os.path.abspath(
+        os.path.join("..", "..", "projects", "data", "pipeline1")
+    )
+    obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
+    assert obs == os.path.join("..", "..", "data", "pipeline1")

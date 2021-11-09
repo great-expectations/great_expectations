@@ -1,19 +1,15 @@
 import copy
 import datetime
-import hashlib
 import json
-from typing import Any, Dict, Optional, Union
+import types
+from typing import Optional
 
-from great_expectations.core.id_dict import (
-    BatchKwargs,
-    BatchSpec,
-    IDDict,
-    PartitionDefinition,
-    PartitionRequest,
-)
+from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.types import DictDot, SerializableDictDot
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.types import SerializableDictDot
+from great_expectations.util import filter_properties_dict
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
@@ -22,39 +18,40 @@ class BatchDefinition(SerializableDictDot):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_definition: PartitionDefinition,
+        batch_identifiers: IDDict,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_definition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_definition=partition_definition,
-            # limit=limit,
+            batch_identifiers=batch_identifiers,
         )
 
-        assert type(partition_definition) == PartitionDefinition
+        assert type(batch_identifiers) == IDDict
 
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
-        self._partition_definition = partition_definition
+        self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
 
-    def to_json_dict(self) -> Dict:
-        return {
-            "datasource_name": self._datasource_name,
-            "data_connector_name": self._data_connector_name,
-            "data_asset_name": self.data_asset_name,
-            "partition_definition": self._partition_definition,
-        }
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(
+            {
+                "datasource_name": self.datasource_name,
+                "data_connector_name": self.data_connector_name,
+                "data_asset_name": self.data_asset_name,
+                "batch_identifiers": self.batch_identifiers,
+            }
+        )
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": repr(self._partition_definition),
+            "batch_identifiers": self._batch_identifiers,
         }
         return str(doc_fields_dict)
 
@@ -63,8 +60,7 @@ class BatchDefinition(SerializableDictDot):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_definition: PartitionDefinition,
-        # limit: Optional[int] = None,
+        batch_identifiers: IDDict,
     ):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
@@ -90,13 +86,11 @@ class BatchDefinition(SerializableDictDot):
 "{str(type(data_asset_name))}", which is illegal.
                 """
             )
-        if partition_definition and not isinstance(
-            partition_definition, PartitionDefinition
-        ):
+        if batch_identifiers and not isinstance(batch_identifiers, IDDict):
             raise TypeError(
-                f"""The type of a partition_request must be a PartitionDefinition object.  The type given is
-"{str(type(partition_definition))}", which is illegal.
-                """
+                f"""The type of batch_identifiers must be an IDDict object.  The type given is \
+"{str(type(batch_identifiers))}", which is illegal.
+"""
             )
 
     #         if limit and not isinstance(limit, int):
@@ -119,8 +113,8 @@ class BatchDefinition(SerializableDictDot):
         return self._data_asset_name
 
     @property
-    def partition_definition(self) -> PartitionDefinition:
-        return self._partition_definition
+    def batch_identifiers(self) -> IDDict:
+        return self._batch_identifiers
 
     @property
     def batch_spec_passthrough(self) -> dict:
@@ -130,19 +124,9 @@ class BatchDefinition(SerializableDictDot):
     def batch_spec_passthrough(self, batch_spec_passthrough: Optional[dict]):
         self._batch_spec_passthrough = batch_spec_passthrough
 
-    def get_json_dict(self) -> dict:
-        return {
-            "datasource_name": self.datasource_name,
-            "data_connector_name": self.data_connector_name,
-            "data_asset_name": self.data_asset_name,
-            "partition_definition": self.partition_definition,
-        }
-
     @property
     def id(self) -> str:
-        return hashlib.md5(
-            json.dumps(self.get_json_dict(), sort_keys=True).encode("utf-8")
-        ).hexdigest()
+        return IDDict(self.to_json_dict()).to_id()
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -151,22 +135,15 @@ class BatchDefinition(SerializableDictDot):
         return self.id == other.id
 
     def __str__(self):
-        return json.dumps(self.get_json_dict(), indent=2)
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def __hash__(self) -> int:
         """Overrides the default implementation"""
-        _result_hash: int = (
-            hash(self.datasource_name)
-            ^ hash(self.data_connector_name)
-            ^ hash(self.data_asset_name)
-        )
-        if self.partition_definition is not None:
-            for key, value in self.partition_definition.items():
-                _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
+        _result_hash: int = hash(self.id)
         return _result_hash
 
 
-class BatchRequestBase(DictDot):
+class BatchRequestBase(SerializableDictDot):
     """
     This class is for internal inter-object protocol purposes only.
     As such, it contains all attributes of a batch_request, but does not validate them.
@@ -188,21 +165,32 @@ class BatchRequestBase(DictDot):
 
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        batch_data: Any = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        data_connector_query: Optional[dict] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
     ):
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
-        self._partition_request = partition_request
-        self._batch_data = batch_data
+        self._data_connector_query = data_connector_query
         self._limit = limit
+
         self._batch_spec_passthrough = batch_spec_passthrough
+        self._runtime_parameters = runtime_parameters
+        self._batch_identifiers = batch_identifiers
+
+    @property
+    def runtime_parameters(self) -> dict:
+        return self._runtime_parameters
+
+    @property
+    def batch_identifiers(self) -> dict:
+        return self._batch_identifiers
 
     @property
     def datasource_name(self) -> str:
@@ -221,12 +209,10 @@ class BatchRequestBase(DictDot):
         self._data_asset_name = data_asset_name
 
     @property
-    def partition_request(self) -> Union[PartitionRequest, dict]:  # PartitionRequest:
-        return self._partition_request
-
-    @property
-    def batch_data(self) -> Any:
-        return self._batch_data
+    def data_connector_query(
+        self,
+    ) -> dict:
+        return self._data_connector_query
 
     @property
     def limit(self) -> int:
@@ -236,37 +222,44 @@ class BatchRequestBase(DictDot):
     def batch_spec_passthrough(self) -> dict:
         return self._batch_spec_passthrough
 
-    def get_json_dict(self) -> dict:
-        partition_request: Optional[dict] = None
-        if self.partition_request is not None:
-            partition_request = copy.deepcopy(self.partition_request)
-            if partition_request.get("custom_filter_function") is not None:
-                partition_request["custom_filter_function"] = partition_request[
+    def to_json_dict(self) -> dict:
+        data_connector_query: Optional[dict] = None
+        if self.data_connector_query is not None:
+            data_connector_query = copy.deepcopy(self.data_connector_query)
+            if data_connector_query.get("custom_filter_function") is not None:
+                data_connector_query["custom_filter_function"] = data_connector_query[
                     "custom_filter_function"
                 ].__name__
-        json_dict = {
+        json_dict: dict = {
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_request": partition_request,
+            "data_connector_query": data_connector_query,
         }
-        if self.batch_data:
-            json_dict["batch_data"] = str(type(self.batch_data))
+
         if self.batch_spec_passthrough is not None:
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
         if self.limit is not None:
             json_dict["limit"] = self.limit
+        if self.batch_identifiers is not None:
+            json_dict["batch_identifiers"] = self.batch_identifiers
+        if self.runtime_parameters is not None:
+            json_dict["runtime_parameters"] = self.runtime_parameters
+            if json_dict["runtime_parameters"].get("batch_data") is not None:
+                json_dict["runtime_parameters"]["batch_data"] = str(
+                    type(json_dict["runtime_parameters"]["batch_data"])
+                )
+
+        filter_properties_dict(properties=json_dict, clean_falsy=True, inplace=True)
 
         return json_dict
 
     def __str__(self):
-        return json.dumps(self.get_json_dict(), indent=2)
+        return json.dumps(self.to_json_dict(), indent=2)
 
     @property
     def id(self) -> str:
-        return hashlib.md5(
-            json.dumps(self.get_json_dict(), sort_keys=True).encode("utf-8")
-        ).hexdigest()
+        return IDDict(self.to_json_dict()).to_id()
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -278,15 +271,15 @@ class BatchRequestBase(DictDot):
 class BatchRequest(BatchRequestBase):
     """
     This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
+    limit: refers to the number of batches requested (not rows per batch)
     """
 
     def __init__(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        batch_data: Any = None,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        data_connector_query: Optional[dict] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -294,15 +287,14 @@ class BatchRequest(BatchRequestBase):
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_request=partition_request,
+            data_connector_query=data_connector_query,
             limit=limit,
         )
         super().__init__(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            batch_data=batch_data,
+            data_connector_query=data_connector_query,
             limit=limit,
             batch_spec_passthrough=batch_spec_passthrough,
         )
@@ -312,7 +304,7 @@ class BatchRequest(BatchRequestBase):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[dict] = None,
         limit: Optional[int] = None,
     ):
         # TODO test and check all logic in this validator!
@@ -334,11 +326,11 @@ class BatchRequest(BatchRequestBase):
         "{str(type(data_asset_name))}", which is illegal.
                         """
             )
-        # TODO Abe 20201015: Switch this to PartitionRequest.
-        if partition_request and not isinstance(partition_request, dict):
+        # TODO Abe 20201015: Switch this to DataConnectorQuery.
+        if data_connector_query and not isinstance(data_connector_query, dict):
             raise TypeError(
-                f"""The type of partition_request must be a dict object.  The type given is
-"{str(type(partition_request))}", which is illegal.
+                f"""The type of data_connector_query must be a dict object.  The type given is
+"{str(type(data_connector_query))}", which is illegal.
                 """
             )
         if limit and not isinstance(limit, int):
@@ -347,6 +339,96 @@ class BatchRequest(BatchRequestBase):
 is illegal.
                 """
             )
+
+    @staticmethod
+    def _validate_runtime_batch_request_specific_init_parameters(
+        runtime_parameters: dict,
+        batch_identifiers: dict,
+        batch_spec_passthrough: Optional[dict] = None,
+    ):
+        if not (runtime_parameters and (isinstance(runtime_parameters, dict))):
+            raise TypeError(
+                f"""The type for runtime_parameters must be a dict object.
+                The type given is "{str(type(runtime_parameters))}", which is illegal."""
+            )
+
+        if not (batch_identifiers and isinstance(batch_identifiers, dict)):
+            raise TypeError(
+                f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
+                data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
+            )
+
+        if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
+            raise TypeError(
+                f"""The type for batch_spec_passthrough must be a dict object. The type given is \
+"{str(type(batch_spec_passthrough))}", which is illegal.
+"""
+            )
+
+
+class RuntimeBatchRequest(BatchRequest):
+    def __init__(
+        self,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        runtime_parameters: dict,
+        batch_identifiers: dict,
+        batch_spec_passthrough: Optional[dict] = None,
+    ):
+        super().__init__(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_spec_passthrough=batch_spec_passthrough,
+        )
+
+        self._validate_runtime_batch_request_specific_init_parameters(
+            runtime_parameters, batch_identifiers, batch_spec_passthrough
+        )
+        self._runtime_parameters = runtime_parameters
+        self._batch_identifiers = batch_identifiers
+
+    def __deepcopy__(self, memo):
+        runtime_parameters = getattr(self, "_runtime_parameters", None)
+        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
+            batch_data = runtime_parameters.pop("batch_data")
+            deepcopy_method = self.__deepcopy__
+            self.__deepcopy__ = None
+            cp = copy.deepcopy(self, memo)
+            self.__deepcopy__ = deepcopy_method
+            # Copy the function object
+            func = types.FunctionType(
+                deepcopy_method.__code__,
+                deepcopy_method.__globals__,
+                deepcopy_method.__name__,
+                deepcopy_method.__defaults__,
+                deepcopy_method.__closure__,
+            )
+            # Bind to cp and set
+            bound_method = func.__get__(cp, cp.__class__)
+            cp.__deepcopy__ = bound_method
+            cp._runtime_parameters["batch_data"] = batch_data
+            self._runtime_parameters["batch_data"] = batch_data
+            return cp
+        return copy.deepcopy(self, memo)
+
+    def to_json_dict(self) -> dict:
+        runtime_parameters = getattr(self, "_runtime_parameters", None)
+        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
+            batch_data = str(type(runtime_parameters.pop("batch_data")))
+            runtime_parameters["batch_data"] = batch_data
+        json_dict: dict = {
+            "datasource_name": self._datasource_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self._data_asset_name,
+            "runtime_parameters": runtime_parameters,
+            "batch_identifiers": self._batch_identifiers,
+        }
+        batch_spec_passthrough = getattr(self, "_batch_spec_passthrough", None)
+        if batch_spec_passthrough is not None:
+            json_dict["batch_spec_passthrough"] = self._batch_spec_passthrough
+        return json_dict
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
@@ -370,7 +452,7 @@ class BatchMarkers(BatchKwargs):
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
 #  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
-class Batch(DictDot):
+class Batch(SerializableDictDot):
     def __init__(
         self,
         data,
@@ -386,7 +468,7 @@ class Batch(DictDot):
     ):
         self._data = data
         if batch_request is None:
-            batch_request = dict()
+            batch_request = {}
         self._batch_request = batch_request
         if batch_definition is None:
             batch_definition = IDDict()
@@ -456,6 +538,18 @@ class Batch(DictDot):
     def batch_kwargs(self):
         return self._batch_kwargs
 
+    def to_json_dict(self) -> dict:
+        json_dict: dict = {
+            "data": str(self.data),
+            "batch_request": self.batch_request.to_json_dict(),
+            "batch_definition": self.batch_definition.to_json_dict()
+            if isinstance(self.batch_definition, BatchDefinition)
+            else {},
+            "batch_spec": str(self.batch_spec),
+            "batch_markers": str(self.batch_markers),
+        }
+        return json_dict
+
     @property
     def id(self):
         batch_definition = self._batch_definition
@@ -466,16 +560,7 @@ class Batch(DictDot):
         )
 
     def __str__(self):
-        json_dict = {
-            "data": str(self.data),
-            "batch_request": self.batch_request.get_json_dict(),
-            "batch_definition": self.batch_definition.get_json_dict()
-            if isinstance(self.batch_definition, BatchDefinition)
-            else {},
-            "batch_spec": str(self.batch_spec),
-            "batch_markers": str(self.batch_markers),
-        }
-        return json.dumps(json_dict, indent=2)
+        return json.dumps(self.to_json_dict(), indent=2)
 
     def head(self, n_rows=5, fetch_all=False):
         # FIXME - we should use a Validator after resolving circularity

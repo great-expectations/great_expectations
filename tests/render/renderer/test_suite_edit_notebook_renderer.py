@@ -7,7 +7,9 @@ import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
-from great_expectations.cli.suite import _suite_edit
+
+# noinspection PyProtectedMember
+from great_expectations.cli.v012.suite import _suite_edit
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,

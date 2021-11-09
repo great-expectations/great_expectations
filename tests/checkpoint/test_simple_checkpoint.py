@@ -10,6 +10,7 @@ from great_expectations.checkpoint.checkpoint import (
     CheckpointResult,
     SimpleCheckpoint,
 )
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import filter_properties_dict
 
@@ -209,7 +210,7 @@ def test_simple_checkpoint_raises_error_on_missing_slack_webhook_when_notify_on_
 def test_simple_checkpoint_raises_error_on_missing_slack_webhook_when_notify_on_is_not_default(
     empty_data_context, slack_notification_action, webhook
 ):
-    for condition in ["faliure", "success"]:
+    for condition in ["failure", "success"]:
         with pytest.raises(ValueError):
             SimpleCheckpointConfigurator(
                 "foo", empty_data_context, notify_on=condition
@@ -426,7 +427,9 @@ def test_simple_checkpoint_persisted_to_store(
         "class_name": "Checkpoint",
         "config_version": 1.0,
         "evaluation_parameters": {},
+        "expectation_suite_ge_cloud_id": None,
         "expectation_suite_name": None,
+        "ge_cloud_id": None,
         "module_name": "great_expectations.checkpoint",
         "name": "foo",
         "profilers": [],
@@ -451,7 +454,7 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_erro
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
     result = simple_checkpoint_defaults.run(
         run_name="bar",
@@ -467,7 +470,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
 def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
     expected_runtime_kwargs: dict = {
@@ -528,14 +531,14 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
         )
     )
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
     expected_runtime_kwargs: dict = {
@@ -606,14 +609,14 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
         )
     )
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
     expected_runtime_kwargs: dict = {
@@ -690,8 +693,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
         )
     )
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
@@ -712,7 +715,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
         "run_name_template": "my_runtime_run_name_template",
         "expectation_suite_name": "my_runtime_suite",
         "batch_request": {
-            "partition_request": {
+            "data_connector_query": {
                 "index": -1,
             },
         },
@@ -779,7 +782,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
         run_name_template="my_runtime_run_name_template",
         expectation_suite_name="my_runtime_suite",
         batch_request={
-            "partition_request": {
+            "data_connector_query": {
                 "index": -1,
             },
         },
@@ -804,8 +807,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     )
     expected_runtime_kwargs.pop("template_name")
     assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict()
-    ) == filter_properties_dict(properties=expected_runtime_kwargs)
+        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
+    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(
@@ -867,6 +870,23 @@ def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
     assert len(result.run_results) == 1
 
 
+def test_simple_checkpoint_error_with_invalid_top_level_batch_request(
+    simple_checkpoint_defaults,
+):
+    # raised by _validate_init_parameters() in BatchRequest.__init__()
+    with pytest.raises(TypeError):
+        # missing data_asset_name
+        result = simple_checkpoint_defaults.run(
+            run_name="bar",
+            batch_request={
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_special_data_connector",
+            },
+            expectation_suite_name="one",
+            validations=[{"expectation_suite_name": "one"}],
+        )
+
+
 def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence(
     context_with_data_source_and_empty_suite,
     simple_checkpoint_defaults,
@@ -910,3 +930,46 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
     assert len(result.list_validation_results()) == 2
     assert result.success
+
+
+def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector_creates_config(
+    context_with_data_source_and_empty_suite,
+    store_validation_result_action,
+    store_eval_parameter_action,
+    update_data_docs_action,
+):
+    context: DataContext = context_with_data_source_and_empty_suite
+    runtime_batch_request = RuntimeBatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_runtime_data_connector",
+        data_asset_name="users",
+        batch_identifiers={"pipeline_stage_name": "first"},  # defined in fixture
+        runtime_parameters={
+            "query": "SELECT * FROM taxi_data"
+        },  # not actually run, but used to test configuration
+    )
+
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
+    )
+    checkpoint_config = checkpoint.config
+
+    assert isinstance(checkpoint_config, CheckpointConfig)
+    assert checkpoint_config.name == "my_checkpoint"
+    assert checkpoint_config.action_list == [
+        store_validation_result_action,
+        store_eval_parameter_action,
+        update_data_docs_action,
+    ]
+    assert checkpoint_config.batch_request == {
+        "batch_identifiers": {"pipeline_stage_name": "first"},
+        "data_asset_name": "users",
+        "data_connector_name": "my_runtime_data_connector",
+        "datasource_name": "my_datasource",
+        "runtime_parameters": {"query": "SELECT * FROM taxi_data"},
+    }
+    assert checkpoint_config.config_version == 1.0
+    assert checkpoint_config.class_name == "Checkpoint"
+    assert checkpoint_config.evaluation_parameters == {}
+    assert checkpoint_config.runtime_configuration == {}
+    assert checkpoint_config.validations == []

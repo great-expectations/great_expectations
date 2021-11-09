@@ -38,8 +38,8 @@ def execute_shell_command(command: str) -> int:
             args=["bash", "-c", command],
             stdin=None,
             input=None,
-            stdout=None,
-            stderr=None,
+            # stdout=None, # commenting out to prevent issues with `subprocess.run` in python <3.7.4
+            # stderr=None, # commenting out to prevent issues with `subprocess.run` in python <3.7.4
             capture_output=True,
             shell=False,
             cwd=cwd,
@@ -126,10 +126,7 @@ def build_gallery(
     built_expectations = set()
     logger.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
-    installed_packages_names = [i.key for i in installed_packages]
-    installed_packages_txt = sorted(
-        [f"{i.key}=={i.version}" for i in installed_packages]
-    )
+    installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
     logger.debug(f"Found the following packages: {installed_packages_txt}")
 
     import great_expectations
@@ -144,9 +141,12 @@ def build_gallery(
             impl = great_expectations.expectations.registry.get_expectation_impl(
                 expectation
             )
-            diagnostics = impl().run_diagnostics()
-            gallery_info[expectation] = diagnostics
-            built_expectations.add(expectation)
+            try:
+                diagnostics = impl().run_diagnostics()
+                gallery_info[expectation] = diagnostics
+                built_expectations.add(expectation)
+            except Exception:
+                logger.error(f"Failed to run diagnostics for: {expectation}")
     else:
         built_expectations = set(core_expectations)
 
@@ -178,11 +178,15 @@ def build_gallery(
             just_installed = set()
             if expectation_module in requirements_dict:
                 logger.info(f"Loading dependencies for module {expectation_module}")
-                for req in requirements_dict[expectation_module]["requirements"]:
-                    req_package = [
-                        package.key for package in pkg_resources.parse_requirements(req)
-                    ]
-                    if req_package in installed_packages_names:
+                requirements = requirements_dict[expectation_module].get(
+                    "requirements", []
+                )
+                parsed_requirements = pkg_resources.parse_requirements(requirements)
+                for req in parsed_requirements:
+                    is_satisfied = any(
+                        [installed_pkg in req for installed_pkg in installed_packages]
+                    )
+                    if is_satisfied:
                         continue
                     just_installed.add(req)
                     logger.debug(f"Executing command: 'pip install \"{req}\"'")
@@ -200,9 +204,13 @@ def build_gallery(
                 impl = great_expectations.expectations.registry.get_expectation_impl(
                     expectation
                 )
-                diagnostics = impl().run_diagnostics()
-                gallery_info[expectation] = diagnostics
-                built_expectations.add(expectation)
+                try:
+                    diagnostics = impl().run_diagnostics()
+                    gallery_info[expectation] = diagnostics
+                    built_expectations.add(expectation)
+                except Exception:
+                    logger.error(f"Failed to run diagnostics for: {expectation}")
+
             logger.info(f"Unloading just-installed for module {expectation_module}")
             for req in just_installed:
                 logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")

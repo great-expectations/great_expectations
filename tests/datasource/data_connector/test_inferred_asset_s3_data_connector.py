@@ -1,5 +1,7 @@
+# noinspection PyPep8Naming
 from contextlib import ExitStack as does_not_raise
 from typing import List
+from unittest import mock
 
 import boto3
 import pandas as pd
@@ -8,17 +10,17 @@ from moto import mock_s3
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-    PartitionDefinition,
-)
+from great_expectations import DataContext
+from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
+
+# noinspection PyProtectedMember
 from great_expectations.datasource.data_connector.inferred_asset_s3_data_connector import (
     INVALID_S3_CHARS,
     _check_valid_s3_path,
 )
+from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
 
@@ -47,6 +49,7 @@ def test_basic_instantiation():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
@@ -99,6 +102,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
             "group_names": [
@@ -131,7 +135,8 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check():
         },
         "example_unmatched_data_references": ["CCC.csv"],
         "unmatched_data_reference_count": 1,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -162,6 +167,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
             "group_names": ["year_dir", "month_dir", "data_asset_name"],
@@ -230,8 +236,8 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
-            partition_request={
-                "batch_identifiers": {
+            data_connector_query={
+                "batch_filter_parameters": {
                     "year_dir": "2020",
                     "month_dir": "03",
                 }
@@ -242,7 +248,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 year_dir="2020",
                 month_dir="03",
             ),
@@ -274,6 +280,7 @@ def test_self_check():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "number"],
@@ -303,13 +310,17 @@ def test_self_check():
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock_s3
-def test_test_yaml_config(empty_data_context):
-    context = empty_data_context
+def test_test_yaml_config(mock_emit, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -348,6 +359,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -375,13 +389,36 @@ default_regex:
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "InferredAssetS3DataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock_s3
-def test_yaml_config_excluding_non_regex_matching_files(empty_data_context):
-    context = empty_data_context
+def test_yaml_config_excluding_non_regex_matching_files(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -424,6 +461,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -451,8 +491,26 @@ default_regex:
         },
         "example_unmatched_data_references": ["gamma-202001.csv", "gamma-202002.csv"],
         "unmatched_data_reference_count": 2,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "InferredAssetS3DataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @mock_s3
@@ -501,6 +559,9 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context):
             - number
         pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
         """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -524,7 +585,8 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context):
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -571,6 +633,9 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -590,7 +655,8 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -636,6 +702,9 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
                 - day
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
       """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
     assert report_object == {
@@ -654,7 +723,8 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -700,6 +770,9 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context):
                   - day
               pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -719,7 +792,8 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context):
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -775,8 +849,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "my_inferred_asset_filesystem_data_connector",
-            "datasource_name": "test_environment",
-            "execution_engine": "BASE_ENGINE",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -796,7 +869,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}
             ),
         ),
@@ -804,7 +877,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}
             ),
         ),
@@ -812,7 +885,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}
             ),
         ),
@@ -820,7 +893,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}
             ),
         ),
@@ -828,7 +901,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}
             ),
         ),
@@ -836,7 +909,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}
             ),
         ),
@@ -844,7 +917,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             datasource_name="test_environment",
             data_connector_name="my_inferred_asset_filesystem_data_connector",
             data_asset_name="some_bucket",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}
             ),
         ),
@@ -906,8 +979,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "my_inferred_asset_filesystem_data_connector",
-                "datasource_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
@@ -972,8 +1044,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "my_inferred_asset_filesystem_data_connector",
-                "datasource_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
@@ -981,6 +1052,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
         )
 
 
+# noinspection PyTypeChecker
 @pytest.mark.parametrize(
     "path,expectation",
     [("BUCKET/DIR/FILE.CSV", does_not_raise())]

@@ -1,10 +1,9 @@
-import abc
 import enum
 import itertools
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -19,7 +18,6 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
-    pre_load,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
@@ -190,6 +188,10 @@ class AssetConfigSchema(Schema):
     max_keys = fields.Integer(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # Necessary addition for Cloud assets
+    table_name = fields.String(required=False, allow_none=True)
+    type = fields.String(required=False, allow_none=True)
+
     @validates_schema
     def validate_schema(self, data, **kwargs):
         pass
@@ -207,6 +209,8 @@ class SorterConfig(DictDot):
         class_name=None,
         module_name=None,
         orderby="asc",
+        reference_list=None,
+        datetime_format=None,
         **kwargs,
     ):
         self._name = name
@@ -215,6 +219,12 @@ class SorterConfig(DictDot):
         self._orderby = orderby
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+        if reference_list is not None:
+            self._reference_list = reference_list
+
+        if datetime_format is not None:
+            self._datetime_format = datetime_format
 
     @property
     def name(self):
@@ -232,6 +242,14 @@ class SorterConfig(DictDot):
     def orderby(self):
         return self._orderby
 
+    @property
+    def reference_list(self):
+        return self._reference_list
+
+    @property
+    def datetime_format(self):
+        return self._datetime_format
+
 
 class SorterConfigSchema(Schema):
     class Meta:
@@ -243,6 +261,12 @@ class SorterConfigSchema(Schema):
         missing="great_expectations.datasource.data_connector.sorter"
     )
     orderby = fields.String(required=False, missing="asc", allow_none=False)
+
+    # allow_none = True because it is only used by some Sorters
+    reference_list = fields.List(
+        cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True
+    )
+    datetime_format = fields.String(required=False, missing=None, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -259,21 +283,35 @@ class DataConnectorConfig(DictDot):
         self,
         class_name,
         module_name=None,
+        credentials=None,
         assets=None,
         base_directory=None,
         glob_directive=None,
         default_regex=None,
-        runtime_keys=None,
-        bucket=None,
-        prefix=None,
-        delimiter=None,
-        max_keys=None,
-        boto3_options=None,
+        batch_identifiers=None,
         sorters=None,
+        batch_spec_passthrough=None,
+        # S3
+        boto3_options=None,
+        bucket=None,
+        max_keys=None,
+        # Azure
+        azure_options=None,
+        container=None,
+        name_starts_with=None,
+        # GCS
+        bucket_or_name=None,
+        max_results=None,
+        # Both S3/GCS
+        prefix=None,
+        # Both S3/Azure
+        delimiter=None,
         **kwargs,
     ):
         self._class_name = class_name
         self._module_name = module_name
+        if credentials is not None:
+            self.credentials = credentials
         if assets is not None:
             self.assets = assets
         if base_directory is not None:
@@ -282,20 +320,43 @@ class DataConnectorConfig(DictDot):
             self.glob_directive = glob_directive
         if default_regex is not None:
             self.default_regex = default_regex
-        if runtime_keys is not None:
-            self.runtime_keys = runtime_keys
-        if bucket is not None:
-            self.bucket = bucket
-        if prefix is not None:
-            self.prefix = prefix
-        if delimiter is not None:
-            self.delimiter = delimiter
-        if max_keys is not None:
-            self.max_keys = max_keys
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
+        if batch_identifiers is not None:
+            self.batch_identifiers = batch_identifiers
         if sorters is not None:
             self.sorters = sorters
+        if batch_spec_passthrough is not None:
+            self.batch_spec_passthrough = batch_spec_passthrough
+
+        # S3
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
+        if bucket is not None:
+            self.bucket = bucket
+        if max_keys is not None:
+            self.max_keys = max_keys
+
+        # Azure
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if container is not None:
+            self.container = container
+        if name_starts_with is not None:
+            self.name_starts_with = name_starts_with
+
+        # GCS
+        if bucket_or_name is not None:
+            self.bucket_or_name = bucket_or_name
+        if max_results is not None:
+            self.max_results = max_results
+
+        # Both S3/GCS
+        if prefix is not None:
+            self.prefix = prefix
+
+        # Both S3/Azure
+        if delimiter is not None:
+            self.delimiter = delimiter
+
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -330,16 +391,38 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
     default_regex = fields.Dict(required=False, allow_none=True)
-    runtime_keys = fields.List(
+    credentials = fields.Raw(required=False, allow_none=True)
+    batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
-    bucket = fields.String(required=False, allow_none=True)
-    prefix = fields.String(required=False, allow_none=True)
-    delimiter = fields.String(required=False, allow_none=True)
-    max_keys = fields.Integer(required=False, allow_none=True)
+
+    # S3
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    bucket = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
+
+    # Azure
+    azure_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    container = fields.String(required=False, allow_none=True)
+    name_starts_with = fields.String(required=False, allow_none=True)
+
+    # GCS
+    gcs_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    bucket_or_name = fields.String(required=False, allow_none=True)
+    max_results = fields.String(required=False, allow_none=True)
+
+    # Both S3/GCS
+    prefix = fields.String(required=False, allow_none=True)
+
+    # Both S3/Azure
+    delimiter = fields.String(required=False, allow_none=True)
+
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
@@ -354,7 +437,9 @@ class DataConnectorConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
+    batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
@@ -367,11 +452,15 @@ class DataConnectorConfigSchema(Schema):
                 "ConfiguredAssetFilesystemDataConnector",
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-subclass of the FilePathDataConnector class (your data conntector is "{data['class_name']}").  Please update your
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
+subclass of the FilePathDataConnector class (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )
@@ -383,17 +472,42 @@ configuration to continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by a
-filesystem type of the data connector (your data conntector is "{data['class_name']}").  Please update your
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
+filesystem type of the data connector (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
             )
-        if (
-            "bucket" in data
-            or "prefix" in data
-            or "delimiter" in data
-            or "max_keys" in data
-        ) and not (
+        if ("delimiter" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if ("prefix" in data) and not (
+            data["class_name"]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if ("bucket" in data or "max_keys" in data) and not (
             data["class_name"]
             in [
                 "InferredAssetS3DataConnector",
@@ -401,11 +515,63 @@ configuration to continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
-S3 type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+S3 type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )
+        if (
+            "azure_options" in data or "container" in data or "name_starts_with" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetAzureDataConnector",
+                "ConfiguredAssetAzureDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                    """
+            )
+        if "azure_options" in data and data["class_name"] in [
+            "InferredAssetAzureDataConnector",
+            "ConfiguredAssetAzureDataConnector",
+        ]:
+            azure_options = data["azure_options"]
+            if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
+                    You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
+                    """
+                )
+        if (
+            "gcs_options" in data or "bucket_or_name" in data or "max_results" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by a
+GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                    """
+            )
+        if "gcs_options" in data and data["class_name"] in [
+            "InferredAssetGCSDataConnector",
+            "ConfiguredAssetGCSDataConnector",
+        ]:
+            gcs_options = data["gcs_options"]
+            if "filename" in gcs_options and "info" in gcs_options:
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your current configuration can only use a single method of authentication for the GCS type of data connector.
+                    You must only select one between `filename` (from_service_account_file) and `info` (from_service_account_info). Please update your configuration to continue.
+                    """
+                )
         if (
             "data_asset_name_prefix" in data
             or "data_asset_name_suffix" in data
@@ -425,8 +591,8 @@ continue.
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data connector, that are required only by an
-SQL type of the data connector (your data conntector is "{data['class_name']}").  Please update your configuration to
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )
@@ -445,8 +611,11 @@ class ExecutionEngineConfig(DictDot):
         caching=None,
         batch_spec_defaults=None,
         connection_string=None,
+        credentials=None,
         spark_config=None,
         boto3_options=None,
+        azure_options=None,
+        gcs_options=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -457,10 +626,16 @@ class ExecutionEngineConfig(DictDot):
             self._batch_spec_defaults = batch_spec_defaults
         if connection_string is not None:
             self.connection_string = connection_string
+        if credentials is not None:
+            self.credentials = credentials
         if spark_config is not None:
             self.spark_config = spark_config
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if gcs_options is not None:
+            self.gcs_options = gcs_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -484,19 +659,28 @@ class ExecutionEngineConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(missing="great_expectations.execution_engine")
     connection_string = fields.String(required=False, allow_none=True)
+    credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    azure_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    gcs_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
+    force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
-        if "connection_string" in data and not (
+        if ("connection_string" in data or "credentials" in data) and not (
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
@@ -535,6 +719,8 @@ class DatasourceConfig(DictDot):
         introspection=None,
         tables=None,
         boto3_options=None,
+        azure_options=None,
+        gcs_options=None,
         reader_method=None,
         reader_options=None,
         limit=None,
@@ -579,6 +765,10 @@ class DatasourceConfig(DictDot):
             self.tables = tables
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if azure_options is not None:
+            self.azure_options = azure_options
+        if gcs_options is not None:
+            self.gcs_options = gcs_options
         if reader_method is not None:
             self.reader_method = reader_method
         if reader_options is not None:
@@ -603,7 +793,10 @@ class DatasourceConfigSchema(Schema):
 
     class_name = fields.String(missing="Datasource")
     module_name = fields.String(missing="great_expectations.datasource")
-
+    force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
+    spark_config = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
     )
@@ -628,18 +821,25 @@ class DatasourceConfigSchema(Schema):
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    azure_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    gcs_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
     reader_method = fields.String(required=False, allow_none=True)
     reader_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     limit = fields.Integer(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
             raise ge_exceptions.InvalidConfigError(
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '
-                'GE, that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
+                'GE that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'
             )
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
@@ -657,7 +857,7 @@ class DatasourceConfigSchema(Schema):
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses one or more keys in a data source, that are required only by a
+                f"""Your current configuration uses one or more keys in a data source that are required only by a
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
                 """
             )
@@ -784,8 +984,8 @@ class NotebookConfig(DictDot):
         column_expectations_markdown=None,
         header_code=None,
         footer_code=None,
-        column_expectation_code=None,
         table_expectation_code=None,
+        column_expectation_code=None,
     ):
         self.class_name = class_name
         self.module_name = module_name
@@ -806,8 +1006,8 @@ class NotebookConfig(DictDot):
 
         self.header_code = header_code
         self.footer_code = footer_code
-        self.column_expectation_code = column_expectation_code
         self.table_expectation_code = table_expectation_code
+        self.column_expectation_code = column_expectation_code
 
 
 class NotebookConfigSchema(Schema):
@@ -840,10 +1040,10 @@ class NotebookConfigSchema(Schema):
 
     header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    column_expectation_code = fields.Nested(
+    table_expectation_code = fields.Nested(
         NotebookTemplateConfigSchema, allow_none=True
     )
-    table_expectation_code = fields.Nested(
+    column_expectation_code = fields.Nested(
         NotebookTemplateConfigSchema, allow_none=True
     )
 
@@ -867,6 +1067,71 @@ class NotebooksConfigSchema(Schema):
     @post_load
     def make_notebooks_config(self, data, **kwargs):
         return NotebooksConfig(**data)
+
+
+class ConcurrencyConfig(DictDot):
+    """WARNING: This class is experimental."""
+
+    def __init__(self, enabled: Optional[bool] = False):
+        """Initialize a concurrency configuration to control multithreaded execution.
+
+        Args:
+            enabled: Whether or not multithreading is enabled.
+        """
+        self._enabled = enabled
+
+    @property
+    def enabled(self):
+        """Whether or not multithreading is enabled."""
+        return self._enabled
+
+    @property
+    def max_database_query_concurrency(self) -> int:
+        """Max number of concurrent database queries to execute with mulithreading."""
+        # BigQuery has a limit of 100 for "Concurrent rate limit for interactive queries" as described at
+        # (https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
+        # databases and/or be manually user configurable.
+        return 100
+
+    def add_sqlalchemy_create_engine_parameters(
+        self, parameters: MutableMapping[str, Any]
+    ):
+        """Update SqlAlchemy parameters to prevent concurrency errors (e.g. http://sqlalche.me/e/14/3o7r) and
+        bottlenecks.
+
+        Args:
+            parameters: SqlAlchemy create_engine parameters to which we add concurrency appropriate parameters. If the
+                concurrency parameters are already set, those parameters are left unchanged.
+        """
+        if not self._enabled:
+            return
+
+        if "pool_size" not in parameters:
+            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.pool_size
+            parameters["pool_size"] = 0
+        if "max_overflow" not in parameters:
+            # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.max_overflow
+            parameters["max_overflow"] = -1
+
+
+class ConcurrencyConfigSchema(Schema):
+    """WARNING: This class is experimental."""
+
+    enabled = fields.Boolean(default=False)
+
+
+class GeCloudConfig(DictDot):
+    def __init__(self, base_url: str, account_id: str, access_token: str):
+        self.base_url = base_url
+        self.account_id = account_id
+        self.access_token = access_token
+
+    def to_json_dict(self):
+        return {
+            "base_url": self.base_url,
+            "account_id": self.account_id,
+            "access_token": self.access_token,
+        }
 
 
 class DataContextConfigSchema(Schema):
@@ -895,6 +1160,7 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    concurrency = fields.Nested(ConcurrencyConfigSchema)
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
@@ -916,6 +1182,7 @@ class DataContextConfigSchema(Schema):
             message=message,
         )
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "config_version" not in data:
@@ -944,7 +1211,7 @@ class DataContextConfigSchema(Schema):
         if data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
-                "Please see the migration guide at https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html".format(
+                "Please see the migration guide at https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api".format(
                     data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
             )
@@ -967,11 +1234,11 @@ class DataContextConfigSchema(Schema):
             )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
                     data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                 ),
                 validation_error=ValidationError(
-                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
                         data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                     )
                 ),
@@ -982,11 +1249,14 @@ class DataContextConfigSchema(Schema):
             and "validation_operators" in data
             and data["validation_operators"] is not None
         ):
-            # TODO: <Alex>Add a URL to the migration guide with instructions for how to replace validation_operators with appropriate actions.</Alex>
             logger.warning(
-                "You appear to be using a legacy capability with the latest config version ({}).\n    Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number {}.".format(
-                    data["config_version"], CURRENT_GE_CONFIG_VERSION
-                ),
+                f"""You appear to be using a legacy capability with the latest config version \
+({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
+are being deprecated.  Please consult the V3 API migration guide \
+https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and \
+update your configuration to be compatible with the version number {CURRENT_GE_CONFIG_VERSION}.\n    (This message \
+will appear repeatedly until your configuration is updated.)
+"""
             )
 
 
@@ -1015,7 +1285,6 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
-    NOTEBOOKS_BASE_DIRECTORY = "notebooks"
     DEFAULT_VALIDATION_OPERATORS = {
         "action_list_operator": {
             "class_name": "ActionListValidationOperator",
@@ -1247,6 +1516,45 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             ] = root_directory
 
 
+class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
+    """
+    Default store configs for in memory backends.
+
+    This is useful for testing without persistence.
+    """
+
+    def __init__(
+        self,
+    ):
+        # Initialize base defaults
+        super().__init__()
+
+        self.stores = {
+            self.expectations_store_name: {
+                "class_name": "ExpectationsStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+            self.validations_store_name: {
+                "class_name": "ValidationsStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+            self.evaluation_parameter_store_name: {
+                "class_name": "EvaluationParameterStore"
+            },
+            self.checkpoint_store_name: {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
+        }
+        self.data_docs_sites = {}
+
+
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for Google Cloud Storage (GCS) backends, with some accessible parameters
@@ -1395,7 +1703,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         # Initialize base defaults
         super().__init__()
 
-        # Use default credentials if seprate credentials not supplied for expectations_store and validations_store
+        # Use default credentials if separate credentials not supplied for expectations_store and validations_store
         if expectations_store_credentials is None:
             expectations_store_credentials = default_credentials
         if validations_store_credentials is None:
@@ -1461,6 +1769,7 @@ class DataContextConfig(BaseYamlConfig):
         anonymous_usage_statistics=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
+        concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1507,6 +1816,11 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
+        if concurrency is None:
+            concurrency = ConcurrencyConfig()
+        elif isinstance(concurrency, dict):
+            concurrency = ConcurrencyConfig(**concurrency)
+        self.concurrency: ConcurrencyConfig = concurrency
 
         super().__init__(commented_map=commented_map)
 
@@ -1549,6 +1863,8 @@ class CheckpointConfigSchema(Schema):
             "slack_webhook",
             "notify_on",
             "notify_with",
+            "ge_cloud_id",
+            "expectation_suite_ge_cloud_id",
         )
         ordered = True
 
@@ -1560,6 +1876,7 @@ class CheckpointConfigSchema(Schema):
         "notify_with",
     ]
 
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
@@ -1572,6 +1889,7 @@ class CheckpointConfigSchema(Schema):
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
+    expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
     action_list = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
@@ -1603,13 +1921,14 @@ class CheckpointConfigSchema(Schema):
     notify_on = fields.String(required=False, allow_none=True)
     notify_with = fields.String(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if not (
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your checkpoint configuration to
+                f"""Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """
             )
@@ -1617,11 +1936,12 @@ class CheckpointConfigSchema(Schema):
         if data.get("config_version"):
             if "name" not in data:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current checkpoint
+                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """
                 )
 
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
         data = deepcopy(data)
@@ -1653,11 +1973,13 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        # the following fous args are used by SimpleCheckpoint
+        ge_cloud_id: Optional[str] = None,
+        # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -1671,12 +1993,14 @@ class CheckpointConfig(BaseYamlConfig):
             self._template_name = template_name
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
+            self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
             self._batch_request = batch_request
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
+            self._ge_cloud_id = ge_cloud_id
             # the following attributes are used by SimpleCheckpoint
             self._site_names = site_names
             self._slack_webhook = slack_webhook
@@ -1709,6 +2033,10 @@ class CheckpointConfig(BaseYamlConfig):
                 self.run_name_template = other_config.run_name_template
             if other_config.expectation_suite_name is not None:
                 self.expectation_suite_name = other_config.expectation_suite_name
+            if other_config.expectation_suite_ge_cloud_id is not None:
+                self.expectation_suite_ge_cloud_id = (
+                    other_config.expectation_suite_ge_cloud_id
+                )
             # update
             if other_config.batch_request is not None:
                 if self.batch_request is None:
@@ -1754,6 +2082,10 @@ class CheckpointConfig(BaseYamlConfig):
                 self.expectation_suite_name = runtime_kwargs.get(
                     "expectation_suite_name"
                 )
+            if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
+                self.expectation_suite_ge_cloud_id = runtime_kwargs.get(
+                    "expectation_suite_ge_cloud_id"
+                )
             # update
             if runtime_kwargs.get("batch_request") is not None:
                 batch_request = self.batch_request
@@ -1794,6 +2126,22 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
+
+    @property
+    def ge_cloud_id(self):
+        return self._ge_cloud_id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value: str):
+        self._ge_cloud_id = value
+
+    @property
+    def expectation_suite_ge_cloud_id(self):
+        return self._expectation_suite_ge_cloud_id
+
+    @expectation_suite_ge_cloud_id.setter
+    def expectation_suite_ge_cloud_id(self, value: str):
+        self._expectation_suite_ge_cloud_id = value
 
     @property
     def name(self):
@@ -1850,6 +2198,10 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def batch_request(self):
         return self._batch_request
+
+    @batch_request.setter
+    def batch_request(self, value: dict):
+        self._batch_request = value
 
     @property
     def expectation_suite_name(self):
@@ -1927,6 +2279,8 @@ datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
+# noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
+concurrencyConfigSchema = ConcurrencyConfigSchema()

@@ -1,26 +1,37 @@
 import copy
+import json
 import logging
 import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional
+from typing import Optional, Union
 
 import requests
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointConfig
 
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(query, slack_webhook):
+def send_slack_notification(
+    query, slack_webhook=None, slack_channel=None, slack_token=None
+):
     session = requests.Session()
+    url = slack_webhook
+    query = query
+    headers = None
+
+    if not slack_webhook:
+        url = "https://slack.com/api/chat.postMessage"
+        headers = {"Authorization": f"Bearer {slack_token}"}
+        query["channel"] = slack_channel
 
     try:
-        response = session.post(url=slack_webhook, json=query)
+        response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
         logger.warning(
             "Failed to connect to Slack webhook at {url} "
@@ -38,6 +49,7 @@ def send_slack_notification(query, slack_webhook):
                     text=response.text,
                 )
             )
+
         else:
             return "Slack notification succeeded."
 
@@ -47,7 +59,7 @@ def send_opsgenie_alert(query, suite_name, settings):
     if settings["region"] != None:
         url = "https://api.{region}.opsgenie.com/v2/alerts".format(
             region=settings["region"]
-        )  # accomodate for Europeans
+        )  # accommodate for Europeans
     else:
         url = "https://api.opsgenie.com/v2/alerts"
 
@@ -196,28 +208,69 @@ def send_email(
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,
-) -> BatchRequest:
-    if substituted_runtime_config.batch_request is None:
-        return (
-            validation_batch_request
-            if validation_batch_request is None
-            else BatchRequest(**validation_batch_request)
+    ge_cloud_mode: bool = False,
+) -> Union[BatchRequest, RuntimeBatchRequest]:
+    runtime_config_batch_request = substituted_runtime_config.batch_request
+    batch_data = None
+    if isinstance(runtime_config_batch_request, RuntimeBatchRequest):
+        runtime_parameters = runtime_config_batch_request.runtime_parameters
+        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
+            batch_data = runtime_parameters["batch_data"]
+            runtime_config_batch_request = runtime_config_batch_request.to_json_dict()
+
+    if (
+        (
+            runtime_config_batch_request is not None
+            and "runtime_parameters" in runtime_config_batch_request
         )
+        or (
+            validation_batch_request is not None
+            and "runtime_parameters" in validation_batch_request
+        )
+        or (isinstance(validation_batch_request, RuntimeBatchRequest))
+    ):
+        batch_request_class = RuntimeBatchRequest
+    else:
+        batch_request_class = BatchRequest
+
+    if runtime_config_batch_request is None and validation_batch_request is None:
+        return None
+
+    if runtime_config_batch_request is None:
+        runtime_config_batch_request = {}
 
     if validation_batch_request is None:
-        return BatchRequest(**substituted_runtime_config.batch_request)
+        validation_batch_request = {}
 
-    runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
-    for key, val in runtime_batch_request_dict.items():
+    if isinstance(validation_batch_request, BatchRequest):
         if (
-            val is not None
-            and substituted_runtime_config.batch_request.get(key) is not None
+            hasattr(validation_batch_request, "runtime_parameters")
+            and (validation_batch_request.runtime_parameters is not None)
+            and ("batch_data" in validation_batch_request.runtime_parameters)
         ):
+            batch_data = validation_batch_request.runtime_parameters["batch_data"]
+        runtime_batch_request_dict: dict = validation_batch_request.to_json_dict()
+    else:
+        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
+
+    for key, val in runtime_batch_request_dict.items():
+        if val is not None and runtime_config_batch_request.get(key) is not None:
             raise ge_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
-    runtime_batch_request_dict.update(substituted_runtime_config.batch_request)
-    return BatchRequest(**runtime_batch_request_dict)
+    runtime_batch_request_dict.update(runtime_config_batch_request)
+    if batch_data is not None:
+        if "runtime_parameters" not in runtime_batch_request_dict:
+            runtime_batch_request_dict["runtime_parameters"] = {}
+        runtime_batch_request_dict["runtime_parameters"]["batch_data"] = batch_data
+
+    if ge_cloud_mode and batch_request_class is RuntimeBatchRequest:
+        batch_identifiers = runtime_batch_request_dict.get("batch_identifiers", {})
+        if len(batch_identifiers.keys()) == 0:
+            batch_identifiers["timestamp"] = str(datetime.datetime.now())
+            runtime_batch_request_dict["batch_identifiers"] = batch_identifiers
+
+    return batch_request_class(**runtime_batch_request_dict)
 
 
 def get_substituted_validation_dict(
@@ -230,6 +283,10 @@ def get_substituted_validation_dict(
         ),
         "expectation_suite_name": validation_dict.get("expectation_suite_name")
         or substituted_runtime_config.expectation_suite_name,
+        "expectation_suite_ge_cloud_id": validation_dict.get(
+            "expectation_suite_ge_cloud_id"
+        )
+        or substituted_runtime_config.expectation_suite_ge_cloud_id,
         "action_list": CheckpointConfig.get_updated_action_list(
             base_action_list=substituted_runtime_config.action_list,
             other_action_list=validation_dict.get("action_list", {}),

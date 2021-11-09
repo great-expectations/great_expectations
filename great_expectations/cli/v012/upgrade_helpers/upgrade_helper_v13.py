@@ -115,7 +115,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 ++====================================++\
 </cyan>
 
-UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 """
         stores_upgrade_checklist = [
             config_attribute
@@ -171,7 +171,7 @@ No manual upgrade steps are required.
 Upgrade Confirmation
 =====================
 </cyan>
-Please consult the 0.13.x migration guide to learn more about the automated upgrade process:
+Please consult the V3 API migration guide to learn more about the automated upgrade process:
 
     <cyan>https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html</cyan>
 
@@ -211,7 +211,7 @@ Would you like to proceed with the project upgrade?\
         if increment_version:
             upgrade_report += f"""
 <green>\
-Your project was successfully upgraded to be compatible with Great Expectations 0.13.x.
+Your project was successfully upgraded to be compatible with Great Expectations V3 API.
 The config_version of your great_expectations.yml has been automatically incremented to 3.0.
 
 A log detailing the upgrade can be found here:

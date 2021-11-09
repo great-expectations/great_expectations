@@ -1,10 +1,134 @@
 """Test usage statistics transmission client-side."""
+import copy
+from typing import Any, Dict, List
+
 import pytest
 import requests
+
+from great_expectations.data_context import BaseDataContext
 
 USAGE_STATISTICS_QA_URL = (
     "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
+
+
+def generate_messages_with_defaults(
+    defaults: Dict[str, Any], message_stubs: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    """
+    Create a list of messages by overriding defaults with message_stubs
+    Args:
+        defaults: Dict of default message items
+        message_stubs: Unique parts of message
+
+    Returns:
+        List of messages same len(message_stubs) combining defaults overridden by message stubs
+    """
+    output_list = []
+    for message_stub in message_stubs:
+        defaults_copy = copy.deepcopy(defaults)
+        defaults_copy.update(message_stub)
+        output_list.append(defaults_copy)
+
+    return output_list
+
+
+def test_generate_messages_with_defaults():
+
+    defaults = {
+        "success": True,
+        "version": "1.0.0",
+        "event_time": "2020-08-04T22:50:58.837Z",
+        "data_context_id": "00000000-0000-0000-0000-000000000002",
+        "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+    }
+
+    message_stubs = [
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {},
+            "ge_version": "0.11.9.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v2"},
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v3"},
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.begin",
+            "event_payload": {"api_version": "v3"},
+            "ge_version": "0.13.18.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.end",
+            "event_payload": {"api_version": "v3"},
+            "ge_version": "0.13.18.manual_testing",
+        },
+    ]
+
+    output = generate_messages_with_defaults(
+        defaults=defaults, message_stubs=message_stubs
+    )
+
+    expected = [
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v2"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v3"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.begin",
+            "event_payload": {"api_version": "v3"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.18.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.end",
+            "event_payload": {"api_version": "v3"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.18.manual_testing",
+        },
+    ]
+
+    assert output == expected
 
 
 """
@@ -316,6 +440,146 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.5.manual_testing",
         }
     ],
+    # BaseDataContext.test_yaml_config() MESSAGES
+    "data_context.test_yaml_config": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2021-06-18T14:36:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": class_name,
+                    "diagnostic_info": [],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        ]
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": class_name,
+                    "diagnostic_info": [],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        ]
+        # Diagnostic Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "diagnostic_info": ["__substitution_error__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "diagnostic_info": ["__yaml_parse_error__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "diagnostic_info": ["__custom_subclass_not_core_ge__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "diagnostic_info": ["__class_name_not_provided__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+            {
+                "event": "data_context.test_yaml_config",
+                "success": False,
+                "event_payload": {
+                    "diagnostic_info": ["__class_name_not_provided__"],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            },
+        ]
+        # Store Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "ExpectationsStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "InMemoryStoreBackend"
+                    },
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # Datasource Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "Datasource",
+                    "anonymized_execution_engine": {
+                        "anonymized_name": "fake_anonymized_name_for_testing",
+                        "parent_class": "PandasExecutionEngine",
+                    },
+                    "anonymized_data_connectors": [
+                        {
+                            "anonymized_name": "fake_anonymized_name_for_testing",
+                            "parent_class": "InferredAssetFilesystemDataConnector",
+                        }
+                    ],
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # DataConnector Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ]
+        # Checkpoint Message Types
+        + [
+            {
+                "event": "data_context.test_yaml_config",
+                "success": True,
+                "event_payload": {
+                    "anonymized_name": "fake_anonymized_name_for_testing",
+                    "parent_class": "Checkpoint",
+                },
+                "ge_version": "0.13.20.manual_testing",
+            }
+        ],
+    ),
+    # CLI INIT COMMANDS
     "cli.init.create": [
         {
             "event": "cli.init.create",
@@ -351,230 +615,241 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
-    "cli.checkpoint.new": [
+    # CLI PROJECT COMMANDS
+    "cli.project.check_config": [
         {
-            "event": "cli.checkpoint.new",
+            "event": "cli.project.check_config",
             "event_payload": {},
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
+            "event_time": "2020-08-03T23:42:34.068Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
         },
         {
-            "event": "cli.checkpoint.new",
+            "event": "cli.project.check_config",
             "event_payload": {"api_version": "v2"},
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
+            "event_time": "2020-08-03T23:42:34.068Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.13.0.manual_testing",
         },
         {
-            "event": "cli.checkpoint.new",
+            "event": "cli.project.check_config",
             "event_payload": {"api_version": "v3"},
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
+            "event_time": "2020-08-03T23:42:34.068Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.13.0.manual_testing",
         },
     ],
-    "cli.checkpoint.script": [
-        {
-            "event": "cli.checkpoint.script",
-            "event_payload": {},
+    "cli.project.upgrade": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:20:37.828Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "cli.project.upgrade.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.project.upgrade.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.project.upgrade.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    # CLI STORE COMMANDS
+    "cli.store.list": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-03T23:56:53.908Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "cli.store.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.store.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.store.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.store.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.store.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.store.list.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    # CLI DATASOURCE COMMANDS
+    "cli.datasource.list": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
         },
-        {
-            "event": "cli.checkpoint.script",
-            "event_payload": {"api_version": "v2"},
+        message_stubs=[
+            {
+                "event": "cli.datasource.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.datasource.new": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-        {
-            "event": "cli.checkpoint.script",
-            "event_payload": {"api_version": "v3"},
+        message_stubs=[
+            {
+                "event": "cli.datasource.new",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.datasource.delete": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-    ],
-    "cli.checkpoint.run": [
-        {
-            "event": "cli.checkpoint.run",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.run",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.run",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.checkpoint.list": [
-        {
-            "event": "cli.checkpoint.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.list",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.list",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.checkpoint.delete": [
-        {
-            "event": "cli.checkpoint.delete",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.delete",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.delete",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.datasource.list": [
-        {
-            "event": "cli.datasource.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:01:06.628Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.datasource.list",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:01:06.628Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.datasource.list",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:01:06.628Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.datasource.new": [
-        {
-            "event": "cli.datasource.new",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:38:32.701Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.datasource.new",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:38:32.701Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.datasource.new",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:38:32.701Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
+        message_stubs=[
+            {
+                "event": "cli.datasource.delete",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.datasource.delete",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.delete",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.delete.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.delete.end",
+                "event_payload": {"api_version": "v3", "cancelled": True},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
     "cli.datasource.profile": [
         {
             "event": "cli.datasource.profile",
@@ -607,102 +882,7 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.0.manual_testing",
         },
     ],
-    "cli.docs.build": [
-        {
-            "event": "cli.docs.build",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:25:27.088Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.docs.build",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:25:27.088Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.docs.build",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:25:27.088Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.docs.clean": [
-        {
-            "event": "cli.docs.clean",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:36:50.979Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.11.9+25.g3ca555c.dirty",
-        },
-        {
-            "event": "cli.docs.clean",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:36:50.979Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.13.0+25.g3ca555c.dirty",
-        },
-        {
-            "event": "cli.docs.clean",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:36:50.979Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.13.0+25.g3ca555c.dirty",
-        },
-    ],
-    "cli.docs.list": [
-        {
-            "event": "cli.docs.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:20:37.828Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.docs.list",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:20:37.828Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.docs.list",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:20:37.828Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
+    # CLI NEW_DS_CHOICE COMMANDS
     "cli.new_ds_choice": [
         {
             "event": "cli.new_ds_choice",
@@ -738,206 +918,239 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
-    "cli.project.check_config": [
-        {
-            "event": "cli.project.check_config",
-            "event_payload": {},
+    # CLI SUITE COMMANDS
+    "cli.suite.demo": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-03T23:42:34.068Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
         },
-        {
-            "event": "cli.project.check_config",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:42:34.068Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.project.check_config",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:42:34.068Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.store.list": [
-        {
-            "event": "cli.store.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:56:53.908Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.store.list",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:56:53.908Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.store.list",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:56:53.908Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.suite.demo": [
-        {
-            "event": "cli.suite.demo",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:40:41.401Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.11.9+25.g3ca555c.dirty",
-        },
-        {
-            "event": "cli.suite.demo",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:40:41.401Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.13.0+25.g3ca555c.dirty",
-        },
-        {
-            "event": "cli.suite.demo",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-05T00:40:41.401Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.13.0+25.g3ca555c.dirty",
-        },
-    ],
-    "cli.suite.edit": [
-        {
-            "event": "cli.suite.edit",
-            "event_payload": {
-                "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e"
+        message_stubs=[
+            {
+                "event": "cli.suite.demo",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
             },
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:16:22.149Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.suite.edit",
-            "event_payload": {
-                "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
-                "api_version": "v2",
+            {
+                "event": "cli.suite.demo",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
             },
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:16:22.149Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.suite.edit",
-            "event_payload": {
-                "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
-                "api_version": "v3",
+            {
+                "event": "cli.suite.demo",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
             },
+            {
+                "event": "cli.suite.demo.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.demo.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.demo.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.suite.list": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-04T00:16:22.149Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-    ],
-    "cli.suite.list": [
-        {
-            "event": "cli.suite.list",
-            "version": "1.0.0",
-            "event_payload": {},
+        message_stubs=[
+            {
+                "event": "cli.suite.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.suite.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.list.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.suite.new": generate_messages_with_defaults(
+        defaults={
             "success": True,
-            "event_time": "2020-06-26T19:33:33.123Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.suite.list",
             "version": "1.0.0",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "event_time": "2020-06-26T19:33:33.123Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-        {
-            "event": "cli.suite.list",
+        message_stubs=[
+            {
+                "event": "cli.suite.new",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.suite.new",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.new",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.new.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.suite.edit": generate_messages_with_defaults(
+        defaults={
+            "success": True,
             "version": "1.0.0",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "event_time": "2020-06-26T19:33:33.123Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-    ],
-    "cli.suite.new": [
-        {
+        message_stubs=[
+            {
+                "event": "cli.suite.edit",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e"
+                },
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.suite.edit",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v2",
+                },
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.edit",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.edit.end",
+                "success": False,
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.suite.delete": generate_messages_with_defaults(
+        defaults={
+            "success": True,
             "version": "1.0.0",
-            "event_time": "2020-06-26T19:33:33.123Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-            "event": "cli.suite.new",
-            "success": True,
-            "event_payload": {},
         },
-        {
-            "version": "1.0.0",
-            "event_time": "2020-06-26T19:33:33.123Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-            "event": "cli.suite.new",
-            "success": True,
-            "event_payload": {"api_version": "v2"},
-        },
-        {
-            "version": "1.0.0",
-            "event_time": "2020-06-26T19:33:33.123Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-            "event": "cli.suite.new",
-            "success": True,
-            "event_payload": {"api_version": "v3"},
-        },
-    ],
+        message_stubs=[
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.suite.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.delete.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.delete.end",
+                "event_payload": {"api_version": "v3", "cancelled": True},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
     "cli.suite.scaffold": [
         {
             "event": "cli.suite.scaffold",
@@ -970,38 +1183,223 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.0.manual_testing",
         },
     ],
-    "cli.suite.delete": [
-        {
-            "event": "cli.suite.delete",
-            "event_payload": {},
+    # CLI CHECKPOINT COMMANDS
+    "cli.checkpoint.new": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-05T00:58:51.961Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
         },
-        {
-            "event": "cli.suite.delete",
-            "event_payload": {"api_version": "v2"},
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.script": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-05T00:58:51.961Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-        {
-            "event": "cli.suite.delete",
-            "event_payload": {"api_version": "v3"},
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.run": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-05T00:58:51.961Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-    ],
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.list": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.delete": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete.end",
+                "event_payload": {"api_version": "v3", "cancelled": True},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    # CLI VALIDATION_OPERATOR COMMANDS
     "cli.validation_operator.list": [
         {
             "event": "cli.validation_operator.list",
@@ -1046,6 +1444,143 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.0.manual_testing",
         },
     ],
+    # CLI DOCS COMMANDS
+    "cli.docs.build": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:25:27.088Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "cli.docs.build",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.docs.build",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.docs.build",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.docs.build.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.build.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.build.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.build.end",
+                "event_payload": {"api_version": "v3", "cancelled": True},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.docs.clean": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-05T00:36:50.979Z",
+            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
+            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
+        },
+        message_stubs=[
+            {
+                "event": "cli.docs.clean",
+                "event_payload": {},
+                "ge_version": "0.11.9+25.g3ca555c.dirty",
+            },
+            {
+                "event": "cli.docs.clean",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0+25.g3ca555c.dirty",
+            },
+            {
+                "event": "cli.docs.clean",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0+25.g3ca555c.dirty",
+            },
+            {
+                "event": "cli.docs.clean.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.clean.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.clean.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.clean.end",
+                "event_payload": {"api_version": "v3", "cancelled": True},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.docs.list": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:20:37.828Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "cli.docs.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.docs.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.docs.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.docs.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.docs.list.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
 }
 
 test_messages = []

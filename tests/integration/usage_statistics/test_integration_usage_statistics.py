@@ -143,7 +143,7 @@ def test_send_malformed_data(valid_usage_statistics_message):
 
 
 def test_graceful_failure_with_no_internet():
-    """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics. """
+    """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics."""
 
     # Execute process that initializes data context
     # NOTE - JPC - 20200227 - this is crazy long (not because of logging I think, but worth revisiting)

@@ -23,7 +23,7 @@ class BatchAnonymizer(Anonymizer):
             expectation_suite_name = batch.expectation_suite_name
             datasource_name = batch_kwargs.get("datasource")
 
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
 
         if batch_kwargs:
             anonymized_info_dict[

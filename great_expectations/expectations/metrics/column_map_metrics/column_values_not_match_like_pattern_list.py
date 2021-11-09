@@ -4,7 +4,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import sa
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -36,10 +36,10 @@ class ColumnValuesNotMatchLikePatternList(ColumnMapMetricProvider):
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 get_dialect_like_pattern_expression(
                     column, _dialect, like_pattern, positive=False
                 )
                 for like_pattern in like_pattern_list
-            ]
+            )
         )

@@ -33,7 +33,7 @@ def store_list(directory):
         elif len(stores) == 1:
             list_intro_string = "1 Store found:"
         else:
-            list_intro_string = "{} Stores found:".format(len(stores))
+            list_intro_string = f"{len(stores)} Stores found:"
 
         cli_message(list_intro_string)
 

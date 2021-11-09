@@ -41,7 +41,7 @@ def validation_operator_list(directory):
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("<red>{}</red>".format(err.message))
+        cli_message(f"<red>{err.message}</red>")
         return
 
     try:
@@ -140,7 +140,7 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
-        cli_message("Failed to process <red>{}</red>".format(err.message))
+        cli_message(f"Failed to process <red>{err.message}</red>")
         sys.exit(1)
 
     try:
@@ -232,7 +232,7 @@ Let us help you specify the batch of data your want the validation operator to v
             try:
                 data_source = toolkit.select_datasource(context)
             except ValueError as ve:
-                cli_message("<red>{}</red>".format(ve))
+                cli_message(f"<red>{ve}</red>")
                 toolkit.send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
@@ -311,7 +311,7 @@ Let us help you specify the batch of data your want the validation operator to v
                         evaluation_parameters=suite.evaluation_parameters,
                     )
         except (ge_exceptions.DataContextError, OSError, SQLAlchemyError) as e:
-            cli_message("<red>{}</red>".format(e))
+            cli_message(f"<red>{e}</red>")
             toolkit.send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=False
             )

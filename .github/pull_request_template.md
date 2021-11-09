@@ -1,4 +1,4 @@
-Please annotate your PR title to describe what the PR does, then give a brief bulleted description of your PR below. PR titles should begin with [BUGFIX], [ENHANCEMENT], [FEATURE],  [DOCS], or [MAINTENANCE]. If a new feature introduces breaking changes for the Great Expectations API or configuration files, please also add [BREAKING]. You can read about the tags in our [contributor checklist](https://docs.greatexpectations.io/en/latest/contributing/contribution_checklist.html).
+Please annotate your PR title to describe what the PR does, then give a brief bulleted description of your PR below. PR titles should begin with [BUGFIX], [FEATURE],  [DOCS], or [MAINTENANCE]. If a new feature introduces breaking changes for the Great Expectations API or configuration files, please also add [BREAKING]. You can read about the tags in our [contributor checklist](https://docs.greatexpectations.io/en/latest/contributing/contribution_checklist.html).
 
 Changes proposed in this pull request:
 -
@@ -16,6 +16,17 @@ Previous Design Review notes:
 -
 -
 -
+
+
+### Definition of Done
+Please delete options that are not relevant.
+
+- [ ] My code follows the Great Expectations [style guide](https://docs.greatexpectations.io/en/latest/contributing/style_guide.html?highlight=style%20guide)
+- [ ] I have performed a [self-review](https://docs.greatexpectations.io/en/latest/contributing/contribution_checklist.html?highlight=checklist) of my own code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] I have added [unit tests](https://docs.greatexpectations.io/en/latest/contributing/testing.html#contributing-testing-writing-unit-tests) where applicable and made sure that new and existing tests are passing.
+- [ ] I have run any local integration tests and made sure that nothing is broken.
 
 
 Thank you for submitting!

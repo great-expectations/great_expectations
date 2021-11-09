@@ -34,6 +34,19 @@ def cardinality_dataset():
 
 
 @pytest.fixture()
+def nulls_dataset():
+    df = pd.DataFrame(
+        {
+            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
+            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
+        }
+    )
+    batch_df = PandasDataset(df)
+
+    return batch_df
+
+
+@pytest.fixture()
 def titanic_dataset():
     df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     batch_df = PandasDataset(df)
@@ -384,7 +397,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
 
-def test_config_with_not_null_only(possible_expectations_set):
+def test_config_with_not_null_only(nulls_dataset, possible_expectations_set):
     """
     What does this test do and why?
     Confirms that the not_null_only key in config works as expected.
@@ -392,13 +405,7 @@ def test_config_with_not_null_only(possible_expectations_set):
 
     excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
 
-    df = pd.DataFrame(
-        {
-            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
-            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
-        }
-    )
-    batch_df = PandasDataset(df)
+    batch_df = nulls_dataset
 
     profiler_without_not_null_only = UserConfigurableProfiler(
         batch_df, excluded_expectations, not_null_only=False
@@ -425,6 +432,22 @@ def test_config_with_not_null_only(possible_expectations_set):
     no_config_suite = no_config_profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
     assert "expect_column_values_to_be_null" in expectations
+
+
+def test_nullity_expectations_mostly_tolerance(
+    nulls_dataset, possible_expectations_set
+):
+    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
+
+    batch_df = nulls_dataset
+
+    profiler = UserConfigurableProfiler(
+        batch_df, excluded_expectations, not_null_only=False
+    )
+    suite = profiler.build_suite()
+
+    for i in suite.expectations:
+        assert i["kwargs"]["mostly"] == 0.66
 
 
 def test_profiled_dataset_passes_own_validation(
@@ -457,7 +480,10 @@ def test_profiler_all_expectation_types(
     """
     context = titanic_data_context
     df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv")
+        file_relative_path(
+            __file__,
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+        )
     )
     batch_df = ge.dataset.PandasDataset(df)
 

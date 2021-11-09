@@ -9,6 +9,7 @@ from great_expectations.dataset.util import check_sql_engine_dialect
 from great_expectations.util import (
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
+    hyphen,
     lint_code,
 )
 
@@ -268,11 +269,11 @@ def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs
 
 def test_filter_properties_dict():
     source_dict: dict = {
-        "a": 0,
-        "b": None,
-        "c": "xyz_0",
-        "d": 1,
-        "e": 9.8e1,
+        "integer_zero": 0,
+        "null": None,
+        "string": "xyz_0",
+        "integer_one": 1,
+        "scientific_notation_floating_point_number": 9.8e1,
     }
 
     d0_begin: dict = copy.deepcopy(source_dict)
@@ -280,20 +281,19 @@ def test_filter_properties_dict():
         # noinspection PyUnusedLocal
         d0_end: dict = filter_properties_dict(
             properties=d0_begin,
-            keep_fields=["c"],
-            delete_fields=["a", "e"],
+            keep_fields=["string"],
+            delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+            clean_falsy=True,
         )
-    d0_end: dict = filter_properties_dict(
-        properties=d0_begin,
-    )
+    d0_end: dict = filter_properties_dict(properties=d0_begin, clean_falsy=True)
     d0_end_expected = copy.deepcopy(d0_begin)
-    d0_end_expected.pop("b")
+    d0_end_expected.pop("null")
     assert d0_end == d0_end_expected
 
     d1_begin: dict = copy.deepcopy(source_dict)
     d1_end: dict = filter_properties_dict(
         properties=d1_begin,
-        clean_empty=False,
+        clean_nulls=False,
     )
     d1_end_expected = copy.deepcopy(d1_begin)
     assert d1_end == d1_end_expected
@@ -301,33 +301,66 @@ def test_filter_properties_dict():
     d2_begin: dict = copy.deepcopy(source_dict)
     d2_end: dict = filter_properties_dict(
         properties=d2_begin,
-        keep_fields=["b"],
+        clean_nulls=True,
+        clean_falsy=False,
     )
-    d2_end_expected = {"b": None}
+    d2_end_expected = copy.deepcopy(d2_begin)
+    d2_end_expected.pop("null")
     assert d2_end == d2_end_expected
 
     d3_begin: dict = copy.deepcopy(source_dict)
     d3_end: dict = filter_properties_dict(
         properties=d3_begin,
-        keep_fields=["a", "e"],
+        keep_fields=["null"],
+        clean_falsy=True,
     )
-    d3_end_expected = {"a": 0, "e": 9.8e1}
+    d3_end_expected = {"null": None}
     assert d3_end == d3_end_expected
 
     d4_begin: dict = copy.deepcopy(source_dict)
     d4_end: dict = filter_properties_dict(
         properties=d4_begin,
-        delete_fields=["a", "e"],
+        clean_falsy=True,
+        keep_falsy_numerics=False,
     )
-    d4_end_expected = {"c": "xyz_0", "d": 1}
+    d4_end_expected = copy.deepcopy(d4_begin)
+    d4_end_expected.pop("integer_zero")
+    d4_end_expected.pop("null")
     assert d4_end == d4_end_expected
 
     d5_begin: dict = copy.deepcopy(source_dict)
-    filter_properties_dict(
+    d5_end: dict = filter_properties_dict(
         properties=d5_begin,
-        delete_fields=["a", "e"],
+        keep_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        clean_falsy=True,
+    )
+    d5_end_expected = {
+        "integer_zero": 0,
+        "scientific_notation_floating_point_number": 9.8e1,
+    }
+    assert d5_end == d5_end_expected
+
+    d6_begin: dict = copy.deepcopy(source_dict)
+    d6_end: dict = filter_properties_dict(
+        properties=d6_begin,
+        delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        clean_falsy=True,
+    )
+    d6_end_expected = {"string": "xyz_0", "integer_one": 1}
+    assert d6_end == d6_end_expected
+
+    d7_begin: dict = copy.deepcopy(source_dict)
+    filter_properties_dict(
+        properties=d7_begin,
+        delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        clean_falsy=True,
         inplace=True,
     )
-    d5_end = copy.deepcopy(d5_begin)
-    d5_end_expected = {"c": "xyz_0", "d": 1}
-    assert d5_end == d5_end_expected
+    d7_end = copy.deepcopy(d7_begin)
+    d7_end_expected = {"string": "xyz_0", "integer_one": 1}
+    assert d7_end == d7_end_expected
+
+
+def test_hyphen():
+    input = "suite_validation_result"
+    assert hyphen(input) == "suite-validation-result"

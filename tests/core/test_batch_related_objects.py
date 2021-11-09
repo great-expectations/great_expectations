@@ -1,3 +1,6 @@
+import copy
+import datetime
+
 import pandas as pd
 import pytest
 
@@ -7,7 +10,8 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchRequest,
     BatchSpec,
-    PartitionDefinition,
+    IDDict,
+    RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
@@ -15,11 +19,11 @@ from great_expectations.exceptions import InvalidBatchSpecError
 
 def test_batch_definition_id():
     # noinspection PyUnusedLocal,PyPep8Naming
-    A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
     print(A.id)
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    B = BatchDefinition("B", "b", "bbb", PartitionDefinition({"id": "B"}))
+    B = BatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
     print(B.id)
 
     assert A.id != B.id
@@ -30,22 +34,22 @@ def test_batch_definition_instantiation():
         # noinspection PyTypeChecker,PyUnusedLocal,PyPep8Naming
         A = BatchDefinition("A", "a", "aaa", {"id": "A"})
 
-    A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     print(A.id)
 
 
 def test_batch_definition_equality():
     # noinspection PyUnusedLocal,PyPep8Naming
-    A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    B = BatchDefinition("B", "b", "bbb", PartitionDefinition({"id": "B"}))
+    B = BatchDefinition("B", "b", "bbb", batch_identifiers=IDDict({"id": "B"}))
 
     assert A != B
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    A2 = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A2 = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
 
     assert A == A2
 
@@ -62,7 +66,7 @@ def test_batch__str__method():
             datasource_name="my_datasource",
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
-            partition_definition=PartitionDefinition({}),
+            batch_identifiers=IDDict({}),
         ),
         batch_spec=BatchSpec(path="/some/path/some.file"),
         batch_markers=BatchMarkers(ge_load_time="FAKE_LOAD_TIME"),
@@ -76,14 +80,13 @@ def test_batch__str__method():
   "batch_request": {
     "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
-    "data_asset_name": "my_data_asset_name",
-    "partition_request": null
+    "data_asset_name": "my_data_asset_name"
   },
   "batch_definition": {
     "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
     "data_asset_name": "my_data_asset_name",
-    "partition_definition": {}
+    "batch_identifiers": {}
   },
   "batch_spec": "{'path': '/some/path/some.file'}",
   "batch_markers": "{'ge_load_time': 'FAKE_LOAD_TIME'}"
@@ -96,7 +99,7 @@ def test_batch_request_instantiation():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_request={"id": "A"},
+        data_connector_query={"id": "A"},
     )
 
     BatchRequest("A", "a", "aaa", {"id": "A"})
@@ -106,7 +109,7 @@ def test_batch_request_instantiation():
     #         "A",
     #         "a",
     #         "aaa",
-    #         PartitionDefinition({
+    #         IDDict({
     #             "id": "A"
     #         })
     #     )
@@ -116,22 +119,18 @@ def test_batch_request_instantiation():
         BatchRequest(
             data_connector_name="a",
             data_asset_name="aaa",
-            partition_request={"id": "A"},
+            data_connector_query={"id": "A"},
         )
 
     # No data_source_name and data_connector_name specified
     with pytest.raises(TypeError):
-        BatchRequest(data_asset_name="aaa", partition_request={"id": "A"})
+        BatchRequest(data_asset_name="aaa", data_connector_query={"id": "A"})
 
     # No data_source_name and data_connector_name and data_asset_name specified
     with pytest.raises(TypeError):
-        BatchRequest(partition_request={"id": "A"})
+        BatchRequest(data_connector_query={"id": "A"})
 
-    BatchRequest(
-        datasource_name="A",
-        data_connector_name="a",
-        data_asset_name="aaa",
-    )
+    BatchRequest(datasource_name="A", data_connector_name="a", data_asset_name="aaa")
 
 
 def test_RuntimeDataBatchSpec():
@@ -149,3 +148,33 @@ def test_RuntimeDataBatchSpec():
             "batch_data": "we don't check types yet",
         }
     )
+
+
+def test_runtime_batch_request_deepcopy():
+    """
+    Python's built-in id() function returns the memory location of a given object.
+    It is used here to ascertain "sameness" and the lack thereof
+    of different objects.
+    """
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    id_1 = id(df)
+    batch_request = RuntimeBatchRequest(
+        datasource_name="context_weeks_datasource",
+        data_connector_name="context_weeks_data_connector",
+        data_asset_name="context_weeks_processed",  # this can be anything that identifies this data_asset for you
+        runtime_parameters={"batch_data": df},  # insert our loaded dataframe
+        batch_identifiers={
+            "test_dataframe": datetime.date.today().strftime("%Y-%m-%d")
+        },
+    )
+    cp = copy.deepcopy(batch_request)
+    id_2 = id(cp.runtime_parameters["batch_data"])
+    id_3 = id(batch_request.runtime_parameters["batch_data"])
+
+    assert id_1 == id_2
+    assert id_2 == id_3
+
+    id_4 = id(batch_request.batch_identifiers)
+    id_5 = id(cp.batch_identifiers)
+
+    assert id_4 != id_5

@@ -163,6 +163,7 @@ legacy_method_parameters = {
         "column_B",
         "value_pairs_set",
         "ignore_row_if",
+        "mostly",
         "result_format",
         "include_config",
         "catch_exceptions",
@@ -478,8 +479,11 @@ legacy_method_parameters = {
     ),
     "expect_multicolumn_sum_to_equal": (
         "column_list",
+        "ignore_row_if",
         "sum_total",
         "result_format",
+        "row_condition",
+        "condition_parser",
         "include_config",
         "catch_exceptions",
         "meta",
@@ -577,7 +581,7 @@ def render_evaluation_parameter_string(render_func):
                     for param in current_expectation_params:
                         # "key in param" condition allows for eval param values to be rendered if arithmetic is present
                         if key == param or key in param:
-                            app_params = dict()
+                            app_params = {}
                             app_params["eval_param"] = key
                             app_params["eval_param_value"] = val
                             to_append = RenderedStringTemplateContent(
@@ -599,3 +603,23 @@ def render_evaluation_parameter_string(render_func):
         return rendered_string_template
 
     return inner_func
+
+
+def add_values_with_json_schema_from_list_in_params(
+    params: dict,
+    params_with_json_schema: dict,
+    param_key_with_list: str,
+    list_values_type: str = "string",
+) -> dict:
+    """
+    Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
+    convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
+    """
+    target_list = params.get(param_key_with_list)
+    if target_list is not None and len(target_list) > 0:
+        for i, v in enumerate(target_list):
+            params_with_json_schema["v__" + str(i)] = {
+                "schema": {"type": list_values_type},
+                "value": v,
+            }
+    return params_with_json_schema

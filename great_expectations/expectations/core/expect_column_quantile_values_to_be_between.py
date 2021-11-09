@@ -9,8 +9,10 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
+    RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
+    renderedAtomicValueSchema,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
@@ -132,7 +134,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     )
     default_kwarg_values = {
         "row_condition": None,
-        "allow_relative_eror": None,
+        "allow_relative_error": None,
         "condition_parser": None,
         "quantile_ranges": None,
         "result_format": "BASIC",
@@ -166,9 +168,160 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
-                "quntile_values and quantiles must have the same number of elements"
+                "quantile_values and quantiles must have the same number of elements"
             )
         return True
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration["kwargs"],
+            ["column", "quantile_ranges", "row_condition", "condition_parser"],
+        )
+
+        header_params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        header_template_str = "quantiles must be within the following value ranges."
+
+        if include_column_name:
+            header_template_str = "$column " + header_template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            header_template_str = (
+                conditional_template_str
+                + ", then "
+                + header_template_str[0].lower()
+                + header_template_str[1:]
+            )
+            header_params_with_json_schema.update(conditional_params)
+
+        quantile_ranges = (
+            params.get("quantile_ranges") if params.get("quantile_ranges") else {}
+        )
+        quantiles = (
+            quantile_ranges.get("quantiles") if quantile_ranges.get("quantiles") else []
+        )
+        value_ranges = (
+            quantile_ranges.get("value_ranges")
+            if quantile_ranges.get("value_ranges")
+            else []
+        )
+
+        table_header_row = [
+            {"schema": {"type": "string"}, "value": "Quantile"},
+            {"schema": {"type": "string"}, "value": "Min Value"},
+            {"schema": {"type": "string"}, "value": "Max Value"},
+        ]
+        table_rows = []
+
+        quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
+
+        for quantile, value_range in zip(quantiles, value_ranges):
+            quantile_string = quantile_strings.get(quantile, f"{quantile:3.2f}")
+            table_rows.append(
+                [
+                    {
+                        "value": quantile_string,
+                        "schema": {"type": "string"},
+                    },
+                    {
+                        "value": value_range[0]
+                        if value_range[0] is not None
+                        else "Any",
+                        "schema": {
+                            "type": "number" if value_range[0] is not None else "string"
+                        },
+                    },
+                    {
+                        "value": value_range[1]
+                        if value_range[1] is not None
+                        else "Any",
+                        "schema": {
+                            "type": "number" if value_range[1] is not None else "string"
+                        },
+                    },
+                ]
+            )
+
+        return (
+            header_template_str,
+            header_params_with_json_schema,
+            styling,
+            table_header_row,
+            table_rows,
+        )
+
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    @render_evaluation_parameter_string
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        (
+            header_template_str,
+            header_params_with_json_schema,
+            _,
+            table_header_row,
+            table_rows,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "header": {
+                    "schema": {"type": "StringValueType"},
+                    "value": {
+                        "template": header_template_str,
+                        "params": header_params_with_json_schema,
+                    },
+                },
+                "header_row": table_header_row,
+                "table": table_rows,
+                "schema": {"type": "TableType"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary", value=value_obj, value_type="TableType"
+        )
+        return rendered
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -179,7 +332,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -223,7 +376,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
 
         for quantile, value_range in zip(quantiles, value_ranges):
-            quantile_string = quantile_strings.get(quantile, "{:3.2f}".format(quantile))
+            quantile_string = quantile_strings.get(quantile, f"{quantile:3.2f}")
             table_rows.append(
                 [
                     quantile_string,
@@ -262,7 +415,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         if result.result is None or result.result.get("observed_value") is None:
             return "--"
@@ -279,7 +432,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             quantile_string = quantile_strings.get(quantile)
             table_rows.append(
                 [
-                    quantile_string if quantile_string else "{:3.2f}".format(quantile),
+                    quantile_string if quantile_string else f"{quantile:3.2f}",
                     str(value_ranges[idx]),
                 ]
             )
@@ -298,6 +451,102 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         )
 
     @classmethod
+    def _atomic_diagnostic_observed_value_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        template_string = None
+        params_with_json_schema = None
+        table_header_row = None
+        table_rows = None
+
+        if result.result is None or result.result.get("observed_value") is None:
+            template_string = "--"
+            params_with_json_schema = {}
+            return (
+                template_string,
+                params_with_json_schema,
+                table_header_row,
+                table_rows,
+            )
+
+        quantiles = result.result.get("observed_value", {}).get("quantiles", [])
+        value_ranges = result.result.get("observed_value", {}).get("values", [])
+
+        table_header_row = [
+            {"schema": {"type": "string"}, "value": "Quantile"},
+            {"schema": {"type": "string"}, "value": "Value"},
+        ]
+        table_rows = []
+
+        quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
+
+        for idx, quantile in enumerate(quantiles):
+            quantile_string = quantile_strings.get(quantile)
+            table_rows.append(
+                [
+                    {
+                        "value": quantile_string
+                        if quantile_string
+                        else f"{quantile:3.2f}",
+                        "schema": {"type": "string"},
+                    },
+                    {"value": value_ranges[idx], "schema": {"type": "number"}},
+                ]
+            )
+
+        return template_string, params_with_json_schema, table_header_row, table_rows
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        (
+            template_string,
+            params_with_json_schema,
+            table_header_row,
+            table_rows,
+        ) = cls._atomic_diagnostic_observed_value_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+        if template_string is not None:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "template": template_string,
+                    "params": {},
+                    "schema": {"type": "StringValueType"},
+                }
+            )
+            return RenderedAtomicContent(
+                name="atomic.diagnostic.observed_value",
+                value=value_obj,
+                value_type="StringValueType",
+            )
+        else:
+            value_obj = renderedAtomicValueSchema.load(
+                {
+                    "header_row": table_header_row,
+                    "table": table_rows,
+                    "schema": {"type": "TableType"},
+                }
+            )
+            return RenderedAtomicContent(
+                name="atomic.diagnostic.observed_value",
+                value=value_obj,
+                value_type="TableType",
+            )
+
+    @classmethod
     @renderer(renderer_type="renderer.descriptive.quantile_table")
     def _descriptive_quantile_table_renderer(
         cls,
@@ -305,7 +554,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         assert result, "Must pass in result."
         table_rows = []
@@ -323,7 +572,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         "string_template": {
                             "template": quantile_string
                             if quantile_string
-                            else "{:3.2f}".format(quantile),
+                            else f"{quantile:3.2f}",
                             "tooltip": {
                                 "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
                                 if quantile == 0.50

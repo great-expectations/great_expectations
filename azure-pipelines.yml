@@ -1,6 +1,9 @@
 trigger:
-  - develop
-  - main
+  branches:
+    include:
+    - pre_pr-*
+    - develop
+    - main
 
 resources:
   containers:
@@ -19,7 +22,7 @@ resources:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: test_ci
   - container: mssql
-    image: microsoft/mssql-server-linux
+    image: mcr.microsoft.com/mssql/server:2019-latest
     env:
       ACCEPT_EULA: Y
       MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
@@ -53,6 +56,9 @@ stages:
 
                 [DocsChanged]
                 docs/**
+                tests/integration/docusaurus/**
+                tests/integration/fixtures/**
+                tests/test_sets/**
 
                 [GEChanged]
                 great_expectations/**
@@ -92,48 +98,64 @@ stages:
       - job: compatibility_matrix
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
             Python36-Pandas023:
               python.version: '3.6'
+              numpy.version: '1.14.1'
               pandas.version: '0.23.4'
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
+              numpy.version: '1.14.1'
               pandas.version: '0.25.3'
+              # numpy 1.20 and pandas 0.25.3 do not coexist happily
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
+              numpy.version: 'latest'
               pandas.version: 'latest'
+              scipy.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
 
-        # TODO: refactor steps into a task
         steps:
           - task: UsePythonVersion@0
             inputs:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # --upgrade pip==20.2.4
             displayName: 'Update pip'
 
-          - bash: pip install  pandas
+          - bash: pip install numpy
+            condition: eq(variables['scipy.version'], 'numpy')
+            displayName: 'Install numpy latest'
+
+          - bash: pip install pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
 
-          - bash: pip install  pandas==$(pandas.version)
+          - bash: pip install scipy
+            condition: eq(variables['scipy.version'], 'latest')
+            displayName: 'Install scipy latest'
+
+          - bash: pip install pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              pip install  $(GE_pytest_pip_opts)
+              pip install $(GE_pytest_pip_opts)
               pip install  --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install  pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -150,11 +172,11 @@ stages:
 
       - job: comprehensive
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
         services:
           postgres: postgres
 
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: ''
 
         strategy:
@@ -162,9 +184,19 @@ stages:
             Python36:
               python.version: '3.6'
               pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python38:
+              python.version: '3.8'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python39:
+              python.version: '3.9'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -172,7 +204,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
@@ -180,23 +212,24 @@ stages:
               pip install pypandoc
             displayName: 'Install pandoc'
 
-          - bash: pip install  pandas
+          - bash: pip install pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
 
-          - bash: pip install  pandas==$(pandas.version)
+          - bash: pip install pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
               pip install --requirement requirements.txt
+              echo "about to run pip install $(GE_pytest_pip_opts)"
               pip install $(GE_pytest_pip_opts)
               pip install  .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -232,9 +265,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
-                pip install --requirement requirements.txt
-                pip install .
+              pip install --requirement requirements-dev-base.txt
+              pip install --requirement requirements.txt
+              pip install .
             displayName: 'Install dependencies'
 
           - script: |
@@ -251,6 +284,7 @@ stages:
     jobs:
       - job: mysql
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
         services:
           mysql: mysql
 
@@ -263,7 +297,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
@@ -280,19 +314,20 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: mssql
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
         services:
           mssql: mssql
 
@@ -305,35 +340,37 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
-  - stage: deploy_gallery
-    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
+  - stage: cli_integration
+    dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [ required, lint, db_integration, usage_stats_integration ]
 
     jobs:
-      - job: build_gallery
+      - job: test_cli
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
+        services:
+          postgres: postgres
+
         variables:
-          python.version: '3.7'
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
-          GE_pytest_opts: ''
+          python.version: '3.8'
 
         steps:
           - task: UsePythonVersion@0
@@ -341,7 +378,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
@@ -350,8 +387,46 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-azurepipelines
+              pytest --aws-integration -v tests/cli
+            displayName: 'pytest'
+
+  - stage: deploy_gallery
+    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
+    pool:
+      vmImage: 'ubuntu-latest'
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+
+    jobs:
+      - job: build_gallery
+        variables:
+          python.version: '3.7'
+          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
+          - script: |
               pip install $(GE_pytest_pip_opts)
+              pip install --requirement requirements.txt
               pip install  .
             displayName: 'Install dependencies'
 
@@ -380,7 +455,7 @@ stages:
     condition: and(succeeded(), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [required, lint, db_integration, usage_stats_integration]
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: deploy
@@ -393,7 +468,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |

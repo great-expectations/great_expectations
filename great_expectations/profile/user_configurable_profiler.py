@@ -1,5 +1,5 @@
-import datetime
 import logging
+import math
 
 import numpy as np
 from dateutil.parser import parse
@@ -21,7 +21,7 @@ from great_expectations.profile.base import (
     profiler_data_types_with_mapping,
     profiler_semantic_types,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -68,9 +68,10 @@ class UserConfigurableProfiler:
         value_set_threshold: str = "MANY",
     ):
         """
-                The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
-                instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
-                instantiated, if config items change, a new profiler will be needed.
+        The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
+        instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
+        instantiated, if config items change, a new profiler will be needed.
+
         Write an entry on how to use the profiler for the GE docs site
                 Args:
                     profile_dataset: A Great Expectations Dataset or Validator object
@@ -113,11 +114,11 @@ class UserConfigurableProfiler:
                 batches=[self.profile_dataset],
             )
             self.all_table_columns = self.profile_dataset.get_metric(
-                MetricConfiguration("table.columns", dict())
+                MetricConfiguration("table.columns", {})
             )
         elif isinstance(self.profile_dataset, Validator):
             self.all_table_columns = self.profile_dataset.get_metric(
-                MetricConfiguration("table.columns", dict())
+                MetricConfiguration("table.columns", {})
             )
         else:
             self.all_table_columns = self.profile_dataset.get_table_columns()
@@ -201,6 +202,7 @@ class UserConfigurableProfiler:
 
         """
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+            # noinspection PyProtectedMember
             suite_name = self.profile_dataset._expectation_suite.expectation_suite_name
             self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
 
@@ -555,7 +557,7 @@ class UserConfigurableProfiler:
             column_name: The name of the column
 
         Returns:
-            A list of semantic_types for a given colum
+            A list of semantic_types for a given column
         """
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
@@ -845,22 +847,21 @@ class UserConfigurableProfiler:
                         profile_dataset.execution_engine.engine.dialect
                     )
 
-            quantile_result = (
-                profile_dataset.expect_column_quantile_values_to_be_between(
-                    column,
-                    quantile_ranges={
-                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                        "value_ranges": [
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                        ],
-                    },
-                    allow_relative_error=allow_relative_error,
-                    result_format="SUMMARY",
-                )
+            quantile_result = profile_dataset.expect_column_quantile_values_to_be_between(
+                column,
+                quantile_ranges={
+                    "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                    "value_ranges": [
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                    ],
+                },
+                # TODO: <Alex>ALEX -- Tal, could you please fix the issue in the next line?</Alex>
+                allow_relative_error=allow_relative_error,
+                result_format="SUMMARY",
             )
             if quantile_result.exception_info and (
                 quantile_result.exception_info["exception_traceback"]
@@ -910,16 +911,7 @@ class UserConfigurableProfiler:
             len(column_list) > 1
             and "expect_compound_columns_to_be_unique" not in self.excluded_expectations
         ):
-            if isinstance(profile_dataset, Validator) and not hasattr(
-                profile_dataset, "expect_compound_columns_to_be_unique"
-            ):
-                # TODO: Remove this upon implementation of this expectation for V3
-                logger.warning(
-                    "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
-                )
-                return profile_dataset
-            else:
-                profile_dataset.expect_compound_columns_to_be_unique(column_list)
+            profile_dataset.expect_compound_columns_to_be_unique(column_list)
         elif len(column_list) < 1:
             raise ValueError(
                 "When specifying a primary or compound key, column_list must not be empty"
@@ -1039,7 +1031,10 @@ class UserConfigurableProfiler:
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
                 if unexpected_percent >= 50 and not self.not_null_only:
-                    potential_mostly_value = unexpected_percent / 100.0
+                    potential_mostly_value = math.floor(unexpected_percent) / 100.0
+                    # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
+                    # value of 0 when we round
+                    safe_mostly_value = max(0.001, potential_mostly_value)
                     profile_dataset._expectation_suite.remove_expectation(
                         ExpectationConfiguration(
                             expectation_type="expect_column_values_to_not_be_null",
@@ -1052,11 +1047,16 @@ class UserConfigurableProfiler:
                         not in self.excluded_expectations
                     ):
                         profile_dataset.expect_column_values_to_be_null(
-                            column, mostly=potential_mostly_value
+                            column, mostly=safe_mostly_value
                         )
                 else:
-                    potential_mostly_value = (100.0 - unexpected_percent) / 100.0
-                    safe_mostly_value = round(max(0.001, potential_mostly_value), 3)
+                    potential_mostly_value = (
+                        100.0 - math.ceil(unexpected_percent)
+                    ) / 100.0
+
+                    # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
+                    # value of 0 when we round
+                    safe_mostly_value = max(0.001, potential_mostly_value)
                     profile_dataset.expect_column_values_to_not_be_null(
                         column, mostly=safe_mostly_value
                     )
@@ -1075,6 +1075,7 @@ class UserConfigurableProfiler:
                     column, min_value=pct_unique, max_value=pct_unique
                 )
             else:
+                # noinspection PyProtectedMember
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",

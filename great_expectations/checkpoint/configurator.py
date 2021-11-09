@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Dict, List, Optional, Union
 
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 
@@ -125,18 +126,22 @@ class SimpleCheckpointConfigurator:
                 "name": self.name,
                 "class_name": "Checkpoint",
                 "action_list": action_list,
+                "ge_cloud_id": self.other_kwargs.pop("ge_cloud_id", None),
             }
         )
         if self.other_kwargs:
-            checkpoint_config.update(
-                other_config=CheckpointConfig(
-                    **{
-                        "config_version": self.other_kwargs.pop("config_version", 1.0)
-                        or 1.0,
-                        **self.other_kwargs,
-                    }
-                )
+            other_config = CheckpointConfig(
+                **{
+                    "config_version": self.other_kwargs.pop("config_version", 1.0)
+                    or 1.0,
+                    **self.other_kwargs,
+                }
             )
+            # Necessary when using RuntimeDataConnector with SimpleCheckpoint
+            if isinstance(other_config.batch_request, BatchRequest):
+                other_config.batch_request = other_config.batch_request.to_json_dict()
+            checkpoint_config.update(other_config=other_config)
+
         logger.debug(
             f"SimpleCheckpointConfigurator built this CheckpointConfig:"
             f" {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"

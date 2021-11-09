@@ -27,7 +27,7 @@ def main():
     # convert to numpy matrix
     matrix = np.array(data)
 
-    # remove colums that have been tagged less than 5 times
+    # remove columns that have been tagged less than 5 times
     columns_to_remove = []
     for col in range(np.shape(matrix)[1]):
         if sum(matrix[:, col]) <= 5:
@@ -46,7 +46,7 @@ def main():
         # distance between centroid 0 and feature vector
         distance = math.sqrt(sum((v - output[0][0]) ** 2))
 
-        # group is the centroid it is closest to so far, set initally to centroid 0
+        # group is the centroid it is closest to so far, set initially to centroid 0
         group = 0
         closest_match = (distance, group)
 

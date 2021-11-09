@@ -6,7 +6,6 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -20,14 +19,13 @@ except ImportError:
 yaml = YAML()
 
 
-def test_basic_instantiation(sa):
+def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector(sa):
     random.seed(0)
 
     db_file = file_relative_path(
         __file__,
         os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
     )
-
     # This is a basic integration test demonstrating an Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
     config = yaml.load(
@@ -42,8 +40,7 @@ data_connectors:
     my_sqlite_db:
         class_name: ConfiguredAssetSqlDataConnector
 
-        data_assets:
-
+        assets:
             table_partitioned_by_date_column__A:
                 splitter_method: _split_on_converted_datetime
                 splitter_kwargs:
@@ -52,13 +49,13 @@ data_connectors:
     """,
     )
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_source = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource"},
         runtime_environment={"name": "my_sql_datasource"},
     )
 
-    report = my_data_connector.self_check()
+    report = my_data_source.self_check()
     # print(json.dumps(report, indent=4))
 
     report["execution_engine"].pop("connection_string")
@@ -86,18 +83,92 @@ data_connectors:
                 },
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
-                "example_data_reference": {
-                    "batch_spec": {
-                        "table_name": "table_partitioned_by_date_column__A",
-                        "partition_definition": {"date": "2020-01"},
-                        "splitter_method": "_split_on_converted_datetime",
-                        "splitter_kwargs": {
-                            "column_name": "date",
-                            "date_format_string": "%Y-%W",
-                        },
+                # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+                # "example_data_reference": {
+                #     "batch_spec": {
+                #         "table_name": "table_partitioned_by_date_column__A",
+                #         "data_asset_name": "table_partitioned_by_date_column__A",
+                #         "batch_identifiers": {"date": "2020-01"},
+                #         "splitter_method": "_split_on_converted_datetime",
+                #         "splitter_kwargs": {
+                #             "column_name": "date",
+                #             "date_format_string": "%Y-%W",
+                #         },
+                #     },
+                #     "n_rows": 24,
+                # },
+            },
+        },
+    }
+
+
+def test_basic_instantiation_with_InferredAssetSqlDataConnector(sa):
+    random.seed(0)
+
+    db_file = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+    # This is a basic integration test demonstrating an Datasource containing a SQL data_connector
+    # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
+
+    config = yaml.load(
+        f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: SqlAlchemyExecutionEngine
+    connection_string: sqlite:///{db_file}
+
+data_connectors:
+    my_sqlite_db:
+        class_name: InferredAssetSqlDataConnector
+        name: whole_table
+        data_asset_name_prefix: prefix__
+        data_asset_name_suffix: __xiffus
+    """,
+    )
+
+    my_data_source = instantiate_class_from_config(
+        config,
+        config_defaults={"module_name": "great_expectations.datasource"},
+        runtime_environment={"name": "my_sql_datasource"},
+    )
+    report = my_data_source.self_check()
+
+    connection_string_to_test = f"""sqlite:///{db_file}"""
+    assert report == {
+        "execution_engine": {
+            "connection_string": connection_string_to_test,
+            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
+            "class_name": "SqlAlchemyExecutionEngine",
+        },
+        "data_connectors": {
+            "count": 1,
+            "my_sqlite_db": {
+                "class_name": "InferredAssetSqlDataConnector",
+                "data_asset_count": 21,
+                "example_data_asset_names": [
+                    "prefix__table_containing_id_spacers_for_D__xiffus",
+                    "prefix__table_full__I__xiffus",
+                    "prefix__table_partitioned_by_date_column__A__xiffus",
+                ],
+                "data_assets": {
+                    "prefix__table_containing_id_spacers_for_D__xiffus": {
+                        "batch_definition_count": 1,
+                        "example_data_references": [{}],
                     },
-                    "n_rows": 24,
+                    "prefix__table_full__I__xiffus": {
+                        "batch_definition_count": 1,
+                        "example_data_references": [{}],
+                    },
+                    "prefix__table_partitioned_by_date_column__A__xiffus": {
+                        "batch_definition_count": 1,
+                        "example_data_references": [{}],
+                    },
                 },
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
             },
         },
     }
@@ -113,7 +184,7 @@ def test_SimpleSqlalchemyDatasource(empty_data_context):
     )
 
     # Absolutely minimal starting config
-    my_sql_datasource = context.test_yaml_config(
+    datasource_with_minimum_config = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -123,9 +194,13 @@ introspection:
     whole_table: {}
 """
     )
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
+    print(
+        json.dumps(
+            datasource_with_minimum_config.get_available_data_asset_names(), indent=4
+        )
+    )
 
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    assert datasource_with_minimum_config.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D",
             "table_full__I",
@@ -151,10 +226,45 @@ introspection:
         ]
     }
 
+    assert datasource_with_minimum_config.get_available_data_asset_names_and_types() == {
+        "whole_table": [
+            ("table_containing_id_spacers_for_D", "table"),
+            ("table_full__I", "table"),
+            ("table_partitioned_by_date_column__A", "table"),
+            ("table_partitioned_by_foreign_key__F", "table"),
+            ("table_partitioned_by_incrementing_batch_id__E", "table"),
+            (
+                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "table",
+            ),
+            ("table_partitioned_by_multiple_columns__G", "table"),
+            (
+                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "table",
+            ),
+            ("table_partitioned_by_timestamp_column__B", "table"),
+            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+            ("table_with_fk_reference_from_F", "table"),
+            ("view_by_date_column__A", "view"),
+            ("view_by_incrementing_batch_id__E", "view"),
+            (
+                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "view",
+            ),
+            ("view_by_multiple_columns__G", "view"),
+            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+            ("view_by_timestamp_column__B", "view"),
+            ("view_containing_id_spacers_for_D", "view"),
+            ("view_partitioned_by_foreign_key__F", "view"),
+            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+            ("view_with_fk_reference_from_F", "view"),
+        ]
+    }
+
     # Here we should test getting a batch
 
     # Very thin starting config
-    my_sql_datasource = context.test_yaml_config(
+    datasource_with_name_suffix = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -167,7 +277,7 @@ introspection:
 """
     )
 
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    assert datasource_with_name_suffix.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D__whole_table",
             "table_full__I__whole_table",
@@ -193,10 +303,45 @@ introspection:
         ]
     }
 
+    assert datasource_with_name_suffix.get_available_data_asset_names_and_types() == {
+        "whole_table": [
+            ("table_containing_id_spacers_for_D", "table"),
+            ("table_full__I", "table"),
+            ("table_partitioned_by_date_column__A", "table"),
+            ("table_partitioned_by_foreign_key__F", "table"),
+            ("table_partitioned_by_incrementing_batch_id__E", "table"),
+            (
+                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "table",
+            ),
+            ("table_partitioned_by_multiple_columns__G", "table"),
+            (
+                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "table",
+            ),
+            ("table_partitioned_by_timestamp_column__B", "table"),
+            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+            ("table_with_fk_reference_from_F", "table"),
+            ("view_by_date_column__A", "view"),
+            ("view_by_incrementing_batch_id__E", "view"),
+            (
+                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "view",
+            ),
+            ("view_by_multiple_columns__G", "view"),
+            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+            ("view_by_timestamp_column__B", "view"),
+            ("view_containing_id_spacers_for_D", "view"),
+            ("view_partitioned_by_foreign_key__F", "view"),
+            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+            ("view_with_fk_reference_from_F", "view"),
+        ]
+    }
+
     # Here we should test getting a batch
 
     # Add some manually configured tables...
-    my_sql_datasource = context.test_yaml_config(
+    datasource_manually_configured = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -249,8 +394,12 @@ tables:
 """
     )
 
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    print(
+        json.dumps(
+            datasource_manually_configured.get_available_data_asset_names(), indent=4
+        )
+    )
+    assert datasource_manually_configured.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D",
             "table_full__I",
@@ -282,10 +431,15 @@ tables:
         ],
     }
 
+    # can't use get_available_data_asset_names_and_types here because it's only implemented
+    # on InferredAssetSqlDataConnector, not ConfiguredAssetSqlDataConnector
+    with pytest.raises(NotImplementedError):
+        datasource_manually_configured.get_available_data_asset_names_and_types()
+
     # Here we should test getting another batch
 
     # Drop the introspection...
-    my_sql_datasource = context.test_yaml_config(
+    datasource_without_introspection = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -312,8 +466,12 @@ tables:
                     divisor: 12
 """
     )
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    print(
+        json.dumps(
+            datasource_without_introspection.get_available_data_asset_names(), indent=4
+        )
+    )
+    assert datasource_without_introspection.get_available_data_asset_names() == {
         "whole_table": [
             "table_partitioned_by_date_column__A",
         ],
@@ -654,182 +812,6 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
             "type": "view",
         },
     ]
-
-
-# Note: Abe 2020111: this test belongs with the data_connector tests, not here.
-def test_basic_instantiation_of_InferredAssetSqlDataConnector(
-    test_cases_for_sql_data_connector_sqlite_execution_engine,
-):
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "whole_table",
-            "data_asset_name_prefix": "prexif__",
-            "data_asset_name_suffix": "__xiffus",
-        },
-        runtime_environment={
-            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    report_object = my_data_connector.self_check()
-    # print(json.dumps(report_object, indent=4))
-    assert report_object == {
-        "class_name": "InferredAssetSqlDataConnector",
-        "data_asset_count": 21,
-        "example_data_asset_names": [
-            "prexif__table_containing_id_spacers_for_D__xiffus",
-            "prexif__table_full__I__xiffus",
-            "prexif__table_partitioned_by_date_column__A__xiffus",
-        ],
-        "data_assets": {
-            "prexif__table_containing_id_spacers_for_D__xiffus": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-            "prexif__table_full__I__xiffus": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-            "prexif__table_partitioned_by_date_column__A__xiffus": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-        "example_data_reference": {
-            "batch_spec": {
-                "schema_name": "main",
-                "table_name": "table_containing_id_spacers_for_D",
-                "partition_definition": {},
-            },
-            "n_rows": 30,
-        },
-    }
-
-    assert my_data_connector.get_available_data_asset_names() == [
-        "prexif__table_containing_id_spacers_for_D__xiffus",
-        "prexif__table_full__I__xiffus",
-        "prexif__table_partitioned_by_date_column__A__xiffus",
-        "prexif__table_partitioned_by_foreign_key__F__xiffus",
-        "prexif__table_partitioned_by_incrementing_batch_id__E__xiffus",
-        "prexif__table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__xiffus",
-        "prexif__table_partitioned_by_multiple_columns__G__xiffus",
-        "prexif__table_partitioned_by_regularly_spaced_incrementing_id_column__C__xiffus",
-        "prexif__table_partitioned_by_timestamp_column__B__xiffus",
-        "prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
-        "prexif__table_with_fk_reference_from_F__xiffus",
-        "prexif__view_by_date_column__A__xiffus",
-        "prexif__view_by_incrementing_batch_id__E__xiffus",
-        "prexif__view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__xiffus",
-        "prexif__view_by_multiple_columns__G__xiffus",
-        "prexif__view_by_regularly_spaced_incrementing_id_column__C__xiffus",
-        "prexif__view_by_timestamp_column__B__xiffus",
-        "prexif__view_containing_id_spacers_for_D__xiffus",
-        "prexif__view_partitioned_by_foreign_key__F__xiffus",
-        "prexif__view_that_should_be_partitioned_by_random_hash__H__xiffus",
-        "prexif__view_with_fk_reference_from_F__xiffus",
-    ]
-
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="whole_table",
-            data_asset_name="prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
-        )
-    )
-    assert len(batch_definition_list) == 1
-
-
-# Note: Abe 2020111: this test belongs with the data_connector tests, not here.
-def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
-    test_cases_for_sql_data_connector_sqlite_execution_engine,
-):
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "whole_table",
-            "data_asset_name_suffix": "__whole",
-            "include_schema_name": True,
-        },
-        runtime_environment={
-            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    report_object = my_data_connector.self_check()
-
-    assert report_object == {
-        "class_name": "InferredAssetSqlDataConnector",
-        "data_asset_count": 21,
-        "data_assets": {
-            "main.table_containing_id_spacers_for_D__whole": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-            "main.table_full__I__whole": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-            "main.table_partitioned_by_date_column__A__whole": {
-                "batch_definition_count": 1,
-                "example_data_references": [{}],
-            },
-        },
-        "example_data_asset_names": [
-            "main.table_containing_id_spacers_for_D__whole",
-            "main.table_full__I__whole",
-            "main.table_partitioned_by_date_column__A__whole",
-        ],
-        "example_data_reference": {
-            "batch_spec": {
-                "partition_definition": {},
-                "schema_name": "main",
-                "table_name": "table_containing_id_spacers_for_D",
-            },
-            "n_rows": 30,
-        },
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
-
-    assert my_data_connector.get_available_data_asset_names() == [
-        "main.table_containing_id_spacers_for_D__whole",
-        "main.table_full__I__whole",
-        "main.table_partitioned_by_date_column__A__whole",
-        "main.table_partitioned_by_foreign_key__F__whole",
-        "main.table_partitioned_by_incrementing_batch_id__E__whole",
-        "main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
-        "main.table_partitioned_by_multiple_columns__G__whole",
-        "main.table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole",
-        "main.table_partitioned_by_timestamp_column__B__whole",
-        "main.table_that_should_be_partitioned_by_random_hash__H__whole",
-        "main.table_with_fk_reference_from_F__whole",
-        "main.view_by_date_column__A__whole",
-        "main.view_by_incrementing_batch_id__E__whole",
-        "main.view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
-        "main.view_by_multiple_columns__G__whole",
-        "main.view_by_regularly_spaced_incrementing_id_column__C__whole",
-        "main.view_by_timestamp_column__B__whole",
-        "main.view_containing_id_spacers_for_D__whole",
-        "main.view_partitioned_by_foreign_key__F__whole",
-        "main.view_that_should_be_partitioned_by_random_hash__H__whole",
-        "main.view_with_fk_reference_from_F__whole",
-    ]
-
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="my_test_datasource",
-            data_connector_name="whole_table",
-            data_asset_name="main.table_that_should_be_partitioned_by_random_hash__H__whole",
-        )
-    )
-    assert len(batch_definition_list) == 1
 
 
 def test_skip_inapplicable_tables(empty_data_context):

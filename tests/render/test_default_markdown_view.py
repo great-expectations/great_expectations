@@ -217,7 +217,7 @@ Q3  | 117.62
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
-Run Time  | 2020-07-27T17:19:32.959193+00:00
+Run Time  | 2020-07-27T17:19:32Z
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |
@@ -283,7 +283,7 @@ Q3  | 117.62
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
-Run Time  | 2020-07-27T17:19:32.959193+00:00
+Run Time  | 2020-07-27T17:19:32Z
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |
@@ -389,7 +389,7 @@ Q3  | 117.62
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
-Run Time  | 2020-07-27T17:19:32.959193+00:00
+Run Time  | 2020-07-27T17:19:32Z
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |
@@ -455,7 +455,7 @@ Q3  | 117.62
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
-Run Time  | 2020-07-27T17:19:32.959193+00:00
+Run Time  | 2020-07-27T17:19:32Z
 ### Batch Markers
  |  |  |
  | ------------  | ------------ |
@@ -487,7 +487,7 @@ def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         md_str
-        == """
+        == r"""
    # Validation Results
 ## Overview
 ### Info
