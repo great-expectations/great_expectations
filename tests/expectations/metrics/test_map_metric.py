@@ -10,10 +10,15 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
-from great_expectations.expectations.metrics import ColumnMax, ColumnValuesNonNull
+from great_expectations.expectations.metrics import (
+    ColumnMax,
+    ColumnValuesNonNull,
+    CompoundColumnsUnique,
+    MetricProvider,
+)
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
+    MapMetricProvider,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -141,6 +146,16 @@ def test_get_map_metric_dependencies():
     metric = MetricConfiguration("foo.unexpected_index_list", {}, {})
     dependencies = mp.get_evaluation_dependencies(metric)
     assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+
+
+def test_is_sqlalchemy_metric_selectable():
+    assert MapMetricProvider.is_sqlalchemy_metric_selectable(
+        map_metric_provider=CompoundColumnsUnique
+    )
+
+    assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
+        map_metric_provider=ColumnValuesNonNull
+    )
 
 
 def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_rows):

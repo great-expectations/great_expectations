@@ -69,23 +69,37 @@ _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
 
 def nested_update(
-    d: Union[Iterable, dict], u: Union[Iterable, dict], dedup: bool = False
+    d: Union[Iterable, dict],
+    u: Union[Iterable, dict],
+    dedup: bool = False,
+    concat_lists: bool = True,
 ):
-    """update d with items from u, recursively and joining elements"""
+    """
+    Update d with items from u, recursively and joining elements. By default, list values are
+    concatenated without de-duplication. If concat_lists is set to False, lists in u (new dict)
+    will replace those in d (base dict).
+    """
     for k, v in u.items():
         if isinstance(v, Mapping):
             d[k] = nested_update(d.get(k, {}), v, dedup=dedup)
         elif isinstance(v, set) or (k in d and isinstance(d[k], set)):
             s1 = d.get(k, set())
             s2 = v or set()
-            d[k] = s1 | s2
+
+            if concat_lists:
+                d[k] = s1 | s2
+            else:
+                d[k] = s2
         elif isinstance(v, list) or (k in d and isinstance(d[k], list)):
             l1 = d.get(k, [])
             l2 = v or []
-            if dedup:
-                d[k] = list(set(l1 + l2))
+            if concat_lists:
+                if dedup:
+                    d[k] = list(set(l1 + l2))
+                else:
+                    d[k] = l1 + l2
             else:
-                d[k] = l1 + l2
+                d[k] = l2
         else:
             d[k] = v
     return d
@@ -159,6 +173,12 @@ def convert_to_json_serializable(data):
         # to the number of digits for which the string representation will equal the float representation
         return [convert_to_json_serializable(x) for x in data.tolist()]
 
+    if isinstance(data, np.int64):
+        return int(data)
+
+    if isinstance(data, np.float64):
+        return float(data)
+
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
@@ -186,7 +206,7 @@ def convert_to_json_serializable(data):
     try:
         if not isinstance(data, list) and pd.isna(data):
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
-            # Hence, why we test for `not isinstance(list))`
+            # Hence, why we test for `not isinstance(list)`
             return None
     except TypeError:
         pass
@@ -404,6 +424,7 @@ def datetime_to_int(dt: datetime.date) -> int:
     return int(dt.strftime("%Y%m%d%H%M%S"))
 
 
+# noinspection SpellCheckingInspection
 class AzureUrl:
     """
     Parses an Azure Blob Storage URL into its separate components.
@@ -414,12 +435,30 @@ class AzureUrl:
         Reference: WASBS -- Windows Azure Storage Blob (https://datacadamia.com/azure/wasb).
     """
 
+    AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN: str = (
+        r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$"
+    )
+
+    AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN: str = (
+        r"^(https?:\/\/)?(.+?)\.blob\.core\.windows\.net/([^/]+)/(.+)$"
+    )
+    AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE: str = (
+        "{account_name}.blob.core.windows.net/{container}/{path}"
+    )
+
+    AZURE_BLOB_STORAGE_WASBS_URL_REGEX_PATTERN: str = (
+        r"^(wasbs?:\/\/)?([^/]+)@(.+?)\.blob\.core\.windows\.net/(.+)$"
+    )
+    AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE: str = (
+        "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
+    )
+
     def __init__(self, url: str):
-        search = re.search(r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$", url)
+        search = re.search(
+            AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
+        )
         if search is None:
-            search = re.search(
-                r"^(https?:\/\/)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
-            )
+            search = re.search(AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN, url)
             assert (
                 search is not None
             ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
@@ -428,9 +467,7 @@ class AzureUrl:
             self._container = search.group(3)
             self._blob = search.group(4)
         else:
-            search = re.search(
-                r"^(wasbs?:\/\/)?([^/]+)@(.+?).blob.core.windows.net/(.+)$", url
-            )
+            search = re.search(AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_REGEX_PATTERN, url)
             assert (
                 search is not None
             ), "The provided URL does not adhere to the format specified by the Azure SDK (wasbs://<CONTAINER>@<ACCOUNT_NAME>.blob.core.windows.net/<BLOB>)"
@@ -466,8 +503,12 @@ class GCSUrl:
     Format: gs://<BUCKET_OR_NAME>/<BLOB>
     """
 
+    URL_REGEX_PATTERN: str = r"^gs://([^/]+)/(.+)$"
+
+    OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}/{path}"
+
     def __init__(self, url: str):
-        search = re.search(r"^gs://([^/]+)/(.+)$", url)
+        search = re.search(GCSUrl.URL_REGEX_PATTERN, url)
         assert (
             search is not None
         ), "The provided URL does not adhere to the format specified by the GCS SDK (gs://<BUCKET_OR_NAME>/<BLOB>)"
@@ -485,6 +526,8 @@ class GCSUrl:
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
 class S3Url:
+    OBJECT_URL_TEMPLATE: str = "s3a://{bucket}/{path}"
+
     """
     >>> s = S3Url("s3://bucket/hello/world")
     >>> s.bucket

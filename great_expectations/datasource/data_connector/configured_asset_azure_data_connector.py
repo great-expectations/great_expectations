@@ -1,23 +1,26 @@
 import logging
 import os
 import re
-from typing import Dict, List, Optional
+from typing import List, Optional
+
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
+    ConfiguredAssetFilePathDataConnector,
+)
+from great_expectations.datasource.data_connector.util import list_azure_keys
+from great_expectations.execution_engine import ExecutionEngine
+
+logger = logging.getLogger(__name__)
 
 try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
     BlobServiceClient = None
-
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetFilePathDataConnector,
-)
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.util import list_azure_keys
-from great_expectations.execution_engine import ExecutionEngine
-
-logger = logging.getLogger(__name__)
+    logger.debug(
+        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
+    )
 
 
 class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
@@ -156,6 +159,12 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return os.path.join(
-            f"{self._account_name}.blob.core.windows.net", self._container, path
+        template_arguments: dict = {
+            "account_name": self._account_name,
+            "container": self._container,
+            "path": path,
+        }
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
         )

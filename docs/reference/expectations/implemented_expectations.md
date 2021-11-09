@@ -54,12 +54,12 @@ out the missing implementations!
 |`expect_column_chisquare_test_p_value_to_be_greater_than` *                     | Y          | Y       | Y         |
 |`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than` *               | Y          | N       | N         |
 |`expect_column_kl_divergence_to_be_less_than`                                   | Y          | Y       | Y         |
-|`expect_column_pair_values_to_be_equal` *                                       | Y          | N       | Y         |
-|`expect_column_pair_values_A_to_be_greater_than_B` *                            | Y          | N       | Y         |
-|`expect_column_pair_values_to_be_in_set` *                                      | Y          | N       | Y         |
-|`expect_select_column_values_to_be_unique_within_record` *                      | Y          | N       | Y         |
-|`expect_compound_columns_to_be_unique` *                                        | Y          | Y       | Y         |
+|`expect_column_pair_values_to_be_equal`                                         | Y          | Y       | Y         |
+|`expect_column_pair_values_A_to_be_greater_than_B`                              | Y          | Y       | Y         |
+|`expect_column_pair_values_to_be_in_set`                                        | Y          | Y       | Y         |
+|`expect_select_column_values_to_be_unique_within_record`                        | Y          | N       | Y         |
+|`expect_compound_columns_to_be_unique`                                          | Y          | Y       | Y         |
 |`expect_column_pair_cramers_phi_value_to_be_less_than` *                        | Y          | N       | N         |
-|`expect_multicolumn_sum_to_equal` *                                             | Y          | N       | Y         |
+|`expect_multicolumn_sum_to_equal`                                               | Y          | Y       | Y         |
 
 `*` This Expectation has not yet been migrated to the v3 (Batch Request) API.

@@ -8,6 +8,7 @@ import os
 import pstats
 import re
 import time
+import uuid
 from collections import OrderedDict
 from datetime import datetime
 from functools import wraps
@@ -25,9 +26,10 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from dateutil.parser import parse
+from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
@@ -45,9 +47,23 @@ except ModuleNotFoundError:
     # Fallback for python < 3.8
     import importlib_metadata
 
-
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy import Table
+    from sqlalchemy.engine import reflection
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
+
+logger = logging.getLogger(__name__)
 
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
@@ -57,6 +73,8 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "expectation_suite": "expectation_suites",
     "suite_validation_result": "suite_validation_results",
     "expectation_validation_result": "expectation_validation_results",
+    "contract": "contracts",
+    "rendered_data_doc": "rendered_data_docs",
 }
 
 PLURAL_TO_SINGULAR_LOOKUP_DICT = {
@@ -67,6 +85,8 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "expectation_suites": "expectation_suite",
     "suite_validation_results": "suite_validation_result",
     "expectation_validation_results": "expectation_validation_result",
+    "contracts": "contract",
+    "rendered_data_docs": "rendered_data_doc",
 }
 
 
@@ -1065,3 +1085,43 @@ def generate_library_json_from_registered_expectations():
 
 def delete_blank_lines(text: str) -> str:
     return re.sub(r"\n\s*\n", "\n", text, flags=re.MULTILINE)
+
+
+def generate_temporary_table_name(
+    default_table_name_prefix: Optional[str] = "ge_temp_",
+    num_digits: Optional[int] = 8,
+) -> str:
+    table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
+    return table_name
+
+
+def get_sqlalchemy_inspector(engine):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+        insp = reflection.Inspector.from_engine(engine)
+    else:
+        insp = sa.inspect(engine)
+    return insp
+
+
+def get_sqlalchemy_url(drivername, **credentials):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Calling URL() deprecated since 1.4, URL.create() should be used instead
+        url = sa.engine.url.URL(drivername, **credentials)
+    else:
+        url = sa.engine.url.URL.create(drivername, **credentials)
+    return url
+
+
+def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+    """
+    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
+    without explicitly turning the inner select() into a subquery first. This helper method ensures that this
+    conversion takes place.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    if version.parse(sa.__version__) >= version.parse("1.4"):
+        if isinstance(selectable, Select):
+            selectable = selectable.subquery()
+    return selectable

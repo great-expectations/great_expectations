@@ -6,7 +6,7 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
-AZURE_CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
+CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
 context = ge.get_context()
 
@@ -27,13 +27,13 @@ datasource_config = {
                 "account_url": "<YOUR_ACCOUNT_URL>",
                 "credential": "<YOUR_CREDENTIAL>",
             },
-            "container": "superconductive-public",
-            "name_starts_with": "data/taxi_yellow_trip_data_samples/",
-            "assets": {"taxi_data": None},
+            "container": "<YOUR_CONTAINER>",
+            "name_starts_with": "<CONTAINER_PATH_TO_DATA>",
             "default_regex": {
-                "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
+                "pattern": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(\\d{4})-(\\d{2})\\.csv",
                 "group_names": ["year", "month"],
             },
+            "assets": {"taxi_data": None},
         },
     },
 }
@@ -42,20 +42,20 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
-datasource_config["execution_engine"]["azure_options"]["credential"] = AZURE_CREDENTIAL
+] = "superconductivetesting.blob.core.windows.net"
+datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
-] = "superconductivetests.blob.core.windows.net"
+] = "superconductivetesting.blob.core.windows.net"
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "credential"
-] = AZURE_CREDENTIAL
+] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "container"
 ] = "superconductive-public"
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "name_starts_with"
-] = "data/taxi_yellow_trip_data_samples/"
+] = "data/taxi_yellow_tripdata_samples/"
 
 context.test_yaml_config(yaml.dump(datasource_config))
 

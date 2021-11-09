@@ -193,7 +193,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
-    converted_string = filepath_template.format(**template_arguments)
+    converted_string: str = filepath_template.format(**template_arguments)
 
     return converted_string
 

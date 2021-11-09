@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import filter_properties_dict, get_sqlalchemy_url
 
 try:
     import sqlalchemy as sa
@@ -179,7 +179,7 @@ class DatabaseStoreBackend(StoreBackend):
                 drivername, credentials
             )
         else:
-            options = sa.engine.url.URL(drivername, **credentials)
+            options = get_sqlalchemy_url(drivername, **credentials)
 
         self.drivername = drivername
 
@@ -232,7 +232,7 @@ class DatabaseStoreBackend(StoreBackend):
         credentials_driver_name = credentials.pop("drivername", None)
         create_engine_kwargs = {"connect_args": {"private_key": pkb}}
         return (
-            sa.engine.url.URL(drivername or credentials_driver_name, **credentials),
+            get_sqlalchemy_url(drivername or credentials_driver_name, **credentials),
             create_engine_kwargs,
         )
 
@@ -255,7 +255,7 @@ class DatabaseStoreBackend(StoreBackend):
             logger.debug("Error fetching value: " + str(e))
             raise ge_exceptions.StoreError("Unable to fetch value for key: " + str(key))
 
-    def _set(self, key, value, allow_update=True):
+    def _set(self, key, value, allow_update=True, **kwargs):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
 

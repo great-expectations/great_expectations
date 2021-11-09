@@ -1,13 +1,12 @@
 import logging
-import os
 from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -168,4 +167,11 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     ) -> str:
         # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"gs://{os.path.join(self._bucket_or_name, path)}"
+        template_arguments: dict = {
+            "bucket_or_name": self._bucket_or_name,
+            "path": path,
+        }
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )

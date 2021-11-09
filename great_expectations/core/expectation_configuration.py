@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import jsonpatch
 
@@ -33,7 +33,7 @@ from great_expectations.types import SerializableDictDot
 logger = logging.getLogger(__name__)
 
 
-def parse_result_format(result_format):
+def parse_result_format(result_format: Union[str, dict]) -> dict:
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""
@@ -76,6 +76,16 @@ class ExpectationConfiguration(SerializableDictDot):
                 "result_format": "BASIC",
                 "include_config": True,
                 "catch_exceptions": False,
+            },
+        },
+        "expect_table_columns_to_match_set": {
+            "domain_kwargs": [],
+            "success_kwargs": ["column_set", "exact_match"],
+            "default_kwarg_values": {
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "exact_match": True,
             },
         },
         "expect_table_column_count_to_be_between": {
@@ -900,7 +910,14 @@ class ExpectationConfiguration(SerializableDictDot):
 
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
 
-    def __init__(self, expectation_type, kwargs, meta=None, success_on_last_run=None):
+    def __init__(
+        self,
+        expectation_type,
+        kwargs,
+        meta=None,
+        success_on_last_run=None,
+        ge_cloud_id=None,
+    ):
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
                 "expectation_type must be a string"
@@ -918,6 +935,9 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
+
+        if ge_cloud_id is not None:
+            self._ge_cloud_id = ge_cloud_id
 
     def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
@@ -978,6 +998,17 @@ class ExpectationConfiguration(SerializableDictDot):
 
         patch.apply(self.kwargs, in_place=True)
         return self
+
+    @property
+    def ge_cloud_id(self):
+        if hasattr(self, "_ge_cloud_id"):
+            return self._ge_cloud_id
+        else:
+            return None
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value):
+        self._ge_cloud_id = value
 
     @property
     def expectation_type(self):
@@ -1286,6 +1317,7 @@ class ExpectationConfigurationSchema(Schema):
     )
     kwargs = fields.Dict()
     meta = fields.Dict()
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @post_load

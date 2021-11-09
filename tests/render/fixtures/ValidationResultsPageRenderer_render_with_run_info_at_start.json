@@ -528,13 +528,12 @@
               {
                 "content_block_type": "string_template",
                 "string_template": {
-                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8 $v__9.",
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8.",
                   "params": {
                     "column": "Unnamed: 0",
                     "type_list": [
                       "BIGINT",
                       "BYTEINT",
-                      "DECIMAL",
                       "INT",
                       "INTEGER",
                       "IntegerType",
@@ -549,14 +548,13 @@
                     "condition_parser": null,
                     "v__0": "BIGINT",
                     "v__1": "BYTEINT",
-                    "v__2": "DECIMAL",
-                    "v__3": "INT",
-                    "v__4": "INTEGER",
-                    "v__5": "IntegerType",
-                    "v__6": "LongType",
-                    "v__7": "SMALLINT",
-                    "v__8": "TINYINT",
-                    "v__9": "int"
+                    "v__2": "INT",
+                    "v__3": "INTEGER",
+                    "v__4": "IntegerType",
+                    "v__5": "LongType",
+                    "v__6": "SMALLINT",
+                    "v__7": "TINYINT",
+                    "v__8": "int"
                   },
                   "styling": {
                     "default": {
@@ -3783,13 +3781,12 @@
               {
                 "content_block_type": "string_template",
                 "string_template": {
-                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8 $v__9.",
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8.",
                   "params": {
                     "column": "Survived",
                     "type_list": [
                       "BIGINT",
                       "BYTEINT",
-                      "DECIMAL",
                       "INT",
                       "INTEGER",
                       "IntegerType",
@@ -3804,14 +3801,13 @@
                     "condition_parser": null,
                     "v__0": "BIGINT",
                     "v__1": "BYTEINT",
-                    "v__2": "DECIMAL",
-                    "v__3": "INT",
-                    "v__4": "INTEGER",
-                    "v__5": "IntegerType",
-                    "v__6": "LongType",
-                    "v__7": "SMALLINT",
-                    "v__8": "TINYINT",
-                    "v__9": "int"
+                    "v__2": "INT",
+                    "v__3": "INTEGER",
+                    "v__4": "IntegerType",
+                    "v__5": "LongType",
+                    "v__6": "SMALLINT",
+                    "v__7": "TINYINT",
+                    "v__8": "int"
                   },
                   "styling": {
                     "default": {
@@ -4284,13 +4280,12 @@
               {
                 "content_block_type": "string_template",
                 "string_template": {
-                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8 $v__9.",
+                  "template": "value types must belong to this set: $v__0 $v__1 $v__2 $v__3 $v__4 $v__5 $v__6 $v__7 $v__8.",
                   "params": {
                     "column": "SexCode",
                     "type_list": [
                       "BIGINT",
                       "BYTEINT",
-                      "DECIMAL",
                       "INT",
                       "INTEGER",
                       "IntegerType",
@@ -4305,14 +4300,13 @@
                     "condition_parser": null,
                     "v__0": "BIGINT",
                     "v__1": "BYTEINT",
-                    "v__2": "DECIMAL",
-                    "v__3": "INT",
-                    "v__4": "INTEGER",
-                    "v__5": "IntegerType",
-                    "v__6": "LongType",
-                    "v__7": "SMALLINT",
-                    "v__8": "TINYINT",
-                    "v__9": "int"
+                    "v__2": "INT",
+                    "v__3": "INTEGER",
+                    "v__4": "IntegerType",
+                    "v__5": "LongType",
+                    "v__6": "SMALLINT",
+                    "v__7": "TINYINT",
+                    "v__8": "int"
                   },
                   "styling": {
                     "default": {
@@ -4709,6 +4703,7 @@
   ],
   "data_asset_name": null,
   "full_data_asset_identifier": null,
+  "ge_cloud_id": null,
   "renderer_type": "ValidationResultsPageRenderer",
   "page_title": "Validations / default / 2020-03-22T17:02:47.671855Z",
   "utm_medium": "validation-results-page",

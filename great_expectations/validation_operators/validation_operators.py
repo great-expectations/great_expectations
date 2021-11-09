@@ -1,15 +1,19 @@
 import logging
 import warnings
 from collections import OrderedDict
+from typing import Union
 
 from dateutil.parser import parse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
+from great_expectations.core.async_executor import AsyncExecutor
+from great_expectations.core.batch import Batch
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -280,9 +284,10 @@ class ActionListValidationOperator(ValidationOperator):
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
+        catch_exceptions=None,
         result_format=None,
+        checkpoint_identifier=None,
     ):
-
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
@@ -304,41 +309,94 @@ class ActionListValidationOperator(ValidationOperator):
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        run_results = {}
+        ###
+        # NOTE: 20211010 - jdimatteo: This method is called by both Checkpoint.run and LegacyCheckpoint.run and below
+        # usage of AsyncExecutor may speed up I/O bound validations by running them in parallel with multithreading
+        # (if concurrency is enabled in the data context configuration).
+        #
+        # When this method is called by LegacyCheckpoint.run, len(assets_to_validate) may be greater than 1. If
+        # concurrency is enabled in the configuration AND len(assets_to_validate) > 1, then execution is run in multiple
+        # threads with AsyncExecutor -- otherwise AsyncExecutor only uses the current single thread to execute the work.
+        # Please see the below arguments used to initialize AsyncExecutor and the corresponding AsyncExecutor docstring
+        # for more details on when multiple threads are used.
+        #
+        # When this method is called by Checkpoint.run, len(assets_to_validate) may be 1 even if there are multiple
+        # validations, because Checkpoint.run calls this method in a loop for each validation. AsyncExecutor is also
+        # used in the Checkpoint.run loop to optionally run each validation in parallel with multithreading, so this
+        # method's AsyncExecutor is nested within the Checkpoint.run AsyncExecutor. The AsyncExecutor logic to only use
+        # multithreading when max_workers > 1 ensures that no nested multithreading is ever used when
+        # len(assets_to_validate) is equal to 1. So no unnecessary multithreading is ever used here even though it may
+        # be nested inside another AsyncExecutor (and this is a good thing because it avoids extra overhead associated
+        # with each thread and minimizes the total number of threads to simplify debugging).
+        with AsyncExecutor(
+            self.data_context.concurrency, max_workers=len(assets_to_validate)
+        ) as async_executor:
+            batch_and_async_result_tuples = []
+            for item in assets_to_validate:
+                batch = self._build_batch_from_item(item)
 
-        for item in assets_to_validate:
-            run_result_obj = {}
-            batch = self._build_batch_from_item(item)
+                if hasattr(batch, "active_batch_id"):
+                    batch_identifier = batch.active_batch_id
+                else:
+                    batch_identifier = batch.batch_id
 
-            if hasattr(batch, "active_batch_id"):
-                batch_identifier = batch.active_batch_id
-            else:
-                batch_identifier = batch.batch_id
+                if result_format is None:
+                    result_format = self.result_format
 
-            expectation_suite_identifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=batch._expectation_suite.expectation_suite_name
-            )
-            validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch_identifier,
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-            )
-            batch_validation_result = batch.validate(
-                run_id=run_id,
-                result_format=result_format if result_format else self.result_format,
-                evaluation_parameters=evaluation_parameters,
-            )
-            run_result_obj["validation_result"] = batch_validation_result
-            batch_actions_results = self._run_actions(
-                batch,
-                expectation_suite_identifier,
-                batch._expectation_suite,
-                batch_validation_result,
-                run_id,
-            )
+                batch_validate_arguments = {
+                    "run_id": run_id,
+                    "result_format": result_format,
+                    "evaluation_parameters": evaluation_parameters,
+                }
 
-            run_result_obj["actions_results"] = batch_actions_results
-            run_results[validation_result_id] = run_result_obj
+                if catch_exceptions is not None:
+                    batch_validate_arguments["catch_exceptions"] = catch_exceptions
+
+                batch_and_async_result_tuples.append(
+                    (
+                        batch,
+                        async_executor.submit(
+                            batch.validate,
+                            **batch_validate_arguments,
+                        ),
+                    )
+                )
+
+            run_results = {}
+            for batch, async_batch_validation_result in batch_and_async_result_tuples:
+                if self.data_context.ge_cloud_mode:
+                    expectation_suite_identifier = GeCloudIdentifier(
+                        resource_type="expectation_suite",
+                        ge_cloud_id=batch._expectation_suite.ge_cloud_id,
+                    )
+                    validation_result_id = GeCloudIdentifier(
+                        resource_type="suite_validation_result"
+                    )
+                else:
+                    expectation_suite_identifier = ExpectationSuiteIdentifier(
+                        expectation_suite_name=batch._expectation_suite.expectation_suite_name
+                    )
+                    validation_result_id = ValidationResultIdentifier(
+                        batch_identifier=batch_identifier,
+                        expectation_suite_identifier=expectation_suite_identifier,
+                        run_id=run_id,
+                    )
+
+                batch_actions_results = self._run_actions(
+                    batch=batch,
+                    expectation_suite_identifier=expectation_suite_identifier,
+                    expectation_suite=batch._expectation_suite,
+                    batch_validation_result=async_batch_validation_result.result(),
+                    run_id=run_id,
+                    validation_result_id=validation_result_id,
+                    checkpoint_identifier=checkpoint_identifier,
+                )
+
+                run_result_obj = {
+                    "validation_result": async_batch_validation_result.result(),
+                    "actions_results": batch_actions_results,
+                }
+                run_results[validation_result_id] = run_result_obj
 
         return ValidationOperatorResult(
             run_id=run_id,
@@ -349,11 +407,13 @@ class ActionListValidationOperator(ValidationOperator):
 
     def _run_actions(
         self,
-        batch,
-        expectation_suite_identifier,
+        batch: Union[Batch, DataAsset],
+        expectation_suite_identifier: ExpectationSuiteIdentifier,
         expectation_suite,
         batch_validation_result,
         run_id,
+        validation_result_id=None,
+        checkpoint_identifier=None,
     ):
         """
         Runs all actions configured for this operator on the result of validating one
@@ -379,17 +439,20 @@ class ActionListValidationOperator(ValidationOperator):
             else:
                 batch_identifier = batch.batch_id
 
-            validation_result_id = ValidationResultIdentifier(
-                expectation_suite_identifier=expectation_suite_identifier,
-                run_id=run_id,
-                batch_identifier=batch_identifier,
-            )
+            if validation_result_id is None:
+                validation_result_id = ValidationResultIdentifier(
+                    expectation_suite_identifier=expectation_suite_identifier,
+                    run_id=run_id,
+                    batch_identifier=batch_identifier,
+                )
             try:
                 action_result = self.actions[action["name"]].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
                     payload=batch_actions_results,
+                    expectation_suite_identifier=expectation_suite_identifier,
+                    checkpoint_identifier=checkpoint_identifier,
                 )
 
                 # add action_result
@@ -779,6 +842,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 failure_run_result_obj = {"expectation_suite_severity_level": "failure"}
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
+                    run_id,
                     result_format=result_format
                     if result_format
                     else self.result_format,
@@ -825,6 +889,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 warning_run_result_obj = {"expectation_suite_severity_level": "warning"}
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
+                    run_id,
                     result_format=result_format
                     if result_format
                     else self.result_format,
