@@ -5,10 +5,10 @@ authors:
   - family-names: Campbell
     given-names: James
   - name: Superconductive
-    website: https://superconductive.ai
+    website: https://superconductive.com
   - name: Great Expectations
-    email: team@greatexpectations.io
     website: https://greatexpectations.io
+    email: team@greatexpectations.io
 cff-version: 1.2.0
 date-released: "2021-11-04"
 identifiers:
@@ -23,6 +23,10 @@ keywords:
   - "pipeline testing"
   - "data testing"
   - "pipeline debt"
+  - "data observability"
+  - "data monitoring"
+  - "data profiling"
+  - "data documentation"
 license: Apache-2.0
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/great-expectations/great_expectations"
