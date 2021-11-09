@@ -54,15 +54,20 @@ except ImportError:
     pybigquery = None
 
 
-class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectation):
-    """Expect a column to contain string-typed integers to be monotonically increasing.
+class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
+    """Expect a column to contain string-typed integers to be increasing.
 
-    expect_column_values_to_be_string_integers_monotonically_increasing is a :func:`column_map_expectation \
+    expect_column_values_to_be_string_integers_increasing is a :func:`column_map_expectation \
     <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
     Args:
         column (str): \
             The column name.
+
+
+    Keyword Args:
+        strictly (Boolean or None): \
+            If True, values must be strictly greater than previous values
 
     Other Parameters:
         result_format (str or None): \
@@ -98,11 +103,13 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         "requirements": [],
     }
 
-    map_metric = "column_values.string_integers.monotonically_increasing"
+    map_metric = "column_values.string_integers.increasing"
+    success_keys = ("strictly",)
 
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
+        "strictly": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -147,16 +154,16 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         )
 
         metric_kwargs = get_metric_kwargs(
-            metric_name="column_values.string_integers.monotonically_increasing.map",
+            metric_name="column_values.string_integers.increasing.map",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         dependencies["metrics"][
-            "column_values.string_integers.monotonically_increasing"
+            "column_values.string_integers.increasing"
         ] = MetricConfiguration(
-            metric_name="column_values.string_integers.monotonically_increasing.map",
+            metric_name="column_values.string_integers.increasing.map",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
 
         return dependencies
@@ -169,12 +176,12 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
         execution_engine: ExecutionEngine = None,
     ) -> Dict:
 
-        SIMI = metrics.get("column_values.string_integers.monotonically_increasing")
+        SIMI = metrics.get("column_values.string_integers.increasing")
         success = all(SIMI[0])
 
         return ExpectationValidationResult(
             expectation_config={
-                "expectation_type": "expect_column_values_to_be_string_integers_monotonically_increasing",
+                "expectation_type": "expect_column_values_to_be_string_integers_increasing",
                 "kwargs": {
                     "column": "a",
                 },
@@ -189,6 +196,6 @@ class ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing(ColumnExpectat
 
 if __name__ == "__main__":
     self_check_report = (
-        ExpectColumnValuesToBeStringIntegersMonotonicallyIncreasing().run_diagnostics()
+        ExpectColumnValuesToBeStringIntegersIncreasing().run_diagnostics()
     )
     print(json.dumps(self_check_report, indent=2))

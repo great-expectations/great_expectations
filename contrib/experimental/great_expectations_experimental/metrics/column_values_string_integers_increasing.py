@@ -28,9 +28,9 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider):
-    function_metric_name = "column_values.string_integers.monotonically_increasing"
-    function_value_keys = "column"
+class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
+    function_metric_name = "column_values.string_integers.increasing"
+    function_value_keys = ("column", "strictly")
 
     @column_function_partial(engine=PandasExecutionEngine)
     def _pandas(self, _column, **kwargs):
@@ -43,7 +43,12 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
 
         series_diff = np.diff(temp_column)
 
-        return series_diff >= 0
+        strictly: Optional[bool] = kwargs.get("strictly") or False
+
+        if strictly:
+            return series_diff > 0
+        else:
+            return series_diff >= 0
 
     @metric_partial(
         engine=SparkDFExecutionEngine,
@@ -88,7 +93,11 @@ class ColumnValuesStringIntegersMonotonicallyIncreasing(ColumnMapMetricProvider)
 
         diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
         diff = F.when(diff.isNull(), 1).otherwise(diff)
-        diff = F.when(diff < 0, F.lit(False)).otherwise(F.lit(True))
+
+        if metric_value_kwargs["strictly"] is True:
+            diff = F.when(diff <= 0, F.lit(False)).otherwise(F.lit(True))
+        else:
+            diff = F.when(diff < 0, F.lit(False)).otherwise(F.lit(True))
 
         return (
             np.array(df.select(diff).collect()).reshape(-1)[1:],
