@@ -283,6 +283,36 @@ class ValidationResultsPageRenderer(Renderer):
 
     @classmethod
     def _get_meta_properties_notes(cls, suite_meta):
+        """
+        This method use for fetching custom meta for added at suite level
+        "notes": {
+            "content": {
+                "dimension": "properties.dimension",
+                "severity": "properties.severity"
+            },
+            "format": "renderer.diagnostic.meta_properties"
+        }
+        expectation level
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "city"
+            },
+            "meta": {
+                "attributes": {
+                    "properties": {
+                        "dimension": "completeness",
+                        "severity": "P3"
+                    },
+                    "user_meta": {
+                        "notes": ""
+                    }
+                }
+            }
+        },
+        this try to fetch dimension and severity value set for each level expectation meta,
+
+        """
         if (
             suite_meta is not None
             and "notes" in suite_meta
