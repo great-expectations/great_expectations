@@ -281,10 +281,10 @@ def test_SnowflakeCredentialYamlHelper_password_auth(
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank and remove database key and the InferredAssetSqlDataConnector from example_yaml below for none)
-schema = ""  # The schema name (optional -- leave blank and remove schema key from example_yaml below for none)
-warehouse = ""  # The warehouse name (optional -- leave blank and remove warehouse key from example_yaml below for none)
-role = ""  # The role name (optional -- leave blank and remove role key from example_yaml below for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 password = "YOUR_PASSWORD"'''
 
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -337,10 +337,10 @@ def test_SnowflakeCredentialYamlHelper_sso_auth(
     expected_credentials_snippet = """\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank and remove database key and the InferredAssetSqlDataConnector from example_yaml below for none)
-schema = ""  # The schema name (optional -- leave blank and remove schema key from example_yaml below for none)
-warehouse = ""  # The warehouse name (optional -- leave blank and remove warehouse key from example_yaml below for none)
-role = ""  # The role name (optional -- leave blank and remove role key from example_yaml below for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
@@ -391,10 +391,10 @@ def test_SnowflakeCredentialYamlHelper_key_pair_auth(
     expected_credentials_snippet = """\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank and remove database key and the InferredAssetSqlDataConnector from example_yaml below for none)
-schema = ""  # The schema name (optional -- leave blank and remove schema key from example_yaml below for none)
-warehouse = ""  # The warehouse name (optional -- leave blank and remove warehouse key from example_yaml below for none)
-role = ""  # The role name (optional -- leave blank and remove role key from example_yaml below for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
 private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
     assert helper.credentials_snippet() == expected_credentials_snippet

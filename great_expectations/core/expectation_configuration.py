@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import jsonpatch
 
@@ -33,7 +33,7 @@ from great_expectations.types import SerializableDictDot
 logger = logging.getLogger(__name__)
 
 
-def parse_result_format(result_format):
+def parse_result_format(result_format: Union[str, dict]) -> dict:
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""
@@ -928,7 +928,9 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
-        self._ge_cloud_id = ge_cloud_id
+
+        if ge_cloud_id is not None:
+            self._ge_cloud_id = ge_cloud_id
 
     def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
@@ -992,7 +994,10 @@ class ExpectationConfiguration(SerializableDictDot):
 
     @property
     def ge_cloud_id(self):
-        return self._ge_cloud_id
+        if hasattr(self, "_ge_cloud_id"):
+            return self._ge_cloud_id
+        else:
+            return None
 
     @ge_cloud_id.setter
     def ge_cloud_id(self, value):

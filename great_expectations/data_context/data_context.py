@@ -3364,6 +3364,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         yaml_config: str,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
+        runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
         return_mode: str = "instantiated_class",
         shorten_tracebacks: bool = False,
@@ -3409,6 +3410,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         The returned object is determined by return_mode.
         """
+        if runtime_environment is None:
+            runtime_environment = {}
+
+        runtime_environment = {
+            **runtime_environment,
+            **self.runtime_environment,
+        }
+
         usage_stats_event_name: str = "data_context.test_yaml_config"
         usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
 
@@ -3429,7 +3438,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             substitutions: dict = {
                 **substituted_config_variables,
                 **dict(os.environ),
-                **self.runtime_environment,
+                **runtime_environment,
             }
 
             config_str_with_substituted_variables: Union[
@@ -3572,7 +3581,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 instantiated_class = instantiate_class_from_config(
                     config=config,
                     runtime_environment={
-                        "root_directory": self.root_directory,
+                        **runtime_environment,
+                        **{
+                            "root_directory": self.root_directory,
+                        },
                     },
                     config_defaults={},
                 )
@@ -3594,7 +3606,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 instantiated_class = instantiate_class_from_config(
                     config=config,
                     runtime_environment={
-                        "root_directory": self.root_directory,
+                        **runtime_environment,
+                        **{
+                            "root_directory": self.root_directory,
+                        },
                     },
                     config_defaults={},
                 )
@@ -3799,6 +3814,7 @@ class DataContext(BaseDataContext):
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
+            usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
             runtime_environment: a dictionary of config variables that
             override both those set in config_variables.yml and the environment
 
