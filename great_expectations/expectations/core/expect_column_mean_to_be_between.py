@@ -98,6 +98,57 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
+    kwargs_json_schema_base_properties = {
+        "result_format": {
+            "oneOf": [
+                {"type": "null"},
+                {
+                    "type": "string",
+                    "enum": ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"],
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "result_format": {
+                            "type": "string",
+                            "enum": ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"],
+                        },
+                        "partial_unexpected_count": {"type": "number"},
+                    },
+                },
+            ],
+            "default": "BASIC",
+        },
+        "include_config": {
+            "oneOf": [{"type": "null"}, {"type": "boolean"}],
+            "default": "true",
+        },
+        "catch_exceptions": {
+            "oneOf": [{"type": "null"}, {"type": "boolean"}],
+            "default": "false",
+        },
+        "meta": {"type": "object"},
+    }
+
+    kwargs_json_schema = {
+        "type": "object",
+        "properties": {
+            **kwargs_json_schema_base_properties,
+            "column": {"type": "string"},
+            "min_value": {"oneOf": [{"type": "null"}, {"type": "number"}]},
+            "max_value": {"oneOf": [{"type": "null"}, {"type": "number"}]},
+            "strict_min": {
+                "oneOf": [{"type": "null"}, {"type": "boolean"}],
+                "default": "false",
+            },
+            "strict_max": {
+                "oneOf": [{"type": "null"}, {"type": "boolean"}],
+                "default": "false",
+            },
+        },
+        "required": ["column"],
+    }
+
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -139,30 +190,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                 "strict_max",
             ],
         )
-
-        if (params["min_value"] is None) and (params["max_value"] is None):
-            template_str = "mean may have any numerical value."
-        else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-
-            if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"mean must be {at_least_str} $min_value and {at_most_str} $max_value."
-            elif params["min_value"] is None:
-                template_str = f"mean must be {at_most_str} $max_value."
-            elif params["max_value"] is None:
-                template_str = f"mean must be {at_least_str} $min_value."
-
-        if include_column_name:
-            template_str = "$column " + template_str
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "min_value": {
@@ -190,6 +217,32 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                 "value": params.get("strict_max"),
             },
         }
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "mean may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"mean must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"mean must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"mean must be {at_least_str} $min_value."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = conditional_template_str + ", then " + template_str
+            params_with_json_schema.update(conditional_params)
+
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

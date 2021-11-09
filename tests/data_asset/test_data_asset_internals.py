@@ -172,7 +172,7 @@ def test_expectation_meta():
     # This should raise an error because meta isn't serializable.
     with pytest.raises(InvalidExpectationConfigurationError) as exc:
         df.expect_column_values_to_be_increasing(
-            "x", meta={"unserializable_content": np.complex(0, 0)}
+            "x", meta={"unserializable_content": complex(0, 0)}
         )
     assert "which cannot be serialized to json" in exc.value.message
 

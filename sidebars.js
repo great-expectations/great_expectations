@@ -94,6 +94,10 @@ module.exports = {
               type: 'category',
               label: 'Core skills',
               items: [
+                'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
+                'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
                 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
                 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
                 'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
@@ -263,6 +267,7 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
+            { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
           ]
