@@ -16,43 +16,6 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.dialects import registry
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support."
-    )
-    sa = None
-    registry = None
-
-try:
-    import sqlalchemy_redshift.dialect
-except ImportError:
-    sqlalchemy_redshift = None
-
-try:
-    import pybigquery.sqlalchemy_bigquery
-
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "dialect")
-
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
-    bigquery_types_tuple = None
-    pybigquery = None
-
 
 class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
     """Expect a column to contain string-typed integers to be increasing.
@@ -96,11 +59,10 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "production",
-        "package": "great_expectations",
-        "tags": ["core expectation", "column map expectation"],
-        "contributors": ["@great_expectations"],
-        "requirements": [],
+        "maturity": "experimental",
+        "package": "experimental_expectation",
+        "tags": ["experimental", "column map expectation"],
+        "contributors": ["@austiezr"],
     }
 
     map_metric = "column_values.string_integers.increasing"
@@ -180,22 +142,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
         success = all(SIMI[0])
 
         return ExpectationValidationResult(
-            expectation_config={
-                "expectation_type": "expect_column_values_to_be_string_integers_increasing",
-                "kwargs": {
-                    "column": "a",
-                },
-                "meta": {},
-                "ge_cloud_id": None,
-            },
-            meta={},
             result={"observed_value": np.unique(SIMI[0], return_counts=True)},
             success=success,
         )
-
-
-if __name__ == "__main__":
-    self_check_report = (
-        ExpectColumnValuesToBeStringIntegersIncreasing().run_diagnostics()
-    )
-    print(json.dumps(self_check_report, indent=2))
