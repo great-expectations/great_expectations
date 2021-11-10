@@ -10,6 +10,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.metrics import (
     ColumnMax,
     ColumnValuesNonNull,
@@ -166,8 +167,8 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
             "mostly": 0.9,
             "value_set": ["cat", "fish", "dog", "giraffe"],
             "result_format": {
-                "result_format": "BASIC",
-                "include_unexpected_rows": True
+                "result_format": "BOOLEAN_ONLY",
+                "include_unexpected_rows": True,
             },
         },
     )
@@ -180,7 +181,7 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
     assert result == ExpectationValidationResult(
         success=False,
         result={
-            "unexpected_row_list": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
+            "unexpected_rows": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
         },
         exception_info={
             "raised_exception": False,
@@ -225,7 +226,7 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
             "unexpected_percent": 33.33333333333333,
             "partial_unexpected_list": [3, 10],
             "unexpected_list": [3, 10],
-            "unexpected_row_list": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
+            "unexpected_rows": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
             "partial_unexpected_index_list": [3, 5],
             "partial_unexpected_counts": [
                 {"value": 3, "count": 1},
