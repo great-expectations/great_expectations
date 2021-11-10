@@ -74,12 +74,7 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
             "path": full_path,
         }
 
-        try:
-            return self.execution_engine.resolve_data_reference(
-                data_connector_name=self.__class__.__name__,
-                template_arguments=template_arguments,
-            )
-        except AttributeError:
-            raise ge_exceptions.DataConnectorError(
-                "A non-existent/unknown ExecutionEngine instance was referenced."
-            )
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )
