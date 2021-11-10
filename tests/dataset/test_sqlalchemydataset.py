@@ -125,7 +125,7 @@ def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql(sa):
         mock_uuid.return_value = "12345678-lots-more-stuff"
 
         dataset = SqlAlchemyDataset(engine=engine, custom_sql="select 1")
-        assert dataset._table.name == "ge_tmp_12345678"
+        assert dataset._table.name == "ge_temp_12345678"
 
 
 def test_sqlalchemydataset_with_custom_sql(sa):

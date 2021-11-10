@@ -7,6 +7,8 @@ import warnings
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
+from dateutil.parser import parse
+
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -35,18 +37,12 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
     import pyspark.sql.functions as F
+
+    # noinspection SpellCheckingInspection
+    import pyspark.sql.types as sparktypes
     from pyspark import SparkContext
     from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
-    from pyspark.sql.types import (
-        BooleanType,
-        DateType,
-        FloatType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-    )
 except ImportError:
     pyspark = None
     SparkContext = None
@@ -54,17 +50,20 @@ except ImportError:
     DataFrame = None
     DataFrameReader = None
     F = None
-    StructType = (None,)
-    StructField = (None,)
-    IntegerType = (None,)
-    FloatType = (None,)
-    StringType = (None,)
-    DateType = (None,)
-    BooleanType = (None,)
+    # noinspection SpellCheckingInspection
+    sparktypes = None
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
+
+
+# noinspection SpellCheckingInspection
+def apply_dateutil_parse(column):
+    assert len(column.columns) == 1, "Expected DataFrame with 1 column"
+    col_name = column.columns[0]
+    _udf = F.udf(parse, sparktypes.TimestampType())
+    return column.withColumn(col_name, _udf(col_name))
 
 
 class SparkDFExecutionEngine(ExecutionEngine):
@@ -315,6 +314,7 @@ Please check your config."""
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 
+    # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
     @staticmethod
     def guess_reader_method_from_path(path):
         """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
@@ -728,7 +728,8 @@ Please check your config."""
         matching_divisor = batch_identifiers[column_name]
         res = (
             df.withColumn(
-                "div_temp", (F.col(column_name) / divisor).cast(IntegerType())
+                "div_temp",
+                (F.col(column_name) / divisor).cast(sparktypes.IntegerType()),
             )
             .filter(F.col("div_temp") == matching_divisor)
             .drop("div_temp")
@@ -740,7 +741,9 @@ Please check your config."""
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_mod_value = batch_identifiers[column_name]
         res = (
-            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            df.withColumn(
+                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
+            )
             .filter(F.col("mod_temp") == matching_mod_value)
             .drop("mod_temp")
         )
@@ -784,7 +787,7 @@ Please check your config."""
             hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
             return hashed_value
 
-        encrypt_udf = F.udf(_encrypt_value, StringType())
+        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
             .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
@@ -812,7 +815,9 @@ Please check your config."""
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
         res = (
-            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            df.withColumn(
+                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
+            )
             .filter(F.col("mod_temp") == value)
             .drop("mod_temp")
         )
@@ -853,7 +858,7 @@ Please check your config."""
             ]
             return hashed_value
 
-        encrypt_udf = F.udf(_encrypt_value, StringType())
+        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
             .filter(F.col("encrypted_value") == hash_value)

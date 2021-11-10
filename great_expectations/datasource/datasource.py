@@ -257,7 +257,7 @@ class LegacyDatasource:
         return generator
 
     def get_batch_kwargs_generator(self, name):
-        """Get the (named) BatchKwargGenerator from a datasource)
+        """Get the (named) BatchKwargGenerator from a datasource
 
         Args:
             name (str): name of BatchKwargGenerator (default value is 'default')

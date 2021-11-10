@@ -46,7 +46,7 @@ def init(ctx, usage_stats):
     This guided input walks the user through setting up a new project and also
     onboards a new developer in an existing project.
 
-    It scaffolds directories, sets up notebooks, creates a project file, and
+    It scaffolds directories, creates a project file, and
     appends to a `.gitignore` file.
     """
     directory = toolkit.parse_cli_config_file_location(
