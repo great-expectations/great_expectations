@@ -270,9 +270,6 @@ Please check your config."""
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
-            print("DEBUGGING START -----------------")
-            print("batch_spec.path", batch_spec.path)
-            print("DEBUGGING END -----------------")
             try:
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
