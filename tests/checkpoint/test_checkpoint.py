@@ -1522,7 +1522,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
+            "runtime_parameters": {
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+            },
         }
     )
 
@@ -1553,9 +1555,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                 },
             },
         ],
-        validations=[
-            {"batch_request": batch_request}
-        ],
+        validations=[{"batch_request": batch_request}],
     )
 
     results = checkpoint.run()
@@ -1583,7 +1583,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"},
+            "runtime_parameters": {
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+            },
         }
     )
 
@@ -1594,7 +1596,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {"query": "SELECT * from table_partitioned_by_date_column__A LIMIT 5"},
+            "runtime_parameters": {
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
+            },
         }
     )
 
@@ -1627,7 +1631,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ],
         validations=[
             {"batch_request": batch_request_1},
-            {"batch_request": batch_request_2}
+            {"batch_request": batch_request_2},
         ],
     )
 
