@@ -2549,6 +2549,7 @@ class BaseDataContext:
         resource_identifiers=None,
         dry_run=False,
         build_index: bool = True,
+        rebuild_previous_validations: bool = False
     ):
         """
         Build Data Docs for your project.
@@ -2573,6 +2574,8 @@ class BaseDataContext:
                             confirm.
 
         :param build_index: a flag if False, skips building the index page
+        :param rebuild_previous_validations: a flag if False, skips building previously built validation and profiling
+            pages
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
@@ -2618,6 +2621,7 @@ class BaseDataContext:
                         index_page_resource_identifier_tuple = site_builder.build(
                             resource_identifiers,
                             build_index=(build_index and not self.ge_cloud_mode),
+                            rebuild_previous_validations=rebuild_previous_validations
                         )
                         if index_page_resource_identifier_tuple:
                             index_page_locator_infos[

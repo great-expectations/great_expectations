@@ -281,7 +281,7 @@ class SiteBuilder:
     def clean_site(self):
         self.target_store.clean_site()
 
-    def build(self, resource_identifiers=None, build_index: bool = True):
+    def build(self, resource_identifiers=None, build_index: bool = True, rebuild_previous_validations=False):
         """
 
         :param resource_identifiers: a list of resource identifiers
@@ -294,13 +294,18 @@ class SiteBuilder:
                             and avoids full rebuild.
 
         :param build_index: a flag if False, skips building the index page
+        :param rebuild_previous_validations: a flag if False, skips building previously built validation and profiling
+            pages
 
         :return:
         """
 
         # copy static assets
         for site_section, site_section_builder in self.site_section_builders.items():
-            site_section_builder.build(resource_identifiers=resource_identifiers)
+            site_section_builder.build(
+                resource_identifiers=resource_identifiers,
+                rebuild_previous_validations=rebuild_previous_validations
+            )
 
         # GE Cloud supports JSON Site Data Docs
         # Skip static assets, indexing
@@ -402,13 +407,20 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None):
+    def build(self, resource_identifiers=None, rebuild_previous_validations=False):
         source_store_keys = self.source_store.list_keys()
-        if self.name == "validations" and self.validation_results_limit:
-            source_store_keys = sorted(
-                source_store_keys, key=lambda x: x.run_id.run_time, reverse=True
-            )[: self.validation_results_limit]
 
+        if self.name == "validations" or self.name == "profiling":
+            if not rebuild_previous_validations:
+                previously_rendered_validation_site_run_ids = [identifier.run_id for identifier in self.target_store.list_keys() if isinstance(identifier, ValidationResultIdentifier)]
+                source_store_keys = [validation_to_render for validation_to_render in source_store_keys if validation_to_render.run_id not in previously_rendered_validation_site_run_ids]
+
+            # self.target_store.list_keys()
+            if self.validation_results_limit:
+                source_store_keys = sorted(
+                    source_store_keys, key=lambda x: x.run_id.run_time, reverse=True
+                )[: self.validation_results_limit]
+        print(f"LENGTH OF source_store_keys is {len(source_store_keys)}")
         for resource_key in source_store_keys:
             # if no resource_identifiers are passed, the section
             # builder will build
