@@ -976,7 +976,7 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
@@ -1037,7 +1037,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
