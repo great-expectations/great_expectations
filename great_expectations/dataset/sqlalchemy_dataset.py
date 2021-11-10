@@ -85,6 +85,11 @@ except ImportError:
     sqlalchemy_redshift = None
 
 try:
+    import sqlalchemy_pytds.dialect
+except ImportError:
+    sqlalchemy_pytds.dialect = None
+
+try:
     import snowflake.sqlalchemy.snowdialect
 
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
@@ -1933,6 +1938,25 @@ WHERE
             # redshift
             if isinstance(
                 self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            ):
+                if positive:
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("~")
+                    )
+                else:
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("!~")
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
+        try:
+            # MS SQL
+            if isinstance(
+                self.sql_engine_dialect, sqlalchemy_pytds.dialect.MSDialect_pytds
             ):
                 if positive:
                     return BinaryExpression(
