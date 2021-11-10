@@ -1,7 +1,6 @@
 import logging
 from typing import List, Optional
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
@@ -161,12 +160,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             "bucket_or_name": self._bucket_or_name,
             "path": path,
         }
-        try:
-            return self.execution_engine.resolve_data_reference(
-                data_connector_name=self.__class__.__name__,
-                template_arguments=template_arguments,
-            )
-        except AttributeError:
-            raise ge_exceptions.DataConnectorError(
-                "A non-existent/unknown ExecutionEngine instance was referenced."
-            )
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )

@@ -6,7 +6,7 @@ from great_expectations.core.batch import BatchRequest
 context = ge.get_context()
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -47,7 +47,7 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "assets": {
                 "yellow_tripdata": {
-                    "pattern": "yellow_tripdata_(.*)\.csv",
+                    "pattern": r"yellow_tripdata_(.*)\.csv",
                     "group_names": ["month"],
                 }
             },
@@ -96,7 +96,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -105,24 +105,24 @@ execution_engine:
   class_name: PandasExecutionEngine
 data_connectors:
   default_inferred_data_connector_name:
-    class_name: InferredAssetS3DataConnector
+    class_name: ConfiguredAssetS3DataConnector
     bucket: <MY S3 BUCKET>/
     prefix: <MY S3 BUCKET PREFIX>/
-    default_regex:
-      group_names:
-        - month
-      pattern: yellow_tripdata_(.*)\.csv
+    assets:
+      yellow_tripdata:
+        pattern: yellow_tripdata_(.*)\.csv
+        group_names:
+          - month
 """
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace("<MY S3 BUCKET>/", "superconductive-public")
 datasource_yaml = datasource_yaml.replace(
-    "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_trip_data_samples/"
+    "<MY S3 BUCKET PREFIX>/", "data/taxi_yellow_tripdata_samples/"
 )
 
-# TODO: Uncomment once S3 testing in Azure Pipelines is re-enabled
-# test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
 datasource_config = {
@@ -135,12 +135,14 @@ datasource_config = {
     },
     "data_connectors": {
         "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+            "class_name": "ConfiguredAssetS3DataConnector",
             "bucket": "<MY S3 BUCKET>/",
             "prefix": "<MY S3 BUCKET PREFIX>/",
-            "default_regex": {
-                "group_names": ["month"],
-                "pattern": "yellow_tripdata_(.*)\.csv",
+            "assets": {
+                "yellow_tripdata": {
+                    "group_names": ["month"],
+                    "pattern": r"yellow_tripdata_(.*)\.csv",
+                },
             },
         },
     },
@@ -153,26 +155,25 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "superconductive-public"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
-] = "data/taxi_yellow_trip_data_samples/"
+] = "data/taxi_yellow_tripdata_samples/"
 
-# TODO: Uncomment once S3 testing in Azure Pipelines is re-enabled
-# test_python = context.test_yaml_config(
-#     yaml.dump(datasource_config), return_mode="report_object"
-# )
-#
-# assert test_yaml == test_python
-#
-# context.add_datasource(**datasource_config)
-#
-# assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-# assert "yellow_tripdata" in set(
-#     context.get_available_data_asset_names()["taxi_datasource"][
-#         "default_inferred_data_connector_name"
-#     ]
-# )
+test_python = context.test_yaml_config(
+    yaml.dump(datasource_config), return_mode="report_object"
+)
+
+assert test_yaml == test_python
+
+context.add_datasource(**datasource_config)
+
+assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
+assert "yellow_tripdata" in set(
+    context.get_available_data_asset_names()["taxi_datasource"][
+        "default_inferred_data_connector_name"
+    ]
+)
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -213,7 +214,7 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "assets": {
                 "yellow_tripdata": {
-                    "pattern": "yellow_tripdata_(.*)\.csv",
+                    "pattern": r"yellow_tripdata_(.*)\.csv",
                     "group_names": ["month"],
                 }
             },
@@ -257,7 +258,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -298,7 +299,7 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "assets": {
                 "yellow_tripdata": {
-                    "pattern": "green_tripdata_(.*)\.csv",
+                    "pattern": r"green_tripdata_(.*)\.csv",
                     "group_names": ["month"],
                 }
             },
@@ -326,7 +327,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -347,7 +348,7 @@ data_connectors:
         pattern: green_tripdata_(\d{4})-(\d{2})\.csv
         group_names:
           - year
-          - month        
+          - month
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -373,11 +374,11 @@ datasource_config = {
             "base_directory": "<MY DIRECTORY>/",
             "assets": {
                 "yellow_tripdata": {
-                    "pattern": "yellow_tripdata_(\d{4})-(\d{2})\.csv",
+                    "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv",
                     "group_names": ["year", "month"],
                 },
                 "green_tripdata": {
-                    "pattern": "green_tripdata_(\d{4})-(\d{2})\.csv",
+                    "pattern": r"green_tripdata_(\d{4})-(\d{2})\.csv",
                     "group_names": ["year", "month"],
                 },
             },
@@ -411,7 +412,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -434,7 +435,7 @@ data_connectors:
         pattern: (\d{4})-(\d{2})\.csv
         group_names:
           - year
-          - month        
+          - month
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -461,12 +462,12 @@ datasource_config = {
             "assets": {
                 "yellow_tripdata": {
                     "base_directory": "yellow_tripdata/",
-                    "pattern": "yellow_tripdata_(\d{4})-(\d{2})\.csv",
+                    "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv",
                     "group_names": ["year", "month"],
                 },
                 "green_tripdata": {
                     "base_directory": "green_tripdata/",
-                    "pattern": "(\d{4})-(\d{2})\.csv",
+                    "pattern": r"(\d{4})-(\d{2})\.csv",
                     "group_names": ["year", "month"],
                 },
             },
@@ -499,7 +500,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -522,7 +523,7 @@ data_connectors:
         glob_directive: "*.txt"
       green_tripdata:
         base_directory: green_tripdata/
-        glob_directive: "*.csv"       
+        glob_directive: "*.csv"
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -547,7 +548,7 @@ datasource_config = {
             "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "<MY DIRECTORY>/",
             "default_regex": {
-                "pattern": "(.*)_(\d{4})-(\d{2})\.(csv|txt)$",
+                "pattern": r"(.*)_(\d{4})-(\d{2})\.(csv|txt)$",
                 "group_names": ["data_asset_name", "year", "month"],
             },
             "assets": {
