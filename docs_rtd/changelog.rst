@@ -7,7 +7,100 @@ Changelog
 
 develop
 -----------------
-* [DOCS] Update g_e docs branding to match g_e.io  (#3741)
+
+0.13.41
+-----------------
+* [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
+* [BUGFIX] Be able to use spark execution engine with spark reuse flag (#3541) (thanks @fep2)
+* [DOCS] punctuation how_to_contribute_a_new_expectation_to_great_expectations.md (#3484) (thanks @plain-jane-gray)
+* [DOCS] Update next_steps.md (#3483) (thanks @plain-jane-gray)
+* [DOCS] Update how_to_configure_a_validation_result_store_in_gcs.md (#3482) (thanks @plain-jane-gray)
+* [DOCS] Choosing and configuring DataConnectors (#3533)
+* [DOCS] Remove --no-spark flag from docs tests (#3625)
+* [DOCS] DevRel - docs fixes (#3498)
+* [DOCS] Adding a period (#3627) (thanks @plain-jane-gray)
+* [DOCS] Remove comments that describe Snowflake parameters as optional (#3639)
+* [MAINTENANCE] Update CODEOWNERS (#3604)
+* [MAINTENANCE] Fix logo (#3598)
+* [MAINTENANCE] Add Expectations to docs navbar (#3597)
+* [MAINTENANCE] Remove unused fixtures (#3218)
+* [MAINTENANCE] Remove unnecessary comment (#3608)
+* [MAINTENANCE] Superconductive Warnings hackathon (#3612)
+* [MAINTENANCE] Bring Core Skills Doc for Creating Batch Under Test (#3629)
+* [MAINTENANCE] Refactor and Clean Up Expectations and Metrics Parts of the Codebase (better encapsulation, improved type hints) (#3633)
+
+
+0.13.40
+-----------------
+* [FEATURE] Retrieve data context config through Cloud API endpoint #3586
+* [FEATURE] Update Batch IDs to match name change in paths included in batch_request #3587
+* [FEATURE] V2-to-V3 Upgrade/Migration #3592
+* [FEATURE] table and graph atomic renderers #3595
+* [FEATURE] V2-to-V3 Upgrade/Migration (Sidebar.js update) #3603
+* [DOCS] Fixing broken links and linking to Expectation Gallery #3591
+* [MAINTENANCE] Get TZLocal back to its original version control. #3585
+* [MAINTENANCE] Add tests for datetime evaluation parameters #3601
+* [MAINTENANCE] Removed warning for pandas option display.max_colwidth #3606
+
+0.13.39
+-----------------
+* [FEATURE] Migration of Expectations to Atomic Prescriptive Renderers (#3530, #3537)
+* [FEATURE] Cloud: Editing Expectation Suites programmatically (#3564)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3546) (thanks @shpolina)
+* [BUGFIX] SQLAlchemy version 1.3.24 compatibility in map metric provider (#3507) (thanks @shpolina)
+* [DOCS] Clarify how to configure optional Snowflake parameters in CLI datasource new notebook (#3543)
+* [DOCS] Added breaks to code snippets, reordered guidance (#3514)
+* [DOCS] typo in documentation (#3542) (thanks @DanielEdu)
+* [DOCS] Update how_to_configure_a_new_data_context_with_the_cli.md (#3556) (thanks @plain-jane-gray)
+* [DOCS] Improved installation instructions, included in-line installation instructions to getting started (#3509)
+* [DOCS] Update contributing_style.md (#3521) (thanks @plain-jane-gray)
+* [DOCS] Update contributing_test.md (#3519) (thanks @plain-jane-gray)
+* [DOCS] Revamp style guides (#3554)
+* [DOCS] Update contributing.md (#3523, #3524) (thanks @plain-jane-gray)
+* [DOCS] Simplify getting started (#3555)
+* [DOCS] How to introspect and partition an SQL database (#3465)
+* [DOCS] Update contributing_checklist.md (#3518) (thanks @plain-jane-gray)
+* [DOCS] Removed duplicate prereq, how_to_instantiate_a_data_context_without_a_yml_file.md (#3481) (thanks @plain-jane-gray)
+* [DOCS] fix link to expectation glossary (#3558) (thanks @sephiartlist)
+* [DOCS] Minor Friction (#3574)
+* [MAINTENANCE] Make CLI Check-Config and CLI More Robust (#3562)
+* [MAINTENANCE] tzlocal version fix (#3565)
+
+0.13.38
+-----------------
+* [FEATURE] Atomic Renderer: Initial framework and Prescriptive renderers (#3529)
+* [FEATURE] Atomic Renderer: Diagnostic renderers (#3534)
+* [BUGFIX] runtime_parameters: {batch_data: <park DF} serialization (#3502)
+* [BUGFIX] Custom query in RuntimeBatchRequest for expectations using table.row_count metric (#3508)
+* [BUGFIX] Transpose \n and , in notebook (#3463) (thanks @mccalluc)
+* [BUGFIX] Fix contributor link (#3462) (thanks @mccalluc)
+* [DOCS] How to introspect and partition a files based data store (#3464)
+* [DOCS] fixed duplication of text in code example (#3503)
+* [DOCS] Make content better reflect the document organization. (#3510)
+* [DOCS] Correcting typos and improving the language. (#3513)
+* [DOCS] Better Sections Numbering in Documentation (#3515)
+* [DOCS] Improved wording (#3516)
+* [DOCS] Improved title wording for section heading (#3517)
+* [DOCS] Improve Readability of Documentation Content (#3536)
+* [MAINTENANCE] Content and test script update (#3532)
+* [MAINTENANCE] Provide Deprecation Notice for the "parse_strings_as_datetimes" Expectation Parameter in V3 (#3539)
+
+0.13.37
+-----------------
+* [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
+* [FEATURE] add get_available_data_asset_names_and_types (#3476)
+* [FEATURE] add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
+* [BUGFIX] Fix TupleS3StoreBackend remove_key bug (#3489)
+* [DOCS] Adding Flyte Deployment pattern to docs (#3383)
+* [DOCS] g_e docs branding updates (#3471)
+* [MAINTENANCE] Add type-hints; add utility method for creating temporary DB tables; clean up imports; improve code readability; and add a directory to pre-commit (#3475)
+* [MAINTENANCE] Clean up for a better code readability. (#3493)
+* [MAINTENANCE] Enable SQL for the "expect_compound_columns_to_be_unique" expectation. (#3488)
+* [MAINTENANCE] Fix some typos (#3474) (Thanks @mohamadmansourX)
+* [MAINTENANCE] Support SQLAlchemy version 1.3.24 for compatibility with Airflow (Airflow does not currently support later versions of SQLAlchemy). (#3499)
+* [MAINTENANCE] Update contributing_checklist.md (#3478) (Thanks @plain-jane-gray)
+* [MAINTENANCE] Update how_to_configure_a_validation_result_store_in_gcs.md (#3480) (Thanks @plain-jane-gray)
+* [MAINTENANCE] update implemented_expectations (#3492)
 
 0.13.36
 -----------------
@@ -24,7 +117,7 @@ develop
 * [MAINTENANCE] Remove validation playground notebooks (#3467)
 * [MAINTENANCE] clean up type hints, API usage, imports, and coding style (#3444)
 * [MAINTENANCE] comments (#3457)
- 
+
 0.13.35
 -----------------
 * [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)

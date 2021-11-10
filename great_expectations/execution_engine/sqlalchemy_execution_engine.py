@@ -34,7 +34,11 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
-from great_expectations.util import filter_properties_dict, import_library_module
+from great_expectations.util import (
+    filter_properties_dict,
+    get_sqlalchemy_url,
+    import_library_module,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -357,7 +361,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 drivername, credentials
             )
         else:
-            options = sa.engine.url.URL(drivername, **credentials)
+            options = get_sqlalchemy_url(drivername, **credentials)
 
         self.drivername = drivername
         engine = sa.create_engine(options, **create_engine_kwargs)
@@ -409,7 +413,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         credentials_driver_name = credentials.pop("drivername", None)
         create_engine_kwargs = {"connect_args": {"private_key": pkb}}
         return (
-            sa.engine.url.URL(drivername or credentials_driver_name, **credentials),
+            get_sqlalchemy_url(drivername or credentials_driver_name, **credentials),
             create_engine_kwargs,
         )
 
@@ -451,7 +455,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
-                    schema_name=data_object._schema_name,
+                    schema=data_object._schema_name,
                 )
             else:
                 selectable = data_object.selectable
@@ -773,9 +777,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
             assert len(query["select"]) == len(query["ids"])
             try:
-                res = self.engine.execute(
-                    sa.select(query["select"]).select_from(selectable)
-                ).fetchall()
+                """
+                If a custom query is passed, selectable will be TextClause and not formatted
+                as a subquery wrapped in "(subquery) alias". TextClause must first be converted
+                to TextualSelect using sa.columns() before it can be converted to type Subquery
+                """
+                if isinstance(selectable, TextClause):
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(
+                            selectable.columns().subquery()
+                        )
+                    ).fetchall()
+                else:
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(selectable)
+                    ).fetchall()
                 logger.debug(
                     f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
                 )
@@ -987,7 +1003,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.table(table_name, schema=batch_spec.get("schema_name", None))
                     )
                     .where(split_clause)
-                ).one()[0]
+                ).scalar()
                 p: Optional[float] = batch_spec["sampling_kwargs"]["p"] or 1.0
                 sample_size: int = round(p * num_rows)
                 return (
