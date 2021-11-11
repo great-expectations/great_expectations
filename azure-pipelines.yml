@@ -155,6 +155,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
+              pip freeze
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
