@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
@@ -77,7 +76,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = os.path.join(prefix, "")
+        self._prefix = prefix
         self._delimiter = delimiter
         self._max_keys = max_keys
 

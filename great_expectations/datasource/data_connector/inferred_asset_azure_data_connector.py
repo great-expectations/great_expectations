@@ -75,7 +75,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._container = container
-        self._name_starts_with = os.path.join(name_starts_with, "")
+        self._name_starts_with = name_starts_with
         self._delimiter = delimiter
 
         if azure_options is None:

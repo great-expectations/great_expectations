@@ -79,7 +79,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
-        self._prefix = os.path.join(prefix, "")
+        self._prefix = prefix
         self._delimiter = delimiter
         self._max_keys = max_keys
 
