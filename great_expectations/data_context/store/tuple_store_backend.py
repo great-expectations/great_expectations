@@ -599,6 +599,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3 = self._create_client()
         paginator = s3.get_paginator("list_objects_v2")
 
+        # If provided as an arg, override the attr (just within the context of this method)
         prefix = prefix if prefix is not None else self.prefix
         if prefix:
             page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=prefix)
@@ -876,8 +877,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud import storage
 
         gcs = storage.Client(self.project)
-        prefix = prefix if prefix is not None else self.prefix
 
+        # If provided as an arg, override the attr (just within the context of this method)
+        prefix = prefix if prefix is not None else self.prefix
         for blob in gcs.list_blobs(self.bucket, prefix=prefix):
             gcs_object_name = blob.name
             gcs_object_key = os.path.relpath(
@@ -1048,6 +1050,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def list_keys(self, prefix: Optional[str] = None) -> List[Tuple]:
         key_list = []
 
+        # If provided as an arg, override the attr (just within the context of this method)
         prefix = prefix if prefix is not None else self.prefix
         for obj in self._get_container_client().list_blobs(name_starts_with=prefix):
             az_blob_key = os.path.relpath(obj.name)
