@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] DBFS Data connectors #3659
 
 0.13.41
 -----------------

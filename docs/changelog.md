@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] DBFS Data connectors #3659
 
 ### 0.13.41
 * [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
