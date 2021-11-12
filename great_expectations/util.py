@@ -907,6 +907,10 @@ def gen_directory_tree_str(startpath):
 
 def lint_code(code: str) -> str:
     """Lint strings of code passed in.  Optional dependency "black" must be installed."""
+
+    # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
+    # While this seems to resolve the issue, the root cause is yet to be determined.
+
     try:
         import black
 
