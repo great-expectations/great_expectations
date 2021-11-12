@@ -208,6 +208,7 @@ def send_email(
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,
+    ge_cloud_mode: bool = False,
 ) -> Union[BatchRequest, RuntimeBatchRequest]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
     batch_data = None
@@ -262,6 +263,13 @@ def get_runtime_batch_request(
         if "runtime_parameters" not in runtime_batch_request_dict:
             runtime_batch_request_dict["runtime_parameters"] = {}
         runtime_batch_request_dict["runtime_parameters"]["batch_data"] = batch_data
+
+    if ge_cloud_mode and batch_request_class is RuntimeBatchRequest:
+        batch_identifiers = runtime_batch_request_dict.get("batch_identifiers", {})
+        if len(batch_identifiers.keys()) == 0:
+            batch_identifiers["timestamp"] = str(datetime.datetime.now())
+            runtime_batch_request_dict["batch_identifiers"] = batch_identifiers
+
     return batch_request_class(**runtime_batch_request_dict)
 
 

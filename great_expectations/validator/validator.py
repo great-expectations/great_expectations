@@ -72,7 +72,51 @@ except ImportError:
 MAX_METRIC_COMPUTATION_RETRIES = 3
 
 
+ValidationStatistics = namedtuple(
+    "ValidationStatistics",
+    [
+        "evaluated_expectations",
+        "successful_expectations",
+        "unsuccessful_expectations",
+        "success_percent",
+        "success",
+    ],
+)
+
+
+def _calc_validation_statistics(validation_results):
+    """
+    Calculate summary statistics for the validation results and
+    return ``ExpectationStatistics``.
+    """
+    # calc stats
+    successful_expectations = sum(exp.success for exp in validation_results)
+    evaluated_expectations = len(validation_results)
+    unsuccessful_expectations = evaluated_expectations - successful_expectations
+    success = successful_expectations == evaluated_expectations
+    try:
+        success_percent = successful_expectations / evaluated_expectations * 100
+    except ZeroDivisionError:
+        # success_percent = float("nan")
+        success_percent = None
+
+    return ValidationStatistics(
+        successful_expectations=successful_expectations,
+        evaluated_expectations=evaluated_expectations,
+        unsuccessful_expectations=unsuccessful_expectations,
+        success=success,
+        success_percent=success_percent,
+    )
+
+
 class Validator:
+    DEFAULT_RUNTIME_CONFIGURATION = {
+        "include_config": True,
+        "catch_exceptions": False,
+        "result_format": "BASIC",
+    }
+    RUNTIME_KEYS = DEFAULT_RUNTIME_CONFIGURATION.keys()
+
     # noinspection PyUnusedLocal
     def __init__(
         self,
@@ -121,11 +165,9 @@ class Validator:
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._default_expectation_args = {
-            "include_config": True,
-            "catch_exceptions": False,
-            "result_format": "BASIC",
-        }
+        self._default_expectation_args = copy.deepcopy(
+            Validator.DEFAULT_RUNTIME_CONFIGURATION
+        )
         self._validator_config = {}
 
         # This special state variable tracks whether a validation run is going on, which will disable
@@ -202,19 +244,14 @@ class Validator:
 
         def inst_expectation(*args, **kwargs):
             # this is used so that exceptions are caught appropriately when they occur in expectation config
-            basic_configuration_keys = {
-                "result_format",
-                "include_config",
-                "catch_exceptions",
-            }
             basic_default_expectation_args = {
                 k: v
                 for k, v in self.default_expectation_args.items()
-                if k in basic_configuration_keys
+                if k in Validator.RUNTIME_KEYS
             }
             basic_runtime_configuration = copy.deepcopy(basic_default_expectation_args)
             basic_runtime_configuration.update(
-                {k: v for k, v in kwargs.items() if k in basic_configuration_keys}
+                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
             expectation_impl = get_expectation_impl(name)
@@ -725,112 +762,6 @@ aborting graph resolution.
 
         return aborted_metrics_info
 
-    @staticmethod
-    def _parse_validation_graph(
-        validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], Any],
-    ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
-        """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
-        validation graph (a graph structure of metric ids) edges"""
-        unmet_dependency_ids = set()
-        unmet_dependency = set()
-        maybe_ready_ids = set()
-        maybe_ready = set()
-
-        for edge in validation_graph.edges:
-            if edge.left.id not in metrics:
-                if edge.right is None or edge.right.id in metrics:
-                    if edge.left.id not in maybe_ready_ids:
-                        maybe_ready_ids.add(edge.left.id)
-                        maybe_ready.add(edge.left)
-                else:
-                    if edge.left.id not in unmet_dependency_ids:
-                        unmet_dependency_ids.add(edge.left.id)
-                        unmet_dependency.add(edge.left)
-
-        return maybe_ready - unmet_dependency, unmet_dependency
-
-    @staticmethod
-    def _resolve_metrics(
-        execution_engine: ExecutionEngine,
-        metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple[str, str, str], Any] = None,
-        runtime_configuration: dict = None,
-    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
-        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
-        resolved"""
-        return execution_engine.resolve_metrics(
-            metrics_to_resolve=metrics_to_resolve,
-            metrics=metrics,
-            runtime_configuration=runtime_configuration,
-        )
-
-    def _initialize_expectations(
-        self,
-        expectation_suite: ExpectationSuite = None,
-        expectation_suite_name: str = None,
-    ):
-        """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
-        In addition, this always sets the `default_expectation_args` to:
-            `include_config`: False,
-            `catch_exceptions`: False,
-            `output_format`: 'BASIC'
-
-        By default, initializes data_asset_type to the name of the implementing class, but subclasses
-        that have interoperable semantics (e.g. Dataset) may override that parameter to clarify their
-        interoperability.
-
-        Args:
-            expectation_suite (json): \
-                A json-serializable expectation config. \
-                If None, creates default `_expectation_suite` with an empty list of expectations and \
-                key value `data_asset_name` as `data_asset_name`.
-
-            expectation_suite_name (string): \
-                The name to assign to the `expectation_suite.expectation_suite_name`
-
-        Returns:
-            None
-        """
-        # Checking type of expectation_suite.
-        # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
-        if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
-            raise TypeError(
-                "expectation_suite must be of type ExpectationSuite, not {}".format(
-                    type(expectation_suite)
-                )
-            )
-        if expectation_suite is not None:
-            if isinstance(expectation_suite, dict):
-                expectation_suite = expectationSuiteSchema.load(expectation_suite)
-            else:
-                expectation_suite = copy.deepcopy(expectation_suite)
-            self._expectation_suite = expectation_suite
-
-            if expectation_suite_name is not None:
-                if (
-                    self._expectation_suite.expectation_suite_name
-                    != expectation_suite_name
-                ):
-                    logger.warning(
-                        "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
-                            n2=expectation_suite_name,
-                        )
-                    )
-                self._expectation_suite.expectation_suite_name = expectation_suite_name
-
-        else:
-            if expectation_suite_name is None:
-                expectation_suite_name = "default"
-            self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name
-            )
-
-        self._expectation_suite.execution_engine_type = type(
-            self.execution_engine
-        ).__name__
-
     def append_expectation(self, expectation_config):
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
         warnings.warn(
@@ -1010,7 +941,7 @@ set as active.
         See also:
             set_default_expectation_arguments
         """
-        return self._default_expectation_args
+        return self.default_expectation_args
 
     @property
     def ge_cloud_mode(self) -> bool:
@@ -1234,6 +1165,7 @@ set as active.
                 "Unable to save config: filepath or data_context must be available."
             )
 
+    # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
     def validate(
         self,
         expectation_suite=None,
@@ -1447,13 +1379,9 @@ set as active.
             for col in columns:
                 expectations_to_evaluate.extend(columns[col])
 
-            runtime_configuration = copy.deepcopy(self.default_expectation_args)
-
-            if catch_exceptions is not None:
-                runtime_configuration.update({"catch_exceptions": catch_exceptions})
-
-            if result_format is not None:
-                runtime_configuration.update({"result_format": result_format})
+            runtime_configuration = self._get_runtime_configuration(
+                catch_exceptions=catch_exceptions, result_format=result_format
+            )
 
             results = self.graph_validate(
                 configurations=expectations_to_evaluate,
@@ -1657,42 +1585,135 @@ set as active.
 
         return df.reset_index(drop=True, inplace=False)
 
+    @staticmethod
+    def _parse_validation_graph(
+        validation_graph: ValidationGraph,
+        metrics: Dict[Tuple[str, str, str], Any],
+    ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
+        """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
+        validation graph (a graph structure of metric ids) edges"""
+        unmet_dependency_ids = set()
+        unmet_dependency = set()
+        maybe_ready_ids = set()
+        maybe_ready = set()
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
+        for edge in validation_graph.edges:
+            if edge.left.id not in metrics:
+                if edge.right is None or edge.right.id in metrics:
+                    if edge.left.id not in maybe_ready_ids:
+                        maybe_ready_ids.add(edge.left.id)
+                        maybe_ready.add(edge.left)
+                else:
+                    if edge.left.id not in unmet_dependency_ids:
+                        unmet_dependency_ids.add(edge.left.id)
+                        unmet_dependency.add(edge.left)
 
+        return maybe_ready - unmet_dependency, unmet_dependency
 
-def _calc_validation_statistics(validation_results):
-    """
-    Calculate summary statistics for the validation results and
-    return ``ExpectationStatistics``.
-    """
-    # calc stats
-    successful_expectations = sum(exp.success for exp in validation_results)
-    evaluated_expectations = len(validation_results)
-    unsuccessful_expectations = evaluated_expectations - successful_expectations
-    success = successful_expectations == evaluated_expectations
-    try:
-        success_percent = successful_expectations / evaluated_expectations * 100
-    except ZeroDivisionError:
-        # success_percent = float("nan")
-        success_percent = None
+    @staticmethod
+    def _resolve_metrics(
+        execution_engine: ExecutionEngine,
+        metrics_to_resolve: Iterable[MetricConfiguration],
+        metrics: Dict[Tuple[str, str, str], Any] = None,
+        runtime_configuration: dict = None,
+    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
+        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
+        resolved"""
+        return execution_engine.resolve_metrics(
+            metrics_to_resolve=metrics_to_resolve,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+        )
 
-    return ValidationStatistics(
-        successful_expectations=successful_expectations,
-        evaluated_expectations=evaluated_expectations,
-        unsuccessful_expectations=unsuccessful_expectations,
-        success=success,
-        success_percent=success_percent,
-    )
+    def _initialize_expectations(
+        self,
+        expectation_suite: ExpectationSuite = None,
+        expectation_suite_name: str = None,
+    ):
+        """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
+        In addition, this always sets the `default_expectation_args` to:
+            `include_config`: False,
+            `catch_exceptions`: False,
+            `output_format`: 'BASIC'
+
+        By default, initializes data_asset_type to the name of the implementing class, but subclasses
+        that have interoperable semantics (e.g. Dataset) may override that parameter to clarify their
+        interoperability.
+
+        Args:
+            expectation_suite (json): \
+                A json-serializable expectation config. \
+                If None, creates default `_expectation_suite` with an empty list of expectations and \
+                key value `data_asset_name` as `data_asset_name`.
+
+            expectation_suite_name (string): \
+                The name to assign to the `expectation_suite.expectation_suite_name`
+
+        Returns:
+            None
+        """
+        # Checking type of expectation_suite.
+        # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
+        if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
+            raise TypeError(
+                "expectation_suite must be of type ExpectationSuite, not {}".format(
+                    type(expectation_suite)
+                )
+            )
+        if expectation_suite is not None:
+            if isinstance(expectation_suite, dict):
+                expectation_suite = expectationSuiteSchema.load(expectation_suite)
+            else:
+                expectation_suite = copy.deepcopy(expectation_suite)
+            self._expectation_suite = expectation_suite
+
+            if expectation_suite_name is not None:
+                if (
+                    self._expectation_suite.expectation_suite_name
+                    != expectation_suite_name
+                ):
+                    logger.warning(
+                        "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
+                            n1=self._expectation_suite.expectation_suite_name,
+                            n2=expectation_suite_name,
+                        )
+                    )
+                self._expectation_suite.expectation_suite_name = expectation_suite_name
+
+        else:
+            if expectation_suite_name is None:
+                expectation_suite_name = "default"
+            self._expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name
+            )
+
+        self._expectation_suite.execution_engine_type = type(
+            self.execution_engine
+        ).__name__
+
+    def _get_runtime_configuration(
+        self,
+        catch_exceptions: Optional[bool] = None,
+        result_format: Optional[Union[dict, str]] = None,
+    ) -> dict:
+        runtime_configuration = copy.deepcopy(self.default_expectation_args)
+
+        if catch_exceptions is not None:
+            runtime_configuration.update({"catch_exceptions": catch_exceptions})
+
+        if (
+            self.default_expectation_args["result_format"]
+            == Validator.DEFAULT_RUNTIME_CONFIGURATION["result_format"]
+        ):
+            if result_format is None:
+                runtime_configuration.pop("result_format")
+            else:
+                runtime_configuration.update({"result_format": result_format})
+        else:
+            if result_format is not None:
+                runtime_configuration.update({"result_format": result_format})
+
+        return runtime_configuration
 
 
 class BridgeValidator:

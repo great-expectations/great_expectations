@@ -60,41 +60,6 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 "mostly",
             ],
         )
-
-        if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
-
-        template_str = (
-            f"Values for given compound columns must be unique together{mostly_str}: "
-        )
-        for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
-
-        last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
-
         params_with_json_schema = {
             "column_list": {
                 "schema": {"type": "array"},
@@ -117,6 +82,48 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 "value": params.get("mostly"),
             },
         }
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = (
+            f"Values for given compound columns must be unique together{mostly_str}: "
+        )
+        column_list = params.get("column_list") if params.get("column_list") else []
+
+        if len(column_list) > 0:
+            for idx, val in enumerate(column_list[:-1]):
+                param = f"$column_list_{idx}"
+                template_str += f"{param}, "
+                params[param] = val
+
+            last_idx = len(column_list) - 1
+            last_param = f"$column_list_{last_idx}"
+            template_str += last_param
+            params[last_param] = column_list[last_idx]
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params_with_json_schema.update(conditional_params)
+
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

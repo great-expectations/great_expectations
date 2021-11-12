@@ -126,21 +126,6 @@ class ExpectTableRowCountToEqual(TableExpectation):
             configuration.kwargs,
             ["value", "row_condition", "condition_parser"],
         )
-        template_str = "Must have exactly $value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
-
         params_with_json_schema = {
             "value": {
                 "schema": {"type": "number"},
@@ -155,6 +140,23 @@ class ExpectTableRowCountToEqual(TableExpectation):
                 "value": params.get("condition_parser"),
             },
         }
+        template_str = "Must have exactly $value rows."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params_with_json_schema.update(conditional_params)
+
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

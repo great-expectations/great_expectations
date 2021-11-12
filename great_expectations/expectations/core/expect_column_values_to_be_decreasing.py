@@ -122,6 +122,26 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
                 "condition_parser",
             ],
         )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "strictly": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strictly"),
+            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
 
         if params.get("strictly"):
             template_str = "values must be strictly less than previous values"
@@ -147,30 +167,12 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
             template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
+            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "strictly": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strictly"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": params.get("parse_strings_as_datetimes"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

@@ -123,13 +123,13 @@ class SqlAlchemyBatchData(BatchData):
                 self._selectable = sa.Table(
                     table_name,
                     sa.MetaData(),
-                    schema_name=None,
+                    schema=None,
                 )
             else:
                 self._selectable = sa.Table(
                     table_name,
                     sa.MetaData(),
-                    schema_name=schema_name,
+                    schema=schema_name,
                 )
 
         elif create_temp_table:
@@ -158,7 +158,7 @@ class SqlAlchemyBatchData(BatchData):
             self._selectable = sa.Table(
                 generated_table_name,
                 sa.MetaData(),
-                schema_name=temp_table_schema_name,
+                schema=temp_table_schema_name,
             )
         else:
             if query:

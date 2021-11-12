@@ -26,9 +26,10 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from dateutil.parser import parse
+from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
@@ -46,9 +47,23 @@ except ModuleNotFoundError:
     # Fallback for python < 3.8
     import importlib_metadata
 
-
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy import Table
+    from sqlalchemy.engine import reflection
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
+
+logger = logging.getLogger(__name__)
 
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
@@ -892,6 +907,10 @@ def gen_directory_tree_str(startpath):
 
 def lint_code(code: str) -> str:
     """Lint strings of code passed in.  Optional dependency "black" must be installed."""
+
+    # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
+    # While this seems to resolve the issue, the root cause is yet to be determined.
+
     try:
         import black
 
@@ -1078,3 +1097,45 @@ def generate_temporary_table_name(
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
+
+
+def get_sqlalchemy_inspector(engine):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+        insp = reflection.Inspector.from_engine(engine)
+    else:
+        insp = sa.inspect(engine)
+    return insp
+
+
+def get_sqlalchemy_url(drivername, **credentials):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Calling URL() deprecated since 1.4, URL.create() should be used instead
+        url = sa.engine.url.URL(drivername, **credentials)
+    else:
+        url = sa.engine.url.URL.create(drivername, **credentials)
+    return url
+
+
+def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+    """
+    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
+    without explicitly turning the inner select() into a subquery first. This helper method ensures that this
+    conversion takes place.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    if version.parse(sa.__version__) >= version.parse("1.4"):
+        if isinstance(selectable, Select):
+            selectable = selectable.subquery()
+    return selectable
+
+
+def get_sqlalchemy_domain_data(domain_data):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
+        # select(query).subquery() should be used instead
+        domain_data = sa.select(["*"]).select_from(domain_data)
+    # engine.get_domain_records returns a valid select object;
+    # calling fetchall at execution is equivalent to a SELECT *
+    return domain_data
