@@ -36,6 +36,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import (
     filter_properties_dict,
+    get_sqlalchemy_selectable,
     get_sqlalchemy_url,
     import_library_module,
 )
@@ -483,9 +484,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.and_(
@@ -496,9 +497,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             elif ignore_row_if == "either_value_is_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.or_(
@@ -536,9 +537,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.and_(
@@ -551,9 +552,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             elif ignore_row_if == "any_value_is_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.or_(
