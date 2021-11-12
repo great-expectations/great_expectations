@@ -1,16 +1,18 @@
-import datetime
+# isort:skip_file
 import os
+import datetime
 
 import pandas as pd
 from ruamel import yaml
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
 )
+
+from great_expectations.core.util import get_or_create_spark_application
 
 spark = get_or_create_spark_application()
 
