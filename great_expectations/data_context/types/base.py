@@ -471,6 +471,8 @@ configuration to continue.
             in [
                 "InferredAssetFilesystemDataConnector",
                 "ConfiguredAssetFilesystemDataConnector",
+                "InferredAssetDBFSDataConnector",
+                "ConfiguredAssetDBFSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
