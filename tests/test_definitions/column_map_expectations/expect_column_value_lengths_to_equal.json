@@ -111,7 +111,7 @@
       },
       "out" : {
         "success": false,
-        "unexpected_index_list": [0],
+        "unexpected_index_list": [3],
         "unexpected_list": ["slimy"]
       }
     },{

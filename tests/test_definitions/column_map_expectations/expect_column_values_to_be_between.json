@@ -574,7 +574,7 @@
         },
         "out": {
           "unexpected_list": [9],
-          "unexpected_index_list": [0],
+          "unexpected_index_list": [8],
           "success": false
         }
       },{
