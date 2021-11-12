@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
     """
     Extension of InferredAssetFilesystemDataConnector used to connect to data on a DBFS filesystem.
+    Note: This works for the current implementation of DBFS. If in the future DBFS diverges from a Filesystem-like implementation, we should instead inherit from InferredAssetFilePathDataConnector or another DataConnector.
 
     The InferredAssetDBFSDataConnector is one of two classes (ConfiguredAssetDBFSDataConnector being the
     other one) designed for connecting to data on a DBFS filesystem. It connects to assets

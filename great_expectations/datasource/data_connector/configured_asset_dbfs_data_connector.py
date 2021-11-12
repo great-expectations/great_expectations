@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
     """
-    Extension of ConfiguredAssetFilesystemDataConnector used to connect to the DataBricks File System (DBFS)
+    Extension of ConfiguredAssetFilesystemDataConnector used to connect to the DataBricks File System (DBFS). Note: This works for the current implementation of DBFS. If in the future DBFS diverges from a Filesystem-like implementation, we should instead inherit from ConfiguredAssetFilePathDataConnector or another DataConnector.
 
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
     can use to get individual batches of data. They add flexibility in how to obtain data
