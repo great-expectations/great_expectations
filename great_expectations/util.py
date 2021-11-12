@@ -1125,3 +1125,13 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
         if isinstance(selectable, Select):
             selectable = selectable.subquery()
     return selectable
+
+
+def get_sqlalchemy_domain_data(domain_data):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
+        # select(query).subquery() should be used instead
+        domain_data = sa.select(["*"]).select_from(domain_data)
+    # engine.get_domain_records returns a valid select object;
+    # calling fetchall at execution is equivalent to a SELECT *
+    return domain_data
