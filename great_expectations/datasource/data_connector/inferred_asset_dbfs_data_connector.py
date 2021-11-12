@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.datasource.data_connector import (
     InferredAssetFilesystemDataConnector,
 )
@@ -27,7 +26,7 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
         name: str,
         datasource_name: str,
         base_directory: str,
-        execution_engine: Optional[ExecutionEngine] = None,
+        execution_engine: ExecutionEngine,
         default_regex: Optional[dict] = None,
         glob_directive: Optional[str] = "*",
         sorters: Optional[list] = None,
@@ -63,8 +62,6 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
-        # data_asset_name isn't used in this method.
-        # It's only kept for compatibility with parent methods.
 
         full_path = super()._get_full_file_path(
             path=path, data_asset_name=data_asset_name

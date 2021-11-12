@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
@@ -33,7 +32,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
         datasource_name: str,
         base_directory: str,
         assets: dict,
-        execution_engine: Optional[ExecutionEngine] = None,
+        execution_engine: ExecutionEngine,
         default_regex: Optional[dict] = None,
         glob_directive: str = "**/*",
         sorters: Optional[list] = None,
@@ -47,7 +46,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
             assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector). These can each have their own regex and sorters
-            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+            execution_engine (ExecutionEngine): Reference to ExecutionEngine
             default_regex (dict): optional regex configuration for filtering data_references
             glob_directive (str): glob for selecting files in directory (defaults to *)
             sorters (list): optional list of sorters for sorting data_references
