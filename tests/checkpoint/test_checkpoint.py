@@ -1508,7 +1508,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
@@ -1569,7 +1569,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
