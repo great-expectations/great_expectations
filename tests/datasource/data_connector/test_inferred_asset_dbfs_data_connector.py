@@ -1,61 +1,11 @@
 from typing import List
 
-import pytest
-
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.data_connector import InferredAssetDBFSDataConnector
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
-
-
-def test_basic_instantiation(tmp_path_factory):
-    """
-    What does this test and why?
-    Parallels the same test for the parent class InferredAssetFilesystemDataConnector to
-    ensure there are no regressions in InferredAssetDBFSDataConnector
-    """
-    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "path/A-100.csv",
-            "path/A-101.csv",
-            "directory/B-1.csv",
-            "directory/B-2.csv",
-        ],
-    )
-
-    my_data_connector: InferredAssetDBFSDataConnector = InferredAssetDBFSDataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        execution_engine=PandasExecutionEngine(),
-        default_regex={
-            "pattern": r"(.+)/(.+)-(\d+)\.csv",
-            "group_names": ["data_asset_name", "letter", "number"],
-        },
-        glob_directive="*/*.csv",
-        base_directory=base_directory,
-    )
-
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
-    assert my_data_connector.get_data_reference_list_count() == 4
-    assert my_data_connector.get_unmatched_data_references() == []
-
-    # Illegal execution environment name
-    with pytest.raises(ValueError):
-        print(
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    datasource_name="something",
-                    data_connector_name="my_data_connector",
-                    data_asset_name="something",
-                )
-            )
-        )
 
 
 def test__get_full_file_path_pandas(fs):
