@@ -8,8 +8,6 @@ import Congratulations from '../guides/connecting_to_your_data/components/congra
 
 Great Expectations works well with many types of Databricks workflows. This guide will help you run Great Expectations in [Databricks](https://databricks.com/).
 
-# TODO: update Prerequisites, empty Prerequisites component?
-
 <Prerequisites>
 
 - Have completed Databricks setup including having a running Databricks cluster with attached notebook
