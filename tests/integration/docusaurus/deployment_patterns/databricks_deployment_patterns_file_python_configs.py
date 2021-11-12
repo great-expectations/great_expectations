@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -56,7 +56,7 @@ my_spark_datasource_config = {
     },
     "data_connectors": {
         "insert_your_data_connector_name_here": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+            "class_name": "InferredAssetDBFSDataConnector",
             "base_directory": "/dbfs/example_data/nyctaxi/tripdata/yellow/",
             "glob_directive": "*.csv",
             "default_regex": {
@@ -75,6 +75,11 @@ my_spark_datasource_config = {
 my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
     "base_directory"
 ] = os.path.join(root_directory, "../data/")
+# For this test script, change the data_conector class_name to the filesystem version since we are unable to
+# mock /dbfs/ and dbfs:/ style paths without using a mocked filesystem
+my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
+    "class_name"
+] = "InferredAssetFilesystemDataConnector"
 
 # Data location used when running or debugging this script directly
 # os.path.join(
@@ -97,7 +102,7 @@ batch_request = BatchRequest(
     },
 )
 
-# # CODE ^^^^^ ^^^^^
+# CODE ^^^^^ ^^^^^
 
 # NOTE: The following code is only for testing and can be ignored by users.
 # ASSERTIONS vvvvv vvvvv

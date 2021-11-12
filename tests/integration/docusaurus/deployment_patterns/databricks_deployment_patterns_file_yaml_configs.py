@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -55,7 +55,7 @@ execution_engine:
 data_connectors:
   insert_your_data_connector_name_here:
     module_name: great_expectations.datasource.data_connector
-    class_name: InferredAssetFilesystemDataConnector
+    class_name: InferredAssetDBFSDataConnector
     base_directory: /dbfs/example_data/nyctaxi/tripdata/yellow/
     glob_directive: "*.csv"
     default_regex:
@@ -66,10 +66,15 @@ data_connectors:
       pattern: (.*)_(\d{4})-(\d{2})\.csv
 """
 
-# # For this test script, change base_directory to location where test runner data is located
+# For this test script, change base_directory to location where test runner data is located
 my_spark_datasource_config = my_spark_datasource_config.replace(
     "/dbfs/example_data/nyctaxi/tripdata/yellow/",
     os.path.join(root_directory, "../data/"),
+)
+# For this test script, change the data_conector class_name to the filesystem version since we are unable to
+# mock /dbfs/ and dbfs:/ style paths without using a mocked filesystem
+my_spark_datasource_config = my_spark_datasource_config.replace(
+    "InferredAssetDBFSDataConnector", "InferredAssetFilesystemDataConnector"
 )
 
 # Data location used when running or debugging this script directly
