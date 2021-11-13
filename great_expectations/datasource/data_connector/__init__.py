@@ -37,3 +37,5 @@ from .configured_asset_sql_data_connector import (
 from .inferred_asset_sql_data_connector import (
     InferredAssetSqlDataConnector,
 )
+from .configured_asset_dbfs_data_connector import ConfiguredAssetDBFSDataConnector
+from .inferred_asset_dbfs_data_connector import InferredAssetDBFSDataConnector
