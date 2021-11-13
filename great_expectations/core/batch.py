@@ -37,6 +37,7 @@ BATCH_REQUEST_INSTANTIATION_KEYS: set = {
     "batch_filter_parameters",
 }
 
+
 class BatchDefinition(SerializableDictDot):
     def __init__(
         self,
@@ -588,7 +589,6 @@ class Batch(SerializableDictDot):
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
 
 
-# TODO: <Alex>ALEX</Alex>
 def get_batch_request_from_acceptable_arguments(
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,
@@ -768,4 +768,3 @@ def get_batch_request_from_acceptable_arguments(
         )
 
     return batch_request
-# TODO: <Alex>ALEX</Alex>
