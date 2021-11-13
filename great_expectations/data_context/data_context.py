@@ -1557,10 +1557,6 @@ class BaseDataContext:
             batch_parameters=batch_parameters,
         )
 
-    @usage_statistics_enabled_method(
-        event_name="data_context.get_batch_list",
-        args_payload_fn=get_batch_list_usage_statistics,
-    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
