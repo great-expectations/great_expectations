@@ -14,6 +14,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 
 def parse_result_format(result_format):
@@ -119,8 +120,21 @@ def recursively_convert_to_json_serializable(test_obj):
             return None
     except (TypeError, ValueError):
         pass
+    
+    if isinstance(test_obj, str):
+        if "'" in test_obj:
+            raise InvalidExpectationConfigurationError(
+            "%s cannot be serialized to json. Do not introduce simple quotes in configuration. Use double quotes instead."
+            % (test_obj)
+        )
+        if "\n" in test_obj:
+            raise InvalidExpectationConfigurationError(
+            "%s cannot be serialized to json. Do not introduce \\n in configuration."
+            % (repr(test_obj))
+        )
+        return test_obj
 
-    if isinstance(test_obj, (str, int, float, bool)):
+    if isinstance(test_obj, (int, float, bool)):
         # No problem to encode json
         return test_obj
 

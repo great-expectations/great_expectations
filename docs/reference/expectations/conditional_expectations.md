@@ -99,6 +99,18 @@ This results in the following Expectation Suite:
 }
 ```
 
+Warning : you should not use simple quotes nor \\n inside the query. Otherwise it may introduce bug at reloading (great_expectations suite edit).
+
+```python 
+row_condition="PClass=='1st'"  # never use simple quotes inside !!!
+```
+
+```python 
+row_condition="""
+PClass=="1st"
+"""  # never use \\n inside !!!
+```
+
 ## Data Docs and Conditional Expectations
 
 Conditional Expectations are displayed differently from standard Expectations in the Data Docs. Each Conditional

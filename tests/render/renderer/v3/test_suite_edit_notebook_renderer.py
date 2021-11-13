@@ -16,6 +16,7 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
+    InvalidExpectationConfigurationError,
 )
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
@@ -1106,3 +1107,47 @@ def test_notebook_execution_with_custom_notebooks(
         expected_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
+
+
+@pytest.mark.parametrize(
+    "row_condition",
+    [
+        "Sex == 'female'",
+        """
+        Sex == "female"
+        """,
+    ]
+)
+def test_raise_exception_quotes_or_space_with_row_condition(
+    row_condition,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    """
+    To set this test up we:
+
+    - create a suite
+    - add an expectations with a row_condition
+    - create the suite edit notebook by hijacking the private cli method
+    - chack if the exception is raised
+    """
+    # Since we'll run the notebook, we use a context with no data docs to avoid the renderer's default
+    # behavior of building and opening docs, which is not part of this test.
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    root_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    expectation_suite_name: str = "warning"
+
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1912",
+    }
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
+    )
+    with pytest.raises(
+        InvalidExpectationConfigurationError, match=r".*Do not introduce (?:simple quotes|\\n) in configuration.*"
+    ):
+        validator.expect_column_values_to_be_in_set(column="Sex", row_condition=row_condition, condition_parser='pandas', value_set=["female", "male"])
