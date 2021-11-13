@@ -51,7 +51,6 @@ from great_expectations.core.usage_statistics.anonymizers.store_anonymizer impor
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
-    get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     send_usage_message,
