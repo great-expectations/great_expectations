@@ -52,7 +52,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
         # 'np.complex64': np.complex64([10.9999999 + 4.9999999j, 11.2+7.3j]),
         # 'np.complex128': np.complex128([20.999999999978335216827+10.99999999j, 22.4+14.6j]),
         # 'np.complex256': np.complex256([40.99999999 + 20.99999999j, 44.8+29.2j]),
-        "np.str": np.str_(["hello"]).replace("'", "\""),
+        "np.str": np.str_(["hello"]).replace("'", '"'),
         "yyy": decimal.Decimal(123.456),
     }
     if hasattr(np, "float128") and platform.system() != "Windows":

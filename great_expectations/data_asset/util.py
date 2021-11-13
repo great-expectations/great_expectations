@@ -120,18 +120,18 @@ def recursively_convert_to_json_serializable(test_obj):
             return None
     except (TypeError, ValueError):
         pass
-    
+
     if isinstance(test_obj, str):
         if "'" in test_obj:
             raise InvalidExpectationConfigurationError(
-            "%s cannot be serialized to json. Do not introduce simple quotes in configuration. Use double quotes instead."
-            % (test_obj)
-        )
+                "%s cannot be serialized to json. Do not introduce simple quotes in configuration. Use double quotes instead."
+                % (test_obj)
+            )
         if "\n" in test_obj:
             raise InvalidExpectationConfigurationError(
-            "%s cannot be serialized to json. Do not introduce \\n in configuration."
-            % (repr(test_obj))
-        )
+                "%s cannot be serialized to json. Do not introduce \\n in configuration."
+                % (repr(test_obj))
+            )
         return test_obj
 
     if isinstance(test_obj, (int, float, bool)):

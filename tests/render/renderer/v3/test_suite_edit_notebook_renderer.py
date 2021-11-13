@@ -1116,7 +1116,7 @@ def test_notebook_execution_with_custom_notebooks(
         """
         Sex == "female"
         """,
-    ]
+    ],
 )
 def test_raise_exception_quotes_or_space_with_row_condition(
     row_condition,
@@ -1148,6 +1148,12 @@ def test_raise_exception_quotes_or_space_with_row_condition(
         expectation_suite_name=expectation_suite_name,
     )
     with pytest.raises(
-        InvalidExpectationConfigurationError, match=r".*Do not introduce (?:simple quotes|\\n) in configuration.*"
+        InvalidExpectationConfigurationError,
+        match=r".*Do not introduce (?:simple quotes|\\n) in configuration.*",
     ):
-        validator.expect_column_values_to_be_in_set(column="Sex", row_condition=row_condition, condition_parser='pandas', value_set=["female", "male"])
+        validator.expect_column_values_to_be_in_set(
+            column="Sex",
+            row_condition=row_condition,
+            condition_parser="pandas",
+            value_set=["female", "male"],
+        )

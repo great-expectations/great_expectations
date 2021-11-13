@@ -163,7 +163,7 @@ class ProfilerTypeMapping:
         "string",
         "str",
         "object",
-        "dtype(\"O\")",
+        'dtype("O")',
     ]
     BOOLEAN_TYPE_NAMES = [
         "BOOLEAN",
