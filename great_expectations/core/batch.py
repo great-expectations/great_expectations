@@ -709,10 +709,7 @@ def get_batch_request_from_acceptable_arguments(
         )
     else:
         if data_connector_query is None:
-            if (
-                batch_filter_parameters is not None
-                and batch_identifiers is not None
-            ):
+            if batch_filter_parameters is not None and batch_identifiers is not None:
                 raise ValueError(
                     'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
                 )
