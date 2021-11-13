@@ -649,7 +649,6 @@ def get_batch_request_from_acceptable_arguments(
         (BatchRequest) The formal BatchRequest object
     """
 
-    datasource_name: str
     if batch_request:
         if not isinstance(batch_request, BatchRequest):
             raise TypeError(

@@ -1569,7 +1569,6 @@ class BaseDataContext:
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
-        batch_spec_passthrough: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
@@ -1578,6 +1577,7 @@ class BaseDataContext:
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1634,7 +1634,7 @@ class BaseDataContext:
             limit=limit,
             index=index,
             custom_filter_function=custom_filter_function,
-            sampling_methodt=sampling_method,
+            sampling_method=sampling_method,
             sampling_kwargs=sampling_kwargs,
             splitter_method=splitter_method,
             splitter_kwargs=splitter_kwargs,
@@ -1645,7 +1645,7 @@ class BaseDataContext:
             batch_spec_passthrough=batch_spec_passthrough,
             **kwargs,
         )
-        datasource_name: str = batch_request.datasource_name
+        datasource_name = batch_request.datasource_name
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
@@ -1665,10 +1665,6 @@ class BaseDataContext:
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
-        expectation_suite_name: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        create_expectation_suite_with_name: Optional[str] = None,
-        batch_spec_passthrough: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
@@ -1678,6 +1674,10 @@ class BaseDataContext:
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        create_expectation_suite_with_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1739,7 +1739,6 @@ class BaseDataContext:
                     limit=limit,
                     index=index,
                     custom_filter_function=custom_filter_function,
-                    batch_spec_passthrough=batch_spec_passthrough,
                     sampling_method=sampling_method,
                     sampling_kwargs=sampling_kwargs,
                     splitter_method=splitter_method,
@@ -1748,6 +1747,7 @@ class BaseDataContext:
                     query=query,
                     path=path,
                     batch_filter_parameters=batch_filter_parameters,
+                    batch_spec_passthrough=batch_spec_passthrough,
                     **kwargs,
                 )
             )
