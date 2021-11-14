@@ -16,7 +16,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
-BATCH_REQUEST_INSTANTIATION_KEYS: set = {
+BATCH_REQUEST_INSTANTIATION_KEYS: Set[str] = {
     "datasource_name",
     "data_connector_name",
     "data_asset_name",
