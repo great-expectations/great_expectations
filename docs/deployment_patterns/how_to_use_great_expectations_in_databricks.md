@@ -185,102 +185,106 @@ df = spark.read.format("csv")\
 </TabItem>
 </Tabs>
 
-
-
 ### 4. Connect to your data
 
+
 <Tabs
-  groupId="file-or-dataframe"
+  groupId="file-or-dataframe-pandas-or-yaml"
   defaultValue='file'
   values={[
-  {label: 'File', value:'file'},
-  {label: 'Dataframe', value:'dataframe'},
+  {label: 'File-yaml', value:'file-yaml'},
+  {label: 'File-python', value:'file-python'},
+  {label: 'Dataframe-yaml', value:'dataframe-yaml'},
+  {label: 'Dataframe-python', value:'dataframe-python'},
   ]}>
-  <TabItem value="file">
+  <TabItem value="file-yaml">
 
-Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `InferredAssetFilesystemDataConnector` so that we can access and validate our file as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
-#### TODO: retrieve this code from databricks_deployment_patterns.py
+Datasource configuration:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L48-L67
+```
 
-#### TODO: Change this to yaml
+Check the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L85
+```
 
-```python
-my_spark_datasource_config = {
-    "name": "insert_your_datasource_name_here",
-    "class_name": "Datasource",
-    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-    "data_connectors": {
-        "insert_your_data_connector_name_here": {
-            "module_name": "great_expectations.datasource.data_connector",
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "/dbfs/example_data/nyctaxi/tripdata/yellow/",
-            "default_regex": {
-                "pattern": r"(.*)",
-                "group_names": ["data_asset_name"]
-            },
-        }
-    },
-}
-
-context.test_yaml_config(yaml.dump(my_spark_datasource_config))
-
-context.add_datasource(**my_spark_datasource_config)
+Add the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L87
 ```
 
 Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
-```python
-batch_request = BatchRequest(
-    datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="yellow_tripdata_2019-01.csv",
-)
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L89-L99
+```
+  
+  </TabItem>
+
+  <TabItem value="file-python">
+
+Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+
+Datasource configuration:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L49-L72
 ```
 
-</TabItem>
-<TabItem value="dataframe">
+Check the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L89
+```
+
+Add the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L91
+```
+
+Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L93-L103
+```
+  
+  </TabItem>
+
+  <TabItem value="dataframe-yaml">
 
 Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
-  
-#### TODO: retrieve this code from databricks_deployment_patterns.py
-#### TODO: Should this be yaml instead of python? Probably for compactness.
-```python
-my_spark_datasource_config = {
-    "name": "insert_your_datasource_name_here",
-    "class_name": "Datasource",
-    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-    "data_connectors": {
-        "insert_your_data_connector_name_here": {
-            "module_name": "great_expectations.datasource.data_connector",
-            "class_name": "RuntimeDataConnector",
-            "batch_identifiers": [
-                "some_key_maybe_pipeline_stage",
-                "some_other_key_maybe_run_id",
-            ],
-        }
-    },
-}
 
-context.test_yaml_config(yaml.dump(my_spark_datasource_config))
-
-context.add_datasource(**my_spark_datasource_config)
+Datasource configuration:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L66-L78
 ```
 
-Next we will create a `RuntimeBatchRequest` to reference our loaded dataframe and add metadata:
-#### TODO: retrieve this code from databricks_deployment_patterns.py, substitute the data_asset_name
-```python
-batch_request = RuntimeBatchRequest(
-    datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
-    batch_identifiers={
-        "some_key_maybe_pipeline_stage": "prod",
-        "some_other_key_maybe_run_id": f"my_run_name_{datetime.date.today().strftime("%Y%m%d")}",
-    },
-    runtime_parameters={"batch_data": df},  # Your dataframe goes here
-)
+Check the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L80
+```
+
+Add the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L82
+```
+
+Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L84-L93
+```
+
+  
+  </TabItem>
+
+  <TabItem value="dataframe-python">
+
+Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+
+Datasource configuration:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L70-L84
+```
+
+Check the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L86
+```
+
+Add the Datasource:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L88
+```
+
+Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L90-L99
 ```
   
-</TabItem>
+  </TabItem>
 </Tabs>
 
 
