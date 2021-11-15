@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import types
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -16,7 +16,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
-BATCH_REQUEST_INSTANTIATION_KEYS: set = {
+BATCH_REQUEST_INSTANTIATION_KEYS: Set[str] = {
     "datasource_name",
     "data_connector_name",
     "data_asset_name",
@@ -649,7 +649,6 @@ def get_batch_request_from_acceptable_arguments(
         (BatchRequest) The formal BatchRequest object
     """
 
-    datasource_name: str
     if batch_request:
         if not isinstance(batch_request, BatchRequest):
             raise TypeError(
@@ -710,10 +709,7 @@ def get_batch_request_from_acceptable_arguments(
         )
     else:
         if data_connector_query is None:
-            if (
-                batch_filter_parameters is not None
-                and batch_identifiers is not None
-            ):
+            if batch_filter_parameters is not None and batch_identifiers is not None:
                 raise ValueError(
                     'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
                 )

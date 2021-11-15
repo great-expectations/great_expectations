@@ -438,8 +438,12 @@ def get_batch_list_usage_statistics(data_context, **kwargs):
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            batch_request_anonymizer = data_context._usage_statistics_handler._batch_request_anonymizer
-            payload["anonymized_batch_request"] = batch_request_anonymizer.anonymize_batch_request(**kwargs)
+            batch_request_anonymizer = (
+                data_context._usage_statistics_handler._batch_request_anonymizer
+            )
+            payload[
+                "anonymized_batch_request"
+            ] = batch_request_anonymizer.anonymize_batch_request(**kwargs)
         except Exception:
             logger.debug(
                 "get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"

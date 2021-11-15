@@ -14,13 +14,19 @@ class BatchRequestAnonymizer(Anonymizer):
         super().__init__(salt=salt)
 
     def anonymize_batch_request(self, **kwargs) -> List[Union[str, dict]]:
-        batch_request: Union[BatchRequest, RuntimeBatchRequest] = get_batch_request_from_acceptable_arguments(**kwargs)
+        batch_request: Union[
+            BatchRequest, RuntimeBatchRequest
+        ] = get_batch_request_from_acceptable_arguments(**kwargs)
         batch_request_dict: dict = batch_request.to_json_dict()
-        anonymized_batch_request_dict: Optional[Union[Any, dict]] = self._anonymize_batch_request_dictionary_properties(
+        anonymized_batch_request_dict: Optional[
+            Union[Any, dict]
+        ] = self._anonymize_batch_request_dictionary_properties(
             source=batch_request_dict
         )
         anonymized_batch_request: List[Union[str, dict]] = []
-        self._build_anonymized_batch_request(destination=anonymized_batch_request, source=anonymized_batch_request_dict)
+        self._build_anonymized_batch_request(
+            destination=anonymized_batch_request, source=anonymized_batch_request_dict
+        )
         return anonymized_batch_request
 
     def _anonymize_batch_request_dictionary_properties(
@@ -35,9 +41,15 @@ class BatchRequestAnonymizer(Anonymizer):
             value: Any
             for key, value in source.items():
                 if key in BATCH_REQUEST_INSTANTIATION_KEYS:
-                    source[key] = self._anonymize_batch_request_dictionary_properties(source=value)
+                    source[key] = self._anonymize_batch_request_dictionary_properties(
+                        source=value
+                    )
                 else:
-                    source[self.anonymize(key)] = self._anonymize_batch_request_dictionary_properties(source=value)
+                    source[
+                        self.anonymize(key)
+                    ] = self._anonymize_batch_request_dictionary_properties(
+                        source=value
+                    )
                     anonymized_keys.add(key)
 
             for key in anonymized_keys:
@@ -60,6 +72,8 @@ class BatchRequestAnonymizer(Anonymizer):
                 if isinstance(value, dict):
                     anonymized_keys: List[Union[str, dict]] = []
                     destination.append({key: anonymized_keys})
-                    self._build_anonymized_batch_request(destination=anonymized_keys, source=value)
+                    self._build_anonymized_batch_request(
+                        destination=anonymized_keys, source=value
+                    )
                 else:
                     destination.append(key)
