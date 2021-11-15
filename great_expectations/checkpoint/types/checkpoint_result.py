@@ -292,7 +292,9 @@ class CheckpointResult(DictDot):
 
         if hasattr(self.checkpoint_config, "batch_request"):
             if isinstance(self.checkpoint_config["batch_request"], BatchRequest):
-                self.checkpoint_config["batch_request"] = self.checkpoint_config["batch_request"].to_json_dict()
+                self.checkpoint_config["batch_request"] = self.checkpoint_config[
+                    "batch_request"
+                ].to_json_dict()
 
         return checkpointResultSchema.dump(self)
 
