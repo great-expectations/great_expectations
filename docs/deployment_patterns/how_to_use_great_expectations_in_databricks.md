@@ -19,9 +19,9 @@ Great Expectations works well with many types of Databricks workflows. This guid
 There are several ways to set up Databricks, this guide centers around an AWS deployment using Databricks Data Science & Engineering Notebooks and Jobs. If you use Databricks on GCP or Azure and there are steps in this guide that don't work for you please reach out to us.
 
 We will cover a simple configuration to get you up and running quickly, and link to our other guides for more customized configurations. For example:
-  - If you want to validate files stored in DBFS select the "File" tab below.
+  - If you want to validate files stored in DBFS select one of the "File" tabs below.
     - If you are using a different file store (e.g. s3, GCS, ABS) take a look at our how-to guides in the "Cloud" section of "Connecting to Your Data" for example configurations. 
-  - If you already have a spark dataframe loaded, select the "dataframe" tab. 
+  - If you already have a spark dataframe loaded, select one of the "Dataframe" tabs below. 
 
 This guide parallels notebook workflows from the Great Expectations CLI, so you can optionally prototype your setup with a local sample batch before moving to Databricks. You can also use examples and code from the notebooks that the CLI generates, and indeed much of the examples that follow parallel those notebooks closely.
 
@@ -40,70 +40,43 @@ A notebook-scoped library is what it sounds like - "custom Python environments t
 After that we will take care of some imports that will be used later. Choose your configuration options to show applicable imports:
 
 <Tabs
-  groupId="file-or-dataframe"
+  groupId="file-or-dataframe-pandas-or-yaml"
   defaultValue='file'
   values={[
-  {label: 'File', value:'file'},
-  {label: 'Dataframe', value:'dataframe'},
+  {label: 'File-yaml', value:'file-yaml'},
+  {label: 'File-python', value:'file-python'},
+  {label: 'Dataframe-yaml', value:'dataframe-yaml'},
+  {label: 'Dataframe-python', value:'dataframe-python'},
   ]}>
-  <TabItem value="file">
-
-  <Tabs
-    groupId="yaml-or-python"
-    defaultValue='yaml'
-    values={[
-    {label: 'Yaml Configs', value:'yaml'},
-    {label: 'Python Configs', value:'python'},
-    ]}>
-  <TabItem value="yaml">
-
-Import the following items:
+  <TabItem value="file-yaml">
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L3-L10
 ```
   
   </TabItem>
-  <TabItem value="python">
 
-Import the following items:
+  <TabItem value="file-python">
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L3-L10
 ```
   
   </TabItem>
-  </Tabs>
 
-</TabItem>
-
-<TabItem value="dataframe">
-
-  <Tabs
-    groupId="yaml-or-python"
-    defaultValue='yaml'
-    values={[
-    {label: 'Yaml Configs', value:'yaml'},
-    {label: 'Python Configs', value:'python'},
-    ]}>
-  <TabItem value="yaml">
-
-Import the following items:
+  <TabItem value="dataframe-yaml">
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L3-L13
 ```
   
   </TabItem>
-  <TabItem value="python">
 
-Import the following items:
+  <TabItem value="dataframe-python">
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L3-L13
 ```
   
   </TabItem>
-  </Tabs>
-
-</TabItem>
 </Tabs>
+
 
 ### 2. Set up Great Expectations
 
