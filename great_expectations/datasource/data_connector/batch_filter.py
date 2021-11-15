@@ -195,6 +195,9 @@ class BatchFilter:
                 batch_definition_list,
             )
         )
+        if len(selected_batch_definitions) == 0:
+            return selected_batch_definitions
+
         if self.index is None:
             selected_batch_definitions = selected_batch_definitions[: self.limit]
         else:

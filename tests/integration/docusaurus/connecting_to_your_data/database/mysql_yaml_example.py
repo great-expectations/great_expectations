@@ -10,7 +10,7 @@ from util import load_data_into_database
 
 load_data_into_database(
     table_name="taxi_data",
-    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=CONNECTION_STRING,
 )
 

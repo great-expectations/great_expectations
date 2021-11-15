@@ -576,10 +576,10 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
         snippet = f"""\
 host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "{self.username}"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)"""
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name"""
 
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
             snippet += '''

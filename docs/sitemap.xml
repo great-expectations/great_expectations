@@ -577,16 +577,6 @@
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_run_a_checkpoint_in_terminal/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_run_a_checkpoint_in_python/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
   <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config/</loc>
   <lastmod>2021-08-13T14:40:36+00:00</lastmod>
   <priority>0.33</priority>

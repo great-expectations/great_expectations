@@ -38,7 +38,7 @@ Upgrade Confirmation
 Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
 to learn more about the automated upgrade process:
 
-    https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
+    https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api
 
 Would you like to proceed with the project upgrade? [Y/n]: 
 
@@ -60,7 +60,7 @@ A log detailing the upgrade can be found here:
 || UpgradeHelperV13: Upgrade Overview ||
 ++====================================++
 
-UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 
 **WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
 
@@ -75,14 +75,19 @@ The following Stores and/or Store Names will be upgraded:
 Manual Steps
 =============
 
-No manual upgrade steps are required.
+The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
+
+    - Data Sources: files_datasource
+
+Your configuration uses validation_operators, which are being deprecated.  Please, manually convert validation_operators to use the new Checkpoint validation unit, since validation_operators will be deleted.
+
 
 Upgrade Confirmation
 =====================
 
-Please consult the 0.13.x migration guide to learn more about the automated upgrade process:
+Please consult the V3 API migration guide for instructions on how to complete any required manual steps or to learn more about the automated upgrade process:
 
-    https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html
+    https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api
 
 Would you like to proceed with the project upgrade? [Y/n]: 
 
@@ -94,8 +99,7 @@ Upgrading project...[0m
 || Upgrade Report ||
 ++================++[0m
 
-[32mYour project was successfully upgraded to be compatible with Great Expectations 0.13.x.
-The config_version of your great_expectations.yml has been automatically incremented to 3.0.
+[33mThe Upgrade Helper has performed the automated upgrade steps as part of upgrading your project to be compatible with Great Expectations V3 API, and the config_version of your great_expectations.yml has been automatically incremented to 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully.
 
 A log detailing the upgrade can be found here:
 

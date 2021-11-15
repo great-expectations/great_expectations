@@ -192,7 +192,7 @@ def test_sqlalchemy_source_limit(sqlitedb_engine):
         expectation_engine=SqlAlchemyDataset,
     ).get_dataset()
     assert limited_dataset._table.name.startswith(
-        "ge_tmp_"
+        "ge_temp_"
     )  # we have generated a temporary table
     assert len(limited_dataset.head(10)) == 1  # and it is only one row long
     assert limited_dataset.head(10)["col_1"][0] == 3  # offset should have been applied

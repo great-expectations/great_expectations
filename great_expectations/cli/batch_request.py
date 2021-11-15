@@ -3,6 +3,8 @@ import os
 import uuid
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+from great_expectations.util import get_sqlalchemy_inspector
+
 try:
     from typing import Final
 except ImportError:
@@ -269,7 +271,7 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = cast(
         SqlAlchemyExecutionEngine, datasource.execution_engine
     )
-    inspector: Inspector = Inspector.from_engine(execution_engine.engine)
+    inspector: Inspector = get_sqlalchemy_inspector(execution_engine.engine)
     return inspector.default_schema_name
 
 

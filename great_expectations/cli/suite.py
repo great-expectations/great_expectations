@@ -8,6 +8,8 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
+
+# noinspection PyPep8Naming
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core import ExpectationSuite
@@ -284,6 +286,7 @@ def _suite_new_workflow(
         else:
             batch_request = None
 
+        # noinspection PyShadowingNames
         suite: ExpectationSuite = toolkit.get_or_create_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             data_context=context,
@@ -565,6 +568,7 @@ def _suite_edit_workflow(
     if suppress_usage_message:
         usage_event = None
 
+    # noinspection PyShadowingNames
     suite: ExpectationSuite = toolkit.load_expectation_suite(
         data_context=context,
         expectation_suite_name=expectation_suite_name,
@@ -705,6 +709,7 @@ def suite_demo(ctx):
     )
 
 
+# noinspection PyShadowingNames
 @suite.command(name="delete")
 @click.argument("suite")
 @click.pass_context

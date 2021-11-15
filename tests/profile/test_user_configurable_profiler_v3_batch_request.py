@@ -195,7 +195,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -212,7 +212,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -228,7 +228,7 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -775,7 +775,10 @@ def test_profiler_all_expectation_types_pandas(
     )
 
     assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
+
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        suite = profiler.build_suite()
+
     assert len(suite.expectations) == 46
     (
         columns_with_expectations,
@@ -794,10 +797,10 @@ def test_profiler_all_expectation_types_pandas(
         i for i in columns_with_expectations if i in taxi_data_ignored_columns
     ]
     assert len(ignored_included_columns_overlap) == 0
-
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_pandas]
-    )
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        results = context.run_validation_operator(
+            "action_list_operator", assets_to_validate=[taxi_validator_pandas]
+        )
 
     assert results["success"]
 
@@ -835,7 +838,9 @@ def test_profiler_all_expectation_types_spark(
     )
 
     assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        suite = profiler.build_suite()
+
     assert len(suite.expectations) == 45
     (
         columns_with_expectations,
@@ -856,9 +861,10 @@ def test_profiler_all_expectation_types_spark(
     ]
     assert len(ignored_included_columns_overlap) == 0
 
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_spark]
-    )
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        results = context.run_validation_operator(
+            "action_list_operator", assets_to_validate=[taxi_validator_spark]
+        )
 
     assert results["success"]
 
@@ -878,7 +884,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
     What does this test do and why?
     Ensures that all available expectation types work as expected for sqlalchemy
     """
-    if taxi_validator_sqlalchemy == None:
+    if taxi_validator_sqlalchemy is None:
         pytest.skip("a message")
 
     context = titanic_data_context_modular_api
@@ -899,7 +905,8 @@ def test_profiler_all_expectation_types_sqlalchemy(
     )
 
     assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        suite = profiler.build_suite()
     assert len(suite.expectations) == 45
     (
         columns_with_expectations,
@@ -919,10 +926,10 @@ def test_profiler_all_expectation_types_sqlalchemy(
         i for i in columns_with_expectations if i in taxi_data_ignored_columns
     ]
     assert len(ignored_included_columns_overlap) == 0
-
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
-    )
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        results = context.run_validation_operator(
+            "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
+        )
 
     assert results["success"]
 

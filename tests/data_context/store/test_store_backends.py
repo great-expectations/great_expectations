@@ -589,9 +589,45 @@ def test_TupleS3StoreBackend_with_prefix():
         == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_BBB"
     )
 
-    my_store.remove_key(("BBB",))
+    assert my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
         my_store.get(("BBB",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
+
+    # Call remove_key on an already deleted object
+    assert not my_store.remove_key(("BBB",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
+
+    # Call remove_key on a non-existent key
+    assert not my_store.remove_key(("NON_EXISTENT_KEY",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
 
     # testing base_public_path
     my_new_store = TupleS3StoreBackend(
@@ -930,6 +966,39 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
         my_store.get_url_for_key(("BBB",))
         == "https://s3.amazonaws.com/leakybucket/my_file_BBB"
     )
+
+
+@mock_s3
+def test_TupleS3StoreBackend_with_s3_put_options():
+
+    bucket = "leakybucket"
+    conn = boto3.client("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    my_store = TupleS3StoreBackend(
+        bucket=bucket,
+        # Since not all out options are supported in moto, only Metadata and StorageClass is passed here.
+        s3_put_options={
+            "Metadata": {"test": "testMetadata"},
+            "StorageClass": "REDUCED_REDUNDANCY",
+        },
+    )
+
+    assert my_store.config["s3_put_options"] == {
+        "Metadata": {"test": "testMetadata"},
+        "StorageClass": "REDUCED_REDUNDANCY",
+    }
+
+    my_store.set(("AAA",), "aaa")
+
+    res = conn.get_object(Bucket=bucket, Key="AAA")
+
+    assert res["Metadata"] == {"test": "testMetadata"}
+    assert res["StorageClass"] == "REDUCED_REDUNDANCY"
+
+    assert my_store.get(("AAA",)) == "aaa"
+    assert my_store.has_key(("AAA",))
+    assert my_store.list_keys() == [(".ge_store_backend_id",), ("AAA",)]
 
 
 def test_TupleGCSStoreBackend_base_public_path():

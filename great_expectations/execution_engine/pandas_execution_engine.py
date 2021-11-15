@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 
 try:
     import boto3
+    from botocore.exceptions import DataNotFoundError
 except ImportError:
     boto3 = None
+    DataNotFoundError = None
     logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
     )
@@ -111,7 +113,7 @@ Notes:
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError, DataNotFoundError):
             self._s3 = None
 
         try:
@@ -129,15 +131,17 @@ Notes:
             try:
                 credentials = None  # If configured with gcloud CLI / env vars
                 if "filename" in gcs_options:
+                    filename = gcs_options.pop("filename")
                     credentials = service_account.Credentials.from_service_account_file(
-                        **gcs_options
+                        filename=filename
                     )
                 elif "info" in gcs_options:
+                    info = gcs_options.pop("info")
                     credentials = service_account.Credentials.from_service_account_info(
-                        **gcs_options
+                        info=info
                     )
                 self._gcs = storage.Client(credentials=credentials, **gcs_options)
-            except (TypeError, AttributeError):
+            except (TypeError, AttributeError, DefaultCredentialsError):
                 self._gcs = None
 
         super().__init__(*args, **kwargs)
@@ -311,6 +315,40 @@ Please check your config."""
 
         return self.active_batch_data.dataframe
 
+    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
+    @staticmethod
+    def guess_reader_method_from_path(path):
+        """Helper method for deciding which reader to use to read in a certain path.
+
+        Args:
+            path (str): the to use to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return {"reader_method": "read_csv"}
+        elif path.endswith(".parquet"):
+            return {"reader_method": "read_parquet"}
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return {"reader_method": "read_excel"}
+        elif path.endswith(".json"):
+            return {"reader_method": "read_json"}
+        elif path.endswith(".pkl"):
+            return {"reader_method": "read_pickle"}
+        elif path.endswith(".feather"):
+            return {"reader_method": "read_feather"}
+        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
+            return {
+                "reader_method": "read_csv",
+                "reader_options": {"compression": "gzip"},
+            }
+
+        raise ge_exceptions.ExecutionEngineError(
+            f'Unable to determine reader method from path: "{path}".'
+        )
+
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
@@ -345,40 +383,6 @@ Please check your config."""
             raise ge_exceptions.ExecutionEngineError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
-
-    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
-    @staticmethod
-    def guess_reader_method_from_path(path):
-        """Helper method for deciding which reader to use to read in a certain path.
-
-        Args:
-            path (str): the to use to guess
-
-        Returns:
-            ReaderMethod to use for the filepath
-
-        """
-        if path.endswith(".csv") or path.endswith(".tsv"):
-            return {"reader_method": "read_csv"}
-        elif path.endswith(".parquet"):
-            return {"reader_method": "read_parquet"}
-        elif path.endswith(".xlsx") or path.endswith(".xls"):
-            return {"reader_method": "read_excel"}
-        elif path.endswith(".json"):
-            return {"reader_method": "read_json"}
-        elif path.endswith(".pkl"):
-            return {"reader_method": "read_pickle"}
-        elif path.endswith(".feather"):
-            return {"reader_method": "read_feather"}
-        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
-            return {
-                "reader_method": "read_csv",
-                "reader_options": {"compression": "gzip"},
-            }
-
-        raise ge_exceptions.ExecutionEngineError(
-            f'Unable to determine reader method from path: "{path}".'
-        )
 
     def get_domain_records(
         self,
@@ -623,7 +627,6 @@ Please check your config."""
     def _split_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
-
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
@@ -741,7 +744,7 @@ Please check your config."""
         hash_value: str = "f",
         hash_function_name: str = "md5",
     ):
-        """Hash the values in the named column, and split on that"""
+        """Hash the values in the named column, and only keep rows that match the given hash_value"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
