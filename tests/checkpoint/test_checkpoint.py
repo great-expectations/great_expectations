@@ -1104,7 +1104,6 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
 
-# TODO: add more test cases
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1164,10 +1163,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
@@ -1692,14 +1687,14 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
                     "class_name": "UpdateDataDocsAction",
                 },
             },
-        ]
+        ],
     )
 
     with pytest.raises(
-        ge_exceptions.CheckpointError, match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.'
+        ge_exceptions.CheckpointError,
+        match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
     ):
         checkpoint.run()
-
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_top_level_batch_request(
     data_context_with_datasource_sqlalchemy_engine,
@@ -1749,7 +1744,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                 },
             },
         ],
-        batch_request=batch_request
+        batch_request=batch_request,
     )
 
     results = checkpoint.run()

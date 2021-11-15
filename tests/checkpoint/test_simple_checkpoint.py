@@ -1160,11 +1160,12 @@ def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_v
                     "class_name": "UpdateDataDocsAction",
                 },
             },
-        ]
+        ],
     )
 
     with pytest.raises(
-        ge_exceptions.CheckpointError, match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.'
+        ge_exceptions.CheckpointError,
+        match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
     ):
         checkpoint.run()
 
@@ -1217,7 +1218,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-        batch_request=batch_request
+        batch_request=batch_request,
     )
 
     results = checkpoint.run()
