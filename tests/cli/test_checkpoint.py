@@ -1441,7 +1441,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
                                 "index",
                             ],
                         },
-                    ]
+                    ],
                 },
                 "success": True,
             }
@@ -1601,7 +1601,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                         "datasource_name",
                         "data_connector_name",
                         "data_asset_name",
-                    ]
+                    ],
                 },
                 "success": True,
             }
@@ -1768,7 +1768,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                         {
                             "batch_spec_passthrough": [],
                         },
-                    ]
+                    ],
                 },
                 "success": True,
             }
@@ -2032,7 +2032,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 6
+    assert mock_emit.call_count == 7
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2056,6 +2056,19 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
             {
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request": [
+                        "datasource_name",
+                        "data_connector_name",
+                        "data_asset_name",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -2174,7 +2187,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 6
+    assert mock_emit.call_count == 7
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2198,6 +2211,27 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             {
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request": [
+                        "datasource_name",
+                        "data_connector_name",
+                        "data_asset_name",
+                        {
+                            "data_connector_query": [
+                                "index",
+                            ],
+                        },
+                        {
+                            "batch_spec_passthrough": [],
+                        },
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -2323,7 +2357,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2347,6 +2381,24 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
             {
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request": [
+                        "datasource_name",
+                        "data_connector_name",
+                        "data_asset_name",
+                        {
+                            "data_connector_query": [
+                                "index",
+                            ],
+                        },
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -2456,7 +2508,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2480,6 +2532,19 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
             {
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request": [
+                        "datasource_name",
+                        "data_connector_name",
+                        "data_asset_name",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -2600,7 +2665,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2624,6 +2689,27 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
             {
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request": [
+                        "datasource_name",
+                        "data_connector_name",
+                        "data_asset_name",
+                        {
+                            "data_connector_query": [
+                                "index",
+                            ],
+                        },
+                        {
+                            "batch_spec_passthrough": [],
+                        },
+                    ],
+                },
                 "success": True,
             }
         ),
