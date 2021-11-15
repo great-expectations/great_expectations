@@ -157,19 +157,6 @@ for month in range(1, 4):
     )
 ```
 
-# TODO: Do we need to unzip these files?
-
-And then unzip them all using the %sh [magic command](https://docs.databricks.com/notebooks/notebooks-use.html#language-magic):
-```bash
-%sh gzip -d /dbfs/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0*.csv.gz
-```
-
-Finally let's remove the compressed files:
-```python
-for month in range(1, 4):
-    dbutils.fs.rm(f"/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0{month}.csv.gz")
-```
-
 </TabItem>
 <TabItem value="dataframe">
 
