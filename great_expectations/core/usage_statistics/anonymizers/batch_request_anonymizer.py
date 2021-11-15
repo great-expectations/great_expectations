@@ -20,16 +20,14 @@ class BatchRequestAnonymizer(Anonymizer):
         batch_request_dict: dict = batch_request.to_json_dict()
         anonymized_batch_request_dict: Optional[
             Union[Any, dict]
-        ] = self._anonymize_batch_request_dictionary_properties(
-            source=batch_request_dict
-        )
+        ] = self._anonymize_batch_request_properties(source=batch_request_dict)
         anonymized_batch_request: List[Union[str, dict]] = []
         self._build_anonymized_batch_request(
             destination=anonymized_batch_request, source=anonymized_batch_request_dict
         )
         return anonymized_batch_request
 
-    def _anonymize_batch_request_dictionary_properties(
+    def _anonymize_batch_request_properties(
         self, source: Optional[Any] = None
     ) -> Optional[Union[Any, dict]]:
         if source is None:
@@ -41,15 +39,11 @@ class BatchRequestAnonymizer(Anonymizer):
             value: Any
             for key, value in source.items():
                 if key in BATCH_REQUEST_INSTANTIATION_KEYS:
-                    source[key] = self._anonymize_batch_request_dictionary_properties(
-                        source=value
-                    )
+                    source[key] = self._anonymize_batch_request_properties(source=value)
                 else:
                     source[
                         self.anonymize(key)
-                    ] = self._anonymize_batch_request_dictionary_properties(
-                        source=value
-                    )
+                    ] = self._anonymize_batch_request_properties(source=value)
                     anonymized_keys.add(key)
 
             for key in anonymized_keys:
