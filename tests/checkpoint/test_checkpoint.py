@@ -301,7 +301,7 @@ def test_basic_checkpoint_config_validation(
     context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
     with pytest.raises(
         ge_exceptions.DataContextError,
-        match=r'Checkpoint "my_checkpoint" does not contain any validations.',
+        match=r'Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = context.run_checkpoint(
@@ -921,7 +921,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     with pytest.raises(
         ge_exceptions.DataContextError,
-        match=r'Checkpoint "my_base_checkpoint" does not contain any validations.',
+        match=r'Checkpoint "my_base_checkpoint" must contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = data_context.run_checkpoint(
