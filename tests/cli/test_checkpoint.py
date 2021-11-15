@@ -1895,7 +1895,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 6
+    assert mock_emit.call_count == 7
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -1919,6 +1919,24 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
             {
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request": [
+                        "datasource_name",
+                        "data_connector_name",
+                        "data_asset_name",
+                        {
+                            "data_connector_query": [
+                                "index",
+                            ],
+                        },
+                    ],
+                },
                 "success": True,
             }
         ),
