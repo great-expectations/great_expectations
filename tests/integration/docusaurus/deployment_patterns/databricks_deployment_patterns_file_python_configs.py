@@ -65,7 +65,7 @@ my_spark_datasource_config = {
                     "year",
                     "month",
                 ],
-                "pattern": r"(.*)_(\d{4})-(\d{2})\.csv",
+                "pattern": r"(.*)_(\d{4})-(\d{2})\.csv\.gz",
             },
         },
     },
@@ -80,6 +80,10 @@ my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_h
 my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
     "class_name"
 ] = "InferredAssetFilesystemDataConnector"
+# For this test script, we use uncompressed sample csv files, but in the databricks example these files are compressed
+my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
+    "default_regex"
+]["pattern"] = r"(.*)_(\d{4})-(\d{2})\.csv"
 
 # Data location used when running or debugging this script directly
 # os.path.join(
@@ -93,7 +97,7 @@ context.add_datasource(**my_spark_datasource_config)
 batch_request = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
     data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="yellow_tripdata_sample",
+    data_asset_name="yellow_tripdata",
     batch_spec_passthrough={
         "reader_method": "csv",
         "reader_options": {
@@ -102,6 +106,8 @@ batch_request = BatchRequest(
     },
 )
 
+# For the purposes of this script, the data_asset_name includes "sample"
+batch_request.data_asset_name = "yellow_tripdata_sample"
 # CODE ^^^^^ ^^^^^
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -185,7 +191,7 @@ checkpoint_config = {
             "batch_request": {
                 "datasource_name": "insert_your_datasource_name_here",
                 "data_connector_name": "insert_your_data_connector_name_here",
-                "data_asset_name": "yellow_tripdata_sample",
+                "data_asset_name": "yellow_tripdata",
                 "data_connector_query": {
                     "index": -1,
                 },
@@ -201,6 +207,10 @@ checkpoint_config = {
     ],
 }
 
+# For the purposes of this script, the data_asset_name includes "sample"
+checkpoint_config["validations"][0]["batch_request"][
+    "data_asset_name"
+] = "yellow_tripdata_sample"
 
 my_checkpoint = context.test_yaml_config(yaml.dump(checkpoint_config))
 
