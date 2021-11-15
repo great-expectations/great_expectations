@@ -255,10 +255,15 @@ def get_runtime_batch_request(
 
     for key, runtime_batch_request_dict_val in runtime_batch_request_dict.items():
         if isinstance(runtime_config_batch_request, BatchRequest):
-            runtime_config_batch_request_val = getattr(runtime_config_batch_request, key)
+            runtime_config_batch_request_val = getattr(
+                runtime_config_batch_request, key
+            )
         else:
             runtime_config_batch_request_val = runtime_config_batch_request.get(key)
-        if runtime_batch_request_dict_val is not None and runtime_config_batch_request_val is not None:
+        if (
+            runtime_batch_request_dict_val is not None
+            and runtime_config_batch_request_val is not None
+        ):
             raise ge_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )

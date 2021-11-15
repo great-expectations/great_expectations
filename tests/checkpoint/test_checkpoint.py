@@ -1696,6 +1696,7 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
     ):
         checkpoint.run()
 
+
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_top_level_batch_request(
     data_context_with_datasource_sqlalchemy_engine,
 ):
@@ -1773,9 +1774,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "batch_data": test_df
-            },
+            "runtime_parameters": {"batch_data": test_df},
         }
     )
 

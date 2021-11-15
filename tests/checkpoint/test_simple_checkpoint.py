@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
@@ -448,7 +449,10 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_erro
     with pytest.raises(ge_exceptions.CheckpointError) as cpe:
         # noinspection PyUnusedLocal
         result: CheckpointResult = simple_checkpoint_defaults.run()
-    assert 'Checkpoint "foo" must contain either a batch_request or validations.' in str(cpe.value)
+    assert (
+        'Checkpoint "foo" must contain either a batch_request or validations.'
+        in str(cpe.value)
+    )
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
