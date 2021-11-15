@@ -1648,19 +1648,6 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
     # create expectation suite
     context.create_expectation_suite("my_expectation_suite")
 
-    # RuntimeBatchRequest with a query
-    batch_request = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "default_data_asset_name",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {
-                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-            },
-        }
-    )
-
     # add checkpoint config
     checkpoint = Checkpoint(
         name="my_checkpoint",
