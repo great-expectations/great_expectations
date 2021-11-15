@@ -1,3 +1,4 @@
+import copy
 from typing import Any, List, Optional, Set, Union
 
 from great_expectations.core.batch import (
@@ -33,28 +34,33 @@ class BatchRequestAnonymizer(Anonymizer):
         if source is None:
             return None
 
-        anonymized_keys: Set[str] = set()
+        if isinstance(source, str) and source in BATCH_REQUEST_INSTANTIATION_KEYS:
+            return source
+
         if isinstance(source, dict):
+            source_copy: dict = copy.deepcopy(source)
+            anonymized_keys: Set[str] = set()
+
             key: str
             value: Any
             for key, value in source.items():
                 if key in BATCH_REQUEST_INSTANTIATION_KEYS:
-                    source[key] = self._anonymize_batch_request_properties(source=value)
+                    source_copy[key] = self._anonymize_batch_request_properties(
+                        source=value
+                    )
                 else:
-                    source[
-                        self.anonymize(key)
+                    anonymized_key: str = self.anonymize(key)
+                    source_copy[
+                        anonymized_key
                     ] = self._anonymize_batch_request_properties(source=value)
                     anonymized_keys.add(key)
 
             for key in anonymized_keys:
-                source.pop(key)
+                source_copy.pop(key)
 
-            return source
+            return source_copy
 
-        elif isinstance(source, str) and source in BATCH_REQUEST_INSTANTIATION_KEYS:
-            return source
-
-        return self.anonymize(source)
+        return self.anonymize(str(source))
 
     def _build_anonymized_batch_request(
         self, destination: List[Union[str, dict]], source: Optional[Any] = None
@@ -63,11 +69,12 @@ class BatchRequestAnonymizer(Anonymizer):
             key: str
             value: Any
             for key, value in source.items():
-                if isinstance(value, dict):
-                    anonymized_keys: List[Union[str, dict]] = []
-                    destination.append({key: anonymized_keys})
-                    self._build_anonymized_batch_request(
-                        destination=anonymized_keys, source=value
-                    )
-                else:
-                    destination.append(key)
+                if key in BATCH_REQUEST_INSTANTIATION_KEYS:
+                    if isinstance(value, dict):
+                        anonymized_keys: List[Union[str, dict]] = []
+                        destination.append({key: anonymized_keys})
+                        self._build_anonymized_batch_request(
+                            destination=anonymized_keys, source=value
+                        )
+                    else:
+                        destination.append(key)

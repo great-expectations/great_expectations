@@ -438,7 +438,7 @@ def get_batch_list_usage_statistics(data_context, **kwargs):
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            batch_request_anonymizer = (
+            batch_request_anonymizer: BatchRequestAnonymizer = (
                 data_context._usage_statistics_handler._batch_request_anonymizer
             )
             payload[
