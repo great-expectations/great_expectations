@@ -89,20 +89,51 @@ In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.
 
 Run the following code to set up a [Data Context](../reference/data_context.md) using the appropriate defaults: 
 
-#### TODO: retrieve this code from databricks_deployment_patterns.py
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns.py#L1-L2
-```
+<Tabs
+  groupId="file-or-dataframe-pandas-or-yaml"
+  defaultValue='file'
+  values={[
+  {label: 'File-yaml', value:'file-yaml'},
+  {label: 'File-python', value:'file-python'},
+  {label: 'Dataframe-yaml', value:'dataframe-yaml'},
+  {label: 'Dataframe-python', value:'dataframe-python'},
+  ]}>
+  <TabItem value="file-yaml">
 
-```python
-root_directory = "/dbfs/great_expectations/"
-
-data_context_config = DataContextConfig(
-    store_backend_defaults=FilesystemStoreBackendDefaults(
-        root_directory=root_directory
-    ),
-)
-context = BaseDataContext(project_config=data_context_config)
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L21
 ```
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L26-L31
+```
+  
+  </TabItem>
+
+  <TabItem value="file-python">
+
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L21
+```
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L26-L31
+```
+  
+  </TabItem>
+
+  <TabItem value="dataframe-yaml">
+
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L28
+```
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L33-L38
+```
+  
+  </TabItem>
+
+  <TabItem value="dataframe-python">
+
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L32
+```
+```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L37-L42
+```
+  
+  </TabItem>
+</Tabs>
 
 ### 3. Prepare your data
 
@@ -115,20 +146,28 @@ context = BaseDataContext(project_config=data_context_config)
   ]}>
   <TabItem value="file">
 
-# TODO: Copy over 3 files of data instead of just the 1
-
 We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Let's copy some example csv data to our DBFS folder for easier access using [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html):
 
 ```python
-dbutils.fs.cp(
-  "/databricks-datasets/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz",
-  "/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz"
-)
+# Copy 3 months of data
+for month in range(1, 4):
+    dbutils.fs.cp(
+      f"/databricks-datasets/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0{month}.csv.gz",
+      f"/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0{month}.csv.gz"
+    )
 ```
 
-And then unzip it using the %sh [magic command](https://docs.databricks.com/notebooks/notebooks-use.html#language-magic):
+# TODO: Do we need to unzip these files?
+
+And then unzip them all using the %sh [magic command](https://docs.databricks.com/notebooks/notebooks-use.html#language-magic):
 ```bash
-%sh gzip -d /dbfs/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz
+%sh gzip -d /dbfs/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0*.csv.gz
+```
+
+Finally let's remove the compressed files:
+```python
+for month in range(1, 4):
+    dbutils.fs.rm(f"/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0{month}.csv.gz")
 ```
 
 </TabItem>
