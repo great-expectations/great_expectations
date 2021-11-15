@@ -7,6 +7,7 @@ from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.util import (
     build_categorical_partition_object,
     build_continuous_partition_object,
@@ -168,6 +169,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         "requirements": [],
     }
 
+    domain_type = MetricDomainTypes.COLUMN
     success_keys = (
         "partition_object",
         "threshold",
