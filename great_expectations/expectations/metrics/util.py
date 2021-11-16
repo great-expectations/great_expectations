@@ -184,7 +184,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
-      
+
     try:
         # Teradata
         if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):

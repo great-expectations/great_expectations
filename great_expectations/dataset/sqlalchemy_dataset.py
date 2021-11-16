@@ -2065,9 +2065,9 @@ WHERE
             AttributeError,
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
-          pass
-        
-        try: 
+            pass
+
+        try:
             # Teradata
             if isinstance(
                 self.sql_engine_dialect, teradatasqlalchemy.dialect.TeradataDialect
