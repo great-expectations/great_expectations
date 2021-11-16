@@ -41,7 +41,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
         result_format = {
             "result_format": result_format,
             "partial_unexpected_count": 20,
-            "include_unexpected_rows": False
+            "include_unexpected_rows": False,
         }
     else:
         if "partial_unexpected_count" not in result_format:
