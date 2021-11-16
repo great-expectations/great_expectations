@@ -10,6 +10,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -2024,7 +2025,7 @@ class CheckpointConfig(BaseYamlConfig):
             }
         else:
             if (
-                self.batch_request is not None
+                isinstance(self.batch_request, dict)
                 and self.batch_request.get("runtime_parameters") is not None
                 and self.batch_request["runtime_parameters"].get("batch_data")
                 is not None
@@ -2042,6 +2043,22 @@ class CheckpointConfig(BaseYamlConfig):
             else:
                 batch_request = self.batch_request
 
+            validations = []
+            if len(self.validations) > 0:
+                for val in self.validations:
+                    if val.get("batch_request") is not None and isinstance(val["batch_request"], BatchRequest):
+                        json_val: dict = {}
+                        for key, value in val.items():
+                            if key != "batch_request":
+                                json_val[key] = value
+                            else:
+                                json_val[key] = value.to_json_dict()
+                        validations.append(json_val)
+                    else:
+                        validations.append(val)
+            else:
+                validations = self.validations
+
             if self.class_name == "SimpleCheckpoint":
                 json_dict: dict = {
                     "name": self.name,
@@ -2056,7 +2073,7 @@ class CheckpointConfig(BaseYamlConfig):
                     "action_list": self.action_list,
                     "evaluation_parameters": self.evaluation_parameters,
                     "runtime_configuration": self.runtime_configuration,
-                    "validations": self.validations,
+                    "validations": validations,
                     "profilers": self.profilers,
                     "ge_cloud_id": self.ge_cloud_id,
                     "site_names": self.site_names,
@@ -2078,7 +2095,7 @@ class CheckpointConfig(BaseYamlConfig):
                     "action_list": self.action_list,
                     "evaluation_parameters": self.evaluation_parameters,
                     "runtime_configuration": self.runtime_configuration,
-                    "validations": self.validations,
+                    "validations": validations,
                     "profilers": self.profilers,
                     "ge_cloud_id": self.ge_cloud_id,
                 }
