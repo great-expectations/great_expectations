@@ -261,7 +261,6 @@ def usage_statistics_enabled_method(
             # Set event_payload now so it can be updated below
             event_payload = {}
             message = {"event_payload": event_payload, "event": event_name}
-            handler = None
             try:
                 if args_payload_fn is not None:
                     nested_update(event_payload, args_payload_fn(*args, **kwargs))
@@ -301,7 +300,7 @@ def run_validation_operator_usage_statistics(
     validation_operator_name,
     assets_to_validate,
     run_id=None,
-    **kwargs
+    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -341,7 +340,7 @@ def save_expectation_suite_usage_statistics(
     expectation_suite,
     expectation_suite_name=None,
     ge_cloud_id=None,  # self
-    **kwargs
+    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -424,7 +423,7 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     return payload
 
 
-def get_batch_list_usage_statistics(data_context, **kwargs):
+def get_batch_list_usage_statistics(data_context, *args, **kwargs):
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -443,7 +442,7 @@ def get_batch_list_usage_statistics(data_context, **kwargs):
             )
             payload[
                 "anonymized_batch_request"
-            ] = batch_request_anonymizer.anonymize_batch_request(**kwargs)
+            ] = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
         except Exception:
             logger.debug(
                 "get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"

@@ -14,10 +14,10 @@ class BatchRequestAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
 
-    def anonymize_batch_request(self, **kwargs) -> List[Union[str, dict]]:
+    def anonymize_batch_request(self, *args, **kwargs) -> List[Union[str, dict]]:
         batch_request: Union[
             BatchRequest, RuntimeBatchRequest
-        ] = get_batch_request_from_acceptable_arguments(**kwargs)
+        ] = get_batch_request_from_acceptable_arguments(*args, **kwargs)
         batch_request_dict: dict = batch_request.to_json_dict()
         anonymized_batch_request_dict: Optional[
             Union[Any, dict]
