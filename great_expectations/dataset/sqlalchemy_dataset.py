@@ -580,6 +580,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
+        elif self.engine.dialect.name.lower() == "dremio":
+            # WARNING: Dremio Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(
+                module_name="sqlalchemy_dremio.pyodbc.dialect"
+            )
         elif dialect_name == "redshift":
             self.dialect = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
@@ -621,10 +626,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql:
             self.create_temporary_table(
                 table_name, custom_sql, schema_name=temp_table_schema_name
-            )
-        elif self.engine.dialect.name.lower() == "dremio":
-            self.dialect = import_library_module(
-                module_name="sqlalchemy_dremio.pyodbc.dialect"
             )
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":

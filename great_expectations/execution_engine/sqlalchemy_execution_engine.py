@@ -253,6 +253,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
         elif self.engine.dialect.name.lower() == "dremio":
+            # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
             )
