@@ -7,13 +7,14 @@ from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.util import (
     build_categorical_partition_object,
     build_continuous_partition_object,
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -33,7 +34,7 @@ from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
 
-class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
+class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
             partition object to be lower than the provided threshold.
 
@@ -773,7 +774,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
     @classmethod
     def _atomic_kl_divergence_chart_template(cls, partition_object: dict) -> tuple:
-        weights = partition_object["weights"]
+        weights = partition_object.get("weights")
+        if weights is None:
+            weights = []
 
         chart_pixel_width = (len(weights) / 60.0) * 500
         if chart_pixel_width < 250:
@@ -790,6 +793,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         if len(weights) == 1:
             mark_bar_args["size"] = 20
 
+        chart = ""
         if partition_object.get("bins"):
             bins = partition_object["bins"]
             bins_x1 = [round(value, 1) for value in bins[:-1]]
@@ -1006,8 +1010,12 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             },
         }
 
-        expected_partition_object = params.get("partition_object", {})
-        weights = expected_partition_object.get("weights", [])
+        expected_partition_object = params.get("partition_object")
+        if expected_partition_object is None:
+            expected_partition_object = {}
+        weights = expected_partition_object.get("weights")
+        if weights is None:
+            weights = []
 
         chart = None
         chart_container_col_width = None
@@ -1037,7 +1045,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             )
         else:
             chart, chart_container_col_width = cls._atomic_kl_divergence_chart_template(
-                partition_object=params.get("partition_object")
+                partition_object=expected_partition_object
             )
 
         if params["row_condition"] is not None:
