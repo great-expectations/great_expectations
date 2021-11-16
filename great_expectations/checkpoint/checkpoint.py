@@ -147,14 +147,18 @@ class Checkpoint:
 
             if not template_name:
                 if (
-                        isinstance(config.batch_request, dict)
-                        and config.batch_request.get("runtime_parameters") is not None
-                        and config.batch_request["runtime_parameters"].get("batch_data")
-                        is not None
+                    isinstance(config.batch_request, dict)
+                    and config.batch_request.get("runtime_parameters") is not None
+                    and config.batch_request["runtime_parameters"].get("batch_data")
+                    is not None
                 ):
-                    batch_data = config.batch_request["runtime_parameters"].pop("batch_data")
+                    batch_data = config.batch_request["runtime_parameters"].pop(
+                        "batch_data"
+                    )
                     substituted_config = copy.deepcopy(config)
-                    substituted_config.batch_request["runtime_parameters"]["batch_data"] = batch_data
+                    substituted_config.batch_request["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data
                 else:
                     substituted_config = copy.deepcopy(config)
 

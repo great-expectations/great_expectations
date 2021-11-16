@@ -2046,7 +2046,9 @@ class CheckpointConfig(BaseYamlConfig):
             validations = []
             if len(self.validations) > 0:
                 for val in self.validations:
-                    if val.get("batch_request") is not None and isinstance(val["batch_request"], BatchRequest):
+                    if val.get("batch_request") is not None and isinstance(
+                        val["batch_request"], BatchRequest
+                    ):
                         json_val: dict = {}
                         for key, value in val.items():
                             if key != "batch_request":

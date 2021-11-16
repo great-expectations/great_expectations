@@ -465,8 +465,7 @@ def substitute_all_config_variables(
         if (
             isinstance(data.batch_request, dict)
             and data.batch_request.get("runtime_parameters") is not None
-            and data.batch_request["runtime_parameters"].get("batch_data")
-            is not None
+            and data.batch_request["runtime_parameters"].get("batch_data") is not None
         ):
             batch_data = data.batch_request["runtime_parameters"].pop("batch_data")
             data = CheckpointConfigSchema().dump(data)
