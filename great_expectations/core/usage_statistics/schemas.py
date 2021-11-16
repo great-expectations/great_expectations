@@ -292,7 +292,7 @@ init_payload_schema = {
     "additionalProperties": False,
 }
 
-anonymized_batch_request_schema = {
+anonymized_batch_request_keys_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-batch-request",
     "definitions": {
@@ -495,7 +495,7 @@ usage_statistics_record_schema = {
         "init_payload": init_payload_schema,
         "run_validation_operator_payload": run_validation_operator_payload_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
-        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_batch_request_keys": anonymized_batch_request_keys_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
@@ -545,7 +545,7 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {"enum": ["data_context.get_batch_list"]},
-                "event_payload": {"$ref": "#/definitions/anonymized_batch_request"},
+                "event_payload": {"$ref": "#/definitions/anonymized_batch_request_keys"},
             },
         },
         {
