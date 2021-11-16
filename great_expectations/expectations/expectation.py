@@ -1434,20 +1434,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         result_format_str = dependencies["result_format"].get("result_format")
 
-        if dependencies["result_format"].get("include_unexpected_rows"):
-            metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_rows",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            metric_dependencies[
-                self.map_metric + ".unexpected_rows"
-                ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_rows",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-            )
-
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
 
@@ -1460,6 +1446,17 @@ class ColumnMapExpectation(TableExpectation, ABC):
             self.map_metric + ".unexpected_values"
         ] = MetricConfiguration(
             metric_name=self.map_metric + ".unexpected_values",
+            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        )
+
+        metric_kwargs = get_metric_kwargs(
+            self.map_metric + ".unexpected_rows",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
+            metric_name=self.map_metric + ".unexpected_rows",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -2029,9 +2026,5 @@ def _format_map_output(
 
     if result_format["result_format"] == "COMPLETE":
         return return_obj
-
-
-    # if result_format["result_format"] == "INCLUDE_UNEXPECTED_ROWS":
-    #     return return_obj
 
     raise ValueError("Unknown result_format {}.".format(result_format["result_format"]))

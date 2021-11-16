@@ -3,9 +3,10 @@ import pytest
 
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationSuite,
     ExpectationValidationResult,
 )
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -23,6 +24,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.expectations.test_expectation_arguments import in_memory_runtime_context
 
 
 @pytest.fixture
@@ -33,6 +35,7 @@ def dataframe_for_unexpected_rows():
             "b": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
         }
     )
+
 
 @pytest.fixture()
 def expected_evr_without_unexpected_rows():
@@ -69,6 +72,31 @@ def expected_evr_without_unexpected_rows():
         },
         meta={},
     )
+
+
+@pytest.fixture()
+def pandas_validator_with_df(in_memory_runtime_context, dataframe_for_unexpected_rows):
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_result_format_suite", overwrite_existing=True
+    )
+
+    runtime_batch_request = RuntimeBatchRequest(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="insert_your_data_asset_name_here",
+        runtime_parameters={"batch_data": dataframe_for_unexpected_rows},
+        batch_identifiers={
+            "id_key_0": "id_value_0",
+            "id_key_1": "id_value_1",
+        },
+    )
+
+    validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    return validator
 
 
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
@@ -160,6 +188,16 @@ def test_is_sqlalchemy_metric_selectable():
 
 
 def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_rows):
+    # validator = pandas_validator_with_df
+    #
+    # runtime_environment_arguments: dict = {
+    #     "result_format": {
+    #         "result_format": "BASIC",
+    #         "include_unexpected_rows": True,
+    #     },
+    # }
+    #
+    # result = validator.expect_column_values_to_be_in_set("b", value_set=["cat", "fish", "dog", "giraffe"], **runtime_environment_arguments)
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -167,7 +205,7 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
             "mostly": 0.9,
             "value_set": ["cat", "fish", "dog", "giraffe"],
             "result_format": {
-                "result_format": "BOOLEAN_ONLY",
+                "result_format": "BASIC",
                 "include_unexpected_rows": True,
             },
         },
@@ -178,17 +216,44 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine, batches=(batch,))
     result = expectation.validate(validator)
+
+    # result = validator.validate(**runtime_environment_arguments)
     assert result == ExpectationValidationResult(
-        success=False,
-        result={
-            "unexpected_rows": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
-        },
-        exception_info={
-            "raised_exception": False,
-            "exception_traceback": None,
-            "exception_message": None,
-        },
-        meta={},
+        **{
+            "exception_info": {
+                "raised_exception": False,
+                "exception_traceback": None,
+                "exception_message": None,
+            },
+            "success": False,
+            "result": {
+                "element_count": 6,
+                "unexpected_count": 2,
+                "unexpected_percent": 33.33333333333333,
+                "partial_unexpected_list": ["lion", "zebra"],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 33.33333333333333,
+                "unexpected_percent_nonmissing": 33.33333333333333,
+                "unexpected_rows": [{"a": 5, "b": "lion"}, {"a": 10, "b": "zebra"}],
+            },
+            "expectation_config": {
+                "ge_cloud_id": None,
+                "expectation_type": "expect_column_values_to_be_in_set",
+                "meta": {},
+                "kwargs": {
+                    "value_set": ["cat", "fish", "dog", "giraffe"],
+                    "result_format": {
+                        "result_format": "BASIC",
+                        "include_unexpected_rows": True,
+                    },
+                    "column": "b",
+                    "mostly": 0.9,
+                    "batch_id": [],
+                },
+            },
+            "meta": {},
+        }
     )
 
 
@@ -200,7 +265,7 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_rows": True
+                "include_unexpected_rows": True,
             },
         },
     )
@@ -247,10 +312,9 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
 
 
 def test_pandas_default_to_not_include_unexpected_rows(
-        dataframe_for_unexpected_rows,
-    expected_evr_without_unexpected_rows
+    dataframe_for_unexpected_rows, expected_evr_without_unexpected_rows
 ):
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
@@ -261,7 +325,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
     batch: Batch = Batch(data=dataframe_for_unexpected_rows)
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine, batches=(batch,))
@@ -270,8 +334,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
 
 
 def test_pandas_specify_not_include_unexpected_rows(
-        dataframe_for_unexpected_rows,
-        expected_evr_without_unexpected_rows
+    dataframe_for_unexpected_rows, expected_evr_without_unexpected_rows
 ):
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -280,7 +343,7 @@ def test_pandas_specify_not_include_unexpected_rows(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_rows": False
+                "include_unexpected_rows": False,
             },
         },
     )
