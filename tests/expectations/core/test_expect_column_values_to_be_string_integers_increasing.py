@@ -4,9 +4,6 @@ import pytest
 from contrib.experimental.great_expectations_experimental.expectations.expect_column_values_to_be_string_integers_increasing import (
     ExpectColumnValuesToBeStringIntegersIncreasing,
 )
-from contrib.experimental.great_expectations_experimental.metrics.column_values_string_integers_increasing import (
-    ColumnValuesStringIntegersIncreasing,
-)
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
