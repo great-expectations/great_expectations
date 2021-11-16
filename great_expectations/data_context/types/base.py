@@ -2037,27 +2037,47 @@ class CheckpointConfig(BaseYamlConfig):
                 }
             else:
                 batch_request = self.batch_request
-            json_dict: dict = {
-                "name": self.name,
-                "config_version": self.config_version,
-                "template_name": self.template_name,
-                "module_name": self.module_name,
-                "class_name": self.class_name,
-                "run_name_template": self.run_name_template,
-                "expectation_suite_name": self.expectation_suite_name,
-                "expectation_suite_ge_cloud_id": self.expectation_suite_ge_cloud_id,
-                "batch_request": batch_request,
-                "action_list": self.action_list,
-                "evaluation_parameters": self.evaluation_parameters,
-                "runtime_configuration": self.runtime_configuration,
-                "validations": self.validations,
-                "profilers": self.profilers,
-                "ge_cloud_id": self.ge_cloud_id,
-                "site_names": self.site_names,
-                "slack_webhook": self.slack_webhook,
-                "notify_on": self.notify_on,
-                "notify_with": self.notify_with,
-            }
+
+            if self.class_name == "SimpleCheckpoint":
+                json_dict: dict = {
+                    "name": self.name,
+                    "config_version": self.config_version,
+                    "template_name": self.template_name,
+                    "module_name": self.module_name,
+                    "class_name": self.class_name,
+                    "run_name_template": self.run_name_template,
+                    "expectation_suite_name": self.expectation_suite_name,
+                    "expectation_suite_ge_cloud_id": self.expectation_suite_ge_cloud_id,
+                    "batch_request": batch_request,
+                    "action_list": self.action_list,
+                    "evaluation_parameters": self.evaluation_parameters,
+                    "runtime_configuration": self.runtime_configuration,
+                    "validations": self.validations,
+                    "profilers": self.profilers,
+                    "ge_cloud_id": self.ge_cloud_id,
+                    "site_names": self.site_names,
+                    "slack_webhook": self.slack_webhook,
+                    "notify_on": self.notify_on,
+                    "notify_with": self.notify_with,
+                }
+            else:
+                json_dict: dict = {
+                    "name": self.name,
+                    "config_version": self.config_version,
+                    "template_name": self.template_name,
+                    "module_name": self.module_name,
+                    "class_name": self.class_name,
+                    "run_name_template": self.run_name_template,
+                    "expectation_suite_name": self.expectation_suite_name,
+                    "expectation_suite_ge_cloud_id": self.expectation_suite_ge_cloud_id,
+                    "batch_request": batch_request,
+                    "action_list": self.action_list,
+                    "evaluation_parameters": self.evaluation_parameters,
+                    "runtime_configuration": self.runtime_configuration,
+                    "validations": self.validations,
+                    "profilers": self.profilers,
+                    "ge_cloud_id": self.ge_cloud_id,
+                }
         return json_dict
 
     def update(
