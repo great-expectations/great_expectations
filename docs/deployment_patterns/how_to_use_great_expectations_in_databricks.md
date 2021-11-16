@@ -138,13 +138,15 @@ Run the following code to set up a [Data Context](../reference/data_context.md) 
 ### 3. Prepare your data
 
 <Tabs
-  groupId="file-or-dataframe"
+  groupId="file-or-dataframe-pandas-or-yaml"
   defaultValue='file'
   values={[
-  {label: 'File', value:'file'},
-  {label: 'Dataframe', value:'dataframe'},
+  {label: 'File-yaml', value:'file-yaml'},
+  {label: 'File-python', value:'file-python'},
+  {label: 'Dataframe-yaml', value:'dataframe-yaml'},
+  {label: 'Dataframe-python', value:'dataframe-python'},
   ]}>
-  <TabItem value="file">
+  <TabItem value="file-yaml">
 
 We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Let's copy some example csv data to our DBFS folder for easier access using [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html):
 
@@ -156,9 +158,25 @@ for month in range(1, 4):
       f"/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0{month}.csv.gz"
     )
 ```
+  
+  </TabItem>
 
-</TabItem>
-<TabItem value="dataframe">
+  <TabItem value="file-python">
+
+We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Let's copy some example csv data to our DBFS folder for easier access using [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html):
+
+```python
+# Copy 3 months of data
+for month in range(1, 4):
+    dbutils.fs.cp(
+      f"/databricks-datasets/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0{month}.csv.gz",
+      f"/example_data/nyctaxi/tripdata/yellow/yellow_tripdata_2019-0{month}.csv.gz"
+    )
+```
+  
+  </TabItem>
+
+  <TabItem value="dataframe-yaml">
 
 We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Run the following code in your notebook to load a month of data as a dataframe:
 
@@ -168,8 +186,21 @@ df = spark.read.format("csv")\
     .option("inferSchema", "true")\
     .load("/databricks-datasets/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz")
 ```
+  
+  </TabItem>
 
-</TabItem>
+  <TabItem value="dataframe-python">
+
+We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Run the following code in your notebook to load a month of data as a dataframe:
+
+```python
+df = spark.read.format("csv")\
+    .option("header", "true")\
+    .option("inferSchema", "true")\
+    .load("/databricks-datasets/nyctaxi/tripdata/yellow/yellow_tripdata_2019-01.csv.gz")
+```
+  
+  </TabItem>
 </Tabs>
 
 ### 4. Connect to your data
