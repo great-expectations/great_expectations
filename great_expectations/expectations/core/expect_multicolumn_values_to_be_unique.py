@@ -121,10 +121,14 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 "schema": {"type": "number"},
                 "value": params.get("mostly"),
             },
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
         }
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
         mostly_str = (

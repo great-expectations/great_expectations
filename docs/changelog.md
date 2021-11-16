@@ -4,6 +4,20 @@ title: Changelog
 
 ### Develop
 
+### 0.13.42
+* [FEATURE] DBFS Data connectors (#3659)
+* [BUGFIX] Fix "null" appearing in notebooks due to incorrect ExpectationConfigurationSchema serialization (#3638)
+* [BUGFIX] Ensure that result_format from saved expectation suite json file takes effect (#3634)
+* [BUGFIX] Allowing user specified run_id to appear in WarningAndFailureExpectationSuitesValidationOperator validation result (#3386) (thanks @wniroshan)
+* [BUGFIX] Update black dependency to ensure passing Azure builds on Python 3.9 (#3664)
+* [BUGFIX] fix Issue #3405 - gcs client init in pandas engine (#3408) (thanks @dz-1)
+* [BUGFIX] Recursion error when passing RuntimeBatchRequest with query into Checkpoint using validations (#3654)
+* [MAINTENANCE] Cloud 388/supported expectations query (#3635)
+* [MAINTENANCE] Proper separation of concerns between specific File Path Data Connectors and corresponding ExecutionEngine objects (#3643)
+* [MAINTENANCE] Enable Docusaurus tests for S3 (#3645)
+* [MAINTENANCE] Formalize Exception Handling Between DataConnector and ExecutionEngine Implementations, and Update DataConnector Configuration Usage in Tests (#3644)
+* [MAINTENANCE] Adds util for handling SADeprecation warning (#3651)
+
 ### 0.13.41
 * [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
 * [BUGFIX] Be able to use spark execution engine with spark reuse flag (#3541) (thanks @fep2)
