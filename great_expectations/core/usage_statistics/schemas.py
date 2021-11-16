@@ -321,6 +321,7 @@ anonymized_batch_request_schema = {
         "limit": {"type": "number"},
         "batch_spec_passthrough": {"$ref": "#/definitions/anonymized_keys"},
     },
+    "additionalProperties": False,
 }
 
 anonymized_batch_schema = {
