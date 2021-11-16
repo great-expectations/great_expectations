@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 
 try:
     import boto3
+    from botocore.exceptions import DataNotFoundError
 except ImportError:
     boto3 = None
+    DataNotFoundError = None
     logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
     )
@@ -111,7 +113,7 @@ Notes:
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError, DataNotFoundError):
             self._s3 = None
 
         try:
@@ -129,15 +131,17 @@ Notes:
             try:
                 credentials = None  # If configured with gcloud CLI / env vars
                 if "filename" in gcs_options:
+                    filename = gcs_options.pop("filename")
                     credentials = service_account.Credentials.from_service_account_file(
-                        **gcs_options
+                        filename=filename
                     )
                 elif "info" in gcs_options:
+                    info = gcs_options.pop("info")
                     credentials = service_account.Credentials.from_service_account_info(
-                        **gcs_options
+                        info=info
                     )
                 self._gcs = storage.Client(credentials=credentials, **gcs_options)
-            except (TypeError, AttributeError):
+            except (TypeError, AttributeError, DefaultCredentialsError):
                 self._gcs = None
 
         super().__init__(*args, **kwargs)

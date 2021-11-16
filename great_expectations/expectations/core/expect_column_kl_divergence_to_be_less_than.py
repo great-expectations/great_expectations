@@ -7,13 +7,14 @@ from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.util import (
     build_categorical_partition_object,
     build_continuous_partition_object,
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -33,7 +34,7 @@ from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
 
-class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
+class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the \
             partition object to be lower than the provided threshold.
 
