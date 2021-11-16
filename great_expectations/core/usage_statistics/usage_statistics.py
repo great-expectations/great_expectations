@@ -190,7 +190,8 @@ class UsageStatisticsHandler:
         message["ge_version"] = self._ge_version
         return message
 
-    def validate_message(self, message, schema):
+    @staticmethod
+    def validate_message(message, schema):
         try:
             jsonschema.validate(message, schema=schema)
             return True
@@ -284,6 +285,7 @@ def usage_statistics_enabled_method(
         return usage_statistics_wrapped_method
     else:
 
+        # noinspection PyShadowingNames
         def usage_statistics_wrapped_method_partial(func):
             return usage_statistics_enabled_method(
                 func,
@@ -299,8 +301,6 @@ def run_validation_operator_usage_statistics(
     data_context,  # self
     validation_operator_name,
     assets_to_validate,
-    run_id=None,
-    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -335,12 +335,11 @@ def run_validation_operator_usage_statistics(
     return payload
 
 
+# noinspection SpellCheckingInspection
 def save_expectation_suite_usage_statistics(
     data_context,
     expectation_suite,
     expectation_suite_name=None,
-    ge_cloud_id=None,  # self
-    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -423,6 +422,7 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     return payload
 
 
+# noinspection SpellCheckingInspection
 def get_batch_list_usage_statistics(data_context, *args, **kwargs):
     try:
         data_context_id = data_context.data_context_id
