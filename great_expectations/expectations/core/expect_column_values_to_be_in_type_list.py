@@ -161,6 +161,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 "value": params.get("type_list"),
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
@@ -179,7 +183,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
 
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
