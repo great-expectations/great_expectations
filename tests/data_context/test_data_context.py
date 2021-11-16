@@ -221,14 +221,7 @@ def test_compile_evaluation_parameter_dependencies(
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {}
     )
-    expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            parameterized_expectation_suite_name
-        )
-    )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies(
-        expectation_suite
-    )
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
     assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
         "source_diabetes_data.default": [
             {
