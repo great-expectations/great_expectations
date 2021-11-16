@@ -36,6 +36,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
 from great_expectations.util import (
     filter_properties_dict,
+    get_sqlalchemy_selectable,
     get_sqlalchemy_url,
     import_library_module,
 )
@@ -121,6 +122,12 @@ except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
+try:
+    import teradatasqlalchemy.dialect
+    import teradatasqlalchemy.types as teradatatypes
+except ImportError:
+    teradatasqlalchemy = None
+
 
 def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
@@ -147,6 +154,19 @@ def _get_dialect_type_module(dialect):
             and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
+    except (TypeError, AttributeError):
+        pass
+
+    # Teradata types module
+    try:
+        if (
+            issubclass(
+                dialect,
+                teradatasqlalchemy.dialect.TeradataDialect,
+            )
+            and teradatatypes is not None
+        ):
+            return teradatatypes
     except (TypeError, AttributeError):
         pass
 
@@ -250,6 +270,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif self.engine.dialect.name.lower() == "bigquery":
             self.dialect_module = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
+            )
+        elif self.engine.dialect.name.lower() == "teradatasql":
+            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="teradatasqlalchemy.dialect"
             )
         else:
             self.dialect_module = None
@@ -483,9 +508,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.and_(
@@ -496,9 +521,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             elif ignore_row_if == "either_value_is_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.or_(
@@ -536,9 +561,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.and_(
@@ -551,9 +576,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             elif ignore_row_if == "any_value_is_missing":
-                selectable = (
+                selectable = get_sqlalchemy_selectable(
                     sa.select([sa.text("*")])
-                    .select_from(selectable)
+                    .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
                             sa.or_(
