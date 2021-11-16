@@ -1,5 +1,5 @@
 import copy
-import json
+import datetime
 import logging
 import smtplib
 import ssl
@@ -209,7 +209,7 @@ def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,
     ge_cloud_mode: bool = False,
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
     batch_data = None
     if isinstance(runtime_config_batch_request, RuntimeBatchRequest):
