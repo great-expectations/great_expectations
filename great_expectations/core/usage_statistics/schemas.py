@@ -12,6 +12,28 @@ anonymized_string_schema = {
     "maxLength": 32,
 }
 
+anonymized_keys_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-keys",
+    "type": "array",
+    "maxItems": 1000,
+    "items": {
+        "anyOf": [
+            {
+                "type": "string",
+                "maxLength": 256,
+            },
+            {
+                "type": "object",
+                "patternProperties": {
+                    "^\\w+$": {"$ref": "#/definitions/anonymized_keys"},
+                },
+            },
+        ],
+    },
+    "additionalProperties": False,
+}
+
 anonymized_class_info_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-class-info",
@@ -179,7 +201,7 @@ anonymized_data_docs_site_schema = {
 
 anonymized_expectation_suite_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "anonymized-expectation-suite-schema",
+    "title": "anonymized-expectation-suite",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
         {
@@ -268,6 +290,37 @@ init_payload_schema = {
         "anonymized_expectation_suites",
     ],
     "additionalProperties": False,
+}
+
+anonymized_batch_request_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-batch-request",
+    "definitions": {
+        "anonymized_keys": anonymized_keys_schema,
+    },
+    "type": "array",
+    "maxItems": 1000,
+    "items": {
+        "allOf": [
+            {
+                "type": "string",
+                "const": "datasource_name",
+            },
+            {
+                "type": "string",
+                "const": "data_connector_name",
+            },
+            {
+                "type": "string",
+                "const": "data_asset_name",
+            },
+        ],
+        "data_connector_query": {"$ref": "#/definitions/anonymized_keys"},
+        "runtime_parameters": {"$ref": "#/definitions/anonymized_keys"},
+        "batch_identifiers": {"$ref": "#/definitions/anonymized_keys"},
+        "limit": {"type": "number"},
+        "batch_spec_passthrough": {"$ref": "#/definitions/anonymized_keys"},
+    },
 }
 
 anonymized_batch_schema = {
@@ -441,6 +494,7 @@ usage_statistics_record_schema = {
         "init_payload": init_payload_schema,
         "run_validation_operator_payload": run_validation_operator_payload_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
@@ -484,6 +538,13 @@ usage_statistics_record_schema = {
                 "event_payload": {
                     "$ref": "#/definitions/run_validation_operator_payload"
                 },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["data_context.get_batch_list"]},
+                "event_payload": {"$ref": "#/definitions/anonymized_batch_request"},
             },
         },
         {

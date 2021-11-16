@@ -430,6 +430,50 @@ valid_usage_statistics_messages = {
                     "data_connector_name",
                     "data_asset_name",
                     {
+                        "batch_spec_passthrough": [
+                            "path",
+                        ]
+                    },
+                ]
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "anonymized_batch_request": [
+                    "datasource_name",
+                    "data_connector_name",
+                    "data_asset_name",
+                    {
+                        "data_connector_query": [
+                            "index",
+                        ],
+                    },
+                ]
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "anonymized_batch_request": [
+                    "datasource_name",
+                    "data_connector_name",
+                    "data_asset_name",
+                    {
                         "data_connector_query": [
                             "index",
                         ],
