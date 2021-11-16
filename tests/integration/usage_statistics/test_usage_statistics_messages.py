@@ -6,9 +6,8 @@ import pytest
 import requests
 
 from great_expectations.data_context import BaseDataContext
-
-USAGE_STATISTICS_QA_URL = (
-    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
 )
 
 
@@ -388,7 +387,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "anonymized_batch_request": [
+                "anonymized_batch_request_keys": [
                     "datasource_name",
                     "data_connector_name",
                     "data_asset_name",
@@ -405,7 +404,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "anonymized_batch_request": [
+                "anonymized_batch_request_keys": [
                     "datasource_name",
                     "data_connector_name",
                     "data_asset_name",
@@ -425,7 +424,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "anonymized_batch_request": [
+                "anonymized_batch_request_keys": [
                     "datasource_name",
                     "data_connector_name",
                     "data_asset_name",
@@ -447,7 +446,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "anonymized_batch_request": [
+                "anonymized_batch_request_keys": [
                     "datasource_name",
                     "data_connector_name",
                     "data_asset_name",
@@ -469,7 +468,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "anonymized_batch_request": [
+                "anonymized_batch_request_keys": [
                     "datasource_name",
                     "data_connector_name",
                     "data_asset_name",
@@ -494,7 +493,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "anonymized_batch_request": [
+                "anonymized_batch_request_keys": [
                     "datasource_name",
                     "data_connector_name",
                     "data_asset_name",
@@ -1726,7 +1725,9 @@ for message_type, messages in valid_usage_statistics_messages.items():
         message_test_ids += [f"{message_type}_{idx}"]
 
 
-@pytest.mark.aws_integration
+# TODO: <Alex>ALEX</Alex>
+# @pytest.mark.aws_integration
+# TODO: <Alex>ALEX</Alex>
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
 def test_usage_statistics_message(message):
     """known message formats should be valid"""
