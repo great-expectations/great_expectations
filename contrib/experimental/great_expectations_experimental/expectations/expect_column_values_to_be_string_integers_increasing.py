@@ -220,10 +220,10 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
             if not rule(param_value):
                 raise InvalidExpectationKwargsError(error_message)
 
-    # def validate_configuration(
-    #     self, configuration: Optional[ExpectationConfiguration]
-    # ) -> bool:
-    #     return super().validate_configuration(configuration=configuration)
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
+        return super().validate_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,
@@ -244,7 +244,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
         )
 
         dependencies["metrics"][
-            "column_values.string_integers.increasing"
+            "column_values.string_integers.increasing.map"
         ] = MetricConfiguration(
             metric_name="column_values.string_integers.increasing.map",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
@@ -262,7 +262,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
     ) -> Dict:
 
         string_integers_increasing = metrics.get(
-            "column_values.string_integers.increasing"
+            "column_values.string_integers.increasing.map"
         )
 
         success = all(string_integers_increasing[0])
@@ -281,8 +281,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
             "data": {
                 "a": ["0", "1", "2", "3", "3", "9", "11"],
                 "b": ["0", "1", "2", "3", "4", "9", "11"],
-                "c": ["1", "2", "3", "3", "4", "2021-05-01", "test"],
-                "d": ["1", "2", "3", "3", "0", "6", "9"],
+                "c": ["1", "2", "3", "3", "0", "6", "9"],
             },
             "tests": [
                 {
@@ -303,7 +302,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
                     "title": "negative_test_monotonic",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "d", "strictly": False},
+                    "in": {"column": "c", "strictly": False},
                     "out": {"success": False},
                 },
                 {
@@ -311,13 +310,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "a", "strictly": True},
-                    "out": {"success": False},
-                },
-                {
-                    "title": "negative_test_int_cast",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {"column": "c", "strictly": False},
                     "out": {"success": False},
                 },
             ],
