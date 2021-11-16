@@ -45,7 +45,9 @@ context = BaseDataContext(project_config=data_context_config)
 # ASSERTIONS vvvvv vvvvv
 # Check the stores were initialized
 uncommitted_directory = os.path.join(root_directory, "uncommitted")
-assert os.listdir(root_directory) == ["checkpoints", "expectations", "uncommitted"]
+assert {"checkpoints", "expectations", "uncommitted"}.issubset(
+    set(os.listdir(root_directory))
+)
 assert os.listdir(uncommitted_directory) == ["validations"]
 # ASSERTIONS ^^^^^ ^^^^^
 
