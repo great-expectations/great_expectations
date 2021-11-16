@@ -139,12 +139,23 @@ class SimpleCheckpointConfigurator:
             )
             # Necessary when using RuntimeDataConnector with SimpleCheckpoint
             if isinstance(other_config.batch_request, BatchRequest):
-                if other_config.batch_request.runtime_parameters.get("batch_data") is not None:
-                    batch_data = other_config.batch_request.runtime_parameters.get("batch_data")
-                    other_config.batch_request = other_config.batch_request.to_json_dict()
-                    other_config.batch_request["runtime_parameters"]["batch_data"] = batch_data
+                if (
+                    other_config.batch_request.runtime_parameters.get("batch_data")
+                    is not None
+                ):
+                    batch_data = other_config.batch_request.runtime_parameters.get(
+                        "batch_data"
+                    )
+                    other_config.batch_request = (
+                        other_config.batch_request.to_json_dict()
+                    )
+                    other_config.batch_request["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data
                 else:
-                    other_config.batch_request = other_config.batch_request.to_json_dict()
+                    other_config.batch_request = (
+                        other_config.batch_request.to_json_dict()
+                    )
             checkpoint_config.update(other_config=other_config)
 
         logger.debug(
