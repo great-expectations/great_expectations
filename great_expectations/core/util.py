@@ -583,6 +583,38 @@ class S3Url:
         return self._parsed.geturl()
 
 
+class DBFSPath:
+    """
+    Methods for converting Databricks Filesystem (DBFS) paths
+    """
+
+    @staticmethod
+    def convert_to_protocol_version(path: str) -> str:
+        if re.search(r"^\/dbfs", path):
+            candidate = path.replace("/dbfs", "dbfs:", 1)
+            if candidate == "dbfs:":
+                # Must add trailing slash
+                return "dbfs:/"
+            else:
+                return candidate
+        elif re.search(r"^dbfs:", path):
+            if path == "dbfs:":
+                # Must add trailing slash
+                return "dbfs:/"
+            return path
+        else:
+            raise ValueError("Path should start with either /dbfs or dbfs:")
+
+    @staticmethod
+    def convert_to_file_semantics_version(path: str) -> str:
+        if re.search(r"^dbfs:", path):
+            return path.replace("dbfs:", "/dbfs", 1)
+        elif re.search("^/dbfs", path):
+            return path
+        else:
+            raise ValueError("Path should start with either /dbfs or dbfs:")
+
+
 def sniff_s3_compression(s3_url: S3Url) -> str:
     """Attempts to get read_csv compression from s3_url"""
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix)
