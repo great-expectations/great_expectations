@@ -118,6 +118,8 @@ validator = context.get_validator(
     expectation_suite_name=expectation_suite_name,
 )
 
+print(validator.head())
+
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
