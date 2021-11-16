@@ -58,7 +58,7 @@ my_spark_datasource_config = {
         "insert_your_data_connector_name_here": {
             "class_name": "InferredAssetDBFSDataConnector",
             "base_directory": "/dbfs/example_data/nyctaxi/tripdata/yellow/",
-            "glob_directive": "*.csv",
+            "glob_directive": "*.csv.gz",
             "default_regex": {
                 "group_names": [
                     "data_asset_name",
@@ -84,6 +84,9 @@ my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_h
 my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
     "default_regex"
 ]["pattern"] = r"(.*)_(\d{4})-(\d{2})\.csv"
+my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
+    "glob_directive"
+] = "*.csv"
 
 # Data location used when running or debugging this script directly
 # os.path.join(

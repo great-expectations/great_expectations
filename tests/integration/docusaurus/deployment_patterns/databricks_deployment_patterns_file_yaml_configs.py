@@ -57,7 +57,7 @@ data_connectors:
     module_name: great_expectations.datasource.data_connector
     class_name: InferredAssetDBFSDataConnector
     base_directory: /dbfs/example_data/nyctaxi/tripdata/yellow/
-    glob_directive: "*.csv"
+    glob_directive: "*.csv.gz"
     default_regex:
       group_names:
         - data_asset_name
@@ -80,6 +80,7 @@ my_spark_datasource_config = my_spark_datasource_config.replace(
 my_spark_datasource_config = my_spark_datasource_config.replace(
     r"(.*)_(\d{4})-(\d{2})\.csv\.gz", r"(.*)_(\d{4})-(\d{2})\.csv"
 )
+my_spark_datasource_config = my_spark_datasource_config.replace("*.csv.gz", "*.csv")
 
 # Data location used when running or debugging this script directly
 # os.path.join(
