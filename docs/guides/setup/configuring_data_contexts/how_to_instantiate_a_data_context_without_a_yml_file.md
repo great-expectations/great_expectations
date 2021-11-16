@@ -199,5 +199,4 @@ Additional resources
 --------------------
 
 - [How to instantiate a Data Context on an EMR Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to instantiate a Data Context on Databricks Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster.md)
 
