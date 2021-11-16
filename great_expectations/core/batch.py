@@ -274,10 +274,16 @@ class BatchRequestBase(SerializableDictDot):
             json_dict["batch_identifiers"] = self.batch_identifiers
 
         if self.runtime_parameters is not None:
-            json_dict["runtime_parameters"] = self.runtime_parameters
-            if json_dict["runtime_parameters"].get("batch_data") is not None:
+            key: str
+            value: Any
+            json_dict["runtime_parameters"] = {
+                key: value
+                for key, value in self.runtime_parameters.items()
+                if key != "batch_data"
+            }
+            if self.runtime_parameters.get("batch_data") is not None:
                 json_dict["runtime_parameters"]["batch_data"] = str(
-                    type(json_dict["runtime_parameters"]["batch_data"])
+                    type(self.runtime_parameters.get("batch_data"))
                 )
 
         filter_properties_dict(properties=json_dict, clean_falsy=True, inplace=True)
