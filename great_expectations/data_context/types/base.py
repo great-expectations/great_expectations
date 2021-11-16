@@ -2024,10 +2024,14 @@ class CheckpointConfig(BaseYamlConfig):
             }
         else:
             if (
-                    self.batch_request["runtime_parameters"].get("batch_data")
-                    is not None
+                self.batch_request is not None
+                and self.batch_request.get("runtime_parameters") is not None
+                and self.batch_request["runtime_parameters"].get("batch_data")
+                is not None
             ):
-                batch_data = str(type(self.batch_request["runtime_parameters"].get("batch_data")))
+                batch_data = str(
+                    type(self.batch_request["runtime_parameters"].get("batch_data"))
+                )
                 batch_request = {
                     "datasource_name": self.batch_request["datasource_name"],
                     "data_connector_name": self.batch_request["data_connector_name"],
