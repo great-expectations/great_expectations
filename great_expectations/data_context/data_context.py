@@ -99,7 +99,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import DataContextError, InvalidKeyError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -2437,8 +2437,11 @@ class BaseDataContext:
     def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
         for key in self.expectations_store.list_keys():
-            expectation_suite = self.expectations_store.get(key)
-            if not expectation_suite:
+            try:
+                expectation_suite = self.expectations_store.get(key)
+                if not expectation_suite:
+                    continue
+            except InvalidKeyError:
                 continue
 
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
