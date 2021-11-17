@@ -218,13 +218,13 @@ class Checkpoint:
 
     def _run_validation(
         self,
-        idx: int,
-        validation_dict: dict,
         substituted_runtime_config: CheckpointConfig,
         async_validation_operator_results: List[AsyncResult],
         async_executor: AsyncExecutor,
         result_format: Optional[dict],
         run_id: Optional[Union[str, RunIdentifier]],
+        idx: Optional[int] = 0,
+        validation_dict: Optional[dict] = {},
     ):
         try:
             substituted_validation_dict: dict = get_substituted_validation_dict(
@@ -387,23 +387,21 @@ class Checkpoint:
             if len(validations) != 0:
                 for idx, validation_dict in enumerate(validations):
                     self._run_validation(
-                        idx,
-                        validation_dict,
-                        substituted_runtime_config,
-                        async_validation_operator_results,
-                        async_executor,
-                        result_format,
-                        run_id,
+                        substituted_runtime_config=substituted_runtime_config,
+                        async_validation_operator_results=async_validation_operator_results,
+                        async_executor=async_executor,
+                        result_format=result_format,
+                        run_id=run_id,
+                        idx=idx,
+                        validation_dict=validation_dict,
                     )
             else:
                 self._run_validation(
-                    0,
-                    {},
-                    substituted_runtime_config,
-                    async_validation_operator_results,
-                    async_executor,
-                    result_format,
-                    run_id,
+                    substituted_runtime_config=substituted_runtime_config,
+                    async_validation_operator_results=async_validation_operator_results,
+                    async_executor=async_executor,
+                    result_format=result_format,
+                    run_id=run_id,
                 )
 
             run_results = {}
