@@ -1,10 +1,12 @@
 import logging
-import os
 import re
 from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
@@ -75,7 +77,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._container = container
-        self._name_starts_with = os.path.join(name_starts_with, "")
+        self._name_starts_with = FilePathDataConnector.sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
 
         if azure_options is None:

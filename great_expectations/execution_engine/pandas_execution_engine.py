@@ -31,10 +31,8 @@ logger = logging.getLogger(__name__)
 
 try:
     import boto3
-    from botocore.exceptions import DataNotFoundError
 except ImportError:
     boto3 = None
-    DataNotFoundError = None
     logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
     )
@@ -113,7 +111,7 @@ Notes:
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         try:
             self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError, DataNotFoundError):
+        except (TypeError, AttributeError):
             self._s3 = None
 
         try:
@@ -141,7 +139,7 @@ Notes:
                         info=info
                     )
                 self._gcs = storage.Client(credentials=credentials, **gcs_options)
-            except (TypeError, AttributeError, DefaultCredentialsError):
+            except (TypeError, AttributeError):
                 self._gcs = None
 
         super().__init__(*args, **kwargs)
