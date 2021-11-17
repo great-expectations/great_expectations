@@ -498,7 +498,7 @@ First we create the Checkpoint configuration:
 Then we test our syntax using `test_yaml_config`:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L150
 ```
-Note that we get a message that the Checkpoint contains no validations. See below, we will pass those in at runtime.
+Note that we get a message that the Checkpoint contains no validations. This is OK because we will pass them in at runtime, as we can see below when we call `context.run_checkpoint()`.
 
 If all is well, we add the Checkpoint:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L152
@@ -521,7 +521,7 @@ First we create the Checkpoint configuration:
 Then we test our syntax using `test_yaml_config`:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L156
 ```
-Note that we get a message that the Checkpoint contains no validations. See below, we will pass those in at runtime.
+Note that we get a message that the Checkpoint contains no validations. This is OK because we will pass them in at runtime, as we can see below when we call `context.run_checkpoint()`.
 
 If all is well, we add the Checkpoint:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L158
