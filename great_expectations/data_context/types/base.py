@@ -456,6 +456,8 @@ class DataConnectorConfigSchema(Schema):
                 "ConfiguredAssetAzureDataConnector",
                 "InferredAssetGCSDataConnector",
                 "ConfiguredAssetGCSDataConnector",
+                "InferredAssetDBFSDataConnector",
+                "ConfiguredAssetDBFSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
@@ -469,6 +471,8 @@ configuration to continue.
             in [
                 "InferredAssetFilesystemDataConnector",
                 "ConfiguredAssetFilesystemDataConnector",
+                "InferredAssetDBFSDataConnector",
+                "ConfiguredAssetDBFSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
