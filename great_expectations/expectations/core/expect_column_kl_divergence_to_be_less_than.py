@@ -444,8 +444,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 expected_weights = test_df["expected"]
 
             distance = self.calculate_distance_metric(
-                observed_weights=observed_weights,
-                expected_weights=expected_weights
+                observed_weights=observed_weights, expected_weights=expected_weights
             )
 
             if np.isinf(distance) or np.isnan(distance):
@@ -663,7 +662,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
             distance = self.calculate_distance_metric(
                 observed_weights=comb_observed_weights,
-                expected_weights=comb_expected_weights
+                expected_weights=comb_expected_weights,
             )
 
             if np.isinf(distance) or np.isnan(distance):
