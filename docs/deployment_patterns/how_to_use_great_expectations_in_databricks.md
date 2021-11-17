@@ -1,7 +1,7 @@
 ---
 title: How to Use Great Expectations in Databricks
 ---
-import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
