@@ -19,3 +19,9 @@ def test_sanitize_prefix_with_filename_input():
     prefix = "baz.txt"
     res = FilePathDataConnector.sanitize_prefix(prefix)
     assert res == "baz.txt"  # Unchanged due to already being formatted properly
+
+
+def test_sanitize_prefix_with_nested_filename_input():
+    prefix = "a/b/c/baz.txt"
+    res = FilePathDataConnector.sanitize_prefix(prefix)
+    assert res == "a/b/c/baz.txt"  # Unchanged due to already being formatted properly
