@@ -151,6 +151,20 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
               parsers to\
               crash when encountered. The python None token will be serialized to null in json.
 
+              In order to implement a custom distance-based expectation, it usually suffice to create a child class
+              with redefined `distance_measure_name` attribute and `calculate_distance_metric` method, for example:
+              ```
+              from scipy.spatial.distance import chebyshev
+
+
+              class ExpectColumnChebyshevDistanceToBeLessThan(ExpectColumnKlDivergenceToBeLessThan):
+                  distance_measure_name = "Chebyshev distance"
+
+                  def calculate_distance_metric(observed_weights, expected_weights):
+                      return chebyshev(observed_weights, expected_weights)
+
+              ```
+
             See also:
                 :func:`expect_column_chisquare_test_p_value_to_be_greater_than \
                 <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
