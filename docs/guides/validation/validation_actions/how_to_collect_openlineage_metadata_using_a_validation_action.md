@@ -4,7 +4,7 @@ title: How to collect OpenLineage metadata using a Validation Action
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
-[OpenLineage](https://openlineage.io) is an open framework for collection and analysis of data lineage. It tracks the movement of data over time, tracing relationships between datasets and maintaining a versioned lineage graph. Operators can use data lineage metadata to determine the root cause of failures, identify performance bottlenecks, and simulate the effects of planned changes.
+[OpenLineage](https://openlineage.io) is an open framework for collection and analysis of data lineage. It tracks the movement of data over time, tracing relationships between datasets. Data engineers can use data lineage metadata to determine the root cause of failures, identify performance bottlenecks, and simulate the effects of planned changes.
 
 Enhancing the metadata in OpenLineage with results from an Expectation Suite makes it possible to answer questions like:
 * have there been failed assertions in any upstream datasets?
