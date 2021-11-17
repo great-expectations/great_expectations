@@ -7,6 +7,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -52,6 +53,7 @@ def expected_evr_without_unexpected_rows():
         result={
             "element_count": 6,
             "unexpected_count": 2,
+            "unexpected_index_list": [3, 5],
             "unexpected_percent": 33.33333333333333,
             "partial_unexpected_list": [3, 10],
             "unexpected_list": [3, 10],
@@ -188,16 +190,6 @@ def test_is_sqlalchemy_metric_selectable():
 
 
 def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_rows):
-    # validator = pandas_validator_with_df
-    #
-    # runtime_environment_arguments: dict = {
-    #     "result_format": {
-    #         "result_format": "BASIC",
-    #         "include_unexpected_rows": True,
-    #     },
-    # }
-    #
-    # result = validator.expect_column_values_to_be_in_set("b", value_set=["cat", "fish", "dog", "giraffe"], **runtime_environment_arguments)
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -217,44 +209,17 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
     validator = Validator(execution_engine=engine, batches=(batch,))
     result = expectation.validate(validator)
 
-    # result = validator.validate(**runtime_environment_arguments)
-    assert result == ExpectationValidationResult(
-        **{
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": False,
-            "result": {
-                "element_count": 6,
-                "unexpected_count": 2,
-                "unexpected_percent": 33.33333333333333,
-                "partial_unexpected_list": ["lion", "zebra"],
-                "missing_count": 0,
-                "missing_percent": 0.0,
-                "unexpected_percent_total": 33.33333333333333,
-                "unexpected_percent_nonmissing": 33.33333333333333,
-                "unexpected_rows": [{"a": 5, "b": "lion"}, {"a": 10, "b": "zebra"}],
-            },
-            "expectation_config": {
-                "ge_cloud_id": None,
-                "expectation_type": "expect_column_values_to_be_in_set",
-                "meta": {},
-                "kwargs": {
-                    "value_set": ["cat", "fish", "dog", "giraffe"],
-                    "result_format": {
-                        "result_format": "BASIC",
-                        "include_unexpected_rows": True,
-                    },
-                    "column": "b",
-                    "mostly": 0.9,
-                    "batch_id": [],
-                },
-            },
-            "meta": {},
-        }
-    )
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": ["lion", "zebra"],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+        "unexpected_rows": [{"a": 5, "b": "lion"}, {"a": 10, "b": "zebra"}],
+    }
 
 
 def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_rows):
@@ -275,40 +240,24 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine, batches=(batch,))
     result = expectation.validate(validator)
-    assert result == ExpectationValidationResult(
-        success=False,
-        expectation_config={
-            "expectation_type": "expect_column_values_to_be_in_set",
-            "kwargs": {
-                "column": "a",
-                "value_set": [1, 5, 22],
-            },
-            "meta": {},
-        },
-        result={
-            "element_count": 6,
-            "unexpected_count": 2,
-            "unexpected_percent": 33.33333333333333,
-            "partial_unexpected_list": [3, 10],
-            "unexpected_list": [3, 10],
-            "unexpected_rows": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
-            "partial_unexpected_index_list": [3, 5],
-            "partial_unexpected_counts": [
-                {"value": 3, "count": 1},
-                {"value": 10, "count": 1},
-            ],
-            "missing_count": 0,
-            "missing_percent": 0.0,
-            "unexpected_percent_total": 33.33333333333333,
-            "unexpected_percent_nonmissing": 33.33333333333333,
-        },
-        exception_info={
-            "raised_exception": False,
-            "exception_traceback": None,
-            "exception_message": None,
-        },
-        meta={},
-    )
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [3, 5],
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "unexpected_rows": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
+        "partial_unexpected_index_list": [3, 5],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
 
 
 def test_pandas_default_to_not_include_unexpected_rows(
@@ -330,7 +279,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine, batches=(batch,))
     result = expectation.validate(validator)
-    assert result == expected_evr_without_unexpected_rows
+    assert result.result == expected_evr_without_unexpected_rows.result
 
 
 def test_pandas_specify_not_include_unexpected_rows(
@@ -353,4 +302,4 @@ def test_pandas_specify_not_include_unexpected_rows(
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine, batches=(batch,))
     result = expectation.validate(validator)
-    assert result == expected_evr_without_unexpected_rows
+    assert result.result == expected_evr_without_unexpected_rows.result
