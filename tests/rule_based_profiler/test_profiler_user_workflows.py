@@ -275,3 +275,35 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
             "test_configuration_bootstrap_sampling_method"
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
+    quentin_columnar_table_multi_batch_data_context,
+    quentin_columnar_table_multi_batch,
+):
+    # Load data context
+    data_context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = quentin_columnar_table_multi_batch["profiler_config"]
+
+    # Instantiate Profiler
+    profiler_config: dict = yaml.load(yaml_config)
+
+    profiler: Profiler = Profiler(
+        profiler_config=profiler_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.profile(
+        expectation_suite_name=quentin_columnar_table_multi_batch["test_configuration"][
+            "expectation_suite_name"
+        ],
+    )
+    print(
+        f"\n[ALEX_TEST] [TEST_PROFILER_USER_WORKFLOWS.QUENTIN] EXPECTATION_SUITE:\n{expectation_suite}"
+    )

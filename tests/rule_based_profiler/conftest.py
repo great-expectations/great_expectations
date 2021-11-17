@@ -38,6 +38,11 @@ from tests.rule_based_profiler.bobster_user_workflow_fixture import (
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 )
 
+# noinspection PyUnresolvedReferences
+from tests.rule_based_profiler.quentin_user_workflow_fixture import (
+    quentin_columnar_table_multi_batch,
+)
+
 yaml = YAML()
 
 
@@ -276,8 +281,64 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
         df = df.sample(
             n=output_file_name_length_map[file_name], replace=False, random_state=1
         )
+        # noinspection PyTypeChecker
         df.to_csv(
             path_or_buf=os.path.join(context_path, "..", "data", file_name), index=False
+        )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+@pytest.fixture
+def quentin_columnar_table_multi_batch_data_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "integration",
+                "fixtures",
+                "yellow_tripdata_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    base_directory: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+        ),
+    )
+    file_name_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        base_directory_path=base_directory, glob_directive="*.csv"
+    )
+    file_name_list = sorted(file_name_list)
+
+    file_name: str
+    csv_source_path: str
+    for file_name in file_name_list:
+        csv_source_path = os.path.join(base_directory, file_name)
+        shutil.copy(
+            csv_source_path,
+            os.path.join(context_path, "..", "data", file_name),
         )
 
     context: DataContext = DataContext(context_root_dir=context_path)

@@ -110,6 +110,35 @@ def test_stdev_metric_pd():
     assert results == {desired_metric.id: 1}
 
 
+def test_quantiles_metric_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 4]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.quantile_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+            "allow_relative_error": "linear",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1.75, 2.5, 3.25]}
+
+
 def test_max_metric_column_exists_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)

@@ -181,7 +181,11 @@ detected.
             )
 
         metric_computation_result: Dict[
-            str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]
+            str,
+            Union[
+                Union[np.ndarray, List[Union[Any, Number, List[Number]]]],
+                Dict[str, Any],
+            ],
         ] = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
@@ -195,7 +199,7 @@ detected.
             parameters=parameters,
         )
         metric_values: Union[
-            np.ndarray, List[Union[Any, Number]]
+            np.ndarray, List[Union[Any, Number, List[Number]]]
         ] = metric_computation_result["metric_values"]
         details: Dict[str, Any] = metric_computation_result["details"]
 
@@ -232,68 +236,102 @@ detected.
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
-            metric_values=metric_values,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        lower_bound: Optional[float] = truncate_values.get("lower_bound")
-        upper_bound: Optional[float] = truncate_values.get("upper_bound")
-
-        round_decimals: int = self._get_round_decimals_using_heuristics(
-            metric_values=metric_values,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
         metric_values = np.array(metric_values, dtype=np.float64)
 
         lower_quantile: Union[Number, float]
         upper_quantile: Union[Number, float]
 
-        if np.all(np.isclose(metric_values, metric_values[0])):
-            # Computation is unnecessary if distribution is degenerate.
-            lower_quantile = upper_quantile = metric_values[0]
-        elif sampling_method == "bootstrap":
-            lower_quantile, upper_quantile = self._get_bootstrap_estimate(
+        if metric_values.shape[1] > 1:
+            metric_values = np.transpose(metric_values)
+
+            value_ranges: List[List[float]] = []
+
+            metric_row: Union[np.ndarray, List[Number]]
+            for metric_row in metric_values:
+                if sampling_method == "bootstrap":
+                    lower_quantile, upper_quantile = self._get_bootstrap_estimate(
+                        metric_values=metric_row,
+                        false_positive_rate=false_positive_rate,
+                        domain=domain,
+                        variables=variables,
+                        parameters=parameters,
+                    )
+                else:
+                    lower_quantile, upper_quantile = compute_quantiles(
+                        metric_values=metric_row,
+                        false_positive_rate=false_positive_rate,
+                    )
+
+                value_ranges.append([lower_quantile, upper_quantile])
+
+            parameter_values: Dict[str, Any] = {
+                f"$parameter.{self.parameter_name}": {
+                    "value": {
+                        "value_ranges": value_ranges,
+                    },
+                    "details": details,
+                },
+            }
+        else:
+            truncate_values: Dict[
+                str, Number
+            ] = self._get_truncate_values_using_heuristics(
                 metric_values=metric_values,
-                false_positive_rate=false_positive_rate,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
             )
-        else:
-            lower_quantile, upper_quantile = compute_quantiles(
+            lower_bound: Optional[float] = truncate_values.get("lower_bound")
+            upper_bound: Optional[float] = truncate_values.get("upper_bound")
+
+            round_decimals: int = self._get_round_decimals_using_heuristics(
                 metric_values=metric_values,
-                false_positive_rate=false_positive_rate,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
             )
 
-        min_value: Union[Number, float]
-        max_value: Union[Number, float]
+            if np.all(np.isclose(metric_values, metric_values[0])):
+                # Computation is unnecessary if distribution is degenerate.
+                lower_quantile = upper_quantile = metric_values[0]
+            elif sampling_method == "bootstrap":
+                lower_quantile, upper_quantile = self._get_bootstrap_estimate(
+                    metric_values=metric_values,
+                    false_positive_rate=false_positive_rate,
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
+                )
+            else:
+                lower_quantile, upper_quantile = compute_quantiles(
+                    metric_values=metric_values,
+                    false_positive_rate=false_positive_rate,
+                )
 
-        if round_decimals == 0:
-            min_value = round(float(lower_quantile))
-            max_value = round(float(upper_quantile))
-        else:
-            min_value = round(float(lower_quantile), round_decimals)
-            max_value = round(float(upper_quantile), round_decimals)
+            min_value: Union[Number, float]
+            max_value: Union[Number, float]
 
-        if lower_bound is not None:
-            min_value = max(min_value, lower_bound)
-        if upper_bound is not None:
-            max_value = min(max_value, upper_bound)
+            if round_decimals == 0:
+                min_value = round(float(lower_quantile))
+                max_value = round(float(upper_quantile))
+            else:
+                min_value = round(float(lower_quantile), round_decimals)
+                max_value = round(float(upper_quantile), round_decimals)
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.parameter_name}": {
-                "value": {
-                    "min_value": min_value,
-                    "max_value": max_value,
+            if lower_bound is not None:
+                min_value = max(min_value, lower_bound)
+            if upper_bound is not None:
+                max_value = min(max_value, upper_bound)
+
+            parameter_values: Dict[str, Any] = {
+                f"$parameter.{self.parameter_name}": {
+                    "value": {
+                        "min_value": min_value,
+                        "max_value": max_value,
+                    },
+                    "details": details,
                 },
-                "details": details,
-            },
-        }
+            }
 
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
@@ -332,7 +370,7 @@ detected.
 
     def _get_truncate_values_using_heuristics(
         self,
-        metric_values: Union[np.ndarray, List[Number]],
+        metric_values: Union[np.ndarray, List[Union[Number, List[Number]]]],
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
@@ -366,15 +404,40 @@ detected.
 
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
-        metric_value: Union[Number, np.float64]
-        if lower_bound is None and all(
-            [metric_value > NP_EPSILON for metric_value in metric_values]
-        ):
-            lower_bound = 0.0
-        if upper_bound is None and all(
-            [metric_value < (-NP_EPSILON) for metric_value in metric_values]
-        ):
-            upper_bound = 0.0
+        metric_value: Union[np.float64, Number, List[Number]]
+        element: Union[np.float64, Number]
+        if isinstance(metric_values[0], list):
+            if lower_bound is None and all(
+                [
+                    [
+                        element > NP_EPSILON
+                        for metric_value in metric_values
+                        for element in metric_value
+                    ]
+                ]
+            ):
+                lower_bound = 0.0
+
+            if upper_bound is None and all(
+                [
+                    [
+                        element < (-NP_EPSILON)
+                        for metric_value in metric_values
+                        for element in metric_value
+                    ]
+                ]
+            ):
+                upper_bound = 0.0
+        else:
+            if lower_bound is None and all(
+                [metric_value > NP_EPSILON for metric_value in metric_values]
+            ):
+                lower_bound = 0.0
+
+            if upper_bound is None and all(
+                [metric_value < (-NP_EPSILON) for metric_value in metric_values]
+            ):
+                upper_bound = 0.0
 
         return {
             "lower_bound": lower_bound,
@@ -383,7 +446,7 @@ detected.
 
     def _get_round_decimals_using_heuristics(
         self,
-        metric_values: Union[np.ndarray, List[Number]],
+        metric_values: Union[np.ndarray, List[Union[Number, List[Number]]]],
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
@@ -407,13 +470,24 @@ detected.
 positive integer, or must be omitted (or set to None).
 """
             )
-        metric_value: Number
-        if all(
-            [
-                np.issubdtype(type(metric_value), np.integer)
-                for metric_value in metric_values
-            ]
-        ):
-            round_decimals = 0
+        metric_value: Union[np.float64, Number, List[Number]]
+        element: Union[np.float64, Number]
+        if isinstance(metric_values[0], list):
+            if all(
+                [
+                    np.issubdtype(type(element), np.integer)
+                    for metric_value in metric_values
+                    for element in metric_value
+                ]
+            ):
+                round_decimals = 0
+        else:
+            if all(
+                [
+                    np.issubdtype(type(metric_value), np.integer)
+                    for metric_value in metric_values
+                ]
+            ):
+                round_decimals = 0
 
         return round_decimals
