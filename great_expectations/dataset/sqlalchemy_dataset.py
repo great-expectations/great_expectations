@@ -80,6 +80,13 @@ except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
 try:
+    import sqlalchemy_dremio.pyodbc
+
+    registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+except ImportError:
+    sqlalchemy_dremio = None
+
+try:
     import sqlalchemy_redshift.dialect
 except ImportError:
     sqlalchemy_redshift = None
@@ -578,6 +585,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif dialect_name == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
+            )
+        elif self.engine.dialect.name.lower() == "dremio":
+            # WARNING: Dremio Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(
+                module_name="sqlalchemy_dremio.pyodbc.dialect"
             )
         elif dialect_name == "redshift":
             self.dialect = import_library_module(
@@ -1340,6 +1352,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
+        elif engine_dialect == "dremio":
+            stmt = "CREATE OR REPLACE VDS {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
         elif engine_dialect == "snowflake":
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
@@ -2029,6 +2045,21 @@ WHERE
                 else:
                     return sa.not_(
                         sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
+        try:
+            # Dremio
+            if isinstance(self.sql_engine_dialect, sqlalchemy_dremio.pyodbc.dialect):
+                if positive:
+                    return sa.func.REGEXP_MATCHES(sa.column(column), literal(regex))
+                else:
+                    return sa.not_(
+                        sa.func.REGEXP_MATCHES(sa.column(column), literal(regex))
                     )
         except (
             AttributeError,
