@@ -236,12 +236,11 @@ detected.
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        metric_values = np.array(metric_values, dtype=np.float64)
-
         lower_quantile: Union[Number, float]
         upper_quantile: Union[Number, float]
 
-        if len(metric_values.shape) > 1 and metric_values.shape[1] > 1:
+        if isinstance(metric_values[0], list):
+            metric_values = np.array(metric_values, dtype=np.float64)
             metric_values = np.transpose(metric_values)
 
             value_ranges: List[List[float]] = []
@@ -290,6 +289,8 @@ detected.
                 variables=variables,
                 parameters=parameters,
             )
+
+            metric_values = np.array(metric_values, dtype=np.float64)
 
             if np.all(np.isclose(metric_values, metric_values[0])):
                 # Computation is unnecessary if distribution is degenerate.
