@@ -160,6 +160,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
             """
 
+    distance_measure_name = "Kulback-Leibler (KL) divergence"
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -456,8 +458,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             # Data are expected to be continuous; discretize first
             if bucketize_data is False:
                 raise ValueError(
-                    "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "
-                    "parameter set to false."
+                    f"{self.distance_measure_name} cannot be computed with a continuous partition object and the "
+                    f"bucketize_data parameter set to false."
                 )
             # Build the histogram first using expected bins so that the largest bin is >=
             nonnull_count = metrics["column_values.nonnull.count"]
@@ -1027,7 +1029,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             header_template_str = "can match any distribution."
         else:
             header_template_str = (
-                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
+                f"{self.distance_measure_name} with respect to the following distribution must be "
                 "lower than $threshold."
             )
 
@@ -1167,7 +1169,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             template_str = "can match any distribution."
         else:
             template_str = (
-                "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
+                f"{self.distance_measure_name} with respect to the following distribution must be "
                 "lower than $threshold."
             )
             expected_distribution = cls._get_kl_divergence_chart(
@@ -1214,7 +1216,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             if result.result.get("observed_value")
             else result.result.get("observed_value")
         )
-        header_template_str = "KL Divergence: $observed_value"
+        header_template_str = f"{self.distance_measure_name}: $observed_value"
         header_params_with_json_schema = {
             "observed_value": {
                 "schema": {"type": "string"},
@@ -1349,7 +1351,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "KL Divergence: $observed_value",
+                    "template": f"{self.distance_measure_name}: $observed_value",
                     "params": {
                         "observed_value": str(observed_value)
                         if observed_value
