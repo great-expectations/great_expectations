@@ -5139,6 +5139,3 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         {"a": 1.0, "b": 1.0, "c": 2.0},
         {"a": 4.0, "b": 4.0, "c": 4.0},
     ]
-
-
-the
