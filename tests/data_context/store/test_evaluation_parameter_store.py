@@ -1,8 +1,10 @@
 import datetime
 import os
 
+import boto3
 import pytest
 from freezegun import freeze_time
+from moto import mock_s3
 
 import tests.test_utils as test_utils
 from great_expectations.core import ExpectationConfiguration
@@ -13,6 +15,10 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.store import (
+    EvaluationParameterStore,
+    TupleS3StoreBackend,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
@@ -248,3 +254,26 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
         "urn:great_expectations:validations:asset2.warning:"
         "expect_column_values_to_match_regex.result.unexpected_percent:column=mycol": 12.3456789,
     }
+
+
+@mock_s3
+def test_metric_store_get_bind_params_with_cloud_store_backend():
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    s3_store = TupleS3StoreBackend(
+        filepath_template="my_file_{0}",
+        bucket=bucket,
+        prefix=prefix,
+    )
+
+    evaluation_parameter_store = EvaluationParameterStore()
+    evaluation_parameter_store._store_backend = s3_store
+
+    run_id = RunIdentifier()
+    bind_params = evaluation_parameter_store.get_bind_params(run_id=run_id)
+    assert bind_params == 1
