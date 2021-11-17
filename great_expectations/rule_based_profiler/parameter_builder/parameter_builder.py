@@ -229,7 +229,12 @@ class ParameterBuilder(ABC):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]]:
+    ) -> Dict[
+        str,
+        Union[
+            Union[np.ndarray, List[Union[Any, Number, List[Number]]]], Dict[str, Any]
+        ],
+    ]:
         domain_kwargs = build_metric_domain_kwargs(
             batch_id=None,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -267,9 +272,9 @@ class ParameterBuilder(ABC):
             parameters=parameters,
         )
 
-        metric_values: List[Union[Any, Number]] = []
+        metric_values: List[Union[Any, Number, List[Number]]] = []
 
-        metric_value: Union[Any, Number]
+        metric_value: Union[Any, Number, List[Number]]
         batch_id: str
         for batch_id in batch_ids:
             metric_domain_kwargs["batch_id"] = batch_id
@@ -283,19 +288,39 @@ class ParameterBuilder(ABC):
                 metric=MetricConfiguration(**metric_configuration_arguments)
             )
             if enforce_numeric_metric:
-                if not is_numeric(value=metric_value):
+                element: Union[Any, Number]
+                if not (
+                    is_numeric(value=metric_value)
+                    or (
+                        isinstance(metric_value, list)
+                        and all([is_numeric(value=element) for element in metric_value])
+                    )
+                ):
                     raise ge_exceptions.ProfilerExecutionError(
                         message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(type(metric_value))}" was computed).
+(value of type "{str(type(metric_value))}" was computed, which is non-numeric or contains a non-numeric-valued element).
 """
                     )
-                if np.isnan(metric_value):
-                    if not replace_nan_with_zero:
-                        raise ValueError(
-                            f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+                if isinstance(metric_value, list):
+                    if any([np.isnan(element) for element in metric_value]):
+                        if not replace_nan_with_zero:
+                            raise ValueError(
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
 """
-                        )
-                    metric_value = 0.0
+                            )
+
+                        idx: int
+                        for idx, element in enumerate(metric_value):
+                            if np.isnan(element):
+                                metric_value[idx] = 0.0
+                else:
+                    if np.isnan(metric_value):
+                        if not replace_nan_with_zero:
+                            raise ValueError(
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
+"""
+                            )
+                        metric_value = 0.0
 
             metric_values.append(metric_value)
 
