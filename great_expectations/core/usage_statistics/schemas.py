@@ -296,8 +296,24 @@ anonymized_batch_request_keys_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-batch-request",
     "definitions": {
+        "anonymized_string": anonymized_string_schema,
         "anonymized_keys": anonymized_keys_schema,
     },
+    "type": "object",
+    "properties": {
+        "datasource_name": {"$ref": "#/definitions/anonymized_string"},
+        "data_connector_name": {"$ref": "#/definitions/anonymized_string"},
+        "data_asset_name": {"$ref": "#/definitions/anonymized_string"},
+    },
+    "required": [
+        "datasource_name",
+        "data_connector_name",
+        "data_asset_name",
+    ],
+    "additionalProperties": False,
+
+
+
     "type": "array",
     "maxItems": 1000,
     "items": {

@@ -16,26 +16,45 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
-BATCH_REQUEST_INSTANTIATION_KEYS: Set[str] = {
+BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS: Set[str] = {
     "datasource_name",
     "data_connector_name",
     "data_asset_name",
-    "batch_data",
+}
+BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS: Set[str] = {
     "data_connector_query",
+    "runtime_parameters",
     "batch_identifiers",
+    "batch_spec_passthrough",
+}
+DATA_CONNECTOR_QUERY_KEYS: Set[str] = {
+    "batch_filter_parameters",
     "limit",
     "index",
     "custom_filter_function",
-    "batch_spec_passthrough",
+}
+RUNTIME_PARAMETERS_KEYS: Set[str] = {
+    "batch_data",
+    "query",
+    "path",
+}
+RECOGNIZED_BATCH_SPEC_PASSTHROUGH_KEYS: Set[str] = {
     "sampling_method",
     "sampling_kwargs",
     "splitter_method",
     "splitter_kwargs",
-    "runtime_parameters",
-    "query",
-    "path",
-    "batch_filter_parameters",
+    "reader_method",
+    "reader_options",
 }
+BATCH_REQUEST_FLATTENED_KEYS: Set[str] = set().union(
+    *[
+        BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
+        BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
+        DATA_CONNECTOR_QUERY_KEYS,
+        RUNTIME_PARAMETERS_KEYS,
+        RECOGNIZED_BATCH_SPEC_PASSTHROUGH_KEYS,
+    ]
+)
 
 
 class BatchDefinition(SerializableDictDot):

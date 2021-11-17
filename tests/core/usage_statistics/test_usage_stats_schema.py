@@ -1,6 +1,7 @@
 import jsonschema
 
 from great_expectations.core.usage_statistics.schemas import (
+    anonymized_batch_request_keys_schema,
     anonymized_batch_schema,
     anonymized_datasource_schema,
     cli_new_ds_choice_payload_schema,
@@ -114,6 +115,23 @@ def test_data_context_add_datasource_message():
             jsonschema.validate(
                 message["event_payload"],
                 anonymized_datasource_schema,
+            )
+
+
+def test_data_context_get_batch_list_message():
+    usage_stats_records_messages = [
+        "data_context.get_batch_list",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_batch_request_keys_schema,
             )
 
 
