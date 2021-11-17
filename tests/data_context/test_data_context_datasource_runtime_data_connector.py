@@ -88,6 +88,7 @@ def test_get_batch_ambiguous_parameter_pandas_engine(
 
     # raised by get_batch_list()
     with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+        # noinspection PyUnusedLocal
         batch_list: list = context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",

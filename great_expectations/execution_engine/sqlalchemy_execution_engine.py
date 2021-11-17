@@ -77,6 +77,14 @@ except ImportError:
     sqlalchemy_redshift = None
 
 try:
+    import sqlalchemy_dremio.pyodbc
+
+    if sa:
+        sa.dialects.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+except ImportError:
+    sqlalchemy_dremio = None
+
+try:
     import snowflake.sqlalchemy.snowdialect
 
     if sa:
@@ -122,6 +130,12 @@ except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
+try:
+    import teradatasqlalchemy.dialect
+    import teradatasqlalchemy.types as teradatatypes
+except ImportError:
+    teradatasqlalchemy = None
+
 
 def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
@@ -148,6 +162,19 @@ def _get_dialect_type_module(dialect):
             and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
+    except (TypeError, AttributeError):
+        pass
+
+    # Teradata types module
+    try:
+        if (
+            issubclass(
+                dialect,
+                teradatasqlalchemy.dialect.TeradataDialect,
+            )
+            and teradatatypes is not None
+        ):
+            return teradatatypes
     except (TypeError, AttributeError):
         pass
 
@@ -244,6 +271,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
+        elif self.engine.dialect.name.lower() == "dremio":
+            # WARNING: Dremio Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="sqlalchemy_dremio.pyodbc"
+            )
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
@@ -251,6 +283,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif self.engine.dialect.name.lower() == "bigquery":
             self.dialect_module = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
+            )
+        elif self.engine.dialect.name.lower() == "teradatasql":
+            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="teradatasqlalchemy.dialect"
             )
         else:
             self.dialect_module = None
