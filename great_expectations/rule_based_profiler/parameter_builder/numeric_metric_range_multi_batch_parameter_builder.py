@@ -241,7 +241,7 @@ detected.
         lower_quantile: Union[Number, float]
         upper_quantile: Union[Number, float]
 
-        if metric_values.shape[1] > 1:
+        if len(metric_values.shape) > 1 and metric_values.shape[1] > 1:
             metric_values = np.transpose(metric_values)
 
             value_ranges: List[List[float]] = []
