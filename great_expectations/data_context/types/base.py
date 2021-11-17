@@ -2020,14 +2020,8 @@ class CheckpointConfig(BaseYamlConfig):
     def to_json_dict(self) -> dict:
         json_dict: dict = {}
         if self.class_name == "LegacyCheckpoint":
-            json_dict.update(
-                {
-                    "class_name": self.class_name,
-                    "validation_operator_name": self.validation_operator_name,
-                }
-            )
-            if hasattr(self, "batches") and isinstance(self.batches, list):
-                json_dict.update({"batches": self.batches})
+            # LegacyCheckpoint can't use RuntimeBatchRequest so we can just use the parent to_json_dict
+            json_dict = super().to_json_dict()
         else:
             if (
                 isinstance(self.batch_request, dict)
