@@ -87,7 +87,17 @@ In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.
     Paraphrased from the Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster. See the Databricks documentation for best practices including mounting object stores.
   </details>
 
-Run the following code to set up a [Data Context](../reference/data_context.md) using the appropriate defaults: 
+Run the following code to set up a [Data Context](../reference/data_context.md) in code using the appropriate defaults: 
+
+<details>
+  <summary>What is an "in code" Data Context?</summary>
+When you don't have easy access to a file system, instead of defining your Data Context via great_expectations.yml you can do so by instantiating a BaseDataContext with a config. Take a look at our how-to guide to learn more: <a href="../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md">How to instantiate a Data Context without a yml file</a>. In Databricks, you can do either since you have access to a filesystem - we've simply shown the in code version here for simplicity.
+</details>
+
+<details>
+  <summary>What do we mean by "root_directory" in the below code?</summary>
+The root_directory here refers to the directory that will hold the data for your Metadata Stores (e.g. Expectations Store, Validations Store, Data Docs Store). We are using the FilesystemStoreBackendDefaults since DBFS acts sufficiently like a filesystem that we can simplify our configuration with these defaults. These are all more configurable than is shown in this simple guide, so for other options please see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
+</details>
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
