@@ -2086,14 +2086,11 @@ class CheckpointConfig(BaseYamlConfig):
                 }
             )
             if self.class_name == "SimpleCheckpoint":
-                json_dict.update(
-                    {
-                        "site_names": self.site_names,
-                        "slack_webhook": self.slack_webhook,
-                        "notify_on": self.notify_on,
-                        "notify_with": self.notify_with,
-                    }
-                )
+                if self.site_names: json_dict.update({"site_names": self.site_names})
+                if self.slack_webhook: json_dict.update({"slack_webhook": self.slack_webhook})
+                if self.notify_on: json_dict.update({"notify_on": self.notify_on})
+                if self.notify_with: json_dict.update({"notify_with": self.notify_with})
+
         return json_dict
 
     def update(
