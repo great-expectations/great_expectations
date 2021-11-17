@@ -152,13 +152,15 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
               crash when encountered. The python None token will be serialized to null in json.
 
               In order to implement a custom distance-based expectation, it usually suffice to create a child class
-              with redefined `distance_measure_name` attribute and `calculate_distance_metric` method, for example:
+              with redefined `distance_name_verbose`, `distance_name_short` attributes
+              and `calculate_distance_metric` method, for example:
               ```
               from scipy.spatial.distance import chebyshev
 
 
               class ExpectColumnChebyshevDistanceToBeLessThan(ExpectColumnKlDivergenceToBeLessThan):
-                  distance_measure_name = "Chebyshev distance"
+                  distance_name_verbose = "Chebyshev (L-inf norm) distance"
+                  distance_name_short = "Chebyshev distance"
 
                   def calculate_distance_metric(observed_weights, expected_weights):
                       return chebyshev(observed_weights, expected_weights)
@@ -174,7 +176,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
             """
 
-    distance_measure_name = "Kulback-Leibler (KL) divergence"
+    distance_name_verbose = "Kulback-Leibler (KL) divergence"
+    distance_name_short = "KL divergence"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -203,8 +206,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    @staticmethod
-    def calculate_distance_metric(observed_weights, expected_weights):
+    @classmethod
+    def calculate_distance_metric(cls, observed_weights, expected_weights):
         return stats.entropy(observed_weights, expected_weights)
 
     def get_validation_dependencies(
@@ -478,7 +481,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             # Data are expected to be continuous; discretize first
             if bucketize_data is False:
                 raise ValueError(
-                    f"{self.distance_measure_name} cannot be computed with a continuous partition object and the "
+                    f"{self.distance_name_short} cannot be computed with a continuous partition object and the "
                     f"bucketize_data parameter set to false."
                 )
             # Build the histogram first using expected bins so that the largest bin is >=
@@ -1052,7 +1055,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             header_template_str = "can match any distribution."
         else:
             header_template_str = (
-                f"{self.distance_measure_name} with respect to the following distribution must be "
+                f"{cls.distance_name_verbose} with respect to the following distribution must be "
                 "lower than $threshold."
             )
 
@@ -1192,7 +1195,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             template_str = "can match any distribution."
         else:
             template_str = (
-                f"{self.distance_measure_name} with respect to the following distribution must be "
+                f"{cls.distance_name_verbose} with respect to the following distribution must be "
                 "lower than $threshold."
             )
             expected_distribution = cls._get_kl_divergence_chart(
@@ -1239,7 +1242,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             if result.result.get("observed_value")
             else result.result.get("observed_value")
         )
-        header_template_str = f"{self.distance_measure_name}: $observed_value"
+        header_template_str = f"{cls.distance_name_short}: $observed_value"
         header_params_with_json_schema = {
             "observed_value": {
                 "schema": {"type": "string"},
@@ -1374,7 +1377,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": f"{self.distance_measure_name}: $observed_value",
+                    "template": f"{cls.distance_name_short}: $observed_value",
                     "params": {
                         "observed_value": str(observed_value)
                         if observed_value
