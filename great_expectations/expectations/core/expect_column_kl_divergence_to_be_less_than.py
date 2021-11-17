@@ -189,6 +189,10 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "catch_exceptions": False,
     }
 
+    @staticmethod
+    def calculate_distance_metric(observed_weights, expected_weights):
+        return stats.entropy(observed_weights, expected_weights)
+
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -412,30 +416,33 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             na_counts = test_df.isnull().sum()
 
             # Handle NaN: if we expected something that's not there, it's just not there.
-            pk = test_df["count"].fillna(0)
+            observed_weights = test_df["count"].fillna(0)
             # Handle NaN: if something's there that was not expected,
             # substitute the relevant value for tail_weight_holdout
             if na_counts["expected"] > 0:
                 # Scale existing expected values
                 test_df["expected"] *= 1 - tail_weight_holdout
                 # Fill NAs with holdout.
-                qk = test_df["expected"].fillna(
+                expected_weights = test_df["expected"].fillna(
                     tail_weight_holdout / na_counts["expected"]
                 )
             else:
-                qk = test_df["expected"]
+                expected_weights = test_df["expected"]
 
-            kl_divergence = stats.entropy(pk, qk)
+            distance = self.calculate_distance_metric(
+                observed_weights=observed_weights,
+                expected_weights=expected_weights
+            )
 
-            if np.isinf(kl_divergence) or np.isnan(kl_divergence):
+            if np.isinf(distance) or np.isnan(distance):
                 observed_value = None
             else:
-                observed_value = kl_divergence
+                observed_value = distance
 
             if threshold is None:
                 success = True
             else:
-                success = kl_divergence <= threshold
+                success = distance <= threshold
 
             return_obj = {
                 "success": success,
@@ -444,11 +451,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     "details": {
                         "observed_partition": {
                             "values": test_df.index.tolist(),
-                            "weights": pk.tolist(),
+                            "weights": observed_weights.tolist(),
                         },
                         "expected_partition": {
                             "values": test_df.index.tolist(),
-                            "weights": qk.tolist(),
+                            "weights": expected_weights.tolist(),
                         },
                     },
                 },
@@ -640,17 +647,20 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             # comb_expected_weights = np.array(comb_expected_weights).astype(float)
             # comb_observed_weights = np.array(comb_observed_weights).astype(float)
 
-            kl_divergence = stats.entropy(comb_observed_weights, comb_expected_weights)
+            distance = self.calculate_distance_metric(
+                observed_weights=comb_observed_weights,
+                expected_weights=comb_expected_weights
+            )
 
-            if np.isinf(kl_divergence) or np.isnan(kl_divergence):
+            if np.isinf(distance) or np.isnan(distance):
                 observed_value = None
             else:
-                observed_value = kl_divergence
+                observed_value = distance
 
             if threshold is None:
                 success = True
             else:
-                success = kl_divergence <= threshold
+                success = distance <= threshold
 
             return_obj = {
                 "success": success,
