@@ -344,7 +344,9 @@ Now let's keep going to create an Expectation Suite and validate our data.
 
 Here we will use a `Validator` to interact with our batch of data and generate an `Expectation Suite`. 
 
-This is the same method used in the CLI interactive mode notebook accessed via `great_expectations --v3-api suite new --interactive`. For more information, see our documentation on [How to create and edit Expectations with instant feedback from a sample Batch of data](../../docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+Each time we evaluate an Expectation (e.g. via `validator.expect_*`), the Expectation configuration is stored in the Validator. When you have run all of the Expectations you want for this dataset, you can call `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
+
+This is the same method of interactive Expectation Suite editing used in the CLI interactive mode notebook accessed via `great_expectations --v3-api suite new --interactive`. For more information, see our documentation on [How to create and edit Expectations with instant feedback from a sample Batch of data](../../docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md). You can also create Expectation Suites using a [profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md) to automatically create expectations based on your data or [manually using domain knowledge and without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md). 
 
 <Tabs
   groupId="file-or-dataframe-pandas-or-yaml"
@@ -367,7 +369,7 @@ Then we use the `Validator` to add a few Expectations:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L166-L168
 ```
 
-Finally we save our suite to our expectation store:
+Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L170
 ```
   
@@ -385,7 +387,7 @@ Then we use the `Validator` to add a few Expectations:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L172-L174
 ```
 
-Finally we save our suite to our expectation store:
+Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L173
 ```
   
@@ -402,7 +404,7 @@ Then we use the `Validator` to add a few Expectations:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L127-L129
 ```
 
-Finally we save our suite to our expectation store:
+Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L131
 ```
   
@@ -420,7 +422,7 @@ Then we use the `Validator` to add a few Expectations:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L133-L135
 ```
 
-Finally we save our suite to our expectation store:
+Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
 ```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L137
 ```
   
