@@ -1,3 +1,4 @@
+import os
 import pathlib
 from typing import List
 
@@ -28,9 +29,15 @@ def test__get_full_file_path_for_asset_pandas(fs):
     when preparing the PathBatchSpec for the PandasExecutionEngine.
     """
 
+    # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
         module_dir = pathlib.Path(module.__file__).parent
         fs.add_real_directory(module_dir, lazy_read=False)
+
+    # Copy google credentials into fake filesystem if they exist on your filesystem
+    google_cred_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if google_cred_file:
+        fs.add_real_file(google_cred_file)
 
     base_directory: str = "/dbfs/great_expectations"
     fs.create_dir(base_directory)
