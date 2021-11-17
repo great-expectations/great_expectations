@@ -139,7 +139,7 @@ Notes:
                         info=info
                     )
                 self._gcs = storage.Client(credentials=credentials, **gcs_options)
-            except (TypeError, AttributeError):
+            except (TypeError, AttributeError, DefaultCredentialsError):
                 self._gcs = None
 
         super().__init__(*args, **kwargs)

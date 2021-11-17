@@ -1,4 +1,8 @@
+import pathlib
 from typing import List
+
+import boto3
+import botocore
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -17,6 +21,9 @@ def test__get_full_file_path_pandas(fs):
     This test verifies that a config using a `/dbfs/` path is NOT translated to `dbfs:/`
     when preparing the PathBatchSpec for the PandasExecutionEngine.
     """
+    for module in [boto3, botocore]:
+        module_dir = pathlib.Path(module.__file__).parent
+        fs.add_real_directory(module_dir, lazy_read=False)
 
     base_directory: str = "/dbfs/great_expectations"
     base_directory_colon: str = "dbfs:/great_expectations"

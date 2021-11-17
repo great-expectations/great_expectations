@@ -1,5 +1,8 @@
+import pathlib
 from typing import List
 
+import boto3
+import botocore
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
@@ -24,6 +27,10 @@ def test__get_full_file_path_for_asset_pandas(fs):
     This test verifies that a config using a `/dbfs/` path is NOT translated to `dbfs:/`
     when preparing the PathBatchSpec for the PandasExecutionEngine.
     """
+
+    for module in [boto3, botocore]:
+        module_dir = pathlib.Path(module.__file__).parent
+        fs.add_real_directory(module_dir, lazy_read=False)
 
     base_directory: str = "/dbfs/great_expectations"
     fs.create_dir(base_directory)
