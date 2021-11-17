@@ -5,7 +5,7 @@ import random
 import re
 import shutil
 from abc import ABCMeta
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
@@ -595,14 +595,13 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3.Object(self.bucket, source_filepath).delete()
 
-    def list_keys(self, prefix: Optional[str] = None) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3 = self._create_client()
         paginator = s3.get_paginator("list_objects_v2")
 
-        # If provided as an arg, override the attr (just within the context of this method)
-        prefix = prefix if prefix is not None else self.prefix
-        if prefix:
-            page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=prefix)
+        if self.prefix:
+            page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=self.prefix)
         else:
             page_iterator = paginator.paginate(Bucket=self.bucket)
 
@@ -628,14 +627,14 @@ class TupleS3StoreBackend(TupleStoreBackend):
         for s3_object_info in objects:
             s3_object_key = s3_object_info["Key"]
             if self.platform_specific_separator:
-                s3_object_key = os.path.relpath(s3_object_key, prefix)
+                s3_object_key = os.path.relpath(s3_object_key, self.prefix)
             else:
-                if prefix is None:
+                if self.prefix is None:
                     if s3_object_key.startswith("/"):
                         s3_object_key = s3_object_key[1:]
                 else:
-                    if s3_object_key.startswith(prefix + "/"):
-                        s3_object_key = s3_object_key[len(prefix) + 1 :]
+                    if s3_object_key.startswith(self.prefix + "/"):
+                        s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
             ):
@@ -871,20 +870,19 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(source_filepath)
         _ = bucket.rename_blob(blob, dest_filepath)
 
-    def list_keys(self, prefix: Optional[str] = None) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
         from google.cloud import storage
 
         gcs = storage.Client(self.project)
 
-        # If provided as an arg, override the attr (just within the context of this method)
-        prefix = prefix if prefix is not None else self.prefix
-        for blob in gcs.list_blobs(self.bucket, prefix=prefix):
+        for blob in gcs.list_blobs(self.bucket, prefix=self.prefix):
             gcs_object_name = blob.name
             gcs_object_key = os.path.relpath(
                 gcs_object_name,
-                prefix,
+                self.prefix,
             )
             if self.filepath_prefix and not gcs_object_key.startswith(
                 self.filepath_prefix
@@ -1047,15 +1045,16 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         return az_blob_key
 
-    def list_keys(self, prefix: Optional[str] = None) -> List[Tuple]:
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
-        # If provided as an arg, override the attr (just within the context of this method)
-        prefix = prefix if prefix is not None else self.prefix
-        for obj in self._get_container_client().list_blobs(name_starts_with=prefix):
+        for obj in self._get_container_client().list_blobs(
+            name_starts_with=self.prefix
+        ):
             az_blob_key = os.path.relpath(obj.name)
-            if az_blob_key.startswith(prefix + "/"):
-                az_blob_key = az_blob_key[len(prefix) + 1 :]
+            if az_blob_key.startswith(self.prefix + "/"):
+                az_blob_key = az_blob_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not az_blob_key.startswith(
                 self.filepath_prefix
             ):
