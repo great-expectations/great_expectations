@@ -1,11 +1,11 @@
 import copy
-import json
+import datetime
 import logging
 import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional, Union
+from typing import Optional
 
 import requests
 
@@ -54,9 +54,10 @@ def send_slack_notification(
             return "Slack notification succeeded."
 
 
+# noinspection SpellCheckingInspection
 def send_opsgenie_alert(query, suite_name, settings):
     """Creates an alert in Opsgenie."""
-    if settings["region"] != None:
+    if settings["region"] is not None:
         url = "https://api.{region}.opsgenie.com/v2/alerts".format(
             region=settings["region"]
         )  # accommodate for Europeans
@@ -157,6 +158,7 @@ def send_webhook_notifications(query, webhook, target_platform):
             )
 
 
+# noinspection SpellCheckingInspection
 def send_email(
     title,
     html,
@@ -175,7 +177,6 @@ def send_email(
     msg["Subject"] = title
     msg.attach(MIMEText(html, "html"))
     try:
-        mailserver = None
         if use_ssl:
             if use_tls:
                 logger.warning("Please choose between SSL or TLS, will default to SSL")
@@ -209,7 +210,7 @@ def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,
     ge_cloud_mode: bool = False,
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+) -> Optional[BatchRequest]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
     batch_data = None
     if isinstance(runtime_config_batch_request, RuntimeBatchRequest):
