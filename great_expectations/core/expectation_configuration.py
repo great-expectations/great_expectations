@@ -1230,9 +1230,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        parsed_dependencies = self._traverse_expectation_configuration_kwargs(
-            root=self.kwargs
-        )
+        parsed_dependencies = ExpectationConfiguration._parse_kwargs(root=self.kwargs)
         dependencies = {}
         urns = parsed_dependencies.get("urns", [])
         for string_urn in urns:
@@ -1264,9 +1262,8 @@ class ExpectationConfiguration(SerializableDictDot):
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
-    def _traverse_expectation_configuration_kwargs(
-        self, root: Any, parsed_dependencies: dict = {}
-    ) -> dict:
+    @staticmethod
+    def _parse_kwargs(root: Any, parsed_dependencies: dict = {}) -> dict:
         """
         Helper method that treats ExpectationConfiguration kwargs as a tree and uses it
         to enable a recursive, DFS traversal.
@@ -1276,9 +1273,7 @@ class ExpectationConfiguration(SerializableDictDot):
         # We want to step through standard iterables
         if isinstance(root, (tuple, list)):
             for child in root:
-                self._traverse_expectation_configuration_kwargs(
-                    child, parsed_dependencies
-                )
+                ExpectationConfiguration._parse_kwargs(child, parsed_dependencies)
         # dicts are similar but we need to account for $PARAMETERs
         elif isinstance(root, dict):
             for key, value in root.items():
@@ -1287,9 +1282,7 @@ class ExpectationConfiguration(SerializableDictDot):
                         value
                     )
                     nested_update(parsed_dependencies, param_string_dependencies)
-                self._traverse_expectation_configuration_kwargs(
-                    value, parsed_dependencies
-                )
+                ExpectationConfiguration._parse_kwargs(value, parsed_dependencies)
         # Any other types is discarded, ending a branch of the traversal and unwinding the call stack
         return parsed_dependencies
 
