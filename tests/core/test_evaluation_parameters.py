@@ -327,4 +327,25 @@ def test_build_evaluation_parameters():
 
 
 def test_build_evaluation_parameters_with_nested_PARAMETERS():
-    pass
+    evaluation_parameters = {
+        "my_min": 1,
+        "my_max": 5,
+    }
+    expectation_args = {
+        "min_value": {
+            "foo": {
+                "$PARAMETER": "my_min",
+                "$PARAMETER.upstream_row_count": 10,
+            }
+        },
+        "max_value": {
+            "bar": {
+                "$PARAMETER": "my_max",
+                "$PARAMETER.upstream_row_count": 50,
+            }
+        },
+    }
+    breakpoint()
+    res = build_evaluation_parameters(
+        expectation_args, evaluation_parameters, interactive_evaluation=True
+    )
