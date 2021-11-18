@@ -326,5 +326,5 @@ def test_build_evaluation_parameters():
     assert res[1] == expected
 
 
-def test_build_evaluation_parameters_with_nested_PARAMETERs():
+def test_build_evaluation_parameters_with_nested_PARAMETERS():
     pass
