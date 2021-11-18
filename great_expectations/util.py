@@ -932,7 +932,7 @@ def lint_code(code: str) -> str:
 
 
 def filter_properties_dict(
-    properties: Optional[dict],
+    properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: Optional[bool] = True,
@@ -1041,7 +1041,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_dict(
-    properties: Optional[dict],
+    properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: Optional[bool] = True,
