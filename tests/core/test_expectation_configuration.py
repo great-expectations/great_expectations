@@ -151,6 +151,38 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
     } == dependencies
 
 
+def test_expectation_configuration_get_evaluation_parameter_dependencies_with_nested_PARAMETERS():
+    ec = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={
+            "quantile_ranges": {
+                "quantiles": [0.1, 0.2],
+                "value_ranges": [
+                    [
+                        {
+                            "$PARAMETER": "(-3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between"
+                            ".result.observed_value:column=norm) + "
+                            "urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value"
+                            ":column=norm"
+                        },
+                        {
+                            "$PARAMETER": "(3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between"
+                            ".result.observed_value:column=norm) + "
+                            "urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value"
+                            ":column=norm"
+                        },
+                    ]
+                ],
+            },
+        },
+    )
+
+    dependencies = ec.get_evaluation_parameter_dependencies()
+    res = dependencies["profile"][0]["metric_kwargs_id"]["column=norm"]
+    assert "expect_column_mean_to_be_between.result.observed_value" in res
+    assert "expect_column_stdev_to_be_between.result.observed_value" in res
+
+
 def test_expectation_configuration_patch(config4, config5, config6, config7):
     assert not config5.isEquivalentTo(config4, match_type="runtime")
     assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(

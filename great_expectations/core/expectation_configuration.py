@@ -1230,28 +1230,19 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        parsed_dependencies = {}
-        for key, value in self.kwargs.items():
-            if isinstance(value, dict) and "$PARAMETER" in value:
-                param_string_dependencies = find_evaluation_parameter_dependencies(
-                    value["$PARAMETER"]
-                )
-                nested_update(parsed_dependencies, param_string_dependencies)
-
+        parsed_dependencies = self._traverse_expectation_configuration_kwargs(
+            root=self.kwargs
+        )
         dependencies = {}
         urns = parsed_dependencies.get("urns", [])
         for string_urn in urns:
             try:
                 urn = ge_urn.parseString(string_urn)
             except ParserError:
-                logger.warning(
-                    "Unable to parse great_expectations urn {}".format(
-                        value["$PARAMETER"]
-                    )
-                )
+                logger.warning(f"Unable to parse great_expectations urn {string_urn}")
                 continue
 
-            if not urn.get("metric_kwargs"):
+            if "metric_kwargs" not in urn:
                 nested_update(
                     dependencies,
                     {urn["expectation_suite_name"]: [urn["metric_name"]]},
@@ -1272,6 +1263,35 @@ class ExpectationConfiguration(SerializableDictDot):
 
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
+
+    def _traverse_expectation_configuration_kwargs(
+        self, root: Any, parsed_dependencies: dict = {}
+    ) -> dict:
+        """
+        Helper method that treats ExpectationConfiguration kwargs as a tree and uses it
+        to enable a recursive, DFS traversal.
+
+        Designed to account for $PARAMETERS at any level of the kwargs dict.
+        """
+        # We want to step through standard iterables
+        if isinstance(root, (tuple, list)):
+            for child in root:
+                self._traverse_expectation_configuration_kwargs(
+                    child, parsed_dependencies
+                )
+        # dicts are similar but we need to account for $PARAMETERs
+        elif isinstance(root, dict):
+            for key, value in root.items():
+                if "$PARAMETER" in key:
+                    param_string_dependencies = find_evaluation_parameter_dependencies(
+                        value
+                    )
+                    nested_update(parsed_dependencies, param_string_dependencies)
+                self._traverse_expectation_configuration_kwargs(
+                    value, parsed_dependencies
+                )
+        # Any other types is discarded, ending a branch of the traversal and unwinding the call stack
+        return parsed_dependencies
 
     def _get_expectation_impl(self):
         return get_expectation_impl(self.expectation_type)
