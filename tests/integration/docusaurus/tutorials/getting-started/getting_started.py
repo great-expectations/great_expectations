@@ -14,18 +14,18 @@ assert context
 
 # First configure a new Datasource and add to DataContext
 datasource_yaml = f"""
-name: data__dir
+name: getting_started_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:
   module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-    default_runtime_data_connector_name:
+    getting_started_runtime_data_connector:
         class_name: RuntimeDataConnector
         batch_identifiers:
             - default_identifier_name
-    default_inferred_data_connector_name:
+    getting_started_inferred_filesystem_data_connector:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: ../data/
         default_regex:
@@ -38,15 +38,17 @@ context.add_datasource(**yaml.load(datasource_yaml))
 
 # Get Validator by creating ExpectationSuite and passing in BatchRequest
 batch_request = BatchRequest(
-    datasource_name="data__dir",
-    data_connector_name="default_inferred_data_connector_name",
+    datasource_name="getting_started_datasource",
+    data_connector_name="getting_started_inferred_filesystem_data_connector",
     data_asset_name="yellow_tripdata_sample_2019-01.csv",
     limit=1000,
 )
-context.create_expectation_suite(expectation_suite_name="taxi.demo")
+context.create_expectation_suite(
+    expectation_suite_name="getting_started_expectation_suite_taxi.demo"
+)
 validator = context.get_validator(
     batch_request=batch_request,
-    expectation_suite_name="taxi.demo",
+    expectation_suite_name="getting_started_expectation_suite_taxi.demo",
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
@@ -88,18 +90,18 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
 my_checkpoint_config = f"""
-name: my_checkpoint
+name: getting_started_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
-      datasource_name: data__dir
-      data_connector_name: default_inferred_data_connector_name
+      datasource_name: getting_started_datasource
+      data_connector_name: getting_started_inferred_filesystem_data_connector
       data_asset_name: yellow_tripdata_sample_2019-01.csv
       data_connector_query:
         index: -1
-    expectation_suite_name: taxi.demo
+    expectation_suite_name: getting_started_expectation_suite_taxi.demo
 """
 my_checkpoint_config = yaml.load(my_checkpoint_config)
 
@@ -115,18 +117,18 @@ assert checkpoint_result.run_results
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
 my_new_checkpoint_config = f"""
-name: my_new_checkpoint
+name: getting_started_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
-      datasource_name: data__dir
-      data_connector_name: default_inferred_data_connector_name
+      datasource_name: getting_started_datasource
+      data_connector_name: getting_started_inferred_filesystem_data_connector
       data_asset_name: yellow_tripdata_sample_2019-02.csv
       data_connector_query:
         index: -1
-    expectation_suite_name: taxi.demo
+    expectation_suite_name: getting_started_expectation_suite_taxi.demo
 """
 
 
