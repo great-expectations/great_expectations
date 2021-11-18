@@ -156,104 +156,95 @@ class Checkpoint:
             config = CheckpointConfig(**config)
 
         substituted_config: Union[CheckpointConfig, dict]
-        if (
-            self._substituted_config is not None
-            and not runtime_kwargs.get("template_name")
-            and not config.template_name
-        ):
-            substituted_config = deepcopy(self._substituted_config)
+        template_name = runtime_kwargs.get("template_name") or config.template_name
+
+        if not template_name:
+            if (
+                config.batch_request is not None
+                and config.batch_request.get("runtime_parameters") is not None
+                and config.batch_request["runtime_parameters"].get("batch_data")
+                is not None
+            ):
+                batch_data = config.batch_request["runtime_parameters"].pop(
+                    "batch_data"
+                )
+                substituted_config = copy.deepcopy(config)
+                substituted_config.batch_request["runtime_parameters"][
+                    "batch_data"
+                ] = batch_data
+            elif len(config.validations) > 0:
+                batch_data_list = []
+                for val in config.validations:
+                    if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters")
+                        is not None
+                        and val["batch_request"]["runtime_parameters"].get(
+                            "batch_data"
+                        )
+                        is not None
+                    ):
+                        batch_data_list.append(
+                            val["batch_request"]["runtime_parameters"].pop(
+                                "batch_data"
+                            )
+                        )
+                    else:
+                        batch_data_list.append(None)
+                substituted_config = copy.deepcopy(config)
+                for idx, val in enumerate(substituted_config.validations):
+                    if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters")
+                        is not None
+                        and batch_data_list[idx] is not None
+                    ):
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data_list[idx]
+
+                for idx, val in enumerate(config.validations):
+                    if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters")
+                        is not None
+                        and batch_data_list[idx] is not None
+                    ):
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data_list[idx]
+            else:
+                substituted_config = copy.deepcopy(config)
+
             if any(runtime_kwargs.values()):
                 substituted_config.update(runtime_kwargs=runtime_kwargs)
+
+            self._substituted_config = substituted_config
         else:
-            template_name = runtime_kwargs.get("template_name") or config.template_name
+            checkpoint = self.data_context.get_checkpoint(name=template_name)
+            template_config = checkpoint.config
 
-            if not template_name:
-                if (
-                    config.batch_request is not None
-                    and config.batch_request.get("runtime_parameters") is not None
-                    and config.batch_request["runtime_parameters"].get("batch_data")
-                    is not None
-                ):
-                    batch_data = config.batch_request["runtime_parameters"].pop(
-                        "batch_data"
-                    )
-                    substituted_config = copy.deepcopy(config)
-                    substituted_config.batch_request["runtime_parameters"][
-                        "batch_data"
-                    ] = batch_data
-                elif len(config.validations) > 0:
-                    batch_data_list = []
-                    for val in config.validations:
-                        if (
-                            val.get("batch_request") is not None
-                            and val["batch_request"].get("runtime_parameters")
-                            is not None
-                            and val["batch_request"]["runtime_parameters"].get(
-                                "batch_data"
-                            )
-                            is not None
-                        ):
-                            batch_data_list.append(
-                                val["batch_request"]["runtime_parameters"].pop(
-                                    "batch_data"
-                                )
-                            )
-                        else:
-                            batch_data_list.append(None)
-                    substituted_config = copy.deepcopy(config)
-                    for idx, val in enumerate(substituted_config.validations):
-                        if (
-                            val.get("batch_request") is not None
-                            and val["batch_request"].get("runtime_parameters")
-                            is not None
-                            and batch_data_list[idx] is not None
-                        ):
-                            val["batch_request"]["runtime_parameters"][
-                                "batch_data"
-                            ] = batch_data_list[idx]
-
-                    for idx, val in enumerate(config.validations):
-                        if (
-                            val.get("batch_request") is not None
-                            and val["batch_request"].get("runtime_parameters")
-                            is not None
-                            and batch_data_list[idx] is not None
-                        ):
-                            val["batch_request"]["runtime_parameters"][
-                                "batch_data"
-                            ] = batch_data_list[idx]
-                else:
-                    substituted_config = copy.deepcopy(config)
-
-                if any(runtime_kwargs.values()):
-                    substituted_config.update(runtime_kwargs=runtime_kwargs)
-
-                self._substituted_config = substituted_config
-            else:
-                checkpoint = self.data_context.get_checkpoint(name=template_name)
-                template_config = checkpoint.config
-
-                if template_config.config_version != config.config_version:
-                    raise ge_exceptions.CheckpointError(
-                        f"Invalid template '{template_name}' (ver. {template_config.config_version}) for Checkpoint "
-                        f"'{config}' (ver. {config.config_version}. Checkpoints can only use templates with the same config_version."
-                    )
-
-                if template_config.template_name is not None:
-                    substituted_config = self.get_substituted_config(
-                        config=template_config
-                    )
-                else:
-                    substituted_config = template_config
-
-                # merge template with config
-                substituted_config.update(
-                    other_config=config, runtime_kwargs=runtime_kwargs
+            if template_config.config_version != config.config_version:
+                raise ge_exceptions.CheckpointError(
+                    f"Invalid template '{template_name}' (ver. {template_config.config_version}) for Checkpoint "
+                    f"'{config}' (ver. {config.config_version}. Checkpoints can only use templates with the same config_version."
                 )
 
-                # don't replace _substituted_config if already exists
-                if self._substituted_config is None:
-                    self._substituted_config = substituted_config
+            if template_config.template_name is not None:
+                substituted_config = self.get_substituted_config(
+                    config=template_config
+                )
+            else:
+                substituted_config = template_config
+
+            # merge template with config
+            substituted_config.update(
+                other_config=config, runtime_kwargs=runtime_kwargs
+            )
+
+            # don't replace _substituted_config if already exists
+            if self._substituted_config is None:
+                self._substituted_config = substituted_config
         if self.data_context.ge_cloud_mode:
             return substituted_config
         return self._substitute_config_variables(config=substituted_config)
