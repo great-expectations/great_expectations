@@ -1229,7 +1229,7 @@ class ExpectationConfiguration(SerializableDictDot):
         myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
         return myself
 
-    def get_evaluation_parameter_dependencies(self):
+    def get_evaluation_parameter_dependencies(self) -> dict:
         parsed_dependencies = self._parse_dependencies(self.kwargs, {})
         dependencies = {}
         urns = parsed_dependencies.get("urns", [])
