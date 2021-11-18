@@ -301,12 +301,12 @@ class CheckpointResult(DictDot):
                     )
                 else:
                     batch_data_list.append(None)
-        elif self.checkpoint_config.get("batch_request") is not None:
+        elif self.checkpoint_config.batch_request is not None:
             if (
-                self.checkpoint_config.get("batch_request") is not None
-                and self.checkpoint_config["batch_request"].get("runtime_parameters")
+                self.checkpoint_config.batch_request is not None
+                and self.checkpoint_config.batch_request.get("runtime_parameters")
                 is not None
-                and self.checkpoint_config["batch_request"]["runtime_parameters"].get(
+                and self.checkpoint_config.batch_request["runtime_parameters"].get(
                     "batch_data"
                 )
                 is not None
