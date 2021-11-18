@@ -303,3 +303,25 @@ def test_pandas_specify_not_include_unexpected_rows(
     validator = Validator(execution_engine=engine, batches=(batch,))
     result = expectation.validate(validator)
     assert result.result == expected_evr_without_unexpected_rows.result
+
+
+def test_include_unexpected_rows_without_explicit_result_format_raises_error(
+    dataframe_for_unexpected_rows,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "include_unexpected_rows": False,
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows)
+    engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=engine, batches=(batch,))
+    with pytest.raises(ValueError):
+        expectation.validate(validator)

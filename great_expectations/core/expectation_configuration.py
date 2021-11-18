@@ -44,6 +44,14 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
             "include_unexpected_rows": False,
         }
     else:
+        if (
+            "include_unexpected_rows" in result_format
+            and "result_format" not in result_format
+        ):
+            raise ValueError(
+                "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
+            )
+
         if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
 
