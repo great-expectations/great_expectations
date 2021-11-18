@@ -1240,7 +1240,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 logger.warning(f"Unable to parse great_expectations urn {string_urn}")
                 continue
 
-            if "metric_kwargs" not in urn:
+            if not urn.get("metric_kwargs"):
                 nested_update(
                     dependencies,
                     {urn["expectation_suite_name"]: [urn["metric_name"]]},
