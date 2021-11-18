@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Set, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -933,8 +933,8 @@ def lint_code(code: str) -> str:
 
 def filter_properties_dict(
     properties: dict,
-    keep_fields: Optional[list] = None,
-    delete_fields: Optional[list] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
     clean_nulls: Optional[bool] = True,
     clean_falsy: Optional[bool] = False,
     keep_falsy_numerics: Optional[bool] = True,
