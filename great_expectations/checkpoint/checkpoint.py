@@ -85,41 +85,46 @@ class Checkpoint:
                 batch_request = batch_request.to_json_dict()
 
         for val in validations:
-            if (
-                val.get("batch_request") is not None
-                and isinstance(val["batch_request"], BatchRequest)
-                and val["batch_request"].runtime_parameters is not None
-                and val["batch_request"].runtime_parameters.get("batch_data")
-                is not None
+            if val.get("batch_request") is not None and isinstance(
+                val["batch_request"], BatchRequest
             ):
-                batch_data = val["batch_request"].runtime_parameters.get("batch_data")
-                val["batch_request"] = val["batch_request"].to_json_dict()
-                val["batch_request"]["runtime_parameters"]["batch_data"] = batch_data
-            else:
-                val["batch_request"] = val["batch_request"].to_json_dict()
+                if (
+                    val["batch_request"].runtime_parameters is not None
+                    and val["batch_request"].runtime_parameters.get("batch_data")
+                    is not None
+                ):
+                    batch_data = val["batch_request"].runtime_parameters.get(
+                        "batch_data"
+                    )
+                    val["batch_request"] = val["batch_request"].to_json_dict()
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data
+                else:
+                    val["batch_request"] = val["batch_request"].to_json_dict()
 
-        checkpoint_config: CheckpointConfig = CheckpointConfig(
-            **{
-                "name": name,
-                "config_version": config_version,
-                "template_name": template_name,
-                "module_name": module_name,
-                "class_name": class_name,
-                "run_name_template": run_name_template,
-                "expectation_suite_name": expectation_suite_name,
-                "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-                "batch_request": batch_request,
-                "action_list": action_list,
-                "evaluation_parameters": evaluation_parameters,
-                "runtime_configuration": runtime_configuration,
-                "validations": validations,
-                "profilers": profilers,
-                "ge_cloud_id": ge_cloud_id,
-                # Next two fields are for LegacyCheckpoint configuration
-                "validation_operator_name": validation_operator_name,
-                "batches": batches,
-            }
-        )
+            checkpoint_config: CheckpointConfig = CheckpointConfig(
+                **{
+                    "name": name,
+                    "config_version": config_version,
+                    "template_name": template_name,
+                    "module_name": module_name,
+                    "class_name": class_name,
+                    "run_name_template": run_name_template,
+                    "expectation_suite_name": expectation_suite_name,
+                    "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+                    "batch_request": batch_request,
+                    "action_list": action_list,
+                    "evaluation_parameters": evaluation_parameters,
+                    "runtime_configuration": runtime_configuration,
+                    "validations": validations,
+                    "profilers": profilers,
+                    "ge_cloud_id": ge_cloud_id,
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
+            )
         self._config = checkpoint_config
         self._substituted_config = None
 
@@ -177,17 +182,12 @@ class Checkpoint:
                 for val in config.validations:
                     if (
                         val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters")
-                        is not None
-                        and val["batch_request"]["runtime_parameters"].get(
-                            "batch_data"
-                        )
+                        and val["batch_request"].get("runtime_parameters") is not None
+                        and val["batch_request"]["runtime_parameters"].get("batch_data")
                         is not None
                     ):
                         batch_data_list.append(
-                            val["batch_request"]["runtime_parameters"].pop(
-                                "batch_data"
-                            )
+                            val["batch_request"]["runtime_parameters"].pop("batch_data")
                         )
                     else:
                         batch_data_list.append(None)
@@ -195,8 +195,7 @@ class Checkpoint:
                 for idx, val in enumerate(substituted_config.validations):
                     if (
                         val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters")
-                        is not None
+                        and val["batch_request"].get("runtime_parameters") is not None
                         and batch_data_list[idx] is not None
                     ):
                         val["batch_request"]["runtime_parameters"][
@@ -206,8 +205,7 @@ class Checkpoint:
                 for idx, val in enumerate(config.validations):
                     if (
                         val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters")
-                        is not None
+                        and val["batch_request"].get("runtime_parameters") is not None
                         and batch_data_list[idx] is not None
                     ):
                         val["batch_request"]["runtime_parameters"][
@@ -231,9 +229,7 @@ class Checkpoint:
                 )
 
             if template_config.template_name is not None:
-                substituted_config = self.get_substituted_config(
-                    config=template_config
-                )
+                substituted_config = self.get_substituted_config(config=template_config)
             else:
                 substituted_config = template_config
 
