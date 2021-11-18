@@ -397,7 +397,10 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {},
+            "event_payload": {
+                "batch_request_optional_top_level_keys": ["data_connector_query"],
+                "data_connector_query_keys": ["index"],
+            },
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -408,7 +411,10 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {},
+            "event_payload": {
+                "batch_request_optional_top_level_keys": ["batch_spec_passthrough"],
+                "batch_spec_passthrough_keys": ["reader_options"],
+            },
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -419,7 +425,14 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {},
+            "event_payload": {
+                "batch_request_optional_top_level_keys": [
+                    "data_connector_query",
+                    "batch_spec_passthrough",
+                ],
+                "data_connector_query_keys": ["index"],
+                "batch_spec_passthrough_keys": ["reader_options"],
+            },
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -430,8 +443,16 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {},
-            "success": True,
+            "event_payload": {
+                "batch_request_optional_top_level_keys": [
+                    "data_connector_query",
+                    "batch_spec_passthrough",
+                ],
+                "data_connector_query_keys": ["index"],
+                "runtime_parameters_keys": ["path"],
+                "batch_spec_passthrough_keys": ["reader_method"],
+            },
+            "success": False,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
@@ -441,7 +462,15 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {},
+            "event_payload": {
+                "batch_request_optional_top_level_keys": [
+                    "data_connector_query",
+                    "batch_spec_passthrough",
+                ],
+                "data_connector_query_keys": ["index"],
+                "runtime_parameters_keys": ["path"],
+                "batch_spec_passthrough_keys": ["reader_options", "reader_method"],
+            },
             "success": False,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
