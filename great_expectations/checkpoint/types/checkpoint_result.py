@@ -285,18 +285,61 @@ class CheckpointResult(DictDot):
         return self._validation_statistics
 
     def to_json_dict(self):
-        # if hasattr(self.checkpoint_config, "validations"):
-        #     for val in self.checkpoint_config["validations"]:
-        #         if isinstance(val.get("batch_request"), BatchRequest):
-        #             val["batch_request"] = val["batch_request"].to_json_dict()
-        #
-        # if hasattr(self.checkpoint_config, "batch_request"):
-        #     if isinstance(self.checkpoint_config["batch_request"], BatchRequest):
-        #         self.checkpoint_config["batch_request"] = self.checkpoint_config[
-        #             "batch_request"
-        #         ].to_json_dict()
+        json_dict = {}
+        batch_data_list = []
+        batch_data = None
+        if len(self.checkpoint_config.validations) > 0:
+            for val in self.checkpoint_config["validations"]:
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    )
+                else:
+                    batch_data_list.append(None)
+        elif self.checkpoint_config.get("batch_request") is not None:
+            if (
+                self.checkpoint_config.get("batch_request") is not None
+                and self.checkpoint_config["batch_request"].get("runtime_parameters")
+                is not None
+                and self.checkpoint_config["batch_request"]["runtime_parameters"].get(
+                    "batch_data"
+                )
+                is not None
+            ):
+                batch_data = self.checkpoint_config["batch_request"][
+                    "runtime_parameters"
+                ].pop("batch_data")
 
-        return checkpointResultSchema.dump(self)
+        json_dict = checkpointResultSchema.dump(self)
+        if len(batch_data_list) > 0:
+            for idx, val in enumerate(json_dict["checkpoint_config"]["validations"]):
+                if batch_data_list[idx] is not None:
+                    self.checkpoint_config["validations"][idx]["batch_request"][
+                        "runtime_parameters"
+                    ]["batch_data"] = json_dict["checkpoint_config"]["validations"][
+                        idx
+                    ][
+                        "batch_request"
+                    ][
+                        "runtime_parameters"
+                    ][
+                        "batch_data"
+                    ] = batch_data_list[
+                        idx
+                    ]
+        elif batch_data is not None:
+            self.checkpoint_config["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ] = json_dict["checkpoint_config"]["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ] = batch_data
+
+        return json_dict
 
     def __repr__(self):
         serializeable_dict = self.to_json_dict()
@@ -332,7 +375,7 @@ class CheckpointResult(DictDot):
                     )
                 )
 
-        return json.dumps(self.to_json_dict(), indent=2)
+        return json.dumps(serializeable_dict, indent=2)
 
 
 class CheckpointResultSchema(Schema):

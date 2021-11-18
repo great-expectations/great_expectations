@@ -204,7 +204,6 @@ def send_email(
         return "success"
 
 
-# TODO: <Alex>BatchRequest attribute processing here is not flexible, compared to DataContext.get_batch_list().</Alex>
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
@@ -212,12 +211,6 @@ def get_runtime_batch_request(
     ge_cloud_mode: bool = False,
 ) -> Optional[BatchRequest]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
-    batch_data = None
-    if isinstance(runtime_config_batch_request, RuntimeBatchRequest):
-        runtime_parameters = runtime_config_batch_request.runtime_parameters
-        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
-            batch_data = runtime_parameters["batch_data"]
-        runtime_config_batch_request = runtime_config_batch_request.to_json_dict()
 
     if (
         (
@@ -243,10 +236,15 @@ def get_runtime_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
-    if validation_batch_request.get("runtime_parameters") is not None and validation_batch_request["runtime_parameters"].get("batch_data") is not None:
+    if (
+        validation_batch_request.get("runtime_parameters") is not None
+        and validation_batch_request["runtime_parameters"].get("batch_data") is not None
+    ):
         batch_data = validation_batch_request["runtime_parameters"].pop("batch_data")
         runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
-        runtime_batch_request_dict["runtime_parameters"]["batch_data"] = str(type(batch_data))
+        validation_batch_request["runtime_parameters"][
+            "batch_data"
+        ] = runtime_batch_request_dict["runtime_parameters"]["batch_data"] = batch_data
     else:
         runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
 
@@ -260,10 +258,6 @@ def get_runtime_batch_request(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
     runtime_batch_request_dict.update(runtime_config_batch_request)
-    if batch_data is not None:
-        if "runtime_parameters" not in runtime_batch_request_dict:
-            runtime_batch_request_dict["runtime_parameters"] = {}
-        runtime_batch_request_dict["runtime_parameters"]["batch_data"] = batch_data
 
     if ge_cloud_mode and batch_request_class is RuntimeBatchRequest:
         batch_identifiers = runtime_batch_request_dict.get("batch_identifiers", {})

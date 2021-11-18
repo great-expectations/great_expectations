@@ -204,7 +204,19 @@ class Checkpoint:
                     for idx, val in enumerate(substituted_config.validations):
                         if (
                             val.get("batch_request") is not None
-                            and val["batch_request"].get("runtime_parameters") is not None
+                            and val["batch_request"].get("runtime_parameters")
+                            is not None
+                            and batch_data_list[idx] is not None
+                        ):
+                            val["batch_request"]["runtime_parameters"][
+                                "batch_data"
+                            ] = batch_data_list[idx]
+
+                    for idx, val in enumerate(config.validations):
+                        if (
+                            val.get("batch_request") is not None
+                            and val["batch_request"].get("runtime_parameters")
+                            is not None
                             and batch_data_list[idx] is not None
                         ):
                             val["batch_request"]["runtime_parameters"][
