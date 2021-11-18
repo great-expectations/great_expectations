@@ -1230,9 +1230,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        parsed_dependencies = ExpectationConfiguration._parse_kwargs(
-            root=self.kwargs, dependencies={}
-        )
+        parsed_dependencies = self._parse_dependencies(self.kwargs, {})
         dependencies = {}
         urns = parsed_dependencies.get("urns", [])
         for string_urn in urns:
@@ -1264,18 +1262,20 @@ class ExpectationConfiguration(SerializableDictDot):
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
-    @staticmethod
-    def _parse_kwargs(root: Any, dependencies: dict) -> dict:
+    def _parse_dependencies(self, root: Any, dependencies: dict) -> dict:
         """
         Helper method that treats ExpectationConfiguration kwargs as a tree and uses it
         to enable a recursive, DFS traversal.
 
         Designed to account for $PARAMETERS at any level of the kwargs dict.
+
+        Consistent between each step of the recursive process is the `dependencies` dict,
+        which gets updated with each call and returned as the final output.
         """
         # We want to step through standard iterables
         if isinstance(root, (tuple, list)):
             for child in root:
-                ExpectationConfiguration._parse_kwargs(child, dependencies)
+                self._parse_dependencies(child, dependencies)
         # dicts are similar but we need to account for $PARAMETERs
         elif isinstance(root, dict):
             for key, value in root.items():
@@ -1284,7 +1284,7 @@ class ExpectationConfiguration(SerializableDictDot):
                         value
                     )
                     nested_update(dependencies, param_string_dependencies)
-                ExpectationConfiguration._parse_kwargs(value, dependencies)
+                self._parse_dependencies(value, dependencies)
         # Any other types is discarded, ending a branch of the traversal and unwinding the call stack
         return dependencies
 
