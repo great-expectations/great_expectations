@@ -243,24 +243,15 @@ def get_runtime_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
-    if isinstance(validation_batch_request, BatchRequest):
-        if (
-            hasattr(validation_batch_request, "runtime_parameters")
-            and (validation_batch_request.runtime_parameters is not None)
-            and ("batch_data" in validation_batch_request.runtime_parameters)
-        ):
-            batch_data = validation_batch_request.runtime_parameters["batch_data"]
-        runtime_batch_request_dict: dict = validation_batch_request.to_json_dict()
+    if validation_batch_request.get("runtime_parameters") is not None and validation_batch_request["runtime_parameters"].get("batch_data") is not None:
+        batch_data = validation_batch_request["runtime_parameters"].pop("batch_data")
+        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
+        runtime_batch_request_dict["runtime_parameters"]["batch_data"] = str(type(batch_data))
     else:
         runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
 
     for key, runtime_batch_request_dict_val in runtime_batch_request_dict.items():
-        if isinstance(runtime_config_batch_request, BatchRequest):
-            runtime_config_batch_request_val = getattr(
-                runtime_config_batch_request, key
-            )
-        else:
-            runtime_config_batch_request_val = runtime_config_batch_request.get(key)
+        runtime_config_batch_request_val = runtime_config_batch_request.get(key)
         if (
             runtime_batch_request_dict_val is not None
             and runtime_config_batch_request_val is not None
