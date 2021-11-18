@@ -463,7 +463,7 @@ def substitute_all_config_variables(
 
     if isinstance(data, CheckpointConfig):
         if (
-            isinstance(data.batch_request, dict)
+            data.batch_request is not None
             and data.batch_request.get("runtime_parameters") is not None
             and data.batch_request["runtime_parameters"].get("batch_data") is not None
         ):
