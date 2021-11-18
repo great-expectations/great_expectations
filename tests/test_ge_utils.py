@@ -281,8 +281,13 @@ def test_filter_properties_dict():
         # noinspection PyUnusedLocal
         d0_end: dict = filter_properties_dict(
             properties=d0_begin,
-            keep_fields=["string"],
-            delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+            keep_fields={
+                "string",
+            },
+            delete_fields={
+                "integer_zero",
+                "scientific_notation_floating_point_number",
+            },
             clean_falsy=True,
         )
     d0_end: dict = filter_properties_dict(properties=d0_begin, clean_falsy=True)
@@ -311,7 +316,9 @@ def test_filter_properties_dict():
     d3_begin: dict = copy.deepcopy(source_dict)
     d3_end: dict = filter_properties_dict(
         properties=d3_begin,
-        keep_fields=["null"],
+        keep_fields={
+            "null",
+        },
         clean_falsy=True,
     )
     d3_end_expected = {"null": None}
@@ -331,7 +338,10 @@ def test_filter_properties_dict():
     d5_begin: dict = copy.deepcopy(source_dict)
     d5_end: dict = filter_properties_dict(
         properties=d5_begin,
-        keep_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        keep_fields={
+            "integer_zero",
+            "scientific_notation_floating_point_number",
+        },
         clean_falsy=True,
     )
     d5_end_expected = {
@@ -343,7 +353,10 @@ def test_filter_properties_dict():
     d6_begin: dict = copy.deepcopy(source_dict)
     d6_end: dict = filter_properties_dict(
         properties=d6_begin,
-        delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        delete_fields={
+            "integer_zero",
+            "scientific_notation_floating_point_number",
+        },
         clean_falsy=True,
     )
     d6_end_expected = {"string": "xyz_0", "integer_one": 1}
@@ -352,7 +365,10 @@ def test_filter_properties_dict():
     d7_begin: dict = copy.deepcopy(source_dict)
     filter_properties_dict(
         properties=d7_begin,
-        delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        delete_fields={
+            "integer_zero",
+            "scientific_notation_floating_point_number",
+        },
         clean_falsy=True,
         inplace=True,
     )

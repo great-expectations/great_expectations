@@ -5,6 +5,7 @@ import random
 import re
 import shutil
 from abc import ABCMeta
+from typing import List, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
@@ -341,7 +342,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return False
 
-    def list_keys(self, prefix=()):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         key_list = []
         for root, dirs, files in os.walk(
             os.path.join(self.full_base_directory, *prefix)
@@ -594,7 +595,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3.Object(self.bucket, source_filepath).delete()
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3 = self._create_client()
         paginator = s3.get_paginator("list_objects_v2")
 
@@ -868,7 +870,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(source_filepath)
         _ = bucket.rename_blob(blob, dest_filepath)
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
         from google.cloud import storage
@@ -1042,7 +1045,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         return az_blob_key
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
         for obj in self._get_container_client().list_blobs(
