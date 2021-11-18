@@ -63,7 +63,7 @@ Great Expectations generates and provides notebooks as interactive development e
 ## Deployment Patterns
 
 * [How to instantiate a Data Context on an EMR Spark cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-* [How to instantiate a Data Context on Databricks Spark cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster)
+* [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
 
 ## Connecting to Data
 Great Expectations allows you to connect to data in a wide variety of sources, and the list is constantly getting longer. If you have an idea for a source not listed here, please speak up in the public discussion forum.
