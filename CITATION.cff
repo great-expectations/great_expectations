@@ -29,6 +29,3 @@ license: Apache-2.0
 message: If you use this software, please cite it using these metadata.
 repository-code: https://github.com/great-expectations/great_expectations
 title: Great Expectations
-version: 0.13.42
-doi: 10.5281/zenodo.5683575
-date-released: 2021-11-12
