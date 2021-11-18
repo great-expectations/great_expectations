@@ -5,7 +5,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
-from typing import Any
+from typing import Any, Optional
 
 from pyparsing import (
     CaselessKeyword,
@@ -197,10 +197,12 @@ class EvaluationParameterParser:
 
 
 def build_evaluation_parameters(
-    expectation_args,
-    evaluation_parameters=None,
-    interactive_evaluation=True,
-    data_context=None,
+    expectation_args: dict,
+    evaluation_parameters: Optional[dict] = None,
+    interactive_evaluation: bool = True,
+    data_context: Optional[
+        Any
+    ] = None,  # Type hinting this as 'DataContext' causes a import cycle
 ):
     """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
@@ -208,52 +210,41 @@ def build_evaluation_parameters(
     """
     evaluation_args = copy.deepcopy(expectation_args)
     substituted_parameters = {}
-    _build_evaluation_parameters(
-        root=evaluation_args,
-        expectation_args=expectation_args,
-        substituted_parameters=substituted_parameters,
-        evaluation_parameters=evaluation_parameters,
-        interactive_evaluation=interactive_evaluation,
-        data_context=data_context,
-    )
 
+    # A closure enables us to perform recursive tree traversal while sharing state with the
+    # primary function, reducing the number of parameters we need to pass to the helper function
+    def _build_evaluation_parameters(root: Any) -> None:
+        if isinstance(root, (tuple, list)):
+            for child in root:
+                _build_evaluation_parameters(child)
+        elif isinstance(root, dict):
+            for key, value in root.items():
+                if isinstance(value, dict) and "$PARAMETER" in value:
+                    # We do not even need to search for a value if we are not going to do interactive evaluation
+                    if not interactive_evaluation:
+                        continue
+
+                    # First, check to see whether an argument was supplied at runtime
+                    # If it was, use that one, but remove it from the stored config
+                    if "$PARAMETER." + value["$PARAMETER"] in value:
+                        root[key] = root[key]["$PARAMETER." + value["$PARAMETER"]]
+                        del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+
+                    # If not, try to parse the evaluation parameter and substitute, which will raise
+                    # an exception if we do not have a value
+                    else:
+                        raw_value = value["$PARAMETER"]
+                        parameter_value = parse_evaluation_parameter(
+                            raw_value,
+                            evaluation_parameters=evaluation_parameters,
+                            data_context=data_context,
+                        )
+                        root[key] = parameter_value
+                        # Once we've substituted, we also track that we did so
+                        substituted_parameters[key] = parameter_value
+
+    _build_evaluation_parameters(evaluation_args)
     return evaluation_args, substituted_parameters
-
-
-def _build_evaluation_parameters(
-    root: Any,
-    expectation_args: dict,
-    substituted_parameters: dict,
-    evaluation_parameters=None,
-    interactive_evaluation=True,
-    data_context=None,
-):
-    # Iterate over arguments, and replace $PARAMETER-defined args with their
-    # specified parameters.
-    for key, value in root.items():
-        if isinstance(value, dict) and "$PARAMETER" in value:
-            # We do not even need to search for a value if we are not going to do interactive evaluation
-            if not interactive_evaluation:
-                continue
-
-            # First, check to see whether an argument was supplied at runtime
-            # If it was, use that one, but remove it from the stored config
-            if "$PARAMETER." + value["$PARAMETER"] in value:
-                root[key] = root[key]["$PARAMETER." + value["$PARAMETER"]]
-                del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
-
-            # If not, try to parse the evaluation parameter and substitute, which will raise
-            # an exception if we do not have a value
-            else:
-                raw_value = value["$PARAMETER"]
-                parameter_value = parse_evaluation_parameter(
-                    raw_value,
-                    evaluation_parameters=evaluation_parameters,
-                    data_context=data_context,
-                )
-                root[key] = parameter_value
-                # Once we've substituted, we also track that we did so
-                substituted_parameters[key] = parameter_value
 
 
 expr = EvaluationParameterParser()

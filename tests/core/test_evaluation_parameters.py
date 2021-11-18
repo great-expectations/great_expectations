@@ -10,6 +10,7 @@ from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
+    build_evaluation_parameters,
     find_evaluation_parameter_dependencies,
     parse_evaluation_parameter,
 )
@@ -306,3 +307,24 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
             "result": {"observed_value": 3},
         }
     )
+
+
+def test_build_evaluation_parameters():
+    evaluation_parameters = {
+        "my_min": 1,
+        "my_max": 5,
+    }
+    expectation_args = {
+        "min_value": {"$PARAMETER": "my_min", "$PARAMETER.upstream_row_count": 10},
+        "max_value": {"$PARAMETER": "my_max", "$PARAMETER.upstream_row_count": 50},
+    }
+    res = build_evaluation_parameters(
+        expectation_args, evaluation_parameters, interactive_evaluation=True
+    )
+    expected = {"max_value": 5, "min_value": 1}
+    assert res[0] == expected
+    assert res[1] == expected
+
+
+def test_build_evaluation_parameters_with_nested_PARAMETERs():
+    pass
