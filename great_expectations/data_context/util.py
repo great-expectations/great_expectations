@@ -469,7 +469,9 @@ def substitute_all_config_variables(
         ):
             batch_data = data.batch_request["runtime_parameters"].pop("batch_data")
             json_data = CheckpointConfigSchema().dump(data)
-            data.batch_request["runtime_parameters"]["batch_data"] = json_data["batch_request"]["runtime_parameters"]["batch_data"] = batch_data
+            data.batch_request["runtime_parameters"]["batch_data"] = json_data[
+                "batch_request"
+            ]["runtime_parameters"]["batch_data"] = batch_data
             return substitute_config_variable(
                 json_data, replace_variables_dict, dollar_sign_escape_string
             )
@@ -478,17 +480,12 @@ def substitute_all_config_variables(
             for val in data["validations"]:
                 if (
                     val.get("batch_request") is not None
-                    and val["batch_request"].get("runtime_parameters")
-                    is not None
-                    and val["batch_request"]["runtime_parameters"].get(
-                        "batch_data"
-                    )
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
                     is not None
                 ):
                     batch_data_list.append(
-                        val["batch_request"]["runtime_parameters"].pop(
-                            "batch_data"
-                        )
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
                     )
                 else:
                     batch_data_list.append(None)
