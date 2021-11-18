@@ -16,6 +16,13 @@ from integrations.databricks.dlt_expectation_translator import (
 )
 from integrations.databricks.exceptions import UnsupportedExpectationConfiguration
 
+try:
+    from integrations.databricks import dlt_mock_library
+except:
+    # TODO: Make this a real error message:
+    print("could not import dlt_mock_library TODO: make this a real error message")
+
+
 yaml = YAML()
 
 
