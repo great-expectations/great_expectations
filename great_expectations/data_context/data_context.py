@@ -100,7 +100,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import DataContextError, InvalidKeyError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -2312,14 +2312,7 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
-            # get the expectation suite if it exists, otherwise None
-            expectation_suite_name = validation_results.meta["expectation_suite_name"]
-            if expectation_suite_name in self.list_expectation_suite_names():
-                expectation_suite = self.get_expectation_suite(expectation_suite_name)
-            else:
-                expectation_suite = None
-
-            self._compile_evaluation_parameter_dependencies(expectation_suite)
+            self._compile_evaluation_parameter_dependencies()
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -2348,17 +2341,15 @@ class BaseDataContext:
     def validations_store(self):
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self, expectation_suite):
+    def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
+        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
+        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        for key in self.expectations_store.list_keys():
+            expectation_suite = self.expectations_store.get(key)
+            if not expectation_suite:
+                continue
 
-        # only if we don't have an expectation suite do we do a key scan
-        if expectation_suite is None:
-            for key in self.expectations_store.list_keys():
-                expectation_suite = self.expectations_store.get(key)
-                if not expectation_suite:
-                    continue
-
-        if expectation_suite:
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
