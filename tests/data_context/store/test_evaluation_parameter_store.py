@@ -303,7 +303,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     """
     What does this test and why?
 
-    Demonstrate that EvaluationParameterStore works as expected with TupleAzureStoreBackend
+    Demonstrate that EvaluationParameterStore works as expected with TupleAzureBlobStoreBackend
     and that the store backend adheres to the Liskov substitution principle.
     """
     evaluation_parameter_store = EvaluationParameterStore()
