@@ -110,6 +110,120 @@ def test_stdev_metric_pd():
     assert results == {desired_metric.id: 1}
 
 
+def test_quantiles_metric_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 4]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.quantile_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+            "allow_relative_error": "linear",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1.75, 2.5, 3.25]}
+
+
+def test_quantiles_metric_sa(sa):
+    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4]}), sa)
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    partial_metric = MetricConfiguration(
+        metric_name="table.row_count.aggregate_fn",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(partial_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    table_row_count_metric = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": partial_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_row_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.quantile_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "table.row_count": table_row_count_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1.0, 2.0, 3.0]}
+
+
+def test_quantiles_metric_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame({"a": [1, 2, 3, 4]}),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.quantile_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1.0, 2.0, 3.0]}
+
+
 def test_max_metric_column_exists_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
@@ -366,7 +480,9 @@ def test_map_value_set_sa(sa):
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"metric_partial_fn": aggregate_partial},
+        metric_dependencies={
+            "metric_partial_fn": aggregate_partial,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -440,7 +556,9 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"metric_partial_fn": aggregate_partial},
+        metric_dependencies={
+            "metric_partial_fn": aggregate_partial,
+        },
     )
 
     results = engine.resolve_metrics(
@@ -484,7 +602,9 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"metric_partial_fn": aggregate_partial},
+        metric_dependencies={
+            "metric_partial_fn": aggregate_partial,
+        },
     )
 
     results = engine.resolve_metrics(
@@ -1389,7 +1509,9 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": mean},
+        metric_dependencies={
+            "metric_partial_fn": mean,
+        },
     )
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
@@ -1449,7 +1571,9 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"metric_partial_fn": desired_metric},
+        metric_dependencies={
+            "metric_partial_fn": desired_metric,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1702,7 +1826,9 @@ def test_table_metric_sa(sa):
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric},
+        metric_dependencies={
+            "metric_partial_fn": desired_metric,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
