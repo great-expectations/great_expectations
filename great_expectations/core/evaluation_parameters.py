@@ -231,7 +231,6 @@ def _build_evaluation_parameters(
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
     for key, value in root.items():
-        breakpoint()
         if isinstance(value, dict) and "$PARAMETER" in value:
             # We do not even need to search for a value if we are not going to do interactive evaluation
             if not interactive_evaluation:
