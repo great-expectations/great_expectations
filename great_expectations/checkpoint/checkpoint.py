@@ -89,22 +89,14 @@ class Checkpoint:
                 val.get("batch_request") is not None
                 and isinstance(val["batch_request"], BatchRequest)
                 and val["batch_request"].runtime_parameters is not None
-                and val.get("batch_request").runtime_parameters.get("batch_data")
+                and val["batch_request"].runtime_parameters.get("batch_data")
                 is not None
             ):
-                if (
-                    val["batch_request"].runtime_parameters.get("batch_data")
-                    is not None
-                ):
-                    batch_data = val["batch_request"].runtime_parameters.get(
-                        "batch_data"
-                    )
-                    val["batch_request"] = val["batch_request"].to_json_dict()
-                    val["batch_request"]["runtime_parameters"][
-                        "batch_data"
-                    ] = batch_data
-                else:
-                    val["batch_request"] = val["batch_request"].to_json_dict()
+                batch_data = val["batch_request"].runtime_parameters.get("batch_data")
+                val["batch_request"] = val["batch_request"].to_json_dict()
+                val["batch_request"]["runtime_parameters"]["batch_data"] = batch_data
+            else:
+                val["batch_request"] = val["batch_request"].to_json_dict()
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
             **{
@@ -177,7 +169,7 @@ class Checkpoint:
 
             if not template_name:
                 if (
-                    isinstance(config.batch_request, dict)
+                    config.batch_request is not None
                     and config.batch_request.get("runtime_parameters") is not None
                     and config.batch_request["runtime_parameters"].get("batch_data")
                     is not None
@@ -189,6 +181,35 @@ class Checkpoint:
                     substituted_config.batch_request["runtime_parameters"][
                         "batch_data"
                     ] = batch_data
+                elif len(config.validations) > 0:
+                    batch_data_list = []
+                    for val in config.validations:
+                        if (
+                            val.get("batch_request") is not None
+                            and val["batch_request"].get("runtime_parameters")
+                            is not None
+                            and val["batch_request"]["runtime_parameters"].get(
+                                "batch_data"
+                            )
+                            is not None
+                        ):
+                            batch_data_list.append(
+                                val["batch_request"]["runtime_parameters"].pop(
+                                    "batch_data"
+                                )
+                            )
+                        else:
+                            batch_data_list.append(None)
+                    substituted_config = copy.deepcopy(config)
+                    for idx, val in enumerate(substituted_config.validations):
+                        if (
+                            val.get("batch_request") is not None
+                            and val["batch_request"].get("runtime_parameters") is not None
+                            and batch_data_list[idx] is not None
+                        ):
+                            val["batch_request"]["runtime_parameters"][
+                                "batch_data"
+                            ] = batch_data_list[idx]
                 else:
                     substituted_config = copy.deepcopy(config)
 
