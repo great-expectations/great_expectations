@@ -1230,7 +1230,9 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self):
-        parsed_dependencies = ExpectationConfiguration._parse_kwargs(root=self.kwargs)
+        parsed_dependencies = ExpectationConfiguration._parse_kwargs(
+            root=self.kwargs, dependencies={}
+        )
         dependencies = {}
         urns = parsed_dependencies.get("urns", [])
         for string_urn in urns:
@@ -1263,7 +1265,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return dependencies
 
     @staticmethod
-    def _parse_kwargs(root: Any, parsed_dependencies: dict = {}) -> dict:
+    def _parse_kwargs(root: Any, dependencies: dict) -> dict:
         """
         Helper method that treats ExpectationConfiguration kwargs as a tree and uses it
         to enable a recursive, DFS traversal.
@@ -1273,7 +1275,7 @@ class ExpectationConfiguration(SerializableDictDot):
         # We want to step through standard iterables
         if isinstance(root, (tuple, list)):
             for child in root:
-                ExpectationConfiguration._parse_kwargs(child, parsed_dependencies)
+                ExpectationConfiguration._parse_kwargs(child, dependencies)
         # dicts are similar but we need to account for $PARAMETERs
         elif isinstance(root, dict):
             for key, value in root.items():
@@ -1281,10 +1283,10 @@ class ExpectationConfiguration(SerializableDictDot):
                     param_string_dependencies = find_evaluation_parameter_dependencies(
                         value
                     )
-                    nested_update(parsed_dependencies, param_string_dependencies)
-                ExpectationConfiguration._parse_kwargs(value, parsed_dependencies)
+                    nested_update(dependencies, param_string_dependencies)
+                ExpectationConfiguration._parse_kwargs(value, dependencies)
         # Any other types is discarded, ending a branch of the traversal and unwinding the call stack
-        return parsed_dependencies
+        return dependencies
 
     def _get_expectation_impl(self):
         return get_expectation_impl(self.expectation_type)
