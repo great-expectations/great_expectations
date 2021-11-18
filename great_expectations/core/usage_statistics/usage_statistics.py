@@ -440,9 +440,7 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
             batch_request_anonymizer: BatchRequestAnonymizer = (
                 data_context._usage_statistics_handler._batch_request_anonymizer
             )
-            payload[
-                "anonymized_batch_request_keys"
-            ] = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
+            payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
         except Exception:
             logger.debug(
                 "get_batch_list_usage_statistics: Unable to create anonymized_batch_request_keys payload field"

@@ -2907,13 +2907,7 @@ suite = profiler.build_suite()"""
         mock.call(
             {
                 "event": "data_context.get_batch_list",
-                "event_payload": {
-                    "anonymized_batch_request": [
-                        "datasource_name",
-                        "data_connector_name",
-                        "data_asset_name",
-                    ]
-                },
+                "event_payload": {},
                 "success": True,
             }
         ),
@@ -3130,13 +3124,7 @@ suite = profiler.build_suite()"""
         mock.call(
             {
                 "event": "data_context.get_batch_list",
-                "event_payload": {
-                    "anonymized_batch_request": [
-                        "datasource_name",
-                        "data_connector_name",
-                        "data_asset_name",
-                    ]
-                },
+                "event_payload": {},
                 "success": True,
             }
         ),

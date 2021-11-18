@@ -38,7 +38,7 @@ RUNTIME_PARAMETERS_KEYS: Set[str] = {
     "query",
     "path",
 }
-RECOGNIZED_BATCH_SPEC_PASSTHROUGH_KEYS: Set[str] = {
+BATCH_SPEC_PASSTHROUGH_KEYS: Set[str] = {
     "sampling_method",
     "sampling_kwargs",
     "splitter_method",
@@ -52,7 +52,7 @@ BATCH_REQUEST_FLATTENED_KEYS: Set[str] = set().union(
         BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
         DATA_CONNECTOR_QUERY_KEYS,
         RUNTIME_PARAMETERS_KEYS,
-        RECOGNIZED_BATCH_SPEC_PASSTHROUGH_KEYS,
+        BATCH_SPEC_PASSTHROUGH_KEYS,
     ]
 )
 
