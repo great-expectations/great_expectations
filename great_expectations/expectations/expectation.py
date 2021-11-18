@@ -1433,6 +1433,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
 
         result_format_str = dependencies["result_format"].get("result_format")
+        include_unexpected_rows = dependencies["result_format"].get(
+            "include_unexpected_rows"
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
@@ -1450,19 +1453,36 @@ class ColumnMapExpectation(TableExpectation, ABC):
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
 
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
+
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
-        metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-        )
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -1490,6 +1510,8 @@ class ColumnMapExpectation(TableExpectation, ABC):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
+        include_unexpected_rows = result_format.get("include_unexpected_rows")
+
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
@@ -1498,6 +1520,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
         unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
         unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
+        unexpected_rows = None
+        if include_unexpected_rows:
+            unexpected_rows = metrics.get(self.map_metric + ".unexpected_rows")
 
         if total_count is None or null_count is None:
             total_count = nonnull_count = 0
@@ -1520,6 +1545,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
+            unexpected_rows=unexpected_rows,
         )
 
 
@@ -1625,6 +1651,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
 
         result_format_str = dependencies["result_format"].get("result_format")
+        include_unexpected_rows = dependencies["result_format"].get(
+            "include_unexpected_rows"
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
@@ -1645,16 +1674,19 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
-        metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-        )
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -1809,6 +1841,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
 
         result_format_str = dependencies["result_format"].get("result_format")
+        include_unexpected_rows = dependencies["result_format"].get(
+            "include_unexpected_rows"
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
@@ -1829,16 +1864,19 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
-        metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-        )
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -1902,6 +1940,7 @@ def _format_map_output(
     unexpected_count,
     unexpected_list,
     unexpected_index_list,
+    unexpected_rows=None,
 ):
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
@@ -1960,6 +1999,13 @@ def _format_map_output(
         return_obj["result"][
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing
+
+    if result_format["include_unexpected_rows"]:
+        return_obj["result"].update(
+            {
+                "unexpected_rows": unexpected_rows,
+            }
+        )
 
     if result_format["result_format"] == "BASIC":
         return return_obj
