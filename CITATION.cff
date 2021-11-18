@@ -1,0 +1,31 @@
+abstract: Great Expectations is a shared, open standard for data quality. It helps
+  data teams eliminate pipeline debt, through data testing, documentation, and profiling.
+authors:
+- family-names: Gong
+  given-names: Abe
+- family-names: Campbell
+  given-names: James
+- name: Superconductive
+  website: https://superconductive.com
+- name: Great Expectations
+  website: https://greatexpectations.io
+  email: team@greatexpectations.io
+cff-version: 1.2.0
+identifiers:
+- description: This is the collection of all archived snapshots of all versions of
+    Great Expectations
+  type: doi
+  value: 10.5281/zenodo.5683574
+keywords:
+- data quality
+- pipeline testing
+- data testing
+- pipeline debt
+- data observability
+- data monitoring
+- data profiling
+- data documentation
+license: Apache-2.0
+message: If you use this software, please cite it using these metadata.
+repository-code: https://github.com/great-expectations/great_expectations
+title: Great Expectations
