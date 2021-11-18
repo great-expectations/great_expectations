@@ -11,8 +11,12 @@ The `result_format` parameter may be either a string or a dictionary which speci
       set to 0, this will suppress the unexpected counts.
     * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
       dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` as well, and
-      `result_format` must be more verbose than `BOOLEAN_ONLY`. *WARNING: This returns EVERY row for each unexpected 
-      value, and for large tables, this could return an unwieldy amount of data.*
+      `result_format` must be more verbose than `BOOLEAN_ONLY`. *WARNING: *
+
+  :::warning
+  `include_unexpected_rows` returns EVERY row for each unexpected value; for large tables, this could return an 
+  unwieldy amount of data.
+  :::
 
 
 ## result_format values
