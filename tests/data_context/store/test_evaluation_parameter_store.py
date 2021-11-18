@@ -277,8 +277,8 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     What does this test and why?
 
     A Store should leverage polymorphism, allowing the interpreter to dynamically determine
-    which class' method to use. This tests asserts that all cloud-based store backends
-    match the appropriate parent class signatures to run as expected.
+    which class' method to use. This tests asserts that all cloud-based tuple store backends
+    adhere to the Liskov substitution principle.
     """
     evaluation_parameter_store = EvaluationParameterStore()
     run_id = RunIdentifier()
