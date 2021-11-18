@@ -1,5 +1,6 @@
 import datetime
 import os
+from unittest import mock
 
 import boto3
 import pytest
@@ -17,6 +18,8 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store import (
     EvaluationParameterStore,
+    TupleAzureBlobStoreBackend,
+    TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -256,24 +259,43 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     }
 
 
-@mock_s3
-def test_metric_store_get_bind_params_with_cloud_store_backend():
-    bucket = "leakybucket"
-    prefix = "this_is_a_test_prefix"
+@mock.patch(
+    "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
+)
+@mock.patch(
+    "great_expectations.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys"
+)
+@mock.patch(
+    "great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys"
+)
+def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
+    mock_gcs_list_keys,
+    mock_azure_list_keys,
+    mock_s3_list_keys,
+):
+    """
+    What does this test and why?
 
-    # create a bucket in Moto's mock AWS environment
-    conn = boto3.resource("s3", region_name="us-east-1")
-    conn.create_bucket(Bucket=bucket)
-
-    s3_store = TupleS3StoreBackend(
-        filepath_template="my_file_{0}",
-        bucket=bucket,
-        prefix=prefix,
-    )
-
+    A Store should leverage polymorphism, allowing the interpreter to dynamically determine
+    which class' method to use. This tests asserts that all cloud-based store backends
+    match the appropriate parent class signatures to run as expected.
+    """
     evaluation_parameter_store = EvaluationParameterStore()
-    evaluation_parameter_store._store_backend = s3_store
-
     run_id = RunIdentifier()
-    bind_params = evaluation_parameter_store.get_bind_params(run_id=run_id)
-    assert bind_params == 1
+
+    s3_store = TupleS3StoreBackend(bucket="my_bucket")
+    evaluation_parameter_store._store_backend = s3_store
+    evaluation_parameter_store.get_bind_params(run_id=run_id)
+    assert mock_s3_list_keys.called
+
+    azure_store = TupleAzureBlobStoreBackend(
+        container="my_container", connection_string="my_connection_string"
+    )
+    evaluation_parameter_store._store_backend = azure_store
+    evaluation_parameter_store.get_bind_params(run_id=run_id)
+    assert mock_azure_list_keys.called
+
+    gcs_store = TupleGCSStoreBackend(bucket="my_bucket", project="my_project")
+    evaluation_parameter_store._store_backend = gcs_store
+    evaluation_parameter_store.get_bind_params(run_id=run_id)
+    assert mock_gcs_list_keys.called
