@@ -5,6 +5,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
+from typing import Any
 
 from pyparsing import (
     CaselessKeyword,
@@ -207,10 +208,30 @@ def build_evaluation_parameters(
     """
     evaluation_args = copy.deepcopy(expectation_args)
     substituted_parameters = {}
+    _build_evaluation_parameters(
+        root=evaluation_args,
+        expectation_args=expectation_args,
+        substituted_parameters=substituted_parameters,
+        evaluation_parameters=evaluation_parameters,
+        interactive_evaluation=interactive_evaluation,
+        data_context=data_context,
+    )
 
+    return evaluation_args, substituted_parameters
+
+
+def _build_evaluation_parameters(
+    root: Any,
+    expectation_args: dict,
+    substituted_parameters: dict,
+    evaluation_parameters=None,
+    interactive_evaluation=True,
+    data_context=None,
+):
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
-    for key, value in evaluation_args.items():
+    for key, value in root.items():
+        breakpoint()
         if isinstance(value, dict) and "$PARAMETER" in value:
             # We do not even need to search for a value if we are not going to do interactive evaluation
             if not interactive_evaluation:
@@ -219,9 +240,7 @@ def build_evaluation_parameters(
             # First, check to see whether an argument was supplied at runtime
             # If it was, use that one, but remove it from the stored config
             if "$PARAMETER." + value["$PARAMETER"] in value:
-                evaluation_args[key] = evaluation_args[key][
-                    "$PARAMETER." + value["$PARAMETER"]
-                ]
+                root[key] = root[key]["$PARAMETER." + value["$PARAMETER"]]
                 del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
 
             # If not, try to parse the evaluation parameter and substitute, which will raise
@@ -233,11 +252,9 @@ def build_evaluation_parameters(
                     evaluation_parameters=evaluation_parameters,
                     data_context=data_context,
                 )
-                evaluation_args[key] = parameter_value
+                root[key] = parameter_value
                 # Once we've substituted, we also track that we did so
                 substituted_parameters[key] = parameter_value
-
-    return evaluation_args, substituted_parameters
 
 
 expr = EvaluationParameterParser()
