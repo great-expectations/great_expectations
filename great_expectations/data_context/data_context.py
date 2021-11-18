@@ -2343,12 +2343,11 @@ class BaseDataContext:
 
     def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
+        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
+        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            try:
-                expectation_suite = self.expectations_store.get(key)
-                if not expectation_suite:
-                    continue
-            except InvalidKeyError:
+            expectation_suite = self.expectations_store.get(key)
+            if not expectation_suite:
                 continue
 
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
