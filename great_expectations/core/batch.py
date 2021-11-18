@@ -425,33 +425,6 @@ class RuntimeBatchRequest(BatchRequest):
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
 
-    def __deepcopy__(self, memo):
-        runtime_parameters = getattr(self, "_runtime_parameters", None)
-        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
-            batch_data = runtime_parameters.pop("batch_data")
-            deepcopy_method = self.__deepcopy__
-            self.__deepcopy__ = None
-            cp = copy.deepcopy(self, memo)
-            self.__deepcopy__ = deepcopy_method
-            # Copy the function object
-            func = types.FunctionType(
-                deepcopy_method.__code__,
-                deepcopy_method.__globals__,
-                deepcopy_method.__name__,
-                deepcopy_method.__defaults__,
-                deepcopy_method.__closure__,
-            )
-            # Bind to cp and set
-            bound_method = func.__get__(cp, cp.__class__)
-            cp.__deepcopy__ = bound_method
-            cp._runtime_parameters["batch_data"] = batch_data
-            self._runtime_parameters["batch_data"] = batch_data
-            return cp
-        else:
-            # Don't use custom deepcopy if batch_data isn't found
-            self.__deepcopy__ = None
-        return copy.deepcopy(self, memo)
-
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
 class BatchMarkers(BatchKwargs):
