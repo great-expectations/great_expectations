@@ -311,9 +311,6 @@ anonymized_batch_request_keys_schema = {
         "data_asset_name",
     ],
     "additionalProperties": False,
-
-
-
     "type": "array",
     "maxItems": 1000,
     "items": {
@@ -561,7 +558,9 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {"enum": ["data_context.get_batch_list"]},
-                "event_payload": {"$ref": "#/definitions/anonymized_batch_request_keys"},
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_batch_request_keys"
+                },
             },
         },
         {

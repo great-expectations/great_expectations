@@ -386,11 +386,7 @@ valid_usage_statistics_messages = {
     "data_context.get_batch_list": [
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {
-                "datasource_name",
-                "data_connector_name",
-                "data_asset_name",
-            },
+            "event_payload": {},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -401,14 +397,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {
-                "datasource_name",
-                "data_connector_name",
-                "data_asset_name",
-                {
-                    "batch_spec_passthrough": [],
-                },
-            },
+            "event_payload": {},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -419,14 +408,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {
-                "datasource_name",
-                "data_connector_name",
-                "data_asset_name",
-                "batch_spec_passthrough": [
-                    "path",
-                ],
-            },
+            "event_payload": {},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -437,16 +419,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {
-                "datasource_name",
-                "data_connector_name",
-                "data_asset_name",
-                {
-                    "data_connector_query": [
-                        "index",
-                    ],
-                },
-            },
+            "event_payload": {},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -457,19 +430,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {
-                "datasource_name",
-                "data_connector_name",
-                "data_asset_name",
-                {
-                    "data_connector_query": [
-                        "index",
-                    ],
-                },
-                {
-                    "batch_spec_passthrough": [],
-                },
-            },
+            "event_payload": {},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -480,21 +441,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {
-                "datasource_name",
-                "data_connector_name",
-                "data_asset_name",
-                {
-                    "data_connector_query": [
-                        "index",
-                    ],
-                },
-                {
-                    "batch_spec_passthrough": [
-                        "path",
-                    ]
-                },
-            },
+            "event_payload": {},
             "success": False,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
