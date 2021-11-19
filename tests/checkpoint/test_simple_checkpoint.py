@@ -1466,7 +1466,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_checkpoint_run(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
@@ -1585,12 +1585,11 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_spark(
-    data_context_with_datasource_spark_engine,
+    data_context_with_datasource_spark_engine, spark_session
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    spark = SparkSession.builder.getOrCreate()
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = spark.createDataFrame(pandas_df)
+    test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
     context.create_expectation_suite("my_expectation_suite")
