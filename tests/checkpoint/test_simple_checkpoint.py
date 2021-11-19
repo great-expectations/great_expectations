@@ -1239,7 +1239,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 
 def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
@@ -1283,7 +1283,7 @@ def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_v
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_top_level_batch_request(
-    data_context_with_datasource_sqlalchemy_engine,
+    data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
