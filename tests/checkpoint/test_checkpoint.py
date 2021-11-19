@@ -1213,10 +1213,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_pandasdf(
@@ -1275,10 +1271,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
@@ -1338,10 +1330,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_pandasdf(
@@ -1414,10 +1402,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 2
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
@@ -1492,10 +1476,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 2
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
@@ -1553,10 +1533,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
@@ -1630,10 +1606,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
@@ -1735,10 +1707,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_pandas(
@@ -1795,10 +1763,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_spark(
@@ -1857,10 +1821,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_checkpoint_run(
@@ -1917,10 +1877,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_pandas(
@@ -1976,10 +1932,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_spark(
@@ -2036,10 +1988,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
@@ -2104,10 +2052,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
@@ -2174,10 +2118,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
-    try:
-        print(results)
-    except Exception as exception:
-        raise pytest.fail(f"EXCEPTION: {exception}")
 
 
 def test_newstyle_checkpoint_config_substitution_simple(
