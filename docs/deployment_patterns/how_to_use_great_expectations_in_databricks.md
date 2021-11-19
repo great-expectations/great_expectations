@@ -19,7 +19,7 @@ Great Expectations works well with many types of Databricks workflows. This guid
 There are several ways to set up Databricks, this guide centers around an AWS deployment using Databricks Data Science & Engineering Notebooks and Jobs. If you use Databricks on GCP or Azure and there are steps in this guide that don't work for you please reach out to us.
 
 We will cover a simple configuration to get you up and running quickly, and link to our other guides for more customized configurations. For example:
-  - If you want to validate files stored in DBFS select one of the "File" tabs below.
+  - If you want to validate files stored in DBFS select one of the "File" tabs below. You can also [watch our video walkthrough](https://youtu.be/9mIsmyuJzhQ) of these steps.
     - If you are using a different file store (e.g. s3, GCS, ABS) take a look at our how-to guides in the "Cloud" section of "Connecting to Your Data" for example configurations. 
   - If you already have a spark dataframe loaded, select one of the "Dataframe" tabs below. 
 
