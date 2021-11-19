@@ -160,7 +160,7 @@ class SimpleCheckpointConfigurator:
 
         logger.debug(
             f"SimpleCheckpointConfigurator built this CheckpointConfig:"
-            f" {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"
+            f" {print(checkpoint_config)}"
         )
         return checkpoint_config
 

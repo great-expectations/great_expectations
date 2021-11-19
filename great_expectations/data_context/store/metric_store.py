@@ -1,6 +1,7 @@
 import json
 
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import ensure_json_serializable
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
@@ -99,7 +100,7 @@ class EvaluationParameterStore(MetricStore):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def get_bind_params(self, run_id):
+    def get_bind_params(self, run_id: RunIdentifier) -> dict:
         params = {}
         for k in self._store_backend.list_keys(run_id.to_tuple()):
             key = self.tuple_to_key(k)

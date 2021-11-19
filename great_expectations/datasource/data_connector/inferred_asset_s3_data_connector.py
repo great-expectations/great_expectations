@@ -1,10 +1,12 @@
 import logging
-import os
 from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 
 try:
     import boto3
@@ -43,9 +45,9 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: Optional[str] = "",
-        delimiter: Optional[str] = "/",
-        max_keys: Optional[int] = 1000,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -77,7 +79,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = os.path.join(prefix, "")
+        self._prefix = FilePathDataConnector.sanitize_prefix(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 

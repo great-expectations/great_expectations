@@ -1,5 +1,6 @@
 import enum
 import itertools
+import json
 import logging
 import uuid
 from copy import deepcopy
@@ -1077,7 +1078,7 @@ class NotebooksConfigSchema(Schema):
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
-    def __init__(self, enabled: Optional[bool] = False):
+    def __init__(self, enabled: bool = False):
         """Initialize a concurrency configuration to control multithreaded execution.
 
         Args:
@@ -1969,7 +1970,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
+        batch_request: Optional[Union[dict, BatchRequest]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1994,6 +1995,36 @@ class CheckpointConfig(BaseYamlConfig):
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
+            if isinstance(batch_request, BatchRequest):
+                if batch_request.runtime_parameters.get("batch_data") is not None:
+                    batch_data = batch_request.runtime_parameters.get("batch_data")
+                    batch_request = batch_request.to_json_dict()
+                    batch_request["runtime_parameters"]["batch_data"] = batch_data
+                else:
+                    batch_request = batch_request.to_json_dict()
+
+            if validations:
+                for val in validations:
+                    if val.get("batch_request") is not None and isinstance(
+                        val["batch_request"], BatchRequest
+                    ):
+                        if (
+                            val["batch_request"].runtime_parameters is not None
+                            and val["batch_request"].runtime_parameters.get(
+                                "batch_data"
+                            )
+                            is not None
+                        ):
+                            batch_data = val["batch_request"].runtime_parameters.get(
+                                "batch_data"
+                            )
+                            val["batch_request"] = val["batch_request"].to_json_dict()
+                            val["batch_request"]["runtime_parameters"][
+                                "batch_data"
+                            ] = batch_data
+                        else:
+                            val["batch_request"] = val["batch_request"].to_json_dict()
+
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
             self._run_name_template = run_name_template
@@ -2016,80 +2047,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
-
-    def to_json_dict(self) -> dict:
-        json_dict: dict = {}
-        if self.class_name == "LegacyCheckpoint":
-            # LegacyCheckpoint can't use RuntimeBatchRequest so we can just use the parent to_json_dict
-            json_dict = super().to_json_dict()
-        else:
-            if (
-                isinstance(self.batch_request, dict)
-                and self.batch_request.get("runtime_parameters") is not None
-                and self.batch_request["runtime_parameters"].get("batch_data")
-                is not None
-            ):
-                batch_data = str(
-                    type(self.batch_request["runtime_parameters"].get("batch_data"))
-                )
-                batch_request = {
-                    "datasource_name": self.batch_request["datasource_name"],
-                    "data_connector_name": self.batch_request["data_connector_name"],
-                    "data_asset_name": self.batch_request["data_asset_name"],
-                    "batch_identifiers": self.batch_request["batch_identifiers"],
-                    "runtime_parameters": {"batch_data": batch_data},
-                }
-            else:
-                batch_request = self.batch_request
-
-            validations = []
-            if len(self.validations) > 0:
-                for val in self.validations:
-                    if val.get("batch_request") is not None and isinstance(
-                        val["batch_request"], BatchRequest
-                    ):
-                        json_val: dict = {}
-                        for key, value in val.items():
-                            if key != "batch_request":
-                                json_val[key] = value
-                            else:
-                                json_val[key] = value.to_json_dict()
-                        validations.append(json_val)
-                    else:
-                        validations.append(val)
-            else:
-                validations = self.validations
-
-            json_dict.update(
-                {
-                    "name": self.name,
-                    "config_version": self.config_version,
-                    "template_name": self.template_name,
-                    "module_name": self.module_name,
-                    "class_name": self.class_name,
-                    "run_name_template": self.run_name_template,
-                    "expectation_suite_name": self.expectation_suite_name,
-                    "expectation_suite_ge_cloud_id": self.expectation_suite_ge_cloud_id,
-                    "batch_request": batch_request or self.batch_request,
-                    "action_list": self.action_list,
-                    "evaluation_parameters": self.evaluation_parameters,
-                    "runtime_configuration": self.runtime_configuration,
-                    "validations": validations or self.validations,
-                    "profilers": self.profilers,
-                    "ge_cloud_id": self.ge_cloud_id,
-                }
-            )
-            if self.class_name == "SimpleCheckpoint":
-                if self.site_names:
-                    json_dict.update({"site_names": self.site_names})
-                if self.slack_webhook:
-                    json_dict.update({"slack_webhook": self.slack_webhook})
-                if self.notify_on:
-                    json_dict.update({"notify_on": self.notify_on})
-                if self.notify_with:
-                    json_dict.update({"notify_with": self.notify_with})
-
-        return json_dict
 
     def update(
         self,
@@ -2346,6 +2303,52 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def runtime_configuration(self):
         return self._runtime_configuration
+
+    def __repr__(self):
+        batch_data_list = []
+        if len(self.validations) > 0:
+            for val in self.validations:
+                if (val["batch_request"].get("runtime_parameters") is not None) and (
+                    val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    )
+                else:
+                    batch_data_list.append(None)
+
+        batch_data = None
+        if (
+            (self.batch_request is not None)
+            and (self.batch_request.get("runtime_parameters") is not None)
+            and (self.batch_request["runtime_parameters"].get("batch_data") is not None)
+        ):
+            batch_data = self.batch_request["runtime_parameters"].pop("batch_data")
+
+        serializeable_dict = self.to_json_dict()
+
+        if len(self.validations) > 0:
+            for idx, val in enumerate(self.validations):
+                if (val["batch_request"].get("runtime_parameters") is not None) and (
+                    batch_data_list[idx] is not None
+                ):
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data_list[idx]
+                    serializeable_dict["validations"][idx]["batch_request"][
+                        "runtime_parameters"
+                    ]["batch_data"] = str(type(batch_data_list[idx]))
+
+        if (batch_data is not None) and (
+            self.batch_request.get("runtime_parameters") is not None
+        ):
+            self.batch_request["runtime_parameters"]["batch_data"] = batch_data
+            serializeable_dict["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ] = str(type(batch_data))
+
+        return json.dumps(serializeable_dict, indent=2)
 
 
 class CheckpointValidationConfig(DictDot):
