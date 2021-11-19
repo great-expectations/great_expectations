@@ -13,6 +13,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -1932,9 +1933,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    spark_session,
 ):
     context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    spark = get_or_create_spark_application()
+
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
