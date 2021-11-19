@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 
 import pandas as pd
@@ -1422,6 +1423,142 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
             "data_asset_name": "default_data_asset_name",
             "batch_identifiers": {"default_identifier_name": "test_identifier"},
             "runtime_parameters": {"batch_data": test_df},
+        }
+    )
+
+    # add checkpoint config
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        batch_request=batch_request,
+    )
+
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_pandas(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_path: str = os.path.join(
+        context.datasources["my_datasource"]
+        .data_connectors["my_basic_data_connector"]
+        .base_directory,
+        "Titanic_19120414_1313.csv",
+    )
+
+    # create expectation suite
+    context.create_expectation_suite("my_expectation_suite")
+
+    # RuntimeBatchRequest with a query
+    batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "Titanic_19120414_1313.csv",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            "runtime_parameters": {"path": data_path},
+        }
+    )
+
+    # add simple checkpoint config
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        batch_request=batch_request,
+    )
+
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert results["success"] == True
+    try:
+        print(results)
+    except Exception as exception:
+        raise pytest.fail(f"EXCEPTION: {exception}")
+
+
+def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_spark(
+    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_path: str = os.path.join(
+        context.datasources["my_datasource"]
+        .data_connectors["my_basic_data_connector"]
+        .base_directory,
+        "Titanic_19120414_1313.csv",
+    )
+
+    # create expectation suite
+    context.create_expectation_suite("my_expectation_suite")
+
+    # RuntimeBatchRequest with a query
+    batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "Titanic_19120414_1313.csv",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            "runtime_parameters": {"path": data_path},
         }
     )
 
