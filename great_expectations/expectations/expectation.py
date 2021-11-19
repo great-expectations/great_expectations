@@ -293,7 +293,7 @@ class Expectation(metaclass=MetaExpectation):
         ----------------------------------------------------------------
         |       | must be exactly 4 columns             |         4       |          1            |
 
-        here Custome column will get added for expectation
+        Here the custom column will be added in data docs.
         """
 
         if result is None:
