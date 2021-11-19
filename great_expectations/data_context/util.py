@@ -509,6 +509,9 @@ def substitute_all_config_variables(
         return [
             substitute_all_config_variables(v, replace_variables_dict) for v in data
         ]
+    return substitute_config_variable(
+        data, replace_variables_dict, dollar_sign_escape_string
+    )
 
 
 def file_relative_path(dunderfile, relative_path):
