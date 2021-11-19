@@ -309,7 +309,7 @@ class ValidationResultsPageRenderer(Renderer):
                     }
                 }
             }
-        },
+        }
         This will fetch dimension and severity values which are in the expectation meta.
 
         """
