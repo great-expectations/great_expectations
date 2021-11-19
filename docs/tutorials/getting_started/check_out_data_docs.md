@@ -54,14 +54,14 @@ These Expectations are not intended to be very smart. Instead, the goal is to qu
 
 ### Expectations under the hood
 
-By default, Expectation Suites are stored in a JSON file in the expectations/ subdirectory of your great_expectations/ folder. You can also configure Great Expectations to store Expectations to other locations, such as S3, Postgres, etc. We’ll come back to these options in the last (optional) step of the tutorial.
+By default, Expectation Suites are stored in a JSON file in the `expectations/` subdirectory of your `great_expectations/` folder. You can also configure Great Expectations to store Expectations to other locations, such as S3, Postgres, etc. We’ll come back to these options in the last (optional) step of the tutorial.
 
 For example, a snippet of the JSON file for the Expectation Suite we just generated will look like this:
 
 ```json
 {
   "data_asset_type": null,
-  "expectation_suite_name": "taxi.demo",
+  "expectation_suite_name": "getting_started_expectation_suite_taxi.demo",
   "expectations": [
 
     {
