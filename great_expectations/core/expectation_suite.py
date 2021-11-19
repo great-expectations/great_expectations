@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
@@ -556,6 +556,42 @@ class ExpectationSuite(SerializableDictDot):
             self.append_expectation(expectation_configuration)
 
         return expectation_configuration
+
+    def get_grouped_and_ordered_expectations_by_column(
+            self, expectation_type_filter: Optional[str] = None) -> Tuple[Dict[str, List[ExpectationConfiguration]],
+                                                                         List[str]]:
+        expectations_by_column = {}
+        ordered_columns = []
+
+        for expectation in self.expectations:
+            if "column" in expectation.kwargs:
+                column = expectation.kwargs["column"]
+            else:
+                column = "_nocolumn"
+            if column not in expectations_by_column:
+                expectations_by_column[column] = []
+
+            if expectation_type_filter is None or expectation.expectation_type == expectation_type_filter:
+                expectations_by_column[column].append(expectation)
+
+            # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
+            if (
+                    expectation.expectation_type
+                    == "expect_table_columns_to_match_ordered_list"
+            ):
+                exp_column_list = expectation.kwargs["column_list"]
+                if exp_column_list and len(exp_column_list) > 0:
+                    ordered_columns = exp_column_list
+
+        # Group items by column
+        sorted_columns = sorted(list(expectations_by_column.keys()))
+
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
+        # names from entire evr, else use alphabetic sort
+        if set(sorted_columns) == set(ordered_columns):
+            return expectations_by_column, ordered_columns
+        else:
+            return expectations_by_column, sorted_columns
 
 
 class ExpectationSuiteSchema(Schema):
