@@ -11,8 +11,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint.util import get_batch_request_dict
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, get_batch_request_dict
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,

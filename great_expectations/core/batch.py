@@ -742,3 +742,39 @@ def get_batch_request_from_acceptable_arguments(
         )
 
     return batch_request
+
+
+def get_batch_request_dict(
+    batch_request: Optional[BatchRequest] = None, validations: Optional[list] = None
+) -> dict:
+    if isinstance(batch_request, BatchRequest):
+        if batch_request.runtime_parameters.get("batch_data") is not None:
+            batch_data = batch_request.runtime_parameters.get("batch_data")
+            batch_request = batch_request.to_json_dict()
+            batch_request["runtime_parameters"]["batch_data"] = batch_data
+        else:
+            batch_request = batch_request.to_json_dict()
+
+    if validations:
+        for val in validations:
+            if val.get("batch_request") is not None and isinstance(
+                    val["batch_request"], BatchRequest
+            ):
+                if (
+                        val["batch_request"].runtime_parameters is not None
+                        and val["batch_request"].runtime_parameters.get(
+                    "batch_data"
+                )
+                        is not None
+                ):
+                    batch_data = val["batch_request"].runtime_parameters.get(
+                        "batch_data"
+                    )
+                    val["batch_request"] = val["batch_request"].to_json_dict()
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data
+                else:
+                    val["batch_request"] = val["batch_request"].to_json_dict()
+
+    return batch_request, validations

@@ -9,13 +9,10 @@ from uuid import UUID
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.checkpoint.util import (
-    get_batch_request_dict,
-    get_substituted_validation_dict,
-)
+from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest, get_batch_request_dict
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
