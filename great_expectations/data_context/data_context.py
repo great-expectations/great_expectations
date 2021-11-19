@@ -1382,7 +1382,11 @@ class BaseDataContext:
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: one of several supported formatting directives for expectation validation results
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:

@@ -297,10 +297,12 @@ def usage_statistics_enabled_method(
         return usage_statistics_wrapped_method_partial
 
 
+# noinspection PyUnusedLocal
 def run_validation_operator_usage_statistics(
-    data_context,  # self
+    data_context,
     validation_operator_name,
     assets_to_validate,
+    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -336,10 +338,12 @@ def run_validation_operator_usage_statistics(
 
 
 # noinspection SpellCheckingInspection
+# noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
     data_context,
     expectation_suite,
     expectation_suite_name=None,
+    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
