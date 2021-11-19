@@ -345,7 +345,8 @@ def test_build_evaluation_parameters_with_nested_PARAMETERS():
             }
         },
     }
-    breakpoint()
     res = build_evaluation_parameters(
         expectation_args, evaluation_parameters, interactive_evaluation=True
     )
+    assert res[0] == {"max_value": {"bar": 5}, "min_value": {"foo": 1}}
+    assert res[1] == {"bar": 5, "foo": 1}

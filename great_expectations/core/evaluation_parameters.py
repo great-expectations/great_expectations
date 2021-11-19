@@ -220,10 +220,6 @@ def build_evaluation_parameters(
         elif isinstance(root, dict):
             for key, value in root.items():
                 if isinstance(value, dict) and "$PARAMETER" in value:
-                    # We do not even need to search for a value if we are not going to do interactive evaluation
-                    if not interactive_evaluation:
-                        continue
-
                     # First, check to see whether an argument was supplied at runtime
                     # If it was, use that one, but remove it from the stored config
                     if "$PARAMETER." + value["$PARAMETER"] in value:
@@ -242,8 +238,11 @@ def build_evaluation_parameters(
                         root[key] = parameter_value
                         # Once we've substituted, we also track that we did so
                         substituted_parameters[key] = parameter_value
+                _build_evaluation_parameters(value)
 
-    _build_evaluation_parameters(evaluation_args)
+    if interactive_evaluation:
+        _build_evaluation_parameters(evaluation_args)
+
     return evaluation_args, substituted_parameters
 
 
