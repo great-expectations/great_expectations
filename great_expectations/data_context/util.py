@@ -472,9 +472,6 @@ def substitute_all_config_variables(
             data.batch_request["runtime_parameters"]["batch_data"] = json_data[
                 "batch_request"
             ]["runtime_parameters"]["batch_data"] = batch_data
-            return substitute_config_variable(
-                json_data, replace_variables_dict, dollar_sign_escape_string
-            )
         elif len(data.validations) > 0:
             batch_data_list = []
             for val in data["validations"]:
@@ -509,18 +506,8 @@ def substitute_all_config_variables(
                     val["batch_request"]["runtime_parameters"][
                         "batch_data"
                     ] = batch_data_list[idx]
-
-            return substitute_config_variable(
-                json_data, replace_variables_dict, dollar_sign_escape_string
-            )
         else:
             json_data = CheckpointConfigSchema().dump(data)
-            return substitute_config_variable(
-                json_data, replace_variables_dict, dollar_sign_escape_string
-            )
-    return substitute_config_variable(
-        data, replace_variables_dict, dollar_sign_escape_string
-    )
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
