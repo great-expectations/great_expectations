@@ -38,10 +38,25 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, str):
-        result_format = {"result_format": result_format, "partial_unexpected_count": 20}
+        result_format = {
+            "result_format": result_format,
+            "partial_unexpected_count": 20,
+            "include_unexpected_rows": False,
+        }
     else:
+        if (
+            "include_unexpected_rows" in result_format
+            and "result_format" not in result_format
+        ):
+            raise ValueError(
+                "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
+            )
+
         if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
+
+        if "include_unexpected_rows" not in result_format:
+            result_format["include_unexpected_rows"] = False
 
     return result_format
 
