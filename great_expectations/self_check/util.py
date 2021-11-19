@@ -1075,7 +1075,7 @@ def build_sa_engine(
     sa: ModuleType,
     schema: Optional[str] = None,
     if_exists: Optional[str] = "fail",
-    index: Optional[bool] = False,
+    index: bool = False,
     dtype: Optional[dict] = None,
 ) -> SqlAlchemyExecutionEngine:
     table_name: str = "test"
