@@ -21,7 +21,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         self,
         data_context: Optional[DataContext] = None,
         context_root_dir: Optional[str] = None,
-        update_version: Optional[bool] = False,
+        update_version: bool = False,
     ):
         assert (
             data_context or context_root_dir
@@ -282,7 +282,7 @@ Manual Steps
 """
                 if not self.upgrade_log["skipped_checkpoint_config_upgrade"]:
                     upgrade_overview += """\
-                    
+
 The following Checkpoints must be upgraded manually, due to using the old Checkpoint format, which is being deprecated:
 
 """
