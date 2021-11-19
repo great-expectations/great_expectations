@@ -284,7 +284,7 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _get_meta_properties_notes(cls, suite_meta):
         """
-        This method use for fetching custom meta for added at suite level
+        This method is used for fetching the custom meta to be added at the suite level
         "notes": {
             "content": {
                 "dimension": "properties.dimension",
