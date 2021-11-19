@@ -590,7 +590,7 @@ class Dataset(MetaDataset):
     def expect_table_columns_to_match_set(
         self,
         column_set: Optional[Union[Set[str], List[str]]],
-        exact_match: Optional[bool] = True,
+        exact_match: bool = True,
         result_format=None,
         include_config=True,
         catch_exceptions=None,

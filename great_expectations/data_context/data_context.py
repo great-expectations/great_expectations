@@ -767,7 +767,7 @@ class BaseDataContext:
         self,
         resource_identifier: Optional[str] = None,
         site_name: Optional[str] = None,
-        only_if_exists: Optional[bool] = True,
+        only_if_exists: bool = True,
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -2067,7 +2067,7 @@ class BaseDataContext:
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
-        overwrite_existing: Optional[bool] = False,
+        overwrite_existing: bool = False,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
@@ -2195,7 +2195,7 @@ class BaseDataContext:
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
-        overwrite_existing: Optional[bool] = True,
+        overwrite_existing: bool = True,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
