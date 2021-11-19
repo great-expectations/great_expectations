@@ -1,9 +1,9 @@
 import enum
 import itertools
+import json
 import logging
 import uuid
 from copy import deepcopy
-import json
 from typing import Any, Dict, List, MutableMapping, Optional, Union
 
 from ruamel.yaml import YAML
