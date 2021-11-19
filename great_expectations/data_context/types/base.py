@@ -1969,7 +1969,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
+        batch_request: Optional[Union[dict, BatchRequest]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1994,6 +1994,34 @@ class CheckpointConfig(BaseYamlConfig):
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
+            if isinstance(batch_request, BatchRequest):
+                if batch_request.runtime_parameters.get("batch_data") is not None:
+                    batch_data = batch_request.runtime_parameters.get("batch_data")
+                    batch_request = batch_request.to_json_dict()
+                    batch_request["runtime_parameters"]["batch_data"] = batch_data
+                else:
+                    batch_request = batch_request.to_json_dict()
+
+            if validations:
+                for val in validations:
+                    if val.get("batch_request") is not None and isinstance(
+                            val["batch_request"], BatchRequest
+                    ):
+                        if (
+                                val["batch_request"].runtime_parameters is not None
+                                and val["batch_request"].runtime_parameters.get("batch_data")
+                                is not None
+                        ):
+                            batch_data = val["batch_request"].runtime_parameters.get(
+                                "batch_data"
+                            )
+                            val["batch_request"] = val["batch_request"].to_json_dict()
+                            val["batch_request"]["runtime_parameters"][
+                                "batch_data"
+                            ] = batch_data
+                        else:
+                            val["batch_request"] = val["batch_request"].to_json_dict()
+
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
             self._run_name_template = run_name_template
