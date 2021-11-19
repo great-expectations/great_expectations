@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Set, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -139,8 +139,8 @@ def underscore(word: str) -> str:
     return word.lower()
 
 
-def hyphen(input: str):
-    return input.replace("_", "-")
+def hyphen(txt: str):
+    return txt.replace("_", "-")
 
 
 def profile(func: Callable = None) -> Callable:
@@ -932,9 +932,9 @@ def lint_code(code: str) -> str:
 
 
 def filter_properties_dict(
-    properties: dict,
-    keep_fields: Optional[list] = None,
-    delete_fields: Optional[list] = None,
+    properties: Optional[dict] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
     clean_nulls: Optional[bool] = True,
     clean_falsy: Optional[bool] = False,
     keep_falsy_numerics: Optional[bool] = True,
@@ -963,10 +963,21 @@ def filter_properties_dict(
     if clean_falsy:
         clean_nulls = True
 
+    if properties is None:
+        properties = {}
+
+    if not isinstance(properties, dict):
+        raise ValueError(
+            f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
+        )
+
     if not inplace:
         properties = copy.deepcopy(properties)
 
     keys_for_deletion: list = []
+
+    key: str
+    value: Any
 
     if keep_fields:
         keys_for_deletion.extend(
@@ -1022,6 +1033,47 @@ def filter_properties_dict(
 
     for key in keys_for_deletion:
         del properties[key]
+
+    if inplace:
+        return None
+
+    return properties
+
+
+def deep_filter_properties_dict(
+    properties: Optional[dict] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
+    clean_nulls: Optional[bool] = True,
+    clean_falsy: Optional[bool] = False,
+    keep_falsy_numerics: Optional[bool] = True,
+    inplace: Optional[bool] = False,
+) -> Optional[dict]:
+    key: str
+    value: Any
+    if isinstance(properties, dict):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        filter_properties_dict(
+            properties=properties,
+            keep_fields=keep_fields,
+            delete_fields=delete_fields,
+            clean_nulls=clean_nulls,
+            clean_falsy=clean_falsy,
+            keep_falsy_numerics=keep_falsy_numerics,
+            inplace=True,
+        )
+        for key, value in properties.items():
+            deep_filter_properties_dict(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
 
     if inplace:
         return None

@@ -664,6 +664,7 @@ def test_result_format_configured_no_set_default_override(
                 "catch_exceptions": False,
                 "result_format": {
                     "result_format": "BOOLEAN_ONLY",
+                    "include_unexpected_rows": False,
                     "partial_unexpected_count": 20,
                 },
                 "include_config": True,
