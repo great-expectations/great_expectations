@@ -8,13 +8,19 @@ from great_expectations.profile.user_configurable_profiler import (
 )
 from great_expectations.validator.validator import Validator
 
+from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
+    GETTING_STARTED_DATASOURCE_NAME,
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
+    GETTING_STARTED_CHECKPOINT_NAME,
+)
+
 context = ge.get_context()
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert context
 
 # First configure a new Datasource and add to DataContext
 datasource_yaml = f"""
-name: getting_started_datasource
+name: {GETTING_STARTED_DATASOURCE_NAME}
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:
@@ -38,17 +44,17 @@ context.add_datasource(**yaml.load(datasource_yaml))
 
 # Get Validator by creating ExpectationSuite and passing in BatchRequest
 batch_request = BatchRequest(
-    datasource_name="getting_started_datasource",
+    datasource_name=GETTING_STARTED_DATASOURCE_NAME,
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="yellow_tripdata_sample_2019-01.csv",
     limit=1000,
 )
 context.create_expectation_suite(
-    expectation_suite_name="getting_started_expectation_suite_taxi.demo"
+    expectation_suite_name=GETTING_STARTED_EXPECTATION_SUITE_NAME
 )
 validator = context.get_validator(
     batch_request=batch_request,
-    expectation_suite_name="getting_started_expectation_suite_taxi.demo",
+    expectation_suite_name=GETTING_STARTED_EXPECTATION_SUITE_NAME,
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
@@ -90,18 +96,18 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
 my_checkpoint_config = f"""
-name: getting_started_checkpoint
+name: {GETTING_STARTED_CHECKPOINT_NAME}
 config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
-      datasource_name: getting_started_datasource
+      datasource_name: {GETTING_STARTED_DATASOURCE_NAME}
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01.csv
       data_connector_query:
         index: -1
-    expectation_suite_name: getting_started_expectation_suite_taxi.demo
+    expectation_suite_name: {GETTING_STARTED_EXPECTATION_SUITE_NAME}
 """
 my_checkpoint_config = yaml.load(my_checkpoint_config)
 
@@ -117,18 +123,18 @@ assert checkpoint_result.run_results
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
 yaml_config = f"""
-name: getting_started_checkpoint
+name: {GETTING_STARTED_CHECKPOINT_NAME}
 config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
-      datasource_name: getting_started_datasource
+      datasource_name: {GETTING_STARTED_DATASOURCE_NAME}
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-02.csv
       data_connector_query:
         index: -1
-    expectation_suite_name: getting_started_expectation_suite_taxi.demo
+    expectation_suite_name: {GETTING_STARTED_EXPECTATION_SUITE_NAME}
 """
 
 
