@@ -310,7 +310,7 @@ class ValidationResultsPageRenderer(Renderer):
                 }
             }
         },
-        this try to fetch dimension and severity value set for each level expectation meta,
+        This will fetch dimension and severity values which are in the expectation meta.
 
         """
         if (
