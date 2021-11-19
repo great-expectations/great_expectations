@@ -276,7 +276,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type="renderer.diagnostic.meta_properties")
     def _diagnostic_meta_properties_renderer(cls, result=None, **kwargs):
         """
-            Render function used to add custom meta in Data docs results,
+            Render function used to add custom meta to Data Docs
             It get column set from meta_properties_to_render and add column in data docs with values set.
             example:
             meta = {
