@@ -1404,7 +1404,8 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_spark(
-    data_context_with_datasource_spark_engine, spark_session,
+    data_context_with_datasource_spark_engine,
+    spark_session,
 ):
     context: DataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
