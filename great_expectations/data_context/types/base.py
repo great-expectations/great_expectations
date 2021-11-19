@@ -2006,12 +2006,14 @@ class CheckpointConfig(BaseYamlConfig):
             if validations:
                 for val in validations:
                     if val.get("batch_request") is not None and isinstance(
-                            val["batch_request"], BatchRequest
+                        val["batch_request"], BatchRequest
                     ):
                         if (
-                                val["batch_request"].runtime_parameters is not None
-                                and val["batch_request"].runtime_parameters.get("batch_data")
-                                is not None
+                            val["batch_request"].runtime_parameters is not None
+                            and val["batch_request"].runtime_parameters.get(
+                                "batch_data"
+                            )
+                            is not None
                         ):
                             batch_data = val["batch_request"].runtime_parameters.get(
                                 "batch_data"
@@ -2335,14 +2337,13 @@ class CheckpointConfig(BaseYamlConfig):
                         "runtime_parameters"
                     ]["batch_data"] = str(type(batch_data_list[idx]))
 
-        if (
-            (batch_data is not None)
-            and (self.batch_request.get("runtime_parameters") is not None)
+        if (batch_data is not None) and (
+            self.batch_request.get("runtime_parameters") is not None
         ):
             self.batch_request["runtime_parameters"]["batch_data"] = batch_data
-            serializeable_dict["batch_request"]["runtime_parameters"]["batch_data"] = str(
-                type(batch_data)
-            )
+            serializeable_dict["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ] = str(type(batch_data))
 
         return json.dumps(serializeable_dict, indent=2)
 
