@@ -3,14 +3,16 @@ import datetime
 import json
 import logging
 import os
-from copy import deepcopy
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.checkpoint.util import get_substituted_validation_dict
+from great_expectations.checkpoint.util import (
+    get_batch_request_dict,
+    get_substituted_validation_dict,
+)
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -367,36 +369,7 @@ class Checkpoint:
             "result_format"
         )
 
-        if isinstance(batch_request, BatchRequest):
-            if batch_request.runtime_parameters.get("batch_data") is not None:
-                batch_data = batch_request.runtime_parameters.get("batch_data")
-                batch_request = batch_request.to_json_dict()
-                batch_request["runtime_parameters"]["batch_data"] = batch_data
-            else:
-                batch_request = batch_request.to_json_dict()
-
-        if validations:
-            for val in validations:
-                if val.get("batch_request") is not None and isinstance(
-                        val["batch_request"], BatchRequest
-                ):
-                    if (
-                            val["batch_request"].runtime_parameters is not None
-                            and val["batch_request"].runtime_parameters.get(
-                        "batch_data"
-                    )
-                            is not None
-                    ):
-                        batch_data = val["batch_request"].runtime_parameters.get(
-                            "batch_data"
-                        )
-                        val["batch_request"] = val["batch_request"].to_json_dict()
-                        val["batch_request"]["runtime_parameters"][
-                            "batch_data"
-                        ] = batch_data
-                    else:
-                        val["batch_request"] = val["batch_request"].to_json_dict()
-
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
 
         runtime_kwargs = {
             "template_name": template_name,
