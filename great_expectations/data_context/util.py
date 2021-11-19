@@ -199,9 +199,6 @@ def substitute_config_variable(
     :return: a string with values substituted, or the same object if template_str is not a string.
     """
 
-    if template_str == "%Y-%M-foo-bar-template-$VAR":
-        print("test")
-
     if template_str is None:
         return template_str
 
