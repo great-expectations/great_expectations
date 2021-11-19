@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
@@ -558,8 +558,8 @@ class ExpectationSuite(SerializableDictDot):
         return expectation_configuration
 
     def get_grouped_and_ordered_expectations_by_column(
-            self, expectation_type_filter: Optional[str] = None) -> Tuple[Dict[str, List[ExpectationConfiguration]],
-                                                                         List[str]]:
+        self, expectation_type_filter: Optional[str] = None
+    ) -> Tuple[Dict[str, List[ExpectationConfiguration]], List[str]]:
         expectations_by_column = {}
         ordered_columns = []
 
@@ -571,13 +571,16 @@ class ExpectationSuite(SerializableDictDot):
             if column not in expectations_by_column:
                 expectations_by_column[column] = []
 
-            if expectation_type_filter is None or expectation.expectation_type == expectation_type_filter:
+            if (
+                expectation_type_filter is None
+                or expectation.expectation_type == expectation_type_filter
+            ):
                 expectations_by_column[column].append(expectation)
 
             # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
             if (
-                    expectation.expectation_type
-                    == "expect_table_columns_to_match_ordered_list"
+                expectation.expectation_type
+                == "expect_table_columns_to_match_ordered_list"
             ):
                 exp_column_list = expectation.kwargs["column_list"]
                 if exp_column_list and len(exp_column_list) > 0:

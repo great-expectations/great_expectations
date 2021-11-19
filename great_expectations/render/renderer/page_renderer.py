@@ -575,7 +575,10 @@ class ExpectationSuitePageRenderer(Renderer):
             )
 
     def render(self, expectations):
-        columns, ordered_columns = expectations.get_grouped_and_ordered_expectations_by_column()
+        (
+            columns,
+            ordered_columns,
+        ) = expectations.get_grouped_and_ordered_expectations_by_column()
         expectation_suite_name = expectations.expectation_suite_name
 
         overview_content_blocks = [
