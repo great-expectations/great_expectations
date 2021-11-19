@@ -92,7 +92,7 @@ def translate_expectation_config_to_dlt_expectation(
         elif max_value is not None:
             return_list.append((dlt_expectation_name, f"{string_repr_max}"))
 
-        return return_list
+        return return_list[0]
 
 
 def translate_dlt_expectation_to_expectation_config(

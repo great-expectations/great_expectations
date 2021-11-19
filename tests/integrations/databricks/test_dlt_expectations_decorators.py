@@ -30,6 +30,7 @@ from great_expectations.data_context.types.base import (
     FilesystemStoreBackendDefaults,
 )
 from great_expectations.util import gen_directory_tree_str
+from integrations.databricks import dlt_mock_library_injected
 
 
 @pytest.fixture
@@ -120,13 +121,14 @@ def test_dlt_expect_decorator(
     print("\n\nSTART =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
     # print("Starting directory tree structure")
     # print(gen_directory_tree_str(str(d)))
-    print("\n", "Beginning of pipeline df:\n", simple_pandas_df)
+    print("\n", "Beginning of pipeline df:\n", simple_pandas_df, "\n")
 
     # Our first "dlt" transformation from a GE expectation
     @dlt_expectations.expect(
         data_context=data_context,
         dlt_expectation_name="my_expect_column_values_to_be_between_expectation",
         ge_expectation_configuration=expect_column_values_to_be_between_strict_config,
+        dlt=dlt_mock_library_injected,
     )
     def transformation_1(df):
         # Note that in DLT, the dataframe is retrieved in the function body
@@ -140,15 +142,17 @@ def test_dlt_expect_decorator(
         dlt_expectation_name="my_expect_column_values_to_not_be_null_expectation",
         # ge_expectation_configuration=expect_column_values_to_not_be_null_config,
         dlt_expectation_condition="col2 IS NOT NULL",
+        dlt=dlt_mock_library_injected,
     )
     def transformation_2(df):
         df += 2
         return df
 
     df_1 = transformation_1(simple_pandas_df)
+    print("\n", "df after first transformation:\n", df_1, "\n")
     df_2 = transformation_2(df_1)
 
-    print("\n", "Resulting end of pipeline df:\n", df_2)
+    print("\n", "Resulting end of pipeline df:\n", df_2, "\n")
 
     print("GE Expectation Suites")
     expectation_suite_names: List[str] = data_context.list_expectation_suite_names()

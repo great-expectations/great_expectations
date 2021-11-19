@@ -19,8 +19,11 @@ from integrations.databricks.exceptions import UnsupportedExpectationConfigurati
 try:
     from integrations.databricks import dlt_mock_library
 except:
-    # TODO: Make this a real error message:
-    print("could not import dlt_mock_library TODO: make this a real error message")
+    # TODO: Make this a real error message & place error messages as appropriate - but potentially allow non DLT workflows (GE validations) to continue with a warning:
+    print(
+        "could not import dlt_mock_library - please install or run in the DLT environment to enable this package. TODO: make this a real error message"
+    )
+    dlt_mock_library = None
 
 
 yaml = YAML()
@@ -33,6 +36,7 @@ def expect(
     dlt_expectation_condition: str = None,
     data_context: BaseDataContext = None,
     ge_expectation_configuration: ExpectationConfiguration = None,
+    dlt=dlt_mock_library,
 ):
     """
     Run a single expectation on a Delta Live Table
@@ -94,7 +98,14 @@ def expect(
             #         f"Here we would apply: @dlt.expect({translated_dlt_expectation[0][0]}, {translated_dlt_expectation[0][1]})"
             #     )
             if dlt_expectation is not None:
-                print(f"Here we would apply: @dlt.expect({dlt_expectation})")
+                print(
+                    f'Here we would normally apply: @dlt.expect("{dlt_expectation[0]}", "{dlt_expectation[1]}")'
+                )
+                print(
+                    f"Here we are instead calling @dlt_mock_library_injected.expect() with appropriate parameters, in the real system the `dlt_mock_library_injected` will be replaced with the main `dlt` library that we pass into the decorator via the `dlt` parameter."
+                )
+                dlt.expect(dlt_expectation[0], dlt_expectation[1])
+                print("\n")
             # Compute resulting dataframe
 
             # TODO: Should the order of GE / DLT be swapped in _drop decorators since
@@ -128,7 +139,7 @@ def expect(
             if ge_expectation is not None:
                 expectation_suite.append_expectation(expectation_config=ge_expectation)
 
-            # TODO: We probably don't want to save this expectation suite, just doing it here out of convenience temporarily to use the checkpoint.
+            # TODO: We probably don't want to save this expectation suite, just doing it here out of convenience temporarily to use the checkpoint. In the future we may wish to work with in-memory Checkpoints.
             data_context.save_expectation_suite(
                 expectation_suite=expectation_suite,
                 expectation_suite_name=expectation_suite_name,
@@ -155,8 +166,10 @@ def expect(
                     }
                 ],
             )
-            print("Checkpoint result:")
-            print(checkpoint_result.success)
+            print(
+                f"GE Checkpoint was just run with converted expectations. Result of GE Checkpoint: {checkpoint_result.success}",
+                "\n",
+            )
 
             return func(*args, **kwargs)
 
