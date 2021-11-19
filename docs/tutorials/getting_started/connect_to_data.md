@@ -36,7 +36,7 @@ The Jupyter Notebook contains some boilerplate code to configure your new Dataso
 Edit the second code cell as follows:
 
 ````console
-datasource_name = "data__dir"
+datasource_name = "getting_started_datasource"
 ````
 
 Then **execute all cells in the notebook** in order to save the new Datasource. If successful, the last cell will print a list of all Datasources, including the one you just created.
@@ -47,7 +47,7 @@ Then **execute all cells in the notebook** in order to save the new Datasource. 
 
 When you completed those last few steps, you told Great Expectations that:
 
-+ You want to create a new Datasource called `data__dir`.
++ You want to create a new Datasource called `getting_started_datasource`.
 + You want to use Pandas to read the data from CSV.
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:
