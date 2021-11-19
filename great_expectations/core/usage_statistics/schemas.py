@@ -12,28 +12,6 @@ anonymized_string_schema = {
     "maxLength": 32,
 }
 
-anonymized_keys_schema = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "anonymized-keys",
-    "type": "array",
-    "maxItems": 1000,
-    "items": {
-        "anyOf": [
-            {
-                "type": "string",
-                "maxLength": 256,
-            },
-            {
-                "type": "object",
-                "patternProperties": {
-                    "^\\w+$": {"$ref": "#/definitions/anonymized_keys"},
-                },
-            },
-        ],
-    },
-    "additionalProperties": False,
-}
-
 anonymized_class_info_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-class-info",
@@ -294,45 +272,70 @@ init_payload_schema = {
 
 anonymized_batch_request_keys_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "anonymized-batch-request",
-    "definitions": {
-        "anonymized_string": anonymized_string_schema,
-        "anonymized_keys": anonymized_keys_schema,
-    },
+    "title": "anonymized-batch-request-keys",
+    "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
-        "datasource_name": {"$ref": "#/definitions/anonymized_string"},
-        "data_connector_name": {"$ref": "#/definitions/anonymized_string"},
-        "data_asset_name": {"$ref": "#/definitions/anonymized_string"},
-    },
-    "required": [
-        "datasource_name",
-        "data_connector_name",
-        "data_asset_name",
-    ],
-    "additionalProperties": False,
-    "type": "array",
-    "maxItems": 1000,
-    "items": {
-        "allOf": [
-            {
+        "batch_request_optional_top_level_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
                 "type": "string",
-                "const": "datasource_name",
+                "enum": [
+                    "data_connector_query",
+                    "runtime_parameters",
+                    "batch_identifiers",
+                    "batch_spec_passthrough",
+                ],
             },
-            {
+            "uniqueItems": True,
+        },
+        "data_connector_query_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
                 "type": "string",
-                "const": "data_connector_name",
+                "enum": [
+                    "batch_filter_parameters",
+                    "limit",
+                    "index",
+                    "custom_filter_function",
+                ],
             },
-            {
+            "uniqueItems": True,
+        },
+        "runtime_parameters_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
                 "type": "string",
-                "const": "data_asset_name",
+                "enum": [
+                    "batch_data",
+                    "query",
+                    "path",
+                ],
             },
-        ],
-        "data_connector_query": {"$ref": "#/definitions/anonymized_keys"},
-        "runtime_parameters": {"$ref": "#/definitions/anonymized_keys"},
-        "batch_identifiers": {"$ref": "#/definitions/anonymized_keys"},
-        "limit": {"type": "number"},
-        "batch_spec_passthrough": {"$ref": "#/definitions/anonymized_keys"},
+        },
+        "batch_spec_passthrough_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "sampling_method",
+                    "sampling_kwargs",
+                    "splitter_method",
+                    "splitter_kwargs",
+                    "reader_method",
+                    "reader_options",
+                ],
+            },
+            "uniqueItems": True,
+        },
     },
     "additionalProperties": False,
 }
