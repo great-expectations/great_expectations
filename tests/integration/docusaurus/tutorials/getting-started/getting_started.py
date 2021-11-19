@@ -21,11 +21,11 @@ execution_engine:
   module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-    getting_started_runtime_data_connector:
+    default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
         batch_identifiers:
             - default_identifier_name
-    getting_started_inferred_filesystem_data_connector:
+    default_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: ../data/
         default_regex:
@@ -39,7 +39,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 # Get Validator by creating ExpectationSuite and passing in BatchRequest
 batch_request = BatchRequest(
     datasource_name="getting_started_datasource",
-    data_connector_name="getting_started_inferred_filesystem_data_connector",
+    data_connector_name="default_inferred_data_connector_name",
     data_asset_name="yellow_tripdata_sample_2019-01.csv",
     limit=1000,
 )
@@ -97,7 +97,7 @@ run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: getting_started_datasource
-      data_connector_name: getting_started_inferred_filesystem_data_connector
+      data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01.csv
       data_connector_query:
         index: -1
@@ -116,7 +116,7 @@ assert checkpoint_result.run_results
 
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
-my_new_checkpoint_config = f"""
+yaml_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint
@@ -124,7 +124,7 @@ run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: getting_started_datasource
-      data_connector_name: getting_started_inferred_filesystem_data_connector
+      data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-02.csv
       data_connector_query:
         index: -1
@@ -132,7 +132,7 @@ validations:
 """
 
 
-my_new_checkpoint_config = yaml.load(my_new_checkpoint_config)
+my_new_checkpoint_config = yaml.load(yaml_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
 # In the current test, site_names are set to None because we do not want to update and build data_docs
