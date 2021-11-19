@@ -1077,7 +1077,7 @@ class NotebooksConfigSchema(Schema):
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
-    def __init__(self, enabled: Optional[bool] = False):
+    def __init__(self, enabled: bool = False):
         """Initialize a concurrency configuration to control multithreaded execution.
 
         Args:

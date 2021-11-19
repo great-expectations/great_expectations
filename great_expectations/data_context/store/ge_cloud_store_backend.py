@@ -40,7 +40,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_base_url: Optional[str] = "https://app.greatexpectations.io/",
         ge_cloud_resource_type: Optional[str] = None,
         ge_cloud_resource_name: Optional[str] = None,
-        suppress_store_backend_id: Optional[bool] = True,
+        suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: Optional[str] = "",
         store_name: Optional[str] = None,
     ):
