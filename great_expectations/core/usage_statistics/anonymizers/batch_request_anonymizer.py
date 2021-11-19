@@ -2,18 +2,21 @@ import copy
 from typing import Any, Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import (
-    BATCH_REQUEST_FLATTENED_KEYS,
-    BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
-    BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
-    BATCH_SPEC_PASSTHROUGH_KEYS,
-    DATA_CONNECTOR_QUERY_KEYS,
-    RUNTIME_PARAMETERS_KEYS,
     BatchRequest,
     RuntimeBatchRequest,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.util import deep_filter_properties_dict
+
+from great_expectations.core.batch import (  # isort:skip
+    BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
+    BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
+    DATA_CONNECTOR_QUERY_KEYS,
+    RUNTIME_PARAMETERS_KEYS,
+    BATCH_SPEC_PASSTHROUGH_KEYS,
+    BATCH_REQUEST_FLATTENED_KEYS,
+)
 
 
 class BatchRequestAnonymizer(Anonymizer):

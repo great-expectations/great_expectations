@@ -1687,9 +1687,7 @@ for message_type, messages in valid_usage_statistics_messages.items():
         message_test_ids += [f"{message_type}_{idx}"]
 
 
-# TODO: <Alex>ALEX</Alex>
-# @pytest.mark.aws_integration
-# TODO: <Alex>ALEX</Alex>
+@pytest.mark.aws_integration
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
 def test_usage_statistics_message(message):
     """known message formats should be valid"""
