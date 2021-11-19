@@ -343,7 +343,7 @@ class CheckpointResult(DictDot):
 
     def __repr__(self):
         serializeable_dict = self.to_json_dict()
-        if serializeable_dict["checkpoint_config"].get("validations") is not None:
+        if len(serializeable_dict["checkpoint_config"].get("validations")) > 0:
             for val in serializeable_dict["checkpoint_config"]["validations"]:
                 if (val["batch_request"].get("runtime_parameters") is not None) and (
                     val["batch_request"]["runtime_parameters"].get("batch_data")

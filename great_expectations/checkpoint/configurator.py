@@ -158,10 +158,10 @@ class SimpleCheckpointConfigurator:
                     )
             checkpoint_config.update(other_config=other_config)
 
-        # logger.debug(
-        #     f"SimpleCheckpointConfigurator built this CheckpointConfig:"
-        #     f" {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"
-        # )
+        logger.debug(
+            f"SimpleCheckpointConfigurator built this CheckpointConfig:"
+            f" {print(checkpoint_config)}"
+        )
         return checkpoint_config
 
     @staticmethod

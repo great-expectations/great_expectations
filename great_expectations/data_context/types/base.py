@@ -3,6 +3,7 @@ import itertools
 import logging
 import uuid
 from copy import deepcopy
+import json
 from typing import Any, Dict, List, MutableMapping, Optional, Union
 
 from ruamel.yaml import YAML
@@ -2297,6 +2298,53 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def runtime_configuration(self):
         return self._runtime_configuration
+
+    def __repr__(self):
+        batch_data_list = []
+        if len(self.validations) > 0:
+            for val in self.validations:
+                if (val["batch_request"].get("runtime_parameters") is not None) and (
+                    val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    )
+                else:
+                    batch_data_list.append(None)
+
+        batch_data = None
+        if (
+            (self.batch_request is not None)
+            and (self.batch_request.get("runtime_parameters") is not None)
+            and (self.batch_request["runtime_parameters"].get("batch_data") is not None)
+        ):
+            batch_data = self.batch_request["runtime_parameters"].pop("batch_data")
+
+        serializeable_dict = self.to_json_dict()
+
+        if len(self.validations) > 0:
+            for idx, val in enumerate(self.validations):
+                if (val["batch_request"].get("runtime_parameters") is not None) and (
+                    batch_data_list[idx] is not None
+                ):
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data_list[idx]
+                    serializeable_dict["validations"][idx]["batch_request"][
+                        "runtime_parameters"
+                    ]["batch_data"] = str(type(batch_data_list[idx]))
+
+        if (
+            (batch_data is not None)
+            and (self.batch_request.get("runtime_parameters") is not None)
+        ):
+            self.batch_request["runtime_parameters"]["batch_data"] = batch_data
+            serializeable_dict["batch_request"]["runtime_parameters"]["batch_data"] = str(
+                type(batch_data)
+            )
+
+        return json.dumps(serializeable_dict, indent=2)
 
 
 class CheckpointValidationConfig(DictDot):
