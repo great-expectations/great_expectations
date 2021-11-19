@@ -13,6 +13,7 @@ from great_expectations.checkpoint.checkpoint import (
     SimpleCheckpoint,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import filter_properties_dict
 
@@ -1717,6 +1718,8 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    spark = get_or_create_spark_application()
+
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
